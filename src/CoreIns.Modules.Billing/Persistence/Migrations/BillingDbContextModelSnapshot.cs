@@ -378,6 +378,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("timestamptz")
                         .HasColumnName("recorded_at");
 
+                    b.Property<Guid?>("RefundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("refund_id");
+
                     b.Property<Guid?>("TargetInvoiceId")
                         .HasColumnType("uuid")
                         .HasColumnName("target_invoice_id");
@@ -400,6 +404,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.HasIndex("CreditItemId")
                         .HasDatabaseName("ix_credit_application_credit_item");
 
+                    b.HasIndex("RefundId")
+                        .HasDatabaseName("ix_credit_application_refund");
+
                     b.HasIndex("TargetInvoiceItemId")
                         .HasDatabaseName("ix_credit_application_target_item");
 
@@ -409,9 +416,11 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_credit_application_currency", "currency ~ '^[A-Z]{3}$'");
 
-                            t.HasCheckConstraint("ck_credit_application_invoice_item", "target_kind <> 'INVOICE_ITEM' OR (target_invoice_id IS NOT NULL AND target_invoice_item_id IS NOT NULL)");
+                            t.HasCheckConstraint("ck_credit_application_invoice_item", "target_kind NOT IN ('INVOICE_ITEM', 'NETTING') OR (target_invoice_id IS NOT NULL AND target_invoice_item_id IS NOT NULL)");
 
-                            t.HasCheckConstraint("ck_credit_application_target", "target_kind IN ('INVOICE_ITEM')");
+                            t.HasCheckConstraint("ck_credit_application_refund", "(target_kind IN ('REFUND', 'NETTING')) = (refund_id IS NOT NULL) AND (target_kind <> 'REFUND' OR (target_invoice_id IS NULL AND target_invoice_item_id IS NULL))");
+
+                            t.HasCheckConstraint("ck_credit_application_target", "target_kind IN ('INVOICE_ITEM', 'REFUND', 'NETTING')");
                         });
                 });
 
@@ -442,6 +451,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.Property<string>("BankReference")
                         .HasColumnType("text")
                         .HasColumnName("bank_reference");
+
+                    b.Property<string>("BusinessRef")
+                        .HasColumnType("text")
+                        .HasColumnName("business_ref");
 
                     b.Property<Guid?>("ClaimId")
                         .HasColumnType("uuid")
@@ -579,6 +592,11 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_disbursement_source")
                         .HasFilter("state NOT IN ('REJECTED', 'STOPPED', 'VOIDED', 'RETURNED')");
+
+                    b.HasIndex("LegalEntityId", "PayeeAccountId", "Amount", "Currency", "SourceType", "BusinessRef")
+                        .IsUnique()
+                        .HasDatabaseName("ux_disbursement_business_ref")
+                        .HasFilter("state NOT IN ('REJECTED', 'STOPPED', 'VOIDED', 'RETURNED') AND business_ref IS NOT NULL");
 
                     b.HasIndex("LegalEntityId", "PayeeAccountId", "Amount", "Currency", "SourceType", "ClaimId")
                         .IsUnique()
@@ -1665,6 +1683,308 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.RefundCreditRow", b =>
+                {
+                    b.Property<Guid>("RefundCreditId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("refund_credit_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("ChargeCategory")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("charge_category");
+
+                    b.Property<string>("ChargeType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("charge_type");
+
+                    b.Property<Guid>("CreditItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("credit_item_id");
+
+                    b.Property<Guid>("CreditNoteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("credit_note_id");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<Guid>("RefundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("refund_id");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_id");
+
+                    b.HasKey("RefundCreditId")
+                        .HasName("pk_refund_credit");
+
+                    b.HasIndex("CreditItemId")
+                        .HasDatabaseName("ix_refund_credit_item");
+
+                    b.HasIndex("RefundId", "CreditItemId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_refund_credit_item");
+
+                    b.ToTable("refund_credit", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_refund_credit_amount", "amount > 0");
+
+                            t.HasCheckConstraint("ck_refund_credit_currency", "currency ~ '^[A-Z]{3}$'");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.RefundNettingRow", b =>
+                {
+                    b.Property<Guid>("RefundNettingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("refund_netting_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("CreditItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("credit_item_id");
+
+                    b.Property<Guid>("CreditNoteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("credit_note_id");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("RefundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("refund_id");
+
+                    b.Property<Guid>("TargetInvoiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_invoice_id");
+
+                    b.Property<Guid>("TargetInvoiceItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("target_invoice_item_id");
+
+                    b.HasKey("RefundNettingId")
+                        .HasName("pk_refund_netting");
+
+                    b.HasIndex("CreditItemId");
+
+                    b.HasIndex("TargetInvoiceItemId");
+
+                    b.HasIndex("RefundId", "CreditItemId", "TargetInvoiceItemId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_refund_netting_pair");
+
+                    b.ToTable("refund_netting", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_refund_netting_amount", "amount > 0");
+
+                            t.HasCheckConstraint("ck_refund_netting_currency", "currency ~ '^[A-Z]{3}$'");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.RefundRow", b =>
+                {
+                    b.Property<Guid>("RefundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("refund_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("ApprovalContentHash")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("approval_content_hash");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<string>("ApprovalState")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("approval_state");
+
+                    b.Property<Guid?>("ApprovedEntryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approved_entry_id");
+
+                    b.Property<Guid>("BillingAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("billing_account_id");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text")
+                        .HasColumnName("comment");
+
+                    b.Property<string>("CreditSetKey")
+                        .IsRequired()
+                        .HasColumnType("char(64)")
+                        .HasColumnName("credit_set_key");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionComment")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_comment");
+
+                    b.Property<Guid?>("DisbursementId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("disbursement_id");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("paid_at");
+
+                    b.PrimitiveCollection<string[]>("Participants")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("participants");
+
+                    b.Property<string>("PayeeAccountChangedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payee_account_changed_by");
+
+                    b.Property<Guid>("PayeeAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payee_account_id");
+
+                    b.Property<bool>("PayeeChanged")
+                        .HasColumnType("boolean")
+                        .HasColumnName("payee_changed");
+
+                    b.Property<Guid>("PayeePartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payee_party_id");
+
+                    b.Property<string>("PayoutMethod")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payout_method");
+
+                    b.Property<DateTime>("ProposedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("proposed_at");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason_code");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("RequestedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("requested_by");
+
+                    b.Property<Guid?>("ResubmitsRefundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("resubmits_refund_id");
+
+                    b.PrimitiveCollection<Guid[]>("SelectedCreditNotes")
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("selected_credit_notes");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.HasKey("RefundId")
+                        .HasName("pk_refund");
+
+                    b.HasIndex("ApprovalRequestId")
+                        .HasDatabaseName("ix_refund_approval_request");
+
+                    b.HasIndex("BillingAccountId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_refund_open_per_account")
+                        .HasFilter("state NOT IN ('REJECTED', 'PAID', 'RETURNED')");
+
+                    b.HasIndex("PayeeAccountId");
+
+                    b.HasIndex("LegalEntityId", "BillingAccountId")
+                        .HasDatabaseName("ix_refund_account");
+
+                    b.ToTable("refund", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_refund_amount", "amount > 0");
+
+                            t.HasCheckConstraint("ck_refund_approval", "(approval_state = 'PENDING') = (state = 'PENDING_APPROVAL')");
+
+                            t.HasCheckConstraint("ck_refund_approval_state", "approval_state IN ('NOT_REQUIRED', 'PENDING', 'APPROVED', 'REJECTED')");
+
+                            t.HasCheckConstraint("ck_refund_credit_set_key", "credit_set_key ~ '^[0-9a-f]{64}$'");
+
+                            t.HasCheckConstraint("ck_refund_currency", "currency ~ '^[A-Z]{3}$'");
+
+                            t.HasCheckConstraint("ck_refund_hash", "approval_content_hash IS NULL OR approval_content_hash ~ '^[0-9a-f]{64}$'");
+
+                            t.HasCheckConstraint("ck_refund_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+
+                            t.HasCheckConstraint("ck_refund_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_refund_state", "state IN ('PROPOSED', 'PENDING_APPROVAL', 'APPROVED', 'HELD', 'DISBURSING', 'AWAITING_PROOF', 'PAID', 'REJECTED', 'RETURNED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.AllocationRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Billing.Persistence.InvoiceItemRow", null)
@@ -1806,6 +2126,64 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_receipt_account");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.RefundCreditRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.InvoiceItemRow", null)
+                        .WithMany()
+                        .HasForeignKey("CreditItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_refund_credit_item");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.RefundRow", null)
+                        .WithMany()
+                        .HasForeignKey("RefundId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_refund_credit_refund");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.RefundNettingRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.InvoiceItemRow", null)
+                        .WithMany()
+                        .HasForeignKey("CreditItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_refund_netting_credit_item");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.RefundRow", null)
+                        .WithMany()
+                        .HasForeignKey("RefundId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_refund_netting_refund");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.InvoiceItemRow", null)
+                        .WithMany()
+                        .HasForeignKey("TargetInvoiceItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_refund_netting_target_item");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.RefundRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.BillingAccountRow", null)
+                        .WithMany()
+                        .HasForeignKey("BillingAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_refund_account");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.PayeeAccountRow", null)
+                        .WithMany()
+                        .HasForeignKey("PayeeAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_refund_payee_account");
                 });
 #pragma warning restore 612, 618
         }

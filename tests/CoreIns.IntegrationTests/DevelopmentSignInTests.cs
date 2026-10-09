@@ -18,7 +18,7 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
 
     private static readonly string[] SuperRoles =
     [
-        "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin",
+        "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority",
     ];
 
     private static readonly Dictionary<string, string?> Enabled = new() { ["DevAuthentication:Enabled"] = "true" };
@@ -165,6 +165,27 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
             decide.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
             using var decided = await client.SendAsync(decide, ct);
             decided.StatusCode.ShouldBe(decideAllowed ? HttpStatusCode.NotFound : HttpStatusCode.Forbidden, uwUser); // allowed: the issue does not exist
+        }
+
+        // SL5-PLT-ROLES: the release manager and design authority dev users exist with exactly one role each (maker / checker for pack activation).
+        var byId = JsonNode.Parse(
+            await File.ReadAllTextAsync(file, ct),
+            documentOptions: new System.Text.Json.JsonDocumentOptions { CommentHandling = System.Text.Json.JsonCommentHandling.Skip })!["DevAuthentication"]!["Users"]!.AsArray();
+        foreach (var (id, name, role) in new[] { ("releasemgr", "Dev Release Manager (synthetic)", "Platform.ReleaseManager"), ("designauth", "Dev Design Authority (synthetic)", "Platform.DesignAuthority") })
+        {
+            var user = byId.Single(u => u!["Id"]!.GetValue<string>() == id)!;
+            user["Name"]!.GetValue<string>().ShouldBe(name);
+            user["Roles"]!.AsArray().Select(r => r!.GetValue<string>()).ShouldBe([role]);
+            using var roleSignIn = await client.PostAsJsonAsync(new Uri("/api/plt/v1/dev/sign-in", UriKind.Relative), new { userId = id }, ct);
+            roleSignIn.StatusCode.ShouldBe(HttpStatusCode.OK);
+            (await roleSignIn.Content.ReadFromJsonAsync<JsonNode>(ct))!["user"]!["roles"]!.AsArray().Select(r => r!.GetValue<string>()).ShouldBe([role]);
+        }
+
+        var names = byId.Select(u => u!["Name"]!.GetValue<string>()).ToList();
+        names.Distinct().Count().ShouldBe(names.Count);
+        foreach (var name in names)
+        {
+            names.Where(other => other != name).ShouldAllBe(other => !other.Contains(name, StringComparison.Ordinal));
         }
 
         // A token with the dev issuer but signed with another key is rejected.

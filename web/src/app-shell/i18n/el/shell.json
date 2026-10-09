@@ -87,6 +87,7 @@
   "roles": {
     "underwriter": "Ανάληψη κινδύνου",
     "billing": "Χρεώσεις και εισπράξεις",
+    "billingManager": "Υπεύθυνος χρεώσεων",
     "finance": "Λογιστήριο",
     "claimsHandler": "Χειριστής ζημιών",
     "claimsManager": "Υπεύθυνος ζημιών",

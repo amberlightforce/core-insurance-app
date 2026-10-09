@@ -77,6 +77,13 @@ internal static class DevelopmentAuthentication
         services.AddOptions<DevAuthenticationOptions>().Bind(configuration.GetSection(DevAuthenticationOptions.Section));
         var key = new SymmetricSecurityKey(RandomNumberGenerator.GetBytes(32)) { KeyId = "dev-" + Guid.NewGuid().ToString("N")[..8] };
         services.AddSingleton(new DevSigningKey(key));
+        // The token times come from IClock (the shiftable dev clock, D-SL3-12), so the lifetime is checked against the same clock;
+        // the library default would compare against the real clock and reject every token issued after a dev clock advance.
+        services.AddOptions<JwtBearerOptions>(Scheme).PostConfigure<IClock>((options, clock) =>
+            options.TokenValidationParameters.LifetimeValidator = (notBefore, expires, _, parameters) =>
+            {
+                return ValidateLifetime(notBefore, expires, parameters, clock.Now.ToUtcDateTime());
+            });
         return builder.AddJwtBearer(Scheme, options =>
         {
             options.MapInboundClaims = false;
@@ -91,6 +98,17 @@ internal static class DevelopmentAuthentication
                 ClockSkew = TimeSpan.FromSeconds(30),
             };
         });
+    }
+
+    internal static bool ValidateLifetime(DateTime? notBefore, DateTime? expires, TokenValidationParameters parameters, DateTime now)
+    {
+        if ((expires is null && parameters.RequireExpirationTime) || (notBefore is not null && expires is not null && notBefore > expires))
+        {
+            return false;
+        }
+
+        var skew = parameters.ClockSkew;
+        return (notBefore is null || notBefore.Value <= now + skew) && (expires is null || expires.Value >= now - skew);
     }
 
     /// <summary>True when the request's bearer token was issued by the dev sign-in (routing only; the scheme validates it).</summary>

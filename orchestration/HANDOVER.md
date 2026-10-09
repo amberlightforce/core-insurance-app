@@ -1,5 +1,8 @@
 # HANDOVER — Greek P&C Core Insurance
 
+> **Verified takeover checkpoint — 2026-10-09:** Claims #37, refunds #39/#34, servicing #28/#46, tax identity #44, and pack history/roles #43 have merged after all required checks. Expanded real servicing acceptance now passes all 8 tests; integration #45 has merged after all ten checks passed. Reinsurance #47/#48 and product fallback #49 are in independent review with corrections under test. See [CODEX-TAKEOVER.md](CODEX-TAKEOVER.md) for current evidence, ownership, dependencies and remaining work. Older paragraphs below are historical.
+
+
 **Updated:** 2026-10-08 · **Repo:** https://github.com/amberlightforce/core-insurance-app (private, branch `main`) ·
 **Live tracker:** https://claude.ai/artifact/QwQVP63L5vGPhUskFrAzaD
 
@@ -383,3 +386,5 @@ its exact subject, type and content.
 **To start any new slice:** write a `SLICE-PLAN`-style table (batches, models, review depth), brief builders from the
 template, point them at `docs/module-pattern.md`, and finish with an integration/E2E WP that adds a browser-level E2E
 test to CI.
+
+

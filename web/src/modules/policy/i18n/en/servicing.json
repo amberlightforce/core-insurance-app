@@ -1,0 +1,355 @@
+{
+  "servicing": {
+    "back": "Back to policy",
+    "openPolicy": "Open the policy",
+    "gatePassed": "passed",
+    "gateFailed": "not passed",
+    "gate": {
+      "EFFECTIVE_DATE": "Effective date",
+      "UW_ISSUES": "Underwriting issues",
+      "PAYMENT": "Payment"
+    },
+    "problems": {
+      "changeNotAllowed": {
+        "what": "This endorsement cannot edit one of the issued vehicle's protected details.",
+        "fix": "Keep the issued details unchanged and edit only the registration year, engine capacity or value. For another vehicle, choose replacement."
+      },
+      "technical": "Technical details",
+      "forbidden": "Your role may not do this. Ask a colleague with the right permission, or an administrator.",
+      "goToVehicle": "Go to the vehicle step",
+      "range": "Permitted dates: {from} to {to}.",
+      "conflict": {
+        "what": "There is already an open request of this kind on this policy term.",
+        "fix": "Finish or discard the open request first, then start again."
+      },
+      "POL-ERR-EFFDATE-LIMIT": {
+        "what": "The effective date is outside the dates your role may choose.",
+        "fix": "Pick a date inside the permitted range. A change dated earlier than today needs an underwriter."
+      },
+      "POL-ERR-OUT-OF-SEQUENCE": {
+        "what": "A later transaction already exists on this term, so a change cannot take effect before it.",
+        "fix": "Choose an effective date on or after the latest transaction shown in the policy file. Backdated corrections are not available yet."
+      },
+      "POL-ERR-PREEMPTED": {
+        "what": "Someone else changed this policy after you started, so your request is no longer based on the current policy.",
+        "fix": "Go back to the policy file, check what changed, and start the request again."
+      },
+      "POL-ERR-AFTER-CANCELLATION": {
+        "what": "The policy is cancelled from an earlier date, so nothing can take effect after that.",
+        "fix": "Open the policy file to see the cancellation. A cancelled policy cannot be changed."
+      },
+      "POL-ERR-ILLEGAL-TRANSITION": {
+        "what": "The policy term is not in a state where this action is allowed.",
+        "fix": "Only a term that is scheduled or in force can be changed or cancelled. Check the status in the policy file."
+      },
+      "POL-ERR-REBASE-REQUIRED": {
+        "what": "The policy changed after the offer was made, so the offer no longer matches it.",
+        "fix": "Issue the offer again, then record the acceptance."
+      },
+      "POL-ERR-STALE": {
+        "what": "Another screen saved this request after you opened it.",
+        "fix": "Calculate the preview again; your entries are kept."
+      },
+      "POL-ERR-HUMAN-CONFIRMATION-REQUIRED": {
+        "what": "The action needs your explicit confirmation.",
+        "fix": "Tick the confirmation box in the dialog and confirm again."
+      }
+    },
+    "preview": {
+      "summary": "Premium effect",
+      "annualBefore": "Annual premium before",
+      "annualAfter": "Annual premium after",
+      "premiumChange": "Premium change",
+      "taxChange": "Tax change",
+      "totalChange": "Total change",
+      "refundMethod": "Refund method",
+      "refundDue": "Refund due to the customer",
+      "refundHelp": "Premium only; see the tax lines for what is not refunded.",
+      "additionalDue": "Additional amount due from the customer",
+      "additionalHelp": "Billed together with the change.",
+      "neutral": "No change in the amount due",
+      "neutralHelp": "The change does not alter the premium.",
+      "provisional": "Provisional",
+      "provisionalTitle": "Provisional tax treatment",
+      "provisionalBody": "At least one tax line follows a rule whose legal status is not settled (for example insurance premium tax is not refunded on cancellation, pending a legal opinion). The figures can change once the rule is confirmed.",
+      "prorated": "Prorated premium lines",
+      "proratedTable": "Prorated premium lines",
+      "noProrated": "There are no premium lines.",
+      "taxes": "Tax lines and their treatment",
+      "taxTable": "Tax lines",
+      "noTaxes": "There are no tax lines.",
+      "columns": {
+        "cover": "Cover",
+        "charge": "Charge",
+        "period": "Affected period",
+        "days": "Days",
+        "fraction": "Fraction",
+        "annual": "Annual amount",
+        "amount": "Amount",
+        "treatment": "Treatment",
+        "rule": "Rule",
+        "legalStatus": "Status"
+      }
+    },
+    "treatment": {
+      "APPLY": "Tax applied",
+      "REDUCE_PRO_RATA": "Reduced pro rata",
+      "REVERSE_AS_VOID": "Reversed (void)",
+      "KEEP_NOT_REDUCED": "IPT not refunded",
+      "INSURER_BEARS": "Insurer bears it"
+    },
+    "legalStatus": {
+      "Settled": "Settled",
+      "Pending": "Pending",
+      "PendingOpinion": "Pending opinion",
+      "Unverified": "Unverified"
+    },
+    "acceptanceMode": {
+      "EXPLICIT": "Explicit acceptance",
+      "AUTO": "Automatic",
+      "IMPLICIT": "Implicit"
+    },
+    "paymentPlan": {
+      "ANNUAL": "Annual"
+    },
+    "refundMethod": {
+      "PRO_RATA": "Pro rata",
+      "SHORT_RATE": "Short rate",
+      "FLAT": "Flat cancellation",
+      "MINIMUM_RETAINED": "Minimum retained premium",
+      "FULL_REFUND": "Full refund",
+      "ProRata": "Pro rata",
+      "FullRefund": "Full refund",
+      "ShortRate": "Short rate"
+    },
+    "change": {
+      "overline": "Policy servicing",
+      "title": "Mid-term change",
+      "stepOf": "Step {step} of {total}",
+      "steps": {
+        "when": "Effective date",
+        "vehicle": "Vehicle",
+        "preview": "Premium preview",
+        "confirm": "Confirm"
+      },
+      "reasons": {
+        "when": "Choose an effective date inside the permitted range to continue.",
+        "vehicle": "Complete the required vehicle fields to continue.",
+        "preview": "Calculate the premium preview for the current entries.",
+        "confirm": "Confirm the change to finish.",
+        "noChange": "Change at least one vehicle detail, or replace the vehicle.",
+        "vehicleValue": "The vehicle value is required because Own damage is covered.",
+        "alreadyBound": "The change is already applied.",
+        "noQuote": "Calculate the premium preview first.",
+        "stale": "The entries changed after the preview. Calculate it again.",
+        "declined": "Underwriting declined this change.",
+        "referred": "The change is referred to underwriting and cannot be applied yet."
+      },
+      "notChangeable": {
+        "title": "This policy cannot be changed",
+        "body": "Only a policy term that is scheduled or in force can be changed. Check the status in the policy file."
+      },
+      "when": {
+        "title": "When does the change take effect?",
+        "range": "Permitted dates: {from} to {to}. Your role may be limited further; the system tells you if the date is refused.",
+        "rangeOpen": "Permitted dates: from {from}.",
+        "date": "Effective date",
+        "dateHelp": "Today means from now on. Athens time.",
+        "locked": "The change has been started, so the date is fixed.",
+        "description": "Reason or note (optional)",
+        "descriptionHelp": "Do not enter personal data.",
+        "failed": "The change could not be started"
+      },
+      "vehicle": {
+        "mode": "What changes?",
+        "edit": "Edit this vehicle",
+        "replace": "Replace the vehicle",
+        "editHelp": "Edit the registration year, engine capacity or vehicle value. Identity, power, fuel and garaging details stay as issued; use replacement for another vehicle.",
+        "replaceHelp": "Enter the new vehicle. The covers move to it and the old vehicle is removed, as one change."
+      },
+      "preview": {
+        "calculate": "Calculate premium preview",
+        "recalculate": "Recalculate preview",
+        "calculated": "Premium preview calculated.",
+        "failed": "The premium preview could not be calculated",
+        "staleTitle": "The preview is out of date",
+        "staleBody": "You changed the entries after calculating. Calculate again before you confirm.",
+        "emptyTitle": "No preview yet",
+        "emptyBody": "Calculate to see what the change does to the premium before anything is applied.",
+        "noPreview": "No premium effect was returned",
+        "noPreviewBody": "The system returned no servicing preview for this request. Try again, or report it with the trace id."
+      },
+      "diff": {
+        "title": "What changes on the policy",
+        "table": "Changed vehicle details",
+        "field": "Detail",
+        "before": "Before",
+        "after": "After",
+        "none": "No vehicle detail differs.",
+        "replaced": "The vehicle {from} is replaced by {to}."
+      },
+      "summary": {
+        "title": "Change summary",
+        "policy": "Policy",
+        "effective": "Effective",
+        "vehicle": "Vehicle",
+        "effect": "Total effect",
+        "notCalculated": "Not calculated"
+      },
+      "confirm": {
+        "commit": "Apply change",
+        "failed": "The change could not be applied",
+        "noQuoteTitle": "Nothing to confirm yet",
+        "noQuoteBody": "Go back and calculate the premium preview for your current entries.",
+        "gateFailedTitle": "The change was not applied",
+        "gateFailedBody": "A check before applying did not pass. Nothing was changed on the policy.",
+        "gates": "Checks",
+        "dialog": {
+          "title": "Apply this change?",
+          "body": "The change takes effect on {date}. Total effect: {effect}. This is recorded on the policy and cannot be undone here.",
+          "check": "I have checked the preview and the customer agrees to the change.",
+          "confirm": "Apply change",
+          "confirmRequired": "Tick the box to confirm."
+        }
+      },
+      "bound": {
+        "title": "The change is applied",
+        "body": "It takes effect on {date}. Billing and finance receive the premium difference."
+      }
+    },
+    "cancel": {
+      "overline": "Policy servicing",
+      "title": "Cancel policy",
+      "notCancellable": {
+        "title": "This policy cannot be cancelled",
+        "body": "Only a policy term that is scheduled or in force can be cancelled. Check the status in the policy file."
+      },
+      "request": {
+        "title": "Cancellation request",
+        "source": "Source of the cancellation",
+        "sourceHelp": "Only a cancellation at the policyholder’s request can be recorded here.",
+        "reason": "Reason",
+        "reasonHelp": "From the illustrative reason list.",
+        "reasonRequired": "Choose the reason for the cancellation.",
+        "kind": "Type",
+        "nowHelp": "Effective from the moment of the request. The refund covers the unused days.",
+        "flatHelp": "Flat cancellation from the term start: the whole written premium is credited.",
+        "requestRef": "Request reference (optional)",
+        "requestRefHelp": "Message or document id of the customer’s request. No personal data.",
+        "preview": "Preview the refund"
+      },
+      "kinds": {
+        "STANDARD": "From now",
+        "FLAT": "Flat (from term start)",
+        "standardScheduled": "The term has not started; use a flat cancellation.",
+        "flatInForce": "Flat cancellation is only possible before the term starts."
+      },
+      "sources": {
+        "Policyholder": "At the policyholder’s request"
+      },
+      "reasons": {
+        "CUSTOMER_REQUEST": "Customer request",
+        "VEHICLE_SOLD": "Vehicle sold",
+        "VEHICLE_SCRAPPED": "Vehicle scrapped",
+        "INSURER_SWITCH": "Moved to another insurer",
+        "OTHER": "Other"
+      },
+      "policy": {
+        "title": "Policy",
+        "number": "Policy number"
+      },
+      "preview": {
+        "emptyTitle": "No refund preview yet",
+        "emptyBody": "Choose the reason and preview the refund. Nothing is cancelled until you confirm.",
+        "failed": "The refund preview could not be calculated",
+        "ready": "Refund preview calculated."
+      },
+      "confirm": {
+        "commit": "Cancel policy",
+        "failed": "The cancellation could not be completed",
+        "dialog": {
+          "title": "Cancel this policy?",
+          "body": "The policy is cancelled from the moment of the request. Refund due: {refund}. This cannot be undone here.",
+          "check": "I have checked the refund and the customer has asked for the cancellation.",
+          "confirm": "Cancel policy",
+          "confirmRequired": "Tick the box to confirm."
+        }
+      },
+      "bound": {
+        "title": "The policy is cancelled",
+        "body": "The refund is passed to billing, which pays it out."
+      }
+    },
+    "renew": {
+      "overline": "Policy servicing",
+      "title": "Renewal",
+      "notRenewable": {
+        "title": "This policy cannot be renewed now",
+        "body": "Only a term that is in force can be renewed. Check the status in the policy file."
+      },
+      "emptyTitle": "No renewal started",
+      "emptyBody": "Use Renew now to rate the next term. You see the premium and any referral before you make an offer.",
+      "window": {
+        "title": "Renewal window",
+        "expiry": "Term ends",
+        "daysLeft": "Days left",
+        "lead": "Renewal lead time",
+        "leadDays": "{count} days (illustrative)",
+        "outsideTitle": "Outside the renewal window",
+        "outsideBody": "Renewal opens {count} days before the term ends. The system refuses an earlier request."
+      },
+      "stage": {
+        "label": "Stage",
+        "none": "Not started",
+        "rated": "Rated",
+        "offered": "Offered",
+        "accepted": "Accepted"
+      },
+      "create": {
+        "commit": "Renew now",
+        "failed": "The renewal could not be started"
+      },
+      "rated": {
+        "title": "Renewal premium",
+        "body": "The next term is rated with the product version valid at its start.",
+        "ready": "Renewal rated.",
+        "referredTitle": "Referred to underwriting",
+        "referredBody": "An underwriter must decide before an offer can be made.",
+        "openReferrals": "Open referrals"
+      },
+      "offer": {
+        "title": "Offer",
+        "help": "Issue the offer to the customer. No document is sent in this release.",
+        "commit": "Issue offer",
+        "referredReason": "The renewal is referred to underwriting.",
+        "failed": "The offer could not be issued",
+        "issued": "Offer issued",
+        "body": "Offer version {version} is open for the customer’s explicit acceptance.",
+        "version": "Offer version",
+        "premium": "Total premium",
+        "deadline": "Valid until",
+        "mode": "Acceptance mode"
+      },
+      "accept": {
+        "commit": "Record acceptance",
+        "failed": "The acceptance could not be recorded",
+        "reoffer": "Issue the offer again",
+        "dialog": {
+          "title": "Record the customer’s acceptance?",
+          "body": "Accepting creates the next term, scheduled to start when this one ends.",
+          "evidence": "Evidence reference (optional)",
+          "evidenceHelp": "Message or document id. No personal data.",
+          "check": "The customer has explicitly accepted the renewal.",
+          "confirm": "Record acceptance",
+          "confirmRequired": "Tick the box to confirm."
+        }
+      },
+      "accepted": {
+        "title": "Renewal accepted",
+        "body": "Term {number} is created and scheduled.",
+        "newTerm": "New term number",
+        "state": "Status"
+      }
+    }
+  }
+}

@@ -24,8 +24,18 @@ public static class SupportAuthorityTypes
     /// <summary>The refund currency as a code (ISO 4217), for per-currency limits.</summary>
     public const string CurrencyDimension = "currency";
 
-    /// <summary>Whether the refund goes to a payee other than the original payer.</summary>
+    /// <summary>
+    /// Whether the refund goes to a payee (or a payee bank account) other than the established one, as the code "true" or
+    /// "false". A Code, not a Flag, so it travels in <c>plt.Approval</c> (which carries only Money and Code dimensions) and is
+    /// re-checked at decide time; a grant limits it with an IN_SET limit on "false" (REQ-BIL-188, REQ-BIL-189).
+    /// </summary>
     public const string PayeeChangedDimension = "payeeChanged";
+
+    /// <summary>The refund reason code (REQ-BIL-188).</summary>
+    public const string ReasonDimension = "reason";
+
+    /// <summary>The code of the <see cref="PayeeChangedDimension"/> value.</summary>
+    public static string PayeeChangedCode(bool changed) => changed ? "true" : "false";
 
     /// <summary>Product code.</summary>
     public const string ProductDimension = "product";
@@ -44,7 +54,9 @@ public static class SupportAuthorityTypes
             [
                 new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money),
                 new AuthorityDimensionDefinition(CurrencyDimension, DimensionKind.Code),
-                new AuthorityDimensionDefinition(PayeeChangedDimension, DimensionKind.Flag),
+                new AuthorityDimensionDefinition(PayeeChangedDimension, DimensionKind.Code),
+                new AuthorityDimensionDefinition(ReasonDimension, DimensionKind.Code),
+                new AuthorityDimensionDefinition(ProductDimension, DimensionKind.Code),
             ]),
         new AuthorityTypeDefinition(
             EffectiveDateOverride, ModuleCode.POL, new LocalizedText("Παράκαμψη ημερομηνίας έναρξης", "Effective-date override"),
