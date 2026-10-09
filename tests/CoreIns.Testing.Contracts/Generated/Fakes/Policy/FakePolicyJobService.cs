@@ -17,6 +17,9 @@ public sealed class FakePolicyJobService : global::CoreIns.Testing.Contracts.Fak
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.JobBindResponse> BindAsync(global::CoreIns.Modules.Policy.Contracts.Api.JobBindRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Policy.Contracts.Api.JobBindResponse>("pol.Job.bind", [request, options], cancellationToken);
 
     /// <inheritdoc />
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.JobGetResponse> GetAsync(string id, string? account = null, string? policy = null, string? participant = null, string? state = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Policy.Contracts.Api.JobGetResponse>("pol.Job.get", [id, account, policy, participant, state], cancellationToken);
+
+    /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.JobListPage> ListAsync(string? cursor = null, int? limit = null, string? account = null, string? policy = null, string? participant = null, string? state = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Policy.Contracts.Api.JobListPage>("pol.Job.list", [cursor, limit, account, policy, participant, state], cancellationToken);
 
     /// <inheritdoc />

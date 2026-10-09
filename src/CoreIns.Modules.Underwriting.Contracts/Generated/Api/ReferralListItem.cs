@@ -4,15 +4,59 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Referral.list result. PRD outputs: "referral"</summary>
+/// <summary>uw.Referral.list result: one referred job (D-USR-13).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReferralListItem
 {
-    /// <summary>PRD: "referral"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("referral")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Referral { get; init; }
+    /// <summary>POL job id</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobRef")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobRef { get; init; }
+
+    /// <summary>POL job (quote) number; null when POL does not return the job</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobNumber")]
+    public string? JobNumber { get; init; }
+
+    /// <summary>POL job state (e.g. QUOTED, BOUND)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobState")]
+    public string? JobState { get; init; }
+
+    /// <summary>Contract member 'productCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productCode")]
+    public string? ProductCode { get; init; }
+
+    /// <summary>Contract member 'customer'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("customer")]
+    public global::CoreIns.Modules.Underwriting.Contracts.Api.ReferralCustomer? Customer { get; init; }
+
+    /// <summary>Total premium of the current quote version (premium plus taxes)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("premiumTotal")]
+    public global::CoreIns.SharedKernel.Money? PremiumTotal { get; init; }
+
+    /// <summary>Policy start date (Europe/Athens business date)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveDate")]
+    public global::CoreIns.SharedKernel.BusinessDate? EffectiveDate { get; init; }
+
+    /// <summary>Contract member 'referralStatus'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("referralStatus")]
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.ReferralStatusCode ReferralStatus { get; init; }
+
+    /// <summary>The job's issues in the queue's scope (Open, Rejected and Approved; closed and invalidated ones are history)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasons")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Underwriting.Contracts.Api.ReferralReason> Reasons { get; init; }
+
+    /// <summary>When the oldest of these issues was raised</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("raisedAt")]
+    public required global::CoreIns.SharedKernel.Instant RaisedAt { get; init; }
+
+    /// <summary>Contract member 'lastDecidedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lastDecidedAt")]
+    public global::CoreIns.SharedKernel.Instant? LastDecidedAt { get; init; }
+
+    /// <summary>Contract member 'lastDecidedBy'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lastDecidedBy")]
+    public string? LastDecidedBy { get; init; }
+
+    /// <summary>The caller created, edited, quoted, bound or evaluated the job and may not decide its issues (SOD-UW-02)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("callerWorkedOnJob")]
+    public required bool CallerWorkedOnJob { get; init; }
 }

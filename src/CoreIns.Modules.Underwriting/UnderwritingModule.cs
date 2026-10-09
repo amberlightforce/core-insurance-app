@@ -2,6 +2,7 @@ using CoreIns.Modules.Underwriting.Authority;
 using CoreIns.Modules.Underwriting.Commands;
 using CoreIns.Modules.Underwriting.Contracts;
 using CoreIns.Modules.Underwriting.Contracts.Api;
+using CoreIns.Modules.Underwriting.Domain;
 using CoreIns.Modules.Underwriting.Persistence;
 using CoreIns.Modules.Underwriting.Queries;
 using CoreIns.Modules.Underwriting.Services;
@@ -53,6 +54,9 @@ public static class UnderwritingModule
         services.AddCommandAuditor<DecideIssues, IssueDecideResponse, DecideIssuesAuditor>();
         services.AddCommand<DecideIssues, IssueDecideResponse, DecideIssuesHandler>(CommandDescriptor.For("uw.Issue.decide") with { SupportsDryRun = true });
         services.AddScoped<UnderwritingIssueQueries>();
+        services.AddScoped<DecisionEligibility>();
+        services.AddScoped<ReferralReads>();
+        services.AddScoped<ReferralQueries>();
 
         services.AddScoped<IUnderwritingRulesService, UnderwritingRulesService>();
         services.AddScoped<IUnderwritingIssueService, UnderwritingIssueService>();
