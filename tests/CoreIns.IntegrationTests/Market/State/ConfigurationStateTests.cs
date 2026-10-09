@@ -128,7 +128,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
 
         (await ScalarAsync<long>("SELECT count(*) FROM mkt.pack_activation WHERE kind = 'ACTIVATE' AND status = 'ACTIVE' AND pack_id = 'gr' AND version = '0.2.0'"))
             .ShouldBe(await ScalarAsync<long>("SELECT count(*) FROM mkt.legal_entity WHERE pack_id = 'gr'"));
-        (await ScalarAsync<string>("SELECT string_agg(DISTINCT resulting_hash, ',') FROM mkt.pack_activation")).Trim().ShouldBe((await GenesisHashAsync()).ToString());
+        (await ScalarAsync<string>("SELECT string_agg(DISTINCT resulting_hash, ',') FROM mkt.pack_activation WHERE requested_by = 'system:genesis'")).Trim().ShouldBe((await GenesisHashAsync()).ToString());
     }
 
     [Fact]
@@ -528,6 +528,69 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
         }
 
         (await states.CurrentAsync(Ct)).Hash.ShouldBe(newest.Hash);
+    }
+
+    [Fact]
+    public async Task PITFALLS_47_a_pack_activation_moves_only_forward_is_decided_by_someone_else_and_is_born_active_only_as_the_genesis()
+    {
+        await using var app = NpgsqlDataSource.Create(database.AppConnectionString);
+        var entity = Entity.Id.Value;
+        var genesis = await GenesisHashAsync();
+        var id = Guid.NewGuid();
+        var approval = Guid.NewGuid();
+
+        async Task<PostgresException> Refused(string sql)
+        {
+            await using var command = app.CreateCommand(sql);
+            var error = await Should.ThrowAsync<PostgresException>(async () => await command.ExecuteNonQueryAsync(Ct));
+            error.SqlState.ShouldBeOneOf(PostgresErrorCodes.RestrictViolation, PostgresErrorCodes.InsufficientPrivilege);
+            return error;
+        }
+
+        async Task Run(string sql)
+        {
+            await using var command = app.CreateCommand(sql);
+            await command.ExecuteNonQueryAsync(Ct);
+        }
+
+        string Insert(Guid rowId, string status, string requestedBy = "user:maker", string? decidedBy = null, string kind = "ROLLBACK") =>
+            $"INSERT INTO mkt.pack_activation (id, legal_entity_id, pack_id, version, kind, status, requested_by, decided_by, activated_at, resulting_hash, created_at) "
+            + $"VALUES ('{rowId}', '{entity}', 'gr', '0.1.0', '{kind}', '{status}', '{requestedBy}', {(decidedBy is null ? "NULL" : "'" + decidedBy + "'")}, "
+            + (status == "ACTIVE" ? $"now(), '{genesis}', now())" : "NULL, NULL, now())");
+
+        // Born ACTIVE, approved or decided: refused (only the genesis row is born active, and only for the genesis state).
+        await Refused(Insert(Guid.NewGuid(), "ACTIVE", decidedBy: "user:checker"));
+        await Refused(Insert(Guid.NewGuid(), "ACTIVE", requestedBy: "system:genesis", decidedBy: "system:genesis", kind: "ROLLBACK"));
+        await Refused(Insert(Guid.NewGuid(), "APPROVED"));
+        await Refused(Insert(Guid.NewGuid(), "PENDING_APPROVAL", decidedBy: "user:checker"));
+
+        await Run(Insert(id, "PENDING_APPROVAL"));
+
+        // Approved or activated by the requester, by nobody, or without an approval request: refused.
+        await Refused($"UPDATE mkt.pack_activation SET status = 'ACTIVE', decided_by = 'user:maker', approval_request_id = '{approval}', resulting_hash = '{genesis}', activated_at = now() WHERE id = '{id}'");
+        await Refused($"UPDATE mkt.pack_activation SET status = 'APPROVED' WHERE id = '{id}'");
+        await Refused($"UPDATE mkt.pack_activation SET status = 'APPROVED', decided_by = 'user:checker' WHERE id = '{id}'");
+        await Refused($"UPDATE mkt.pack_activation SET status = 'ACTIVE', decided_by = 'user:checker', approval_request_id = '{approval}' WHERE id = '{id}'");
+        await Refused($"UPDATE mkt.pack_activation SET status = 'SUPERSEDED' WHERE id = '{id}'");
+        await Refused($"UPDATE mkt.pack_activation SET requested_by = 'user:checker' WHERE id = '{id}'");
+        await Refused($"UPDATE mkt.pack_activation SET version = '0.2.0' WHERE id = '{id}'");
+        await Refused($"DELETE FROM mkt.pack_activation WHERE id = '{id}'");
+
+        // The proper path: decided by someone else, naming the approval, becoming active with its state and instant.
+        await Run($"UPDATE mkt.pack_activation SET status = 'ACTIVE', decided_by = 'user:checker', approval_request_id = '{approval}', resulting_hash = '{genesis}', activated_at = now() WHERE id = '{id}'");
+
+        // Frozen once written; no way back; superseded is final.
+        await Refused($"UPDATE mkt.pack_activation SET decided_by = 'user:other' WHERE id = '{id}'");
+        await Refused($"UPDATE mkt.pack_activation SET approval_request_id = '{Guid.NewGuid()}' WHERE id = '{id}'");
+        await Refused($"UPDATE mkt.pack_activation SET status = 'PENDING_APPROVAL' WHERE id = '{id}'");
+        await Run($"UPDATE mkt.pack_activation SET status = 'SUPERSEDED' WHERE id = '{id}'");
+        await Refused($"UPDATE mkt.pack_activation SET status = 'ACTIVE' WHERE id = '{id}'");
+        await Refused($"UPDATE mkt.pack_activation SET decided_by = 'user:later' WHERE id = '{id}'");
+
+        var truncate = await Should.ThrowAsync<PostgresException>(async () => await database.ExecuteAsSuperuserAsync("TRUNCATE mkt.pack_activation", Ct));
+        truncate.SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation);
+        var owner = await Should.ThrowAsync<PostgresException>(async () => await database.ExecuteAsSuperuserAsync($"DELETE FROM mkt.pack_activation WHERE id = '{id}'", Ct));
+        owner.SqlState.ShouldBe(PostgresErrorCodes.RestrictViolation);
     }
 
     private async Task<ConfigurationHash?> GenesisParentOtherThan(ConfigurationHash newest)

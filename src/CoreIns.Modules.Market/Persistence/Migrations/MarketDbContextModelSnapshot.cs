@@ -243,6 +243,7 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                     b.ToTable("pack_activation", "mkt", t =>
                         {
                             t.HasCheckConstraint("ck_pack_activation_kind", "kind IN ('ACTIVATE', 'ROLLBACK')");
+                            t.HasCheckConstraint("ck_pack_activation_status", "status IN ('PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'WITHDRAWN', 'ACTIVE', 'SUPERSEDED')");
                         });
                 });
 

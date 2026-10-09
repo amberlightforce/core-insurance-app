@@ -98,6 +98,7 @@ internal sealed class MarketDbContext(DbContextOptions<MarketDbContext> options)
             entity.ToTable("pack_activation", table =>
             {
                 table.HasCheckConstraint("ck_pack_activation_kind", "kind IN ('ACTIVATE', 'ROLLBACK')");
+                table.HasCheckConstraint("ck_pack_activation_status", "status IN ('PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'WITHDRAWN', 'ACTIVE', 'SUPERSEDED')");
             });
             entity.HasKey(e => e.Id).HasName("pk_pack_activation");
             entity.Property(e => e.Id).HasColumnName("id");

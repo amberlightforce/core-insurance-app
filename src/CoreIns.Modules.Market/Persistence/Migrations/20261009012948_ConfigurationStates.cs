@@ -84,6 +84,7 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                 {
                     table.PrimaryKey("pk_pack_activation", x => x.id);
                     table.CheckConstraint("ck_pack_activation_kind", "kind IN ('ACTIVATE', 'ROLLBACK')");
+                    table.CheckConstraint("ck_pack_activation_status", "status IN ('PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'WITHDRAWN', 'ACTIVE', 'SUPERSEDED')");
                     table.ForeignKey(
                         name: "fk_pack_activation_legal_entity",
                         column: x => x.legal_entity_id,

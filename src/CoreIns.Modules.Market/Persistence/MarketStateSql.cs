@@ -8,7 +8,11 @@ namespace CoreIns.Modules.Market.Persistence;
 /// <item>a state can be inserted only by a transaction that holds the state advisory lock (<see cref="LockClass"/>, <see cref="LockObject"/>;
 /// checked in <c>pg_locks</c> for this backend, not trusted from the caller), only on top of the newest state
 /// (<c>parent_hash</c> = the hash with the highest <c>seq</c>, the first state has none), and not before the activation instant
-/// of that newest state. So two writers cannot fork the chain and history never runs backwards (PITFALLS 17, 40).</item>
+/// of that newest state. So two writers cannot fork the chain and history never runs backwards (PITFALLS 17, 40);</item>
+/// <item><c>pack_activation</c> (written by SL5-MKT-ROLLBACK): never deleted; identity and request frozen; the status only moves
+/// PENDING_APPROVAL → APPROVED / REJECTED / WITHDRAWN / ACTIVE, APPROVED → ACTIVE, ACTIVE → SUPERSEDED; a decision is made by someone other than the
+/// requester and an approval or activation names its approval request; the one row born ACTIVE is the genesis activation of the genesis state
+/// (PITFALLS 47).</item>
 /// </list>
 /// </summary>
 internal static class MarketStateSql
@@ -68,9 +72,77 @@ internal static class MarketStateSql
 
         CREATE TRIGGER tr_config_state_chain BEFORE INSERT ON mkt.config_state
             FOR EACH ROW EXECUTE FUNCTION mkt.guard_config_state_insert();
+
+        CREATE FUNCTION mkt.guard_pack_activation() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF TG_OP = 'DELETE' THEN
+                RAISE LOG 'SECURITY: DELETE on mkt.pack_activation refused for role %', current_user;
+                RAISE EXCEPTION 'mkt.pack_activation rows are never deleted' USING ERRCODE = 'restrict_violation';
+            END IF;
+
+            IF TG_OP = 'INSERT' THEN
+                -- A request starts pending, undecided and not yet in force.
+                IF NEW.status = 'PENDING_APPROVAL' AND NEW.decided_by IS NULL AND NEW.resulting_hash IS NULL AND NEW.activated_at IS NULL THEN
+                    RETURN NEW;
+                END IF;
+                -- The one row born active: the genesis activation the release writes for the state it created, never an approval.
+                IF NEW.status = 'ACTIVE' AND NEW.kind = 'ACTIVATE' AND NEW.requested_by = 'system:genesis' AND NEW.decided_by = 'system:genesis'
+                   AND NEW.approval_request_id IS NULL AND NEW.activated_at IS NOT NULL AND NEW.supersedes_id IS NULL
+                   AND EXISTS (SELECT 1 FROM mkt.config_state WHERE hash = NEW.resulting_hash AND cause = 'GENESIS') THEN
+                    RETURN NEW;
+                END IF;
+                RAISE LOG 'SECURITY: mkt.pack_activation inserted as % (kind %) by role % refused', NEW.status, NEW.kind, current_user;
+                RAISE EXCEPTION 'mkt.pack_activation starts PENDING_APPROVAL; only the genesis activation is born ACTIVE' USING ERRCODE = 'restrict_violation';
+            END IF;
+
+            IF (NEW.id, NEW.legal_entity_id, NEW.pack_id, NEW.version, NEW.kind, NEW.requested_by, NEW.created_at)
+               IS DISTINCT FROM (OLD.id, OLD.legal_entity_id, OLD.pack_id, OLD.version, OLD.kind, OLD.requested_by, OLD.created_at) THEN
+                RAISE EXCEPTION 'mkt.pack_activation identity and request are frozen' USING ERRCODE = 'restrict_violation';
+            END IF;
+            IF (OLD.decided_by IS NOT NULL AND NEW.decided_by IS DISTINCT FROM OLD.decided_by)
+               OR (OLD.approval_request_id IS NOT NULL AND NEW.approval_request_id IS DISTINCT FROM OLD.approval_request_id)
+               OR (OLD.resulting_hash IS NOT NULL AND NEW.resulting_hash IS DISTINCT FROM OLD.resulting_hash)
+               OR (OLD.activated_at IS NOT NULL AND NEW.activated_at IS DISTINCT FROM OLD.activated_at)
+               OR (OLD.supersedes_id IS NOT NULL AND NEW.supersedes_id IS DISTINCT FROM OLD.supersedes_id) THEN
+                RAISE EXCEPTION 'mkt.pack_activation decision, approval and result are frozen once written' USING ERRCODE = 'restrict_violation';
+            END IF;
+            IF NEW.status <> OLD.status AND NOT (
+                   (OLD.status = 'PENDING_APPROVAL' AND NEW.status IN ('APPROVED', 'REJECTED', 'WITHDRAWN', 'ACTIVE'))
+                OR (OLD.status = 'APPROVED' AND NEW.status = 'ACTIVE')
+                OR (OLD.status = 'ACTIVE' AND NEW.status = 'SUPERSEDED')) THEN
+                RAISE LOG 'SECURITY: mkt.pack_activation % status % -> % refused for role %', OLD.id, OLD.status, NEW.status, current_user;
+                RAISE EXCEPTION 'mkt.pack_activation status % cannot move to %', OLD.status, NEW.status USING ERRCODE = 'restrict_violation';
+            END IF;
+            IF NEW.status = OLD.status AND OLD.status IN ('REJECTED', 'WITHDRAWN', 'SUPERSEDED') AND NEW IS DISTINCT FROM OLD THEN
+                RAISE EXCEPTION 'mkt.pack_activation is final in status %', OLD.status USING ERRCODE = 'restrict_violation';
+            END IF;
+            -- Maker-checker and "approved only with an approval" (PITFALLS 47): whoever decides is not the requester, and approving or activating names the approval.
+            IF NEW.status IN ('APPROVED', 'REJECTED', 'ACTIVE') AND OLD.status = 'PENDING_APPROVAL' THEN
+                IF NEW.decided_by IS NULL OR NEW.decided_by = NEW.requested_by THEN
+                    RAISE LOG 'SECURITY: mkt.pack_activation % decided by the requester or by nobody (role %)', OLD.id, current_user;
+                    RAISE EXCEPTION 'mkt.pack_activation must be decided by someone other than the requester' USING ERRCODE = 'restrict_violation';
+                END IF;
+                IF NEW.status IN ('APPROVED', 'ACTIVE') AND NEW.approval_request_id IS NULL THEN
+                    RAISE EXCEPTION 'mkt.pack_activation cannot be approved without an approval request' USING ERRCODE = 'restrict_violation';
+                END IF;
+            END IF;
+            IF NEW.status = 'ACTIVE' AND OLD.status <> 'ACTIVE' AND (NEW.resulting_hash IS NULL OR NEW.activated_at IS NULL) THEN
+                RAISE EXCEPTION 'mkt.pack_activation becomes ACTIVE with the state it produced and the instant it took effect' USING ERRCODE = 'restrict_violation';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE TRIGGER tr_pack_activation_guard BEFORE INSERT OR UPDATE OR DELETE ON mkt.pack_activation
+            FOR EACH ROW EXECUTE FUNCTION mkt.guard_pack_activation();
+        CREATE TRIGGER tr_pack_activation_no_truncate BEFORE TRUNCATE ON mkt.pack_activation
+            FOR EACH STATEMENT EXECUTE FUNCTION mkt.reject_state_change();
         """;
 
     public const string Down = """
+        DROP TRIGGER IF EXISTS tr_pack_activation_no_truncate ON mkt.pack_activation;
+        DROP TRIGGER IF EXISTS tr_pack_activation_guard ON mkt.pack_activation;
+        DROP FUNCTION IF EXISTS mkt.guard_pack_activation();
         DROP TRIGGER IF EXISTS tr_config_state_chain ON mkt.config_state;
         DROP FUNCTION IF EXISTS mkt.guard_config_state_insert();
         DROP TRIGGER IF EXISTS tr_config_state_no_truncate ON mkt.config_state;
