@@ -15,17 +15,24 @@
         // SL3-PLT-SUPPORT: refunds are read by billing staff; only the billing manager decides them (SoD: maker != checker is enforced by plt.Approval).
         "bil.Refund.get": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.Refund.list": [ "Staff.Billing", "Staff.BillingManager" ],
-        "bil.Refund.decide": [ "Staff.BillingManager" ]
+        "bil.Refund.decide": [ "Staff.BillingManager" ],
+        // SL3-BIL-REFUND: billing staff (and the manager) propose and resubmit; maker != checker is enforced by plt.Approval and by BIL.
+        "bil.Refund.propose": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Refund.resubmit": [ "Staff.Billing", "Staff.BillingManager" ]
       }
     },
     "Authority": {
       // ILLUSTRATIVE TEST DATA (D-SL3-14; no approved refund authority matrix exists): refund authority per refund, EUR. Never presented as
       // approved limits; "Illustrative": true grants are ignored in Production (fail closed: DENY). The exact limit is allowed; one cent above
-      // refers to the next role (four eyes); above the manager's limit, DENY. The payeeChanged dimension is declared, not limited, in the slice.
+      // refers to the next role (four eyes); above the manager's limit, DENY. payeeChanged is limited on the Staff.Billing grant only ("false"), so a changed payee always refers to the manager.
       "Grants": [
         {
           "Id": "bil-billing-refund-illustrative", "Role": "Staff.Billing", "Type": "BIL.REFUND", "Illustrative": true,
-          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "500.00", "Currency": "EUR" } ]
+          "Limits": [
+            { "Dimension": "amount", "Comparison": "AtMost", "Amount": "500.00", "Currency": "EUR" },
+            // SL3-BIL-REFUND (REQ-BIL-188/189): a refund to a changed payee or payee account refers up to the billing manager.
+            { "Dimension": "payeeChanged", "Comparison": "InSet", "Codes": [ "false" ] }
+          ]
         },
         {
           "Id": "bil-billingmgr-refund-illustrative", "Role": "Staff.BillingManager", "Type": "BIL.REFUND", "Illustrative": true,

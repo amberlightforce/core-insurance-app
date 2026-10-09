@@ -3815,6 +3815,33 @@ paths:
       - code: BIL-ERR-REFUND-STATE
         note: the refund is not PENDING_APPROVAL
         status: 409
+      - code: BIL-ERR-SOD
+        note: an editor of the refund (an earlier requester or resubmitter) or the person who changed the payee account cannot decide it
+        status: 403
+      - code: PLT-ERR-SELF-APPROVAL
+        note: the maker (or the maker's principal) of the approval request cannot decide it
+        status: 403
+      - code: BIL-ERR-STALE
+        note: the credit or the open invoices changed since the proposal, or the refund changed meanwhile
+        status: 409
+      - code: BIL-ERR-REFUND-OPEN
+        note: another refund became open on the account meanwhile
+        status: 409
+      - code: BIL-ERR-PAYEE-UNVERIFIED
+        note: the payee account is not verified for refunds
+        status: 422
+      - code: BIL-ERR-APPROVAL-MISMATCH
+        note: the decided approval does not cover this refund's amount and payee
+        status: 422
+      - code: BIL-ERR-COOLING-OFF
+        note: the payee account changed recently; the payment is held
+        status: 409
+      - code: BIL-ERR-PAYEE-BLOCKED
+        note: sanctions screening of the payee was not clear
+        status: 409
+      - code: PLT-ERR-AUTHORITY-DENIED
+        note: the approver holds no BIL.REFUND authority for this total and payee
+        status: 403
       x-source:
       - PRD-06 §9.1 l.1800
       - PRD-06 §9.1 l.1819
