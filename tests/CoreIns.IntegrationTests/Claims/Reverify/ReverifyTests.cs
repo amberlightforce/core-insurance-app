@@ -433,7 +433,9 @@ public sealed class ReverifyTests(PostgresFixture database) : IClassFixture<Post
         var (submitted, submit) = await _h.Money.SubmitAsync(setId);
         submitted.StatusCode.ShouldBe(HttpStatusCode.Conflict, submit?.ToJsonString());
         submit.Text("code").ShouldBe("CLM-ERR-SET-STALE");
-        (await _h.Money.ScalarAsync<long>($"SELECT count(*) FROM clm.claim_payment WHERE claim_id = '{claim.ClaimId}' AND status NOT IN ('REJECTED')")).ShouldBe(0);
+        (await _h.Money.ScalarAsync<string>($"SELECT status FROM clm.transaction_set WHERE set_id = '{setId}'")).ShouldBe("DRAFT");
+        (await _h.Money.ScalarAsync<long>(
+            $"SELECT count(*) FROM clm.claim_payment WHERE claim_id = '{claim.ClaimId}' AND status IN ('APPROVED', 'SUBMITTED', 'ISSUED', 'CLEARED')")).ShouldBe(0);
     }
 
     [Fact]

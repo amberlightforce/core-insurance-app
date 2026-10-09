@@ -48,6 +48,10 @@ public sealed class ReverifyRealPolTests(PostgresFixture database) : IClassFixtu
         bound.StatusCode.ShouldBe(HttpStatusCode.OK, bind?.ToJsonString());
         var clock = (ShiftableClock)_policy.Factory.Services.GetRequiredService<IClock>();
         clock.Advance(TimeSpan.FromDays(10));
+
+        // POL's watermark cap (pol.assert_watermark_cap) compares record time with the database clock plus plt.dev_clock's offset:
+        // move that offset forward by the same ten days, as the dev-clock endpoint does.
+        await _money.ScalarAsync<long>("UPDATE plt.dev_clock SET offset_micros = offset_micros + 864000000000 RETURNING offset_micros");
         await _money.DrainAsync();
 
         var policyId = Guid.Parse(bind.Text("policyId"));
