@@ -1,10 +1,12 @@
 using CoreIns.Modules.Billing.Commands;
+using CoreIns.Modules.Billing.Domain;
 using CoreIns.Modules.Billing.Contracts.Api;
 using CoreIns.Modules.Billing.Queries;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -67,16 +69,29 @@ internal sealed class RefundController : ControllerBase
     [HttpGet]
     [Authorize(Policy = RefundPermissions.List)]
     public async Task<IResult> ListAsync(
-        [FromQuery] string? cursor, [FromQuery] int? limit, [FromQuery] Guid? billingAccountId, [FromQuery] Guid? policyId, [FromQuery] RefundState? state,
-        [FromServices] RefundReader reader, CancellationToken cancellationToken) =>
-        Results.Ok(await reader.ListAsync(
+        [FromQuery] string? cursor, [FromQuery] int? limit, [FromQuery] Guid? billingAccountId, [FromQuery] Guid? policyId, [FromQuery] string? state,
+        [FromServices] RefundReader reader, CancellationToken cancellationToken)
+    {
+        // The state is the contract's wire code (PENDING_APPROVAL), which model binding of the enum would not read.
+        RefundState? parsed = null;
+        if (state is not null)
+        {
+            parsed = Enum.GetValues<RefundState>().Cast<RefundState?>().FirstOrDefault(v => string.Equals(Codes.Of(v!.Value), state, StringComparison.Ordinal));
+            if (parsed is null)
+            {
+                return HttpResults.Problem(DomainError.Of(ModuleCode.BIL, "VALIDATION", $"The state '{state}' is not a refund state."), HttpContext);
+            }
+        }
+
+        return Results.Ok(await reader.ListAsync(
             LegalEntity(),
             billingAccountId is { } a ? new BillingAccountId(a) : null,
             policyId is { } p ? new PolicyId(p) : null,
-            state,
+            parsed,
             cursor,
             limit,
             cancellationToken).ConfigureAwait(false));
+    }
 
     private LegalEntityId LegalEntity()
     {

@@ -218,7 +218,7 @@ public sealed class RefundApprovalTests(PostgresFixture database) : IClassFixtur
         var hash = (await _h.TextsAsync($"SELECT approval_content_hash FROM bil.refund WHERE refund_id = '{id}'")).Single();
         const string inboxRoles = "Staff.BillingManager,Staff.ClaimsManager"; // a person who may use the inbox and holds BIL.REFUND authority
 
-        var (inbox, inboxBody) = await _h.SendAsync(HttpMethod.Post, "/api/plt/v1/approval/decide", new { requestId, decision = "APPROVE", payloadHash = hash }, inboxRoles, "bob");
+        var (inbox, inboxBody) = await _h.SendAsync(HttpMethod.Post, "/api/plt/v1/approval/decide", new { requestId, decision = "Approve", payloadHash = hash }, inboxRoles, "bob");
         inbox.StatusCode.ShouldBe(HttpStatusCode.Conflict, inboxBody?.ToJsonString());
         inboxBody.Text("code").ShouldBe("PLT-ERR-OWNER-DECIDED");
         (await _h.TextsAsync($"SELECT status FROM plt.approval_request WHERE request_id = '{requestId}'")).Single().ShouldBe("PendingApproval");
@@ -240,7 +240,9 @@ public sealed class RefundApprovalTests(PostgresFixture database) : IClassFixtur
         var id = refund.Text("refundId");
         var requestId = (await _h.TextsAsync($"SELECT approval_request_id::text FROM bil.refund WHERE refund_id = '{id}'")).Single();
         // Tamper with the stored request as the database owner (the app cannot): its payeeChanged code no longer matches BIL's own data.
+        await _h.Slice.ScalarAsync<long>("ALTER TABLE plt.approval_request DISABLE TRIGGER USER");
         (await _h.Slice.ScalarAsync<long>($"UPDATE plt.approval_request SET authority_codes = jsonb_set(authority_codes, '{{payeeChanged}}', '\"true\"') WHERE request_id = '{requestId}' RETURNING 1")).ShouldBe(1);
+        await _h.Slice.ScalarAsync<long>("ALTER TABLE plt.approval_request ENABLE TRIGGER USER");
 
         var (response, body) = await _h.DecideAsync(id, "APPROVE", "bob");
 
