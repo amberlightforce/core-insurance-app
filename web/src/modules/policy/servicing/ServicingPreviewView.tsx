@@ -159,7 +159,11 @@ export function ServicingPreviewView({
     [t, currency],
   );
 
-  const prorated = preview.proratedLines;
+  // Table accessors cache values by row identity; refresh rows when catalogue labels change.
+  const prorated = useMemo(
+    () => preview.proratedLines.map((line) => ({ ...line })),
+    [preview.proratedLines, coverNames],
+  );
   const tax = preview.taxLines;
   return (
     <div className={styles.stack}>
