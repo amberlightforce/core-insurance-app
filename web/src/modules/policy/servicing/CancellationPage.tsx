@@ -194,12 +194,7 @@ function CancellationForm({ data }: { data: PolicyGetResponse }) {
           <Banner variant="success" live="status" title={t('servicing.cancel.bound.title')}>
             {t('servicing.cancel.bound.body')}
           </Banner>
-          {bound.servicingPreview ? (
-            <ServicingPreviewView
-              preview={bound.servicingPreview}
-              artefactHash={term.artefactHash}
-            />
-          ) : null}
+          <ServicingPreviewView preview={bound.servicingPreview} artefactHash={term.artefactHash} />
           <div className={styles.actions}>
             <LinkButton variant="primary" to={`/policies/${policy.policyId}`}>
               {t('servicing.openPolicy')}
