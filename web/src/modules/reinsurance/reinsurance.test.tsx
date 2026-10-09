@@ -11,17 +11,16 @@ import { ReinsuranceHomePage } from './ReinsuranceHomePage';
 import { treaty } from './fixtures';
 import { ClaimRecoveriesPage } from './ClaimRecoveriesPage';
 import { maxRecoveryPages, type ClaimRecoveryRow } from './api';
+import type { DevSession } from '../../dev-auth/devAuth';
 
 vi.setConfig({ testTimeout: 60_000 });
-function signIn(id: string, roles: string[]) {
-  sessionStorage.setItem(
-    'coreins.devSession',
-    JSON.stringify({
-      accessToken: 'test',
-      expiresAt: '2099-01-01T00:00:00Z',
-      user: { id, name: id, roles },
-    }),
-  );
+function signIn(id: string, roles: string[], actorKey: string | undefined = `USER:dev:${id}`) {
+  const session: DevSession = {
+    accessToken: 'test',
+    expiresAt: '2099-01-01T00:00:00Z',
+    user: { id, name: id, roles, ...(actorKey ? { actorKey } : {}) },
+  };
+  sessionStorage.setItem('coreins.devSession', JSON.stringify(session));
 }
 beforeEach(() => {
   signIn('riacct', ['Staff.ReinsuranceAccountant']);
@@ -179,13 +178,29 @@ describe('reinsurance registry and treaty editor', () => {
   });
 });
 describe('maker-checker treaty approval', () => {
-  it('hides approval for the API USER:maker actor key when the session user holds the manager role', () => {
-    signIn('maker', ['Staff.ReinsuranceManager']);
-    mockApi([]);
+  it('keeps approval read-only when the server-derived actor key is missing', () => {
+    signIn('checker', ['Staff.ReinsuranceManager'], '');
+    const api = mockApi([]);
     renderScreen(<DecisionBar contract={{ ...treaty, status: 'PENDING_APPROVAL' }} />, {
       path: '/',
       url: '/',
     });
+    expect(screen.getByText(/Συνδεθείτε ξανά/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Έγκριση…' })).not.toBeInTheDocument();
+    expect(api.calls).toHaveLength(0);
+  });
+  it('hides approval for native USER:dev:riacct maker while the picker id remains riacct', () => {
+    signIn('riacct', ['Staff.ReinsuranceManager'], 'USER:dev:riacct');
+    mockApi([]);
+    renderScreen(
+      <DecisionBar
+        contract={{ ...treaty, maker: 'USER:dev:riacct', status: 'PENDING_APPROVAL' }}
+      />,
+      {
+        path: '/',
+        url: '/',
+      },
+    );
     expect(
       screen.getByText('Δεν μπορείτε να εγκρίνετε τη δική σας καταχώριση'),
     ).toBeInTheDocument();

@@ -13,7 +13,11 @@ export const reinsuranceRoles = [
 
 export function currentUser() {
   const session = readSession();
-  return { id: session?.user.id ?? '', roles: session?.user.roles ?? [] };
+  return {
+    id: session?.user.id ?? '',
+    actorKey: session?.user.actorKey ?? '',
+    roles: session?.user.roles ?? [],
+  };
 }
 
 export const hasRole = (roles: readonly string[], role: string) => roles.includes(role);
