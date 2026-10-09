@@ -93,3 +93,16 @@ it('guards the exception route for an unrelated role', async () => {
   await screen.findByText(/permission/i);
   expect(api.calls).toHaveLength(0);
 });
+
+it('loads the next exception page without dropping existing rows or changing the status filter', async () => {
+  const api = mockApi([{ method: 'GET', path: '/api/pol/v1/pack-rollback-exceptions', respond: ({ url }) => ({ body: url.searchParams.has('cursor') ? { items: [{ ...fx.exception, exceptionId: '018f8000-0000-7000-8000-000000000095', policyNumber: 'SYNTHETIC-2026-0002' }], nextCursor: null } : { items: [fx.exception], nextCursor: 'opaque-next' } }) }]);
+  const { user } = renderScreen(<ExceptionQueuePage />, { path: '/policies/pack-rollback', url: '/policies/pack-rollback' });
+  await screen.findByText('SYNTHETIC-2026-0001');
+  await user.click(screen.getByRole('button', { name: 'Load more exceptions' }));
+  await screen.findByText('SYNTHETIC-2026-0002');
+  expect(screen.getByText('SYNTHETIC-2026-0001')).toBeInTheDocument();
+  expect(api.calls).toHaveLength(2);
+  expect(api.calls[1]?.url.searchParams.get('status')).toBe('OPEN');
+  expect(api.calls[1]?.url.searchParams.get('cursor')).toBe('opaque-next');
+  expect(screen.queryByRole('button', { name: 'Load more exceptions' })).not.toBeInTheDocument();
+});

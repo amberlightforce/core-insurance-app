@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import type { PackListItem } from '../../../api/types';
-import { EmptyState, StatusPill } from '../../../design-system';
+import { Button, EmptyState, StatusPill } from '../../../design-system';
 import { LinkButton } from '../../staff/LinkButton';
 import { PageHeader, Section } from '../../staff/PageHeader';
 import { QueryView } from '../../staff/QueryView';
@@ -82,6 +82,7 @@ export function PackRegistryPage() {
           )
         }
       </QueryView>
+      {query.hasNextPage ? <Button variant="secondary" isLoading={query.isFetchingNextPage} onPress={() => { void query.fetchNextPage(); }}>{t('packs.registry.more')}</Button> : null}
     </div>
   );
 }

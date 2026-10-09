@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { PackRollbackExceptionView } from '../../../api/types';
-import { EmptyState, SegmentedControl } from '../../../design-system';
+import { Button, EmptyState, SegmentedControl } from '../../../design-system';
 import { LinkButton } from '../../staff/LinkButton';
 import { PageHeader, Section } from '../../staff/PageHeader';
 import { QueryView } from '../../staff/QueryView';
@@ -116,6 +116,7 @@ export function ExceptionQueuePage() {
             )
           }
         </QueryView>
+        {query.hasNextPage ? <Button variant="secondary" isLoading={query.isFetchingNextPage} onPress={() => { void query.fetchNextPage(); }}>{t('packRollback.queue.more')}</Button> : null}
       </Section>
     </div>
   );

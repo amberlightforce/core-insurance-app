@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 
 import { apiRequest } from '../../../api/client';
 import { useDevSession } from '../../../dev-auth/devAuth';
@@ -9,18 +9,22 @@ import type {
 } from '../../../api/types';
 
 const pol = '/api/pol/v1';
+const exceptionPages = (data: InfiniteData<PackRollbackExceptionListPage, string | null>): PackRollbackExceptionListPage => ({ ...data.pages[data.pages.length - 1]!, items: data.pages.flatMap((page) => page.items) });
 
 export type ExceptionFilter = 'OPEN' | 'REVIEWED';
 
 /** pol.PackRollbackException.list, filtered by status. Only the status travels in the query. */
 export function useExceptions(status: ExceptionFilter) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['pol', 'packRollbackExceptions', status],
-    queryFn: ({ signal }) =>
+    initialPageParam: null as string | null,
+    queryFn: ({ signal, pageParam }) =>
       apiRequest<PackRollbackExceptionListPage>(`${pol}/pack-rollback-exceptions`, {
-        query: { status },
+        query: { status, ...(pageParam ? { cursor: pageParam } : {}) },
         signal,
       }),
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    select: exceptionPages,
   });
 }
 

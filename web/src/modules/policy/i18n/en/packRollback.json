@@ -38,6 +38,7 @@
     },
     "queue": {
       "title": "Pack-rollback exceptions",
+      "more": "Load more exceptions",
       "subtitle": "Transactions bound under a pack configuration that a rollback has since replaced. Review each case and record the outcome.",
       "section": "Exceptions",
       "filter": "Exception status",

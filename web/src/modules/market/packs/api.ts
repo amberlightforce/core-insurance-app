@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 
 import { apiRequest } from '../../../api/client';
 import type {
@@ -14,12 +14,16 @@ import type {
 } from '../../../api/types';
 
 const mkt = '/api/mkt/v1';
+const packPages = (data: InfiniteData<PackListPage, string | null>): PackListPage => ({ ...data.pages[data.pages.length - 1]!, items: data.pages.flatMap((page) => page.items) });
 
 /** mkt.Pack.list: every pack with its versions and the active version per legal entity. */
 export function usePacks() {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['mkt', 'packs'],
-    queryFn: ({ signal }) => apiRequest<PackListPage>(`${mkt}/packs`, { signal }),
+    initialPageParam: null as string | null,
+    queryFn: ({ signal, pageParam }) => apiRequest<PackListPage>(`${mkt}/packs`, { signal, ...(pageParam ? { query: { cursor: pageParam } } : {}) }),
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
+    select: packPages,
   });
 }
 

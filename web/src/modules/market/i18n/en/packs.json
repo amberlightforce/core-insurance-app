@@ -53,6 +53,7 @@
       "title": "Pack registry",
       "subtitle": "The market packs with their versions and the active version per legal entity.",
       "emptyTitle": "No packs",
+      "more": "Load more packs",
       "emptyBody": "No market pack is registered yet.",
       "open": "Open pack {pack}",
       "versions": "{count, plural, one {# version} other {# versions}} · {published} published",
