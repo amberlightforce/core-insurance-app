@@ -167,7 +167,7 @@ public sealed class FinanceClaimsTests(PostgresFixture database) : IClassFixture
             """)).ShouldBe(0);
         (await ScalarAsync<long>(_db, $"""
             SELECT count(*) FROM fin.journal_entry WHERE journal_id IN (SELECT journal_id FROM fin.journal_line WHERE {claimLines})
-               AND (book <> 'IFRS17' OR rule_set_version <> 2 OR accounting_date <> DATE '{Day}')
+               AND (book <> 'IFRS17' OR rule_set_version <> 3 OR accounting_date <> DATE '{Day}')
             """)).ShouldBe(0);
 
         // Balances after the path (PRD-09 §4.11 / GF-05 subset): incurred 6,200.00; case reserve, clearing and in-transit

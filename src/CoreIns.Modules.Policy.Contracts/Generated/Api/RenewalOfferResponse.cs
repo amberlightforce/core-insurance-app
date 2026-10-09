@@ -32,6 +32,11 @@ public sealed record RenewalOfferResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("deadline")]
     public required global::CoreIns.SharedKernel.Instant Deadline { get; init; }
 
+    /// <summary>True when an open underwriting referral holds the offer back (the job is Quoted but not offered; no RenewalOffered was published)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("referred")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Referred { get; init; }
+
     /// <summary>Contract member 'servicingPreview'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("servicingPreview")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]

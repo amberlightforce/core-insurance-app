@@ -16,7 +16,7 @@ namespace CoreIns.IntegrationTests.Finance;
 /// payloads built from the generated contract samples (tests/CoreIns.Contracts.Tests/Generated/Samples/events), then
 /// drains the outbox so the FIN handlers run as in the worker.
 /// </summary>
-internal sealed class FinanceSlice(ApiHostFactory factory)
+internal sealed class FinanceSlice(Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program> factory)
 {
     public const string FinanceRole = "Staff.Finance";
 
