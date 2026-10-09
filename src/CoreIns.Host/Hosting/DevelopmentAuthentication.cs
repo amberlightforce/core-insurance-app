@@ -79,7 +79,7 @@ internal static class DevelopmentAuthentication
         services.AddSingleton(new DevSigningKey(key));
         // The token times come from IClock (the shiftable dev clock, D-SL3-12), so the lifetime is checked against the same clock;
         // the library default would compare against the real clock and reject every token issued after a dev clock advance.
-        services.AddOptions<JwtBearerOptions>(Scheme).Configure<IClock>((options, clock) =>
+        services.AddOptions<JwtBearerOptions>(Scheme).PostConfigure<IClock>((options, clock) =>
             options.TokenValidationParameters.LifetimeValidator = (notBefore, expires, _, parameters) =>
             {
                 var now = clock.Now.ToUtcDateTime();
