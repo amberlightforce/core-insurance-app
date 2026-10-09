@@ -40,7 +40,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-GATE-FAILED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): chn.Purchase.confirm, pol.Job.bind.</para>
+    /// <para>Declared by 3 operation(s): chn.Purchase.confirm, pol.Job.bind, pol.Renewal.accept.</para>
     /// </remarks>
     public const string GateFailed = "POL-ERR-GATE-FAILED";
 
@@ -178,7 +178,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): pol.Job.quote, pol.Job.updateDraft, pol.Policy.search, pol.Policy.searchByCriteria, pol.Snapshot.get, pol.Submission.create.</para>
+    /// <para>Declared by 7 operation(s): pol.Job.quote, pol.Job.updateDraft, pol.Policy.search, pol.Policy.searchByCriteria, pol.Renewal.create, pol.Snapshot.get, pol.Submission.create.</para>
     /// </remarks>
     public const string Validation = "POL-ERR-VALIDATION";
 
