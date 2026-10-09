@@ -5,7 +5,7 @@ import { alive, assertNoIbanInUrls, go, signInAs } from './support/ui.js';
 
 // Real browser interactions against the isolated shiftable stack. API setup creates each paid policy;
 // servicing, explicit confirmation and refund proposal are performed through staff screens.
-test.use({ actionTimeout: 30_000 });
+test.use({ actionTimeout: 30_000, screenshot: 'only-on-failure', trace: 'retain-on-failure' });
 
 test('E2E-03 staff cancellation and refund proposal reach the paid refund', async ({ page, request }) => {
   test.setTimeout(420_000);
@@ -26,7 +26,9 @@ test('E2E-03 staff cancellation and refund proposal reach the paid refund', asyn
   await page.getByRole('button', { name: 'Ακύρωση ασφαλιστηρίου', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByRole('button', { name: 'Ακύρωση ασφαλιστηρίου', exact: true })).toBeDisabled();
-  await dialog.getByRole('checkbox').check();
+  await dialog.getByRole('checkbox').focus();
+  await dialog.getByRole('checkbox').press('Space');
+  await expect(dialog.getByRole('checkbox')).toBeChecked();
   await dialog.getByRole('button', { name: 'Ακύρωση ασφαλιστηρίου', exact: true }).click();
   await expect(page.getByText('Το ασφαλιστήριο ακυρώθηκε', { exact: true }).first()).toBeVisible();
   await alive(page);
@@ -73,7 +75,9 @@ test('E2E-04 staff renewal requires confirmation and binds the next term', async
   await page.getByRole('button', { name: 'Καταχώριση αποδοχής', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByRole('button', { name: 'Καταχώριση αποδοχής', exact: true })).toBeDisabled();
-  await dialog.getByRole('checkbox').check();
+  await dialog.getByRole('checkbox').focus();
+  await dialog.getByRole('checkbox').press('Space');
+  await expect(dialog.getByRole('checkbox')).toBeChecked();
   await dialog.getByRole('button', { name: 'Καταχώριση αποδοχής', exact: true }).click();
   await expect(page.getByText('Η ανανέωση έγινε αποδεκτή', { exact: true }).first()).toBeVisible();
   await alive(page);
@@ -101,7 +105,9 @@ test('staff change edits the vehicle, previews and explicitly applies the change
   await page.getByRole('button', { name: /Επόμενο/ }).click();
   await page.getByRole('button', { name: 'Εφαρμογή αλλαγής', exact: true }).click();
   const dialog = page.getByRole('dialog');
-  await dialog.getByRole('checkbox').check();
+  await dialog.getByRole('checkbox').focus();
+  await dialog.getByRole('checkbox').press('Space');
+  await expect(dialog.getByRole('checkbox')).toBeChecked();
   await dialog.getByRole('button', { name: 'Εφαρμογή αλλαγής', exact: true }).click();
   await expect(page.getByText('Η αλλαγή εφαρμόστηκε', { exact: true }).first()).toBeVisible();
   await alive(page);

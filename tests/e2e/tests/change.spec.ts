@@ -90,13 +90,18 @@ test('change: a premium increase bills an additional invoice, a decrease issues 
   expect(downPremium).toBe(cents(downPreview['premiumChange']));
   expect(cents(downPreview['refundDue'])).toBe(-downPremium);
 
-  const creditNote = await eventually('the credit note of the change', async () => {
-    return (await invoicesOf(request, policy)).find((i) => i['kind'] === 'CREDIT_NOTE');
+  const creditNotes = await eventually('the complete credit notes of the change', async () => {
+    const notes = (await invoicesOf(request, policy)).filter(
+      (invoice) => invoice['kind'] === 'CREDIT_NOTE' && invoice['transactionId'] === down.bind['transactionId'],
+    );
+    return notes.length > 0 && sum(notes.map((note) => cents(note['total']))) === -downPremium ? notes : undefined;
   });
-  expect(creditNote['transactionId']).toBe(down.bind['transactionId']);
-  expect(cents(creditNote['total']), 'the credited amount is positive on the note').toBe(-downPremium);
+  expect(sum(creditNotes.map((note) => cents(note['total']))), 'the complete correction equals the premium credit').toBe(-downPremium);
   const originals = (await invoicesOf(request, policy)).filter((i) => i['kind'] === 'INVOICE').map((i) => i['invoiceId']);
-  expect(originals, 'the credit note corrects an invoice of the policy').toContain(creditNote['originalInvoiceId']);
+  for (const note of creditNotes) {
+    expect(cents(note['total']) > 0n, 'each credit note carries a positive credit').toBe(true);
+    expect(originals, 'each credit note corrects an invoice of the policy').toContain(note['originalInvoiceId']);
+  }
 
   // ---- FIN: every journal type of the policy present (written, billed, IPT due, received, allocated, credits), all balanced.
   const journals = await eventually('FIN journals of the change credit note', async () => {
