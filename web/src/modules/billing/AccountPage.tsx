@@ -18,6 +18,7 @@ import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
 import { useBillingAccount, useInvoices } from './api';
 import { InvoiceTable } from './InvoiceTable';
+import { ProposeRefundSection } from './refunds/ProposeRefundSection';
 import { RecordPaymentForm } from './RecordPaymentForm';
 
 type Term = BillingAccountGetResponse['account']['terms'][number];
@@ -119,6 +120,13 @@ function AccountDetails({ data }: { data: BillingAccountGetResponse }) {
         <RecordPaymentForm
           billingAccountId={account.billingAccountId}
           currency={account.currency}
+        />
+      </Section>
+      <Section title={t('refunds.propose.title')}>
+        <ProposeRefundSection
+          billingAccountId={account.billingAccountId}
+          payerPartyId={account.payerPartyId}
+          credit={balances.credit}
         />
       </Section>
     </div>

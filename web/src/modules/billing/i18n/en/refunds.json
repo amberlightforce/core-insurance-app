@@ -1,0 +1,175 @@
+{
+  "refunds": {
+    "title": "Refunds",
+    "subtitle": "Refunds of account credit to the payer's verified bank account",
+    "open": "Refunds",
+    "pendingTitle": "Awaiting a decision",
+    "allTitle": "All refunds",
+    "backToBilling": "Billing",
+    "backToInbox": "Refunds",
+    "emptyPendingTitle": "No refunds awaiting a decision",
+    "emptyPendingBody": "A refund above the auto-approval limit will appear here for the billing manager.",
+    "emptyAllTitle": "No refunds yet",
+    "emptyAllBody": "Propose a refund from a billing account that holds a credit.",
+    "notFound": "Refund not found",
+    "queuePrimary": "Refund to payer",
+    "columns": {
+      "refund": "Refund",
+      "amount": "Amount",
+      "state": "Status",
+      "approval": "Approval",
+      "requestedBy": "Requested by",
+      "requestedAt": "Proposed",
+      "account": "Billing account"
+    },
+    "approval": {
+      "NOT_REQUIRED": "Not required",
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "detail": {
+      "title": "Refund",
+      "summary": "Summary",
+      "amount": "Refund amount",
+      "approvalState": "Approval",
+      "payee": "Payee",
+      "maskedIban": "Bank account (IBAN, masked)",
+      "verification": "Account verification",
+      "payoutMethod": "Payout method",
+      "reason": "Reason",
+      "requestedBy": "Requested by",
+      "proposedAt": "Proposed",
+      "decidedBy": "Decided by",
+      "decidedAt": "Decided",
+      "decisionComment": "Decision comment",
+      "disbursement": "Disbursement",
+      "openAccount": "Billing account",
+      "payeeNote": "The payee is the payer of the billing account. The refund goes to a verified bank account; the full IBAN is never shown."
+    },
+    "verificationStatus": {
+      "Unverified": "Not verified",
+      "VoPMatched": "Name matched",
+      "VoPCloseMatch": "Name close match",
+      "VoPNoMatch": "Name does not match",
+      "VoPNotAvailable": "Check not available",
+      "Confirmed": "Confirmed"
+    },
+    "breakdown": {
+      "title": "Breakdown by charge type",
+      "empty": "No lines.",
+      "total": "Total of lines",
+      "provisional": "Provisional",
+      "columns": {
+        "chargeType": "Charge type",
+        "category": "Category",
+        "transactionKind": "Transaction",
+        "rule": "Treatment rule",
+        "legal": "Legal status",
+        "amount": "Amount"
+      }
+    },
+    "netting": {
+      "title": "Netting",
+      "none": "Nothing was netted against open amounts.",
+      "kind": {
+        "OPEN_INVOICE": "Applied to an open invoice",
+        "OFFSET_CREDIT": "Offset against another credit"
+      },
+      "columns": {
+        "kind": "Kind",
+        "invoice": "Invoice",
+        "amount": "Amount"
+      },
+      "total": "Total netted"
+    },
+    "decision": {
+      "title": "Decision",
+      "comment": "Comment",
+      "commentHelp": "Required when you reject.",
+      "commentRequired": "Enter the reason for rejecting.",
+      "approve": "Approve refund",
+      "reject": "Reject refund",
+      "approved": "Refund approved",
+      "rejected": "Refund rejected",
+      "decidedBody": "The decision is recorded. An approved refund goes to disbursement.",
+      "disbursementCreated": "Disbursement created",
+      "failed": "The decision failed",
+      "makerNote": "You proposed this refund. Another approver must decide it.",
+      "roleNote": "Only the billing manager decides refunds above the auto-approval limit.",
+      "notPending": "This refund is not awaiting a decision."
+    },
+    "resubmit": {
+      "title": "Resubmit",
+      "intro": "A rejected or returned refund can be proposed again, optionally to a corrected bank account.",
+      "comment": "Comment",
+      "differentPayee": "Use a different bank account",
+      "submit": "Resubmit refund",
+      "done": "Refund resubmitted",
+      "failed": "The refund could not be resubmitted",
+      "needPayee": "Save the new bank account first, or clear the option."
+    },
+    "payee": {
+      "intro": "Enter the payer's bank account for refunds. It is checked against the account holder's name. Only the last four characters are shown afterwards.",
+      "holder": "Account holder",
+      "holderHelp": "As the bank holds it.",
+      "iban": "IBAN",
+      "ibanHelp": "Spaces are fine.",
+      "errors": {
+        "holder": "Enter the account holder.",
+        "ibanRequired": "Enter the IBAN.",
+        "ibanInvalid": "The IBAN is not valid."
+      },
+      "submit": "Save bank account",
+      "saved": "Bank account saved",
+      "savedSummary": "Saved bank account",
+      "maskedIban": "IBAN (masked)",
+      "verification": "Verification",
+      "coolingOffUntil": "Held until",
+      "changeNote": "This replaces the previous account, so a second approver and a waiting period apply.",
+      "failed": "The bank account could not be saved"
+    },
+    "propose": {
+      "title": "Refund of credit",
+      "intro": "Pays the credit on this account back to the payer, after netting against open invoices.",
+      "noCredit": "This account holds no credit to refund.",
+      "creditAvailable": "Credit on the account",
+      "reason": "Reason",
+      "reasonPlaceholder": "Choose a reason",
+      "reasonRequired": "Choose a reason.",
+      "reasons": {
+        "CREDIT_BALANCE": "Credit balance on the account",
+        "CANCELLATION": "Cancellation",
+        "OVERPAYMENT": "Overpayment",
+        "OTHER": "Other"
+      },
+      "comment": "Comment",
+      "defaultPayee": "The refund goes to the payer's verified bank account.",
+      "differentPayee": "Pay to a different bank account",
+      "needPayee": "Save the new bank account first, or clear the option.",
+      "preview": "Preview refund",
+      "previewTitle": "Preview",
+      "previewNote": "Nothing is saved yet.",
+      "propose": "Propose refund",
+      "failed": "The refund could not be proposed",
+      "approvalNote": {
+        "NOT_REQUIRED": "Within the auto-approval limit: no approval needed.",
+        "PENDING": "Above the auto-approval limit: the billing manager must approve it.",
+        "APPROVED": "Approved.",
+        "REJECTED": "Rejected."
+      }
+    },
+    "creditNote": {
+      "title": "Credit note",
+      "bannerTitle": "Credit note",
+      "bannerBody": "This credit note corrects an earlier invoice. It reduces what the customer owes and can be refunded as account credit.",
+      "original": "Corrects invoice",
+      "openOriginal": "Open the original invoice",
+      "amountCredited": "Credited amount"
+    },
+    "lines": {
+      "transactionKind": "Transaction",
+      "rule": "Treatment rule"
+    }
+  }
+}
