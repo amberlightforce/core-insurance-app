@@ -449,6 +449,7 @@ internal sealed class PlatformApprovalService(
     RequestContext context,
     ICommandHandler<RequestApproval, ApprovalRequestResponse> request,
     ICommandHandler<DecideApproval, ApprovalDecideResponse> decide,
+    ICommandHandler<WithdrawApproval, ApprovalWithdrawResponse> withdraw,
     ApprovalQueries queries) : IPlatformApprovalService
 {
     public async Task<ApprovalRequestResponse> RequestAsync(ApprovalRequestRequest request1, CommandOptions options, CancellationToken cancellationToken = default)
@@ -477,12 +478,16 @@ internal sealed class PlatformApprovalService(
     public Task<ApprovalVerifyForExecutionResponse> VerifyForExecutionAsync(ApprovalVerifyForExecutionRequest request1, CancellationToken cancellationToken = default) =>
         queries.VerifyForExecutionAsync(request1, cancellationToken);
 
-    /// <summary>
-    /// Contract placeholder (SL4-CONTRACTS, D-SL4-14): <c>plt.Approval.withdraw</c> is typed in the contract but its
-    /// behaviour is built by SL4-PLT. Until then the call fails closed rather than silently doing nothing.
-    /// </summary>
-    public Task<ApprovalWithdrawResponse> WithdrawAsync(ApprovalWithdrawRequest request1, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw new NotSupportedException("plt.Approval.withdraw is built by SL4-PLT.");
+    public async Task<ApprovalWithdrawResponse> WithdrawAsync(ApprovalWithdrawRequest request1, CommandOptions options, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        // Capture the outer registered owner before the nested PLT command stamps its own identity.
+        var callerModule = context.CurrentCommandModule;
+        using (context.Use(options.IdempotencyKey, options.DryRun))
+        {
+            return Unwrap(await withdraw.HandleAsync(new WithdrawApproval(request1, callerModule), cancellationToken).ConfigureAwait(false));
+        }
+    }
 
     private static T Unwrap<T>(Result<T> result) => result.IsSuccess ? result.Value : throw new DomainException(result.Error);
 }

@@ -88,8 +88,8 @@
       "summary": "Limit xs retention",
       "attachment": "Retention (attachment)",
       "limit": "Limit per risk",
-      "aad": "Annual deductible (AAD)",
-      "aal": "Annual limit (AAL)"
+      "aad": "Annual aggregate deductible (AAD)",
+      "aal": "Annual aggregate limit (AAL)"
     }
   },
   "participants": {

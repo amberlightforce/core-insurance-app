@@ -37,6 +37,7 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
         user["name"]!.GetValue<string>().ShouldBe(name);
         user["roles"]!.AsArray().Select(r => r!.GetValue<string>()).ShouldBe([role]);
         var names = users.Select(u => u!["name"]!.GetValue<string>()).ToArray();
+        names.Distinct(StringComparer.Ordinal).Count().ShouldBe(names.Length);
         foreach (var other in names.Where(n => n != name))
         {
             name.Contains(other, StringComparison.Ordinal).ShouldBeFalse();
