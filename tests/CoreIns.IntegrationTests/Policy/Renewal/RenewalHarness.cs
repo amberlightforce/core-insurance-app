@@ -65,6 +65,9 @@ internal sealed class RenewalHarness(PolicySlice slice, string superuserConnecti
         var expiry = await ScalarAsync<DateTime>($"SELECT valid_to FROM pol.policy_term WHERE term_id = '{TermId}' AND recorded_to IS NULL");
         var target = new DateTimeOffset(DateTime.SpecifyKind(expiry, DateTimeKind.Utc)).AddDays(-daysBeforeExpiry);
         Clock.Advance(target - Clock.Now.ToDateTimeOffset());
+        // The policy watermark may run ahead of the database clock only by the dev clock offset (plt.dev_clock, D-SL3-12): tell it.
+        var micros = (long)(Clock.Offset.TotalMilliseconds * 1000);
+        await ExecuteAsync($"UPDATE plt.dev_clock SET offset_micros = GREATEST(offset_micros, {micros}), version = version + 1");
     }
 
     public string JobId { get; private set; } = string.Empty;
