@@ -1,6 +1,6 @@
 # SL4-RI-REGISTRY recovery validation — 9 October 2026
 
-Recovered branch: `worktree-agent-a1fd0c774fb4c3051`, based on main `c85a424`.
+Recovered branch: `worktree-agent-a1fd0c774fb4c3051`, latest main `cbd1e68` merged after the integration fixes.
 Preserved implementation checkpoints: `d3f7aba`, `da42709`, `5b9ad17`; list summaries `ac89a41`;
 PLT approval evidence and authoritative editors `e4d222b`.
 
@@ -78,13 +78,15 @@ The list summary regression compares decimal values rather than database formatt
 
 Native Windows Release build uses `MSBUILDDISABLENODEREUSE=1`, `DOTNET_CLI_USE_MSBUILD_SERVER=0`,
 and `-m:2`. Tests use `--no-build` and Microsoft Testing Platform namespace/class filters.
-Logs are unique to this worktree under `.logs/ri-recovery-validation-*20261009.log`.
+Logs are unique to this worktree under `.logs/ri48-post-main-final-*.log`; earlier recovery
+and independently reproduced UI review logs are preserved alongside them.
 
 | Gate | Result |
 |---|---|
 | Full native solution Release build | Passed; zero warnings/errors |
-| Registry namespace | 38 passed, zero failed/skipped |
+| Registry namespace | 46 passed, zero failed/skipped |
 | PLT `ApprovalTests` | 20 passed, zero failed/skipped |
+| Host settings and token tests | 35 passed, zero failed/skipped |
 | Architecture | 198 passed, zero failed/skipped |
 | ContractGen `--check` | Current, 2,852 generated files |
 | Generated API samples | 2,423 checked; OK |
