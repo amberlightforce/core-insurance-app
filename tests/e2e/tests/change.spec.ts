@@ -165,7 +165,7 @@ test('change: an open claim on the changed cover gets ReverificationRequired and
 
   // The handler adopts the new ref (REQ-CLM-058); the claim is verified again on the new snapshot.
   const decision = await call(request, claimsUser, 'POST', '/api/clm/v1/coverage/reverify', {
-    claimId, decision: 'ADOPT', reasonCode: 'POLICY_CHANGED', expectedNewSnapshotRef: demand['newSnapshotRef'],
+    claimId, decision: 'ADOPT', reasonCode: 'CHANGE_APPLIES', expectedNewSnapshotRef: demand['newSnapshotRef'],
   });
   expect(decision.status, decision.text).toBe(200);
   expect(decision.body['snapshotStatus']).toBe('VERIFIED');
