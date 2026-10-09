@@ -1342,6 +1342,9 @@ paths:
         status: 422
       - code: CLM-ERR-NOT-PAYABLE
         status: 422
+      - code: CLM-ERR-COVERAGE-IN-QUESTION
+        note: the exposure's cover was removed by an adopted snapshot and no coverage decision has cleared it (REQ-CLM-058)
+        status: 422
       - code: CLM-ERR-DUPLICATE-PAYMENT
         status: 409
       - code: CLM-ERR-SET-STALE
