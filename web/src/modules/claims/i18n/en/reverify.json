@@ -19,7 +19,6 @@
       "productVersion": "Product version",
       "coverages": "Selected coverages",
       "noCoverages": "No coverage is selected.",
-      "onlyHere": "only in this version",
       "notInForce": "The policy is not in force in this version."
     },
     "decision": {
@@ -38,7 +37,6 @@
     },
     "reason": {
       "label": "Reason",
-      "illustrative": "Illustrative code list.",
       "codes": {
         "LOSS_BEFORE_CHANGE": "The loss happened before the change",
         "CHANGE_NOT_MATERIAL": "The change does not affect this claim",
@@ -62,6 +60,25 @@
     "noPermission": {
       "title": "You cannot take this decision",
       "body": "Taking a coverage decision needs the claims handler authority. Ask a claims handler to review it."
-    }
+    },
+    "problems": {
+      "generic": "The decision could not be recorded. Try again, or ask a colleague.",
+      "CLM-ERR-SNAPSHOT-MISMATCH": "The policy changed again while you were deciding. The claim was refreshed: review the comparison and decide again.",
+      "CLM-ERR-STALE": "The claim changed meanwhile. It was refreshed: review it and decide again.",
+      "CLM-ERR-ILLEGAL-TRANSITION": "No re-verification is pending on this claim any more.",
+      "CLM-ERR-AUTHORITY": "You do not have the authority to take this decision. Ask a claims handler."
+    },
+    "technical": "Technical details",
+    "technicalCode": "Code",
+    "technicalTrace": "Trace id",
+    "technicalDetail": "Detail",
+    "coverageNames": {
+      "MTPL": "Motor third-party liability",
+      "OWN-DAMAGE": "Own damage",
+      "WINDSCREEN": "Windscreen and glass breakage"
+    },
+    "notIncluded": "Not included",
+    "changed": "changed",
+    "compareUnavailable": "The decision is available once both versions can be shown."
   }
 }

@@ -36,7 +36,12 @@ function claim(
   } as unknown as ClaimView;
 }
 
-function snapshot(ref: string, make: string, coverages: string[]): SnapshotResponse {
+function snapshot(
+  ref: string,
+  make: string,
+  coverages: string[],
+  value = '12000.00',
+): SnapshotResponse {
   return {
     snapshotRef: ref,
     knownAt: '2026-10-05T09:00:00Z',
@@ -48,7 +53,7 @@ function snapshot(ref: string, make: string, coverages: string[]): SnapshotRespo
           make,
           model: 'Golf',
           firstRegistrationYear: 2019,
-          value: { amount: '12000.00', currency: 'EUR' },
+          value: { amount: value, currency: 'EUR' },
         },
       ],
       coverages: coverages.map((coverageCode) => ({ coverageCode, selected: true })),
@@ -65,8 +70,8 @@ const snapshotRoute = (reply?: () => { status?: number; body?: unknown }): MockR
       : {
           body:
             request.url.searchParams.get('snapshotRef') === oldRef
-              ? snapshot(oldRef, 'VW', ['OWN-DAMAGE', 'GLASS'])
-              : snapshot(newRef, 'VW', ['OWN-DAMAGE']),
+              ? snapshot(oldRef, 'VW', ['OWN-DAMAGE', 'WINDSCREEN'])
+              : snapshot(newRef, 'VW', ['OWN-DAMAGE'], '9500.00'),
         },
 });
 
@@ -100,16 +105,62 @@ describe('ReverifyBanner', () => {
     await expectNoA11yViolations(container);
   });
 
-  it('compares old and new snapshots side by side and marks the removed coverage', async () => {
+  it('compares old and new snapshots side by side and marks what changed', async () => {
     mockApi([snapshotRoute()]);
     const { user } = show(claim('REVERIFICATION_REQUIRED'));
     await user.click(screen.getByRole('button', { name: 'Σύγκριση και απόφαση' }));
     const current = await screen.findByRole('region', { name: 'Τρέχουσα βάση (στη ζημία)' });
     const next = screen.getByRole('region', { name: 'Νέο στιγμιότυπο ασφαλιστηρίου' });
-    expect(within(current).getByText('GLASS')).toBeInTheDocument();
-    expect(within(current).getByText('μόνο σε αυτή την έκδοση')).toBeInTheDocument();
-    expect(within(next).queryByText('GLASS')).not.toBeInTheDocument();
-    expect(within(next).getByText('OWN-DAMAGE')).toBeInTheDocument();
+    expect(within(current).getByText('Θραύση κρυστάλλων')).toBeInTheDocument();
+    expect(within(next).getByText(/Θραύση κρυστάλλων: Δεν περιλαμβάνεται/)).toBeInTheDocument();
+    expect(within(next).getByText('Ίδιες ζημιές')).toBeInTheDocument();
+    expect(within(next).getByText('9.500,00 €')).toBeInTheDocument();
+    expect(within(next).getAllByText('(άλλαξε)').length).toBeGreaterThan(0);
+    expect(within(current).queryByText('(άλλαξε)')).not.toBeInTheDocument();
+  });
+
+  it('offers only the reasons the backend accepts for each decision', async () => {
+    mockApi([snapshotRoute()]);
+    const { user } = show(claim('REVERIFICATION_REQUIRED'));
+    await user.click(screen.getByRole('button', { name: 'Σύγκριση και απόφαση' }));
+    await screen.findByRole('region', { name: 'Νέο στιγμιότυπο ασφαλιστηρίου' });
+    await user.click(screen.getByRole('radio', { name: /Υιοθέτηση του νέου στιγμιοτύπου/ }));
+    await user.click(screen.getByRole('button', { name: /Λόγος/ }));
+    expect(await screen.findAllByRole('option')).toHaveLength(2);
+    expect(screen.queryByRole('option', { name: 'Κρίση του χειριστή' })).not.toBeInTheDocument();
+  });
+
+  it('hides the decision form when the comparison cannot be read', async () => {
+    mockApi([snapshotRoute(() => problem(403, 'POL-ERR-FORBIDDEN', 'Forbidden'))]);
+    const { user } = show(claim('REVERIFICATION_REQUIRED'));
+    await user.click(screen.getByRole('button', { name: 'Σύγκριση και απόφαση' }));
+    expect(await screen.findByText('Δεν έχετε δικαίωμα')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Καταγραφή απόφασης' })).not.toBeInTheDocument();
+  });
+
+  it('explains a changed-again policy in plain words with the code under technical details', async () => {
+    mockApi([
+      snapshotRoute(),
+      {
+        method: 'POST',
+        path: '/api/clm/v1/coverage/reverify',
+        respond: () =>
+          problem(409, 'CLM-ERR-SNAPSHOT-MISMATCH', 'Conflict', 'expectedNewSnapshotRef is stale'),
+      },
+    ]);
+    const { user } = show(claim('REVERIFICATION_REQUIRED'));
+    await user.click(screen.getByRole('button', { name: 'Σύγκριση και απόφαση' }));
+    await screen.findByRole('region', { name: 'Νέο στιγμιότυπο ασφαλιστηρίου' });
+    await user.click(screen.getByRole('radio', { name: /Διατήρηση της τρέχουσας βάσης/ }));
+    await user.click(screen.getByRole('button', { name: /Λόγος/ }));
+    await user.click(await screen.findByRole('option', { name: 'Κρίση του χειριστή' }));
+    await user.click(screen.getByRole('button', { name: 'Καταγραφή απόφασης' }));
+    expect(await screen.findByText(/άλλαξε ξανά ενώ αποφασίζατε/)).toBeInTheDocument();
+    const details = screen.getByText('Τεχνικές λεπτομέρειες').closest('details');
+    expect(details).not.toHaveAttribute('open');
+    expect(
+      within(details as HTMLElement).getByText('CLM-ERR-SNAPSHOT-MISMATCH'),
+    ).toBeInTheDocument();
   });
 
   it('requires a decision and a reason before sending', async () => {
@@ -164,25 +215,6 @@ describe('ReverifyBanner', () => {
       expectedNewSnapshotRef: newRef,
     });
     expect(post?.headers.get('Idempotency-Key')).toBeTruthy();
-  });
-
-  it('explains a refused decision in the no-permission state', async () => {
-    mockApi([
-      snapshotRoute(),
-      {
-        method: 'POST',
-        path: '/api/clm/v1/coverage/reverify',
-        respond: () => problem(403, 'CLM-ERR-AUTHORITY', 'Forbidden'),
-      },
-    ]);
-    const { user } = show(claim('REVERIFICATION_REQUIRED'));
-    await user.click(screen.getByRole('button', { name: 'Σύγκριση και απόφαση' }));
-    await screen.findByRole('region', { name: 'Νέο στιγμιότυπο ασφαλιστηρίου' });
-    await user.click(screen.getByRole('radio', { name: /Διατήρηση της τρέχουσας βάσης/ }));
-    await user.click(screen.getByRole('button', { name: /Λόγος/ }));
-    await user.click(await screen.findByRole('option', { name: 'Κρίση του χειριστή' }));
-    await user.click(screen.getByRole('button', { name: 'Καταγραφή απόφασης' }));
-    expect(await screen.findByText('Δεν μπορείτε να λάβετε αυτή την απόφαση')).toBeInTheDocument();
   });
 
   it('shows an error with a retry when a snapshot cannot be read', async () => {

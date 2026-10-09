@@ -36,8 +36,29 @@
   font-weight: var(--weight-semibold);
 }
 
+.missing {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
 .form {
   display: grid;
   gap: var(--space-4);
   margin-block-start: var(--space-4);
+}
+
+.technical {
+  margin-block-start: var(--space-2);
+  font: var(--type-caption);
+}
+
+.technical dl {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-1) var(--space-0) var(--space-0);
+}
+
+.technical dd {
+  margin: var(--space-0);
+  overflow-wrap: anywhere;
 }

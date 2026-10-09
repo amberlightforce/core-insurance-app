@@ -15,10 +15,9 @@ import {
   TextField,
 } from '../../../design-system';
 import { useFormat } from '../../staff/useFormat';
-import { problemOf } from '../../staff/problem';
-import { ProblemBanner } from '../../staff/ProblemBanner';
 import styles from '../../staff/staff.module.css';
-import { useReverify } from './api';
+import { useReverify, useSnapshot } from './api';
+import { ReverifyProblem } from './ReverifyProblem';
 import { reverifyDecisions, reverifyReasons, type ReverifyDecision } from './reasons';
 import file from './reverify.module.css';
 import { SnapshotCompare } from './SnapshotCompare';
@@ -32,7 +31,11 @@ function DecisionForm({ claim, onDone }: { claim: ClaimView; onDone: () => void 
   const [comment, setComment] = useState('');
   const [tried, setTried] = useState(false);
   const mutation = useReverify(claim.summary.claimId);
+  // The form is offered only once both versions can be shown: a decision is never taken blind.
+  const before = useSnapshot(pending?.oldSnapshotRef ?? '', pending !== undefined);
+  const after = useSnapshot(pending?.newSnapshotRef ?? '', pending !== undefined);
   if (!pending) return null;
+  const ready = Boolean(before.data && after.data);
 
   const submit = () => {
     setTried(true);
@@ -57,68 +60,62 @@ function DecisionForm({ claim, onDone }: { claim: ClaimView; onDone: () => void 
     );
   };
 
-  const forbidden = mutation.isError && problemOf(mutation.error).status === 403;
   return (
     <>
       <SnapshotCompare oldRef={pending.oldSnapshotRef} newRef={pending.newSnapshotRef} />
-      <form
-        noValidate
-        className={file.form}
-        aria-label={t('reverify.decision.title')}
-        onSubmit={(event) => {
-          event.preventDefault();
-          submit();
-        }}
-      >
-        <p className={styles.muted}>{t('reverify.decision.intro')}</p>
-        <RadioGroup
-          label={t('reverify.decision.label')}
-          isRequired
-          value={decision}
-          onChange={(value) => {
-            setDecision(value as ReverifyDecision);
-            setReason(null);
+      {ready ? (
+        <form
+          noValidate
+          className={file.form}
+          aria-label={t('reverify.decision.title')}
+          onSubmit={(event) => {
+            event.preventDefault();
+            submit();
           }}
-          errorMessage={tried && !decision ? t('reverify.errors.decision') : undefined}
         >
-          {reverifyDecisions.map((d) => (
-            <Radio key={d} value={d} description={t(`reverify.decision.${d}.help`)}>
-              {t(`reverify.decision.${d}.label`)}
-            </Radio>
-          ))}
-        </RadioGroup>
-        <Select
-          label={t('reverify.reason.label')}
-          isRequired
-          isDisabled={!decision}
-          helperText={t('reverify.reason.illustrative')}
-          options={(decision ? reverifyReasons[decision] : []).map((r) => ({
-            id: r,
-            label: t(`reverify.reason.codes.${r}`),
-          }))}
-          value={reason}
-          onChange={setReason}
-          errorMessage={tried && decision && !reason ? t('reverify.errors.reason') : undefined}
-        />
-        <TextField
-          label={t('reverify.comment.label')}
-          multiline
-          value={comment}
-          onChange={setComment}
-        />
-        {forbidden ? (
-          <Banner variant="warning" live="alert" title={t('reverify.noPermission.title')}>
-            {t('reverify.noPermission.body')}
-          </Banner>
-        ) : mutation.isError ? (
-          <ProblemBanner error={mutation.error} title={t('reverify.failed')} />
-        ) : null}
-        <div className={styles.actions}>
-          <Button type="submit" variant="primary" isLoading={mutation.isPending}>
-            {t('reverify.decision.submit')}
-          </Button>
-        </div>
-      </form>
+          <p className={styles.muted}>{t('reverify.decision.intro')}</p>
+          <RadioGroup
+            label={t('reverify.decision.label')}
+            isRequired
+            value={decision}
+            onChange={(value) => {
+              setDecision(value as ReverifyDecision);
+              setReason(null);
+            }}
+            errorMessage={tried && !decision ? t('reverify.errors.decision') : undefined}
+          >
+            {reverifyDecisions.map((d) => (
+              <Radio key={d} value={d} description={t(`reverify.decision.${d}.help`)}>
+                {t(`reverify.decision.${d}.label`)}
+              </Radio>
+            ))}
+          </RadioGroup>
+          <Select
+            label={t('reverify.reason.label')}
+            isRequired
+            isDisabled={!decision}
+            options={(decision ? reverifyReasons[decision] : []).map((r) => ({
+              id: r,
+              label: t(`reverify.reason.codes.${r}`),
+            }))}
+            value={reason}
+            onChange={setReason}
+            errorMessage={tried && decision && !reason ? t('reverify.errors.reason') : undefined}
+          />
+          <TextField
+            label={t('reverify.comment.label')}
+            multiline
+            value={comment}
+            onChange={setComment}
+          />
+          {mutation.isError ? <ReverifyProblem error={mutation.error} /> : null}
+          <div className={styles.actions}>
+            <Button type="submit" variant="primary" isLoading={mutation.isPending}>
+              {t('reverify.decision.submit')}
+            </Button>
+          </div>
+        </form>
+      ) : null}
     </>
   );
 }
@@ -151,7 +148,8 @@ export function ReverifyBanner({ claim }: { claim: ClaimView }) {
         title={t('reverify.banner.title')}
         actions={
           <Button
-            variant="link"
+            variant="secondary"
+            size="sm"
             onPress={() => {
               setOpen(true);
             }}
@@ -172,7 +170,7 @@ export function ReverifyBanner({ claim }: { claim: ClaimView }) {
         title={t('reverify.dialog.title')}
         icon={GitCompare}
         tone="warning"
-        size="xl"
+        size="lg"
         isOpen={open}
         onOpenChange={setOpen}
         hideCancel
