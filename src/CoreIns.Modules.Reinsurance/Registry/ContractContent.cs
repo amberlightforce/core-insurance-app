@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Text;
-using System.Text.RegularExpressions;
+using System.Text.Json;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
@@ -56,8 +56,8 @@ internal sealed record ContractContent(
         Line("validFrom", ValidFrom.ToString());
         Line("validTo", ValidTo.ToString());
         Line("placedPct", Fixed(PlacedPct, PercentScale));
-        Line("products", string.Join(',', ProductCodes.Order(StringComparer.Ordinal)));
-        Line("coverages", string.Join(',', CoverageCodes.Order(StringComparer.Ordinal)));
+        Line("products", JsonSerializer.Serialize(ProductCodes.Order(StringComparer.Ordinal).ToArray()));
+        Line("coverages", JsonSerializer.Serialize(CoverageCodes.Order(StringComparer.Ordinal).ToArray()));
         Line("alae", AlaeIncluded ? "1" : "0");
         Line("interest", StatutoryInterestIncluded ? "1" : "0");
         Line("inure", RecoveriesInure);
@@ -84,7 +84,7 @@ internal sealed record ContractContent(
 }
 
 /// <summary>The business rules of a contract's content (REQ-RI-037, -038, -046, -047, D-SL4-04). Pure; no I/O.</summary>
-internal static partial class ContractRules
+internal static class ContractRules
 {
     /// <summary>The only contract type of slice 4 (D-SL4-04).</summary>
     public const string XolPerRisk = "XOL_PER_RISK";
@@ -94,9 +94,6 @@ internal static partial class ContractRules
 
     /// <summary>The only inuring rule of slice 4 (REQ-RI-117 default).</summary>
     public const string RealisedOnly = "REALISED_ONLY";
-
-    [GeneratedRegex("^[A-Z0-9][A-Z0-9_]{0,63}$", RegexOptions.None, matchTimeoutMilliseconds: 2000)]
-    private static partial Regex CodePattern();
 
     /// <summary>
     /// Null when the content is acceptable. Shape and amount problems are <c>RI-ERR-VALIDATION</c> with field errors;
@@ -193,7 +190,9 @@ internal static partial class ContractRules
             return;
         }
 
-        if (codes.Any(c => c is null || !CodePattern().IsMatch(c)))
+        // Scope uses the shared Code shape (1–128 non-whitespace/control characters), also enforced by ProductCode.
+        // Configuration owns the vocabulary: MOTOR-GR and OWN-DAMAGE are valid catalogue codes.
+        if (codes.Any(c => !ProductCode.TryParse(c, out _)))
         {
             add(field, "CODE_FORMAT");
         }
@@ -250,6 +249,17 @@ internal static partial class ContractRules
             if (layer.Aal is { } aal)
             {
                 CheckAmount(aal, path + ".aal", mustBePositive: true, add);
+            }
+        }
+
+        // This slice has no explicit non-contiguous declaration, so adjacent numbered layers must meet exactly.
+        var ordered = layers.OrderBy(l => l.LayerNo).ToArray();
+        for (var index = 1; index < ordered.Length; index++)
+        {
+            if (ordered[index].Attachment != ordered[index - 1].Attachment + ordered[index - 1].Limit)
+            {
+                add("layers", "LAYERS_NOT_CONTIGUOUS");
+                break;
             }
         }
     }

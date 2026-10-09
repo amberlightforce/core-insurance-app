@@ -9,6 +9,23 @@ gapless entity-scoped numbering, typed create/update/submit/approve/get/list/app
 PLT maker-checker approvals, and worker activation/expiry through the transactional pipeline.
 List items include optional layers from the current content revision in one batched page read.
 
+Independent backend/UI integration review found two additional blockers. Scope codes now use the
+shared Code identifier shape, accepting the real PFC `MOTOR-GR` / `OWN-DAMAGE` catalogue vocabulary.
+Layer validation requires each numbered layer's attachment to equal the previous attachment plus
+limit exactly; gaps and overlaps are refused on create, edit and submission, because this slice
+does not expose an explicit non-contiguous declaration (REQ-RI-037).
+The previously unreleased registry hash format now serializes sorted scope-code arrays as JSON,
+so configured codes containing commas cannot make different product/coverage scopes share a hash.
+The other frozen treaty, layer, clause and participant facts remain in the same deterministic
+hash calculation. No already released main module hash format is changed.
+
+Root authorized the narrow ownership exception for `src/CoreIns.Host/permissions/pfc.json` and
+`pty.json`: existing read-grant arrays add only RI accountant/manager roles and preserve all prior
+roles. Host configuration requires one file per operation, so adding duplicate keys in `ri.json`
+would fail startup. No party/product write permissions are added. Exact-role HTTP regressions
+resolve/read the real catalogue, search/read a reinsurer, create a real-code treaty as accountant,
+and prove product import and party creation remain forbidden.
+
 ## Approval producer trust boundary
 
 RI creates requests in process and supplies the real contract participants as authoritative editor keys.
@@ -41,6 +58,8 @@ Tests are in `tests/CoreIns.IntegrationTests/Reinsurance/Registry/` unless state
 | REQ-RI-001 registry APIs, permissions and entity isolation | `ContractLifecycleTests.REQ_RI_001_Permissions_get_list_and_the_legal_entity_boundary`; temporal applicable test |
 | REQ-RI-030/031/032 programme-less XoL; REQ-RI-231 identity/year | Lifecycle create/submit/approve test; `ContractContentTests.D_SL4_04_Only_XoL_per_risk_in_EUR_with_realised_only_inuring` |
 | REQ-RI-037/038 validation; EUR only | Invalid-treaty and draft-edit lifecycle tests; content rules tests |
+| REQ-RI-037 adjacent layers, gaps and overlaps | `REQ_RI_037_Adjacent_layers_must_meet_exactly_when_non_contiguous_is_not_declared`; HTTP create/update refusals |
+| RI-only catalogue and organisation picker read permissions | `Exact_RI_roles_can_read_the_real_catalogue_and_reinsurer_picker_without_write_permissions` (accountant/manager); actual `MOTOR-GR` / `OWN-DAMAGE` creation |
 | REQ-RI-046/047 signed share and exactly one lead | Invalid-treaty lifecycle test; `ContractContentTests.REQ_RI_046_047_Signed_lines_must_equal_the_placed_share_with_exactly_one_lead` |
 | REQ-RI-056/057 lifecycle and maker/checker | Lifecycle tests for creator/editor/submitter, return, stale content, duplicate decisions, inbox approval/rejection and delegated participant principal |
 | REQ-RI-057 immutability and decision-evidence consistency | `ContractDatabaseTests`: app-role sealed-version/content refusal, already-approved insert refusal, pending seal refusal and predicate dimension/participant checks |
