@@ -90,12 +90,14 @@ internal sealed class RatingServicingTax(
                         TaxPointDate = request.TaxPointDate.Value,
                         PolicyholderType = holder,
                         BusinessBasis = request.BusinessBasis,
+                        TreatmentAction = treatment.Action,
                         ChargeLines =
                         [
                             new TaxChargeLine
                             {
                                 Element = delta.Element,
                                 ChargeType = delta.PremiumChargeType,
+                                ChargeCategory = ChargeLineCategory.Premium,
                                 ProductLine = request.ProductLine,
                                 TaxClass = delta.TaxClass,
                                 PremiumAmount = new SpiMoney(delta.Delta.Amount, delta.Delta.Currency.Code),
