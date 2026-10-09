@@ -1,4 +1,10 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type InfiniteData,
+} from '@tanstack/react-query';
 
 import { apiRequest } from '../../../api/client';
 import { useDevSession } from '../../../dev-auth/devAuth';
@@ -9,7 +15,12 @@ import type {
 } from '../../../api/types';
 
 const pol = '/api/pol/v1';
-const exceptionPages = (data: InfiniteData<PackRollbackExceptionListPage, string | null>): PackRollbackExceptionListPage => ({ ...data.pages[data.pages.length - 1]!, items: data.pages.flatMap((page) => page.items) });
+const exceptionPages = (
+  data: InfiniteData<PackRollbackExceptionListPage, string | null>,
+): PackRollbackExceptionListPage => ({
+  ...(data.pages.at(-1) ?? { items: [], nextCursor: null }),
+  items: data.pages.flatMap((page) => page.items),
+});
 
 export type ExceptionFilter = 'OPEN' | 'REVIEWED';
 

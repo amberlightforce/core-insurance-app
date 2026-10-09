@@ -20,7 +20,7 @@ function ExceptionRow({ item }: { item: PackRollbackExceptionView }) {
   return (
     <li className={rollbackStyles.row} data-testid="exception-row">
       <div className={rollbackStyles.rowHead}>
-        <span className={`ds-mono ${rollbackStyles.policyNumber}`}>{item.policyNumber}</span>
+        <span className={`ds-mono ${rollbackStyles.policyNumber ?? ''}`}>{item.policyNumber}</span>
         <ExceptionStatusPill status={item.status} />
         <LinkButton to={`/policies/pack-rollback/${item.exceptionId}`}>
           {t('packRollback.queue.open')}
@@ -116,7 +116,17 @@ export function ExceptionQueuePage() {
             )
           }
         </QueryView>
-        {query.hasNextPage ? <Button variant="secondary" isLoading={query.isFetchingNextPage} onPress={() => { void query.fetchNextPage(); }}>{t('packRollback.queue.more')}</Button> : null}
+        {query.hasNextPage ? (
+          <Button
+            variant="secondary"
+            isLoading={query.isFetchingNextPage}
+            onPress={() => {
+              void query.fetchNextPage();
+            }}
+          >
+            {t('packRollback.queue.more')}
+          </Button>
+        ) : null}
       </Section>
     </div>
   );

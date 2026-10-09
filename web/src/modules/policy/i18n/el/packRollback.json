@@ -12,6 +12,14 @@
       "CORRECTION_REQUIRED": "Απαιτείται διόρθωση"
     },
     "kind": {
+      "ISSUANCE": "Έκδοση",
+      "CHANGE": "Μεταβολή ασφαλιστηρίου",
+      "REWRITE": "Επανέκδοση",
+      "RENEWAL": "Ανανέωση",
+      "CARRY_FORWARD": "Μεταφορά μεταβολής",
+      "SUSPENSION": "Αναστολή",
+      "REACTIVATION": "Επανενεργοποίηση",
+      "REVERSAL": "Αντιλογισμός",
       "NEW_BUSINESS": "Νέα παραγωγή",
       "ENDORSEMENT_DEBIT": "Πρόσθετη πράξη (χρέωση)",
       "ENDORSEMENT_CREDIT": "Πρόσθετη πράξη (πίστωση)",

@@ -741,59 +741,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/pfc/v1/product-versions/fallback": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Emergency fall-back to the previous version
-         * @description Emergency fall-back to the previous version
-         *
-         *     Maker call (D-SL5-09, REQ-PFC-213). Creates a write-once copy of the content of the version before the defective one as the next free minor
-         *     version (for example MOTOR-GR 1.2 as a copy of 1.0 when 1.1 is defective), with a new-business window from the fall-back date. The defective version's
-         *     new-business window is closed at that date in the same transaction; renewal windows are untouched. Maker-checker: the call creates a fall-back in
-         *     PENDING_APPROVAL with an in-process PLT approval (type PFC.Fallback, authority PFC.EmergencyChange); nothing is published until
-         *     pfc.ProductVersion.decideFallback approves it. With dryRun it returns the preview and creates nothing. Idempotency-Key required.
-         *     Distinct from pfc.ProductVersion.fallBack (the PRD release call).
-         *     PRD outputs: schedule
-         */
-        post: operations["pfc.ProductVersion.fallback"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pfc/v1/product-versions/decide-fallback": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Decide an emergency fall-back
-         * @description Decide an emergency fall-back
-         *
-         *     Checker call (D-SL5-09). The checker holds Platform.DesignAuthority and is neither the maker nor the maker's principal (PITFALLS 3-6).
-         *     Approval verifies subject, type and the content hash of the fall-back request (verifyForExecution). On APPROVE one transaction writes the new version,
-         *     closes the defective version's new-business window and emits ProductVersionPublished with fallbackOf and replaces. Idempotency-Key required.
-         *     PRD outputs: schedule
-         */
-        post: operations["pfc.ProductVersion.decideFallback"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1579,69 +1526,6 @@ export interface components {
             /** @description PRD: "rows" */
             rows?: components["schemas"]["Unspecified"][];
         };
-        /** @description The version whose content the fall-back copies */
-        FallbackSource: {
-            version: components["schemas"]["ProductVersionNumber"];
-            /** @description Artefact hash of the source version; the new version carries the same hash (RAT activates the same artefact, D-SL5-09) */
-            artefactHash: components["schemas"]["Sha256"];
-        };
-        /** @description Dry-run preview of an emergency fall-back. Nothing is created. Every field is always set. */
-        FallbackPreview: {
-            /** @description The next free minor version (write-once copy) */
-            newVersion: components["schemas"]["ProductVersionNumber"];
-            source: components["schemas"]["FallbackSource"];
-            /** @description New-business window of the new version, from the fall-back date */
-            newBusinessWindow: components["schemas"]["TimeWindow"];
-            /** @description New-business window of the defective version as it will stand after the fall-back, ending at the fall-back date */
-            closedWindow: components["schemas"]["TimeWindow"];
-        };
-        /** @enum {string} */
-        FallbackStatus: "PENDING_APPROVAL" | "APPLIED" | "REJECTED";
-        /** @description One emergency fall-back. Every field is always set; the nullable ones are null until known. */
-        FallbackView: {
-            fallbackId: components["schemas"]["Uuid"];
-            productCode: components["schemas"]["Code"];
-            defectiveVersion: components["schemas"]["ProductVersionNumber"];
-            /** @description The version written; null until APPLIED */
-            newVersion: components["schemas"]["ProductVersionNumber"] | null;
-            status: components["schemas"]["FallbackStatus"];
-            /** @description The maker's reason (20 to 128 characters) */
-            reason: string;
-            requestedBy: components["schemas"]["Text"];
-            decidedBy: components["schemas"]["Text"] | null;
-            approvalRequestId: components["schemas"]["Uuid"];
-            decidedAt: components["schemas"]["Instant"] | null;
-        };
-        /** @description pfc.ProductVersion.fallback request (REQ-PFC-213, D-SL5-09) */
-        ProductVersionEmergencyFallbackRequest: {
-            productCode: components["schemas"]["Code"];
-            defectiveVersion: components["schemas"]["ProductVersionNumber"];
-            /** @description Why the version is defective (20 to 128 characters). No personal data. */
-            reason: string;
-        };
-        /** @description pfc.ProductVersion.fallback result: the preview on a dry run, otherwise the PENDING_APPROVAL fall-back */
-        ProductVersionEmergencyFallbackResponse: {
-            dryRun: boolean;
-            /** @description Always set on a dry run, null otherwise */
-            preview: components["schemas"]["FallbackPreview"] | null;
-            /** @description Null on a dry run */
-            fallbackId: components["schemas"]["Uuid"] | null;
-            /** @description PENDING_APPROVAL for a real call; null on a dry run */
-            status: components["schemas"]["FallbackStatus"] | null;
-            /** @description In-process PLT approval request (type PFC.Fallback, authority PFC.EmergencyChange); null on a dry run */
-            approvalRequestId: components["schemas"]["Uuid"] | null;
-        };
-        /** @description pfc.ProductVersion.decideFallback request */
-        ProductVersionDecideFallbackRequest: {
-            fallbackId: components["schemas"]["Uuid"];
-            /** @enum {string} */
-            decision: "APPROVE" | "REJECT";
-            /** @description Reason of the checker (required for REJECT). No personal data. */
-            reason: string;
-        };
-        ProductVersionDecideFallbackResponse: {
-            fallback: components["schemas"]["FallbackView"];
-        };
         /** Format: date */
         LocalDate: string;
         /**
@@ -1739,11 +1623,6 @@ export interface components {
             /** @description Cursor of the next page, or null on the last page. */
             nextCursor: string | null;
             limit?: number;
-        };
-        /** @description Time window [from, to); `to` is null when open-ended. */
-        TimeWindow: {
-            from: components["schemas"]["Instant"];
-            to: components["schemas"]["Instant"] | null;
         };
     };
     responses: {
@@ -3265,103 +3144,6 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pfc.ProductVersion.fallback": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProductVersionEmergencyFallbackRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProductVersionEmergencyFallbackResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pfc.ProductVersion.decideFallback": {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProductVersionDecideFallbackRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProductVersionDecideFallbackResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };

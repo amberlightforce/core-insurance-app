@@ -21,7 +21,7 @@ export function HashText({ value, short = false }: { value: string; short?: bool
         label={t('packRollback.copyHash')}
         onPress={() => {
           void navigator.clipboard
-            ?.writeText(value)
+            .writeText(value)
             .then(() => {
               announce(t('packRollback.copied'));
             })

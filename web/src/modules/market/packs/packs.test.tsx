@@ -57,7 +57,7 @@ describe('pack lifecycle and decisions', () => {
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
   });
 
-  it('guards the pack route for an unrelated role without an API request', async () => {
+  it('guards the pack route for an unrelated role without an API request', () => {
     session.user.roles = ['Staff.ClaimsHandler'];
     const api = mockApi([]);
     renderScreen(<RequirePackRole />, { path: '/admin/packs', url: '/admin/packs' });
@@ -86,7 +86,7 @@ describe('pack lifecycle and decisions', () => {
         }}
         kind="ROLLBACK"
         isOpen
-        onClose={() => {}}
+        onClose={vi.fn()}
         onSubmitted={submitted}
       />,
       { path: '/admin/packs', url: '/admin/packs' },
@@ -123,7 +123,9 @@ describe('pack lifecycle and decisions', () => {
       ),
     );
     await user.click(screen.getByRole('button', { name: 'Submit request' }));
-    await waitFor(() => expect(submitted).toHaveBeenCalledWith(fx.activationId));
+    await waitFor(() => {
+      expect(submitted).toHaveBeenCalledWith(fx.activationId);
+    });
     expect(api.calls).toHaveLength(3);
     expect(api.calls[2]?.url.searchParams.has('dryRun')).toBe(false);
     expect(api.calls[2]?.body).toEqual({
@@ -213,9 +215,9 @@ describe('pack lifecycle and decisions', () => {
       'Synthetic checker approves',
     );
     await user.click(screen.getByRole('button', { name: 'Approve' }));
-    await waitFor(() =>
-      expect(api.callsTo('POST', '/api/mkt/v1/pack-activations/decide')).toHaveLength(1),
-    );
+    await waitFor(() => {
+      expect(api.callsTo('POST', '/api/mkt/v1/pack-activations/decide')).toHaveLength(1);
+    });
     expect(api.callsTo('POST', '/api/mkt/v1/pack-activations/decide')[0]?.body).toEqual({
       activationId: fx.activationId,
       decision: 'APPROVE',

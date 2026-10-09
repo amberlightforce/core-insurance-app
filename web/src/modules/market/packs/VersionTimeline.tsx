@@ -107,7 +107,7 @@ export function VersionTimeline({
             data-testid={`version-${v.version}`}
           >
             <div className={styles.versionHead}>
-              <span className={`ds-mono ${styles.versionName}`}>{v.version}</span>
+              <span className={`ds-mono ${styles.versionName ?? ''}`}>{v.version}</span>
               <StatusPill
                 semantic={v.status === 'PUBLISHED' ? 'info' : 'read-only'}
                 text={t(`packs.versionStatus.${v.status}`)}

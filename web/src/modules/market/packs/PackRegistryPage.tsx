@@ -82,7 +82,17 @@ export function PackRegistryPage() {
           )
         }
       </QueryView>
-      {query.hasNextPage ? <Button variant="secondary" isLoading={query.isFetchingNextPage} onPress={() => { void query.fetchNextPage(); }}>{t('packs.registry.more')}</Button> : null}
+      {query.hasNextPage ? (
+        <Button
+          variant="secondary"
+          isLoading={query.isFetchingNextPage}
+          onPress={() => {
+            void query.fetchNextPage();
+          }}
+        >
+          {t('packs.registry.more')}
+        </Button>
+      ) : null}
     </div>
   );
 }

@@ -12,6 +12,14 @@
       "CORRECTION_REQUIRED": "Correction required"
     },
     "kind": {
+      "ISSUANCE": "Issuance",
+      "CHANGE": "Policy change",
+      "REWRITE": "Rewrite",
+      "RENEWAL": "Renewal",
+      "CARRY_FORWARD": "Carry-forward",
+      "SUSPENSION": "Suspension",
+      "REACTIVATION": "Reactivation",
+      "REVERSAL": "Reversal",
       "NEW_BUSINESS": "New business",
       "ENDORSEMENT_DEBIT": "Endorsement (debit)",
       "ENDORSEMENT_CREDIT": "Endorsement (credit)",

@@ -20,7 +20,7 @@ export function HashText({ value, label }: { value: string; label: string }) {
         label={t('packs.copyHash', { label })}
         onPress={() => {
           void navigator.clipboard
-            ?.writeText(value)
+            .writeText(value)
             .then(() => {
               announce(t('packs.copied'));
             })

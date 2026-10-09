@@ -71,7 +71,7 @@ export function PreviewPanel({ preview }: { preview: PackActivationPreview }) {
           {preview.keyDiff.map((d) => (
             <li key={`${d.change}:${d.key}`}>
               <ChangePill change={d.change} />
-              <span className={`ds-mono ${styles.diffKey}`}>{d.key}</span>
+              <span className={`ds-mono ${styles.diffKey ?? ''}`}>{d.key}</span>
             </li>
           ))}
         </ul>

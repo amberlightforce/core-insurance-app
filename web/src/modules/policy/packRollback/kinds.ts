@@ -1,6 +1,14 @@
 import { useTranslation } from 'react-i18next';
 
 const knownKinds = new Set([
+  'ISSUANCE',
+  'CHANGE',
+  'REWRITE',
+  'RENEWAL',
+  'CARRY_FORWARD',
+  'SUSPENSION',
+  'REACTIVATION',
+  'REVERSAL',
   'NEW_BUSINESS',
   'ENDORSEMENT_DEBIT',
   'ENDORSEMENT_CREDIT',

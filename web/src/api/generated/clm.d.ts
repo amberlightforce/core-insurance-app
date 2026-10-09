@@ -1307,335 +1307,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/clm/v1/transaction-sets": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Financial sets of a claim
-         * @description The claim's transaction sets, newest first, with their status (D-SL4-14).
-         *
-         *     PRD inputs: claim
-         *     PRD outputs: sets
-         */
-        get: operations["clm.TransactionSet.list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/recoveries": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Recoveries of a claim
-         * @description List recovery cases.
-         *
-         *     PRD inputs: claim
-         *     PRD outputs: recoveries
-         */
-        get: operations["clm.Recovery.list"];
-        put?: never;
-        /**
-         * Create a recovery case
-         * @description Create a subrogation or salvage recovery case (REQ-CLM-143).
-         *
-         *     PRD inputs: claim, type, counterparty, expected amount
-         *     PRD outputs: recovery
-         */
-        post: operations["clm.Recovery.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/recoveries/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Recovery case
-         * @description One recovery case with milestones and BIL references.
-         *
-         *     PRD inputs: recovery id
-         *     PRD outputs: recovery
-         */
-        get: operations["clm.Recovery.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/recoveries/record-milestone": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Record a recovery milestone
-         * @description REQ-CLM-147.
-         *
-         *     PRD inputs: recovery, milestone
-         *     PRD outputs: recovery
-         */
-        post: operations["clm.Recovery.recordMilestone"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/recoveries/demand": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Demand a recovery through a BIL receivable
-         * @description Registers the BIL receivable for the case (D-SL4-06).
-         *
-         *     PRD inputs: recovery, amount, due date
-         *     PRD outputs: recovery, receivable
-         */
-        post: operations["clm.Recovery.demand"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/recoveries/write-off": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Write off a recovery
-         * @description Releases the open recovery reserve under CLM.RECOVERY_WRITEOFF.
-         *
-         *     PRD inputs: recovery, amount, reason
-         *     PRD outputs: recovery
-         */
-        post: operations["clm.Recovery.writeOff"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/friendly-settlements": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Friendly Settlement cases
-         * @description Cases of a claim or of a state.
-         *
-         *     PRD inputs: claim, state
-         *     PRD outputs: cases
-         */
-        get: operations["clm.FriendlySettlement.list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/friendly-settlements/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Friendly Settlement case
-         * @description One case with its stored eligibility.
-         *
-         *     PRD inputs: case id
-         *     PRD outputs: case
-         */
-        get: operations["clm.FriendlySettlement.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/friendly-settlements/evaluate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Evaluate Friendly Settlement eligibility
-         * @description Calls the SPI and stores the result (REQ-CLM-155, -156).
-         *
-         *     PRD inputs: claim
-         *     PRD outputs: eligibility
-         */
-        post: operations["clm.FriendlySettlement.evaluate"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/friendly-settlements/open-own-settlement": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Open the own-settlement exposure
-         * @description Creates the FS_OWN_SETTLEMENT exposure and the FRIENDLY_SETTLEMENT recovery (REQ-CLM-157).
-         *
-         *     PRD inputs: case
-         *     PRD outputs: exposure, recovery
-         */
-        post: operations["clm.FriendlySettlement.openOwnSettlement"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/friendly-settlements/submit": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Submit a case to clearing
-         * @description REQ-CLM-159 (submit part): one SPI call, FriendlySettlementSubmitted once.
-         *
-         *     PRD inputs: case
-         *     PRD outputs: clearing reference
-         */
-        post: operations["clm.FriendlySettlement.submit"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/friendly-settlements/import-statement": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Import a clearing statement
-         * @description REQ-CLM-160.
-         *
-         *     PRD inputs: period, counterparty
-         *     PRD outputs: statement
-         */
-        post: operations["clm.FriendlySettlement.importStatement"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/friendly-settlements/statements/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Friendly Settlement statement
-         * @description A statement with its lines, exceptions and nets.
-         *
-         *     PRD inputs: statement id
-         *     PRD outputs: statement
-         */
-        get: operations["clm.FriendlySettlement.getStatement"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/clm/v1/friendly-settlements/approve-net": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Approve and hand over a net
-         * @description CLM.FS_NET_SETTLEMENT, then BIL (REQ-CLM-160, -264, D-SL4-12).
-         *
-         *     PRD inputs: statement, counterparty, net
-         *     PRD outputs: net
-         */
-        post: operations["clm.FriendlySettlement.approveNet"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1677,8 +1348,6 @@ export interface components {
             /** @description TELEPHONE, EMAIL, LETTER, FAX, SMS, IN_PERSON, ELECTRONIC (REQ-CLM-036) */
             receiptMedium?: components["schemas"]["Code"] | null;
             channelMetadata?: components["schemas"]["OpenObject"];
-            /** @description Optional liability facts captured at FNOL (D-SL4-17) */
-            liabilityFacts?: components["schemas"]["LiabilityFacts"];
         };
         /** @description An incident of the loss (REQ-CLM-064). The slice records vehicle incidents only; no injury (P3) fields. */
         FnolIncidentInput: {
@@ -1824,21 +1493,6 @@ export interface components {
             createdAt: components["schemas"]["Instant"];
             closedAt?: components["schemas"]["Instant"] | null;
         };
-        /** @description Liability facts of a motor claim (REQ-CLM-076 subset, REQ-CLM-144, REQ-CLM-155; D-SL4-17). Set at FNOL or by clm.Claim.update and audited; every member may be absent until known. */
-        LiabilityFacts: {
-            /** @description Insured driver fault, 0 to 100 (decimal string, no more than 2 decimals). Subrogation is proposed when below 100 (REQ-CLM-144); Friendly Settlement needs 0 or 100 (D-SL4-03) */
-            insuredFaultPct?: components["schemas"]["Decimal"];
-            /** @description Where the fault figure comes from (open Code; e.g. INSURED_STATEMENT, JOINT_REPORT, POLICE_REPORT, COUNTERPARTY_INSURER, HANDLER) */
-            faultSource?: components["schemas"]["Code"];
-            /** @description PTY organisation party of the counterparty insurer; no other vehicle plate or driver is stored (D-SL4-17) */
-            counterpartyInsurerPartyId?: components["schemas"]["Uuid"] | null;
-            /** @description A joint accident report (amicable statement) exists; WRK classification of the document is out of slice 4 */
-            jointReportFlag?: boolean;
-            /** @description Number of vehicles involved */
-            vehicleCount?: number;
-            /** @description The accident happened in Greece */
-            accidentInGreece?: boolean;
-        };
         /**
          * @description Open sub-state (REQ-CLM-071)
          * @enum {string}
@@ -1866,8 +1520,6 @@ export interface components {
                 causeEventId: components["schemas"]["Uuid"];
                 raisedAt?: components["schemas"]["Instant"];
             };
-            /** @description Liability facts; null until set (D-SL4-17) */
-            liabilityFacts?: components["schemas"]["LiabilityFacts"] | null;
         };
         /** @description An exposure (REQ-CLM-062) = one coverage × one claimant. */
         ExposureView: {
@@ -1908,26 +1560,19 @@ export interface components {
         ClaimGetResponse: {
             claim: components["schemas"]["ClaimView"];
         };
-        /** @description clm.Claim.update request. PRD inputs: "ids, changes, reason". SL4-CONTRACTS types liability facts (D-SL4-17). */
+        /** @description clm.Claim.update request. PRD inputs: "ids, changes, reason" */
         ClaimUpdateRequest: {
             /** @description PRD: "ids" */
             ids?: components["schemas"]["Uuid"][];
-            /** @description The claim recordVersion the user saw; a different current version is CLM-ERR-STALE */
-            expectedRecordVersion?: number;
-            /** @description Typed changes. Slice 4 types the liability facts; other changes are defined by later work packages. */
-            changes?: {
-                /** @description Members present replace the stored facts; absent members are unchanged (D-SL4-17) */
-                liabilityFacts?: components["schemas"]["LiabilityFacts"];
-            };
-            /** @description Reason code (audit) */
-            reason?: components["schemas"]["Code"] | null;
+            /** @description PRD: "changes" */
+            changes?: components["schemas"]["Unspecified"];
+            /** @description PRD: "reason" */
+            reason?: components["schemas"]["Unspecified"];
         };
         /** @description clm.Claim.update result. PRD outputs: "claim" */
         ClaimUpdateResponse: {
             /** @description PRD: "claim" */
-            claim?: components["schemas"]["ClaimSummary"];
-            /** @description Stored facts after the change; always set */
-            liabilityFacts?: components["schemas"]["LiabilityFacts"] | null;
+            claim?: components["schemas"]["Unspecified"];
         };
         /** @description clm.Claim.close request (REQ-CLM-071..073, SL2-CLM-CORE). Open exposures close with the claim when each passes the close guard (REQ-CLM-072). */
         ClaimCloseRequest: {
@@ -1944,13 +1589,6 @@ export interface components {
         /** @description clm.Claim.close result. PRD outputs: "claim" */
         ClaimCloseResponse: {
             claim: components["schemas"]["ClaimSummary"];
-        };
-        /** @description Item of the errors[] member of the Problem Details of CLM-ERR-CLOSE-GUARD (D-SL4-14). */
-        CloseGuardError: {
-            /** @description Guard that failed (REQ-CLM-072/073): OPEN_RESERVE, PAYMENT_PENDING, CLOCK_NOT_FINAL, LITIGATION_OPEN, SIU_CASE_OPEN, OPEN_EXPOSURE */
-            code: components["schemas"]["Code"];
-            /** @description Exposures that fail the guard; empty for a claim-level guard. Always set */
-            exposureIds: components["schemas"]["Uuid"][];
         };
         /** @description clm.Claim.reopen request. PRD inputs: "ids, changes, reason" */
         ClaimReopenRequest: {
@@ -2112,8 +1750,6 @@ export interface components {
                  * @enum {string}
                  */
                 paymentType?: "PARTIAL" | "FINAL";
-                /** @description Recovery case of the line; required for kinds RECOVERY_RESERVE and RECOVERY (a recovery-reserve increase is checked under CLM.RESERVE on the exposure total of open recovery reserve, D-SL4-07). Kind RECOVERY is accepted only from evidence-backed system sets, never from a client (PITFALLS 7) */
-                recoveryId?: components["schemas"]["Uuid"];
             }[];
         };
         /** @description Typed from REQ-CLM-003, REQ-CLM-107. PRD outputs: "set with preview, checks, approval request" */
@@ -2135,25 +1771,6 @@ export interface components {
             }[];
             checks?: components["schemas"]["Unspecified"][];
             set?: components["schemas"]["TransactionSetView"];
-            /** @description Dry-run only: what submitting the set would do under authority (type, cost type, aggregate amount, WITHIN/REFER/DENY, role). Always set on a dry run, absent otherwise */
-            authorityPreview?: components["schemas"]["AuthorityPreviewItem"][];
-        };
-        /** @description One authority preview line of a dry-run build (D-SL4-14). */
-        AuthorityPreviewItem: {
-            /** @description Authority type (CLM.RESERVE, CLM.PAYMENT, CLM.RECOVERY_WRITEOFF) */
-            type: string;
-            costType: components["schemas"]["Code"];
-            /** @description The aggregate the authority is checked on (never per line, PITFALLS 1) */
-            amount: components["schemas"]["Money"];
-            /** @enum {string} */
-            basis: "EXPOSURE_TOTAL_RESERVE" | "EXPOSURE_TOTAL_RECOVERY_RESERVE" | "RESERVE_DECREASE" | "PAYMENT" | "CLAIM_CUMULATIVE_PAID";
-            /**
-             * @description WITHIN = ALLOW; REFER = needs the referral role; DENY = CLM-ERR-AUTHORITY on submit
-             * @enum {string}
-             */
-            outcome: "WITHIN" | "REFER" | "DENY";
-            /** @description Referral role when outcome is REFER (e.g. Staff.ClaimsManager); null otherwise */
-            role?: string | null;
         };
         /** @description A claim transaction set (PRD-07 §7.1 TransactionSet, §7.3.2) with its transactions and derived states */
         TransactionSetView: {
@@ -2177,12 +1794,6 @@ export interface components {
             transactions: components["schemas"]["FinancialTransactionView"][];
             /** @description One PLT approval request per referred (authority type, cost type) (D-SL2-13); the set executes when all are approved */
             approvals?: components["schemas"]["SetApprovalView"][];
-            /** @description Before/after per line; always set while the set is PENDING_APPROVAL, null otherwise */
-            approvalDiff?: components["schemas"]["ApprovalDiff"] | null;
-            /** @description True for an evidence-backed set recorded by the system (maker = system principal); such sets never take amounts from a client (PITFALLS 7) */
-            systemRecorded?: boolean;
-            /** @description Evidence reference of a system-recorded set (BIL allocation id, FS notification or statement line); always set when systemRecorded */
-            evidenceRef?: components["schemas"]["Text"] | null;
         };
         /** @description One PLT approval request of a referred set and the authority it must cover (D-SL2-13) */
         SetApprovalView: {
@@ -2196,36 +1807,13 @@ export interface components {
             status: "PENDING" | "APPROVED" | "REJECTED";
             decidedAt?: components["schemas"]["Instant"];
         };
-        /** @description Before/after of one line of a set (REQ-CLM-107, IB-07 approve-the-diff). */
-        ApprovalDiffLine: {
-            /** @enum {string} */
-            kind: "RESERVE" | "PAYMENT" | "RECOVERY_RESERVE" | "RECOVERY";
-            exposureId: components["schemas"]["Uuid"];
-            costType: components["schemas"]["Code"];
-            costCategory: components["schemas"]["Code"];
-            recoveryId?: components["schemas"]["Uuid"] | null;
-            /** @description Open amount of the reserve line (or open recovery reserve) before the set */
-            before: components["schemas"]["Money"];
-            /** @description Open amount after the set */
-            after: components["schemas"]["Money"];
-            paidBefore?: components["schemas"]["Money"] | null;
-            paidAfter?: components["schemas"]["Money"] | null;
-            /** @description The set amount on this line */
-            delta: components["schemas"]["Money"];
-        };
-        /** @description Typed approval diff sent with the PLT approval request and shown in the approval inbox (D-SL4-14). Approvers decide on this diff; they cannot edit amounts (REQ-CLM-116). */
-        ApprovalDiff: {
-            lines: components["schemas"]["ApprovalDiffLine"][];
-            /** @description The content hash the approval is bound to */
-            contentHash: components["schemas"]["Sha256"];
-        };
         /** @description An immutable claim financial transaction (PRD-07 §7.1); status is derived from its set and payment */
         FinancialTransactionView: {
             txnId: components["schemas"]["Uuid"];
             /** @description Per-claim transaction number (D-SL2-07) */
             txnNumber: string;
             /** @enum {string} */
-            kind: "RESERVE" | "PAYMENT" | "RECOVERY_RESERVE" | "RECOVERY";
+            kind: "RESERVE" | "PAYMENT";
             exposureId: components["schemas"]["Uuid"];
             reserveLineId?: components["schemas"]["Uuid"];
             costType: components["schemas"]["Code"];
@@ -2240,34 +1828,10 @@ export interface components {
             /** @description Added by the system (reserve top-up REQ-CLM-097, final release REQ-CLM-099) */
             proposed?: boolean;
             status: components["schemas"]["Code"];
-            /** @description Recovery case. Always set for kinds RECOVERY_RESERVE and RECOVERY, null otherwise */
-            recoveryId?: components["schemas"]["Uuid"] | null;
-            /** @description Evidence of a system-recorded transaction (BIL allocation id, FS statement line reference); null for user-built transactions */
-            evidenceRef?: components["schemas"]["Text"] | null;
         };
         /** @description clm.TransactionSet.get result */
         TransactionSetGetResponse: {
             set: components["schemas"]["TransactionSetView"];
-        };
-        /** @description Row of the claim's transaction-set list (D-SL4-14). The set detail is clm.TransactionSet.get. */
-        TransactionSetListItem: {
-            setId: components["schemas"]["Uuid"];
-            claimId: components["schemas"]["Uuid"];
-            /** @enum {string} */
-            status: "DRAFT" | "SUBMITTED" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED" | "POSTED";
-            contentHash: components["schemas"]["Sha256"];
-            maker: string;
-            fourEyes?: boolean;
-            transactionCount: number;
-            hasPayment: boolean;
-            systemRecorded?: boolean;
-            createdAt: components["schemas"]["Instant"];
-            submittedAt?: components["schemas"]["Instant"] | null;
-            decidedAt?: components["schemas"]["Instant"] | null;
-        };
-        /** @description Page of clm.TransactionSet.list results (cursor pagination, contract §3.5.5) */
-        TransactionSetListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["TransactionSetListItem"][];
         };
         /** @description A claim payment (PRD-07 §7.1 ClaimPayment, §7.3.3). No IBAN: the BIL payee account id and the masked account only (R-38) */
         ClaimPaymentView: {
@@ -2277,12 +1841,11 @@ export interface components {
             payeePartyId: components["schemas"]["Uuid"];
             payeeAccountId: components["schemas"]["Uuid"];
             maskedAccount?: string;
-            /** @description Payment method (open Code): SEPA_CT, SEPA_INST, VENDOR, OFFSET or CLEARING (Friendly Settlement at-fault leg: no disbursement, settled through its statement, D-SL4-02) */
             method?: components["schemas"]["Code"];
             paymentType?: components["schemas"]["Code"];
             amount: components["schemas"]["Money"];
             /** @enum {string} */
-            status: "PENDING" | "APPROVED" | "ON_HOLD" | "SUBMITTED" | "ISSUED" | "CLEARED" | "REJECTED" | "VOIDED" | "STOPPED" | "RETURNED";
+            status: "PENDING" | "APPROVED" | "ON_HOLD" | "SUBMITTED" | "ISSUED" | "CLEARED" | "REJECTED";
             holdReason?: components["schemas"]["Code"];
             disbursementId?: components["schemas"]["Uuid"];
             approvalEvidenceRef?: string;
@@ -2290,211 +1853,6 @@ export interface components {
             submittedAt?: components["schemas"]["Instant"];
             issuedAt?: components["schemas"]["Instant"];
             clearedAt?: components["schemas"]["Instant"];
-            /** @description The payment this one reissues (REQ-CLM-127); always set on a reissued payment, null otherwise */
-            reissueOf?: components["schemas"]["Uuid"] | null;
-            /** @description MARK of the fiscal settlement receipt, stored from FiscalDocRegistered (D-SL4-11); null until registered, always null for CLEARING */
-            fiscalMark?: components["schemas"]["Text"] | null;
-            /** @description FS statement of a CLEARING payment; always set for method CLEARING */
-            fsStatementId?: components["schemas"]["Uuid"] | null;
-        };
-        /**
-         * @description Recovery type (PRD-07 §7.1). Slice 4 builds SUBROGATION and SALVAGE (clm.Recovery.create) and FRIENDLY_SETTLEMENT (created by clm.FriendlySettlement.openOwnSettlement); the others are refused with CLM-ERR-VALIDATION.
-         * @enum {string}
-         */
-        RecoveryType: "SUBROGATION" | "SALVAGE" | "DEDUCTIBLE" | "FRIENDLY_SETTLEMENT" | "GUARANTEE_FUND" | "GREEN_CARD" | "CONTRIBUTION" | "OTHER";
-        /**
-         * @description Recovery lifecycle (PRD-07 §7.3.4): Open -> Demanded -> Agreed -> Closed; Demanded -> Disputed -> InArbitration | InLitigation | Agreed | WrittenOff; any open -> WrittenOff (CLM.RECOVERY_WRITEOFF); Closed -> Open on new information. Illegal moves are CLM-ERR-RECOVERY-STATE.
-         * @enum {string}
-         */
-        RecoveryState: "OPEN" | "DEMANDED" | "DISPUTED" | "AGREED" | "IN_ARBITRATION" | "IN_LITIGATION" | "CLOSED" | "WRITTEN_OFF";
-        /** @description Salvage fields of a SALVAGE recovery (REQ-CLM-145): estimate, buyer party, sale price. */
-        SalvageDetails: {
-            /** @description Estimated salvage value (the recovery reserve is raised to it) */
-            estimate?: components["schemas"]["Money"] | null;
-            /** @description PTY party of the salvage buyer (id only) */
-            buyerPartyId?: components["schemas"]["Uuid"] | null;
-            /** @description Sale price once sold; the recovery is recorded at the sale price when BIL allocates the cash (REQ-CLM-145) */
-            salePrice?: components["schemas"]["Money"] | null;
-            /** @description Sale date */
-            soldOn?: components["schemas"]["LocalDate"] | null;
-        };
-        /** @description User-specified allocation of a recovery to a reserve line (REQ-CLM-151). The allocation must sum to the recovered amount and name lines of the claim (CLM-ERR-ALLOCATION). */
-        RecoveryAllocationLine: {
-            exposureId: components["schemas"]["Uuid"];
-            costType: components["schemas"]["Code"];
-            costCategory: components["schemas"]["Code"];
-            amount: components["schemas"]["Money"];
-        };
-        /** @description A recorded milestone of a recovery case (REQ-CLM-147). */
-        RecoveryMilestoneView: {
-            milestone: components["schemas"]["Code"];
-            occurredOn: components["schemas"]["LocalDate"];
-            recordedAt: components["schemas"]["Instant"];
-            recordedBy?: string;
-            note?: components["schemas"]["Text"] | null;
-        };
-        /** @description A recovery case (PRD-07 §7.1 Recovery). Cash is only ever recorded from BIL evidence (D-SL4-06). */
-        RecoveryView: {
-            recoveryId: components["schemas"]["Uuid"];
-            claimId: components["schemas"]["Uuid"];
-            /** @description Exposure the recovery relates to; null for a claim-level recovery */
-            exposureId?: components["schemas"]["Uuid"] | null;
-            type: components["schemas"]["RecoveryType"];
-            state: components["schemas"]["RecoveryState"];
-            /** @description PTY party of the counterparty (insurer, salvage buyer, clearing counterparty) */
-            counterpartyPartyId: components["schemas"]["Uuid"];
-            /** @description Expected recovery (REQ-CLM-144) */
-            expectedAmount: components["schemas"]["Money"];
-            /** @description Open recovery reserve of the case; always set (Σ recovery reserves − Σ recoveries, never below zero) */
-            recoveryReserve: components["schemas"]["Money"];
-            /** @description Σ recoveries recorded for the case; always set */
-            recoveredAmount: components["schemas"]["Money"];
-            /**
-             * @description REQ-CLM-151 / BR-CLM-039: default pro rata to paid; SPECIFIED = the allocation of the demand
-             * @enum {string}
-             */
-            allocationRule: "PRO_RATA_PAID" | "SPECIFIED";
-            /** @description Always set for SALVAGE, null otherwise */
-            salvage?: components["schemas"]["SalvageDetails"] | null;
-            milestones: components["schemas"]["RecoveryMilestoneView"][];
-            /** @description BIL receivable registered by the demand (D-SL4-06); null before the demand. Always set from DEMANDED on */
-            receivableId?: components["schemas"]["Uuid"] | null;
-            /** @description BIL payment reference the payer quotes; set with receivableId */
-            paymentReference?: string | null;
-            /** @description FS case for type FRIENDLY_SETTLEMENT */
-            fsCaseId?: components["schemas"]["Uuid"] | null;
-            /** @description FS statement that settled the recovery, once matched */
-            fsStatementId?: components["schemas"]["Uuid"] | null;
-            demandedOn?: components["schemas"]["LocalDate"] | null;
-            createdAt: components["schemas"]["Instant"];
-            recordVersion: number;
-        };
-        /**
-         * @description Role of the legal entity in the case (PRD-07 §7.1 FsCase): OWN_INSURER pays its own insured and recovers from the at-fault insurer; AT_FAULT_INSURER receives a clearing notification and owes through the statement.
-         * @enum {string}
-         */
-        FsCaseRole: "OWN_INSURER" | "AT_FAULT_INSURER";
-        /**
-         * @description FsCase lifecycle (PRD-07 §7.3.5). Slice 4 reaches SUBMITTED, SETTLED and RECONCILED; ACCEPTED, DISPUTED and REJECTED need the unbuilt dispute path (D-SL4-01).
-         * @enum {string}
-         */
-        FsCaseState: "ELIGIBILITY_PENDING" | "ELIGIBLE" | "NOT_ELIGIBLE" | "SUBMITTED" | "ACCEPTED" | "DISPUTED" | "REJECTED" | "SETTLED" | "RECONCILED";
-        /** @description Stored result of IFriendlySettlementClearing.EvaluateEligibilityAsync (REQ-CLM-155, REQ-MKT-313). */
-        FsEligibility: {
-            /**
-             * @description NOT_APPLICABLE when the pack has no Friendly Settlement (Cyprus stub); the SPI is not called when the capability is off
-             * @enum {string}
-             */
-            result: "ELIGIBLE" | "NOT_ELIGIBLE" | "NOT_APPLICABLE";
-            /** @description Reason codes (e.g. COUNTERPARTY_NOT_MEMBER, AMOUNT_ABOVE_LIMIT, VEHICLE_COUNT, NOT_IN_GREECE, LIABILITY_NOT_CLEAR); always set, empty when eligible */
-            reasons: components["schemas"]["Code"][];
-            /** @description Eligibility rule id; always set */
-            ruleId: components["schemas"]["Code"];
-            /** @description Rule version; always set */
-            ruleVersion: components["schemas"]["Text"];
-            /** @description Legal status of the values used (UNVERIFIED for the stub, D-SL4-03); always set */
-            legalStatus: components["schemas"]["Code"];
-            /** @description True while legalStatus is not Settled; refused in Production (PITFALLS 36); always set */
-            provisional: boolean;
-            /** @description Clearing value of the claim; set when eligible */
-            clearingValue?: components["schemas"]["Money"] | null;
-            /** @description ACTUAL in slice 4 (averages unknown, D-SL4-03); set when eligible */
-            clearingValueBasis?: ("ACTUAL" | "AVERAGE") | null;
-        };
-        /** @description A Friendly Settlement case (PRD-07 §7.1 FsCase). */
-        FsCaseView: {
-            fsCaseId: components["schemas"]["Uuid"];
-            claimId: components["schemas"]["Uuid"];
-            role: components["schemas"]["FsCaseRole"];
-            state: components["schemas"]["FsCaseState"];
-            /** @description Counterparty insurer code (company code from the pack member list) */
-            counterpartyCode: components["schemas"]["Code"];
-            /** @description PTY organisation party of the counterparty insurer */
-            counterpartyPartyId?: components["schemas"]["Uuid"] | null;
-            /** @description Latest stored evaluation; null before the first evaluation */
-            eligibility?: components["schemas"]["FsEligibility"] | null;
-            /** @description Clearing value of the case */
-            clearingValue?: components["schemas"]["Money"] | null;
-            /** @description Reference returned by submit (OWN_INSURER) or received in the notification (AT_FAULT_INSURER) */
-            clearingReference?: components["schemas"]["Text"] | null;
-            /** @description FS_OWN_SETTLEMENT exposure (OWN_INSURER), set by openOwnSettlement */
-            ownSettlementExposureId?: components["schemas"]["Uuid"] | null;
-            /** @description Recovery case of type FRIENDLY_SETTLEMENT holding the FS receivable (OWN_INSURER) */
-            recoveryId?: components["schemas"]["Uuid"] | null;
-            /** @description CLEARING payment (AT_FAULT_INSURER) */
-            atFaultPaymentId?: components["schemas"]["Uuid"] | null;
-            /** @description Statement that matched the case */
-            fsStatementId?: components["schemas"]["Uuid"] | null;
-            /** @description Statement line that matched the case */
-            statementLineRef?: components["schemas"]["Text"] | null;
-            /** @description Clearing value minus paid amount; 0.00 for basis ACTUAL */
-            expectedGainLoss?: components["schemas"]["Money"] | null;
-            createdAt: components["schemas"]["Instant"];
-            recordVersion: number;
-        };
-        /** @description A statement line (REQ-CLM-160). */
-        FsStatementLine: {
-            /** @description Statement line reference */
-            lineRef: components["schemas"]["Text"];
-            clearingReference?: components["schemas"]["Text"] | null;
-            /**
-             * @description RECEIVABLE = the counterparty owes us (own-insurer case); PAYABLE = we owe (at-fault case)
-             * @enum {string}
-             */
-            direction: "RECEIVABLE" | "PAYABLE";
-            amount: components["schemas"]["Money"];
-            counterpartyCode: components["schemas"]["Code"];
-            /**
-             * @description UNMATCHED and DIFFERENCE lines are exceptions and block the net of their counterparty
-             * @enum {string}
-             */
-            matchStatus: "MATCHED" | "UNMATCHED" | "DIFFERENCE";
-            /** @description Matched case; always set when MATCHED or DIFFERENCE */
-            fsCaseId?: components["schemas"]["Uuid"] | null;
-            claimId?: components["schemas"]["Uuid"] | null;
-            /** @description Statement amount minus case clearing value, when DIFFERENCE */
-            difference?: components["schemas"]["Money"] | null;
-        };
-        /**
-         * @description Net settlement status. PRD-07 §7.1: Pending, Requested, Settled, Rejected; slice 4 adds APPROVAL_REQUESTED between Pending and Requested (CLM.FS_NET_SETTLEMENT four-eyes). A rejected or stopped net returns to PENDING (REQ-CLM-264).
-         * @enum {string}
-         */
-        FsNetStatus: "PENDING" | "APPROVAL_REQUESTED" | "REQUESTED" | "SETTLED" | "REJECTED";
-        /** @description Net of one counterparty on a statement. */
-        FsNetView: {
-            counterpartyCode: components["schemas"]["Code"];
-            counterpartyPartyId?: components["schemas"]["Uuid"] | null;
-            /**
-             * @description PAYABLE = we pay the clearing office through a BIL FS_CLEARING disbursement; RECEIVABLE = BIL receivable with source FS_CLEARING
-             * @enum {string}
-             */
-            direction: "PAYABLE" | "RECEIVABLE";
-            /** @description Net per counterparty and statement: Σ receivable lines − Σ payable lines (absolute value, direction separate) */
-            amount: components["schemas"]["Money"];
-            status: components["schemas"]["FsNetStatus"];
-            /** @description PLT approval request (CLM.FS_NET_SETTLEMENT) */
-            approvalRequestId?: components["schemas"]["Uuid"] | null;
-            /** @description Statement reference shared with BIL (the FS_CLEARING statementReference / receivable statement ref); always set */
-            statementRef: components["schemas"]["Text"];
-            /** @description Set from REQUESTED on */
-            bilReferenceType?: ("DISBURSEMENT" | "RECEIVABLE") | null;
-            /** @description BIL disbursement or receivable id; set from REQUESTED on */
-            bilReferenceId?: components["schemas"]["Uuid"] | null;
-        };
-        /** @description A Friendly Settlement statement (PRD-07 §7.1 FsStatement); one per period per legal entity. */
-        FsStatementView: {
-            fsStatementId: components["schemas"]["Uuid"];
-            period: components["schemas"]["DatePeriod"];
-            /**
-             * @description MATCHED when every line is matched; a net can only be approved then (CLM-ERR-ALLOCATION otherwise)
-             * @enum {string}
-             */
-            reconciliation: "EXCEPTIONS_OPEN" | "MATCHED";
-            lines: components["schemas"]["FsStatementLine"][];
-            nets: components["schemas"]["FsNetView"][];
-            exceptionCount: number;
-            importedAt: components["schemas"]["Instant"];
-            recordVersion: number;
         };
         /** @description Page of clm.Payment.list results (cursor pagination, contract §3.5.5) */
         PaymentListPage: components["schemas"]["PageEnvelope"] & {
@@ -2680,14 +2038,6 @@ export interface components {
             incurred: components["schemas"]["Money"];
             /** @description A payment is pending approval, approved, on hold or submitted (not yet issued) */
             paymentPending?: boolean;
-            /** @description Σ approved recovery-reserve transactions (REQ-CLM-096); always set */
-            recoveryReserve?: components["schemas"]["Money"];
-            /** @description Σ approved recovery transactions (realised); always set */
-            recoveries?: components["schemas"]["Money"];
-            /** @description Σ recovery reserves − Σ recoveries, never below zero; always set */
-            openRecoveryReserve?: components["schemas"]["Money"];
-            /** @description incurred − recoveries − open recovery reserve (REQ-CLM-096); always set */
-            netIncurred?: components["schemas"]["Money"];
         };
         /** @description Balances of one reserve line (exposure × cost type × cost category × currency, REQ-CLM-093) */
         FinancialLineBalance: {
@@ -2701,12 +2051,6 @@ export interface components {
             paid: components["schemas"]["Money"];
             openReserve: components["schemas"]["Money"];
             incurred: components["schemas"]["Money"];
-            /** @description Σ approved recovery-reserve transactions (REQ-CLM-096); always set */
-            recoveryReserve?: components["schemas"]["Money"];
-            /** @description Σ approved recovery transactions (realised); always set */
-            recoveries?: components["schemas"]["Money"];
-            /** @description Σ recovery reserves − Σ recoveries, never below zero; always set */
-            openRecoveryReserve?: components["schemas"]["Money"];
         };
         /** @description clm.Financials.dailyTotals result. PRD outputs: "totals by currency and cost type with transaction ids" */
         FinancialsDailyTotalsResponse: {
@@ -3021,172 +2365,6 @@ export interface components {
             /** @description PRD: "result" */
             result?: components["schemas"]["Unspecified"];
         };
-        /** @description clm.Recovery.create request (REQ-CLM-143, -144, -145). Creates the case Open; the recovery reserve is raised through a transaction set with a RECOVERY_RESERVE line carrying recoveryId. */
-        RecoveryCreateRequest: {
-            claimId: components["schemas"]["Uuid"];
-            /** @description Optional exposure */
-            exposureId?: components["schemas"]["Uuid"] | null;
-            /**
-             * @description SUBROGATION or SALVAGE only in slice 4
-             * @enum {string}
-             */
-            type: "SUBROGATION" | "SALVAGE";
-            /** @description PTY party: the at-fault insurer (subrogation) or the buyer (salvage) */
-            counterpartyPartyId: components["schemas"]["Uuid"];
-            expectedAmount: components["schemas"]["Money"];
-            /** @description Required for SALVAGE, refused for SUBROGATION */
-            salvage?: components["schemas"]["SalvageDetails"];
-            /**
-             * @description Default PRO_RATA_PAID
-             * @enum {string}
-             */
-            allocationRule?: "PRO_RATA_PAID" | "SPECIFIED";
-            /** @description Reason code (REQ-CLM-102 for the recovery reserve raised later) */
-            reason: components["schemas"]["Code"];
-        };
-        /** @description clm.Recovery.create result */
-        RecoveryCreateResponse: {
-            recovery: components["schemas"]["RecoveryView"];
-        };
-        /** @description clm.Recovery.get result */
-        RecoveryGetResponse: {
-            recovery: components["schemas"]["RecoveryView"];
-        };
-        /** @description Page of clm.Recovery.list results (cursor pagination, contract §3.5.5) */
-        RecoveryListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["RecoveryView"][];
-        };
-        /** @description clm.Recovery.recordMilestone request (REQ-CLM-147). Some milestones move the state (e.g. SETTLEMENT_AGREED -> Agreed). */
-        RecoveryRecordMilestoneRequest: {
-            recoveryId: components["schemas"]["Uuid"];
-            expectedRecordVersion: number;
-            /** @description Milestone code (open Code; e.g. COUNTERPARTY_ACKNOWLEDGED, LIABILITY_ACCEPTED, SETTLEMENT_AGREED, SALVAGE_SOLD) */
-            milestone: components["schemas"]["Code"];
-            occurredOn: components["schemas"]["LocalDate"];
-            note?: components["schemas"]["Text"] | null;
-            /** @description SALVAGE_SOLD requires buyerPartyId and salePrice; the case becomes Agreed */
-            salvage?: components["schemas"]["SalvageDetails"];
-        };
-        /** @description clm.Recovery.recordMilestone result */
-        RecoveryRecordMilestoneResponse: {
-            recovery: components["schemas"]["RecoveryView"];
-        };
-        /** @description clm.Recovery.demand request (REQ-CLM-147, REQ-BIL-346). Registers a BIL receivable (source CLM_CLAIM_PAYMENT, purpose SALVAGE or SUBROGATION); the case becomes Demanded. No cash moves in CLM. */
-        RecoveryDemandRequest: {
-            recoveryId: components["schemas"]["Uuid"];
-            expectedRecordVersion: number;
-            /** @description Amount demanded; at most the expected amount */
-            amount: components["schemas"]["Money"];
-            /** @description Due date of the BIL receivable */
-            dueDate: components["schemas"]["LocalDate"];
-            /** @enum {string} */
-            allocationRule?: "PRO_RATA_PAID" | "SPECIFIED";
-            /** @description Required when allocationRule is SPECIFIED; must sum to the amount (CLM-ERR-ALLOCATION) */
-            allocation?: components["schemas"]["RecoveryAllocationLine"][];
-        };
-        /** @description clm.Recovery.demand result */
-        RecoveryDemandResponse: {
-            recovery: components["schemas"]["RecoveryView"];
-            /** @description BIL receivable */
-            receivableId: components["schemas"]["Uuid"];
-            /** @description Counterparty billing account of type CLAIM_RECOVERY */
-            billingAccountId: components["schemas"]["Uuid"];
-            /** @description Reference the payer quotes; staff record the receipt with bil.Payment.take */
-            paymentReference: string;
-        };
-        /** @description clm.Recovery.writeOff request (REQ-CLM-149 subset, CLM.RECOVERY_WRITEOFF, D-SL4-07). Checked on the aggregate; above the handler's authority the set is referred. */
-        RecoveryWriteOffRequest: {
-            recoveryId: components["schemas"]["Uuid"];
-            expectedRecordVersion: number;
-            /** @description Amount written off (at most the open recovery reserve plus the unreceived expected amount) */
-            amount: components["schemas"]["Money"];
-            reason: components["schemas"]["Code"];
-        };
-        /** @description clm.Recovery.writeOff result */
-        RecoveryWriteOffResponse: {
-            recovery: components["schemas"]["RecoveryView"];
-            /** @enum {string} */
-            outcome: "WRITTEN_OFF" | "PENDING_APPROVAL";
-            /** @description The transaction set that releases the recovery reserve */
-            setId?: components["schemas"]["Uuid"] | null;
-            /** @description PLT approval request when referred */
-            approvalRequestId?: components["schemas"]["Uuid"] | null;
-        };
-        /** @description clm.FriendlySettlement.evaluate request: the claim facts come from the claim and its liability facts (D-SL4-17), never from the client. */
-        FsEvaluateRequest: {
-            claimId: components["schemas"]["Uuid"];
-        };
-        /** @description clm.FriendlySettlement.evaluate result */
-        FsEvaluateResponse: {
-            fsCase: components["schemas"]["FsCaseView"];
-            eligibility: components["schemas"]["FsEligibility"];
-        };
-        /** @description clm.FriendlySettlement.openOwnSettlement request (REQ-CLM-157). The FS value is the stored clearing value; the client sends no amount. */
-        FsOpenOwnSettlementRequest: {
-            fsCaseId: components["schemas"]["Uuid"];
-            expectedRecordVersion: number;
-            /** @description Claimant (default the insured) */
-            claimantPartyId?: components["schemas"]["Uuid"] | null;
-        };
-        /** @description clm.FriendlySettlement.openOwnSettlement result */
-        FsOpenOwnSettlementResponse: {
-            fsCase: components["schemas"]["FsCaseView"];
-            /** @description The FS_OWN_SETTLEMENT exposure */
-            exposureId: components["schemas"]["Uuid"];
-            /** @description The FRIENDLY_SETTLEMENT recovery; raise its recovery reserve at the clearing value with a RECOVERY_RESERVE line */
-            recoveryId: components["schemas"]["Uuid"];
-        };
-        /** @description clm.FriendlySettlement.submit request (REQ-CLM-159, submit part): calls IFriendlySettlementClearing.SubmitAsync once and publishes FriendlySettlementSubmitted once. */
-        FsSubmitRequest: {
-            fsCaseId: components["schemas"]["Uuid"];
-            expectedRecordVersion: number;
-        };
-        /** @description clm.FriendlySettlement.submit result */
-        FsSubmitResponse: {
-            fsCase: components["schemas"]["FsCaseView"];
-            clearingReference: components["schemas"]["Text"];
-        };
-        /** @description clm.FriendlySettlement.get result */
-        FsGetResponse: {
-            fsCase: components["schemas"]["FsCaseView"];
-        };
-        /** @description Page of clm.FriendlySettlement.list results (cursor pagination, contract §3.5.5) */
-        FsListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["FsCaseView"][];
-        };
-        /** @description clm.FriendlySettlement.importStatement request (REQ-CLM-160): CLM asks the SPI for the statement (SettlementStatementAsync); in slice 4 the stub builds it from its own store in a documented JSON test format. */
-        FsImportStatementRequest: {
-            /** @description Statement period (a calendar month, half-open [from, to) Athens dates) */
-            period: components["schemas"]["DatePeriod"];
-            /** @description Optional counterparty filter */
-            counterpartyCode?: components["schemas"]["Code"] | null;
-        };
-        /** @description clm.FriendlySettlement.importStatement result: lines are matched to cases at once; matched lines record FS recoveries and settle CLEARING payables in evidence-backed system sets. */
-        FsImportStatementResponse: {
-            statement: components["schemas"]["FsStatementView"];
-        };
-        /** @description clm.FriendlySettlement.getStatement result */
-        FsGetStatementResponse: {
-            statement: components["schemas"]["FsStatementView"];
-        };
-        /** @description clm.FriendlySettlement.approveNet request (REQ-CLM-160, -264): approves the net of one counterparty under CLM.FS_NET_SETTLEMENT (four-eyes above the threshold) and hands it to BIL (bil.Disbursement.request source FS_CLEARING method CLEARING, or bil.Receivable.register source FS_CLEARING). */
-        FsApproveNetRequest: {
-            fsStatementId: components["schemas"]["Uuid"];
-            counterpartyCode: components["schemas"]["Code"];
-            expectedRecordVersion: number;
-            /** @description The net the approver saw; a different computed net is CLM-ERR-STALE. The net is never taken from the client. */
-            expectedNet: components["schemas"]["Money"];
-        };
-        /** @description clm.FriendlySettlement.approveNet result */
-        FsApproveNetResponse: {
-            statement: components["schemas"]["FsStatementView"];
-            net: components["schemas"]["FsNetView"];
-            /**
-             * @description PENDING_APPROVAL when the amount is above the maker's authority (PLT approval opened)
-             * @enum {string}
-             */
-            outcome: "REQUESTED" | "PENDING_APPROVAL";
-        };
         /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
         Uuid: string;
         /** @description Code value from a configured code list. Values are owned by configuration, not by this schema. */
@@ -3208,8 +2386,6 @@ export interface components {
         OpenObject: {
             [key: string]: components["schemas"]["OpenValue"];
         };
-        /** @description Decimal number as a string (no binary floating point for money or rates). */
-        Decimal: string;
         ProblemFieldError: {
             /** @description JSON pointer or dotted path of the field. */
             path: string;
@@ -3269,6 +2445,8 @@ export interface components {
             limit?: number;
         };
         Text: string;
+        /** @description Decimal number as a string (no binary floating point for money or rates). */
+        Decimal: string;
         /** @description ISO 4217 alphabetic code. */
         CurrencyCode: string;
         /** @description Amount as a decimal string plus ISO 4217 currency. */
@@ -3278,11 +2456,6 @@ export interface components {
         };
         /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
         Sha256: string;
-        /** @description Date period; `to` is null when open-ended. */
-        DatePeriod: {
-            from: components["schemas"]["LocalDate"];
-            to: components["schemas"]["LocalDate"] | null;
-        };
     };
     responses: {
         /** @description Malformed request or failed schema validation. */
@@ -4265,7 +3438,6 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -4684,7 +3856,6 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -4736,7 +3907,6 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -4788,7 +3958,6 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -6192,673 +5361,6 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.TransactionSet.list": {
-        parameters: {
-            query: {
-                claimId: components["schemas"]["Uuid"];
-                status?: "DRAFT" | "SUBMITTED" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED" | "POSTED";
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TransactionSetListPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.Recovery.list": {
-        parameters: {
-            query: {
-                claimId: components["schemas"]["Uuid"];
-                state?: components["schemas"]["RecoveryState"];
-                type?: components["schemas"]["RecoveryType"];
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecoveryListPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.Recovery.create": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RecoveryCreateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecoveryCreateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.Recovery.get": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the id */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecoveryGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.Recovery.recordMilestone": {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RecoveryRecordMilestoneRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecoveryRecordMilestoneResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.Recovery.demand": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RecoveryDemandRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecoveryDemandResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.Recovery.writeOff": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RecoveryWriteOffRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecoveryWriteOffResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.FriendlySettlement.list": {
-        parameters: {
-            query?: {
-                claimId?: components["schemas"]["Uuid"];
-                state?: components["schemas"]["FsCaseState"];
-                role?: components["schemas"]["FsCaseRole"];
-                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Page size, at most 200 (contract §3.5.5). */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FsListPage"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.FriendlySettlement.get": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the id */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FsGetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.FriendlySettlement.evaluate": {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["FsEvaluateRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FsEvaluateResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.FriendlySettlement.openOwnSettlement": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["FsOpenOwnSettlementRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FsOpenOwnSettlementResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.FriendlySettlement.submit": {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["FsSubmitRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FsSubmitResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.FriendlySettlement.importStatement": {
-        parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["FsImportStatementRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FsImportStatementResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.FriendlySettlement.getStatement": {
-        parameters: {
-            query?: never;
-            header?: {
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path: {
-                /** @description Identifier of the id */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FsGetStatementResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "clm.FriendlySettlement.approveNet": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["FsApproveNetRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FsApproveNetResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];

@@ -13,7 +13,7 @@ export const preview: PackActivationPreview = {
   window: { from: '2026-10-08T09:00:00Z', to: '2026-10-09T09:00:00Z' },
   hashesIssued: [issuedHash, 'b'.repeat(64)],
   keyDiff: Array.from({ length: 8 }, (_, index) => ({
-    key: `tax.treatment.rule.synthetic_${index + 1}`,
+    key: `tax.treatment.rule.synthetic_${String(index + 1)}`,
     change: 'CHANGED' as const,
   })),
 };
@@ -48,7 +48,7 @@ export const pack: PackGetResponse = {
       legalEntity: 'GR-TEST',
       version: '0.1.0',
       activationId,
-      activeSince: preview.window.to!,
+      activeSince: '2026-10-09T09:00:00Z',
       configurationHash: 'c'.repeat(64),
     },
   ],

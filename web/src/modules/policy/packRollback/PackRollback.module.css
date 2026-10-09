@@ -11,7 +11,8 @@
 
 .hash > span {
   overflow-wrap: anywhere;
-  font-size: 0.8125rem;
+  font: var(--type-caption);
+  font-family: var(--font-mono);
 }
 
 .list {

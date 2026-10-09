@@ -40,6 +40,8 @@ it('records an explicit outcome and reason without re-rating the policy', async 
     url: `/policies/pack-rollback/${fx.exceptionId}`,
   });
   await screen.findByText('Correction is not available yet');
+  expect(screen.getAllByText('Issuance').length).toBeGreaterThan(0);
+  expect(screen.queryByText('ISSUANCE')).not.toBeInTheDocument();
   expect(screen.getByText('Not created (work management is not built yet)')).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: /Re-rate/ })).not.toBeInTheDocument();
   await expectNoA11yViolations(container);
@@ -54,9 +56,9 @@ it('records an explicit outcome and reason without re-rating the policy', async 
     'Synthetic manual correction required',
   );
   await user.click(screen.getByRole('button', { name: 'Record review' }));
-  await waitFor(() =>
-    expect(api.callsTo('POST', '/api/pol/v1/pack-rollback-exceptions/review')).toHaveLength(1),
-  );
+  await waitFor(() => {
+    expect(api.callsTo('POST', '/api/pol/v1/pack-rollback-exceptions/review')).toHaveLength(1);
+  });
   expect(api.callsTo('POST', '/api/pol/v1/pack-rollback-exceptions/review')[0]?.body).toEqual({
     exceptionId: fx.exceptionId,
     outcome: 'CORRECTION_REQUIRED',
@@ -95,8 +97,30 @@ it('guards the exception route for an unrelated role', async () => {
 });
 
 it('loads the next exception page without dropping existing rows or changing the status filter', async () => {
-  const api = mockApi([{ method: 'GET', path: '/api/pol/v1/pack-rollback-exceptions', respond: ({ url }) => ({ body: url.searchParams.has('cursor') ? { items: [{ ...fx.exception, exceptionId: '018f8000-0000-7000-8000-000000000095', policyNumber: 'SYNTHETIC-2026-0002' }], nextCursor: null } : { items: [fx.exception], nextCursor: 'opaque-next' } }) }]);
-  const { user } = renderScreen(<ExceptionQueuePage />, { path: '/policies/pack-rollback', url: '/policies/pack-rollback' });
+  const api = mockApi([
+    {
+      method: 'GET',
+      path: '/api/pol/v1/pack-rollback-exceptions',
+      respond: ({ url }) => ({
+        body: url.searchParams.has('cursor')
+          ? {
+              items: [
+                {
+                  ...fx.exception,
+                  exceptionId: '018f8000-0000-7000-8000-000000000095',
+                  policyNumber: 'SYNTHETIC-2026-0002',
+                },
+              ],
+              nextCursor: null,
+            }
+          : { items: [fx.exception], nextCursor: 'opaque-next' },
+      }),
+    },
+  ]);
+  const { user } = renderScreen(<ExceptionQueuePage />, {
+    path: '/policies/pack-rollback',
+    url: '/policies/pack-rollback',
+  });
   await screen.findByText('SYNTHETIC-2026-0001');
   await user.click(screen.getByRole('button', { name: 'Load more exceptions' }));
   await screen.findByText('SYNTHETIC-2026-0002');
