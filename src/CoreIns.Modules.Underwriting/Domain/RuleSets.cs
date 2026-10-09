@@ -66,6 +66,39 @@ internal sealed record UwRisk(
         return Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(canonical)));
     }
 
+    /// <summary>
+    /// The facts the rules read at <paramref name="effectiveDate"/> in a form without personal data, stored with POL's evaluation
+    /// for the referral workbench (D-USR-13): the vehicle facts as read, the vehicle age and the youngest driver's age band the
+    /// rules compute (the birth date is P2 and is never stored by UW).
+    /// </summary>
+    public UwFactsRecord Derived(DateOnly effectiveDate) => new(
+        effectiveDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+        FirstRegistrationDate.Year,
+        WholeYears(FirstRegistrationDate, effectiveDate),
+        VehicleValue > 0m ? decimal.Round(VehicleValue, 2).ToString("0.00", CultureInfo.InvariantCulture) : null,
+        EngineCc,
+        Usage,
+        DriverBirthDates.Count == 0 ? null : AgeBand(WholeYears(DriverBirthDates.Max(), effectiveDate)),
+        ClaimsLast5Years);
+
+    /// <summary>Age bands of the workbench (ReferralDriverAgeBand); the bounds follow the rule thresholds (18, 21).</summary>
+    public static string AgeBand(int age) => age switch
+    {
+        < 18 => "UNDER_18",
+        <= 20 => "FROM_18_TO_20",
+        <= 24 => "FROM_21_TO_24",
+        <= 29 => "FROM_25_TO_29",
+        <= 69 => "FROM_30_TO_69",
+        _ => "FROM_70",
+    };
+
+    /// <summary>Whole years from <paramref name="from"/> to <paramref name="to"/> (the rule engine's ageAt / yearsBetween).</summary>
+    public static int WholeYears(DateOnly from, DateOnly to)
+    {
+        var years = to.Year - from.Year;
+        return to < from.AddYears(years) ? years - 1 : years;
+    }
+
     private static decimal ReadDecimal(JsonElement element)
     {
         if (element.ValueKind == JsonValueKind.Object && element.TryGetProperty("amount", out var amount))
@@ -106,13 +139,30 @@ internal sealed record UwRisk(
     }
 }
 
+/// <summary>The stored form of <see cref="UwRisk.Derived"/> (uw.evaluation.facts, camelCase JSON). No personal data.</summary>
+internal sealed record UwFactsRecord(
+    string EffectiveDate,
+    int FirstRegistrationYear,
+    int VehicleAgeYears,
+    string? VehicleValue,
+    int EngineCc,
+    string Usage,
+    string? YoungestDriverAgeBand,
+    int ClaimsLast5Years);
+
 internal sealed record RuleVariableDto(string Name, string Type, string Expression);
 
 internal sealed record RuleColumnDto(string Name, string Type, string Expression);
 
 internal sealed record RuleOutputDto(string Name, string Type);
 
-internal sealed record RuleRowDto(string Id, List<string> Conditions, List<string> Outputs);
+/// <summary>
+/// What the workbench shows for a referral rule (D-SL5): the derived fact the rule reads and its declared threshold, copied from the
+/// rule's own condition (the illustrative thresholds; never a new number). A rule without it declares no limit.
+/// </summary>
+internal sealed record RuleExplainDto(string Fact, string Limit);
+
+internal sealed record RuleRowDto(string Id, List<string> Conditions, List<string> Outputs, RuleExplainDto? Explain = null);
 
 /// <summary>One test case of a rule-set version (REQ-UW-038): a risk and the rule ids that must hit.</summary>
 internal sealed record RuleTestCaseDto(
@@ -240,7 +290,20 @@ internal static class BuiltInRuleSets
     public const string BindCode = "UW-MOTOR-GR-B";
     public const string Note = "ILLUSTRATIVE TEST DATA. These thresholds are made up for development and tests; they are not an approved underwriting guideline.";
 
+    public const string FactDriverAge = "youngestDriverAge";
+    public const string FactVehicleAge = "vehicleAgeYears";
+    public const string FactVehicleValue = "vehicleValue";
+
     private static RuleRowDto R(string id, string[] conditions, params string[] outputs) => new(id, [.. conditions], [.. outputs]);
+
+    private static RuleRowDto WithExplain(RuleRowDto rule, string fact, string limit) => rule with { Explain = new RuleExplainDto(fact, limit) };
+
+    /// <summary>The built-in explain of a referral rule whose conditions are unchanged (rule sets stored before explain existed).</summary>
+    public static RuleExplainDto? BuiltInExplain(string ruleSetCode, RuleRowDto stored)
+    {
+        var builtIn = (ruleSetCode == BindCode ? Bind("MOTOR-GR") : null)?.Rules.FirstOrDefault(r => r.Id == stored.Id);
+        return builtIn is not null && builtIn.Conditions.SequenceEqual(stored.Conditions, StringComparer.Ordinal) ? builtIn.Explain : null;
+    }
 
     private static readonly RuleRowDto[] Declines =
     [
@@ -254,12 +317,12 @@ internal static class BuiltInRuleSets
 
     private static readonly RuleRowDto[] Referrals =
     [
-        R("REFER-YOUNG-DRIVER", ["[18..20]", "-", "-", "-", "-"], "\"REFER\"", "\"DRIVER_AGE_REFERRAL\"", "\"REFER\"", "\"PRE_BIND\"",
-            "\"The driver is under 21.\"", "\"Ο οδηγός είναι κάτω των 21 ετών.\""),
-        R("REFER-OLD-VEHICLE", ["-", "> 20", "-", "-", "-"], "\"REFER\"", "\"VEHICLE_AGE_REFERRAL\"", "\"REFER\"", "\"PRE_BIND\"",
-            "\"The vehicle is older than 20 years.\"", "\"Το όχημα είναι παλαιότερο των 20 ετών.\""),
-        R("REFER-HIGH-VALUE", ["-", "-", "> 100000", "-", "-"], "\"REFER\"", "\"VEHICLE_VALUE_REFERRAL\"", "\"REFER\"", "\"PRE_BIND\"",
-            "\"The vehicle value is above 100,000.\"", "\"Η αξία του οχήματος υπερβαίνει τις 100.000.\""),
+        WithExplain(R("REFER-YOUNG-DRIVER", ["[18..20]", "-", "-", "-", "-"], "\"REFER\"", "\"DRIVER_AGE_REFERRAL\"", "\"REFER\"", "\"PRE_BIND\"",
+            "\"The driver is under 21.\"", "\"Ο οδηγός είναι κάτω των 21 ετών.\""), FactDriverAge, "21"),
+        WithExplain(R("REFER-OLD-VEHICLE", ["-", "> 20", "-", "-", "-"], "\"REFER\"", "\"VEHICLE_AGE_REFERRAL\"", "\"REFER\"", "\"PRE_BIND\"",
+            "\"The vehicle is older than 20 years.\"", "\"Το όχημα είναι παλαιότερο των 20 ετών.\""), FactVehicleAge, "20"),
+        WithExplain(R("REFER-HIGH-VALUE", ["-", "-", "> 100000", "-", "-"], "\"REFER\"", "\"VEHICLE_VALUE_REFERRAL\"", "\"REFER\"", "\"PRE_BIND\"",
+            "\"The vehicle value is above 100,000.\"", "\"Η αξία του οχήματος υπερβαίνει τις 100.000.\""), FactVehicleValue, "100000"),
     ];
 
     /// <summary>The PRE_QUOTE rule set (declines only).</summary>
