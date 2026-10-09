@@ -36,7 +36,7 @@ internal sealed record FallbackPlan(
 
 /// <summary>
 /// REQ-PFC-213 / D-SL5-09: the source is the highest earlier Locked, non-abstract, not-replaced version with the same channel
-/// scope; the new number is the next free minor of the source's major; the new version takes the new-business window
+/// scope; the new number advances past the highest allocated minor of the source's major (holes are not reused); the new version takes the new-business window
 /// [fallbackDate, defective's old end) and renewal window [fallbackDate, open); the defective version's new-business window
 /// is shortened to [its start, fallbackDate). Pure; the handler loads the facts and applies the plan.
 /// </summary>
@@ -74,16 +74,12 @@ internal static class FallbackPlanner
 
         var source = versions
             .Where(v => v.Number < defectiveNumber && v.Status == Locked && !v.IsAbstract && !v.Replaced)
+            .Where(v => v.Channels.Order(StringComparer.Ordinal).SequenceEqual(defective.Channels.Order(StringComparer.Ordinal), StringComparer.Ordinal))
             .OrderByDescending(v => v.Number)
             .FirstOrDefault();
         if (source is null)
         {
             return DomainError.Of(ModuleCode.PFC, "FALLBACK-SOURCE", $"Version {defectiveNumber} has no earlier published version to copy.");
-        }
-
-        if (!source.Channels.Order(StringComparer.Ordinal).SequenceEqual(defective.Channels.Order(StringComparer.Ordinal), StringComparer.Ordinal))
-        {
-            return DomainError.Of(ModuleCode.PFC, "FALLBACK-SOURCE", $"Version {source.Number} has another channel scope than {defectiveNumber}.");
         }
 
         var nextMinor = versions.Where(v => v.Number.Major == source.Number.Major).Max(v => v.Number.Minor) + 1;
