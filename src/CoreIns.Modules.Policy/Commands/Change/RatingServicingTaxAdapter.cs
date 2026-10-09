@@ -161,6 +161,14 @@ internal sealed class RatingServicingTaxAdapter(
             }
 
             var calculable = line.TreatmentAction is ServicingTreatmentAction.Apply or ServicingTreatmentAction.ReduceProRata or ServicingTreatmentAction.ReverseAsVoid;
+            if (decimal.Round(line.Amount.Amount, line.Amount.Currency.MinorUnits) != line.Amount.Amount
+                || Math.Abs(line.Amount.Amount) > Math.Abs(expected.Delta.Amount)
+                || (line.Amount.Amount != 0m && Math.Sign(line.Amount.Amount) != Math.Sign(expected.Delta.Amount))
+                || (!calculable && line.Amount.Amount != 0m))
+            {
+                return Refused("RAT returned an invalid tax amount for its premium delta");
+            }
+
             if (calculable && (line.Rate is null || line.Rate < 0m || line.Rate > 1m
                 || string.IsNullOrWhiteSpace(line.CalculationRuleId) || string.IsNullOrWhiteSpace(line.CalculationRuleVersion)))
             {

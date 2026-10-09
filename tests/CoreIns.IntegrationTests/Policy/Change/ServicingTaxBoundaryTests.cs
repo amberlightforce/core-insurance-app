@@ -51,6 +51,9 @@ public sealed class ServicingTaxBoundaryTests
     [InlineData("rate")]
     [InlineData("rule")]
     [InlineData("status")]
+    [InlineData("sign")]
+    [InlineData("amount")]
+    [InlineData("precision")]
     public void Invalid_calculated_line_evidence_is_refused(string changed)
     {
         var item = Item();
@@ -65,10 +68,25 @@ public sealed class ServicingTaxBoundaryTests
             "action" => line with { TreatmentAction = (ServicingTreatmentAction)999 },
             "rate" => line with { Rate = null },
             "rule" => line with { CalculationRuleId = null },
+            "sign" => line with { Amount = new Money(-1m, Currency.EUR) },
+            "amount" => line with { Amount = new Money(71m, Currency.EUR) },
+            "precision" => line with { Amount = new Money(1.001m, Currency.EUR) },
             _ => line with { Provisional = true },
         };
 
         RatingServicingTaxAdapter.MapLines([item], new ServicingTaxLinesResult([line])).IsFailure.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void A_small_debit_may_have_tax_rounded_to_zero_with_calculation_evidence()
+    {
+        var item = Item(amount: 0.01m);
+
+        var result = RatingServicingTaxAdapter.MapLines([item], new ServicingTaxLinesResult([Line(item.Rat)]));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Single().Amount.ShouldBe(0m);
+        ChangePricer.CheckTax([item.Delta], result.Value).ShouldBeNull();
     }
 
     [Fact]

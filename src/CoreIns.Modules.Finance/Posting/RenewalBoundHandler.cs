@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using CoreIns.Modules.Finance.Persistence;
 using CoreIns.Platform.Events;
+using CoreIns.Platform.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoreIns.Modules.Finance.Posting;
@@ -32,15 +33,20 @@ internal sealed record RenewalBoundContext
 /// predecessor term's context; the BIL entries of the new term wait on <c>term:{newTermId}</c> until this arrives, exactly as for
 /// PolicyBound (REQ-FIN-040). Without it the entries of a renewal term were never journalised.
 /// </summary>
-internal sealed class RenewalBoundHandler(FinanceDbContext db, PolicyBoundHandler policyBound) : IEventHandler<RenewalBoundContext>
+internal sealed class RenewalBoundHandler(FinanceDbContext db, PolicyBoundHandler policyBound, ILegalEntityDirectory legalEntities) : IEventHandler<RenewalBoundContext>
 {
     public async Task HandleAsync(EventEnvelope envelope, RenewalBoundContext payload, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(envelope);
         ArgumentNullException.ThrowIfNull(payload);
         var predecessorId = payload.PredecessorTermId ?? throw new InvalidOperationException("RenewalBound without predecessorTermId (contract: always set).");
-        var predecessor = await db.PolicyContexts.AsNoTracking().SingleOrDefaultAsync(p => p.PolicyTermId == predecessorId, cancellationToken).ConfigureAwait(false)
+        var legalEntity = legalEntities.Resolve(envelope.LegalEntity).Value;
+        var predecessor = await db.PolicyContexts.AsNoTracking().SingleOrDefaultAsync(p => p.PolicyTermId == predecessorId && p.LegalEntityId == legalEntity, cancellationToken).ConfigureAwait(false)
             ?? throw new InvalidOperationException($"RenewalBound for a term whose predecessor {predecessorId} has no policy context yet; retried.");
+        if (envelope.AggregateType != "Policy" || !Guid.TryParse(envelope.AggregateId, out var policyId) || predecessor.PolicyId != policyId)
+        {
+            throw new InvalidOperationException("RenewalBound predecessor does not belong to the event's policy.");
+        }
         await policyBound.HandleAsync(
             envelope,
             new PolicyBoundContext
