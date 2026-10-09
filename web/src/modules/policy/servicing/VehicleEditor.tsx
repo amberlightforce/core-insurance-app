@@ -10,13 +10,8 @@ import {
 } from '../../../design-system';
 import { Section } from '../../staff/PageHeader';
 import styles from '../../staff/staff.module.css';
-import {
-  fuelTypes,
-  validateVehicle,
-  vehicleValueIssue,
-  type FieldIssue,
-  type VehicleForm,
-} from '../../quote/state';
+import { fuelTypes, vehicleValueIssue, type FieldIssue, type VehicleForm } from '../../quote/state';
+import { validateServicingVehicle } from './logic';
 
 export type VehicleMode = 'edit' | 'replace';
 
@@ -46,7 +41,7 @@ export function VehicleEditor({
   const { t } = useTranslation('policy');
   const q = useTranslation('quote').t;
   const [touched, setTouched] = useState<ReadonlySet<keyof VehicleForm>>(new Set());
-  const issues = validateVehicle(form, thisYear());
+  const issues = validateServicingVehicle(form, thisYear(), mode);
   const set = (field: keyof VehicleForm) => (value: string | null) => {
     onChange((f) => ({ ...f, [field]: value ?? '' }));
   };

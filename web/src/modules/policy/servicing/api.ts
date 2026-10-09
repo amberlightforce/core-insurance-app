@@ -36,11 +36,17 @@ export function createPolicyChange(request: PolicyChangeCreateRequest, key: stri
   });
 }
 
-export function createCancellation(request: CancellationCreateRequest, key: string) {
+/** Cancellation is one atomic command; dryRun previews it without creating a job or changing the policy. */
+export function createCancellation(
+  request: CancellationCreateRequest,
+  key: string,
+  dryRun = false,
+) {
   return apiRequest<CancellationCreateResponse>('/api/pol/v1/cancellations', {
     method: 'POST',
     body: request,
     idempotencyKey: key,
+    ...(dryRun ? { query: { dryRun: true } } : {}),
   });
 }
 

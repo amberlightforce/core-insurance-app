@@ -43,7 +43,7 @@ function policyFx(
       vehicles: [
         {
           locator: 'v1',
-          plate: 'ΙΚΧ1234',
+          plate: 'ikx-1234',
           make: 'Toyota',
           model: 'Yaris',
           firstRegistrationYear: 2021,
@@ -206,47 +206,24 @@ describe('CancellationPage', () => {
       url: `/policies/${fx.policyId}/cancel`,
     });
 
-  const cancelRoutes = (overrides: { bind?: MockRoute['respond'] } = {}): MockRoute[] => [
+  const cancelRoutes = (): MockRoute[] => [
     policyRoute(policyFx()),
     catalogueRoute,
     {
       method: 'POST',
       path: '/api/pol/v1/cancellations',
-      respond: () => ({
+      respond: (request) => ({
         status: 201,
         body: {
-          jobId,
-          state: 'DRAFT',
+          jobId: request.url.searchParams.get('dryRun') === 'true' ? 'preview-only' : jobId,
+          state: 'BOUND',
           kind: 'STANDARD',
           effectiveAt: '2027-02-05T10:00:00Z',
           servicingPreview: cancellationPreview(),
         },
       }),
     },
-    jobRoute,
-    {
-      method: 'POST',
-      path: '/api/pol/v1/jobs/quote',
-      respond: () => ({
-        body: { ...fx.quote(), servicingPreview: cancellationPreview() },
-      }),
-    },
-    {
-      method: 'POST',
-      path: '/api/pol/v1/jobs/bind',
-      respond:
-        overrides.bind ??
-        (() => ({
-          body: {
-            jobId,
-            state: 'BOUND',
-            gateResults: [{ gate: 'EFFECTIVE_DATE', passed: true, severity: 'BLOCK' }],
-            servicingPreview: cancellationPreview(),
-          },
-        })),
-    },
   ];
-
   it('requires the reason, then previews the refund and cancels after explicit confirmation', async () => {
     const api = mockApi(cancelRoutes());
     const { user, container } = page();
@@ -272,7 +249,13 @@ describe('CancellationPage', () => {
       kind: 'STANDARD',
     });
     expect(created?.headers.get('Idempotency-Key')).toBeTruthy();
-    expect(api.callsTo('POST', '/api/pol/v1/jobs/quote')[0]?.body).toEqual({ jobId, versionNo: 1 });
+    expect(created?.url.searchParams.get('dryRun')).toBe('true');
+    expect(api.callsTo('POST', '/api/pol/v1/jobs/quote')).toHaveLength(0);
+    expect(
+      api
+        .callsTo('POST', '/api/pol/v1/cancellations')
+        .filter((call) => call.url.searchParams.get('dryRun') !== 'true'),
+    ).toHaveLength(0);
     expect(screen.getByText(/ΦΑΑ: δεν επιστρέφεται/)).toBeInTheDocument();
     expect(await screen.findByText('Αστική ευθύνη αυτοκινήτου')).toBeInTheDocument();
     expect(screen.getByText('Ετήσιο')).toBeInTheDocument();
@@ -282,17 +265,24 @@ describe('CancellationPage', () => {
     const dialog = await screen.findByRole('alertdialog');
     const confirm = within(dialog).getByRole('button', { name: 'Ακύρωση ασφαλιστηρίου' });
     await user.click(confirm);
-    expect(api.callsTo('POST', '/api/pol/v1/jobs/bind')).toHaveLength(0);
+    expect(
+      api
+        .callsTo('POST', '/api/pol/v1/cancellations')
+        .filter((call) => call.url.searchParams.get('dryRun') !== 'true'),
+    ).toHaveLength(0);
     await user.click(within(dialog).getByRole('checkbox'));
     await user.click(within(dialog).getByRole('button', { name: 'Ακύρωση ασφαλιστηρίου' }));
 
     expect((await screen.findAllByText('Το ασφαλιστήριο ακυρώθηκε')).length).toBeGreaterThan(0);
-    expect(api.callsTo('POST', '/api/pol/v1/jobs/bind')[0]?.body).toMatchObject({
-      jobId,
-      versionNo: 1,
-      confirmation: true,
-      paymentPlanOption: 'ANNUAL',
-    });
+    const calls = api.callsTo('POST', '/api/pol/v1/cancellations');
+    expect(calls).toHaveLength(2);
+    const committed = calls.filter((call) => call.url.searchParams.get('dryRun') !== 'true');
+    expect(committed).toHaveLength(1);
+    expect(committed[0]?.body).toEqual(created?.body);
+    expect(committed[0]?.headers.get('Idempotency-Key')).not.toBe(
+      created?.headers.get('Idempotency-Key'),
+    );
+    expect(api.callsTo('POST', '/api/pol/v1/jobs/bind')).toHaveLength(0);
   });
 
   it('explains an out-of-sequence refusal in plain words', async () => {
@@ -591,7 +581,7 @@ describe('ChangeWorkspacePage', () => {
     };
     expect(update.instructions[0]).toMatchObject({
       op: 'SET_VEHICLE',
-      vehicle: { locator: 'v1', engineCapacityCc: 1800 },
+      vehicle: { locator: 'v1', plate: 'ikx-1234', engineCapacityCc: 1800 },
     });
     const diff = screen.getByRole('grid', { name: 'Αλλαγμένα στοιχεία οχήματος' });
     expect(within(diff).getByText('1500')).toBeInTheDocument();
