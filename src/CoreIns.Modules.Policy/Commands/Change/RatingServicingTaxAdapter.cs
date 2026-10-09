@@ -1,9 +1,12 @@
 using System.Text.Json;
+using CoreIns.Modules.Market.Contracts;
+using CoreIns.Modules.Market.Contracts.Api;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Domain.Servicing;
 using CoreIns.Modules.Policy.Services;
 using CoreIns.Modules.Product.Contracts;
 using CoreIns.Modules.Rating.Contracts.Servicing;
+using CoreIns.Platform.Contracts;
 using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
@@ -22,11 +25,11 @@ internal interface IBoundServicingTax
 /// <summary>
 /// The production <see cref="IServicingTax"/> (SL3-E2E integration fix; SL3-POL-WIRING): the tax lines of a change's premium deltas come
 /// from RAT's servicing tax (<see cref="IRatingServicingTax"/>), which asks MKT's <c>TaxCalculator.treatment</c> and, where a tax applies,
-/// <c>calculate</c>. POL computes no tax: it reads, from the term's pinned product artefact, the tax class of each premium charge type
-/// and the tax charge types that charge is included in (category TAX only; the slice has no levy line, D-REG-06a), and maps the answer.
+/// <c>calculate</c>. POL computes no tax: it reads the IPT class from MKT configuration and, from the term's pinned product artefact, the tax charge types that charge is included in (category TAX only; the slice has no levy line, D-REG-06a), and maps the answer.
 /// Fails closed on anything missing (PITFALLS 10).
 /// </summary>
-internal sealed class RatingServicingTaxAdapter(IRatingServicingTax rating, Dependency<IProductArtifactService> products) : IServicingTax, IBoundServicingTax
+internal sealed class RatingServicingTaxAdapter(
+    IRatingServicingTax rating, Dependency<IProductArtifactService> products, Dependency<IMarketConfigurationService> marketConfiguration) : IServicingTax, IBoundServicingTax
 {
     private string? _artefactHash;
 
@@ -57,15 +60,44 @@ internal sealed class RatingServicingTaxAdapter(IRatingServicingTax rating, Depe
             return Refused("the pinned product artefact has no product line or charge types");
         }
 
+        // The tax class is MKT configuration (tax.ipt.motor_class), the same source the rating artefact reads at issuance; the
+        // artefact's own class label is not a key of the pack (D-REG-01: no default, fail closed).
+        var productCode = artefact.TryGetProperty("product", out var pr) && pr.TryGetProperty("code", out var prCode) ? prCode.GetString() : null;
+        string motorClass;
+        try
+        {
+            var resolved = await marketConfiguration.Value.ResolveAsync(
+                new ConfigurationResolveRequest
+                {
+                    LegalEntity = request.LegalEntity,
+                    Jurisdiction = request.Jurisdiction,
+                    ProductCode = productCode,
+                    Channel = "STAFF",
+                    TimeBasisDates = new Dictionary<string, BusinessDate> { ["TAX_POINT_DATE"] = request.TaxPointDate, ["EFFECTIVE_DATE"] = request.TaxPointDate },
+                    Keys = ["tax.ipt.motor_class"],
+                },
+                ValidAt.From(request.TaxPointDate), cancellationToken: cancellationToken).ConfigureAwait(false);
+            var value = resolved.Values.FirstOrDefault(v => v.Key == "tax.ipt.motor_class");
+            motorClass = value is { Value.ValueKind: JsonValueKind.String } ? value.Value.GetString()!.Trim().ToLowerInvariant() : string.Empty;
+        }
+        catch (DomainException)
+        {
+            return Refused("MKT configuration could not resolve the IPT class");
+        }
+
+        if (motorClass.Length == 0)
+        {
+            return Refused("MKT configuration holds no IPT class (tax.ipt.motor_class)");
+        }
+
         var byCode = chargeTypes.EnumerateArray().Where(c => c.TryGetProperty("code", out _)).ToDictionary(c => c.GetProperty("code").GetString()!, c => c, StringComparer.Ordinal);
         var items = new List<(Domain.Servicing.ServicingDelta Delta, RatDelta Rat)>();
         foreach (var delta in request.PremiumDeltas)
         {
             if (!byCode.TryGetValue(delta.Key.ChargeType, out var premium)
-                || !premium.TryGetProperty("taxClass", out var taxClass) || string.IsNullOrWhiteSpace(taxClass.GetString())
                 || !premium.TryGetProperty("includedInTaxBases", out var bases) || bases.ValueKind != JsonValueKind.Array)
             {
-                return Refused($"charge type {delta.Key.ChargeType} declares no tax class or tax bases");
+                return Refused($"charge type {delta.Key.ChargeType} declares no tax bases");
             }
 
             var taxTypes = bases.EnumerateArray().Select(b => b.GetString()!)
@@ -81,7 +113,7 @@ internal sealed class RatingServicingTaxAdapter(IRatingServicingTax rating, Depe
                 PremiumChargeType: delta.Key.ChargeType,
                 TaxChargeType: taxTypes[0],
                 Category: ServicingTaxCategory.Tax,
-                TaxClass: taxClass.GetString()!,
+                TaxClass: motorClass,
                 Delta: new Money(delta.Amount, request.Currency),
                 PeriodFrom: new BusinessDate(delta.DateFrom),
                 PeriodTo: new BusinessDate(delta.DateTo),
@@ -97,7 +129,7 @@ internal sealed class RatingServicingTaxAdapter(IRatingServicingTax rating, Depe
         }
         catch (DomainException ex)
         {
-            return DomainError.Of(ModuleCode.POL, "RATING", $"Servicing tax lines failed: {ex.Error.Code}.");
+            return DomainError.Of(ModuleCode.POL, "RATING", $"Servicing tax lines failed: {ex.Error}");
         }
 
         if (result.Lines.Count != items.Count)
