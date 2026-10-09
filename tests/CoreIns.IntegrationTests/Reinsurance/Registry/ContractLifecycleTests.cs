@@ -1,6 +1,16 @@
 using System.Globalization;
 using System.Net;
 using System.Text.Json.Nodes;
+using CoreIns.Modules.Reinsurance.Contracts.Api;
+using CoreIns.Modules.Reinsurance.Registry;
+using CoreIns.Platform.Commands;
+using CoreIns.Platform.Context;
+using CoreIns.Platform.Contracts;
+using CoreIns.Platform.Contracts.Api;
+using CoreIns.Platform.Errors;
+using CoreIns.SharedKernel;
+using CoreIns.SharedKernel.Identifiers;
+using Microsoft.Extensions.DependencyInjection;
 using static CoreIns.IntegrationTests.Party.PartyApi;
 using static CoreIns.IntegrationTests.Reinsurance.Registry.RegistrySlice;
 
@@ -38,11 +48,11 @@ public sealed class ContractLifecycleTests(PostgresFixture database) : IClassFix
         var item = page!["items"]!.AsArray().Single(i => i!["contractId"]!.GetValue<string>() == id)!;
         item["layers"]!.AsArray().Count.ShouldBe(2);
         item.Text("layers.0.layerNo").ShouldBe("1");
-        item.Text("layers.0.attachment.amount").ShouldBe("400000.00");
-        item.Text("layers.0.limit.amount").ShouldBe("500000.00");
+        decimal.Parse(item.Text("layers.0.attachment.amount"), CultureInfo.InvariantCulture).ShouldBe(400000m);
+        decimal.Parse(item.Text("layers.0.limit.amount"), CultureInfo.InvariantCulture).ShouldBe(500000m);
         item.Text("layers.0.limit.currency").ShouldBe("EUR");
         item.Text("layers.1.layerNo").ShouldBe("2");
-        item.Text("layers.1.limit.amount").ShouldBe("750000.00");
+        decimal.Parse(item.Text("layers.1.limit.amount"), CultureInfo.InvariantCulture).ShouldBe(750000m);
     }
 
     [Fact]
@@ -120,6 +130,33 @@ public sealed class ContractLifecycleTests(PostgresFixture database) : IClassFix
         var (ok, approved) = await slice.ApproveAsync(id, submitted, "other-manager");
         ok.StatusCode.ShouldBe(HttpStatusCode.OK, approved?.ToJsonString());
         approved.Text("contract.status").ShouldBe("ACTIVE");
+    }
+
+    [Fact]
+    public async Task A_delegated_checker_acting_for_a_participant_is_refused_by_RI_and_the_PLT_inbox()
+    {
+        var (slice, lead, follow) = await NewSliceAsync();
+        await using var _ = slice;
+        var (id, version, _) = await slice.CreateAsync(Body(NewProduct(), "OD", lead, follow), user: "enterer");
+        var submitted = await slice.SubmitAsync(id, version, user: "submitter");
+        await using var scope = slice.Factory.Services.CreateAsyncScope();
+        var services = scope.ServiceProvider;
+        var context = services.GetRequiredService<RequestContext>();
+        context.Actor = ActorRef.User("delegated-checker");
+        context.OnBehalfOf = ActorRef.User("enterer");
+        context.Roles = [Manager];
+        context.LegalEntity = LegalEntityCode.Parse("GR-TEST");
+        context.Jurisdiction = Jurisdiction.Parse("GR");
+        var result = await services.GetRequiredService<ICommandHandler<ApproveContract, ContractApproveResponse>>().HandleAsync(
+            new ApproveContract(new ContractApproveRequest { ContractId = new RiContractId(Guid.Parse(id)), ExpectedRecordVersion = submitted, Decision = ContractApproveRequest.DecisionValue.Approve }), Ct);
+        result.IsFailure.ShouldBeTrue();
+        result.Error!.Code.Value.ShouldBe("RI-ERR-SOD");
+        var request = await slice.ScalarAsync<Guid>($"SELECT approval_request_id FROM ri.contract WHERE contract_id = '{id}'");
+        var hash = await slice.ScalarAsync<string>($"SELECT content_hash FROM ri.contract_version WHERE contract_id = '{id}'");
+        var error = await Should.ThrowAsync<DomainException>(() => services.GetRequiredService<IPlatformApprovalService>().DecideAsync(
+            new ApprovalDecideRequest { RequestId = request, Decision = ApprovalDecideRequest.DecisionValue.Approve, PayloadHash = Sha256Hash.Parse(hash) }, CommandOptions.New(), Ct));
+        error.Error.Code.Value.ShouldBe("PLT-ERR-EDITOR-CANNOT-APPROVE");
+        (await slice.GetAsync(id)).Text("contract.status").ShouldBe("PENDING_APPROVAL");
     }
 
     [Fact]
@@ -235,13 +272,12 @@ public sealed class ContractLifecycleTests(PostgresFixture database) : IClassFix
         executedBody.Text("contract.status").ShouldBe("ACTIVE");
         (await slice.ScalarAsync<string>($"SELECT approved_by FROM ri.contract_version WHERE contract_id = '{id}'")).ShouldBe("USER:inbox-mgr");
 
-        // Approved in the inbox by the person who entered the contract: PLT cannot know that editor; RI refuses to execute it.
+        // RI supplies its authoritative participants to PLT, so the inbox refuses the enterer before any decision.
         var (id2, version2, _) = await slice.CreateAsync(Body(NewProduct(), "OD", lead, follow), user: "enterer2");
         var submitted2 = await slice.SubmitAsync(id2, version2, user: "submitter2");
-        (await DecideInInboxAsync(slice, id2, "enterer2", "Approve")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var (refused, refusedBody) = await slice.ApproveAsync(id2, submitted2, "rimgr3");
+        var (refused, refusedBody) = await DecideInInboxAsync(slice, id2, "enterer2", "Approve");
         refused.StatusCode.ShouldBe(HttpStatusCode.Forbidden, refusedBody?.ToJsonString());
-        refusedBody.Text("code").ShouldBe("RI-ERR-SOD");
+        refusedBody.Text("code").ShouldBe("PLT-ERR-EDITOR-CANNOT-APPROVE");
         (await slice.GetAsync(id2)).Text("contract.status").ShouldBe("PENDING_APPROVAL");
         (await slice.ScalarAsync<long>($"SELECT count(*) FROM plt.outbox_message WHERE event_type = 'RIContractActivated' AND aggregate_id = '{id2}'")).ShouldBe(0);
 

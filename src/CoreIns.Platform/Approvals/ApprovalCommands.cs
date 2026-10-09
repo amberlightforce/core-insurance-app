@@ -46,6 +46,8 @@ internal sealed class RequestApprovalValidator : AbstractValidator<RequestApprov
         RuleFor(c => c.Request.Type).NotEmpty().MaximumLength(128).When(c => c.Request is not null);
         RuleFor(c => c.Request.ReferralRole).NotEmpty().MaximumLength(128).When(c => c.Request is not null);
         RuleFor(c => c.Request.Reason).MaximumLength(1024).When(c => c.Request is not null);
+        RuleForEach(c => c.Request.Editors).NotEmpty().MaximumLength(256)
+            .Matches("^(USER|SERVICE|AI_AGENT):[^\\s:]+$").When(c => c.Request?.Editors is not null);
         RuleFor(c => c.Request.Authority).NotNull().When(c => c.Request is not null);
         RuleFor(c => c.Request.Authority.Type).NotEmpty().When(c => c.Request?.Authority is not null);
         RuleFor(c => c.Request.Authority)
@@ -130,12 +132,15 @@ internal sealed class RequestApprovalHandler(
         var now = clock.Now;
         var maker = context.Actor;
 
-        var editors = new List<string>();
+        var editors = new List<string>(request.Editors ?? []);
         var existing = await ApprovalStore.LockPendingAsync(connection, transaction, legalEntity, request.Type, request.ObjectRef, cancellationToken)
             .ConfigureAwait(false);
         if (existing is not null)
         {
-            if (existing.PayloadHash == request.PayloadHash)
+            // An identical hash can still name newly discovered participants. Supersede instead of silently dropping
+            // them; inherited maker/editor keys can never be removed by a later owning-module request.
+            if (existing.PayloadHash == request.PayloadHash
+                && editors.All(e => existing.Editors.Contains(e, StringComparer.Ordinal) || existing.MakerKeys.Contains(e, StringComparer.Ordinal)))
             {
                 return new ApprovalRequestResponse { Request = existing.ToView() };
             }

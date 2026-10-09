@@ -27,6 +27,69 @@ public sealed class ContractDatabaseTests(PostgresFixture database) : IClassFixt
     }
 
     [Fact]
+    public async Task REQ_RI_057_Pending_version_cannot_be_sealed_without_an_approved_PLT_request()
+    {
+        var slice = new RegistrySlice(database);
+        await using var _ = slice;
+        var lead = await slice.OrganisationAsync("Synthetic Lead Re " + Guid.NewGuid().ToString("N")[..6]);
+        var follow = await slice.OrganisationAsync("Synthetic Follow Re " + Guid.NewGuid().ToString("N")[..6]);
+        var (id, version, _) = await slice.CreateAsync(Body(NewProduct(), "OD", lead, follow));
+        await slice.SubmitAsync(id, version);
+        await using var app = NpgsqlDataSource.Create(database.AppConnectionString);
+        (await RefusedAsync(app, $"UPDATE ri.contract_version SET approved_at = now(), approved_by = 'USER:forged-checker' WHERE contract_id = '{id}'"))
+            .SqlState.ShouldBe(PostgresErrorCodes.InsufficientPrivilege);
+        await using var connection = await app.OpenConnectionAsync(Ct);
+        await using var transaction = await connection.BeginTransactionAsync(Ct);
+        await using var forged = new NpgsqlCommand($"UPDATE ri.contract_version SET approved_at = now(), approved_by = 'USER:forged-checker' WHERE contract_id = '{id}'", connection, transaction);
+        (await forged.ExecuteNonQueryAsync(Ct)).ShouldBe(1); // Deferred until the transaction commits, like the real command.
+        (await Should.ThrowAsync<PostgresException>(() => transaction.CommitAsync(Ct))).SqlState.ShouldBe(PostgresErrorCodes.InsufficientPrivilege);
+    }
+
+    [Fact]
+    public async Task REQ_RI_057_Approval_proof_binds_every_dimension_and_cannot_be_reused_for_another_subject()
+    {
+        var (slice, id, app) = await ActiveContractAsync();
+        await using var _ = slice;
+        await using var __ = app;
+        var detail = await slice.GetAsync(id);
+        var request = detail.Text("contract.approvalRequestId");
+        var hash = await slice.ScalarAsync<string>($"SELECT content_hash FROM ri.contract_version WHERE contract_id = '{id}'");
+        var entity = await slice.ScalarAsync<Guid>($"SELECT legal_entity_id FROM ri.contract WHERE contract_id = '{id}'");
+        async Task<bool> Verified(string subject, string entityId, string digest, string checker, string type, string participants = "ARRAY[]::text[]")
+        {
+            await using var query = app.CreateCommand($"SELECT plt.ri_contract_approval_verified('{request}', '{entityId}', '{subject}', '{digest}', '{checker}', '{type}', {participants})");
+            return (bool)(await query.ExecuteScalarAsync(Ct))!;
+        }
+        (await Verified(id, entity.ToString(), hash, "USER:rimgr", "XOL_PER_RISK")).ShouldBeTrue();
+        (await Verified(Guid.NewGuid().ToString(), entity.ToString(), hash, "USER:rimgr", "XOL_PER_RISK")).ShouldBeFalse();
+        (await Verified(id, Guid.NewGuid().ToString(), hash, "USER:rimgr", "XOL_PER_RISK")).ShouldBeFalse();
+        (await Verified(id, entity.ToString(), new string('a', 64), "USER:rimgr", "XOL_PER_RISK")).ShouldBeFalse();
+        (await Verified(id, entity.ToString(), hash, "USER:other", "XOL_PER_RISK")).ShouldBeFalse();
+        (await Verified(id, entity.ToString(), hash, "USER:rimgr", "QUOTA_SHARE")).ShouldBeFalse();
+        (await Verified(id, entity.ToString(), hash, "USER:rimgr", "XOL_PER_RISK", "ARRAY['USER:rimgr']")).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task REQ_RI_057_A_version_cannot_be_inserted_already_approved()
+    {
+        var (slice, id, app) = await ActiveContractAsync();
+        await using var _ = slice;
+        await using var __ = app;
+        (await RefusedAsync(app, $"""
+            INSERT INTO ri.contract_version
+            SELECT (jsonb_populate_record(NULL::ri.contract_version, to_jsonb(v) ||
+                jsonb_build_object('version_id', gen_random_uuid(), 'version_no', 99))).*
+            FROM ri.contract_version v WHERE contract_id = '{id}'
+            """)).SqlState.ShouldBe(PostgresErrorCodes.InsufficientPrivilege);
+        (await RefusedAsync(app, $"""
+            INSERT INTO ri.contract
+            SELECT (jsonb_populate_record(NULL::ri.contract, to_jsonb(c) ||
+                jsonb_build_object('contract_id', gen_random_uuid(), 'contract_number', 'RIC999999', 'stable_treaty_id', 'RIC999999'))).*
+            FROM ri.contract c WHERE contract_id = '{id}'
+            """)).SqlState.ShouldBe(PostgresErrorCodes.InsufficientPrivilege);
+    }
+
+    [Fact]
     public async Task REQ_RI_065_The_ri_schema_is_migrated_with_no_delete_and_append_only_content_for_the_app_role()
     {
         CoreIns.Host.Hosting.ModuleCatalog.Databases.Select(d => d.Schema).ShouldContain("ri");

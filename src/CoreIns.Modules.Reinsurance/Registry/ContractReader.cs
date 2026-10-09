@@ -101,10 +101,10 @@ internal sealed class ContractReader(
             Layers = byVersion[r.v.VersionId].Where(l => l.Rev == r.v.ContentRev).Select(l => new RiLayer
             {
                 LayerNo = l.LayerNo,
-                Attachment = new Money(l.Attachment, Currency.FromCode(l.Currency.Trim())),
-                Limit = new Money(l.LimitAmount, Currency.FromCode(l.Currency.Trim())),
-                Aad = new Money(l.Aad, Currency.FromCode(l.Currency.Trim())),
-                Aal = l.Aal is { } aal ? new Money(aal, Currency.FromCode(l.Currency.Trim())) : null,
+                Attachment = new Money(ContractSupport.Amount(l.Attachment), Currency.FromCode(l.Currency.Trim())),
+                Limit = new Money(ContractSupport.Amount(l.LimitAmount), Currency.FromCode(l.Currency.Trim())),
+                Aad = new Money(ContractSupport.Amount(l.Aad), Currency.FromCode(l.Currency.Trim())),
+                Aal = l.Aal is { } aal ? new Money(ContractSupport.Amount(aal), Currency.FromCode(l.Currency.Trim())) : null,
             }).ToList(),
         }).ToList();
         return new ContractListPage

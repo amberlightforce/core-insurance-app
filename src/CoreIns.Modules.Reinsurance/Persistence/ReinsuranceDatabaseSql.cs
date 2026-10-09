@@ -25,6 +25,13 @@ internal static class ReinsuranceDatabaseSql
 
         CREATE FUNCTION ri.contract_guard() RETURNS trigger LANGUAGE plpgsql AS $$
         BEGIN
+            IF TG_OP = 'INSERT' THEN
+                IF NEW.status <> 'DRAFT' OR NEW.approval_request_id IS NOT NULL OR NEW.decided_by IS NOT NULL
+                   OR NEW.decided_at IS NOT NULL OR NEW.activated_at IS NOT NULL OR NEW.expired_at IS NOT NULL THEN
+                    RAISE EXCEPTION 'ri.contract must start as an undecided draft' USING ERRCODE = '42501';
+                END IF;
+                RETURN NEW;
+            END IF;
             IF TG_OP = 'DELETE' THEN
                 RAISE EXCEPTION 'ri.contract rows are never deleted (REQ-RI-065)' USING ERRCODE = '42501';
             END IF;
@@ -47,6 +54,12 @@ internal static class ReinsuranceDatabaseSql
                 OR (OLD.status = 'ACTIVE' AND NEW.status = 'EXPIRED')) THEN
                 RAISE EXCEPTION 'ri.contract cannot move from % to %', OLD.status, NEW.status USING ERRCODE = '23514';
             END IF;
+            IF OLD.status IN ('APPROVED', 'ACTIVE', 'EXPIRED') AND (
+                NEW.participants IS DISTINCT FROM OLD.participants OR NEW.submitted_by IS DISTINCT FROM OLD.submitted_by
+                OR NEW.submitted_at IS DISTINCT FROM OLD.submitted_at OR NEW.approval_request_id IS DISTINCT FROM OLD.approval_request_id
+                OR NEW.decided_by IS DISTINCT FROM OLD.decided_by OR NEW.decided_at IS DISTINCT FROM OLD.decided_at) THEN
+                RAISE EXCEPTION 'ri.contract approved decision facts are immutable' USING ERRCODE = '42501';
+            END IF;
             IF NEW.status IS DISTINCT FROM OLD.status AND NEW.status IN ('APPROVED', 'ACTIVE', 'EXPIRED') THEN
                 PERFORM 1 FROM ri.contract_version v
                  WHERE v.contract_id = NEW.contract_id AND v.known_to IS NULL AND v.approved_at IS NOT NULL
@@ -59,11 +72,17 @@ internal static class ReinsuranceDatabaseSql
         END
         $$;
 
-        CREATE TRIGGER tr_contract_guard BEFORE UPDATE OR DELETE ON ri.contract
+        CREATE TRIGGER tr_contract_guard BEFORE INSERT OR UPDATE OR DELETE ON ri.contract
             FOR EACH ROW EXECUTE FUNCTION ri.contract_guard();
 
         CREATE FUNCTION ri.contract_version_guard() RETURNS trigger LANGUAGE plpgsql AS $$
         BEGIN
+            IF TG_OP = 'INSERT' THEN
+                IF NEW.approved_at IS NOT NULL OR NEW.approved_by IS NOT NULL THEN
+                    RAISE EXCEPTION 'ri.contract_version must start unapproved' USING ERRCODE = '42501';
+                END IF;
+                RETURN NEW;
+            END IF;
             IF TG_OP = 'DELETE' THEN
                 RAISE EXCEPTION 'ri.contract_version rows are never deleted (REQ-RI-065)' USING ERRCODE = '42501';
             END IF;
@@ -99,8 +118,42 @@ internal static class ReinsuranceDatabaseSql
         END
         $$;
 
-        CREATE TRIGGER tr_contract_version_guard BEFORE UPDATE OR DELETE ON ri.contract_version
+        CREATE TRIGGER tr_contract_version_guard BEFORE INSERT OR UPDATE OR DELETE ON ri.contract_version
             FOR EACH ROW EXECUTE FUNCTION ri.contract_version_guard();
+
+        -- PLT's successful decision audit is staged until BeforeCommit. Check actual frozen evidence at commit,
+        -- after all transactional participants flush, allowing approval and immediate activation in one transaction.
+        CREATE FUNCTION ri.approval_execution_guard() RETURNS trigger LANGUAGE plpgsql AS $$
+        DECLARE
+            header RECORD;
+            version RECORD;
+        BEGIN
+            IF TG_TABLE_NAME = 'contract_version' THEN
+                IF NEW.approved_at IS NULL THEN RETURN NEW; END IF;
+                SELECT * INTO header FROM ri.contract WHERE contract_id = NEW.contract_id;
+                version := NEW;
+            ELSE
+                IF NEW.status NOT IN ('APPROVED', 'ACTIVE', 'EXPIRED') THEN RETURN NEW; END IF;
+                header := NEW;
+                SELECT * INTO version FROM ri.contract_version
+                    WHERE contract_id = NEW.contract_id AND known_to IS NULL AND approved_at IS NOT NULL;
+            END IF;
+            IF version.version_id IS NULL OR header.approval_request_id IS DISTINCT FROM version.approval_request_id
+               OR (header.status IN ('APPROVED', 'ACTIVE', 'EXPIRED') AND (
+                    header.decided_by IS DISTINCT FROM version.approved_by OR header.decided_at IS DISTINCT FROM version.approved_at))
+               OR NOT plt.ri_contract_approval_verified(version.approval_request_id, header.legal_entity_id,
+                    header.contract_id, version.content_hash, version.approved_by, header.contract_type,
+                    header.participants || ARRAY[header.submitted_by, header.created_by]) THEN
+                RAISE EXCEPTION 'ri contract approval requires its frozen, independently checked PLT decision and audit'
+                    USING ERRCODE = '42501';
+            END IF;
+            RETURN NEW;
+        END
+        $$;
+        CREATE CONSTRAINT TRIGGER tr_contract_version_approval_execution AFTER UPDATE ON ri.contract_version
+            DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION ri.approval_execution_guard();
+        CREATE CONSTRAINT TRIGGER tr_contract_approval_execution AFTER UPDATE ON ri.contract
+            DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION ri.approval_execution_guard();
 
         CREATE FUNCTION ri.content_insert_guard() RETURNS trigger LANGUAGE plpgsql AS $$
         DECLARE
@@ -139,6 +192,9 @@ internal static class ReinsuranceDatabaseSql
         DROP TRIGGER IF EXISTS tr_contract_no_truncate ON ri.contract;
         DROP TRIGGER IF EXISTS tr_contract_version_guard ON ri.contract_version;
         DROP TRIGGER IF EXISTS tr_contract_guard ON ri.contract;
+        DROP TRIGGER IF EXISTS tr_contract_version_approval_execution ON ri.contract_version;
+        DROP TRIGGER IF EXISTS tr_contract_approval_execution ON ri.contract;
+        DROP FUNCTION IF EXISTS ri.approval_execution_guard();
         DROP FUNCTION IF EXISTS ri.content_append_only();
         DROP FUNCTION IF EXISTS ri.content_insert_guard();
         DROP FUNCTION IF EXISTS ri.contract_version_guard();

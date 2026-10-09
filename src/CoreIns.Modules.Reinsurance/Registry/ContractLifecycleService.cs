@@ -49,9 +49,11 @@ internal sealed class ContractLifecycleService(
                 Codes = new Dictionary<string, string>(StringComparer.Ordinal) { [ReinsuranceAuthorityTypes.ContractTypeDimension] = contract.ContractType },
             },
             ReferralRole = ReferralRole,
+            Editors = [.. contract.Participants.Distinct(StringComparer.Ordinal)],
             Reason = $"Reinsurance contract {contract.ContractNumber} ({contract.ContractType} {contract.ContractYear}) submitted for approval.",
             Diff = JsonSerializer.SerializeToElement(new
             {
+                legalEntityId = contract.LegalEntityId.Value,
                 contractNumber = contract.ContractNumber,
                 stableTreatyId = contract.StableTreatyId,
                 contractYear = contract.ContractYear,
