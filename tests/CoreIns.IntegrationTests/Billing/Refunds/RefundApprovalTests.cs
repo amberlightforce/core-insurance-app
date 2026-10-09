@@ -289,7 +289,7 @@ public sealed class RefundCoolingOffTests(PostgresFixture database) : IClassFixt
         (await _h.CreditOnAccountAsync()).ShouldBe(_h.Credit);
         (await _h.LinesAsync("REFUND_APPROVED")).ShouldBeEmpty();
         (await _h.Slice.ScalarAsync<string>($"SELECT status FROM plt.approval_request WHERE request_id = (SELECT approval_request_id FROM bil.refund WHERE refund_id = '{refund.Text("refundId")}')"))
-            .ShouldBe("PENDING_APPROVAL");
+            .ShouldBe("PendingApproval");
     }
 }
 

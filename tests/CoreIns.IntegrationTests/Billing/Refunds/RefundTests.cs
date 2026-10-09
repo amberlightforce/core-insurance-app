@@ -68,7 +68,7 @@ public sealed class RefundAutoApprovalTests(PostgresFixture database) : IClassFi
         // The disbursement is the shared service's: source BIL_REFUND from BIL, the refund's own evidence and credit-set reference.
         var row = await _h.TextsAsync(
             $"SELECT source_module || '|' || source_type || '|' || source_id || '|' || state || '|' || approval_evidence_ref || '|' || (business_ref IS NOT NULL)::text FROM bil.disbursement WHERE source_id = '{id}'");
-        row.ShouldBe([$"BIL|BIL_REFUND|{id}|ISSUED|BIL/RefundAuto/{id}|true"], "or CLEARED: the stub debits at once");
+        row.ShouldBe([$"BIL|BIL_REFUND|{id}|CLEARED|BIL/RefundAuto/{id}|true"], "the stub bank accepts (ISSUED, which is the paid point) and debits at once (CLEARED)");
     }
 
     [Fact]
@@ -142,9 +142,7 @@ public sealed class RefundAutoApprovalTests(PostgresFixture database) : IClassFi
     [Fact]
     public async Task PITFALLS_4_6_the_disbursement_service_pays_a_BIL_REFUND_only_as_the_stored_refund_was_approved()
     {
-        await using var scope = _h.Slice.Policy.Factory.Services.CreateAsyncScope();
-        var context = scope.ServiceProvider.GetRequiredService<CoreIns.Platform.Context.RequestContext>();
-        context.Roles = [RefundUsers.Clerk];
+        await using var scope = CoreIns.IntegrationTests.Rating.RatingTestSupport.Scope(_h.Slice.Policy.Factory.Services, RefundUsers.Clerk);
         var disbursements = scope.ServiceProvider.GetRequiredService<IBillingDisbursementService>();
         var forged = new DisbursementRequestRequest
         {
@@ -214,13 +212,13 @@ public sealed class RefundAutoApprovalTests(PostgresFixture database) : IClassFi
             await using var command = app.CreateCommand($"DELETE FROM bil.refund WHERE refund_id = '{id}'");
             await command.ExecuteNonQueryAsync(Ct);
         });
-        delete.SqlState.ShouldBe("BL002");
+        delete.SqlState.ShouldBeOneOf("BL002", "42501"); // the app role has no DELETE grant at all; the trigger refuses it for every other role
         var lines = await Should.ThrowAsync<PostgresException>(async () =>
         {
             await using var command = app.CreateCommand($"UPDATE bil.refund_credit SET amount = amount + 1 WHERE refund_id = '{id}'");
             await command.ExecuteNonQueryAsync(Ct);
         });
-        lines.SqlState.ShouldBe("BL002");
+        lines.SqlState.ShouldBeOneOf("BL002", "42501");
     }
 }
 

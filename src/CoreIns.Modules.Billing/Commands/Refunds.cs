@@ -720,9 +720,11 @@ internal sealed partial class DecideRefundHandler(
 
         // BIL's segregation of duties (REQ-BIL-189): everyone who took part in making the refund except the current maker (whom plt.Approval
         // refuses, with its own error), and the person who changed the payee account, cannot decide it; a delegated actor counts as its principal.
+        // The maker themselves is left to plt.Approval (PLT-ERR-SELF-APPROVAL, whatever else they did); the database refuses them too.
         var actorKeys = workflow.ActorKeys();
         var editors = refund.Participants.Where(p => p != refund.RequestedBy);
-        if (actorKeys.Any(k => editors.Contains(k, StringComparer.Ordinal)) || actorKeys.Contains(refund.PayeeAccountChangedBy, StringComparer.Ordinal))
+        if (!actorKeys.Contains(refund.RequestedBy, StringComparer.Ordinal)
+            && (actorKeys.Any(k => editors.Contains(k, StringComparer.Ordinal)) || actorKeys.Contains(refund.PayeeAccountChangedBy, StringComparer.Ordinal)))
         {
             LogSodRefused(logger, refund.RefundId.Value);
             return DomainError.Of(ModuleCode.BIL, "SOD", "The requester, an editor of the refund or the person who changed the payee account cannot decide it (REQ-BIL-189).");
