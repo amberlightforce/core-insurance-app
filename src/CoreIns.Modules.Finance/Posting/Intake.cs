@@ -169,7 +169,7 @@ internal sealed partial class Intake(
         // Checked before the policy context is awaited, so a forged entry is suspended at once and never waits.
         if (row.RegistryName == BillingEntryPosted)
         {
-            var check = await taxCheck.CheckAsync(entry.EntryType, entry, legalEntity.Value, row.Jurisdiction, cancellationToken).ConfigureAwait(false);
+            var check = await taxCheck.CheckSourceAsync(entry.EntryType, entry, legalEntity.Value, row.Jurisdiction, cancellationToken).ConfigureAwait(false);
             if (!check.Passed)
             {
                 await SuspendAsync(row, ExceptionReasons.TaxRuleViolation, check.Detail!, entry, cancellationToken).ConfigureAwait(false);
@@ -228,6 +228,18 @@ internal sealed partial class Intake(
             {
                 await SuspendAsync(row, outcome.Reason!, outcome.Detail!, entry, cancellationToken).ConfigureAwait(false);
                 return;
+            }
+
+            // The same check on the resolved accounts: a line cannot reach GL-2410/2411/2420/2425 by its charge type's GL key
+            // while its BIL account and category looked harmless (REQ-FIN-182).
+            if (row.RegistryName == BillingEntryPosted)
+            {
+                var resolved = await taxCheck.CheckJournalAsync(entry.EntryType, outcome.Journal, legalEntity.Value, row.Jurisdiction, cancellationToken).ConfigureAwait(false);
+                if (!resolved.Passed)
+                {
+                    await SuspendAsync(row, ExceptionReasons.TaxRuleViolation, resolved.Detail!, entry, cancellationToken).ConfigureAwait(false);
+                    return;
+                }
             }
 
             drafts.Add((outcome.Journal, setup.FunctionalCurrency));

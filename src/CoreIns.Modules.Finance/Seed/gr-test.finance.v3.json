@@ -1,6 +1,6 @@
 {
   "seed": "gr-test.finance.v3",
-  "note": "SL3-FIN-RULES reference data for the synthetic legal entity GR-TEST: v2 unchanged plus the slice-3 servicing postings (D-SL3-01, D-SL3-05): BIL credit entries CREDIT_WRITTEN and CREDIT_BILLED (the WRITTEN and BILLED rules for premium and surcharge lines; the side comes from the BIL line), REFUND_APPROVED (credit balance on the billed receivable to refunds payable) and the refund leg of DISBURSEMENT_RELEASED (refunds payable to disbursements in transit; the transit and cash legs are the v2 rules). No rule maps a tax, levy or fee line of a credit: the Greece treatment keeps IPT payable (KEEP_NOT_REDUCED), so such a line is never mapped, and any movement on a tax payable is first validated against TaxCalculator.treatment (REQ-FIN-182, -183; Posting/TaxTreatmentCheck.cs). IMMUTABLE once applied by migration 'ServicingPostings': a change is a new versioned file and a new rule-set version. Account codes are the illustrative codes of the PRD-09 section 7.1.4 reference chart or technical placeholders; they are NOT the Greek statutory (ELP) chart (OI-FIN-11 open). CLM events carry no sub-ledger accounts: see v2 for the leg roles.",
+  "note": "SL3-FIN-RULES reference data for the synthetic legal entity GR-TEST: v2 unchanged plus the slice-3 servicing postings (D-SL3-01, D-SL3-05): BIL credit entries CREDIT_WRITTEN and CREDIT_BILLED (the WRITTEN and BILLED rules for premium, surcharge and fee lines; the side comes from the BIL line), REFUND_APPROVED (credit balance on the billed receivable to refunds payable) and the refund leg of DISBURSEMENT_RELEASED (refunds payable to disbursements in transit; the transit and cash legs are the v2 rules). No rule maps a tax or levy line of a credit: the Greece treatment keeps IPT payable (KEEP_NOT_REDUCED), so such a line is never mapped, and any movement on a tax payable is first validated against TaxCalculator.treatment (REQ-FIN-182, -183; Posting/TaxTreatmentCheck.cs). IMMUTABLE once applied by migration 'ServicingPostings': a change is a new versioned file and a new rule-set version. Account codes are the illustrative codes of the PRD-09 section 7.1.4 reference chart or technical placeholders; they are NOT the Greek statutory (ELP) chart (OI-FIN-11 open). CLM events carry no sub-ledger accounts: see v2 for the leg roles.",
   "legalEntity": "GR-TEST",
   "bookProfile": {
     "functionalCurrency": "EUR",
@@ -570,6 +570,16 @@
         "deriveFrom": "GL_KEY",
         "el": "Πίστωση εγγραφής: επασφάλιστρο ανά κάλυψη",
         "en": "Credit written: surcharge (account from the charge type GL key)"
+      },
+      {
+        "code": "CW-FEE",
+        "sourceEvent": "bil.BillingEntryPosted",
+        "entryType": "CREDIT_WRITTEN",
+        "sourceAccount": "LA-05",
+        "chargeCategory": "FEE",
+        "deriveFrom": "GL_KEY",
+        "el": "Πίστωση εγγραφής: δικαίωμα συμβολαίου",
+        "en": "Credit written: fee (account from the charge type GL key; no fee GL key is derived yet, so a fee line is an intake exception, as WR-FEE)"
       },
       {
         "code": "CB-BILLED",

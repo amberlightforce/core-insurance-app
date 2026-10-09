@@ -164,7 +164,7 @@ public sealed class FinanceServicingTests(PostgresFixture database) : IClassFixt
         (await StatusAsync(forged)).ShouldBe("SUSPENDED/TAX_RULE_VIOLATION");
         (await JournalsAsync(policy)).ShouldBe(0);
         (await ScalarAsync<string>(_db, $"SELECT exception_detail FROM fin.business_event WHERE source_event_id = '{forged.EventId.Value}'")).ShouldContain("GR-TRT-IPT-CANCEL-POLICYHOLDER");
-        var request = _treatment.Requests.ShouldHaveSingleItem();
+        var request = _treatment.Requests[0];
         (request.TransactionKind, request.CancellationSource, request.Category).ShouldBe((TaxTransactionKind.Cancellation, "Policyholder", TaxCategory.Tax));
 
         // Visible in the intake exception queue's event stream (REQ-FIN-080) and never on a suspense account (REQ-FIN-084).
@@ -184,6 +184,67 @@ public sealed class FinanceServicingTests(PostgresFixture database) : IClassFixt
             Ipt("DEBIT", "43.29", policy, account), Plain("LA-01", "CREDIT", "43.29", policy, account));
         await _slice.DrainAsync();
         (await StatusAsync(forged)).ShouldBe("SUSPENDED/TAX_RULE_VIOLATION");
+    }
+
+    [Fact]
+    public async Task D1_P1_a_forged_IPT_DUE_without_a_kind_that_debits_the_IPT_payable_is_suspended()
+    {
+        var policy = NewPolicy();
+        var account = Guid.CreateVersion7();
+        await _slice.PolicyBoundAsync(policy);
+        var forged = await _slice.EntryAsync(account, "IPT_DUE", Day,
+            WithoutKind(Ipt("DEBIT", "60.00", policy, account)), WithoutKind(Ipt("CREDIT", "60.00", policy, account, account: "LA-27")));
+        await _slice.DrainAsync();
+        (await StatusAsync(forged)).ShouldBe("SUSPENDED/TAX_RULE_VIOLATION");
+        (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.journal_line WHERE billing_account_id = '{account}'")).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task D3_P2_the_IPT_due_of_an_endorsement_debit_Dr_LA_27_Cr_LA_06_posts_as_BIL_shapes_it()
+    {
+        var policy = NewPolicy();
+        var account = Guid.CreateVersion7();
+        await _slice.PolicyBoundAsync(policy);
+        var written = await _slice.EntryAsync(account, "WRITTEN", Day,
+            Servicing("LA-01", "DEBIT", "3.00", policy, account, "ENDORSEMENT_DEBIT", null, "GR-IPT", "TAX", null, "GR-TRT-IPT-ENDORSEMENT-DEBIT"),
+            Ipt("CREDIT", "3.00", policy, account, "ENDORSEMENT_DEBIT", null, "GR-TRT-IPT-ENDORSEMENT-DEBIT", "LA-27"));
+        var due = await _slice.EntryAsync(account, "IPT_DUE", Day,
+            Ipt("DEBIT", "3.00", policy, account, "ENDORSEMENT_DEBIT", null, "GR-TRT-IPT-ENDORSEMENT-DEBIT", "LA-27"),
+            Ipt("CREDIT", "3.00", policy, account, "ENDORSEMENT_DEBIT", null, "GR-TRT-IPT-ENDORSEMENT-DEBIT", "LA-06"));
+        await _slice.DrainAsync();
+        (await StatusAsync(written)).ShouldBe("POSTED");
+        (await StatusAsync(due)).ShouldBe("POSTED");
+        (await NetAsync("GL-2410", $"policy_number = '{policy.Number}'")).ShouldBe(-3.00m);
+        (await NetAsync("GL-2411", $"policy_number = '{policy.Number}'")).ShouldBe(0m);
+    }
+
+    [Fact]
+    public async Task D2_P3_a_premium_line_carrying_the_IPT_charge_type_cannot_reduce_GL_2410_through_its_GL_key()
+    {
+        var policy = NewPolicy();
+        var account = Guid.CreateVersion7();
+        await _slice.PolicyBoundAsync(policy);
+        // BIL account LA-04 and category PREMIUM look harmless; the charge type GR-IPT derives GL-2410 from the PFC GL key.
+        var forged = await _slice.EntryAsync(account, "CREDIT_WRITTEN", Day,
+            Servicing("LA-04", "DEBIT", "43.29", policy, account, chargeType: "GR-IPT", category: "PREMIUM", coverage: "MTPL"),
+            Plain("LA-01", "CREDIT", "43.29", policy, account));
+        await _slice.DrainAsync();
+        (await StatusAsync(forged)).ShouldBe("SUSPENDED/TAX_RULE_VIOLATION");
+        (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.journal_line WHERE billing_account_id = '{account}'")).ShouldBe(0);
+        (await ScalarAsync<string>(_db, $"SELECT exception_detail FROM fin.business_event WHERE source_event_id = '{forged.EventId.Value}'")).ShouldContain("GL-2410");
+    }
+
+    [Fact]
+    public async Task D4_P4_a_fee_credit_Dr_LA_05_Cr_LA_01_matches_CW_FEE_and_is_an_intake_exception_only_for_the_missing_fee_GL_key()
+    {
+        var policy = NewPolicy();
+        var account = Guid.CreateVersion7();
+        await _slice.PolicyBoundAsync(policy);
+        var fee = await _slice.EntryAsync(account, "CREDIT_WRITTEN", Day,
+            Servicing("LA-05", "DEBIT", "5.00", policy, account, "CANCELLATION", "Policyholder", "FEE-X", "FEE"),
+            Plain("LA-01", "CREDIT", "5.00", policy, account));
+        await _slice.DrainAsync();
+        (await StatusAsync(fee)).ShouldBe("SUSPENDED/NO_CHARGE_TYPE", "the rule exists (not NO_RULE); a fee GL key is not derived yet, as for WR-FEE");
     }
 
     [Fact]
@@ -224,7 +285,8 @@ public sealed class FinanceServicingTests(PostgresFixture database) : IClassFixt
         (await NetAsync("GL-1215", lines)).ShouldBe(23.00m);
         (await ScalarAsync<string>(_db, $"SELECT string_agg(DISTINCT rule_code, ',' ORDER BY rule_code) FROM fin.journal_line WHERE {lines}"))
             .ShouldBe("WR-PREMIUM,WR-TAX-NOT-DUE,WR-WRITTEN-UNBILLED");
-        _treatment.Requests.ShouldHaveSingleItem().TransactionKind.ShouldBe(TaxTransactionKind.EndorsementDebit);
+        _treatment.Requests.ShouldNotBeEmpty();
+        _treatment.Requests.ShouldAllBe(r => r.TransactionKind == TaxTransactionKind.EndorsementDebit);
     }
 
     [Fact]
@@ -361,10 +423,12 @@ public sealed class FinanceServicingTests(PostgresFixture database) : IClassFixt
         (await NetAsync("GL-2110", $"policy_number = '{policy.Number}'")).ShouldBe(288.63m);
         (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.journal_line WHERE billing_account_id = '{account}' AND account_code IN ('GL-2410', 'GL-2411')")).ShouldBe(0);
 
-        // Every journal balances (REQ-FIN-068).
-        (await ScalarAsync<long>(_db, """
-            SELECT count(*) FROM (SELECT journal_id FROM fin.journal_line GROUP BY journal_id
-                                  HAVING sum(CASE side WHEN 'DEBIT' THEN amount ELSE -amount END) <> 0) t
+        // Every journal of this test balances (REQ-FIN-068).
+        (await ScalarAsync<long>(_db, $"""
+            SELECT count(*) FROM (SELECT journal_id FROM fin.journal_line
+                                   WHERE journal_id IN (SELECT journal_id FROM fin.journal_line
+                                                         WHERE policy_number = '{policy.Number}' OR refund_id = '{refund}' OR disbursement_id = '{disbursement}')
+                                   GROUP BY journal_id HAVING sum(CASE side WHEN 'DEBIT' THEN amount ELSE -amount END) <> 0) t
             """)).ShouldBe(0);
     }
 

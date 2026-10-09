@@ -14,6 +14,9 @@ internal sealed class FakeTaxCalculator : ITaxCalculator
     /// <summary>When set, every call throws it (a calculator that is down or refuses).</summary>
     public Exception? Failure { get; set; }
 
+    /// <summary>When set, a Business policyholder gets APPLY: a treatment that depends on a field BIL does not carry (D8).</summary>
+    public bool DependsOnPolicyholderType { get; set; }
+
     /// <summary>Requests received, for assertions on what FIN asks.</summary>
     public List<TaxTreatmentRequest> Requests { get; } = [];
 
@@ -50,6 +53,11 @@ internal sealed class FakeTaxCalculator : ITaxCalculator
             throw new SpiException(
                 new SpiError(SpiErrorCategory.RuleMissing, "RULE_MISSING"),
                 $"No treatment rule for {request.Category} {request.TransactionKind} {request.CancellationSource ?? "ANY"}.");
+        }
+
+        if (DependsOnPolicyholderType && request.PolicyholderType == PolicyholderType.Business)
+        {
+            found = (TreatmentAction.Apply, "GR-TRT-IPT-BUSINESS");
         }
 
         var reduces = found.Action == TreatmentAction.ReverseAsVoid;

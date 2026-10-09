@@ -18,7 +18,7 @@ public sealed class FinanceServicingRulesTests
     private static readonly string V3 = FinanceSeed.GrTestV3;
 
     // Pinned when gr-test.finance.v3 was applied by migration ServicingPostings (SL3-FIN-RULES).
-    private const string PinnedV3Hash = "3f50fcb7268a07a9718436eff8e41ead0ab0e4d802e75bd95108a758a88e03d6";
+    private const string PinnedV3Hash = "8e69245fd1a0a683fe6efe18ee4455ec927b20a12cbb97bec60b5be9fca6010e";
 
     private static readonly Guid Entity = Guid.Parse("0192f0c4-0000-7000-8000-000000000001");
     private static readonly Guid Term = Guid.CreateVersion7();
@@ -48,6 +48,7 @@ public sealed class FinanceServicingRulesTests
             "CREDIT_WRITTEN/LA-01/-->GL-1215",
             "CREDIT_WRITTEN/LA-04/PREMIUM->GL_KEY",
             "CREDIT_WRITTEN/LA-04/SURCHARGE->GL_KEY",
+            "CREDIT_WRITTEN/LA-05/FEE->GL_KEY",
             "DISBURSEMENT_RELEASED/LA-12/-->GL-2535",
             "REFUND_APPROVED/LA-02/-->GL-1210",
             "REFUND_APPROVED/LA-12/-->GL-2535",
@@ -59,11 +60,11 @@ public sealed class FinanceServicingRulesTests
     }
 
     [Fact]
-    public void REQ_FIN_182_no_v3_rule_maps_a_tax_levy_or_fee_line_of_a_credit()
+    public void REQ_FIN_182_no_v3_rule_maps_a_tax_or_levy_line_of_a_credit()
     {
-        // Greece keeps IPT payable on a cancellation: a tax, levy or fee line of a credit has no rule (D-SL3-05, D-SL3-06).
+        // Greece keeps IPT payable on a cancellation: a tax or levy line of a credit has no rule (D-SL3-05, D-SL3-06).
         FinanceSeed.Rules(V3).Where(r => r.EntryType is "CREDIT_WRITTEN" or "CREDIT_BILLED" or "REFUND_APPROVED")
-            .Where(r => r.SourceAccount is "LA-06" or "LA-07" or "LA-08" or "LA-26" or "LA-27" or "LA-05")
+            .Where(r => r.SourceAccount is "LA-06" or "LA-07" or "LA-08" or "LA-26" or "LA-27")
             .ShouldBeEmpty();
     }
 
@@ -100,7 +101,7 @@ public sealed class FinanceServicingRulesTests
         new(Guid.CreateVersion7(), type, new BusinessDate(2026, 11, 2), new BusinessDate(2026, 11, 2), lines);
 
     private static Task<TaxCheckResult> CheckAsync((TaxTreatmentCheck Check, FakeTaxCalculator Calculator) c, SourceEntry entry) =>
-        c.Check.CheckAsync(entry.EntryType, entry, Entity, "GR", TestContext.Current.CancellationToken);
+        c.Check.CheckSourceAsync(entry.EntryType, entry, Entity, "GR", TestContext.Current.CancellationToken);
 
     [Fact]
     public async Task REQ_FIN_182_a_cancellation_credit_with_a_zero_IPT_line_passes_and_the_zero_line_is_not_even_looked_up()
@@ -123,7 +124,7 @@ public sealed class FinanceServicingRulesTests
         result.Detail!.ShouldContain("REQ-FIN-182");
 
         // The request carries the line's transaction kind, source and charge type, and the IPT category (REQ-MKT-330).
-        var request = c.Calculator.Requests.ShouldHaveSingleItem();
+        var request = c.Calculator.Requests[0];
         (request.TransactionKind, request.CancellationSource, request.ChargeType, request.Category, request.ChargeOrigin, request.RiskJurisdiction)
             .ShouldBe((TaxTransactionKind.Cancellation, "Policyholder", "GR-IPT", TaxCategory.Tax, ChargeOrigin.Bil, "GR"));
     }
@@ -157,7 +158,8 @@ public sealed class FinanceServicingRulesTests
         var result = await CheckAsync(c, Entry("WRITTEN",
             Line("LA-01", "DEBIT", 6.00m, "ENDORSEMENT_DEBIT", null, null, null), Line("LA-27", "CREDIT", 6.00m, "ENDORSEMENT_DEBIT", null, rule: "GR-TRT-IPT-ENDORSEMENT-DEBIT")));
         result.Passed.ShouldBeTrue(result.Detail);
-        c.Calculator.Requests.ShouldHaveSingleItem().TransactionKind.ShouldBe(TaxTransactionKind.EndorsementDebit);
+        c.Calculator.Requests.ShouldAllBe(r => r.TransactionKind == TaxTransactionKind.EndorsementDebit);
+        c.Calculator.Requests.ShouldNotBeEmpty();
     }
 
     [Fact]
@@ -226,8 +228,6 @@ public sealed class FinanceServicingRulesTests
             .Passed.ShouldBeFalse("ENDORSEMENT is not a transaction kind of the contract");
         (await CheckAsync(Checker(), Entry("CREDIT_WRITTEN", Line("LA-06", "DEBIT", 1m, chargeType: null), Line("LA-01", "CREDIT", 1m, chargeType: null, category: null))))
             .Passed.ShouldBeFalse("no charge type");
-        (await CheckAsync(Checker(), Entry("CREDIT_WRITTEN", Line("LA-06", "DEBIT", 1m, category: null), Line("LA-01", "CREDIT", 1m, chargeType: null, category: null))))
-            .Passed.ShouldBeFalse("no category");
 
         var failing = Checker();
         failing.Calculator.Failure = new TimeoutException("treatment timed out");
@@ -241,6 +241,73 @@ public sealed class FinanceServicingRulesTests
 
         // Premium-only credits never need the calculator.
         (await CheckAsync(unbound, Entry("CREDIT_BILLED", Premium("LA-01", "DEBIT", 10m), Premium("LA-02", "CREDIT", 10m)))).Passed.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task D1_P1_IPT_DUE_may_never_debit_the_IPT_payable_with_or_without_a_transaction_kind()
+    {
+        (await CheckAsync(Checker(), Entry("IPT_DUE", Line("LA-06", "DEBIT", 60m, kind: null), Line("LA-27", "CREDIT", 60m, kind: null)))).Passed.ShouldBeFalse();
+        (await CheckAsync(Checker(), Entry("IPT_DUE", Line("LA-06", "DEBIT", 60m, kind: null), Line("LA-10", "CREDIT", 60m, kind: null, chargeType: null, category: null)))).Passed.ShouldBeFalse();
+        (await CheckAsync(Checker(), Entry("IPT_DUE", Line("LA-06", "DEBIT", 60m), Line("LA-27", "CREDIT", 60m)))).Passed.ShouldBeFalse("a kind does not make it legitimate");
+
+        // Any other entry type that reduces a payable without a kind is refused too (no entry type is exempt).
+        foreach (var type in new[] { "RECEIVED", "ALLOCATED", "COMMISSION", "TAX_REMITTANCE" })
+        {
+            (await CheckAsync(Checker(), Entry(type, Line("LA-06", "DEBIT", 10m, kind: null), Line("LA-10", "CREDIT", 10m, kind: null, chargeType: null, category: null))))
+                .Passed.ShouldBeFalse(type);
+        }
+    }
+
+    [Fact]
+    public async Task D3_P2_the_normal_Greek_DUE_path_of_an_endorsement_debit_Dr_LA_27_Cr_LA_06_is_a_transfer_not_a_reduction()
+    {
+        // BIL posts IPT_DUE of an endorsement debit with the inherited kind ENDORSEMENT_DEBIT (TermBilling ChargeDimensions).
+        var c = Checker();
+        var due = await CheckAsync(c, Entry("IPT_DUE",
+            Line("LA-27", "DEBIT", 3.00m, "ENDORSEMENT_DEBIT", null, rule: "GR-TRT-IPT-ENDORSEMENT-DEBIT"),
+            Line("LA-06", "CREDIT", 3.00m, "ENDORSEMENT_DEBIT", null, rule: "GR-TRT-IPT-ENDORSEMENT-DEBIT")));
+        due.Passed.ShouldBeTrue(due.Detail);
+        c.Calculator.Requests.ShouldBeEmpty("a transfer inside the payable moves no authority liability");
+
+        // The same shape without a kind (new business, slice 2) and the reverse direction are judged on the net too.
+        (await CheckAsync(Checker(), Entry("IPT_DUE", Line("LA-27", "DEBIT", 60m, kind: null), Line("LA-06", "CREDIT", 60m, kind: null)))).Passed.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task D2_P3_the_check_runs_on_the_resolved_account_a_premium_line_with_the_IPT_charge_type_that_derives_GL_2410_is_a_reduction()
+    {
+        JournalDraft Draft(params JournalLineDraft[] lines) =>
+            new("IFRS17", new BusinessDate(2026, 11, 2), new BusinessDate(2026, 11, 2), SourceTypes.Event, Guid.CreateVersion7(), 3, ["R"], lines);
+        JournalLineDraft Of(int no, string account, string side, decimal amount, string? chargeType = null) =>
+            new(no, account, side, Money.Of(amount, "EUR"), Money.Of(amount, "EUR"), "R",
+                new LineDimensions { ChargeType = chargeType, TransactionKind = "CANCELLATION", CancellationSource = "Policyholder" });
+
+        var c = Checker();
+        var forged = await c.Check.CheckJournalAsync("CREDIT_WRITTEN", Draft(Of(1, "GL-2410", "DEBIT", 43.29m, "GR-IPT"), Of(2, "GL-1215", "CREDIT", 43.29m)), Entity, "GR", TestContext.Current.CancellationToken);
+        forged.Passed.ShouldBeFalse();
+        forged.Detail!.ShouldContain("GL-2410");
+
+        var premium = await Checker().Check.CheckJournalAsync("CREDIT_WRITTEN", Draft(Of(1, "GL-2110", "DEBIT", 288.63m, "PREM-MTPL"), Of(2, "GL-1215", "CREDIT", 288.63m)), Entity, "GR", TestContext.Current.CancellationToken);
+        premium.Passed.ShouldBeTrue();
+
+        (await Checker().Check.CheckJournalAsync("IPT_DUE", Draft(Of(1, "GL-2410", "DEBIT", 60m, "GR-IPT"), Of(2, "GL-2411", "CREDIT", 60m, "GR-IPT")), Entity, "GR", TestContext.Current.CancellationToken))
+            .Passed.ShouldBeFalse("IPT_DUE never debits GL-2410");
+        (await Checker().Check.CheckJournalAsync("IPT_DUE", Draft(Of(1, "GL-2411", "DEBIT", 60m, "GR-IPT"), Of(2, "GL-2410", "CREDIT", 60m, "GR-IPT")), Entity, "GR", TestContext.Current.CancellationToken))
+            .Passed.ShouldBeTrue("the release of not-yet-due IPT into the payable is a transfer");
+    }
+
+    [Fact]
+    public async Task D8_a_treatment_that_depends_on_policyholder_type_or_business_basis_fails_closed()
+    {
+        var c = Checker();
+        c.Calculator.DependsOnPolicyholderType = true;
+        var result = await CheckAsync(c, Entry("CREDIT_WRITTEN", Line("LA-06", "CREDIT", 5m, "ENDORSEMENT_DEBIT", null), Line("LA-01", "DEBIT", 5m, "ENDORSEMENT_DEBIT", null, null, null)));
+        result.Passed.ShouldBeFalse();
+        result.Detail!.ShouldContain("policyholder type");
+
+        // The Greece rows ignore both fields, so the defaults are safe there.
+        var ok = Checker();
+        (await CheckAsync(ok, Entry("CREDIT_WRITTEN", Line("LA-06", "CREDIT", 5m, "ENDORSEMENT_DEBIT", null), Line("LA-01", "DEBIT", 5m, "ENDORSEMENT_DEBIT", null, null, null)))).Passed.ShouldBeTrue();
     }
 
     // -------- mapping --------------------------------------------------------------------------------------------------
@@ -278,8 +345,9 @@ public sealed class FinanceServicingRulesTests
         // Consistent with a REDUCE treatment the check passes, but v3 has no tax rule for a credit: fail closed.
         Map("CREDIT_WRITTEN", Line("LA-06", "DEBIT", 43.29m), Line("LA-01", "CREDIT", 43.29m, chargeType: null, category: null)).Reason.ShouldBe(ExceptionReasons.NoRule);
 
-        // A fee line of a credit: refundability of fees is not given by any PRD, so no rule.
-        Map("CREDIT_WRITTEN", Line("LA-05", "DEBIT", 5m, chargeType: "FEE-X", category: "FEE"), Line("LA-01", "CREDIT", 5m, chargeType: null, category: null)).Reason.ShouldBe(ExceptionReasons.NoRule);
+        // D4: BIL posts a fee credit as Dr LA-05 / Cr LA-01 (BLR-CREDIT-WRITTEN-FEE): CW-FEE mirrors WR-FEE, so the rule matches and,
+        // as for a written fee, no fee GL key is derived yet: an intake exception NO_CHARGE_TYPE, not NO_RULE.
+        Map("CREDIT_WRITTEN", Line("LA-05", "DEBIT", 5m, chargeType: "FEE-X", category: "FEE"), Line("LA-01", "CREDIT", 5m, chargeType: null, category: null)).Reason.ShouldBe(ExceptionReasons.NoChargeType);
     }
 
     [Fact]

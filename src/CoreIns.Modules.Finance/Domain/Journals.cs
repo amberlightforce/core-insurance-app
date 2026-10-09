@@ -52,6 +52,11 @@ internal sealed record LineDimensions
     /// <summary>BIL policy refund: the refund payable nets to zero per refund (SL3-FIN-RULES, like GL-2510 per claim payment).</summary>
     public Guid? RefundId { get; init; }
 
+    /// <summary>Servicing context of the source line (in memory only, not a journal column): what the tax-treatment check needs on the resolved account.</summary>
+    public string? TransactionKind { get; init; }
+
+    public string? CancellationSource { get; init; }
+
     public static LineDimensions None { get; } = new();
 }
 

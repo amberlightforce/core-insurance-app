@@ -76,7 +76,7 @@ internal static class EntryPosting
         {
             // A zero line moves nothing and posts nothing, so it needs no rule: a credit that carries an explicit 0.00 IPT
             // line (KEEP_NOT_REDUCED, D-SL3-05) leaves the tax payable untouched instead of becoming an intake exception.
-            if (line.Amount.IsZero)
+            if (line.Amount.IsZero && ServicingEntryTypes.All.Contains(entry.EntryType, StringComparer.Ordinal))
             {
                 continue;
             }
@@ -134,6 +134,11 @@ internal static class EntryPosting
                 return PostingOutcome.Fail(ExceptionReasons.Unbalanced, $"Source line side {line.Side} is unknown.");
             }
 
+            if (line.Amount.IsZero)
+            {
+                continue;
+            }
+
             var side = line.Amount.IsNegative ? Sides.Opposite(line.Side) : line.Side;
             var amount = line.Amount.Abs();
             lines.Add(new JournalLineDraft(lines.Count + 1, account, side, amount, amount, rule.Code, Dimensions(line, context, glKey)));
@@ -184,6 +189,8 @@ internal static class EntryPosting
         ClaimPaymentId = line.Id(LineDimensionKeys.ClaimPaymentId)
             ?? (line.Dimension(LineDimensionKeys.SourceType) == DisbursementSources.ClaimPayment ? line.Id(LineDimensionKeys.SourceId) : null),
         DisbursementId = line.Id(LineDimensionKeys.DisbursementId),
+        TransactionKind = line.Dimension(LineDimensionKeys.TransactionKind),
+        CancellationSource = line.Dimension(LineDimensionKeys.CancellationSource),
         RefundId = line.Dimension(LineDimensionKeys.SourceType) == DisbursementSources.BilRefund ? line.Id(LineDimensionKeys.SourceId) : null,
     };
 }

@@ -319,7 +319,7 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
         var (response, body) = await PartyApi.SendAsync(_client, HttpMethod.Get, $"/api/fin/v1/posting-rules?book=IFRS17&validAt={Day}&limit=200", roles: FinanceRole);
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         var items = body!["items"]!.AsArray();
-        items.Count.ShouldBe(32, "rule set v3 from 2026-10-01: the 24 rules of v2 (16 premium of v1, 4 disbursement, 4 claim) plus 8 credit, refund and refund-release rules (SL3-FIN-RULES)");
+        items.Count.ShouldBe(33, "rule set v3 from 2026-10-01: the 24 rules of v2 (16 premium of v1, 4 disbursement, 4 claim) plus 9 credit, refund and refund-release rules (SL3-FIN-RULES)");
         var premium = items.Single(i => i.Text("ruleCode") == "WR-PREMIUM")!;
         premium.Text("entryType").ShouldBe("WRITTEN");
         premium.Text("sourceAccount").ShouldBe("LA-04");
