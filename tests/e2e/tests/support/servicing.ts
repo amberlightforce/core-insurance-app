@@ -149,7 +149,7 @@ export async function routeExists(request: APIRequestContext, token: string, met
   return !(probe.status === 404 && probe.text === '');
 }
 
-/** Registers and verifies the refund payee account of the policyholder (the IBAN travels in the request body only). */
+/** Registers (VoP stub verifies on create) the refund payee account of the policyholder (the IBAN travels in the request body only). */
 export async function registerRefundAccount(request: APIRequestContext, partyId: string, iban: string, holderName: string): Promise<string> {
   const billing = await signIn(request, 'billing');
   const created = await call(request, billing, 'POST', '/api/bil/v1/payee-accounts', {
@@ -159,7 +159,5 @@ export async function registerRefundAccount(request: APIRequestContext, partyId:
   const id = (created.body['payeeAccount']?.['payeeAccountId'] ?? created.body['payeeAccountId']) as string;
   expect(id, created.text).toBeTruthy();
   expect(created.text, 'the IBAN is never returned').not.toContain(iban);
-  const checked = await call(request, billing, 'POST', '/api/bil/v1/payee-accounts/verify', { payeeAccountId: id });
-  expect(checked.status, checked.text).toBe(200);
   return id;
 }
