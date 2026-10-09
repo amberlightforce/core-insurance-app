@@ -15,7 +15,8 @@ internal sealed record ContractTerms(
     UnlClause Clause,
     IReadOnlyList<Participation> Participations,
     decimal PlacedPct,
-    Func<decimal, decimal> Round);
+    Func<decimal, decimal> Round,
+    string ContractVersion);
 
 /// <summary>Per-claim totals of the in-scope cost types (D-SL4-05). Open parts must be zero on a closed claim (REQ-RI-122).</summary>
 internal sealed record ClaimAmounts(
@@ -32,8 +33,14 @@ internal sealed record ClaimAmounts(
 /// <summary>An occurrence (= one claim, per risk; D-SL4-05) of a contract year.</summary>
 internal sealed record RecoveryOccurrence(string OccurrenceId, DateOnly OccurrenceDate, ClaimAmounts Claim);
 
-/// <summary>Cumulative recoverable (booked or target) for one occurrence x layer x participant. Outstanding = Incurred - Paid.</summary>
-internal sealed record RecoverableRow(string OccurrenceId, string LayerId, string ParticipantId, decimal Incurred, decimal Paid, decimal Outstanding);
+/// <summary>
+/// Cumulative incurred and paid recoverable (booked, target or delta) for one occurrence x layer x participant.
+/// There is deliberately no per-occurrence outstanding: outstanding is a layer-year figure (D-SL4-21), see <see cref="LayerYearTotal"/>.
+/// </summary>
+internal sealed record RecoverableRow(string OccurrenceId, string LayerId, string ParticipantId, decimal Incurred, decimal Paid);
+
+/// <summary>Layer-year totals after the placed % (ParticipantId null = whole layer). Outstanding = sum incurred - sum paid (D-SL4-21), >= 0. Per participant, outstanding is the layer figure allocated by largest remainder, so it can differ by a cent from incurred - paid.</summary>
+internal sealed record LayerYearTotal(string LayerId, string? ParticipantId, decimal Incurred, decimal Paid, decimal Outstanding);
 
 internal sealed record RecoveryInput(ContractTerms Terms, IReadOnlyList<RecoveryOccurrence> Occurrences, IReadOnlyList<RecoverableRow> Booked);
 
@@ -71,16 +78,20 @@ internal sealed record LayerTrace(
     AggregatePosition AggregatePaid,
     decimal RecoverableIncurred,
     decimal RecoverablePaid,
-    decimal RecoverableOutstanding,
     decimal PlacedPct,
     decimal PlacedIncurred,
     decimal PlacedPaid,
+    bool ClauseIncludeAlae,
+    bool ClauseIncludeStatutoryInterest,
+    bool ClauseAnticipatedRecoveriesInure,
+    string ContractVersion,
     string EngineVersion);
 
 internal sealed record RecoveryResult(
     IReadOnlyList<RecoverableRow> Targets,
     IReadOnlyList<RecoverableRow> Deltas,
-    IReadOnlyList<LayerTrace> Traces);
+    IReadOnlyList<LayerTrace> Traces,
+    IReadOnlyList<LayerYearTotal> LayerYearTotals);
 
 internal sealed record RecoveryOutcome(RecoveryResult? Result, IReadOnlyList<RecoveryError> Errors)
 {

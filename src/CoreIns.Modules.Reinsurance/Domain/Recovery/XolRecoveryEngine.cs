@@ -44,25 +44,27 @@ internal static class XolRecoveryEngine
                 var recInc = incPos.RecoveryAfter - incPos.RecoveryBefore;
                 var recPaid = paidPos.RecoveryAfter - paidPos.RecoveryBefore;
 
-                var placedInc = terms.Round(recInc * terms.PlacedPct);
-                var placedPaid = terms.Round(recPaid * terms.PlacedPct);
-                var splitInc = Split(placedInc, participants, terms.Round);
-                var splitPaid = Split(placedPaid, participants, terms.Round);
+                // Placed amounts are rounded on the cumulative recovery and differenced, so year totals are monotone (paid <= incurred) and exact.
+                var placedInc = terms.Round(incPos.RecoveryAfter * terms.PlacedPct) - terms.Round(incPos.RecoveryBefore * terms.PlacedPct);
+                var placedPaid = terms.Round(paidPos.RecoveryAfter * terms.PlacedPct) - terms.Round(paidPos.RecoveryBefore * terms.PlacedPct);
+                var splitInc = Split(placedInc, participants);
+                var splitPaid = Split(placedPaid, participants);
                 foreach (var p in participants)
                 {
                     var i = splitInc[p.ParticipantId];
                     var pd = splitPaid[p.ParticipantId];
-                    targets.Add(new RecoverableRow(occ.OccurrenceId, layer.LayerId, p.ParticipantId, i, pd, i - pd));
+                    targets.Add(new RecoverableRow(occ.OccurrenceId, layer.LayerId, p.ParticipantId, i, pd));
                 }
 
                 traces.Add(new LayerTrace(
                     occ.OccurrenceId, occ.OccurrenceDate, layer.LayerId, occ.Claim, u.Incurred, u.Paid,
                     layer.Attachment, layer.Limit, layer.Aad, layer.Aal, lossInc, lossPaid, incPos, paidPos,
-                    recInc, recPaid, recInc - recPaid, terms.PlacedPct, placedInc, placedPaid, EngineVersion));
+                    recInc, recPaid, terms.PlacedPct, placedInc, placedPaid,
+                    terms.Clause.IncludeAlae, terms.Clause.IncludeStatutoryInterest, terms.Clause.AnticipatedRecoveriesInure, terms.ContractVersion, EngineVersion));
             }
         }
 
-        return new RecoveryOutcome(new RecoveryResult(targets, Deltas(targets, input.Booked), traces), []);
+        return new RecoveryOutcome(new RecoveryResult(targets, Deltas(targets, input.Booked), traces, LayerYearTotals(targets, traces, participants)), []);
     }
 
     /// <summary>UNL on one basis (REQ-RI-116/117). Incurred adds open reserves; paid does not. Floored at 0.</summary>
@@ -97,21 +99,52 @@ internal static class XolRecoveryEngine
         return new AggregatePosition(before, cumulative, Aggregate(before, layer), Aggregate(cumulative, layer));
     }
 
-    /// <summary>Sum of participants = total exactly: each non-lead rounds by the MKT rule, the lead takes the residual.</summary>
-    private static Dictionary<string, decimal> Split(decimal total, List<Participation> participants, Func<decimal, decimal> round)
+    /// <summary>
+    /// Largest-remainder allocation: floor each share to cents, then hand the remaining cents to the largest fractional
+    /// remainders (ties: lead first, then participant id). Shares are never negative and sum exactly to the total.
+    /// </summary>
+    private static Dictionary<string, decimal> Split(decimal total, List<Participation> participants)
     {
-        var result = new Dictionary<string, decimal>(StringComparer.Ordinal);
-        decimal assigned = 0m;
-        foreach (var p in participants.Where(p => !p.IsLead))
+        var rows = participants
+            .Select(p =>
+            {
+                var exact = total * p.SignedLine;
+                var floor = Math.Floor(exact * 100m) / 100m;
+                return (p.ParticipantId, p.IsLead, Floor: floor, Remainder: exact - floor);
+            })
+            .ToList();
+        var cents = (int)Math.Round((total - rows.Sum(r => r.Floor)) * 100m, MidpointRounding.ToZero);
+        var order = rows.OrderByDescending(r => r.Remainder).ThenByDescending(r => r.IsLead).ThenBy(r => r.ParticipantId, StringComparer.Ordinal).ToList();
+        var result = rows.ToDictionary(r => r.ParticipantId, r => r.Floor, StringComparer.Ordinal);
+        for (var i = 0; i < cents && i < order.Count; i++)
         {
-            var share = round(total * p.SignedLine);
-            result[p.ParticipantId] = share;
-            assigned += share;
+            result[order[i].ParticipantId] += 0.01m;
         }
 
-        var lead = participants.Single(p => p.IsLead);
-        result[lead.ParticipantId] = total - assigned;
+        // Any sub-cent leftover (a rounding rule finer than cents) goes to the lead so the sum stays exact.
+        var lead = participants.Single(p => p.IsLead).ParticipantId;
+        result[lead] += total - result.Values.Sum();
         return result;
+    }
+
+    private static List<LayerYearTotal> LayerYearTotals(List<RecoverableRow> targets, List<LayerTrace> traces, List<Participation> participants)
+    {
+        var totals = new List<LayerYearTotal>();
+        foreach (var g in traces.GroupBy(t => t.LayerId).OrderBy(g => g.Key, StringComparer.Ordinal))
+        {
+            var inc = g.Sum(t => t.PlacedIncurred);
+            var paid = g.Sum(t => t.PlacedPaid);
+            totals.Add(new LayerYearTotal(g.Key, null, inc, paid, inc - paid));
+            var outstandingSplit = Split(inc - paid, participants);
+            foreach (var p in targets.Where(r => r.LayerId == g.Key).GroupBy(r => r.ParticipantId).OrderBy(x => x.Key, StringComparer.Ordinal))
+            {
+                var pi = p.Sum(r => r.Incurred);
+                var pp = p.Sum(r => r.Paid);
+                totals.Add(new LayerYearTotal(g.Key, p.Key, pi, pp, outstandingSplit[p.Key]));
+            }
+        }
+
+        return totals;
     }
 
     private static List<RecoverableRow> Deltas(List<RecoverableRow> targets, IReadOnlyList<RecoverableRow> booked)
@@ -129,10 +162,9 @@ internal static class XolRecoveryEngine
             b.TryGetValue(key, out var br);
             var inc = (tr?.Incurred ?? 0m) - (br?.Incurred ?? 0m);
             var paid = (tr?.Paid ?? 0m) - (br?.Paid ?? 0m);
-            var outstanding = (tr?.Outstanding ?? 0m) - (br?.Outstanding ?? 0m);
-            if (inc != 0m || paid != 0m || outstanding != 0m)
+            if (inc != 0m || paid != 0m)
             {
-                deltas.Add(new RecoverableRow(key.OccurrenceId, key.LayerId, key.ParticipantId, inc, paid, outstanding));
+                deltas.Add(new RecoverableRow(key.OccurrenceId, key.LayerId, key.ParticipantId, inc, paid));
             }
         }
 
@@ -163,6 +195,7 @@ internal static class XolRecoveryEngine
         Func<decimal, decimal>? round = t.Round;
         UnlClause? clause = t.Clause;
 
+        Err(string.IsNullOrWhiteSpace(t.ContractVersion), "CONTRACT_VERSION_MISSING", "The contract version is required.");
         Err(round is null, "ROUNDING_MISSING", "The MKT rounding rule is required.");
         Err(clause is null, "CLAUSE_MISSING", "The UNL clause is required.");
         Err(layerList is null || layerList.Count == 0, "LAYERS_MISSING", "At least one layer is required.");
@@ -172,6 +205,14 @@ internal static class XolRecoveryEngine
             return errors;
         }
 
+        if (layerList.Any(l => l is null) || parts.Any(p => p is null) || occurrences.Any(o => o is null) || bookedRows.Any(b => b is null))
+        {
+            errors.Add(new RecoveryError("ELEMENT_NULL", "Layers, participants, occurrences and booked rows must not contain null elements."));
+            return errors;
+        }
+
+        Err(parts.Any(p => string.IsNullOrWhiteSpace(p.ParticipantId)), "PARTICIPANT_ID_MISSING", "Participant id is required.");
+        Err(bookedRows.Any(b => string.IsNullOrWhiteSpace(b.OccurrenceId) || string.IsNullOrWhiteSpace(b.LayerId) || string.IsNullOrWhiteSpace(b.ParticipantId)), "BOOKED_ID_MISSING", "Booked rows need occurrence, layer and participant ids.");
         Err(t.PlacedPct is <= 0m or > 1m, "PLACED_PCT_INVALID", "Placed percentage must be in (0, 1].");
 
         foreach (var l in layerList)
@@ -201,6 +242,7 @@ internal static class XolRecoveryEngine
             var c = o.Claim;
             decimal[] all = [c.IndemnityPaid, c.IndemnityOpen, c.AlaePaid, c.AlaeOpen, c.InterestPaid, c.InterestOpen, c.RealisedRecoveries, c.OpenRecoveryReserve];
             Err(all.Any(a => a < 0m), "AMOUNT_NEGATIVE", $"Occurrence {o.OccurrenceId}: amounts must not be negative.");
+            Err(c.OpenRecoveryReserve > c.IndemnityOpen + c.AlaeOpen + c.InterestOpen, "OPEN_RECOVERY_RESERVE_EXCEEDS_OPEN", $"Occurrence {o.OccurrenceId}: open recovery reserve exceeds the open reserve.");
             if (c.Closed && (c.IndemnityOpen != 0m || c.AlaeOpen != 0m || c.InterestOpen != 0m))
             {
                 errors.Add(new("CLOSED_WITH_OPEN_RESERVE", $"Occurrence {o.OccurrenceId}: a closed claim has an open reserve."));

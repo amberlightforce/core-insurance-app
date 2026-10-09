@@ -26,16 +26,17 @@ public sealed class XolRecoveryEnginePropertyTests
         var lines = r.Next(0, 3) switch { 0 => new[] { 0.60m, 0.40m }, 1 => [0.5m, 0.3m, 0.2m], _ => [0.333m, 0.333m, 0.334m] };
         var parts = lines.Select((l, i) => new Participation("P" + i, l, i == 0)).ToList();
         var placed = new[] { 1m, 0.9m, 0.75m, 0.333m }[r.Next(0, 4)];
-        return new ContractTerms(layers, new UnlClause(r.Next(0, 2) == 0, r.Next(0, 2) == 0), parts, placed, XolRecoveryEngineTests.Cents);
+        return new ContractTerms(layers, new UnlClause(r.Next(0, 2) == 0, r.Next(0, 2) == 0), parts, placed, XolRecoveryEngineTests.Cents, "RI-PROP-v1");
     }
 
     private static List<RecoveryOccurrence> RandomOccurrences(Random r, int count) =>
         Enumerable.Range(0, count).Select(i =>
         {
             var closed = r.Next(0, 4) == 0;
+            var open = closed ? 0m : Amt(r, 800);
             var c = new ClaimAmounts(
-                Amt(r, 600), closed ? 0m : Amt(r, 800), Amt(r, 50), closed ? 0m : Amt(r, 50), Amt(r, 10), 0m,
-                r.Next(0, 3) == 0 ? Amt(r, 100) : 0m, Amt(r, 30), closed);
+                Amt(r, 600), open, Amt(r, 50), closed ? 0m : Amt(r, 50), Amt(r, 10), 0m,
+                r.Next(0, 3) == 0 ? Amt(r, 100) : 0m, Math.Min(Amt(r, 30), open), closed);
             return new RecoveryOccurrence("O" + r.Next(0, 1_000_000).ToString("D7", System.Globalization.CultureInfo.InvariantCulture) + i, new DateOnly(2028, 1, 1).AddDays(r.Next(0, 40)), c);
         }).ToList();
 
@@ -83,12 +84,20 @@ public sealed class XolRecoveryEnginePropertyTests
         {
             var terms = RandomTerms(r);
             var res = Run(terms, RandomOccurrences(r, r.Next(1, 9)), []);
+            foreach (var layer in res.Traces.GroupBy(x => x.LayerId))
+            {
+                var last = layer.Last();
+                layer.Sum(x => x.PlacedIncurred).ShouldBe(XolRecoveryEngineTests.Cents(last.AggregateIncurred.RecoveryAfter * terms.PlacedPct));
+                layer.Sum(x => x.PlacedPaid).ShouldBe(XolRecoveryEngineTests.Cents(last.AggregatePaid.RecoveryAfter * terms.PlacedPct));
+            }
+
             foreach (var t in res.Traces)
             {
                 var rows = res.Targets.Where(x => x.OccurrenceId == t.OccurrenceId && x.LayerId == t.LayerId).ToList();
-                rows.Sum(x => x.Incurred).ShouldBe(XolRecoveryEngineTests.Cents(t.RecoverableIncurred * terms.PlacedPct));
-                rows.Sum(x => x.Paid).ShouldBe(XolRecoveryEngineTests.Cents(t.RecoverablePaid * terms.PlacedPct));
-                rows.Sum(x => x.Outstanding).ShouldBe(rows.Sum(x => x.Incurred) - rows.Sum(x => x.Paid));
+                rows.Sum(x => x.Incurred).ShouldBe(t.PlacedIncurred);
+                rows.Sum(x => x.Paid).ShouldBe(t.PlacedPaid);
+                t.PlacedIncurred.ShouldBeGreaterThanOrEqualTo(0m);
+                rows.ShouldAllBe(x => x.Incurred >= 0m && x.Paid >= 0m);
             }
         }
     }
@@ -132,6 +141,7 @@ public sealed class XolRecoveryEnginePropertyTests
         {
             var terms = RandomTerms(r);
             var res = Run(terms, RandomOccurrences(r, r.Next(1, 9)), []);
+            res.LayerYearTotals.ShouldAllBe(x => x.Outstanding >= 0m);
             foreach (var layer in res.Traces.GroupBy(t => t.LayerId))
             {
                 layer.Sum(t => t.RecoverablePaid).ShouldBeLessThanOrEqualTo(layer.Sum(t => t.RecoverableIncurred) + 0m);
@@ -154,13 +164,13 @@ public sealed class XolRecoveryEnginePropertyTests
             var booked = new Dictionary<(string, string, string), RecoverableRow>();
             for (var step = 0; step < 5; step++)
             {
-                occ = occ.Select(o => r.Next(0, 2) == 0 ? o : o with { Claim = o.Claim with { IndemnityOpen = o.Claim.Closed ? 0m : Amt(r, 900), IndemnityPaid = o.Claim.IndemnityPaid + Amt(r, 20) } }).ToList();
+                occ = occ.Select(o => r.Next(0, 2) == 0 ? o : o with { Claim = o.Claim with { IndemnityOpen = o.Claim.Closed ? 0m : Amt(r, 900), OpenRecoveryReserve = 0m, IndemnityPaid = o.Claim.IndemnityPaid + Amt(r, 20) } }).ToList();
                 var res = Run(terms, occ, [.. booked.Values]);
                 foreach (var d in res.Deltas)
                 {
                     var k = (d.OccurrenceId, d.LayerId, d.ParticipantId);
                     booked.TryGetValue(k, out var cur);
-                    booked[k] = new RecoverableRow(d.OccurrenceId, d.LayerId, d.ParticipantId, (cur?.Incurred ?? 0m) + d.Incurred, (cur?.Paid ?? 0m) + d.Paid, (cur?.Outstanding ?? 0m) + d.Outstanding);
+                    booked[k] = new RecoverableRow(d.OccurrenceId, d.LayerId, d.ParticipantId, (cur?.Incurred ?? 0m) + d.Incurred, (cur?.Paid ?? 0m) + d.Paid);
                 }
 
                 var final = Run(terms, occ, []);
@@ -169,7 +179,6 @@ public sealed class XolRecoveryEnginePropertyTests
                     var b = booked.GetValueOrDefault((t.OccurrenceId, t.LayerId, t.ParticipantId));
                     (b?.Incurred ?? 0m).ShouldBe(t.Incurred);
                     (b?.Paid ?? 0m).ShouldBe(t.Paid);
-                    (b?.Outstanding ?? 0m).ShouldBe(t.Outstanding);
                 }
             }
         }

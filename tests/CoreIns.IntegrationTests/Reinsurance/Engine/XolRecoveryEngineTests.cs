@@ -12,7 +12,7 @@ public sealed class XolRecoveryEngineTests
     internal static ContractTerms Terms(params XolLayer[] layers) => Terms(new UnlClause(true, false), 1m, layers);
 
     internal static ContractTerms Terms(UnlClause clause, decimal placed, params XolLayer[] layers) =>
-        new(layers.Length == 0 ? [Gt05] : layers, clause, [new Participation("RE-A", 0.60m, true), new Participation("RE-B", 0.40m, false)], placed, Cents);
+        new(layers.Length == 0 ? [Gt05] : layers, clause, [new Participation("RE-A", 0.60m, true), new Participation("RE-B", 0.40m, false)], placed, Cents, "RI-TEST-v1");
 
     internal static ClaimAmounts Claim(decimal paid = 0m, decimal open = 0m, decimal alaePaid = 0m, decimal alaeOpen = 0m, decimal realised = 0m, bool closed = false, decimal interestPaid = 0m, decimal recReserve = 0m) =>
         new(paid, open, alaePaid, alaeOpen, interestPaid, 0m, realised, recReserve, closed);
@@ -65,7 +65,7 @@ public sealed class XolRecoveryEngineTests
             var r = Run(terms, [Occ("C1", "2028-03-03", rows[i].claim)], booked);
             Sum(r.Targets, t => t.Incurred).ShouldBe(rows[i].inc, $"row {i} incurred");
             Sum(r.Targets, t => t.Paid).ShouldBe(rows[i].paid, $"row {i} paid");
-            Sum(r.Targets, t => t.Outstanding).ShouldBe(rows[i].outstanding, $"row {i} outstanding");
+            r.LayerYearTotals.Single(x => x.ParticipantId is null).Outstanding.ShouldBe(rows[i].outstanding, $"row {i} outstanding");
             Sum(r.Deltas, t => t.Incurred).ShouldBe(expectedDelta[i], $"row {i} delta");
             booked = r.Targets;
         }
@@ -76,7 +76,8 @@ public sealed class XolRecoveryEngineTests
     {
         var r = Run(Terms(), [Occ("C1", "2028-03-03", Claim(paid: 400_000m, open: 500_000m))]);
         var t = r.Traces.Single();
-        (t.RecoverableIncurred, t.RecoverablePaid, t.RecoverableOutstanding).ShouldBe((500_000m, 150_000m, 350_000m));
+        (t.RecoverableIncurred, t.RecoverablePaid).ShouldBe((500_000m, 150_000m));
+        r.LayerYearTotals.Single(x => x.ParticipantId is null).Outstanding.ShouldBe(350_000m);
     }
 
     [Fact]
@@ -176,11 +177,11 @@ public sealed class XolRecoveryEngineTests
         var open = Run(Terms(), [Occ("C1", "2028-03-03", Claim(paid: 400_000m, open: 500_000m))]);
         var closed = Run(Terms(), [Occ("C1", "2028-03-03", Claim(paid: 400_000m, closed: true))], open.Targets);
         var t = closed.Traces.Single();
-        t.RecoverableOutstanding.ShouldBe(0m);
+        t.RecoverableIncurred.ShouldBe(t.RecoverablePaid);
         t.RecoverablePaid.ShouldBe(150_000m);
-        Sum(closed.Targets, r => r.Outstanding).ShouldBe(0m);
+        closed.LayerYearTotals.Single(x => x.ParticipantId is null).Outstanding.ShouldBe(0m);
         Sum(closed.Deltas, r => r.Paid).ShouldBe(0m);
-        Sum(closed.Deltas, r => r.Outstanding).ShouldBe(-350_000m);
+        Sum(closed.Deltas, r => r.Incurred).ShouldBe(-350_000m);
     }
 
     [Fact]
@@ -275,6 +276,73 @@ public sealed class XolRecoveryEngineTests
 
         Codes([Occ("C1", "2028-03-03", Claim(open: -1m))]).ShouldContain("AMOUNT_NEGATIVE");
         Codes([Occ("C1", "2028-03-03", Claim()), Occ("C1", "2028-03-04", Claim())]).ShouldContain("OCCURRENCE_DUPLICATE");
-        Codes([], [new RecoverableRow("C1", "NOPE", "RE-A", 1m, 0m, 1m)]).ShouldContain("BOOKED_UNKNOWN_KEY");
+        Codes([], [new RecoverableRow("C1", "NOPE", "RE-A", 1m, 0m)]).ShouldContain("BOOKED_UNKNOWN_KEY");
+    }
+
+    [Fact]
+    public void D1_split_never_gives_a_negative_share_lead_10_percent_three_30_percent_and_2_cents()
+    {
+        var terms = Terms() with
+        {
+            Participations = [new Participation("L", 0.10m, true), new Participation("A", 0.30m, false), new Participation("B", 0.30m, false), new Participation("C", 0.30m, false)],
+        };
+        var r = Run(terms, [Occ("C1", "2028-03-03", Claim(open: 250_000.02m))]);
+        r.Targets.ShouldAllBe(t => t.Incurred >= 0m);
+        Sum(r.Targets, t => t.Incurred).ShouldBe(0.02m);
+        r.Targets.Single(t => t.ParticipantId == "L").Incurred.ShouldBe(0m);
+    }
+
+    [Fact]
+    public void D1_split_ties_go_to_the_lead_then_participant_id()
+    {
+        var terms = Terms() with { Participations = [new Participation("B", 0.5m, false), new Participation("A", 0.5m, true)] };
+        var r = Run(terms, [Occ("C1", "2028-03-03", Claim(open: 250_000.01m))]);
+        r.Targets.Single(t => t.ParticipantId == "A").Incurred.ShouldBe(0.01m);
+        r.Targets.Single(t => t.ParticipantId == "B").Incurred.ShouldBe(0m);
+    }
+
+    [Fact]
+    public void D2_P2_closed_claim_on_an_AAD_layer_layer_year_outstanding_is_not_negative()
+    {
+        var terms = Terms(new XolLayer("L1", 0m, null, Aad: 100_000m));
+        var r = Run(terms, [Occ("A", "2028-01-01", Claim(open: 300_000m)), Occ("B", "2028-02-01", Claim(paid: 80_000m, closed: true))]);
+        r.LayerYearTotals.Single(x => x.ParticipantId is null).Outstanding.ShouldBe(280_000m);
+        r.LayerYearTotals.ShouldAllBe(x => x.Outstanding >= 0m);
+    }
+
+    [Fact]
+    public void D2_P3_AAL_case_layer_year_outstanding_is_not_negative()
+    {
+        var terms = Terms(new XolLayer("L1", 0m, null, Aal: 100_000m));
+        var r = Run(terms, [Occ("A", "2028-01-01", Claim(open: 1_000_000m)), Occ("B", "2028-02-01", Claim(paid: 50_000m, open: 10_000m))]);
+        var total = r.LayerYearTotals.Single(x => x.ParticipantId is null);
+        total.Incurred.ShouldBe(100_000m);
+        total.Paid.ShouldBe(50_000m);
+        total.Outstanding.ShouldBe(50_000m);
+    }
+
+    [Fact]
+    public void M1_open_recovery_reserve_above_the_open_reserve_is_refused()
+    {
+        var o = XolRecoveryEngine.Calculate(new RecoveryInput(Terms(), [Occ("C1", "2028-03-03", Claim(open: 10m, recReserve: 11m))], []));
+        o.Errors.Select(e => e.Code).ShouldContain("OPEN_RECOVERY_RESERVE_EXCEEDS_OPEN");
+    }
+
+    [Fact]
+    public void M2_null_elements_and_blank_ids_are_refused()
+    {
+        string[] Codes(RecoveryInput i) => XolRecoveryEngine.Calculate(i).Errors.Select(e => e.Code).ToArray();
+        Codes(new RecoveryInput(Terms(), [null!], [])).ShouldContain("ELEMENT_NULL");
+        Codes(new RecoveryInput(Terms(), [], [null!])).ShouldContain("ELEMENT_NULL");
+        Codes(new RecoveryInput(Terms() with { Layers = [null!] }, [], [])).ShouldContain("ELEMENT_NULL");
+        Codes(new RecoveryInput(Terms() with { Participations = [new Participation(" ", 1m, true)] }, [], [])).ShouldContain("PARTICIPANT_ID_MISSING");
+        Codes(new RecoveryInput(Terms() with { ContractVersion = "" }, [], [])).ShouldContain("CONTRACT_VERSION_MISSING");
+    }
+
+    [Fact]
+    public void M3_trace_echoes_clause_flags_and_contract_version()
+    {
+        var t = Run(Terms(new UnlClause(true, true, true), 1m), [Occ("C1", "2028-03-03", Claim(open: 400_000m))]).Traces.Single();
+        (t.ClauseIncludeAlae, t.ClauseIncludeStatutoryInterest, t.ClauseAnticipatedRecoveriesInure, t.ContractVersion).ShouldBe((true, true, true, "RI-TEST-v1"));
     }
 }
