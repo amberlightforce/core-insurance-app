@@ -58,4 +58,4 @@ cd "$HERE"
 if [ ! -d node_modules ]; then
   npm ci --no-audit
 fi
-E2E_BASE_URL="$API" E2E_PRODUCT_SEED="$ROOT/src/CoreIns.Modules.Product/Seed/motor-gr.product.json" npx playwright test e2e03 e2e04 change --workers=1
+E2E_BASE_URL="$API" E2E_PRODUCT_SEED="$ROOT/src/CoreIns.Modules.Product/Seed/motor-gr.product.json" npx playwright test e2e03 e2e04 change ri-registry-ui --workers=1
