@@ -201,6 +201,10 @@ internal sealed class RequestFallbackHandler(
                     ObjectRef = FallbackSupport.Subject(fallbackId),
                     PayloadHash = hash,
                     Diff = JsonSerializer.SerializeToElement(new { legalEntityId = legalEntity.Value }, SharedKernelJson.Options),
+                    // The same authoritative identities are persisted on FallbackRequestRow below; callers cannot supply editors.
+                    Editors = context.OnBehalfOf is { } makerPrincipal
+                        ? [FallbackSupport.ActorKey(context.Actor), FallbackSupport.ActorKey(makerPrincipal)]
+                        : [FallbackSupport.ActorKey(context.Actor)],
                     Authority = new ApprovalAuthority
                     {
                         Type = ProductAuthorityTypes.EmergencyChange.Value,
