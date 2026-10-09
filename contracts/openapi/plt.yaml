@@ -1835,6 +1835,9 @@ paths:
       - code: PLT-ERR-APPROVAL-STALE
         note: the request is no longer pending (decided, superseded) or its content hash differs from the one the checker saw
         status: 409
+      - code: PLT-ERR-OWNER-DECIDED
+        note: the approval type is decided by its owning module's own operation (BIL.REFUND by bil.Refund.decide), never in the inbox
+        status: 409
       - code: PLT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409

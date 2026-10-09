@@ -532,6 +532,23 @@ internal static class BillingDatabaseSql
             IF OLD.state IN ('PAID', 'REJECTED') AND NEW.state IS DISTINCT FROM OLD.state THEN
                 RAISE EXCEPTION 'refund % is %, which is final', OLD.refund_id, OLD.state USING ERRCODE = 'BL004';
             END IF;
+            -- The approval state only moves PENDING -> APPROVED/REJECTED, and only with the approval request that was made for it.
+            -- NOT_REQUIRED exists from INSERT only (bil.guard_refund_insert); it is never reached by an update.
+            IF NEW.approval_state IS DISTINCT FROM OLD.approval_state THEN
+                IF OLD.approval_state <> 'PENDING' OR NEW.approval_state NOT IN ('APPROVED', 'REJECTED') OR OLD.approval_request_id IS NULL THEN
+                    RAISE LOG 'SECURITY: refund % approval state change % -> % refused for role %', OLD.refund_id, OLD.approval_state, NEW.approval_state, current_user;
+                    RAISE EXCEPTION 'refund approval state moves only from PENDING to APPROVED or REJECTED, through its approval request (REQ-BIL-188)' USING ERRCODE = 'BL004';
+                END IF;
+            END IF;
+            IF NEW.state = 'APPROVED' AND OLD.state IS DISTINCT FROM 'APPROVED' THEN
+                IF OLD.state <> 'PENDING_APPROVAL' OR NEW.approval_state <> 'APPROVED' THEN
+                    RAISE LOG 'SECURITY: refund % moved to APPROVED from % with approval % refused for role %', OLD.refund_id, OLD.state, NEW.approval_state, current_user;
+                    RAISE EXCEPTION 'a pending refund becomes APPROVED only with an approved approval (REQ-BIL-188)' USING ERRCODE = 'BL004';
+                END IF;
+            END IF;
+            IF NEW.state = 'REJECTED' AND (OLD.state <> 'PENDING_APPROVAL' OR NEW.approval_state <> 'REJECTED') THEN
+                RAISE EXCEPTION 'only a pending refund is rejected, with a rejected approval' USING ERRCODE = 'BL004';
+            END IF;
             IF OLD.approval_request_id IS NOT NULL AND NEW.approval_request_id IS DISTINCT FROM OLD.approval_request_id THEN
                 RAISE EXCEPTION 'the approval request of refund % is never replaced', OLD.refund_id USING ERRCODE = 'BL004';
             END IF;
@@ -545,6 +562,26 @@ internal static class BillingDatabaseSql
         $fn$;
 
         CREATE TRIGGER tr_refund_frozen BEFORE UPDATE ON bil.refund FOR EACH ROW EXECUTE FUNCTION bil.freeze_refund();
+
+        -- A refund starts pending (waiting for its approval request) or, only when approval is NOT_REQUIRED, already approved: no approval
+        -- request, an unchanged payee, not a resubmission, and within the hard ceiling of the illustrative auto-approval limit (500.00;
+        -- BIL's configured limit may be lower, never higher; the application checks the configured one first, D-SL3-08).
+        CREATE FUNCTION bil.guard_refund_insert() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF NEW.approval_state = 'NOT_REQUIRED' THEN
+                IF NEW.state <> 'APPROVED' OR NEW.approval_request_id IS NOT NULL OR NEW.payee_changed OR NEW.resubmits_refund_id IS NOT NULL
+                   OR NEW.amount > 500.00 OR NEW.decided_by IS NOT NULL THEN
+                    RAISE LOG 'SECURITY: refund % inserted as NOT_REQUIRED outside the rule refused for role %', NEW.refund_id, current_user;
+                    RAISE EXCEPTION 'approval is not required only for an unchanged payee, within the auto limit, not after a rejection (REQ-BIL-188)' USING ERRCODE = 'BL004';
+                END IF;
+            ELSIF NEW.approval_state <> 'PENDING' OR NEW.state <> 'PENDING_APPROVAL' THEN
+                RAISE EXCEPTION 'a refund starts PENDING_APPROVAL or approved by rule' USING ERRCODE = 'BL004';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE TRIGGER tr_refund_insert_guard BEFORE INSERT ON bil.refund FOR EACH ROW EXECUTE FUNCTION bil.guard_refund_insert();
         CREATE TRIGGER tr_refund_append_only BEFORE DELETE ON bil.refund FOR EACH ROW EXECUTE FUNCTION bil.reject_change();
         CREATE TRIGGER tr_refund_credit_append_only BEFORE UPDATE OR DELETE ON bil.refund_credit FOR EACH ROW EXECUTE FUNCTION bil.reject_change();
         CREATE TRIGGER tr_refund_netting_append_only BEFORE UPDATE OR DELETE ON bil.refund_netting FOR EACH ROW EXECUTE FUNCTION bil.reject_change();
@@ -567,6 +604,7 @@ internal static class BillingDatabaseSql
     public const string RefundsDown = """
         DELETE FROM bil.ledger_rule WHERE rule_id IN ('BLR-REFUND-APPROVED', 'BLR-DISB-RELEASED-REFUND');
         DROP FUNCTION IF EXISTS bil.freeze_refund() CASCADE;
+        DROP FUNCTION IF EXISTS bil.guard_refund_insert() CASCADE;
 
         CREATE OR REPLACE FUNCTION bil.freeze_disbursement() RETURNS trigger LANGUAGE plpgsql AS $fn$
         BEGIN

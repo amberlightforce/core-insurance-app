@@ -172,9 +172,10 @@ internal sealed partial class RefundWorkflow(
         var payeeChanged = payeeAccount.IsChange;
 
         // 3. Authority of the requester on the refund total (REQ-BIL-188; the dimensions are computed here, never taken from the client).
+        var product = await ProductOfAsync(plan.Lines.Select(l => l.Credit.TermId).Distinct().ToList(), cancellationToken).ConfigureAwait(false);
         var check = await authority.CheckAsync(
             new AuthorityCheckRequest(
-                context.Actor, context.Roles, SupportAuthorityTypes.Refund, RefundAuthority.Dimensions(total, payeeChanged, reasonCode),
+                context.Actor, context.Roles, SupportAuthorityTypes.Refund, RefundAuthority.Dimensions(total, payeeChanged, reasonCode, product),
                 ObjectRef.For(ModuleCode.BIL, "BillingAccount", account.BillingAccountId), now),
             cancellationToken).ConfigureAwait(false);
         context.AuthorityChecks.Add(check);
@@ -292,7 +293,7 @@ internal sealed partial class RefundWorkflow(
                             {
                                 Type = SupportAuthorityTypes.Refund.Value,
                                 Amount = total,
-                                Codes = RefundAuthority.ApprovalCodes(total, payeeChanged, reasonCode),
+                                Codes = RefundAuthority.ApprovalCodes(total, payeeChanged, reasonCode, product),
                             },
                             ReferralRole = opts.RefundApproverRole,
                             Reason = $"Refund {total} on billing account {account.AccountNumber}: {(payeeChanged ? "payee account changed; " : string.Empty)}"
@@ -545,6 +546,13 @@ internal sealed partial class RefundWorkflow(
         return saved is not null ? saved : true;
     }
 
+    /// <summary>The product of the terms whose credit is refunded (REQ-BIL-188 dimension product): one code, or MIXED.</summary>
+    public async Task<string> ProductOfAsync(IReadOnlyCollection<PolicyTermId> terms, CancellationToken cancellationToken)
+    {
+        var products = await db.PlanInstances.AsNoTracking().Where(p => terms.Contains(p.TermId)).Select(p => p.ProductCode).Distinct().ToListAsync(cancellationToken).ConfigureAwait(false);
+        return products.Count == 1 ? products[0] : RefundAuthority.MixedProducts;
+    }
+
     private async Task SettleItemsAsync(List<RefundNettingRow> netting, List<RefundCreditRow> lines, Instant now, CancellationToken cancellationToken)
     {
         // Credit items used up are Settled; netted invoice items with nothing open are Settled and an invoice with nothing open is Paid.
@@ -765,7 +773,9 @@ internal sealed partial class DecideRefundHandler(
                 var verified = await approvals.VerifyForExecutionAsync(
                     new ApprovalVerifyForExecutionRequest { RequestId = approvalRequestId, Hash = hash, Type = DisbursementApproval.RefundType, ObjectRef = subject },
                     cancellationToken).ConfigureAwait(false);
-                var expectedCodes = RefundAuthority.ApprovalCodes(money, refund.PayeeChanged, refund.ReasonCode);
+                var terms = await db.RefundCredits.AsNoTracking().Where(c => c.RefundId == refund.RefundId).Select(c => c.TermId).Distinct().ToListAsync(cancellationToken).ConfigureAwait(false);
+                var product = await workflow.ProductOfAsync(terms, cancellationToken).ConfigureAwait(false);
+                var expectedCodes = RefundAuthority.ApprovalCodes(money, refund.PayeeChanged, refund.ReasonCode, product);
                 var codes = verified.Authority.Codes ?? new Dictionary<string, string>();
                 if (!verified.Ok || verified.Authority.Type != SupportAuthorityTypes.Refund.Value || verified.Authority.Amount != money
                     || expectedCodes.Any(e => !codes.TryGetValue(e.Key, out var value) || value != e.Value))

@@ -124,8 +124,12 @@ internal static class RefundContent
 /// <summary>The authority dimensions of a refund (REQ-BIL-188), computed by BIL from its own data, never from the client.</summary>
 internal static class RefundAuthority
 {
-    public static Dictionary<string, DimensionValue> Dimensions(Money amount, bool payeeChanged, string reason) => new(StringComparer.Ordinal)
+    /// <summary>The product code when every credit line is of one product, otherwise this code (a grant limited by product never matches it: fail closed).</summary>
+    public const string MixedProducts = "MIXED";
+
+    public static Dictionary<string, DimensionValue> Dimensions(Money amount, bool payeeChanged, string reason, string product) => new(StringComparer.Ordinal)
     {
+        [SupportAuthorityTypes.ProductDimension] = DimensionValue.OfCodes(product),
         [SupportAuthorityTypes.AmountDimension] = DimensionValue.Of(amount),
         [SupportAuthorityTypes.CurrencyDimension] = DimensionValue.OfCodes(amount.Currency.Code),
         [SupportAuthorityTypes.PayeeChangedDimension] = DimensionValue.OfCodes(SupportAuthorityTypes.PayeeChangedCode(payeeChanged)),
@@ -133,8 +137,9 @@ internal static class RefundAuthority
     };
 
     /// <summary>The code dimensions carried in the PLT approval request (the amount travels as its money field).</summary>
-    public static Dictionary<string, string> ApprovalCodes(Money amount, bool payeeChanged, string reason) => new(StringComparer.Ordinal)
+    public static Dictionary<string, string> ApprovalCodes(Money amount, bool payeeChanged, string reason, string product) => new(StringComparer.Ordinal)
     {
+        [SupportAuthorityTypes.ProductDimension] = product,
         [SupportAuthorityTypes.CurrencyDimension] = amount.Currency.Code,
         [SupportAuthorityTypes.PayeeChangedDimension] = SupportAuthorityTypes.PayeeChangedCode(payeeChanged),
         [SupportAuthorityTypes.ReasonDimension] = reason,

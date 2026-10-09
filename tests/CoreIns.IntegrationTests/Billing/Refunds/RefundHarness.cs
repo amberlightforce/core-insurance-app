@@ -60,7 +60,7 @@ internal sealed class RefundHarness : IAsyncDisposable
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     /// <summary>The host with the refund options of the test (null = the defaults).</summary>
-    public static async Task<RefundHarness> StartAsync(PostgresFixture database, Action<BillingOptions>? configure = null, bool verifier = true)
+    public static async Task<RefundHarness> StartAsync(PostgresFixture database, Action<BillingOptions>? configure = null, bool verifier = true, Action<IServiceCollection>? extra = null)
     {
         var treatment = new FakeTaxCalculator();
         var screening = new FakePartyScreeningService();
@@ -70,6 +70,7 @@ internal sealed class RefundHarness : IAsyncDisposable
             services.WithFakeTreatment(treatment);
             services.RemoveAll<IPartyScreeningService>();
             services.AddSingleton<IPartyScreeningService>(screening);
+            extra?.Invoke(services);
             if (!verifier)
             {
                 services.RemoveAll<CoreIns.Modules.Billing.Services.IPayeeVerifier>();
@@ -117,11 +118,11 @@ internal sealed class RefundHarness : IAsyncDisposable
         await Scenario.PayAsync(Scenario.Policy.Total);
         var first = Scenario.Deltas.First(d => CreditScenario.CategoryOf(d) != CreditScenario.TaxCategory);
         var firstId = first.Payload["chargeId"]!.GetValue<string>();
-        var (debit, debitAmount, debitTx) = Scenario.ServicingSet("ENDORSEMENT_DEBIT", null, 0.2m, choose: p => p["chargeId"]!.GetValue<string>() == firstId);
+        var (debit, debitAmount, debitTx) = Scenario.ServicingSet("ENDORSEMENT_DEBIT", null, 0.05m, choose: p => p["chargeId"]!.GetValue<string>() == firstId);
         await Scenario.DeliverAsync(debit);
         DebitOpen = debitAmount;
         SecondInvoiceId = (await Scenario.DocumentsAsync()).Single(d => d.Text("invoice.transactionId") == debitTx.ToString()).Text("invoice.invoiceId");
-        var (set, credit, transaction) = Scenario.ServicingSet("CANCELLATION", "Policyholder", -0.6m, choose: p => p["chargeId"]!.GetValue<string>() != firstId);
+        var (set, credit, transaction) = Scenario.ServicingSet("CANCELLATION", "Policyholder", -1m, choose: p => p["chargeId"]!.GetValue<string>() != firstId);
         (await Slice.InvokeAsync("BIL.PolicyCancelled.StopBilling", Scenario.Cancelled(transaction))).ShouldBeTrue();
         await Scenario.DeliverAsync(set);
         Credit = -credit;

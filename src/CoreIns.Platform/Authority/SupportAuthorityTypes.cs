@@ -56,6 +56,7 @@ public static class SupportAuthorityTypes
                 new AuthorityDimensionDefinition(CurrencyDimension, DimensionKind.Code),
                 new AuthorityDimensionDefinition(PayeeChangedDimension, DimensionKind.Code),
                 new AuthorityDimensionDefinition(ReasonDimension, DimensionKind.Code),
+                new AuthorityDimensionDefinition(ProductDimension, DimensionKind.Code),
             ]),
         new AuthorityTypeDefinition(
             EffectiveDateOverride, ModuleCode.POL, new LocalizedText("Παράκαμψη ημερομηνίας έναρξης", "Effective-date override"),
