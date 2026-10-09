@@ -146,6 +146,12 @@ internal sealed class RatingStore(DbSession session, IClock clock, RequestContex
         {
             return new(null, false, "The fallback source has no active rating artefact; no other tariff is substituted.");
         }
+        if (!string.Equals(source.ProductCode, productCode, StringComparison.Ordinal)
+            || (!string.Equals(source.ProductVersion, sourceVersion, StringComparison.Ordinal)
+                && !await HasFallbackBindingAsync(productCode, sourceVersion, source.ArtefactHash, fromDate, cancellationToken).ConfigureAwait(false)))
+        {
+            return new(null, false, "The source activation's artefact does not belong to the source product version.");
+        }
 
         var args = new DynamicParameters(new
         {
