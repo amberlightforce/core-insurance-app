@@ -184,7 +184,9 @@ test('E2E-01 through the staff screens', async ({ page }) => {
   const covers = page.getByRole('region', { name: 'Καλύψεις' });
   await expect(covers.getByText('MTPL')).toBeVisible();
   await expect(page.getByRole('region', { name: 'Ασφαλιζόμενο όχημα' }).getByText(/ΙΚΧ-?1234/)).toBeVisible();
-  const charges = page.getByRole('grid', { name: 'Γραμμές χρέωσης' });
+  // The charge lines sit in the NEW_BUSINESS history row: expand it, then the IPT line is visible.
+  await page.getByRole('button', { name: /^Χρεώσεις \(\d+\)$/ }).first().click();
+  const charges = page.getByRole('grid', { name: /^Χρεώσεις συναλλαγής/ });
   await expect(charges.getByText('GR-IPT').first()).toBeVisible();
   const policyUrl = page.url();
 

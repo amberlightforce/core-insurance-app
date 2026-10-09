@@ -1,0 +1,92 @@
+{
+  "file": {
+    "asKnownAt": {
+      "label": "As known at"
+    },
+    "renewalPending": "Renewal pending",
+    "superseded": {
+      "badge": "Superseded",
+      "title": "This snapshot has been superseded",
+      "body": "A later transaction changed the content that is valid for this date.",
+      "bodyAt": "A later transaction, recorded on {date}, changed the content that is valid for this date."
+    },
+    "timeline": {
+      "label": "Policy terms",
+      "term": "Term {number}",
+      "renewal": "renewal"
+    },
+    "state": {
+      "SCHEDULED": "Scheduled",
+      "IN_FORCE": "In force",
+      "PENDING_CANCELLATION": "Cancellation pending",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired",
+      "VOIDED": "Voided",
+      "REWRITTEN": "Rewritten"
+    },
+    "premium": {
+      "title": "Term premium",
+      "net": "Net term premium",
+      "split": "Written {written} · Credits {credits}",
+      "unavailable": "The term premium is not available.",
+      "billing": "Billing",
+      "billed": "Billed",
+      "paid": "Paid",
+      "noInvoices": "No invoice has been issued for the term yet.",
+      "billingUnavailable": "Billing figures are not available.",
+      "openInvoice": "Open invoice {number}"
+    },
+    "kind": {
+      "NEW_BUSINESS": "New business",
+      "CHANGE": "Change",
+      "CANCELLATION": "Cancellation",
+      "RENEWAL": "Renewal",
+      "OTHER": "Other transaction"
+    },
+    "history": {
+      "title": "Transaction history",
+      "meta": "by term",
+      "label": "Transactions by term",
+      "termList": "Transactions of term {number}",
+      "termHeading": "Term {number}",
+      "termEmpty": "The term has no transactions.",
+      "emptyTitle": "No transactions",
+      "emptyBody": "The policy has no recorded transaction for the chosen date.",
+      "effective": "Effective {date}",
+      "recorded": "Recorded {date}",
+      "reversed": "Reversed",
+      "showCharges": "Charges ({count})",
+      "hideCharges": "Hide charges",
+      "chargesOf": "Charges of transaction {sequence}",
+      "timelineDenied": "You do not have permission to see the full term history. The policy's own transactions are shown.",
+      "timelineUnavailable": "The term history is not available right now. The policy's own transactions are shown."
+    },
+    "charges": {
+      "element": "Element",
+      "type": "Charge",
+      "legalStatus": "Legal status",
+      "provisional": "Provisional",
+      "amount": "Amount"
+    },
+    "actions": {
+      "label": "Policy actions",
+      "change": "Change",
+      "cancel": "Cancel",
+      "renew": "Renew now",
+      "reason": {
+        "notInForce": "The term is not in force.",
+        "cancellationPending": "A cancellation is already pending.",
+        "renewalExists": "A renewal term already exists.",
+        "noTerm": "There is no policy term on the chosen date."
+      }
+    },
+    "servicing": {
+      "back": "Back to the policy",
+      "soonTitle": "This screen is not available yet",
+      "soonBody": "The screen for this action will be added in a later step.",
+      "change": { "title": "Change policy" },
+      "cancel": { "title": "Cancel policy" },
+      "renew": { "title": "Renew policy" }
+    }
+  }
+}
