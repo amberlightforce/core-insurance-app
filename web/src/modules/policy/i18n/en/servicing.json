@@ -10,6 +10,10 @@
       "PAYMENT": "Payment"
     },
     "problems": {
+      "changeNotAllowed": {
+        "what": "This endorsement cannot edit one of the issued vehicle's protected details.",
+        "fix": "Keep the issued details unchanged and edit only the registration year, engine capacity or value. For another vehicle, choose replacement."
+      },
       "technical": "Technical details",
       "forbidden": "Your role may not do this. Ask a colleague with the right permission, or an administrator.",
       "goToVehicle": "Go to the vehicle step",
@@ -109,6 +113,11 @@
       "ANNUAL": "Annual"
     },
     "refundMethod": {
+      "PRO_RATA": "Pro rata",
+      "SHORT_RATE": "Short rate",
+      "FLAT": "Flat cancellation",
+      "MINIMUM_RETAINED": "Minimum retained premium",
+      "FULL_REFUND": "Full refund",
       "ProRata": "Pro rata",
       "FullRefund": "Full refund",
       "ShortRate": "Short rate"
@@ -155,7 +164,7 @@
         "mode": "What changes?",
         "edit": "Edit this vehicle",
         "replace": "Replace the vehicle",
-        "editHelp": "Change the technical and rating details of the insured vehicle. The plate, make and model stay as they are.",
+        "editHelp": "Edit the registration year, engine capacity or vehicle value. Identity, power, fuel and garaging details stay as issued; use replacement for another vehicle.",
         "replaceHelp": "Enter the new vehicle. The covers move to it and the old vehicle is removed, as one change."
       },
       "preview": {
