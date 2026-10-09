@@ -15,15 +15,21 @@ import { SimpleTable } from '../staff/SimpleTable';
 import { FiscalStatusPill } from './FiscalStatusPill';
 import { InvoiceStatePill } from './InvoiceStatePill';
 
+/** The fiscal status code of a row; absent when billing has not reported one yet. */
+const fiscalOf = (row: Row): string | undefined =>
+  (row.fiscalStatus as { status?: string } | undefined)?.status;
+
 type Row = NonNullable<InvoiceListPage['items']>[number];
 
 export interface InvoiceTableProps {
   items: readonly Row[];
   label: string;
+  /** Short fiscal-status pill for narrow cards. */
+  compact?: boolean;
 }
 
 /** Invoices with their state and the fiscal-document marker; Enter opens one. */
-export function InvoiceTable({ items, label }: InvoiceTableProps) {
+export function InvoiceTable({ items, label, compact = false }: InvoiceTableProps) {
   const { t } = useTranslation('billing');
   const navigate = useNavigate();
   const columns = useMemo<DataColumn<Row>[]>(
@@ -48,11 +54,11 @@ export function InvoiceTable({ items, label }: InvoiceTableProps) {
       statusColumn<Row>(
         'fiscal',
         t('invoice.columns.fiscal'),
-        (r) => r.fiscalStatus.status,
-        (r) => <FiscalStatusPill status={r.fiscalStatus.status} />,
+        (r) => fiscalOf(r),
+        (r) => <FiscalStatusPill status={fiscalOf(r)} compact={compact} />,
       ),
     ],
-    [t],
+    [t, compact],
   );
   return (
     <SimpleTable<Row>

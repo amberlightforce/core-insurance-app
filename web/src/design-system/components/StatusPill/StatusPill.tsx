@@ -20,6 +20,11 @@ export interface StatusPillOptions {
    */
   variant?: StatusPillVariant;
   size?: StatusPillSize;
+  /**
+   * Replaces the status word with the record's own label, keeping the status colour and icon (e.g. a transaction
+   * kind «Νέα παραγωγή» on the success family). The status map stays the source of the family.
+   */
+  text?: string;
   /** «· sub-label», e.g. the approver group of «Αναμένει έγκριση · Ομάδα Β». */
   subLabel?: string;
   /** Countdown in days («6 ημ.»); updates without animation. */
@@ -69,7 +74,7 @@ export function StatusPill(props: StatusPillProps) {
       : ({ entity: props.entity, state: props.state } as StatusRef);
   const definition = getStatusDefinition(ref);
   const id = statusId(ref);
-  const label = t(definition.labelKey);
+  const label = props.text ?? t(definition.labelKey);
 
   // MI-15: detect a change of status during render and remember it, so the pill re-mounts its content
   // (the CSS morph plays) and the change is announced once.

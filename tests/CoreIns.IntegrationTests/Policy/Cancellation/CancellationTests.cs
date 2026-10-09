@@ -1,7 +1,13 @@
 using System.Net;
 using System.Text.Json.Nodes;
+using CoreIns.Modules.Policy.Commands.Cancellation;
+using CoreIns.Modules.Policy.Domain;
+using CoreIns.Modules.Policy.Domain.Servicing;
+using CoreIns.Platform.Context;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
+using CoreIns.SharedKernel.Identifiers;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using static CoreIns.IntegrationTests.Party.PartyApi;
 
@@ -361,6 +367,30 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
         problem.Text("code").ShouldBe("POL-ERR-EFFDATE-LIMIT");
         var (ok, body) = await _slice.CancelAsync(policy.PolicyId, effectiveAt: _slice.Clock.Now.Plus(TimeSpan.FromMinutes(3)).ToString());
         ok.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+    }
+
+    [Fact]
+    public async Task WIRING_the_change_worked_case_430_to_500_at_day_200_is_plus_31_64_through_the_real_adapter()
+    {
+        // The shared servicing engine with RAT's proration behind POL's port (the production binding): (500 - 430) x 165/365 = 31.64.
+        var policy = await _slice.BindAsync();
+        await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        var artefact = await ScalarAsync<string>(data, $"SELECT artefact_hash FROM pol.policy_term WHERE term_id = '{policy.TermId}' AND recorded_to IS NULL");
+        var configuration = await ScalarAsync<string>(data, $"SELECT configuration_hash FROM pol.policy_term WHERE term_id = '{policy.TermId}' AND recorded_to IS NULL");
+
+        await using var scope = _slice.Factory.Services.CreateAsyncScope();
+        scope.ServiceProvider.GetRequiredService<RequestContext>().LegalEntity = LegalEntityCode.Parse("GR-TEST");
+        var adapter = scope.ServiceProvider.GetRequiredService<IProration>().ShouldBeOfType<RatingProrationAdapter>();
+        var athens = TimeZoneInfo.FindSystemTimeZoneById("Europe/Athens");
+        var term = new ServicingTerm(CancellationSlice.Day0, PolicyTime.AnnualEnd(CancellationSlice.Day0, athens), Currency.FromCode("EUR"), DayCountConvention.Act365F, athens);
+        adapter.Bind(artefact, ConfigurationHash.Parse(configuration), term);
+        var engine = new ServicingEngine(adapter, a => decimal.Round(a, 2, MidpointRounding.AwayFromZero));
+        var rate = new ChargeRate("v", "MTPL", "PREM-MTPL", "PREMIUM", 430m);
+        var state = new ServicingState(term, [new ServicingSegment(rate, term.From, term.To, 430m)], null, term.From);
+
+        var result = engine.Apply(state, new ChangeIntent(CancellationSlice.Day0.Plus(TimeSpan.FromDays(200)), [rate with { AnnualRate = 500m }]), new DeltaCorrelation("c", "s"));
+        result.IsAccepted.ShouldBeTrue(result.Message);
+        result.Deltas.Single().Amount.ShouldBe(31.64m);
     }
 
     [Fact]

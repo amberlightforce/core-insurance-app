@@ -4775,6 +4775,12 @@ components:
           $ref: ../events/common.schema.json#/$defs/Instant
           description: 'The transaction-time instant the answer was resolved at: min(requested knownAt or now, the policy''s record-time watermark). Always
             set; the UI shows it next to the as-of date (D-SL3-03).'
+        terms:
+          type: array
+          items:
+            $ref: '#/components/schemas/TermView'
+          description: 'Every term of the policy known at effectiveKnownAt, by term number ascending, each with its state as of validAt (REQ-POL-002).
+            Always set. `term` stays the one valid at validAt (or the nearest).'
       required:
       - policy
       - transactions
@@ -4799,6 +4805,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ChargeLine'
+        effectiveKnownAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'The transaction-time instant the answer was resolved at: min(requested knownAt or now, the policy''s record-time watermark). Always
+            set (D-SL3-03, D-SL3-22 follow-up).'
       required:
       - policy
       - term
