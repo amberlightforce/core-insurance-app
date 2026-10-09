@@ -1109,6 +1109,29 @@ export interface components {
             /** @description PERSON, ORGANISATION or ANY */
             customerType: components["schemas"]["Code"];
         };
+        /**
+         * @description Refund method of a cancellation (REQ-PFC-134, REQ-POL-206).
+         * @enum {string}
+         */
+        RefundMethod: "PRO_RATA" | "SHORT_RATE" | "FLAT" | "MINIMUM_RETAINED" | "FULL_REFUND";
+        /** @description The refund method for one cancellation source (REQ-PFC-134, subset). Tax and levy charge types are never listed here, they follow the pack tax treatment (REQ-PFC-116). */
+        RefundMethodDef: {
+            /** @description Cancellation source, for example Policyholder or DistanceWithdrawal. */
+            source: components["schemas"]["Code"];
+            method: components["schemas"]["RefundMethod"];
+            legalStatus?: components["schemas"]["ConfigLegalStatus"];
+            /** @description True when the method is test data, not an approved commercial value (D-SL3-08). */
+            illustrative?: boolean;
+            /** @description PRD requirement or legal source citation. */
+            reference?: components["schemas"]["Text"];
+        };
+        /** @description What a mid-term change may touch on this version (REQ-PFC-066, subset). */
+        ChangePermissions: {
+            /** @description Codes of vehicle-element fields that a mid-term change may edit. */
+            editableVehicleFields: components["schemas"]["Code"][];
+            /** @description True when the insured vehicle may be replaced mid-term. */
+            vehicleReplacement: boolean;
+        };
         /** @description New-business and renewal windows of a version (REQ-PFC-166); half-open, `to` null when open. */
         ProductWindows: {
             newBusiness: components["schemas"]["DatePeriod"];
@@ -1150,6 +1173,13 @@ export interface components {
             terms: components["schemas"]["ProductTerms"];
             offeringRequired: boolean;
             dayCount?: components["schemas"]["Code"];
+            /** @description True when the day-count convention is a recommendation awaiting confirmation, not an approved value (REQ-PFC-135, D-SL3-04). Absent means not provisional. */
+            dayCountProvisional?: boolean;
+            /** @description Why the day count is provisional and who must confirm it. */
+            dayCountNote?: components["schemas"]["Text"];
+            /** @description Refund method per cancellation source (REQ-PFC-134, subset). A source with no entry has no refund method, so POL refuses a cancellation from it (fail closed). */
+            refundMethods?: components["schemas"]["RefundMethodDef"][];
+            changePermissions?: components["schemas"]["ChangePermissions"];
             windows: components["schemas"]["ProductWindows"];
             elements: components["schemas"]["CatalogueElement"][];
             coverages: components["schemas"]["CatalogueCoverage"][];
