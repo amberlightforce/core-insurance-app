@@ -31,10 +31,12 @@ describe('treaty draft validation and exact money', () => {
     expect(() => toMinor('bad')).toThrow();
     expect(() => toMinor('0.001')).toThrow();
     expect(() => pctToMicro('0.0000001')).toThrow();
+    const layer = treatyDraft.layers[0];
+    if (!layer) throw new Error('Expected layer fixture');
     expect(
       draftErrors({
         ...treatyDraft,
-        layers: [{ ...treatyDraft.layers[0]!, limit: { amount: '0.001', currency: 'EUR' } }],
+        layers: [{ ...layer, limit: { amount: '0.001', currency: 'EUR' } }],
       }),
     ).toContain('layers');
   });

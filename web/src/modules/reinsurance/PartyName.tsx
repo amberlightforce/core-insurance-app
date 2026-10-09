@@ -18,7 +18,7 @@ export function PartyName({ partyId }: { partyId: string }) {
     : null;
   return (
     <Link href={`/parties/${partyId}`} className={cx(styles.wrapId)}>
-      {name || view?.partyNumber || partyId}
+      {name?.trim() ? name : (view?.partyNumber ?? partyId)}
     </Link>
   );
 }

@@ -47,6 +47,7 @@
       "type": "Type",
       "period": "Period",
       "currency": "Currency",
+      "layers": "Layers",
       "placed": "Placed %",
       "status": "Status"
     },

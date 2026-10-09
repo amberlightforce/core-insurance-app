@@ -131,7 +131,7 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
     index: number,
     field: 'attachment' | 'limit' | 'aad' | 'aal',
     amount: string | null,
-  ) =>
+  ) => {
     setDraft((d) => ({
       ...d,
       layers: d.layers.map((l, i) =>
@@ -140,6 +140,7 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
           : l,
       ),
     }));
+  };
   const problem = mutation.isError ? problemOf(mutation.error) : null;
   const explained =
     problem?.code && i18n.exists(`reinsurance:errors.codes.${problem.code}`)
@@ -168,7 +169,9 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
               isReadOnly={Boolean(contract)}
               inputMode="numeric"
               value={String(draft.contractYear)}
-              onChange={(value) => setDraft((d) => ({ ...d, contractYear: Number(value) }))}
+              onChange={(value) => {
+                setDraft((d) => ({ ...d, contractYear: Number(value) }));
+              }}
             />
             <TextField label={t('editor.product')} isReadOnly value={slice.product} />
             <DatePicker
@@ -184,9 +187,9 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
               label={t('editor.to')}
               isRequired
               value={draft.period.to ? parseDate(draft.period.to) : null}
-              onChange={(date) =>
-                setDraft((d) => ({ ...d, period: { ...d.period, to: date?.toString() ?? null } }))
-              }
+              onChange={(date) => {
+                setDraft((d) => ({ ...d, period: { ...d.period, to: date?.toString() ?? null } }));
+              }}
             />
           </div>
           <QueryView query={product}>
@@ -198,7 +201,7 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
                       <Checkbox
                         key={cover.code}
                         isSelected={draft.scope.coverageCodes.includes(cover.code)}
-                        onChange={(selected) =>
+                        onChange={(selected) => {
                           setDraft((d) => ({
                             ...d,
                             scope: {
@@ -207,8 +210,8 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
                                 ? [...d.scope.coverageCodes, cover.code]
                                 : d.scope.coverageCodes.filter((c) => c !== cover.code),
                             },
-                          }))
-                        }
+                          }));
+                        }}
                       >
                         {i18n.language === 'en' ? cover.name.en : cover.name.el}
                       </Checkbox>
@@ -220,17 +223,20 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
           </QueryView>
           <Checkbox
             isSelected={draft.clause.alaeIncluded}
-            onChange={(value) =>
-              setDraft((d) => ({ ...d, clause: { ...d.clause, alaeIncluded: value } }))
-            }
+            onChange={(value) => {
+              setDraft((d) => ({ ...d, clause: { ...d.clause, alaeIncluded: value } }));
+            }}
           >
             {t('terms.alae')}
           </Checkbox>
           <Checkbox
             isSelected={draft.clause.statutoryInterestIncluded}
-            onChange={(value) =>
-              setDraft((d) => ({ ...d, clause: { ...d.clause, statutoryInterestIncluded: value } }))
-            }
+            onChange={(value) => {
+              setDraft((d) => ({
+                ...d,
+                clause: { ...d.clause, statutoryInterestIncluded: value },
+              }));
+            }}
           >
             {t('terms.interest')}
           </Checkbox>
@@ -246,21 +252,24 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
                     label={t(`layers.columns.${field}`)}
                     value={layer[field]?.amount ?? null}
                     allowNegative={false}
-                    onChange={(amount) => patchLayer(index, field, amount)}
+                    isRequired={field !== 'aal'}
+                    onChange={(amount) => {
+                      patchLayer(index, field, amount);
+                    }}
                   />
                 ))}
               </div>
               {draft.layers.length > 1 ? (
                 <Button
                   variant="ghost"
-                  onPress={() =>
+                  onPress={() => {
                     setDraft((d) => ({
                       ...d,
                       layers: d.layers
                         .filter((_, i) => i !== index)
                         .map((l, i) => ({ ...l, layerNo: i + 1 })),
-                    }))
-                  }
+                    }));
+                  }}
                 >
                   {t('editor.remove')}
                 </Button>
@@ -269,9 +278,9 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
           ))}
           <Button
             variant="secondary"
-            onPress={() =>
-              setDraft((d) => ({ ...d, layers: [...d.layers, newLayer(d.layers.length + 1)] }))
-            }
+            onPress={() => {
+              setDraft((d) => ({ ...d, layers: [...d.layers, newLayer(d.layers.length + 1)] }));
+            }}
           >
             {t('editor.addLayer')}
           </Button>
@@ -283,48 +292,50 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
             isRequired
             inputMode="decimal"
             value={draft.placedPct}
-            onChange={(value) => setDraft((d) => ({ ...d, placedPct: value.replaceAll(',', '.') }))}
+            onChange={(value) => {
+              setDraft((d) => ({ ...d, placedPct: value.replaceAll(',', '.') }));
+            }}
           />
           <p>{t('editor.signedTotal', { signed, placed: draft.placedPct })}</p>
           {draft.participations.map((p, index) => (
             <div className={staff.grid} key={p.reinsurerPartyId}>
               <PartyName partyId={p.reinsurerPartyId} />
               <TextField
-                label={t('participants.columns.signed')}
+                label={t('participants.columns.signedLine')}
                 isRequired
                 inputMode="decimal"
                 value={p.signedLinePct}
-                onChange={(value) =>
+                onChange={(value) => {
                   setDraft((d) => ({
                     ...d,
                     participations: d.participations.map((line, i) =>
                       i === index ? { ...line, signedLinePct: value.replaceAll(',', '.') } : line,
                     ),
-                  }))
-                }
+                  }));
+                }}
               />
               <Checkbox
                 isSelected={p.lead}
-                onChange={(lead) =>
+                onChange={(lead) => {
                   setDraft((d) => ({
                     ...d,
                     participations: d.participations.map((line, i) => ({
                       ...line,
                       lead: i === index && lead,
                     })),
-                  }))
-                }
+                  }));
+                }}
               >
-                {t('participants.columns.lead')}
+                {t('participants.lead')}
               </Checkbox>
               <Button
                 variant="ghost"
-                onPress={() =>
+                onPress={() => {
                   setDraft((d) => ({
                     ...d,
                     participations: d.participations.filter((_, i) => i !== index),
-                  }))
-                }
+                  }));
+                }}
               >
                 {t('editor.remove')}
               </Button>
@@ -396,7 +407,9 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
         primaryAction={{
           label: t('editor.save'),
           variant: 'commit',
-          onAction: () => mutation.mutate(),
+          onAction: () => {
+            mutation.mutate();
+          },
         }}
       >
         {t('editor.confirmBody')}

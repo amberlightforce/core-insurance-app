@@ -19,11 +19,13 @@ import { LinkButton } from '../staff/LinkButton';
 import staff from '../staff/staff.module.css';
 import { contractStatuses, isContractStatus, useContractList, type ContractListItem } from './api';
 import { ContractStatusPill } from './ContractStatusPill';
+import { layerSummary } from './layerSummary';
 import styles from './Reinsurance.module.css';
 import { useRiFormat } from './useRiFormat';
 import { accountantRole, currentUser, hasRole } from './roles';
 
 const all = 'ALL';
+type RegistryRow = ContractListItem & { layerSummary: string };
 
 /** The treaty registry («Συμβάσεις αντασφάλισης», REQ-RI-001): number, year, type, period, placed %, status. */
 export function ReinsuranceHomePage() {
@@ -34,6 +36,15 @@ export function ReinsuranceHomePage() {
   const raw = params.get('status');
   const status = isContractStatus(raw) ? raw : null;
   const { query, items } = useContractList(status);
+  const rows = useMemo<RegistryRow[]>(
+    () =>
+      items.map((item) => ({
+        ...item,
+        layerSummary:
+          item.layers?.map((layer) => layerSummary(layer, fmt.region)).join('; ') ?? '—',
+      })),
+    [items, fmt.region],
+  );
 
   const statusOptions = useMemo(
     () => [
@@ -43,40 +54,40 @@ export function ReinsuranceHomePage() {
     [t],
   );
 
-  const columns = useMemo<DataColumn<ContractListItem>[]>(
+  const columns = useMemo<DataColumn<RegistryRow>[]>(
     () => [
-      identifierColumn<ContractListItem>(
+      identifierColumn<RegistryRow>(
         'number',
         t('registry.columns.number'),
         (c) => c.contractNumber ?? t('registry.noNumber'),
         { size: 170 },
       ),
-      textColumn<ContractListItem>(
-        'year',
-        t('registry.columns.year'),
-        (c) => String(c.contractYear),
-        { size: 90 },
-      ),
-      textColumn<ContractListItem>(
+      textColumn<RegistryRow>('year', t('registry.columns.year'), (c) => String(c.contractYear), {
+        size: 90,
+      }),
+      textColumn<RegistryRow>(
         'type',
         t('registry.columns.type'),
         (c) => t(`type.${c.contractType}`),
         { size: 200 },
       ),
-      textColumn<ContractListItem>(
+      textColumn<RegistryRow>(
         'period',
         t('registry.columns.period'),
         (c) =>
           `${fmt.date(c.period.from)} – ${c.period.to ? fmt.date(c.period.to) : t('contract.openEnded')}`,
         { size: 230 },
       ),
-      textColumn<ContractListItem>('currency', t('registry.columns.currency'), (c) => c.currency, {
+      textColumn<RegistryRow>('layers', t('registry.columns.layers'), (c) => c.layerSummary, {
+        size: 240,
+      }),
+      textColumn<RegistryRow>('currency', t('registry.columns.currency'), (c) => c.currency, {
         size: 100,
       }),
-      percentColumn<ContractListItem>('placed', t('registry.columns.placed'), (c) => c.placedPct, {
-        size: 120,
+      percentColumn<RegistryRow>('placed', t('registry.columns.placed'), (c) => c.placedPct, {
+        size: 150,
       }),
-      statusColumn<ContractListItem>(
+      statusColumn<RegistryRow>(
         'status',
         t('registry.columns.status'),
         (c) => c.status,
@@ -120,23 +131,37 @@ export function ReinsuranceHomePage() {
         <QueryView query={query}>
           {() => (
             <>
-              <SimpleTable<ContractListItem>
+              <SimpleTable<RegistryRow>
                 aria-label={t('registry.section')}
                 columns={columns}
-                data={items}
+                data={rows}
                 getRowId={(c) => c.contractId}
                 getRowLabel={(c) => c.contractNumber ?? t('registry.noNumber')}
                 onOpen={(c) => {
                   void navigate(`/reinsurance/contracts/${c.contractId}`);
                 }}
                 emptyState={
-                  <EmptyState
-                    kind={status ? 'filtered' : 'first-use'}
-                    headingLevel={3}
-                    illustration={<></>}
-                    headline={status ? t('registry.noResultsTitle') : t('registry.emptyTitle')}
-                    description={status ? t('registry.noResultsBody') : t('registry.emptyBody')}
-                  />
+                  status ? (
+                    <EmptyState
+                      kind="filtered"
+                      headingLevel={3}
+                      filters={[
+                        { label: t('registry.filterStatus'), value: t(`status.${status}`) },
+                      ]}
+                      onClearFilters={() => {
+                        const next = new URLSearchParams(params);
+                        next.delete('status');
+                        setParams(next, { replace: true });
+                      }}
+                    />
+                  ) : (
+                    <EmptyState
+                      kind="first-use"
+                      headingLevel={3}
+                      headline={t('registry.emptyTitle')}
+                      description={t('registry.emptyBody')}
+                    />
+                  )
                 }
               />
               {query.hasNextPage ? (

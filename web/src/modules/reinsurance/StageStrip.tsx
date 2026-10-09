@@ -5,7 +5,7 @@ import { Icon } from '../../design-system/icons';
 import type { ContractStatus } from './api';
 import styles from './Reinsurance.module.css';
 
-export type StageId = 'draft' | 'submitted' | 'approved' | 'active' | 'expired';
+type StageId = 'draft' | 'submitted' | 'approved' | 'active' | 'expired';
 type StageState = 'done' | 'current' | 'todo';
 
 const order: readonly StageId[] = ['draft', 'submitted', 'approved', 'active', 'expired'];
@@ -20,7 +20,7 @@ const reached: Record<ContractStatus, number> = {
 };
 
 /** The treaty's stages from its status: earlier ones done, the status' own one current, later ones to come. */
-export function contractStages(status: ContractStatus): { id: StageId; state: StageState }[] {
+function contractStages(status: ContractStatus): { id: StageId; state: StageState }[] {
   const at = reached[status];
   return order.map((id, index) => ({
     id,

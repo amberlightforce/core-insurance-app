@@ -2941,6 +2941,8 @@ export interface components {
             placedPct: components["schemas"]["Decimal"];
             status: components["schemas"]["RiContractStatus"];
             recordVersion: number;
+            /** @description Current revision layers, ordered by layer number, for registry attachment and limit summaries */
+            layers?: components["schemas"]["RiLayer"][];
         };
         /** @description Page of ri.Contract.list results (cursor pagination, contract §3.5.5) */
         ContractListPage: components["schemas"]["PageEnvelope"] & {
@@ -4304,8 +4306,6 @@ export interface components {
         };
         /** @description Decimal number as a string (no binary floating point for money or rates). */
         Decimal: string;
-        /** @description Code value from a configured code list. Values are owned by configuration, not by this schema. */
-        Code: string;
         /** @description Amount as a decimal string plus ISO 4217 currency. */
         Money: {
             amount: components["schemas"]["Decimal"];
@@ -4324,6 +4324,8 @@ export interface components {
             /** @description Annual aggregate limit; null when none */
             aal?: components["schemas"]["Money"] | null;
         };
+        /** @description Code value from a configured code list. Values are owned by configuration, not by this schema. */
+        Code: string;
         Text: string;
         /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
         Sha256: string;

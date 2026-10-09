@@ -138,6 +138,46 @@ const moduleRoutes: RouteObject[] = [
   },
 ];
 
+moduleRoutes.push({
+  path: 'reinsurance',
+  lazy: async () => ({
+    Component: (await import('./modules/reinsurance/RequireReinsuranceRole'))
+      .RequireReinsuranceRole,
+  }),
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/reinsurance/ReinsuranceHomePage')).ReinsuranceHomePage,
+      }),
+    },
+    {
+      path: 'contracts/new',
+      lazy: async () => ({
+        Component: (await import('./modules/reinsurance/ContractEditorPage')).NewContractPage,
+      }),
+    },
+    {
+      path: 'contracts/:contractId',
+      lazy: async () => ({
+        Component: (await import('./modules/reinsurance/ContractPage')).ContractPage,
+      }),
+    },
+    {
+      path: 'contracts/:contractId/edit',
+      lazy: async () => ({
+        Component: (await import('./modules/reinsurance/ContractEditorPage')).EditContractPage,
+      }),
+    },
+    {
+      path: 'claims/:claimId',
+      lazy: async () => ({
+        Component: (await import('./modules/reinsurance/ClaimRecoveriesPage')).ClaimRecoveriesPage,
+      }),
+    },
+  ],
+});
+
 const implemented = new Set([
   '/parties',
   '/policies',

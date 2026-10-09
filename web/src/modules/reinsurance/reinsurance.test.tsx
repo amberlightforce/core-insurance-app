@@ -20,7 +20,9 @@ function signIn(id: string, roles: string[]) {
     }),
   );
 }
-beforeEach(() => signIn('riacct', ['Staff.ReinsuranceAccountant']));
+beforeEach(() => {
+  signIn('riacct', ['Staff.ReinsuranceAccountant']);
+});
 afterEach(() => {
   vi.unstubAllGlobals();
   sessionStorage.clear();
@@ -38,7 +40,7 @@ const catalogueRoutes: MockRoute[] = [
   },
   {
     method: 'GET',
-    path: `/api/pty/v1/parties/${treaty.participations[0]!.reinsurerPartyId}`,
+    path: `/api/pty/v1/parties/11111111-1111-4111-8111-111111111111`,
     respond: () => ({ body: { party: fx.party() } }),
   },
 ];
@@ -51,17 +53,33 @@ describe('reinsurance registry and treaty editor', () => {
         respond: () => ({ body: { items: [treaty], nextCursor: null } }),
       },
     ]);
-    const { container } = renderScreen(<ReinsuranceHomePage />, {
+    const { container, user } = renderScreen(<ReinsuranceHomePage />, {
       path: '/reinsurance',
       url: '/reinsurance?status=DRAFT',
     });
     expect(await screen.findByText('RI000000001')).toBeInTheDocument();
+    expect(screen.getByText('500.000,00 xs 250.000,00')).toBeInTheDocument();
     expect(api.calls[0]?.url.searchParams.get('status')).toBe('DRAFT');
-    expect(screen.getByRole('link', { name: 'Νέα σύμβαση' })).toHaveAttribute(
-      'href',
-      '/reinsurance/contracts/new',
-    );
+    expect(api.callsTo('GET', `/api/ri/v1/contracts/${treaty.contractId}`)).toHaveLength(0);
     await expectNoA11yViolations(container);
+    await user.click(screen.getByRole('button', { name: 'Νέα σύμβαση' }));
+    expect(screen.getByTestId('location')).toHaveTextContent('/reinsurance/contracts/new');
+  });
+  it('clears an empty status filter without losing the registry route', async () => {
+    mockApi([
+      {
+        method: 'GET',
+        path: '/api/ri/v1/contracts',
+        respond: () => ({ body: { items: [], nextCursor: null } }),
+      },
+    ]);
+    const { user } = renderScreen(<ReinsuranceHomePage />, {
+      path: '/reinsurance',
+      url: '/reinsurance?status=ACTIVE',
+    });
+    await user.click(await screen.findByRole('button', { name: 'Εκκαθάριση φίλτρων' }));
+    expect(screen.getByTestId('location')).toHaveTextContent('/reinsurance');
+    await screen.findByText('Δεν υπάρχουν συμβάσεις ακόμη');
   });
   it('refuses a save without coverages, limits or participants', async () => {
     const api = mockApi(catalogueRoutes);
@@ -98,10 +116,11 @@ describe('reinsurance registry and treaty editor', () => {
     expect(api.callsTo('PATCH', `/api/ri/v1/contracts/${treaty.contractId}`)).toHaveLength(0);
     const dialog = await screen.findByRole('dialog');
     await user.click(within(dialog).getByRole('button', { name: 'Αποθήκευση προχείρου' }));
-    await waitFor(() =>
-      expect(api.callsTo('PATCH', `/api/ri/v1/contracts/${treaty.contractId}`)).toHaveLength(1),
-    );
-    const call = api.callsTo('PATCH', `/api/ri/v1/contracts/${treaty.contractId}`)[0]!;
+    await waitFor(() => {
+      expect(api.callsTo('PATCH', `/api/ri/v1/contracts/${treaty.contractId}`)).toHaveLength(1);
+    });
+    const call = api.callsTo('PATCH', `/api/ri/v1/contracts/${treaty.contractId}`)[0];
+    if (!call) throw new Error('Expected update request');
     expect(call.body).toMatchObject({
       expectedRecordVersion: 4,
       placedPct: '100',
@@ -118,7 +137,7 @@ describe('reinsurance registry and treaty editor', () => {
   });
 });
 describe('maker-checker treaty approval', () => {
-  it('hides approval from the treaty enterer even when they hold the manager role', async () => {
+  it('hides approval from the treaty enterer even when they hold the manager role', () => {
     signIn('maker', ['Staff.ReinsuranceManager']);
     mockApi([]);
     renderScreen(<DecisionBar contract={{ ...treaty, status: 'PENDING_APPROVAL' }} />, {

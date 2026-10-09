@@ -135,7 +135,9 @@ export function ClaimRecoveriesPage() {
               aria-label={t('claim.section')}
               columns={columns}
               data={rows}
-              getRowId={(r) => r.recoveryId ?? `${r.contractId}|${r.layerId}|${r.participantId}`}
+              getRowId={(r) =>
+                r.recoveryId ?? `${r.contractId}|${r.layerId ?? ''}|${r.participantId ?? ''}`
+              }
               emptyState={
                 <EmptyState
                   kind="first-use"
