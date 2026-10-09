@@ -32,7 +32,8 @@ internal static class TermHead
         ServicingTerm term,
         IReadOnlyList<PolicyTransactionRow> transactions,
         IReadOnlyList<ChargeLineRow> lines,
-        DeltaCorrelation correlation)
+        DeltaCorrelation correlation,
+        IReadOnlyDictionary<string, ChargeHandlingInfo> handling)
     {
         var ordered = transactions.OrderBy(t => t.Sequence).ToList();
         if (ordered.Count == 0 || Codes.Parse<PolicyTransactionKind>(ordered[0].Kind) != PolicyTransactionKind.Issuance)
@@ -44,7 +45,12 @@ internal static class TermHead
         var segments = new List<ServicingSegment>();
         foreach (var line in PremiumLines(lines, ordered[0]))
         {
-            var rate = new ChargeRate(line.ElementLocator, line.CoverageCode, line.ChargeType, line.ChargeCategory, line.AnnualRate);
+            if (!handling.TryGetValue(line.ChargeType, out var how))
+            {
+                return Inconsistent($"the pinned artefact does not declare how {line.ChargeType} is handled (FLAT, PRO_RATA or FULLY_EARNED)");
+            }
+
+            var rate = new ChargeRate(line.ElementLocator, line.CoverageCode, line.ChargeType, line.ChargeCategory, line.AnnualRate, how.Flat, how.RefundableOnCancel);
             if (!rates.TryAdd(rate.Key, rate))
             {
                 return Inconsistent($"{line.ChargeType} appears twice on the issuance");
@@ -63,8 +69,9 @@ internal static class TermHead
 
             foreach (var line in PremiumLines(lines, transaction))
             {
+                var how = handling[line.ChargeType];
                 rates[new ChargeKey(line.ElementLocator, line.CoverageCode, line.ChargeType)] =
-                    new ChargeRate(line.ElementLocator, line.CoverageCode, line.ChargeType, line.ChargeCategory, line.AnnualRate);
+                    new ChargeRate(line.ElementLocator, line.CoverageCode, line.ChargeType, line.ChargeCategory, line.AnnualRate, how.Flat, how.RefundableOnCancel);
             }
 
             var applied = engine.Apply(state, new ChangeIntent(transaction.EffectiveAt, [.. rates.Values]), correlation);
@@ -76,7 +83,7 @@ internal static class TermHead
             state = applied.State!;
         }
 
-        foreach (var group in lines.Where(l => l.ChargeCategory == ChargeCategories.Premium).GroupBy(l => new ChargeKey(l.ElementLocator, l.CoverageCode, l.ChargeType)))
+        foreach (var group in lines.Where(l => !IsTaxLike(l.ChargeCategory)).GroupBy(l => new ChargeKey(l.ElementLocator, l.CoverageCode, l.ChargeType)))
         {
             var written = state.Segments.Where(s => s.Key == group.Key).Sum(s => s.Amount);
             if (written != group.Sum(l => l.Amount))
@@ -88,8 +95,11 @@ internal static class TermHead
         return state;
     }
 
+    /// <summary>Tax, levy and stamp lines are priced by the MKT treatment, everything else (premium, fee, surcharge, discount) by the engine.</summary>
+    public static bool IsTaxLike(string category) => category is ChargeCategories.Tax or ChargeCategories.Levy or "STAMP";
+
     private static IEnumerable<ChargeLineRow> PremiumLines(IReadOnlyList<ChargeLineRow> lines, PolicyTransactionRow transaction) =>
-        lines.Where(l => l.TransactionId == transaction.TransactionId && l.ChargeCategory == ChargeCategories.Premium);
+        lines.Where(l => l.TransactionId == transaction.TransactionId && !IsTaxLike(l.ChargeCategory));
 
     private static DomainError Inconsistent(string detail) =>
         DomainError.Of(ModuleCode.POL, "GATE-FAILED", $"The term's charges cannot be reconstructed for a cancellation: {detail}. Nothing was changed.");

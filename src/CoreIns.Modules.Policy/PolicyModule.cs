@@ -104,8 +104,10 @@ public static class PolicyModule
 
         // SL3-POL-CANCEL: policyholder cancellation now / flat (pol.Cancellation.create; dry run = the refund preview).
         services.AddScoped<ICancellationRefundMethods, IllustrativeRefundMethods>();
-        // Fail-closed default until SL3-POL-WIRING binds RAT; ReferenceProration is test-only. TryAdd: one registration with POL-CHANGE.
-        services.TryAddScoped<IProration, UnavailableProration>();
+        // The production IProration is RAT's shared proration behind POL's port (never ReferenceProration, which is test-only, PITFALLS 43).
+        // Replace, so exactly one registration survives next to POL-CHANGE's default.
+        services.AddScoped<RatingProrationAdapter>();
+        services.Replace(ServiceDescriptor.Scoped<IProration>(sp => sp.GetRequiredService<RatingProrationAdapter>()));
         services.AddScoped<IValidator<CancelPolicy>, CancelPolicyValidator>();
         services.AddCommandAuditor<CancelPolicy, CancellationCreateResponse, CancelPolicyAuditor>();
         services.AddCommand<CancelPolicy, CancellationCreateResponse, CancelPolicyHandler>(CommandDescriptor.For("pol.Cancellation.create") with { SupportsDryRun = true });

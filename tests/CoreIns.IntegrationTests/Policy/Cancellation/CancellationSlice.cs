@@ -37,15 +37,19 @@ internal sealed class CancellationSlice : IAsyncDisposable
     public static readonly Instant Day0 = Instant.FromUtc(2026, 10, 8, 9, 0, 0);
 
     private readonly ApiHostFactory _root;
+    private readonly string _connectionString;
     private readonly decimal _premium;
     private readonly decimal _ipt;
+    private readonly decimal? _fee;
     private Sha256Hash? _configurationHash;
 
-    public CancellationSlice(string connectionString, decimal premium = 430.00m, decimal ipt = 64.50m, IReadOnlyDictionary<string, string?>? settings = null)
+    public CancellationSlice(string connectionString, decimal premium = 430.00m, decimal ipt = 64.50m, IReadOnlyDictionary<string, string?>? settings = null, decimal? fee = null)
     {
         _premium = premium;
         _ipt = ipt;
+        _fee = fee;
         var all = new Dictionary<string, string?>(settings ?? new Dictionary<string, string?>()) { ["Policy:AllowMissingDraftValidation"] = "true" };
+        _connectionString = connectionString;
         _root = new ApiHostFactory(connectionString, settings: all);
         Product = "MOTOR-GR-" + Guid.NewGuid().ToString("N")[..8].ToUpperInvariant();
         Factory = _root.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
@@ -54,7 +58,6 @@ internal sealed class CancellationSlice : IAsyncDisposable
             services.AddSingleton<IUnderwritingRulesService>(Underwriting);
             services.AddSingleton<IClock>(Clock);
             services.AddSingleton<ITaxCalculator>(Tax);
-            services.AddSingleton<CoreIns.Modules.Policy.Domain.Servicing.IProration, CoreIns.Modules.Policy.Domain.Servicing.ReferenceProration>();
         }));
         Client = Factory.CreateClient();
         Rating.Setup("rat.Rate.rate", call => Rate((RateRateRequest)call.Arguments[0]!));
@@ -82,7 +85,24 @@ internal sealed class CancellationSlice : IAsyncDisposable
             _configurationHash = (await scope.ServiceProvider.GetRequiredService<IMarketConfigurationService>().CurrentHashAsync()).Hash;
         }
 
-        var (response, body) = await ProductApi.ImportAsync(Client, ProductApi.Seed(Product));
+        var definition = ProductApi.Seed(Product);
+        if (_fee is not null)
+        {
+            // A FLAT, non-refundable policy fee (FEE-POLICY): copy the own-damage charge type and change what makes it a fee.
+            var charges = definition["chargeTypes"]!.AsArray();
+            var fee = JsonNode.Parse(charges.Single(c => c!["code"]!.GetValue<string>() == "PREM-OD")!.ToJsonString())!.AsObject();
+            fee["code"] = "FEE-POLICY";
+            fee["category"] = "FEE";
+            fee["writtenPremium"] = false;
+            fee["coverage"] = "MTPL";
+            fee["handling"] = "FLAT";
+            fee["cancellationTreatment"] = "NON_REFUNDABLE";
+            fee["includedInTaxBases"] = new JsonArray();
+            fee["glKey"] = "FEE-POLICY";
+            charges.Add(fee);
+        }
+
+        var (response, body) = await ProductApi.ImportAsync(Client, definition);
         response.IsSuccessStatusCode.ShouldBeTrue(body?.ToJsonString());
     }
 
@@ -91,7 +111,7 @@ internal sealed class CancellationSlice : IAsyncDisposable
         var vehicle = request.Segments[0].RiskTree.GetProperty("vehicle").GetProperty("elementId").GetString()!;
         var segment = request.Segments[0].SegmentId;
         var eur = Currency.FromCode("EUR");
-        return new RateRateResponse
+        var response = new RateRateResponse
         {
             Rates =
             [
@@ -116,6 +136,21 @@ internal sealed class CancellationSlice : IAsyncDisposable
             WorksheetId = Sha256Hash.Parse(WorksheetId),
             WorksheetHash = Sha256Hash.Parse(WorksheetId),
         };
+
+        return _fee is { } feeAmount
+            ? response with
+            {
+                Rates =
+                [
+                    .. response.Rates,
+                    new RateRateResponse.RateItem
+                    {
+                        SegmentId = segment, ElementId = vehicle, ChargeType = "FEE-POLICY", ChargeCategory = "FEE", CoverageCode = "MTPL",
+                        AnnualRate = feeAmount, Currency = eur, Handling = RateRateResponse.RateItem.HandlingValue.Flat,
+                    },
+                ],
+            }
+            : response;
     }
 
     /// <summary>Submission → draft → quote → bind at the clock's current time (or later); returns the ids.</summary>
@@ -154,6 +189,26 @@ internal sealed class CancellationSlice : IAsyncDisposable
             Client, HttpMethod.Post, "/api/pol/v1/cancellations" + (dryRun ? "?dryRun=true" : string.Empty),
             new { policyId, source, reasonCode = "CUSTOMER_REQUEST", effectiveAt = effectiveAt ?? Clock.Now.ToString(), kind = (kind ?? "STANDARD").ToUpperInvariant() },
             roles: roles, key: key);
+
+    /// <summary>
+    /// Moves the test clock and raises <c>plt.dev_clock.offset_micros</c> (forward only) by how far it runs ahead of real time, so the
+    /// watermark cap of <c>pol.assert_watermark_cap</c> (1 day + the dev clock offset ahead of the database clock) accepts the
+    /// later record times, as it does on the time-shifted stack.
+    /// </summary>
+    public async Task AdvanceAsync(TimeSpan duration)
+    {
+        Clock.Advance(duration);
+        var ahead = (long)(Clock.Now - SystemClock.Instance.Now).TotalMicroseconds;
+        if (ahead <= 0)
+        {
+            return;
+        }
+
+        await using var data = Npgsql.NpgsqlDataSource.Create(_connectionString);
+        await using var command = data.CreateCommand("UPDATE plt.dev_clock SET offset_micros = GREATEST(offset_micros, @m), version = version + 1 WHERE id = 1");
+        command.Parameters.AddWithValue("m", ahead);
+        await command.ExecuteNonQueryAsync();
+    }
 
     public async ValueTask DisposeAsync()
     {

@@ -9,6 +9,7 @@ using CoreIns.Modules.Policy.Domain;
 using CoreIns.Modules.Policy.Domain.Servicing;
 using CoreIns.Modules.Policy.Persistence;
 using CoreIns.Modules.Policy.Services;
+using CoreIns.Modules.Product.Contracts;
 using CoreIns.Platform.Audit;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
@@ -70,6 +71,7 @@ internal sealed class CancelPolicyHandler(
     Dependency<IMarketRoundingService> rounding,
     Dependency<ITaxCalculator> taxCalculator,
     IProration proration,
+    Dependency<IProductArtifactService> products,
     ICancellationRefundMethods refundMethods,
     IOptions<PolicyOptions> options) : ICommandHandler<CancelPolicy, CancellationCreateResponse>
 {
@@ -107,6 +109,11 @@ internal sealed class CancelPolicyHandler(
             if (requestedDate > today)
             {
                 return DomainError.Of(ModuleCode.POL, PolicyErrorNames.EffdateLimit, "Scheduled cancellation is not available in this release: cancel now (REQ-POL-209).");
+            }
+
+            if (requestedDate == today && request.EffectiveAt > now.Plus(TimeSpan.FromMinutes(5)))
+            {
+                return DomainError.Of(ModuleCode.POL, PolicyErrorNames.EffdateLimit, "Scheduled cancellation is not available in this release: the effective time is more than 5 minutes ahead (REQ-POL-209).");
             }
 
             if (requestedDate < today)
@@ -159,9 +166,16 @@ internal sealed class CancelPolicyHandler(
         var termTransactions = transactions.Where(x => x.TermId == term.TermId).ToList();
         var lines = await db.ChargeLines.AsNoTracking().Where(x => x.TermId == term.TermId).ToListAsync(cancellationToken).ConfigureAwait(false);
         var currency = Currency.FromCode(term.Currency.Trim());
+        var pinned = await PinnedArtefact.LoadAsync(products.Value, term.ArtefactHash, cancellationToken).ConfigureAwait(false);
+        if (pinned.IsFailure)
+        {
+            return pinned.Error!;
+        }
+
         var engine = new ServicingEngine(proration, Rounding(currency, effective.ToBusinessDate(zone)));
 
-        var servicingTerm = new ServicingTerm(term.ValidFrom, term.ValidTo, currency, DayCountConvention.TermRatio, zone);
+        var servicingTerm = new ServicingTerm(term.ValidFrom, term.ValidTo, currency, pinned.Value.Convention, zone);
+        (proration as IBoundProration)?.Bind(term.ArtefactHash, ConfigurationHash.Parse(term.ConfigurationHash), servicingTerm);
         var transactionId = PolicyTransactionId.New();
         var correlation = new DeltaCorrelation(transactionId.Value.ToString(), transactionId.Value.ToString());
 
@@ -169,7 +183,7 @@ internal sealed class CancelPolicyHandler(
         ServicingState state;
         try
         {
-            var head = TermHead.Reconstruct(engine, servicingTerm, termTransactions, lines, correlation);
+            var head = TermHead.Reconstruct(engine, servicingTerm, termTransactions, lines, correlation, pinned.Value.Handling);
             if (head.IsFailure)
             {
                 return head.Error!;
@@ -438,7 +452,7 @@ internal sealed class CancelPolicyHandler(
     private async Task<Result<IReadOnlyList<TreatedTaxLine>>> TreatTaxLinesAsync(
         PolicyRow policy, IReadOnlyList<ChargeLineRow> lines, string source, Instant effective, TimeZoneInfo zone, CancellationToken cancellationToken)
     {
-        var keys = lines.Where(l => l.ChargeCategory != ChargeCategories.Premium)
+        var keys = lines.Where(l => TermHead.IsTaxLike(l.ChargeCategory))
             .GroupBy(l => new ChargeKey(l.ElementLocator, l.CoverageCode, l.ChargeType))
             .OrderBy(g => g.Key)
             .ToList();

@@ -31,7 +31,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     {
         var policy = await _slice.BindAsync();
         policy.TermState.ShouldBe("IN_FORCE");
-        _slice.Clock.Advance(TimeSpan.FromDays(120));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(120));
 
         var (response, body) = await _slice.CancelAsync(policy.PolicyId);
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
@@ -210,7 +210,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     public async Task REQ_POL_208_backdating_is_refused_and_an_effective_time_equal_to_now_is_accepted()
     {
         var policy = await _slice.BindAsync();
-        _slice.Clock.Advance(TimeSpan.FromDays(3));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(3));
         var past = _slice.Clock.Now.Minus(TimeSpan.FromDays(1)).ToString();
         var (backdated, problem) = await _slice.CancelAsync(policy.PolicyId, effectiveAt: past);
         backdated.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, problem?.ToJsonString());
@@ -225,9 +225,9 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     public async Task REQ_POL_004_a_second_cancellation_is_an_illegal_transition()
     {
         var policy = await _slice.BindAsync();
-        _slice.Clock.Advance(TimeSpan.FromDays(30));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(30));
         (await _slice.CancelAsync(policy.PolicyId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        _slice.Clock.Advance(TimeSpan.FromDays(1));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(1));
         var (second, problem) = await _slice.CancelAsync(policy.PolicyId);
         second.StatusCode.ShouldBe(HttpStatusCode.Conflict, problem?.ToJsonString());
         problem.Text("code").ShouldBe("POL-ERR-ILLEGAL-TRANSITION");
@@ -240,9 +240,10 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     public async Task D_SL3_21_a_term_with_a_scheduled_successor_cannot_be_cancelled()
     {
         var policy = await _slice.BindAsync();
-        _slice.Clock.Advance(TimeSpan.FromDays(30));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(30));
         await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
         await using (var command = data.CreateCommand($"""
+            UPDATE pol.policy SET last_recorded_at = last_recorded_at + interval '1 microsecond', record_version = record_version + 1 WHERE policy_id = '{policy.PolicyId}';
             CREATE TEMP TABLE successor AS SELECT * FROM pol.policy_term WHERE term_id = '{policy.TermId}' AND recorded_to IS NULL;
             UPDATE successor SET term_version_id = gen_random_uuid(), term_id = gen_random_uuid(), term_number = 2, valid_from = valid_to,
                 valid_to = valid_to + interval '1 year', state = 'SCHEDULED', predecessor_term_id = '{policy.TermId}',
@@ -265,7 +266,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     public async Task D_SL3_21_a_term_with_an_open_renewal_job_cannot_be_cancelled()
     {
         var policy = await _slice.BindAsync();
-        _slice.Clock.Advance(TimeSpan.FromDays(30));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(30));
         await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
         await using (var command = data.CreateCommand($"""
             CREATE TEMP TABLE renewal AS SELECT * FROM pol.job WHERE policy_id = '{policy.PolicyId}' AND job_type = 'SUBMISSION';
@@ -284,10 +285,89 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     }
 
     [Fact]
+    public async Task D1_the_day_count_comes_from_the_pinned_artefact_ACT_365F_on_a_leap_term()
+    {
+        // MOTOR-GR 1.0 declares ACT/365F. Bound on 2027-10-08 the term runs 366 days (Feb 29 2028); at day 100 ACT/365F has earned 100/365,
+        // so 430.00 x 265/365 = 312.19 is credited (TERM_RATIO would credit 430.00 x 266/366 = 312.51).
+        await _slice.AdvanceAsync(TimeSpan.FromDays(365));
+        var policy = await _slice.BindAsync();
+        await _slice.AdvanceAsync(TimeSpan.FromDays(100));
+        var (response, body) = await _slice.CancelAsync(policy.PolicyId);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        body!["servicingPreview"]!.Text("premiumChange.amount").ShouldBe("-312.19");
+        body["servicingPreview"]!.Text("proratedLines.0.termDays").ShouldBe("366");
+    }
+
+    [Fact]
+    public async Task D2_a_flat_non_refundable_fee_is_kept_and_only_the_prorated_premium_is_credited()
+    {
+        await using var feeSlice = new CancellationSlice(database.AppConnectionString, fee: 20.00m, settings: new Dictionary<string, string?> { ["Policy:LockWaitSeconds"] = "1" });
+        await feeSlice.SeedAsync();
+        var policy = await feeSlice.BindAsync();
+        await feeSlice.AdvanceAsync(TimeSpan.FromDays(120));
+        var (response, body) = await feeSlice.CancelAsync(policy.PolicyId);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        var preview = body!["servicingPreview"]!;
+        preview.Text("premiumChange.amount").ShouldBe("-288.63");
+        preview["proratedLines"]!.AsArray().Select(l => l!.Text("chargeType")).ShouldBe(["PREM-MTPL"]);
+
+        await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        (await ScalarAsync<decimal>(data, $"SELECT sum(amount) FROM pol.charge_line WHERE term_id = '{policy.TermId}' AND charge_type = 'FEE-POLICY'")).ShouldBe(20.00m);
+
+        // Flat cancellation of a Scheduled term: the premium is credited in full, the non-refundable fee stays.
+        var scheduled = await feeSlice.BindAsync(effectiveIn: TimeSpan.FromDays(10));
+        var (flat, flatBody) = await feeSlice.CancelAsync(scheduled.PolicyId, kind: "Flat");
+        flat.StatusCode.ShouldBe(HttpStatusCode.OK, flatBody?.ToJsonString());
+        flatBody!["servicingPreview"]!.Text("premiumChange.amount").ShouldBe("-430.00");
+        (await ScalarAsync<decimal>(data, $"SELECT sum(amount) FROM pol.charge_line WHERE term_id = '{scheduled.TermId}' AND charge_type = 'FEE-POLICY'")).ShouldBe(20.00m);
+    }
+
+    [Fact]
+    public async Task D6_a_cancellation_on_the_last_athens_date_of_the_term_credits_nothing_and_writes_no_tax_line()
+    {
+        var policy = await _slice.BindAsync();
+        // The term ends 2027-10-08 12:00 Athens; 10:00 the same day is its last Athens date: no whole day remains.
+        await _slice.AdvanceAsync(TimeSpan.FromDays(365) - TimeSpan.FromHours(2));
+        var (response, body) = await _slice.CancelAsync(policy.PolicyId);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        body!["servicingPreview"]!.Text("premiumChange.amount").ShouldBe("0.00");
+        body["servicingPreview"]!.Text("refundDue.amount").ShouldBe("0.00");
+        await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        (await ScalarAsync<long>(data, $"SELECT count(*) FROM pol.charge_line WHERE policy_id = '{policy.PolicyId}' AND transaction_kind = 'CANCELLATION'")).ShouldBe(0);
+        (await ScalarAsync<long>(data, $"SELECT count(*) FROM pol.policy_term WHERE term_id = '{policy.TermId}' AND recorded_to IS NULL AND state = 'CANCELLED'")).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task D3_a_valid_time_before_the_effective_time_known_after_it_is_still_in_force()
+    {
+        var policy = await _slice.BindAsync();
+        await _slice.AdvanceAsync(TimeSpan.FromDays(120));
+        (await _slice.CancelAsync(policy.PolicyId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var before = _slice.Clock.Now.Minus(TimeSpan.FromDays(60)).ToString();
+        var (read, body) = await SendAsync(_slice.Client, HttpMethod.Get, $"/api/pol/v1/policies/{policy.PolicyId}?validAt={Uri.EscapeDataString(before)}", roles: Billing);
+        read.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        body.Text("policy.status").ShouldBe("IN_FORCE");
+        var (now, current) = await SendAsync(_slice.Client, HttpMethod.Get, $"/api/pol/v1/policies/{policy.PolicyId}", roles: Billing);
+        now.StatusCode.ShouldBe(HttpStatusCode.OK);
+        current.Text("policy.status").ShouldBe("CANCELLED");
+    }
+
+    [Fact]
+    public async Task REQ_POL_209_an_effective_time_hours_ahead_on_the_same_day_is_refused()
+    {
+        var policy = await _slice.BindAsync();
+        var (response, problem) = await _slice.CancelAsync(policy.PolicyId, effectiveAt: _slice.Clock.Now.Plus(TimeSpan.FromHours(2)).ToString());
+        response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, problem?.ToJsonString());
+        problem.Text("code").ShouldBe("POL-ERR-EFFDATE-LIMIT");
+        var (ok, body) = await _slice.CancelAsync(policy.PolicyId, effectiveAt: _slice.Clock.Now.Plus(TimeSpan.FromMinutes(3)).ToString());
+        ok.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+    }
+
+    [Fact]
     public async Task REQ_POL_209_cancel_after_expiry_is_refused()
     {
         var policy = await _slice.BindAsync();
-        _slice.Clock.Advance(TimeSpan.FromDays(370));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(370));
         var (response, problem) = await _slice.CancelAsync(policy.PolicyId);
         response.StatusCode.ShouldBe(HttpStatusCode.Conflict, problem?.ToJsonString());
         problem.Text("code").ShouldBe("POL-ERR-ILLEGAL-TRANSITION");
@@ -297,7 +377,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     public async Task REQ_POL_071_the_dry_run_equals_the_real_run_and_writes_nothing()
     {
         var policy = await _slice.BindAsync();
-        _slice.Clock.Advance(TimeSpan.FromDays(120));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(120));
         await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
         var watermark = await ScalarAsync<DateTime>(data, $"SELECT last_recorded_at FROM pol.policy WHERE policy_id = '{policy.PolicyId}'");
         var outbox = await ScalarAsync<long>(data, $"SELECT count(*) FROM plt.outbox_message WHERE aggregate_id = '{policy.PolicyId}'");
@@ -324,7 +404,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     public async Task Pitfall_idempotent_replay_returns_the_same_cancellation_and_writes_once()
     {
         var policy = await _slice.BindAsync();
-        _slice.Clock.Advance(TimeSpan.FromDays(10));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(10));
         var key = Guid.NewGuid();
         var (first, one) = await _slice.CancelAsync(policy.PolicyId, key: key);
         first.StatusCode.ShouldBe(HttpStatusCode.OK, one?.ToJsonString());
@@ -339,7 +419,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     public async Task Pitfall_15_a_writer_holding_the_policy_lock_makes_the_cancel_a_409_not_a_500_and_it_succeeds_afterwards()
     {
         var policy = await _slice.BindAsync();
-        _slice.Clock.Advance(TimeSpan.FromDays(10));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(10));
         await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
         await using (var holder = await data.OpenConnectionAsync(Ct))
         {
@@ -364,7 +444,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     public async Task Pitfall_15_two_concurrent_cancellations_one_wins_and_the_other_gets_a_409()
     {
         var policy = await _slice.BindAsync();
-        _slice.Clock.Advance(TimeSpan.FromDays(20));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(20));
         var results = await Task.WhenAll(Enumerable.Range(0, 2).Select(_ => _slice.CancelAsync(policy.PolicyId)));
         results.ShouldAllBe(r => (int)r.Response.StatusCode < 500, "a lost race is a 409, never a 500 (PITFALLS 15)");
         var codes = results.Select(r => r.Response.StatusCode).Order().ToList();
@@ -379,7 +459,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     public async Task REQ_POL_215_a_missing_treatment_rule_fails_the_cancellation_closed_and_writes_nothing()
     {
         var policy = await _slice.BindAsync();
-        _slice.Clock.Advance(TimeSpan.FromDays(30));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(30));
         _slice.Tax.Behaviour = FakeTaxCalculator.Mode.RuleMissing;
         var (response, problem) = await _slice.CancelAsync(policy.PolicyId);
         response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, problem?.ToJsonString());
@@ -391,7 +471,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     public async Task REQ_POL_215_production_refuses_the_provisional_treatment_and_nothing_is_written()
     {
         var policy = await _slice.BindAsync();
-        _slice.Clock.Advance(TimeSpan.FromDays(30));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(30));
         _slice.Tax.Behaviour = FakeTaxCalculator.Mode.NotSettledInProduction;
         var (response, problem) = await _slice.CancelAsync(policy.PolicyId);
         response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, problem?.ToJsonString());
@@ -403,7 +483,7 @@ public sealed class CancellationTests(PostgresFixture database) : IClassFixture<
     public async Task REQ_POL_215_only_keep_not_reduced_is_implemented_other_treatments_fail_closed()
     {
         var policy = await _slice.BindAsync();
-        _slice.Clock.Advance(TimeSpan.FromDays(30));
+        await _slice.AdvanceAsync(TimeSpan.FromDays(30));
         _slice.Tax.Behaviour = FakeTaxCalculator.Mode.ApplyAction;
         var (response, problem) = await _slice.CancelAsync(policy.PolicyId);
         response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, problem?.ToJsonString());
