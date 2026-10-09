@@ -75,7 +75,8 @@ internal static class RatingModes
         var artefact = await store.LoadAsync(pinned.Value, cancellationToken).ConfigureAwait(false)
             ?? throw Error("INPUT", "The pinned rating artefact is unknown.");
         if (!string.Equals(artefact.Definition.ProductCode, envelope.ProductCode, StringComparison.Ordinal)
-            || (version is not null && !string.Equals(artefact.Definition.ProductVersion, version, StringComparison.Ordinal)))
+            || (version is not null && !string.Equals(artefact.Definition.ProductVersion, version, StringComparison.Ordinal)
+                && !await store.HasFallbackBindingAsync(envelope.ProductCode, version, pinned.Value, null, cancellationToken).ConfigureAwait(false)))
         {
             throw Error("INPUT", "The pinned rating artefact does not belong to this product version.");
         }
