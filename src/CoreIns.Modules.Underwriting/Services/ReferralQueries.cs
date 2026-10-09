@@ -136,7 +136,8 @@ internal sealed class ReferralQueries(
 
         // Decidability: the decide check run dry for every issue (nothing is recorded; uw.Issue.decide re-runs it at commit).
         var checks = await eligibility.DryChecksAsync(issues, cancellationToken).ConfigureAwait(false);
-        var rows = issues.Select(issue => (Issue: issue, Eligibility: eligibility.Evaluate(issue, participation, checks[issue.IssueType]))).ToList();
+        var changed = DecisionEligibility.JobChanged(job, participation);
+        var rows = issues.Select(issue => (Issue: issue, Eligibility: eligibility.Evaluate(issue, participation, checks[issue.IssueId], changed))).ToList();
         var open = rows.Where(r => r.Issue.Status == IssueStatus.Open).ToList();
         var viewReasons = open.Count == 0 ? [DecidabilityReason.NotOpen] : open.SelectMany(r => r.Eligibility.Reasons).Distinct().ToList();
 
@@ -153,7 +154,7 @@ internal sealed class ReferralQueries(
                 Taxes = version?.Taxes,
                 Facts = facts is null ? null : Facts(facts, job, version),
                 Issues = [.. rows.Select(r => new ReferralIssue { Issue = UnderwritingIssueQueries.Item(r.Issue), Decidability = Decidability(r.Issue, r.Eligibility) })],
-                Decidability = new ReferralDecidability { CanDecide = open.Count > 0 && open.All(r => r.Eligibility.CanDecide), Reasons = viewReasons },
+                Decidability = new ReferralDecidability { CanDecide = DecisionEligibility.AllDecidable([.. open.Select(r => r.Eligibility)]), Reasons = viewReasons },
             },
         };
     }
@@ -197,7 +198,8 @@ internal sealed class ReferralQueries(
         {
             var part = participation.GetValueOrDefault(group.Key, JobParticipation.None);
             var open = group.Where(i => i.Status == IssueStatus.Open).ToList();
-            if (open.Count > 0 && open.All(i => eligibility.Evaluate(i, part, checks[i.IssueType]).CanDecide))
+            var changed = DecisionEligibility.JobChanged(await eligibility.JobAsync(group.Key, cancellationToken).ConfigureAwait(false), part);
+            if (DecisionEligibility.AllDecidable([.. open.Select(i => eligibility.Evaluate(i, part, checks[i.IssueId], changed))]))
             {
                 mine.Add(new ReferralJobRecord { JobId = group.Key, SortAt = group.Min(i => i.CreatedAt) });
             }

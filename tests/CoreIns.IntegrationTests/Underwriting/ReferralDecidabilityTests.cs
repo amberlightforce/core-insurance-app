@@ -3,10 +3,17 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
 using CoreIns.IntegrationTests.Policy;
+using CoreIns.Modules.Policy.Contracts;
+using CoreIns.Modules.Underwriting.Authority;
 using CoreIns.Modules.Underwriting.Contracts.Api;
+using CoreIns.Modules.Underwriting.Domain;
+using CoreIns.Modules.Underwriting.Queries;
+using CoreIns.Platform.Authority;
+using CoreIns.Platform.Time;
 using CoreIns.Modules.Underwriting.Services;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts;
+using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using Microsoft.Extensions.DependencyInjection;
 using static CoreIns.IntegrationTests.Party.PartyApi;
@@ -439,5 +446,125 @@ public sealed class ReferralDecidabilityTests(PostgresFixture database) : IClass
         get.Headers.Add(TestAuthHandler.RolesHeader, Seniors);
         get.Headers.Add(TestAuthHandler.UserHeader, Outsider);
         (await client.SendAsync(get, Ct)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    /// <summary>The job's current version number and draft version through pol.Job.get.</summary>
+    private async Task<(int VersionNo, int DraftVersion)> CurrentVersionAsync(string jobId)
+    {
+        var (response, got) = await SendAsync(_slice.Client, HttpMethod.Get, $"/api/pol/v1/jobs/{jobId}", roles: Seniors);
+        var job = got?["job"] ?? got;
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, got?.ToJsonString());
+        var versionNo = job!["currentVersionNo"]!.GetValue<int>();
+        var version = job["versions"]!.AsArray().Single(v => v!["versionNo"]!.GetValue<int>() == versionNo)!;
+        return (versionNo, version["draftVersion"]!.GetValue<int>());
+    }
+
+    /// <summary>An uninvolved senior edits the referred job through pol.Job.updateDraft (the D1 probe).</summary>
+    private async Task EditAsOutsiderAsync(string jobId)
+    {
+        var (versionNo, draft) = await CurrentVersionAsync(jobId);
+        try
+        {
+            As(Outsider);
+            var (response, body) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pol/v1/jobs/update-draft",
+                new { jobId, versionNo, expectedDraftVersion = draft, instructions = new[] { PolicySlice.MotorRisk()[1] } }, roles: Seniors);
+            response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        }
+        finally
+        {
+            _slice.Client.DefaultRequestHeaders.Remove(TestAuthHandler.UserHeader);
+        }
+    }
+
+    [Fact]
+    public async Task An_edit_after_the_evaluation_blocks_the_preview_the_commit_and_mine_until_the_job_is_evaluated_again()
+    {
+        var jobId = await ReferredJobAsync();
+        InQueue(await QueueAsync("MINE", Outsider), jobId).ShouldBeTrue();
+
+        await EditAsOutsiderAsync(jobId);
+
+        var referral = await ReferralAsync(jobId, Outsider);
+        referral["decidability"]!["canDecide"]!.GetValue<bool>().ShouldBeFalse();
+        Reasons(referral["decidability"]!["reasons"]).ShouldContain("NEEDS_REEVALUATION");
+        referral["issues"]!.AsArray().ShouldAllBe(i => i!["decidability"]!["reasons"]!.AsArray().Any(r => r!.GetValue<string>() == "NEEDS_REEVALUATION"));
+        InQueue(await QueueAsync("MINE", Outsider), jobId).ShouldBeFalse();
+        var (decide, body, text) = await AsAsync(HttpMethod.Post, "/api/uw/v1/issues/decide", Outsider, body: new
+        {
+            issueIds = new[] { IssueId(referral, "DRIVER_AGE_REFERRAL") }, decision = "APPROVE", reason = "Approving after my own edit.",
+        });
+        decide.IsSuccessStatusCode.ShouldBeFalse(text);
+        body.Text("code").ShouldBe("UW-ERR-STALE");
+
+        // The quoter evaluates the edited job again: that records the editor, who is now barred as a participant.
+        var (versionNo, _) = await CurrentVersionAsync(jobId);
+        try
+        {
+            As(Quoter);
+            (await _slice.QuoteAsync(jobId, versionNo)).Body.Text("state").ShouldBe("QUOTED");
+            (await _slice.BindAsync(jobId, versionNo)).Body.Text("state").ShouldBe("QUOTED");
+        }
+        finally
+        {
+            _slice.Client.DefaultRequestHeaders.Remove(TestAuthHandler.UserHeader);
+        }
+
+        var again = await ReferralAsync(jobId, Outsider);
+        again["decidability"]!["canDecide"]!.GetValue<bool>().ShouldBeFalse();
+        Reasons(again["decidability"]!["reasons"]).ShouldContain("SOD_PARTICIPANT");
+        Reasons(again["decidability"]!["reasons"]).ShouldNotContain("NEEDS_REEVALUATION");
+        InQueue(await QueueAsync("MINE", Outsider), jobId).ShouldBeFalse();
+        var (second, _, _) = await AsAsync(HttpMethod.Post, "/api/uw/v1/issues/decide", Outsider, body: new
+        {
+            issueIds = new[] { IssueId(again, "DRIVER_AGE_REFERRAL") }, decision = "APPROVE", reason = "Still my own edit.",
+        });
+        second.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    private static IssueRecord OpenIssue(string type = "DRIVER_AGE_REFERRAL") =>
+        new() { IssueId = Guid.CreateVersion7(), JobId = Guid.CreateVersion7(), IssueType = type, Status = "Open", Fingerprint = "f" };
+
+    private static AuthorityCheckResult Check(AuthorityDecision decision) =>
+        new(AuthorityCheckId.New(), UnderwritingAuthorityTypes.IssueApproval, decision, decision == AuthorityDecision.Allow ? "WITHIN_LIMIT" : "ISSUETYPE_NOT_ALLOWED",
+            [], decision == AuthorityDecision.Deny ? null : "grant-1", [], Instant.FromUtcDateTime(DateTime.UtcNow), Instant.FromUtcDateTime(DateTime.UtcNow));
+
+    private static DecisionEligibility EligibilityFor(IServiceProvider sp, string user)
+    {
+        var context = sp.GetRequiredService<RequestContext>();
+        context.Actor = ActorRef.User(user);
+        return new DecisionEligibility(context, null!, sp.GetRequiredService<IClock>(), sp.GetRequiredService<IPolicyJobService>());
+    }
+
+    [Fact]
+    public async Task Refer_and_deny_are_no_authority_and_one_undecidable_issue_makes_the_referral_undecidable()
+    {
+        await using var scope = Scope(_slice.Factory.Services, Seniors);
+        var eligibility = EligibilityFor(scope.ServiceProvider, "uw-outsider");
+
+        var allow = eligibility.Evaluate(OpenIssue(), JobParticipation.None, Check(AuthorityDecision.Allow), jobChanged: false);
+        var refer = eligibility.Evaluate(OpenIssue(), JobParticipation.None, Check(AuthorityDecision.Refer), jobChanged: false);
+        var deny = eligibility.Evaluate(OpenIssue(), JobParticipation.None, Check(AuthorityDecision.Deny), jobChanged: false);
+
+        allow.CanDecide.ShouldBeTrue();
+        refer.Reasons.ShouldBe([DecidabilityReason.NoAuthority]);
+        deny.Reasons.ShouldBe([DecidabilityReason.NoAuthority]);
+        DecisionEligibility.AllDecidable([allow]).ShouldBeTrue();
+        DecisionEligibility.AllDecidable([allow, refer]).ShouldBeFalse();
+        DecisionEligibility.AllDecidable([allow, deny]).ShouldBeFalse();
+        DecisionEligibility.AllDecidable([]).ShouldBeFalse();
+        eligibility.Evaluate(OpenIssue(), JobParticipation.None, Check(AuthorityDecision.Allow), jobChanged: true).Reasons.ShouldBe([DecidabilityReason.NeedsReevaluation]);
+        eligibility.Evaluate(new IssueRecord { IssueId = Guid.CreateVersion7(), IssueType = "X", Status = "Approved" }, JobParticipation.None, Check(AuthorityDecision.Allow), false)
+            .Reasons.ShouldBe([DecidabilityReason.NotOpen]);
+    }
+
+    [Fact]
+    public async Task SOD_PRODUCER_is_inert_until_users_are_mapped_to_producer_codes()
+    {
+        await using var scope = Scope(_slice.Factory.Services, Seniors);
+        var eligibility = EligibilityFor(scope.ServiceProvider, "P-0001");
+        var job = new JobParticipation(null, new HashSet<string>(), new HashSet<string>(), new HashSet<string> { "P-0001" });
+
+        // A producer code never equals an actor id (actor ids carry their kind), so no one is barred as the producer today.
+        eligibility.SodReasons(job).ShouldBeEmpty();
     }
 }

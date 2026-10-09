@@ -226,7 +226,7 @@ internal sealed class UnderwritingStore(DbSession session, IClock clock, Request
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         var rows = await connection.QueryAsync<ParticipationRow>(new CommandDefinition(
             """
-            SELECT job_id AS JobId, created_by AS CreatedBy, job_participants AS JobParticipants, producer_code AS ProducerCode
+            SELECT job_id AS JobId, created_by AS CreatedBy, job_participants AS JobParticipants, producer_code AS ProducerCode, snapshot_ref AS SnapshotRef
               FROM uw.evaluation
              WHERE legal_entity_id = @legalEntity AND job_id = ANY(@jobIds)
              ORDER BY created_at, evaluation_id

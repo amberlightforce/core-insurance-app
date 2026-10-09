@@ -91,6 +91,12 @@ internal sealed class DecideIssuesHandler(
         var participation = await store.ParticipationAsync(legalEntity, [.. issues.Select(i => i.JobId).Distinct()], cancellationToken).ConfigureAwait(false);
         foreach (var jobId in issues.Select(i => i.JobId).Distinct())
         {
+            var part = participation.GetValueOrDefault(jobId, JobParticipation.None);
+            if (DecisionEligibility.JobChanged(await eligibility.JobAsync(jobId, cancellationToken).ConfigureAwait(false), part))
+            {
+                return Stale(issues.First(i => i.JobId == jobId).IssueId, "The job changed since it was last evaluated, so the editor is not yet recorded; run the quote or bind again so the rules re-evaluate, then decide (SOD-UW-02).");
+            }
+
             if (eligibility.SodReasons(participation.GetValueOrDefault(jobId, JobParticipation.None)).Count > 0)
             {
                 return DomainError.Of(ModuleCode.UW, "SOD", "You created, edited, quoted or bound this job, so you cannot decide its underwriting issues; ask another underwriter with authority (SOD-UW-02).");
