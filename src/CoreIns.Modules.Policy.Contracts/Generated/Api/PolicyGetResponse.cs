@@ -39,4 +39,9 @@ public sealed record PolicyGetResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("effectiveKnownAt")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Instant? EffectiveKnownAt { get; init; }
+
+    /// <summary>Every term of the policy known at effectiveKnownAt, by term number ascending, each with its state as of validAt (REQ-POL-002). Always set. `term` stays the one valid at validAt (or the nearest).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("terms")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Policy.Contracts.Api.TermView>? Terms { get; init; }
 }

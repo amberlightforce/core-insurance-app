@@ -40,13 +40,42 @@ const moduleRoutes: RouteObject[] = [
   {
     path: 'policies/referrals',
     lazy: async () => ({
-      Component: (await import('./modules/policy/ReferralsPage')).ReferralsPage,
+      Component: (await import('./modules/underwriting/workbench/WorkbenchPage')).WorkbenchPage,
+    }),
+  },
+  {
+    // The «Ανάληψη κινδύνου» rail entry opens the same referral workbench (SL5-UI-UW-WB).
+    path: 'underwriting',
+    lazy: async () => ({
+      Component: (await import('./modules/underwriting/workbench/WorkbenchPage')).WorkbenchPage,
     }),
   },
   {
     path: 'policies/:policyId',
     lazy: async () => ({
       Component: (await import('./modules/policy/PolicyViewPage')).PolicyViewPage,
+    }),
+  },
+  // Servicing entry points of the policy file (SL3-UI-POL-FILE); SL3-UI-POL-JOBS swaps these three elements.
+  {
+    path: 'policies/:policyId/change',
+    lazy: async () => ({
+      Component: (await import('./modules/policy/file/ServicingPlaceholderPage'))
+        .PolicyChangePlaceholder,
+    }),
+  },
+  {
+    path: 'policies/:policyId/cancel',
+    lazy: async () => ({
+      Component: (await import('./modules/policy/file/ServicingPlaceholderPage'))
+        .PolicyCancelPlaceholder,
+    }),
+  },
+  {
+    path: 'policies/:policyId/renew',
+    lazy: async () => ({
+      Component: (await import('./modules/policy/file/ServicingPlaceholderPage'))
+        .PolicyRenewPlaceholder,
     }),
   },
   {
@@ -133,7 +162,14 @@ const moduleRoutes: RouteObject[] = [
   },
 ];
 
-const implemented = new Set(['/parties', '/policies', '/billing', '/finance', '/claims']);
+const implemented = new Set([
+  '/parties',
+  '/policies',
+  '/billing',
+  '/finance',
+  '/claims',
+  '/underwriting',
+]);
 
 /** Placeholder routes for modules whose work packages have not landed, plus the thin-slice staff screens. */
 export const routes: RouteObject[] = [

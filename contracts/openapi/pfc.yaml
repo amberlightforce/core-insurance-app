@@ -2180,6 +2180,169 @@ paths:
           $ref: common.yaml#/components/responses/Forbidden
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/product-versions/fallback:
+    post:
+      operationId: pfc.ProductVersion.fallback
+      summary: Emergency fall-back to the previous version
+      description: |-
+        Emergency fall-back to the previous version
+
+        Maker call (D-SL5-09, REQ-PFC-213). Creates a write-once copy of the content of the version before the defective one as the next free minor
+        version (for example MOTOR-GR 1.2 as a copy of 1.0 when 1.1 is defective), with a new-business window from the fall-back date. The defective version's
+        new-business window is closed at that date in the same transaction; renewal windows are untouched. Maker-checker: the call creates a fall-back in
+        PENDING_APPROVAL with an in-process PLT approval (type PFC.Fallback, authority PFC.EmergencyChange); nothing is published until
+        pfc.ProductVersion.decideFallback approves it. With dryRun it returns the preview and creates nothing. Idempotency-Key required.
+        Distinct from pfc.ProductVersion.fallBack (the PRD release call).
+        PRD outputs: schedule
+      tags:
+      - ProductVersion
+      x-requirement:
+      - REQ-PFC-213
+      x-anchor:
+      - REQ-PFC-213
+      x-wave: W2
+      x-work-packages:
+      - SL5-CONTRACTS-PACKS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: SL5-CONTRACTS-PACKS (D-SL5-09)
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: dry-run validates and previews'
+      x-exposure:
+      - ui
+      x-permission: pfc.ProductVersion.fallback
+      x-error-codes:
+      - code: PFC-ERR-FALLBACK-SOURCE
+        note: 'no valid source version: the defective version has no earlier published version to copy, or the source is not published'
+        status: 422
+      - code: PFC-ERR-FALLBACK-STATE
+        note: 'the version is already replaced by a fall-back, or a fall-back for it is pending'
+        status: 409
+      - code: PFC-ERR-UNKNOWN-PRODUCT
+        status: 422
+      - code: PFC-ERR-NO-VERSION
+        note: 'the defective version does not exist'
+        status: 422
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: 'contract §3.5.3 (replay with a different payload)'
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1474
+      - PRD-02 §12.2
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductVersionEmergencyFallbackRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVersionEmergencyFallbackResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/product-versions/decide-fallback:
+    post:
+      operationId: pfc.ProductVersion.decideFallback
+      summary: Decide an emergency fall-back
+      description: |-
+        Decide an emergency fall-back
+
+        Checker call (D-SL5-09). The checker holds Platform.DesignAuthority and is neither the maker nor the maker's principal (PITFALLS 3-6).
+        Approval verifies subject, type and the content hash of the fall-back request (verifyForExecution). On APPROVE one transaction writes the new version,
+        closes the defective version's new-business window and emits ProductVersionPublished with fallbackOf and replaces. Idempotency-Key required.
+        PRD outputs: schedule
+      tags:
+      - ProductVersion
+      x-requirement:
+      - REQ-PFC-213
+      x-anchor:
+      - REQ-PFC-213
+      x-wave: W2
+      x-work-packages:
+      - SL5-CONTRACTS-PACKS
+      x-status: full
+      x-maturity: pre-release
+      x-typed: SL5-CONTRACTS-PACKS (D-SL5-09)
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: pfc.ProductVersion.decideFallback
+      x-error-codes:
+      - code: PFC-ERR-SOD
+        note: 'the checker lacks the role or the approval is not bound to this fall-back content'
+        status: 403
+      - code: PLT-ERR-SELF-APPROVAL
+        note: 'the checker is the maker or the maker''s principal'
+        status: 403
+      - code: PFC-ERR-FALLBACK-STATE
+        note: 'the fall-back is not PENDING_APPROVAL'
+        status: 409
+      - code: PFC-ERR-FALLBACK-SOURCE
+        note: 'the source version is no longer a valid source at decision time'
+        status: 422
+      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
+        note: 'contract §3.5.3 (replay with a different payload)'
+        status: 409
+      x-source:
+      - PRD-02 §9.1 l.1474
+      - PRD-02 §12.2
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductVersionDecideFallbackRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVersionDecideFallbackResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
 components:
   securitySchemes:
     entra:
@@ -3707,3 +3870,160 @@ components:
           items:
             $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "rows"'
+    FallbackSource:
+      type: object
+      description: The version whose content the fall-back copies
+      properties:
+        version:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: Artefact hash of the source version; the new version carries the same hash (RAT activates the same artefact, D-SL5-09)
+      required:
+      - version
+      - artefactHash
+    FallbackPreview:
+      type: object
+      description: Dry-run preview of an emergency fall-back. Nothing is created. Every field is always set.
+      properties:
+        newVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+          description: The next free minor version (write-once copy)
+        source:
+          $ref: '#/components/schemas/FallbackSource'
+        newBusinessWindow:
+          $ref: ../events/common.schema.json#/$defs/TimeWindow
+          description: New-business window of the new version, from the fall-back date
+        closedWindow:
+          $ref: ../events/common.schema.json#/$defs/TimeWindow
+          description: New-business window of the defective version as it will stand after the fall-back, ending at the fall-back date
+      required:
+      - newVersion
+      - source
+      - newBusinessWindow
+      - closedWindow
+    FallbackStatus:
+      type: string
+      enum:
+      - PENDING_APPROVAL
+      - APPLIED
+      - REJECTED
+    FallbackView:
+      type: object
+      description: One emergency fall-back. Every field is always set; the nullable ones are null until known.
+      properties:
+        fallbackId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        defectiveVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        newVersion:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+          - type: 'null'
+          description: The version written; null until APPLIED
+        status:
+          $ref: '#/components/schemas/FallbackStatus'
+        reason:
+          type: string
+          description: The maker's reason (20 to 128 characters)
+        requestedBy:
+          $ref: ../events/common.schema.json#/$defs/Text
+        decidedBy:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decidedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+      required:
+      - fallbackId
+      - productCode
+      - defectiveVersion
+      - newVersion
+      - status
+      - reason
+      - requestedBy
+      - decidedBy
+      - approvalRequestId
+      - decidedAt
+    ProductVersionEmergencyFallbackRequest:
+      type: object
+      description: pfc.ProductVersion.fallback request (REQ-PFC-213, D-SL5-09)
+      properties:
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        defectiveVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        reason:
+          type: string
+          minLength: 20
+          maxLength: 128
+          description: Why the version is defective (20 to 128 characters). No personal data.
+      required:
+      - productCode
+      - defectiveVersion
+      - reason
+    ProductVersionEmergencyFallbackResponse:
+      type: object
+      description: 'pfc.ProductVersion.fallback result: the preview on a dry run, otherwise the PENDING_APPROVAL fall-back'
+      properties:
+        dryRun:
+          type: boolean
+        preview:
+          oneOf:
+          - $ref: '#/components/schemas/FallbackPreview'
+          - type: 'null'
+          description: Always set on a dry run, null otherwise
+        fallbackId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Null on a dry run
+        status:
+          oneOf:
+          - $ref: '#/components/schemas/FallbackStatus'
+          - type: 'null'
+          description: PENDING_APPROVAL for a real call; null on a dry run
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: In-process PLT approval request (type PFC.Fallback, authority PFC.EmergencyChange); null on a dry run
+      required:
+      - dryRun
+      - preview
+      - fallbackId
+      - status
+      - approvalRequestId
+    ProductVersionDecideFallbackRequest:
+      type: object
+      description: pfc.ProductVersion.decideFallback request
+      properties:
+        fallbackId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Reason of the checker (required for REJECT). No personal data.
+      required:
+      - fallbackId
+      - decision
+      - reason
+    ProductVersionDecideFallbackResponse:
+      type: object
+      properties:
+        fallback:
+          $ref: '#/components/schemas/FallbackView'
+      required:
+      - fallback

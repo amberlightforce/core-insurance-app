@@ -8,11 +8,56 @@ namespace CoreIns.Modules.Market.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PackGetResponse
 {
-    /// <summary>PRD: "pack/version/activation"</summary>
+    /// <summary>Contract member 'packId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'packId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("packId")]
+    public required global::System.Guid PackId { get; init; }
+
+    /// <summary>Pack code (for example GR)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("pack")]
+    public required string Pack { get; init; }
+
+    /// <summary>Contract member 'scope'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("scope")]
+    public required ScopeValue Scope { get; init; }
+
+    /// <summary>Contract member 'versions'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("versions")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Market.Contracts.Api.PackVersionView> Versions { get; init; }
+
+    /// <summary>The active version per legal entity (empty when never activated)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("activeVersions")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Market.Contracts.Api.PackActiveVersionView> ActiveVersions { get; init; }
+
+    /// <summary>PRD: "pack/version/activation" (superseded by the typed members above)</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("packVersionActivation")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? PackVersionActivation { get; init; }
+
+    /// <summary>Activations and rollbacks of the pack, newest first</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("activationHistory")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Market.Contracts.Api.PackActivationView> ActivationHistory { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ScopeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ScopeValue
+    {
+        /// <summary><c>REGION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REGION")]
+        Region,
+
+        /// <summary><c>GROUP</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("GROUP")]
+        Group,
+
+        /// <summary><c>COUNTRY</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("COUNTRY")]
+        Country,
+    }
 }

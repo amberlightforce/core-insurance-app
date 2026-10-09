@@ -268,6 +268,157 @@ internal static class BillingDatabaseSql
         DROP FUNCTION IF EXISTS bil.freeze_payee_account() CASCADE;
         """;
 
+    /// <summary>
+    /// SL3-BIL-CREDIT: the billing-ledger rules of credits (CREDIT_WRITTEN premium, surcharge and fee clearing → written
+    /// unbilled; CREDIT_BILLED written unbilled → billed receivable; there is deliberately no tax or levy rule, so a tax or
+    /// levy credit fails closed, D-SL3-05/06) and the database guards of credit notes:
+    /// a credit item credits exactly one invoice item of the original invoice its credit note references, and Σ credit items
+    /// per invoice item ≤ that item (SQLSTATE BL006); a credit application offsets exactly the invoice item its credit item
+    /// credits, Σ per credit item ≤ the credit item and Σ (cash allocations + credit applications) per invoice item ≤ the item
+    /// (BL001), under row locks; credit applications are append-only; the charge, invoice and item freeze triggers cover the new columns.
+    /// </summary>
+    public const string Credits = """
+        INSERT INTO bil.ledger_rule (rule_id, version, event_type, charge_category, bill_mode, jurisdiction, qualifier,
+            debit_account, credit_account, amount_expression, valid_from, valid_to, source) VALUES
+            ('BLR-CREDIT-WRITTEN-PREMIUM', 1, 'CREDIT_WRITTEN', 'PREMIUM', 'DIRECT_BILL', '*', '*', 'LA-04', 'LA-01', 'AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-073; PRD-06 §4.13 step 16'),
+            ('BLR-CREDIT-WRITTEN-SURCHARGE', 1, 'CREDIT_WRITTEN', 'SURCHARGE', 'DIRECT_BILL', '*', '*', 'LA-04', 'LA-01', 'AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-073 (written premium includes surcharges, D5)'),
+            ('BLR-CREDIT-WRITTEN-FEE', 1, 'CREDIT_WRITTEN', 'FEE', 'DIRECT_BILL', '*', '*', 'LA-05', 'LA-01', 'AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-073; PRD-06 §7.1.4 LA-05'),
+            ('BLR-CREDIT-BILLED', 1, 'CREDIT_BILLED', '*', 'DIRECT_BILL', '*', '*', 'LA-01', 'LA-02', 'AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-074, REQ-BIL-091; PRD-06 §4.13 step 17');
+
+        CREATE OR REPLACE FUNCTION bil.freeze_charge() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF (NEW.charge_id, NEW.set_id, NEW.set_size, NEW.set_index, NEW.policy_id, NEW.term_id, NEW.transaction_id, NEW.element_locator,
+                NEW.coverage_code, NEW.charge_type, NEW.charge_category, NEW.delta_kind, NEW.amount, NEW.currency, NEW.valid_from, NEW.valid_to,
+                NEW.booking_date, NEW.correlation_key, NEW.tax_treatment_ref, NEW.source_event_id,
+                NEW.transaction_kind, NEW.cancellation_source, NEW.treatment_rule_id, NEW.treatment_rule_version)
+               IS DISTINCT FROM
+               (OLD.charge_id, OLD.set_id, OLD.set_size, OLD.set_index, OLD.policy_id, OLD.term_id, OLD.transaction_id, OLD.element_locator,
+                OLD.coverage_code, OLD.charge_type, OLD.charge_category, OLD.delta_kind, OLD.amount, OLD.currency, OLD.valid_from, OLD.valid_to,
+                OLD.booking_date, OLD.correlation_key, OLD.tax_treatment_ref, OLD.source_event_id,
+                OLD.transaction_kind, OLD.cancellation_source, OLD.treatment_rule_id, OLD.treatment_rule_version) THEN
+                RAISE EXCEPTION 'charge % is frozen as received (REQ-BIL-002)', OLD.charge_id USING ERRCODE = 'BL004';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE OR REPLACE FUNCTION bil.freeze_invoice() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF (NEW.total, NEW.currency, NEW.invoice_number, NEW.billing_account_id, NEW.transaction_id, NEW.kind, NEW.original_invoice_id)
+               IS DISTINCT FROM (OLD.total, OLD.currency, OLD.invoice_number, OLD.billing_account_id, OLD.transaction_id, OLD.kind, OLD.original_invoice_id) THEN
+                RAISE EXCEPTION 'bil.invoice amounts and numbers are frozen once written' USING ERRCODE = 'BL004';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE OR REPLACE FUNCTION bil.freeze_invoice_item() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        BEGIN
+            IF (NEW.amount, NEW.currency, NEW.charge_id, NEW.invoice_id, NEW.credits_item_id, NEW.transaction_kind, NEW.cancellation_source, NEW.treatment_rule_id)
+               IS DISTINCT FROM (OLD.amount, OLD.currency, OLD.charge_id, OLD.invoice_id, OLD.credits_item_id, OLD.transaction_kind, OLD.cancellation_source, OLD.treatment_rule_id) THEN
+                RAISE EXCEPTION 'bil.invoice_item amounts and numbers are frozen once written' USING ERRCODE = 'BL004';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE FUNCTION bil.guard_credit_item() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        DECLARE
+            original_amount numeric;
+            original_invoice uuid;
+            original_credits uuid;
+            used numeric;
+            note_kind text;
+            note_original uuid;
+            original_kind text;
+        BEGIN
+            IF NEW.credits_item_id IS NULL THEN
+                RETURN NEW;
+            END IF;
+            SELECT amount, invoice_id, credits_item_id INTO original_amount, original_invoice, original_credits
+                FROM bil.invoice_item WHERE invoice_item_id = NEW.credits_item_id FOR UPDATE;
+            IF original_amount IS NULL OR original_credits IS NOT NULL THEN
+                RAISE EXCEPTION 'credit item % credits no invoice item (REQ-BIL-091)', NEW.invoice_item_id USING ERRCODE = 'BL006';
+            END IF;
+            SELECT kind, original_invoice_id INTO note_kind, note_original FROM bil.invoice WHERE invoice_id = NEW.invoice_id;
+            SELECT kind INTO original_kind FROM bil.invoice WHERE invoice_id = original_invoice;
+            IF note_kind IS DISTINCT FROM 'CREDIT_NOTE' OR original_kind IS DISTINCT FROM 'INVOICE' OR note_original IS DISTINCT FROM original_invoice THEN
+                RAISE EXCEPTION 'credit item % must belong to a credit note referencing the invoice of the item it credits (REQ-BIL-091)', NEW.invoice_item_id USING ERRCODE = 'BL006';
+            END IF;
+            SELECT coalesce(sum(amount), 0) INTO used FROM bil.invoice_item WHERE credits_item_id = NEW.credits_item_id;
+            IF used + NEW.amount > original_amount THEN
+                RAISE EXCEPTION 'credits of invoice item % would exceed it (REQ-BIL-073)', NEW.credits_item_id USING ERRCODE = 'BL006';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE TRIGGER tr_invoice_item_credit_guard BEFORE INSERT ON bil.invoice_item FOR EACH ROW EXECUTE FUNCTION bil.guard_credit_item();
+
+        CREATE OR REPLACE FUNCTION bil.guard_allocation() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        DECLARE
+            limit_amount numeric;
+            used numeric;
+        BEGIN
+            SELECT amount INTO limit_amount FROM bil.receipt WHERE receipt_id = NEW.receipt_id FOR UPDATE;
+            SELECT coalesce(sum(amount), 0) INTO used FROM bil.allocation WHERE receipt_id = NEW.receipt_id;
+            IF used + NEW.amount > limit_amount THEN
+                RAISE EXCEPTION 'allocations of receipt % would exceed it (REQ-BIL-130)', NEW.receipt_id USING ERRCODE = 'BL001';
+            END IF;
+            SELECT amount INTO limit_amount FROM bil.invoice_item WHERE invoice_item_id = NEW.invoice_item_id FOR UPDATE;
+            SELECT coalesce(sum(amount), 0) INTO used FROM bil.allocation WHERE invoice_item_id = NEW.invoice_item_id;
+            used := used + coalesce((SELECT sum(amount) FROM bil.credit_application WHERE target_invoice_item_id = NEW.invoice_item_id), 0);
+            IF used + NEW.amount > limit_amount THEN
+                RAISE EXCEPTION 'allocations of invoice item % would exceed it (REQ-BIL-130)', NEW.invoice_item_id USING ERRCODE = 'BL001';
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE FUNCTION bil.guard_credit_application() RETURNS trigger LANGUAGE plpgsql AS $fn$
+        DECLARE
+            credit_amount numeric;
+            credited_item uuid;
+            credit_invoice uuid;
+            limit_amount numeric;
+            used numeric;
+        BEGIN
+            SELECT amount, credits_item_id, invoice_id INTO credit_amount, credited_item, credit_invoice
+                FROM bil.invoice_item WHERE invoice_item_id = NEW.credit_item_id FOR UPDATE;
+            IF credit_amount IS NULL OR credited_item IS NULL OR credit_invoice <> NEW.credit_note_id THEN
+                RAISE EXCEPTION 'credit application % is not from an item of credit note %', NEW.credit_application_id, NEW.credit_note_id USING ERRCODE = 'BL001';
+            END IF;
+            SELECT coalesce(sum(amount), 0) INTO used FROM bil.credit_application WHERE credit_item_id = NEW.credit_item_id;
+            IF used + NEW.amount > credit_amount THEN
+                RAISE EXCEPTION 'applications of credit item % would exceed it (REQ-BIL-073)', NEW.credit_item_id USING ERRCODE = 'BL001';
+            END IF;
+            IF NEW.target_kind = 'INVOICE_ITEM' THEN
+                IF NEW.target_invoice_item_id IS DISTINCT FROM credited_item THEN
+                    RAISE EXCEPTION 'a credit offsets only the invoice item it credits (REQ-BIL-073)' USING ERRCODE = 'BL001';
+                END IF;
+                SELECT amount INTO limit_amount FROM bil.invoice_item WHERE invoice_item_id = NEW.target_invoice_item_id FOR UPDATE;
+                SELECT coalesce(sum(amount), 0) INTO used FROM bil.allocation WHERE invoice_item_id = NEW.target_invoice_item_id;
+                used := used + coalesce((SELECT sum(amount) FROM bil.credit_application WHERE target_invoice_item_id = NEW.target_invoice_item_id), 0);
+                IF used + NEW.amount > limit_amount THEN
+                    RAISE EXCEPTION 'credit applications on invoice item % would exceed it (REQ-BIL-130)', NEW.target_invoice_item_id USING ERRCODE = 'BL001';
+                END IF;
+            END IF;
+            RETURN NEW;
+        END
+        $fn$;
+
+        CREATE TRIGGER tr_credit_application_guard BEFORE INSERT ON bil.credit_application FOR EACH ROW EXECUTE FUNCTION bil.guard_credit_application();
+        CREATE TRIGGER tr_credit_application_append_only BEFORE UPDATE OR DELETE ON bil.credit_application FOR EACH ROW EXECUTE FUNCTION bil.reject_change();
+        CREATE TRIGGER tr_credit_application_no_truncate BEFORE TRUNCATE ON bil.credit_application FOR EACH STATEMENT EXECUTE FUNCTION bil.reject_change();
+        """;
+
+    public const string CreditsDown = """
+        DROP TRIGGER IF EXISTS tr_invoice_item_credit_guard ON bil.invoice_item;
+        DROP FUNCTION IF EXISTS bil.guard_credit_item() CASCADE;
+        DROP FUNCTION IF EXISTS bil.guard_credit_application() CASCADE;
+        DELETE FROM bil.ledger_rule WHERE rule_id IN ('BLR-CREDIT-WRITTEN-PREMIUM', 'BLR-CREDIT-WRITTEN-SURCHARGE', 'BLR-CREDIT-WRITTEN-FEE', 'BLR-CREDIT-BILLED');
+        """;
+
     public const string SealDown = """
         DROP TRIGGER IF EXISTS tr_invoice_append_only ON bil.invoice;
         DROP TRIGGER IF EXISTS tr_invoice_item_append_only ON bil.invoice_item;

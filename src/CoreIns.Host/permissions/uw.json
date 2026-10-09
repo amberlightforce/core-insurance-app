@@ -5,7 +5,9 @@
         "uw.Rules.evaluate": [ "Staff.Underwriter" ],
         "uw.Issue.blockingStatus": [ "Staff.Underwriter", "Staff.Billing" ],
         "uw.Issue.list": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
-        "uw.Issue.decide": [ "Staff.UnderwritingManager" ]
+        "uw.Issue.decide": [ "Staff.UnderwritingManager" ],
+        "uw.Referral.list": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Referral.get": [ "Staff.UnderwritingManager", "Platform.Admin" ]
       }
     },
     "Authority": {

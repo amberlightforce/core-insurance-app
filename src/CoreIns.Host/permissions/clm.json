@@ -15,7 +15,8 @@
         "clm.Financials.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.Payment.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.PayeeAccount.capture": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
-        "clm.PayeeAccount.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
+        "clm.PayeeAccount.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Coverage.reverify": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
       }
     },
     "Authority": {

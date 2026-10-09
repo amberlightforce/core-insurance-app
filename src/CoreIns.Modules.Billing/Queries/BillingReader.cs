@@ -66,11 +66,14 @@ internal sealed class BillingReader(BillingDbContext db)
             BalancesByState = new BillingAccountBalances
             {
                 WrittenUnbilled = new Money(Debit(LedgerAccounts.WrittenUnbilled), currency),
-                Billed = new Money(Debit(LedgerAccounts.BilledReceivable), currency),
+                Billed = new Money(Math.Max(Debit(LedgerAccounts.BilledReceivable), 0m), currency),
                 Overdue = new Money(overdue, currency),
                 Collected = new Money(Sum(LedgerAccounts.CashAtBank, LedgerSide.Debit), currency),
                 Unapplied = new Money(-Debit(LedgerAccounts.Suspense), currency),
-                Credit = new Money(-Debit(LedgerAccounts.RefundsPayable), currency),
+
+                // Customer credit: credit notes not yet offset against an invoice (a credit balance of the billed receivable
+                // LA-02) plus what has been moved to refunds payable LA-12 (PRD-06 §4.13 steps 17 and 18).
+                Credit = new Money(Math.Max(-Debit(LedgerAccounts.BilledReceivable), 0m) - Debit(LedgerAccounts.RefundsPayable), currency),
             },
         };
     }
@@ -89,6 +92,18 @@ internal sealed class BillingReader(BillingDbContext db)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var currency = Currency.FromCode(invoice.Currency);
         var paidByItem = allocations.GroupBy(a => a.InvoiceItemId).ToDictionary(g => g.Key, g => g.Sum(a => a.Amount));
+
+        // Credit notes settle items too: an invoice item by the credit offset against it, a credit item by what has been applied.
+        var itemIds = items.Select(i => i.InvoiceItemId).ToList();
+        var applications = await db.CreditApplications.AsNoTracking()
+            .Where(c => (c.TargetInvoiceItemId != null && itemIds.Contains(c.TargetInvoiceItemId.Value)) || itemIds.Contains(c.CreditItemId))
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        foreach (var application in applications)
+        {
+            var key = invoice.Kind == "CREDIT_NOTE" ? application.CreditItemId : application.TargetInvoiceItemId!.Value;
+            paidByItem[key] = paidByItem.GetValueOrDefault(key) + application.Amount;
+        }
+
         return new InvoiceGetResponse
         {
             Invoice = View(invoice, items, paidByItem.Values.Sum()),
@@ -108,6 +123,9 @@ internal sealed class BillingReader(BillingDbContext db)
                 Amount = new Money(i.Amount, currency),
                 Open = new Money(i.Amount - paidByItem.GetValueOrDefault(i.InvoiceItemId), currency),
                 State = Codes.Api<InvoiceItemView.StateValue>(Codes.Parse<InvoiceItemState>(i.State)),
+                TransactionKind = i.TransactionKind,
+                CancellationSource = i.CancellationSource,
+                TreatmentRuleId = i.TreatmentRuleId,
             })],
             Allocations = [.. allocations.Select(Allocation)],
             FiscalStatus = Fiscal(invoice),
@@ -147,13 +165,12 @@ internal sealed class BillingReader(BillingDbContext db)
         var shown = page.Take(size).ToList();
         var ids = shown.Select(i => i.InvoiceId).ToList();
         var items = await db.InvoiceItems.AsNoTracking().Where(i => ids.Contains(i.InvoiceId)).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var paid = await db.Allocations.AsNoTracking().Where(x => ids.Contains(x.InvoiceId)).GroupBy(x => x.InvoiceId)
-            .Select(g => new { g.Key, Sum = g.Sum(x => x.Amount) }).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var paid = await SettledByInvoiceAsync(ids, cancellationToken).ConfigureAwait(false);
         return new InvoiceListPage
         {
             Items = [.. shown.Select(i => new InvoiceListItem
             {
-                Invoice = View(i, [.. items.Where(x => x.InvoiceId == i.InvoiceId)], paid.FirstOrDefault(x => x.Key == i.InvoiceId)?.Sum ?? 0m),
+                Invoice = View(i, [.. items.Where(x => x.InvoiceId == i.InvoiceId)], paid.GetValueOrDefault(i.InvoiceId)),
                 FiscalStatus = Fiscal(i),
             })],
             NextCursor = page.Count > size ? shown[^1].InvoiceId.Value.ToString("D") : null,
@@ -213,9 +230,39 @@ internal sealed class BillingReader(BillingDbContext db)
     {
         var totals = await db.Invoices.AsNoTracking().Where(i => ids.Contains(i.InvoiceId)).Select(i => new { i.InvoiceId, i.Total })
             .ToListAsync(cancellationToken).ConfigureAwait(false);
-        var paid = await db.Allocations.AsNoTracking().Where(a => ids.Contains(a.InvoiceId)).GroupBy(a => a.InvoiceId)
+        var paid = await SettledByInvoiceAsync(ids, cancellationToken).ConfigureAwait(false);
+        return totals.ToDictionary(t => t.InvoiceId, t => t.Total - paid.GetValueOrDefault(t.InvoiceId));
+    }
+
+    /// <summary>
+    /// Settled amount per invoice: cash allocations plus credit offset against an invoice, and for a credit note the credit
+    /// applied from it (REQ-BIL-087, REQ-BIL-073). The rest is open (for a credit note: the account credit it still holds).
+    /// </summary>
+    private async Task<Dictionary<InvoiceId, decimal>> SettledByInvoiceAsync(List<InvoiceId> ids, CancellationToken cancellationToken)
+    {
+        var result = new Dictionary<InvoiceId, decimal>();
+        var cash = await db.Allocations.AsNoTracking().Where(a => ids.Contains(a.InvoiceId)).GroupBy(a => a.InvoiceId)
             .Select(g => new { g.Key, Sum = g.Sum(a => a.Amount) }).ToListAsync(cancellationToken).ConfigureAwait(false);
-        return totals.ToDictionary(t => t.InvoiceId, t => t.Total - (paid.FirstOrDefault(p => p.Key == t.InvoiceId)?.Sum ?? 0m));
+        foreach (var c in cash)
+        {
+            result[c.Key] = result.GetValueOrDefault(c.Key) + c.Sum;
+        }
+
+        var offset = await db.CreditApplications.AsNoTracking().Where(a => a.TargetInvoiceId != null && ids.Contains(a.TargetInvoiceId.Value))
+            .GroupBy(a => a.TargetInvoiceId!.Value).Select(g => new { g.Key, Sum = g.Sum(a => a.Amount) }).ToListAsync(cancellationToken).ConfigureAwait(false);
+        foreach (var o in offset)
+        {
+            result[o.Key] = result.GetValueOrDefault(o.Key) + o.Sum;
+        }
+
+        var applied = await db.CreditApplications.AsNoTracking().Where(a => ids.Contains(a.CreditNoteId)).GroupBy(a => a.CreditNoteId)
+            .Select(g => new { g.Key, Sum = g.Sum(a => a.Amount) }).ToListAsync(cancellationToken).ConfigureAwait(false);
+        foreach (var a in applied)
+        {
+            result[a.Key] = result.GetValueOrDefault(a.Key) + a.Sum;
+        }
+
+        return result;
     }
 
     private static InvoiceView View(InvoiceRow i, List<InvoiceItemRow> items, decimal paid)
@@ -231,6 +278,7 @@ internal sealed class BillingReader(BillingDbContext db)
             PolicyId = i.PolicyId,
             PolicyTermId = i.TermId,
             TransactionId = i.TransactionId,
+            OriginalInvoiceId = i.OriginalInvoiceId?.Value,
             IssueDate = i.IssueDate,
             DueDate = i.DueDate,
             Method = i.Method,

@@ -106,3 +106,11 @@ found by a review or by CI in slices 1–2; the decision id says where.
 45. **Verify the push landed**: when the local branch name differs from the remote one, a plain `git push` may update
     nothing. Push explicitly (`git push origin HEAD:<remote-branch>`) and confirm with
     `git rev-parse HEAD` == `git ls-remote origin <remote-branch>` before reporting a PR as updated.
+46. **Guard the posted account, not the source label**: a ledger check that inspects a line's source account or
+    category can be bypassed when the posted account is derived elsewhere (charge type → GL key). Check the resolved
+    target account, and treat any debit of a tax/levy payable as forbidden unless a named rule allows it (SL3-FIN-RULES D1/D2).
+47. **DB guards cover state transitions, not just frozen columns**: a trigger that freezes money/payee but lets the app
+    role set `state`/`approval_state` directly is a maker-checker bypass. Guard every status column's allowed transitions
+    and the preconditions for "approved without approval" (SL3-BIL-REFUND D1).
+48. **One owner decides each approval type**: if a module decides its own approvals, the generic PLT inbox must refuse
+    that type, or a decision there strands the record (SL3-BIL-REFUND D2).

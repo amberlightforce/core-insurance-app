@@ -222,8 +222,12 @@ public sealed class PolicySnapshotTests(PostgresFixture database) : IClassFixtur
         // The reference taken before the change re-reads byte for byte (POL P5), HTTP and in process.
         var reread = await RawAsync($"/api/pol/v1/snapshots/get?snapshotRef={Q(originalRef)}");
         reread.Response.StatusCode.ShouldBe(HttpStatusCode.OK, reread.Raw);
-        reread.Raw.ShouldBe(original.Raw);
-        (await RawAsync($"/api/pol/v1/snapshots/get?snapshotRef={Q(originalRef)}")).Raw.ShouldBe(original.Raw);
+        // Only the live supersession metadata may differ: the content, its ref and knownAt are byte-identical (D-SL3-03 c).
+        string Stable(string raw) { var node = JsonNode.Parse(raw)!.AsObject(); node.Remove("supersession"); return node.ToJsonString(); }
+        Stable(reread.Raw).ShouldBe(Stable(original.Raw));
+        JsonNode.Parse(reread.Raw)!["supersession"]!["superseded"]!.GetValue<bool>().ShouldBeTrue();
+        JsonNode.Parse(original.Raw)!["supersession"]!["superseded"]!.GetValue<bool>().ShouldBeFalse();
+        Stable((await RawAsync($"/api/pol/v1/snapshots/get?snapshotRef={Q(originalRef)}")).Raw).ShouldBe(Stable(original.Raw));
 
         await using var scope = _slice.Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<RequestContext>();
@@ -234,6 +238,8 @@ public sealed class PolicySnapshotTests(PostgresFixture database) : IClassFixtur
         var second = await service.GetAsync(snapshotRef: originalRef, cancellationToken: Ct);
         JsonSerializer.Serialize(second, CoreIns.SharedKernel.Json.SharedKernelJson.Options)
             .ShouldBe(JsonSerializer.Serialize(first, CoreIns.SharedKernel.Json.SharedKernelJson.Options));
+        first.Supersession!.Superseded.ShouldBeTrue();
+        first.Supersession.SuccessorRef.ShouldNotBeNull();
         first.SnapshotRef.ShouldBe(originalRef);
         first.Content!.Coverages.Count.ShouldBe(2);
         first.Policy.PolicyNumber.Value.ShouldBe(p.PolicyNumber);
@@ -306,6 +312,7 @@ public sealed class PolicySnapshotTests(PostgresFixture database) : IClassFixtur
         await using var dataSource = NpgsqlDataSource.Create(database.AppConnectionString);
         await using var command = dataSource.CreateCommand($"""
             BEGIN;
+            UPDATE pol.policy SET last_recorded_at = transaction_timestamp(), record_version = record_version + 1 WHERE policy_id = '{p.PolicyId}';
             INSERT INTO pol.policy_transaction (transaction_id, policy_id, term_id, job_id, legal_entity_id, kind, sequence, effective_at, recorded_at,
                 configuration_hash, artefact_hash, resolution_hash, intent, premium, taxes, total, currency, actor, correlation_id, origin)
             SELECT '{Guid.CreateVersion7()}', policy_id, term_id, gen_random_uuid(), legal_entity_id, 'CHANGE', 2, effective_at, transaction_timestamp(),

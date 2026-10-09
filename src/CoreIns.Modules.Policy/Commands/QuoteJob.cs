@@ -1,6 +1,7 @@
 using System.Text.Json;
 using CoreIns.Modules.Market.Contracts;
 using CoreIns.Modules.Market.Contracts.Api;
+using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Contracts.Events;
@@ -64,6 +65,7 @@ internal sealed partial class QuoteJobHandler(
     Dependency<IMarketRoundingService> roundingService,
     Dependency<IUnderwritingRulesService> underwritingService,
     RatingInput ratingInput,
+    ChangeQuoteService changeQuote,
     ILogger<QuoteJobHandler> logger,
     IOptions<PolicyOptions> options) : ICommandHandler<QuoteJob, JobQuoteResponse>
 {
@@ -71,6 +73,12 @@ internal sealed partial class QuoteJobHandler(
     {
         var request = command.Request;
         var now = clock.Now;
+        if (await changeQuote.IsChangeJobAsync(request.JobId, cancellationToken).ConfigureAwait(false))
+        {
+            // A mid-term change job quotes through SL3-POL-CHANGE (RAT ENDORSEMENT + the servicing engine).
+            return await changeQuote.QuoteAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+
         // Fail fast (POL-ERR-DEPENDENCY-UNAVAILABLE) before any work when a module is not wired yet.
         _ = (questionSetService.Value, ratingService.Value, roundingService.Value, underwritingService.Value);
         var loaded = await JobSupport.LoadAsync(db, JobSupport.LegalEntity(context, legalEntities), request.JobId, request.VersionNo, cancellationToken)

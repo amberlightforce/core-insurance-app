@@ -743,6 +743,10 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("receipt_id");
 
+                    b.Property<Guid?>("RefundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("refund_id");
+
                     b.Property<Guid?>("ReserveLineId")
                         .HasColumnType("uuid")
                         .HasColumnName("reserve_line_id");
@@ -775,6 +779,10 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                     b.HasIndex("LegalEntityId", "ClaimPaymentId", "AccountCode")
                         .HasDatabaseName("ix_journal_line_claim_payment")
                         .HasFilter("claim_payment_id IS NOT NULL");
+
+                    b.HasIndex("LegalEntityId", "RefundId", "AccountCode")
+                        .HasDatabaseName("ix_journal_line_refund")
+                        .HasFilter("refund_id IS NOT NULL");
 
                     b.ToTable("journal_line", "fin", t =>
                         {
