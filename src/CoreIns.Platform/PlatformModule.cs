@@ -204,6 +204,7 @@ public static class PlatformModule
         $"GRANT SELECT ON {Schema}.audit_chain_head TO {appRole}",
         $"REVOKE ALL ON FUNCTION {Schema}.audit_chain_lock(date) FROM PUBLIC",
         $"GRANT EXECUTE ON FUNCTION {Schema}.audit_chain_lock(date) TO {appRole}",
+        $"GRANT EXECUTE ON FUNCTION {Schema}.pfc_fallback_approval_verified(uuid, uuid, uuid, text, text, text, text, timestamptz, text[]) TO {appRole}",
         $"GRANT EXECUTE ON FUNCTION {Schema}.ri_contract_approval_verified(uuid, uuid, uuid, text, text, text, text[]) TO {appRole}",
         $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
     ];
