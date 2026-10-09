@@ -946,6 +946,37 @@
       "maximum": "12.50",
       "displayOrder": 1
     },
+    "FallbackPreview": {
+      "newVersion": "1.0",
+      "source": {
+        "version": "1.0",
+        "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "newBusinessWindow": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      },
+      "closedWindow": {
+        "from": "2026-01-01T00:00:00Z",
+        "to": "2027-01-01T00:00:00Z"
+      }
+    },
+    "FallbackSource": {
+      "version": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "FallbackView": {
+      "fallbackId": "0192af90-a6e9-7092-85a8-8c778b59515a",
+      "productCode": "SAMPLE_CODE",
+      "defectiveVersion": "1.0",
+      "newVersion": "1.0",
+      "status": "PENDING_APPROVAL",
+      "reason": "sample",
+      "requestedBy": "Sample text",
+      "decidedBy": "Sample text",
+      "approvalRequestId": "01920f5c-4e75-7442-879e-7cdcd2719d13",
+      "decidedAt": "2026-10-07T09:00:00Z"
+    },
     "FinalBinding": {
       "key": "Sample text",
       "layer": "SAMPLE_CODE",
@@ -1339,8 +1370,53 @@
     "ProductVersionCancelScheduleResponse": {
       "schedule": "unspecified"
     },
+    "ProductVersionDecideFallbackRequest": {
+      "fallbackId": "01923196-1f86-731e-8818-3d9a7c089df9",
+      "decision": "APPROVE",
+      "reason": "sample"
+    },
+    "ProductVersionDecideFallbackResponse": {
+      "fallback": {
+        "fallbackId": "0192d182-56e5-7b76-8c8a-6e024f124a7b",
+        "productCode": "SAMPLE_CODE",
+        "defectiveVersion": "1.0",
+        "newVersion": "1.0",
+        "status": "PENDING_APPROVAL",
+        "reason": "sample",
+        "requestedBy": "Sample text",
+        "decidedBy": "Sample text",
+        "approvalRequestId": "01924665-0ff6-7299-8507-930ef92dfa8e",
+        "decidedAt": "2026-10-07T09:00:00Z"
+      }
+    },
     "ProductVersionDiffResponse": {
       "groupedEntriesClasses": "unspecified"
+    },
+    "ProductVersionEmergencyFallbackRequest": {
+      "productCode": "SAMPLE_CODE",
+      "defectiveVersion": "1.0",
+      "reason": "samplexxxxxxxxxxxxxx"
+    },
+    "ProductVersionEmergencyFallbackResponse": {
+      "dryRun": true,
+      "preview": {
+        "newVersion": "1.0",
+        "source": {
+          "version": "1.0",
+          "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        },
+        "newBusinessWindow": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        },
+        "closedWindow": {
+          "from": "2026-01-01T00:00:00Z",
+          "to": "2027-01-01T00:00:00Z"
+        }
+      },
+      "fallbackId": "0192786b-089a-746e-89cb-496f42a17863",
+      "status": "PENDING_APPROVAL",
+      "approvalRequestId": "0192a5a5-1194-7165-8351-2884254f904a"
     },
     "ProductVersionFallBackRequest": {
       "version": "unspecified",

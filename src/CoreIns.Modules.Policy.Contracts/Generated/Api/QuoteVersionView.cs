@@ -66,6 +66,10 @@ public sealed record QuoteVersionView
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Instant? ValidUntil { get; init; }
 
+    /// <summary>PACK_ROLLBACK when the version was recorded under a rolled-back pack version (D-SL5-10); bind refuses it with QUOTE-STALE. Null when not stale; treat an absent member as null.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("staleReason")]
+    public StaleReasonValue? StaleReason { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StateValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
@@ -86,5 +90,15 @@ public sealed record QuoteVersionView
         /// <summary><c>EXPIRED</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("EXPIRED")]
         Expired,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StaleReasonValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StaleReasonValue
+    {
+        /// <summary><c>PACK_ROLLBACK</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PACK_ROLLBACK")]
+        PackRollback,
     }
 }
