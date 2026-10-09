@@ -46,10 +46,23 @@ The brief's generic `PLT-ERR-STATE` name is implemented using the already typed 
 The reason is persisted in decision_comment and successful audit, without changing supersession withdrawal.
 No contracts/generated artifacts change.
 
+Files changed: Host development-users JSON and DevelopmentAuthentication; Platform Approvals/WithdrawApproval,
+ApprovalCommands SPI wiring, ApprovalStore withdrawal path, PlatformModule registration, Context/RequestContext,
+Commands/Decorators; IntegrationTests DevelopmentSignInTests and Platform/WithdrawApprovalTests; this report.
+
 ## Validation
 
 Initial checkpoint: native Release build zero warnings/errors; eight DevelopmentSignInTests passed.
-Final gates and exact PR head will be recorded after completion. Logs use unique `.logs/sl4-plt-*` paths.
+Final native gates passed against the implementation checkpoint plus the distinct-name assertion:
+Release zero warnings/errors; WithdrawApprovalTests 6; DevelopmentSignInTests 11; existing ApprovalTests 16
+(including superuser SoD); IdempotencyTests 9; AuditTests 8; Platform unit tests 69; Host tests 35;
+Architecture 198; Contracts 18. All passed with zero skipped/failed. ContractGen current (2,852 files);
+API samples checked 2,423, all valid. Logs: `.logs/sl4-plt-final-{build,withdraw,signin,approval,idempotency,audit,platform,host,architecture,contractgen,samples,api-samples}.log`.
+
+These are focused integration/pipeline/unit/contract checks, not a full solution test run or proof of the dependent
+RI UI browser acceptance. No requested behavior remains stubbed. GitHub CI and independent security review are
+reported on the PR; root owns integration and merging. The initial user/actor-key checkpoints were separately
+provided to root for its real RI browser journey.
 
 PITFALLS 3/5: owning module/principal SoD; 4/6: typed SPI and no REST; 15: conditional state transition;
 30: unique display names; 38/39: Windows native, two MSBuild workers, server/node reuse disabled; 45: verify pushed HEAD.
