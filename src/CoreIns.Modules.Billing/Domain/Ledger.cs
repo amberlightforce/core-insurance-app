@@ -31,6 +31,9 @@ internal static class EntryTypes
     /// <summary>A credit note billed: written unbilled → billed receivable credited (PRD-06 §4.13 step 17, REQ-BIL-074, REQ-BIL-091).</summary>
     public const string CreditBilled = "CREDIT_BILLED";
 
+    /// <summary>A refund approved: the credit moves from the billed receivable LA-02 to refunds payable LA-12 (PRD-06 §4.13 step 18, REQ-BIL-190).</summary>
+    public const string RefundApproved = "REFUND_APPROVED";
+
     /// <summary>Cash received into unapplied cash (REQ-BIL-126, REQ-BIL-131).</summary>
     public const string Received = "RECEIVED";
 

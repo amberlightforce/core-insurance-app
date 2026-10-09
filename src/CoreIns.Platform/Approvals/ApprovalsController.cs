@@ -30,8 +30,19 @@ internal sealed class ApprovalsController : ControllerBase
     [HttpPost("decide")]
     [Authorize(Policy = ApprovalPermissions.Decide)]
     public async Task<IResult> DecideAsync(
-        [FromBody] ApprovalDecideRequest body, [FromServices] ICommandHandler<DecideApproval, ApprovalDecideResponse> handler, CancellationToken cancellationToken) =>
-        (await handler.HandleAsync(new DecideApproval(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+        [FromBody] ApprovalDecideRequest body, [FromServices] ICommandHandler<DecideApproval, ApprovalDecideResponse> handler,
+        [FromServices] ApprovalQueries queries, [FromServices] OwnerDecidedApprovalTypes owners, CancellationToken cancellationToken)
+    {
+        // Approval types whose owner executes the decision (refunds): deciding them here would leave the owner's object pending forever.
+        var found = await queries.GetAsync(body.RequestId, cancellationToken).ConfigureAwait(false);
+        if (found.IsSuccess && owners.Contains(found.Value.Request.Type))
+        {
+            return ((Result<ApprovalDecideResponse>)ApprovalErrors.Of(
+                ApprovalErrors.OwnerDecided, $"Requests of type {found.Value.Request.Type} are decided in the owning module's own screen, not in the approvals inbox.")).ToHttpResult(HttpContext);
+        }
+
+        return (await handler.HandleAsync(new DecideApproval(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+    }
 
     /// <summary>plt.Approval.get.</summary>
     [HttpGet("{id}")]
@@ -46,6 +57,12 @@ internal sealed class ApprovalsController : ControllerBase
     [Authorize(Policy = ApprovalPermissions.List)]
     public async Task<IResult> ListAsync(
         [FromQuery] ApprovalStatus? status, [FromQuery] string? role, [FromQuery] string? cursor, [FromQuery] int? limit, [FromServices] ApprovalQueries queries,
-        CancellationToken cancellationToken) =>
-        (await queries.ListAsync(status, role, cursor, limit, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+        [FromServices] OwnerDecidedApprovalTypes owners, CancellationToken cancellationToken)
+    {
+        // Owner-decided types are not listed: they are decided in the owning module's own screen (PLT-ERR-OWNER-DECIDED otherwise).
+        var page = await queries.ListAsync(status, role, cursor, limit, cancellationToken).ConfigureAwait(false);
+        return page.IsSuccess
+            ? Results.Ok(page.Value with { Items = [.. page.Value.Items.Where(i => !owners.Contains(i.Request.Type))] })
+            : page.ToHttpResult(HttpContext);
+    }
 }

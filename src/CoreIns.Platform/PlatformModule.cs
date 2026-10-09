@@ -127,6 +127,7 @@ public static class PlatformModule
         services.AddCommand<DecideApproval, ApprovalDecideResponse, DecideApprovalHandler>(CommandDescriptor.For("plt.Approval.decide"));
 
         services.TryAddScoped<ApprovalQueries>();
+        services.TryAddSingleton<OwnerDecidedApprovalTypes>();
         services.TryAddScoped<IPlatformApprovalService, PlatformApprovalService>();
         services.AddErrorDefinitions(
             ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.SelfApproval, 403, "Δεν μπορείτε να εγκρίνετε δικό σας αίτημα", "You cannot decide your own request")
@@ -139,6 +140,8 @@ public static class PlatformModule
                 .Describe("Το αίτημα αποφασίστηκε ή αντικαταστάθηκε, ή το περιεχόμενο άλλαξε μετά τον έλεγχό σας. Φορτώστε το ξανά.", "The request was decided or superseded, or its content changed after you reviewed it. Reload it."),
             ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.HashMismatch, 422, "Το περιεχόμενο διαφέρει από αυτό που εγκρίθηκε", "The content differs from what was approved")
                 .Describe("Η εκτέλεση επιτρέπεται μόνο για το περιεχόμενο που εγκρίθηκε (ίδιο αποτύπωμα SHA-256).", "Execution is allowed only for the approved content (same SHA-256 hash)."),
+            ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.OwnerDecided, 409, "Η έγκριση γίνεται στην οθόνη του υπεύθυνου τομέα", "Decided in the owning module")
+                .Describe("Αυτός ο τύπος αιτήματος εγκρίνεται ή απορρίπτεται μόνο από την οθόνη του τομέα που τον κατέχει (π.χ. επιστροφές χρημάτων από τη χρέωση), όχι από τα εισερχόμενα εγκρίσεων.", "This request type is approved or rejected only in the screen of the module that owns it (for example refunds in billing), not in the approvals inbox."),
             ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.SubjectMismatch, 422, "Η έγκριση αφορά άλλο αντικείμενο", "The approval is for another subject")
                 .Describe("Το αίτημα έγκρισης είναι άλλου τύπου ή αφορά άλλο αντικείμενο από αυτό που εκτελείται.", "The approval request is of another type or for another subject than the one being executed."));
         return services;
