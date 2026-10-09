@@ -7,9 +7,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Hangfire.Core: the recurring lifecycle scanner (SL4-RI-REGISTRY, activation and expiry at the period boundaries). -->
+    <PackageReference Include="Hangfire.Core" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CoreIns.Modules.Reinsurance.Contracts\CoreIns.Modules.Reinsurance.Contracts.csproj" />
+    <!-- pty.Party.get: reinsurers and brokers must be organisation parties (REQ-RI-046). Contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Party.Contracts\CoreIns.Modules.Party.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.IntegrationTests" />
+    <InternalsVisibleTo Include="CoreIns.ArchitectureTests" />
   </ItemGroup>
 
 </Project>
