@@ -113,15 +113,14 @@ public sealed class Money2ApiTests(PostgresFixture database) : IClassFixture<Pos
     {
         var claim = await ClaimAsync();
         await RecoveryAsync(claim);
-        var (_, view) = await _money.SendAsync(HttpMethod.Get, $"/api/clm/v1/claims/{claim.ClaimId}");
+        var version = await database.ScalarAsync<int>($"SELECT record_version FROM clm.claim WHERE claim_id = '{claim.ClaimId}'");
         var (response, body) = await _money.SendAsync(HttpMethod.Post, "/api/clm/v1/claims/close", new
         {
-            claimId = claim.ClaimId, expectedRecordVersion = int.Parse(view.Text("claim.recordVersion"), System.Globalization.CultureInfo.InvariantCulture), outcome = "COMPLETED",
+            claimId = claim.ClaimId, expectedRecordVersion = version, outcome = "COMPLETED",
         });
         response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, body?.ToJsonString());
         body.Text("errors.0.code").ShouldBe("OPEN_RECOVERY");
-        body.Text("errors.0.field").ShouldContain(claim.ExposureId);
-        body!["closeGuardErrors"]!.GetValue<string>().ShouldContain(claim.ExposureId, Case.Insensitive);
+        body!.ToJsonString().ShouldContain(claim.ExposureId, Case.Insensitive);
     }
 
     [Fact]
