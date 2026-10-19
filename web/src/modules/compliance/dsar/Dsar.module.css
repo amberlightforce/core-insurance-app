@@ -37,7 +37,7 @@
 .grid {
   inline-size: 100%;
   border-collapse: collapse;
-  font-size: var(--font-size-body-sm, 0.875rem);
+  font: var(--type-body-compact);
 }
 
 .grid th,
