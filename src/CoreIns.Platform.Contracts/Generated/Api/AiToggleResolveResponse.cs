@@ -4,31 +4,33 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.AiToggle.resolve result. PRD outputs: "output, interaction id; outcome"</summary>
+/// <summary>plt.AiToggle.resolve result: the effective state the gate would answer now.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AiToggleResolveResponse
 {
-    /// <summary>PRD: "output"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("output")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Output { get; init; }
+    /// <summary>Contract member 'featureId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("featureId")]
+    public required global::CoreIns.SharedKernel.Identifiers.AiFeatureId FeatureId { get; init; }
 
-    /// <summary>PRD: "interaction id"</summary>
-    /// <remarks>
-    /// <para>Untyped id: no SharedKernel id type is mapped for 'interactionId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("interactionId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? InteractionId { get; init; }
+    /// <summary>The feature's own toggle</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("enabled")]
+    public required bool Enabled { get; init; }
 
-    /// <summary>PRD: "outcome"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    /// <summary>Toggle on and no kill switch active</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("allowed")]
+    public required bool Allowed { get; init; }
+
+    /// <summary>Gate reason code when not allowed</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Outcome { get; init; }
+    public string? Reason { get; init; }
+
+    /// <summary>AI register status last seen (null when no register)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("registerStatus")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? RegisterStatus { get; init; }
+
+    /// <summary>Contract member 'killSwitchActive'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("killSwitchActive")]
+    public required bool KillSwitchActive { get; init; }
 }

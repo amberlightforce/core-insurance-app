@@ -13,6 +13,9 @@
 
   <!-- Transitive security floors (not referenced directly) -->
   <ItemGroup>
+    <!-- Transitive security pins (GHSA advisories on 10.0.10). -->
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.13" />
     <!-- Hangfire.Core allows Newtonsoft.Json 11.0.1, which has GHSA-5crp-9r3c-p9vr; pin the fixed line. -->
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
