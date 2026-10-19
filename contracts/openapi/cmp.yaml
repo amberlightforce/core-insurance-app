@@ -6750,121 +6750,61 @@ components:
           description: 'PRD: "breaks"'
     ClockStartRequest:
       type: object
-      description: 'cmp.Clock.start request. PRD inputs: "clock code, subject ref, jurisdiction, start time, variant, causation
-        id, reason"'
+      description: 'cmp.Clock.start request. Idempotent on clockCode + subjectRef + key.'
       properties:
         clockCode:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "clock code"'
+          $ref: ../events/common.schema.json#/$defs/ClockCode
+          description: 'Clock code'
         subjectRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "subject ref"'
-        jurisdiction:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "jurisdiction"'
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: 'Subject of the clock'
+        key:
+          type: string
+          maxLength: 128
+          description: 'Instance key within definition and subject (default empty)'
         startTime:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "start time"'
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'Start instant (default now); e.g. the notification date'
         variant:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "variant"'
+          type: string
+          description: 'Definition variant, optional'
         causationId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "causation id"'
+          description: 'Causing event'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          description: 'Reason text'
+      required:
+      - clockCode
+      - subjectRef
     ClockStartResponse:
       type: object
-      description: 'cmp.Clock.start result. PRD outputs: "instance id, deadline, value version"'
+      description: 'cmp.Clock.start result'
       properties:
         instanceId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "instance id"'
+          description: 'Clock instance id'
+        status:
+          type: string
+          enum:
+          - RUNNING
+          - WARNED
+          - PAUSED
+          - MET
+          - BREACHED
+          - ELAPSED
+          - CANCELLED
+          description: 'Instance state after the call'
         deadline:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadline"'
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'Due instant (absent for none)'
         valueVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "value version"'
-    ClockPauseRequest:
-      type: object
-      description: 'cmp.Clock.pause request. PRD inputs: "clock code, subject ref, jurisdiction, start time, variant, causation
-        id, reason"'
-      properties:
-        clockCode:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "clock code"'
-        subjectRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "subject ref"'
-        jurisdiction:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "jurisdiction"'
-        startTime:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "start time"'
-        variant:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "variant"'
-        causationId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "causation id"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-    ClockPauseResponse:
-      type: object
-      description: 'cmp.Clock.pause result. PRD outputs: "instance id, deadline, value version"'
-      properties:
-        instanceId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "instance id"'
-        deadline:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadline"'
-        valueVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "value version"'
-    ClockResumeRequest:
-      type: object
-      description: 'cmp.Clock.resume request. PRD inputs: "clock code, subject ref, jurisdiction, start time, variant, causation
-        id, reason"'
-      properties:
-        clockCode:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "clock code"'
-        subjectRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "subject ref"'
-        jurisdiction:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "jurisdiction"'
-        startTime:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "start time"'
-        variant:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "variant"'
-        causationId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "causation id"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-    ClockResumeResponse:
-      type: object
-      description: 'cmp.Clock.resume result. PRD outputs: "instance id, deadline, value version"'
-      properties:
-        instanceId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "instance id"'
-        deadline:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadline"'
-        valueVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "value version"'
+          type: integer
+          description: 'Version of the clock value (increments on pause, resume, extend)'
+      required:
+      - instanceId
+      - status
+      - valueVersion
     ClockStopRequest:
       type: object
       description: 'cmp.Clock.stop request (PRD-11 §9.1: instance id or subject ref + clock code, outcome, stop time). Identify
@@ -6879,6 +6819,10 @@ components:
         clockCode:
           $ref: ../events/common.schema.json#/$defs/ClockCode
           description: Clock code `<MOD>_<NAME>`
+        key:
+          type: string
+          maxLength: 128
+          description: Instance key (default empty)
         outcome:
           type: string
           enum:
@@ -6900,106 +6844,356 @@ components:
         - clockCode
     ClockStopResponse:
       type: object
-      description: 'cmp.Clock.stop result. PRD outputs: "instance state, met/late flag"'
+      description: 'cmp.Clock.stop result'
       properties:
         instanceState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "instance state"'
+          type: string
+          enum:
+          - RUNNING
+          - WARNED
+          - PAUSED
+          - MET
+          - BREACHED
+          - ELAPSED
+          - CANCELLED
+          description: 'Instance state after the call'
         metLateFlag:
           type: boolean
-          description: 'PRD: "met/late flag"'
+          description: 'True when stopped after the deadline'
+      required:
+      - instanceState
+    ClockPauseRequest:
+      type: object
+      description: 'cmp.Clock.pause request; identify by instanceId or subjectRef + clockCode (+ key).'
+      properties:
+        instanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Clock instance id (or give subjectRef + clockCode + key)'
+        clockCode:
+          $ref: ../events/common.schema.json#/$defs/ClockCode
+          description: 'Clock code'
+        subjectRef:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: 'Subject of the clock'
+        key:
+          type: string
+          maxLength: 128
+          description: 'Instance key within definition and subject (default empty)'
+        causationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+      oneOf:
+      - required:
+        - instanceId
+      - required:
+        - subjectRef
+        - clockCode
+    ClockPauseResponse:
+      type: object
+      description: 'cmp.Clock.pause result'
+      properties:
+        instanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Clock instance id'
+        status:
+          type: string
+          enum:
+          - RUNNING
+          - WARNED
+          - PAUSED
+          - MET
+          - BREACHED
+          - ELAPSED
+          - CANCELLED
+          description: 'Instance state after the call'
+        deadline:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'Due instant (absent for none)'
+        valueVersion:
+          type: integer
+          description: 'Version of the clock value (increments on pause, resume, extend)'
+      required:
+      - instanceId
+      - status
+      - valueVersion
+    ClockResumeRequest:
+      type: object
+      description: 'cmp.Clock.resume request; identify by instanceId or subjectRef + clockCode (+ key).'
+      properties:
+        instanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Clock instance id (or give subjectRef + clockCode + key)'
+        clockCode:
+          $ref: ../events/common.schema.json#/$defs/ClockCode
+          description: 'Clock code'
+        subjectRef:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: 'Subject of the clock'
+        key:
+          type: string
+          maxLength: 128
+          description: 'Instance key within definition and subject (default empty)'
+        causationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+      oneOf:
+      - required:
+        - instanceId
+      - required:
+        - subjectRef
+        - clockCode
+    ClockResumeResponse:
+      type: object
+      description: 'cmp.Clock.resume result'
+      properties:
+        instanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Clock instance id'
+        status:
+          type: string
+          enum:
+          - RUNNING
+          - WARNED
+          - PAUSED
+          - MET
+          - BREACHED
+          - ELAPSED
+          - CANCELLED
+          description: 'Instance state after the call'
+        deadline:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'Due instant (absent for none)'
+        valueVersion:
+          type: integer
+          description: 'Version of the clock value (increments on pause, resume, extend)'
+      required:
+      - instanceId
+      - status
+      - valueVersion
     ClockCancelRequest:
       type: object
-      description: 'cmp.Clock.cancel request. PRD inputs: "clock code, subject ref, jurisdiction, start time, variant, causation
-        id, reason"'
+      description: 'cmp.Clock.cancel request; identify by instanceId or subjectRef + clockCode (+ key).'
       properties:
+        instanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Clock instance id (or give subjectRef + clockCode + key)'
         clockCode:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "clock code"'
+          $ref: ../events/common.schema.json#/$defs/ClockCode
+          description: 'Clock code'
         subjectRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "subject ref"'
-        jurisdiction:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "jurisdiction"'
-        startTime:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "start time"'
-        variant:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "variant"'
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: 'Subject of the clock'
+        key:
+          type: string
+          maxLength: 128
+          description: 'Instance key within definition and subject (default empty)'
         causationId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "causation id"'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          description: 'Required (CMP-ERR-CLOCK-CANCEL-REASON)'
+      oneOf:
+      - required:
+        - instanceId
+      - required:
+        - subjectRef
+        - clockCode
     ClockCancelResponse:
       type: object
-      description: 'cmp.Clock.cancel result. PRD outputs: "instance id, deadline, value version"'
+      description: 'cmp.Clock.cancel result'
       properties:
         instanceId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "instance id"'
+          description: 'Clock instance id'
+        status:
+          type: string
+          enum:
+          - RUNNING
+          - WARNED
+          - PAUSED
+          - MET
+          - BREACHED
+          - ELAPSED
+          - CANCELLED
+          description: 'Instance state after the call'
         deadline:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadline"'
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'Due instant (absent for none)'
         valueVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "value version"'
+          type: integer
+          description: 'Version of the clock value (increments on pause, resume, extend)'
+      required:
+      - instanceId
+      - status
+      - valueVersion
     ClockExtendRequest:
       type: object
-      description: 'cmp.Clock.extend request. PRD inputs: "clock code, subject ref, jurisdiction, start time, variant, causation
-        id, reason"'
-      properties:
-        clockCode:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "clock code"'
-        subjectRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "subject ref"'
-        jurisdiction:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "jurisdiction"'
-        startTime:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "start time"'
-        variant:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "variant"'
-        causationId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "causation id"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-    ClockExtendResponse:
-      type: object
-      description: 'cmp.Clock.extend result. PRD outputs: "instance id, deadline, value version"'
+      description: 'cmp.Clock.extend request; identify by instanceId or subjectRef + clockCode (+ key).'
       properties:
         instanceId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "instance id"'
+          description: 'Clock instance id (or give subjectRef + clockCode + key)'
+        clockCode:
+          $ref: ../events/common.schema.json#/$defs/ClockCode
+          description: 'Clock code'
+        subjectRef:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: 'Subject of the clock'
+        key:
+          type: string
+          maxLength: 128
+          description: 'Instance key within definition and subject (default empty)'
+        extension:
+          type: string
+          description: 'ISO 8601 period added to the deadline (PnYnMnWnD)'
+        reason:
+          type: string
+      required:
+      - extension
+      oneOf:
+      - required:
+        - instanceId
+      - required:
+        - subjectRef
+        - clockCode
+    ClockExtendResponse:
+      type: object
+      description: 'cmp.Clock.extend result'
+      properties:
+        instanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Clock instance id'
+        status:
+          type: string
+          enum:
+          - RUNNING
+          - WARNED
+          - PAUSED
+          - MET
+          - BREACHED
+          - ELAPSED
+          - CANCELLED
+          description: 'Instance state after the call'
         deadline:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadline"'
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'Due instant (absent for none)'
         valueVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "value version"'
+          type: integer
+          description: 'Version of the clock value (increments on pause, resume, extend)'
+      required:
+      - instanceId
+      - status
+      - valueVersion
     ClockGetResponse:
       type: object
-      description: 'cmp.Clock.get result. PRD outputs: "instances"'
+      description: 'cmp.Clock.get result'
       properties:
         instances:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "instances"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ClockInstanceView'
+      required:
+      - instances
+    ClockInstanceView:
+      type: object
+      description: One clock instance
+      properties:
+        instanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        clockCode:
+          $ref: ../events/common.schema.json#/$defs/ClockCode
+        subjectRef:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+        key:
+          type: string
+        kind:
+          type: string
+          enum:
+          - WAITING_PERIOD
+          - DEADLINE
+        status:
+          type: string
+          enum:
+          - RUNNING
+          - WARNED
+          - PAUSED
+          - MET
+          - BREACHED
+          - ELAPSED
+          - CANCELLED
+        startedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        deadline:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'Current due instant'
+        pausedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        closedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        outcome:
+          type: string
+        metLate:
+          type: boolean
+        variant:
+          type: string
+        valueVersion:
+          type: integer
+      required:
+      - instanceId
+      - clockCode
+      - subjectRef
+      - status
     ClockQueryItem:
       type: object
-      description: 'cmp.Clock.query result. PRD outputs: "instances"'
+      description: 'cmp.Clock.query item (one clock instance)'
       properties:
-        instances:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "instances"'
+        instanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        clockCode:
+          $ref: ../events/common.schema.json#/$defs/ClockCode
+        subjectRef:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+        key:
+          type: string
+        kind:
+          type: string
+          enum:
+          - WAITING_PERIOD
+          - DEADLINE
+        status:
+          type: string
+          enum:
+          - RUNNING
+          - WARNED
+          - PAUSED
+          - MET
+          - BREACHED
+          - ELAPSED
+          - CANCELLED
+        startedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        deadline:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'Current due instant'
+        pausedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        closedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        outcome:
+          type: string
+        metLate:
+          type: boolean
+        variant:
+          type: string
+        valueVersion:
+          type: integer
+      required:
+      - instanceId
+      - clockCode
+      - subjectRef
+      - status
     ClockQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7012,8 +7206,38 @@ components:
       description: Page of cmp.Clock.query results (cursor pagination, contract §3.5.5)
     ClockDefListItem:
       type: object
-      description: 'cmp.ClockDef.list result. PRD outputs: "definitions"'
-      x-status: minimal
+      description: 'cmp.ClockDef.list item'
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/ClockCode
+        name:
+          type: string
+        kind:
+          type: string
+          enum:
+          - WAITING_PERIOD
+          - DEADLINE
+        duration:
+          type: string
+          description: 'ISO 8601 period'
+        jurisdiction:
+          type: string
+        legalStatus:
+          type: string
+          description: 'VERIFIED, SECONDARY_SOURCE or ILLUSTRATIVE'
+        source:
+          type: string
+          description: 'Legal or PRD source'
+        extendable:
+          type: boolean
+        warnBefore:
+          type: string
+          description: 'ISO 8601 period before the deadline for ClockWarned'
+      required:
+      - code
+      - kind
+      - duration
+      - legalStatus
     ClockDefListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7026,8 +7250,38 @@ components:
       description: Page of cmp.ClockDef.list results (cursor pagination, contract §3.5.5)
     ClockDefGetResponse:
       type: object
-      description: 'cmp.ClockDef.get result. PRD outputs: "definitions"'
-      x-status: minimal
+      description: 'cmp.ClockDef.get result'
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/ClockCode
+        name:
+          type: string
+        kind:
+          type: string
+          enum:
+          - WAITING_PERIOD
+          - DEADLINE
+        duration:
+          type: string
+          description: 'ISO 8601 period'
+        jurisdiction:
+          type: string
+        legalStatus:
+          type: string
+          description: 'VERIFIED, SECONDARY_SOURCE or ILLUSTRATIVE'
+        source:
+          type: string
+          description: 'Legal or PRD source'
+        extendable:
+          type: boolean
+        warnBefore:
+          type: string
+          description: 'ISO 8601 period before the deadline for ClockWarned'
+      required:
+      - code
+      - kind
+      - duration
+      - legalStatus
     ClockDefProposeRequest:
       type: object
       description: 'cmp.ClockDef.propose request. PRD inputs: "jurisdiction, code"'

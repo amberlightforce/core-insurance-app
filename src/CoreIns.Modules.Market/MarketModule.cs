@@ -106,6 +106,7 @@ public static class MarketModule
         services.AddScoped<IMarketConfigurationService>(sp => sp.GetRequiredService<MarketConfigurationService>());
         services.AddScoped<MarketRoundingService>();
         services.AddScoped<IMarketRoundingService>(sp => sp.GetRequiredService<MarketRoundingService>());
+        services.AddScoped<IMarketCapabilityService, MarketCapabilityService>();
 
         // SPI 4 treatment (SL3-MKT-TREATMENT): rows are pack data in the state, the calculator holds no default. Scoped: it prices under the
         // configuration hash pinned for the unit of work (REQ-MKT-051).
