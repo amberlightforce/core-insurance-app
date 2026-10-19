@@ -18,6 +18,12 @@ internal static class GrTreatmentRules
     private const string Apply = "PRD-17 REQ-MKT-331 (D2 Greece treatment defaults); Law 5177/2025 Art. 43; legalStatus PendingOpinion (OI-MKT-19)";
     private const string Void = "PRD-17 REQ-MKT-331 (D2 Greece treatment defaults); Law 5317/2026 Art. 72 (full refund including tax and levy lines on distance withdrawal); legalStatus PendingOpinion (OI-MKT-19)";
 
+    /// <summary>
+    /// F-401 / D-SL6-02: the customer is refunded in full (secondary source Law 5317/2026 Art. 72, legalStatus SECONDARY_SOURCE); only the
+    /// insurer's tax position is open (tax_position TAX_OPINION_PENDING). The pack enum keeps PendingOpinion (provisional outside Production).
+    /// </summary>
+    private const string WithdrawalNote = "legalStatus SECONDARY_SOURCE (Law 5317/2026 Art. 72); tax_position TAX_OPINION_PENDING (F-401, D-SL6-02): customer refunded in full, insurer tax position open.";
+
     public static IReadOnlyList<PackConfigValue> Values { get; } =
     [
         Row("CANCELLATION", "Policyholder", "KEEP_NOT_REDUCED", "GR-TRT-IPT-CANCEL-POLICYHOLDER", Keep),
@@ -36,6 +42,6 @@ internal static class GrTreatmentRules
             $$"""{"action":"{{action}}","ruleId":"{{ruleId}}","ruleVersion":"{{RuleVersion}}"}""",
             LegalStatus.PendingOpinion, sourceRef, MotorPath: true,
             Note: kind == "DISTANCE_WITHDRAWAL_VOID"
-                ? "Alternative INSURER_BEARS selectable via tax.treatment.withdrawal_void_routing (registered, not used by the slice)."
-                : null);
+                ? "Alternative INSURER_BEARS selectable via tax.treatment.withdrawal_void_routing (registered, not used by the slice). " + WithdrawalNote
+                : kind == "VOID" && source == "DistanceWithdrawal" ? WithdrawalNote : null);
 }

@@ -18,7 +18,7 @@ public interface IPolicyWithdrawalService
     /// <para>Status: full. Wave W6.</para>
     /// <para>Exposure: ui; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: POL-ERR-RIGHT-EXPIRED (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-RIGHT-EXPIRED (422), POL-ERR-NOT-FOUND (404), POL-ERR-VALIDATION (422), POL-ERR-ILLEGAL-TRANSITION (409), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.WithdrawalSubmitResponse> SubmitAsync(global::CoreIns.Modules.Policy.Contracts.Api.WithdrawalSubmitRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

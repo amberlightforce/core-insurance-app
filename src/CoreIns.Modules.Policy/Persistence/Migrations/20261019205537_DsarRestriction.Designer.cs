@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CoreIns.Modules.Policy.Persistence.Migrations
 {
     [DbContext(typeof(PolicyDbContext))]
-    [Migration("20261019202815_DsarRestriction")]
+    [Migration("20261019205537_DsarRestriction")]
     partial class DsarRestriction
     {
         /// <inheritdoc />
@@ -1140,6 +1140,70 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                             t.HasCheckConstraint("ck_segment_snapshot_hash", "snapshot_hash ~ '^[0-9a-f]{64}$'");
 
                             t.HasCheckConstraint("ck_segment_valid", "valid_to > valid_from");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.WithdrawalRow", b =>
+                {
+                    b.Property<Guid>("WithdrawalId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("withdrawal_id");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actor");
+
+                    b.Property<string>("ChannelRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("channel_ref");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("job_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("received_at");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("result");
+
+                    b.Property<string>("Right")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("right");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.HasKey("WithdrawalId")
+                        .HasName("pk_withdrawal");
+
+                    b.HasIndex("PolicyId", "ChannelRef")
+                        .IsUnique()
+                        .HasDatabaseName("ux_withdrawal_policy_channel_ref");
+
+                    b.ToTable("withdrawal", "pol", t =>
+                        {
+                            t.HasCheckConstraint("ck_withdrawal_right", "\"right\" IN ('WITHDRAWAL', 'OBJECTION')");
                         });
                 });
 

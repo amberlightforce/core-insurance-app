@@ -32,6 +32,9 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
     public DbSet<PackRollbackExceptionRow> PackRollbackExceptions => Set<PackRollbackExceptionRow>();
 
     public DbSet<DsarRestrictionRow> DsarRestrictions => Set<DsarRestrictionRow>();
+
+    public DbSet<WithdrawalRow> Withdrawals => Set<WithdrawalRow>();
+
     public DbSet<OosCorrectionRow> OosCorrections => Set<OosCorrectionRow>();
 
     protected override string Schema => PolicyModule.Schema;
@@ -379,6 +382,23 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.HasIndex(e => new { e.LegalEntityId, e.Status, e.IdentifiedAt }).HasDatabaseName("ix_pack_rollback_exception_queue");
             entity.HasOne<PolicyTransactionRow>().WithMany().HasForeignKey(e => e.TransactionId)
                 .HasConstraintName("fk_pack_rollback_exception_transaction").OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<WithdrawalRow>(entity =>
+        {
+            entity.ToTable("withdrawal", table => table.HasCheckConstraint("ck_withdrawal_right", "\"right\" IN ('WITHDRAWAL', 'OBJECTION')"));
+            entity.HasKey(e => e.WithdrawalId).HasName("pk_withdrawal");
+            entity.Property(e => e.WithdrawalId).HasColumnName("withdrawal_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.JobId).HasColumnName("job_id");
+            entity.Property(e => e.ChannelRef).HasColumnName("channel_ref");
+            entity.Property(e => e.Right).HasColumnName("right");
+            entity.Property(e => e.ReceivedAt).HasColumnName("received_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Actor).HasColumnName("actor");
+            entity.Property(e => e.Result).HasColumnName("result").HasColumnType("jsonb");
+            entity.HasIndex(e => new { e.PolicyId, e.ChannelRef }).IsUnique().HasDatabaseName("ux_withdrawal_policy_channel_ref");
         });
     }
 
