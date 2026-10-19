@@ -25,7 +25,8 @@ internal sealed class BillingEntryPostedHandler(Intake intake) : IEventHandler<J
 }
 
 /// <summary>
-/// CLM ReserveChanged and PaymentIssued: FIN's posting sources for claims (PRD-09 events table, REQ-FIN-037, D-SL2-08).
+/// CLM ReserveChanged, PaymentIssued, RecoveryRecorded and PaymentVoided and RI RecoveryCalculated: FIN's posting sources for claims
+/// and recoverables (PRD-09 events table, REQ-FIN-037, -159, -160, -164, D-SL2-08, D-SL4-10).
 /// Idempotent on the source event id; each fact posts on its own, so PaymentIssued and BIL's DISBURSEMENT_RELEASED
 /// net GL-2510 to zero per payment in either arrival order (D-ARC-26).
 /// </summary>

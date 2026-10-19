@@ -187,10 +187,18 @@ internal static class EntryPosting
         CostType = line.Dimension(LineDimensionKeys.CostType),
         CostCategory = line.Dimension(LineDimensionKeys.CostCategory),
         ClaimPaymentId = line.Id(LineDimensionKeys.ClaimPaymentId)
-            ?? (line.Dimension(LineDimensionKeys.SourceType) == DisbursementSources.ClaimPayment ? line.Id(LineDimensionKeys.SourceId) : null),
+            ?? (line.Dimension(LineDimensionKeys.SourceType) == DisbursementSources.ClaimPayment && line.Id(LineDimensionKeys.RecoveryId) is null
+                ? line.Id(LineDimensionKeys.SourceId) : null), // a CLM receivable (salvage, subrogation) reuses the source type: its source id is the recovery
         DisbursementId = line.Id(LineDimensionKeys.DisbursementId),
         TransactionKind = line.Dimension(LineDimensionKeys.TransactionKind),
         CancellationSource = line.Dimension(LineDimensionKeys.CancellationSource),
         RefundId = line.Dimension(LineDimensionKeys.SourceType) == DisbursementSources.BilRefund ? line.Id(LineDimensionKeys.SourceId) : null,
+        RecoveryId = line.Id(LineDimensionKeys.RecoveryId),
+        CounterpartyPartyId = line.Id(LineDimensionKeys.CounterpartyPartyId),
+        FsStatementRef = line.Dimension(LineDimensionKeys.StatementRef)?.ToLowerInvariant(),
+        RecoverableBasis = line.Dimension(LineDimensionKeys.RecoverableBasis),
+        RiContractId = line.Id(LineDimensionKeys.RiContractId),
+        RiContractYear = int.TryParse(line.Dimension(LineDimensionKeys.RiContractYear), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var year) ? year : null,
+        RiHeldGroup = line.Dimension(LineDimensionKeys.RiHeldGroup),
     };
 }

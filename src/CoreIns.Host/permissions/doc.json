@@ -1,0 +1,18 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "doc.Document.request": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.Document.get": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.Document.listForObject": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.Document.reprint": [ "Platform.Admin" ],
+        "doc.Delivery.status": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.Delivery.evidenceFor": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.EvidencePack.get": [ "Platform.Admin" ],
+        "doc.Archive.store": [ "Platform.Admin" ],
+        "doc.Archive.get": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.ProviderEvent.receive": [ "Platform.Admin" ]
+      }
+    }
+  }
+}

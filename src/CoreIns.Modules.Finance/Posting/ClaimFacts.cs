@@ -14,7 +14,9 @@ namespace CoreIns.Modules.Finance.Posting;
 /// <list type="bullet">
 /// <item><c>ReserveChanged</c> (entry type = reserve kind): Dr <see cref="ClaimLegs.Incurred"/> / Cr
 /// <see cref="ClaimLegs.CaseReserve"/> by the delta (a negative delta posts on the opposite sides). A recovery reserve
-/// uses Dr <see cref="ClaimLegs.RecoveryReserve"/> / Cr <see cref="ClaimLegs.Incurred"/>, which has no rule in the slice.</item>
+/// uses Dr <see cref="ClaimLegs.RecoveryReserve"/> / Cr <see cref="ClaimLegs.Incurred"/> and must name its recovery (rule set v4).</item>
+/// <item><c>PaymentIssued</c> with method CLEARING (Friendly Settlement payable, rule set v4): Dr <see cref="ClaimLegs.Incurred"/> /
+/// Cr <see cref="ClaimLegs.FsClearing"/> with the statement and counterparty; it never touches GL-2510.</item>
 /// <item><c>PaymentIssued</c> (entry type PAYMENT): per payment line, Dr <see cref="ClaimLegs.CaseReserve"/> (eroding;
 /// <see cref="ClaimLegs.PaidNonEroding"/> otherwise) / Cr <see cref="ClaimLegs.PaymentClearing"/>, with the claim
 /// payment id on every line so GL-2510 can be netted per payment against BIL's DISBURSEMENT_RELEASED.</item>
@@ -29,7 +31,8 @@ internal static class ClaimFacts
     public static readonly string PaymentIssued = $"clm.{PaymentIssuedV1.EventType}";
 
     /// <summary>True for the CLM events FIN posts.</summary>
-    public static bool IsClaimSource(string registryName) => registryName == ReserveChanged || registryName == PaymentIssued;
+    public static bool IsClaimSource(string registryName) =>
+        registryName == ReserveChanged || registryName == PaymentIssued || registryName == RecoveryFacts.RecoveryRecorded;
 
     /// <summary>
     /// The source entry of a CLM posting event. <paramref name="claimId"/> is the envelope aggregate (the claim), used
@@ -52,6 +55,11 @@ internal static class ClaimFacts
             return Payment(payment, claimId, occurredOn);
         }
 
+        if (registryName == RecoveryFacts.RecoveryRecorded)
+        {
+            return RecoveryFacts.Normalise(payload, sourceEventId, claimId, occurredOn);
+        }
+
         throw new ArgumentException($"{registryName} is not a CLM posting source.", nameof(registryName));
     }
 
@@ -67,12 +75,18 @@ internal static class ClaimFacts
             [LineDimensionKeys.CostCategory] = reserve.ReserveLine.Category,
             [LineDimensionKeys.PolicyTermId] = Text(reserve.PolicyTermId.Value),
             [LineDimensionKeys.ProductCode] = reserve.ProductCode,
+            [LineDimensionKeys.RecoveryId] = Text(reserve.RecoveryId?.Value),
         };
         var amount = reserve.Delta.Transaction;
         var date = reserve.AccountingDate ?? occurredOn;
         var problem = SingleCurrency(reserve.Delta) && SingleCurrency(reserve.NewOpenAmount)
             ? null
             : ((string, string)?)(ExceptionReasons.RateMissing, "ReserveChanged functional or group amounts differ from the transaction amount; FIN has no FX rates (D-SL2-06).");
+        if (problem is null && recovery && reserve.RecoveryId is null)
+        {
+            problem = (ExceptionReasons.InvalidEnvelope, "RECOVERY_RESERVE ReserveChanged without a recoveryId: the recovery reserve cannot be attributed (REQ-FIN-160).");
+        }
+
         return new SourceEntry(
             sourceEventId,
             recovery ? ClaimLegs.RecoveryReserveKind : ClaimLegs.Reserve,
@@ -112,9 +126,20 @@ internal static class ClaimFacts
             problem = (ExceptionReasons.Unbalanced, $"PaymentIssued lines do not add up to the payment amount {total}.");
         }
 
-        // A Friendly Settlement payment (method CLEARING) settles through the FS clearing account per statement
-        // (REQ-FIN-299), never the per-payment GL-2510: its own entry type has no rule in the slice, so it suspends.
-        var entryType = payment.Method == ClaimLegs.FsClearingMethod ? ClaimLegs.PaymentFsClearing : ClaimLegs.Payment;
+        // A Friendly Settlement payment (method CLEARING) settles through the FS clearing account GL-2515 per counterparty
+        // and statement (REQ-FIN-299, D-SL4-02), never the per-payment GL-2510. Without a statement or a counterparty it
+        // fails closed (D-SL2-12a), so GL-2515 can never hold an unattributable balance.
+        var fs = payment.Method == ClaimLegs.FsClearingMethod;
+        var entryType = fs ? ClaimLegs.PaymentFsClearing : ClaimLegs.Payment;
+        if (fs && problem is null && (payment.FsStatementId is null || payment.FsStatementId == Guid.Empty))
+        {
+            problem = (ExceptionReasons.InvalidEnvelope, "PaymentIssued with method CLEARING without an fsStatementId: GL-2515 nets per statement (REQ-FIN-299).");
+        }
+        else if (fs && problem is null && payment.PayeePartyId.Value == Guid.Empty)
+        {
+            problem = (ExceptionReasons.InvalidEnvelope, "PaymentIssued with method CLEARING without a counterparty party: GL-2515 nets per counterparty (REQ-FIN-299).");
+        }
+
         var lines = new List<SourceLine>();
         foreach (var line in payment.Lines)
         {
@@ -129,6 +154,17 @@ internal static class ClaimFacts
                 [LineDimensionKeys.DisbursementId] = Text(payment.DisbursementId?.Value), // null for method CLEARING (SL4-CONTRACTS)
             };
             var amount = line.Amount.Transaction;
+            if (fs)
+            {
+                // The payable is a Friendly Settlement debt to the counterparty, not a reserve consumption (plan section 4); the
+                // payment id stays for lineage and for the void reversal, but the per-payment GL-2510 check never sees GL-2515.
+                dimensions[LineDimensionKeys.StatementRef] = payment.FsStatementId?.ToString("D");
+                dimensions[LineDimensionKeys.CounterpartyPartyId] = Text(payment.PayeePartyId.Value);
+                lines.Add(new SourceLine(ClaimLegs.Incurred, Sides.Debit, amount, dimensions));
+                lines.Add(new SourceLine(ClaimLegs.FsClearing, Sides.Credit, amount, dimensions));
+                continue;
+            }
+
             lines.Add(new SourceLine(line.Eroding == false ? ClaimLegs.PaidNonEroding : ClaimLegs.CaseReserve, Sides.Debit, amount, dimensions));
             lines.Add(new SourceLine(ClaimLegs.PaymentClearing, Sides.Credit, amount, dimensions));
         }

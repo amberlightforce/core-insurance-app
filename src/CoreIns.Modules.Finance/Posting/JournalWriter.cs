@@ -116,6 +116,13 @@ internal sealed class JournalWriter(
                 ClaimPaymentId = line.Dimensions.ClaimPaymentId,
                 DisbursementId = line.Dimensions.DisbursementId,
                 RefundId = line.Dimensions.RefundId,
+                RecoveryId = line.Dimensions.RecoveryId,
+                CounterpartyPartyId = line.Dimensions.CounterpartyPartyId,
+                FsStatementRef = line.Dimensions.FsStatementRef,
+                RecoverableBasis = line.Dimensions.RecoverableBasis,
+                RiContractId = line.Dimensions.RiContractId,
+                RiContractYear = line.Dimensions.RiContractYear,
+                RiHeldGroup = line.Dimensions.RiHeldGroup,
             });
         }
 
@@ -177,6 +184,8 @@ internal static class JournalRows
                 PolicyTransactionId = l.PolicyTransactionId, ChargeId = l.ChargeId, BillingAccountId = l.BillingAccountId, InvoiceId = l.InvoiceId, ReceiptId = l.ReceiptId,
                 ClaimId = l.ClaimId, ExposureId = l.ExposureId, ReserveLineId = l.ReserveLineId, CostType = l.CostType, CostCategory = l.CostCategory,
                 ClaimPaymentId = l.ClaimPaymentId, DisbursementId = l.DisbursementId, RefundId = l.RefundId,
+                RecoveryId = l.RecoveryId, CounterpartyPartyId = l.CounterpartyPartyId, FsStatementRef = l.FsStatementRef, RecoverableBasis = l.RecoverableBasis,
+                RiContractId = l.RiContractId, RiContractYear = l.RiContractYear, RiHeldGroup = l.RiHeldGroup,
             }))]);
     }
 }

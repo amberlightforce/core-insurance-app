@@ -90,6 +90,51 @@ const moduleRoutes: RouteObject[] = [
     lazy: async () => ({ Component: (await import('./modules/billing/InvoicePage')).InvoicePage }),
   },
   {
+    // SL4-UI-BIL: receivables and FS_CLEARING release approvals (billing roles; the guard is shared with refunds).
+    path: 'billing/receivables',
+    lazy: async () => ({
+      Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/receivables/ReceivablesListPage'))
+            .ReceivablesListPage,
+        }),
+      },
+      {
+        path: ':receivableId',
+        lazy: async () => ({
+          Component: (await import('./modules/billing/receivables/ReceivableDetailPage'))
+            .ReceivableDetailPage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'billing/releases',
+    lazy: async () => ({
+      Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/receivables/ReleasesInboxPage'))
+            .ReleasesInboxPage,
+        }),
+      },
+      {
+        path: ':disbursementId',
+        lazy: async () => ({
+          Component: (await import('./modules/billing/receivables/ReleaseDetailPage'))
+            .ReleaseDetailPage,
+        }),
+      },
+    ],
+  },
+  {
     // Refund screens: billing roles see them, everyone else the no-permission state (RequireRefundRole).
     path: 'billing/refunds',
     lazy: async () => ({
