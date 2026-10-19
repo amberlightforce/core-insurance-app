@@ -73,7 +73,7 @@ test('E2E-01 happy path: quote, bind, invoice, fiscal MARK, payment, ledger jour
   // ---- Seed: import and lock the product (admin).
   await test.step('import and lock the MOTOR-GR product version', async () => {
     const imported = await call(request, admin, 'POST', '/api/pfc/v1/product-versions/import', { definition: seed, lock: true });
-    expect(imported.status, JSON.stringify(imported.body)).toBeLessThan(300);
+    expect([200, 201, 409], JSON.stringify(imported.body)).toContain(imported.status); // 409: imported by an earlier spec on the same stack (E2E-10 re-run)
   });
 
   // ---- 2. Party.
