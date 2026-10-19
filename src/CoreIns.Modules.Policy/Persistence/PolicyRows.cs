@@ -446,3 +446,35 @@ internal sealed class PackRollbackExceptionRow
 
     public int RecordVersion { get; set; } = 1;
 }
+
+/// <summary>
+/// A statutory withdrawal or objection that voided a term (SL6-POL-WITHDRAW, REQ-POL-307/308). Unique per policy and channel
+/// reference: that is the exactly-once key, and <c>Result</c> is the first response, returned verbatim on a replay.
+/// </summary>
+internal sealed class WithdrawalRow
+{
+    public Guid WithdrawalId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public PolicyId PolicyId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    public JobId JobId { get; set; }
+
+    /// <summary>The caller's channel reference (CHN withdrawal id, message id).</summary>
+    public string ChannelRef { get; set; } = string.Empty;
+
+    /// <summary>WITHDRAWAL or OBJECTION.</summary>
+    public string Right { get; set; } = string.Empty;
+
+    public Instant ReceivedAt { get; set; }
+
+    public Instant RecordedAt { get; set; }
+
+    public string Actor { get; set; } = string.Empty;
+
+    /// <summary>The first <c>WithdrawalSubmitResponse</c> as JSON.</summary>
+    public string Result { get; set; } = string.Empty;
+}

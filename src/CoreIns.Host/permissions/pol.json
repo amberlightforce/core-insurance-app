@@ -13,6 +13,7 @@
         "pol.Policy.search": [ "Staff.Underwriter", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "pol.cancel": [ "Staff.Underwriter" ],
         "pol.Cancellation.create": [ "Staff.Underwriter" ],
+        "pol.Withdrawal.submit": [ "Staff.Underwriter" ],
         "pol.renewal.manage": [ "Staff.Underwriter" ],
         "pol.Renewal.create": [ "Staff.Underwriter" ],
         "pol.Renewal.offer": [ "Staff.Underwriter" ],

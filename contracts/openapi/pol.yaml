@@ -1608,6 +1608,13 @@ paths:
       x-error-codes:
       - code: POL-ERR-RIGHT-EXPIRED
         status: 422
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      - code: POL-ERR-VALIDATION
+        status: 422
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        note: the term is already cancelled or voided
+        status: 409
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -5541,32 +5548,81 @@ components:
         refundPreview:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "refund preview"'
+    WithdrawalRight:
+      type: string
+      enum:
+      - WITHDRAWAL
+      - OBJECTION
+      description: 'The statutory right exercised (REQ-POL-307, REQ-POL-308): WITHDRAWAL from a distance contract, or OBJECTION. Both void the term ab initio.'
     WithdrawalSubmitRequest:
       type: object
-      description: 'pol.Withdrawal.submit request. PRD inputs: "policyId, right (WITHDRAWAL, OBJECTION), receivedAt, channelRef"'
+      description: 'pol.Withdrawal.submit request. PRD inputs: "policyId, right (WITHDRAWAL, OBJECTION), receivedAt, channelRef". The right window is checked from
+        receivedAt, not from the time of the call. Exactly once per (policyId, channelRef): a replay returns the first result.'
       properties:
         policyId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "policyId"'
         right:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "right (WITHDRAWAL, OBJECTION)"'
+          $ref: '#/components/schemas/WithdrawalRight'
         receivedAt:
           $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "receivedAt"'
+          description: 'When the customer declared the right (the channel receipt time), PRD: "receivedAt"'
         channelRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "channelRef"'
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: 'Channel reference of the declaration (CHN withdrawal id or message id); no personal data. The exactly-once key with policyId, PRD: "channelRef"'
+      required:
+      - policyId
+      - right
+      - receivedAt
+      - channelRef
     WithdrawalSubmitResponse:
       type: object
-      description: 'pol.Withdrawal.submit result. PRD outputs: "void job, refund preview"'
+      description: 'pol.Withdrawal.submit result. PRD outputs: "void job, refund preview". The refund is the whole premium paid including IPT and levies, with no
+        cost-of-cover deduction (D-SL6-02).'
       properties:
         voidJob:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "void job"'
+          $ref: '#/components/schemas/WithdrawalVoidJob'
         refundPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "refund preview"'
+          $ref: '#/components/schemas/ServicingPreview'
+        replayed:
+          type: boolean
+          description: True when this is the stored first result of the same (policyId, channelRef)
+      required:
+      - voidJob
+      - refundPreview
+      - replayed
+    WithdrawalVoidJob:
+      type: object
+      description: The void job of a withdrawal.
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: The cover start of the voided term
+        right:
+          $ref: '#/components/schemas/WithdrawalRight'
+        refundDue:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Equals the total premium paid including IPT and levies
+        costOfCoverDeduction:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Always 0.00 (D-SL6-02)
+      required:
+      - jobId
+      - state
+      - termId
+      - transactionId
+      - effectiveAt
+      - right
+      - refundDue
+      - costOfCoverDeduction
     ReinstatementCreateRequest:
       type: object
       description: 'pol.Reinstatement.create request. PRD inputs: "termId, type, effectiveAt, reason"'

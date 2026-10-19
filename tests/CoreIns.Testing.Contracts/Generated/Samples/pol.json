@@ -1360,8 +1360,98 @@
       "effectiveKnownAt": "2026-10-07T09:00:00Z"
     },
     "pol.Withdrawal.submit": {
-      "voidJob": "unspecified",
-      "refundPreview": "unspecified"
+      "voidJob": {
+        "jobId": "01923940-d0c1-720e-80b9-442bb75602b2",
+        "state": "DRAFT",
+        "termId": "019239cc-55f0-7a1a-82dc-bc81361b0b03",
+        "transactionId": "01921ddc-6620-7ac0-8240-eb6b3b7c12c1",
+        "effectiveAt": "2026-10-07T09:00:00Z",
+        "right": "WITHDRAWAL",
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "costOfCoverDeduction": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "refundPreview": {
+        "annualBefore": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "annualAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "proratedLines": [
+          {
+            "elementLocator": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "days": 1,
+            "termDays": 1,
+            "fraction": "12.50",
+            "annualAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "taxLines": [
+          {
+            "elementLocator": "Sample text",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "treatmentAction": "APPLY",
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "legalSourceRef": "Sample text"
+          }
+        ],
+        "premiumChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "additionalDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "transactionKind": "NEW_BUSINESS",
+        "cancellationSource": "Policyholder",
+        "refundMethod": "SAMPLE_CODE",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "provisional": true
+      },
+      "replayed": true
     }
   },
   "schemas": {
@@ -3825,13 +3915,119 @@
     },
     "WithdrawalSubmitRequest": {
       "policyId": "01929782-2e1e-77a9-8f49-be3c564432c5",
-      "right": "unspecified",
+      "right": "WITHDRAWAL",
       "receivedAt": "2026-10-07T09:00:00Z",
-      "channelRef": "unspecified"
+      "channelRef": "Sample text"
     },
     "WithdrawalSubmitResponse": {
-      "voidJob": "unspecified",
-      "refundPreview": "unspecified"
+      "voidJob": {
+        "jobId": "0192a20f-97a9-788c-8723-c51339186b39",
+        "state": "DRAFT",
+        "termId": "0192466b-c963-7287-8217-a3a7223041a2",
+        "transactionId": "01923141-5522-774b-8454-18898387d655",
+        "effectiveAt": "2026-10-07T09:00:00Z",
+        "right": "WITHDRAWAL",
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "costOfCoverDeduction": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "refundPreview": {
+        "annualBefore": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "annualAfter": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "proratedLines": [
+          {
+            "elementLocator": "Sample text",
+            "coverageCode": "SAMPLE_CODE",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "days": 1,
+            "termDays": 1,
+            "fraction": "12.50",
+            "annualAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "taxLines": [
+          {
+            "elementLocator": "Sample text",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "treatmentAction": "APPLY",
+            "ruleId": "SAMPLE_CODE",
+            "ruleVersion": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "legalSourceRef": "Sample text"
+          }
+        ],
+        "premiumChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "taxChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "totalChange": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "refundDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "additionalDue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "transactionKind": "NEW_BUSINESS",
+        "cancellationSource": "Policyholder",
+        "refundMethod": "SAMPLE_CODE",
+        "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "provisional": true
+      },
+      "replayed": true
+    },
+    "WithdrawalVoidJob": {
+      "jobId": "0192790b-9d05-7bb8-85b2-b9b30bfeaf59",
+      "state": "DRAFT",
+      "termId": "019247a1-3bec-771a-8f25-3c7f0fa00d22",
+      "transactionId": "01929831-9393-7274-8b67-86337738d7fc",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "right": "WITHDRAWAL",
+      "refundDue": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "costOfCoverDeduction": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
     }
   }
 }

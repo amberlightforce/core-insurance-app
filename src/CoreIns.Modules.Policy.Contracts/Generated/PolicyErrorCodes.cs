@@ -58,7 +58,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-ILLEGAL-TRANSITION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 13 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.notTaken, pol.Job.quote, pol.Job.updateDraft, pol.Job.withdraw, pol.PackRollbackException.review, pol.PolicyChange.create, pol.Reinstatement.create, pol.Renewal.accept, pol.Renewal.create, pol.Renewal.offer, ….</para>
+    /// <para>Declared by 14 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.notTaken, pol.Job.quote, pol.Job.updateDraft, pol.Job.withdraw, pol.PackRollbackException.review, pol.PolicyChange.create, pol.Reinstatement.create, pol.Renewal.accept, pol.Renewal.create, pol.Renewal.offer, ….</para>
     /// </remarks>
     public const string IllegalTransition = "POL-ERR-ILLEGAL-TRANSITION";
 
@@ -82,7 +82,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 16 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.get, pol.Job.quote, pol.Job.updateDraft, pol.PackRollbackException.get, pol.PackRollbackException.review, pol.Policy.get, pol.PolicyChange.create, pol.Renewal.accept, pol.Renewal.create, pol.Renewal.offer, ….</para>
+    /// <para>Declared by 17 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.get, pol.Job.quote, pol.Job.updateDraft, pol.PackRollbackException.get, pol.PackRollbackException.review, pol.Policy.get, pol.PolicyChange.create, pol.Renewal.accept, pol.Renewal.create, pol.Renewal.offer, ….</para>
     /// </remarks>
     public const string NotFound = "POL-ERR-NOT-FOUND";
 
@@ -178,7 +178,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): pol.Job.quote, pol.Job.updateDraft, pol.PackRollbackException.list, pol.Policy.search, pol.Policy.searchByCriteria, pol.Renewal.create, pol.Snapshot.get, pol.Submission.create.</para>
+    /// <para>Declared by 9 operation(s): pol.Job.quote, pol.Job.updateDraft, pol.PackRollbackException.list, pol.Policy.search, pol.Policy.searchByCriteria, pol.Renewal.create, pol.Snapshot.get, pol.Submission.create, pol.Withdrawal.submit.</para>
     /// </remarks>
     public const string Validation = "POL-ERR-VALIDATION";
 
