@@ -444,6 +444,100 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.NonPaymentCancellationRow", b =>
+                {
+                    b.Property<Guid>("NonPaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("nonpay_id");
+
+                    b.Property<Guid>("ClockInstanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("clock_instance_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateTime>("EffectiveAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("effective_at");
+
+                    b.Property<Guid?>("JobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("job_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("NoticeDocumentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("notice_document_id");
+
+                    b.Property<decimal>("OverdueAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("overdue_amount");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<string>("ProofRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("proof_ref");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("request_id");
+
+                    b.Property<Guid>("SourceEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_event_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("NonPaymentId")
+                        .HasName("pk_nonpay_cancellation");
+
+                    b.HasIndex("RequestId")
+                        .HasDatabaseName("ix_nonpay_cancellation_request");
+
+                    b.HasIndex("Status", "EffectiveAt")
+                        .HasDatabaseName("ix_nonpay_cancellation_due");
+
+                    b.HasIndex("PolicyId", "TermId", "ClockInstanceId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_nonpay_cancellation_policy_term_clock");
+
+                    b.ToTable("nonpay_cancellation", "pol", t =>
+                        {
+                            t.HasCheckConstraint("ck_nonpay_cancellation_status", "status IN ('SCHEDULED', 'EXECUTED', 'EXCEPTION', 'RESCINDED', 'HELD')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.OosCorrectionRow", b =>
                 {
                     b.Property<Guid>("SetId")
@@ -952,6 +1046,78 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.PsrExceptionRow", b =>
+                {
+                    b.Property<Guid>("ExceptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("exception_id");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionNote")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_note");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("NonPaymentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("nonpay_id");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<DateTime>("RaisedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("raised_at");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.HasKey("ExceptionId")
+                        .HasName("pk_psr_exception");
+
+                    b.HasIndex("NonPaymentId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_psr_exception_nonpay");
+
+                    b.HasIndex("LegalEntityId", "Status", "RaisedAt")
+                        .HasDatabaseName("ix_psr_exception_queue");
+
+                    b.ToTable("psr_exception", "pol", t =>
+                        {
+                            t.HasCheckConstraint("ck_psr_exception_reason", "reason IN ('VULNERABLE_CUSTOMER', 'HOLD')");
+
+                            t.HasCheckConstraint("ck_psr_exception_status", "status IN ('PENDING', 'PROCEED', 'HOLD', 'RESCINDED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.QuoteVersionRow", b =>
                 {
                     b.Property<Guid>("QuoteId")
@@ -1252,6 +1418,16 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_policy_transaction_policy");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.PsrExceptionRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Policy.Persistence.NonPaymentCancellationRow", null)
+                        .WithMany()
+                        .HasForeignKey("NonPaymentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_psr_exception_nonpay");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.QuoteVersionRow", b =>

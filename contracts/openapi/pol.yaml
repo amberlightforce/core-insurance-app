@@ -42,6 +42,7 @@ tags:
 - name: Import
 - name: Dsar
 - name: PackRollbackException
+- name: Psr
 paths:
   /api/pol/v1/submissions:
     post:
@@ -3856,6 +3857,142 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/psr-exceptions:
+    get:
+      operationId: pol.Psr.list
+      summary: PSR exception queue
+      description: |-
+        PSR exception queue
+
+        Non-payment cancellations that a vulnerable-customer flag, a hold or a missing notice reference stopped (D-SL6-04, REQ-POL-210). Filters: status. Oldest first.
+      tags:
+      - Psr
+      x-requirement:
+      - REQ-POL-210
+      x-anchor:
+      - REQ-POL-210
+      x-wave: W6
+      x-work-packages:
+      - SL6-POL-NONPAY
+      x-status: full
+      x-maturity: pre-release
+      x-typed: SL6-POL-NONPAY
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: pol.Psr.list
+      x-error-codes:
+      - code: POL-ERR-VALIDATION
+        note: 'unknown filter value'
+        status: 400
+      x-source:
+      - PRD-05 REQ-POL-210
+      - SLICE-PLAN-6 D-SL6-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: status
+        in: query
+        required: false
+        description: Exception status filter
+        schema:
+          type: string
+          enum:
+          - PENDING
+          - PROCEED
+          - HOLD
+          - RESCINDED
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PsrExceptionListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/psr-exceptions/decide:
+    post:
+      operationId: pol.Psr.decide
+      summary: Decide a PSR exception
+      description: |-
+        Decide a PSR exception
+
+        A staff member decides a PENDING exception: PROCEED runs the non-payment cancellation now (pro-rata), HOLD keeps the policy in force. Audited.
+        Idempotency-Key required.
+      tags:
+      - Psr
+      x-requirement:
+      - REQ-POL-210
+      x-anchor:
+      - REQ-POL-210
+      x-wave: W6
+      x-work-packages:
+      - SL6-POL-NONPAY
+      x-status: full
+      x-maturity: pre-release
+      x-typed: SL6-POL-NONPAY
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: pol.Psr.decide
+      x-error-codes:
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        note: 'the exception is not PENDING'
+        status: 409
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: 'contract §3.5.3 (replay with a different payload)'
+        status: 409
+      x-source:
+      - PRD-05 REQ-POL-210
+      - SLICE-PLAN-6 D-SL6-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PsrDecideRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PsrExceptionView'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/pol/v1/pack-rollback-exceptions:
     get:
       operationId: pol.PackRollbackException.list
@@ -6441,6 +6578,102 @@ components:
         retentionConflicts:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "retention conflicts"'
+    PsrExceptionStatus:
+      type: string
+      enum:
+      - PENDING
+      - PROCEED
+      - HOLD
+      - RESCINDED
+    PsrExceptionView:
+      type: object
+      description: One PSR queue entry of a non-payment cancellation that was not run automatically (D-SL6-04).
+      properties:
+        exceptionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: BIL's cancellation request id (its delinquency case)
+        reason:
+          type: string
+          enum:
+          - VULNERABLE_CUSTOMER
+          - HOLD
+          - NOTICE_REFERENCE_MISSING
+        status:
+          $ref: '#/components/schemas/PsrExceptionStatus'
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: The cancellation's effective time as BIL asked for it
+        raisedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        decidedBy:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        decidedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        decisionNote:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        jobId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The cancellation job when the decision was PROCEED
+      required:
+      - exceptionId
+      - policyId
+      - policyNumber
+      - termId
+      - requestId
+      - reason
+      - status
+      - effectiveAt
+      - raisedAt
+      - decidedBy
+      - decidedAt
+      - decisionNote
+      - jobId
+    PsrExceptionListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PsrExceptionView'
+      description: Page of pol.Psr.list results (cursor pagination, contract §3.5.5)
+    PsrDecideRequest:
+      type: object
+      description: pol.Psr.decide request
+      properties:
+        exceptionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - PROCEED
+          - HOLD
+        note:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: The reason for the decision. No personal data.
+      required:
+      - exceptionId
+      - decision
+      - note
     PackRollbackExceptionStatus:
       type: string
       enum:
