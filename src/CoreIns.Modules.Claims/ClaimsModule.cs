@@ -1,5 +1,7 @@
 using CoreIns.Modules.Claims.Authority;
 using CoreIns.Modules.Claims.Commands;
+using CoreIns.Modules.Claims.Commands.FriendlySettlement;
+using CoreIns.Modules.Claims.Api;
 using CoreIns.Modules.Claims.Commands.Recoveries;
 using CoreIns.Modules.Claims.Contracts;
 using CoreIns.Modules.Claims.Contracts.Api;
@@ -89,8 +91,10 @@ public static class ClaimsModule
         services.AddScoped<FinancialsReader>();
         services.AddScoped<SetLifecycle>();
         services.AddScoped<IClaimFinancialEngine, ClaimFinancialEngine>();
+        services.TryAddScoped<IClaimFinancialEvidenceSource, ChainedClaimFinancialEvidenceSource>();
+        services.AddScoped<IClaimFinancialEvidenceProvider, FsEvidenceProvider>();
         services.AddScoped<RecoveryCashBuffer>();
-        services.AddScoped<IClaimFinancialEvidenceSource, RecoveryEvidenceSource>();
+        services.AddScoped<IClaimFinancialEvidenceProvider, RecoveryEvidenceSource>();
         services.TryAddScoped<IClaimFinancialGuard, DerivedClaimFinancials>();
 
         services.AddScoped<IValidator<BuildTransactionSet>, BuildTransactionSetValidator>();
@@ -144,6 +148,22 @@ public static class ClaimsModule
         services.AddCommandAuditor<CreateExposure, ExposureCreateResponse, CreateExposureAuditor>();
         services.AddCommand<CreateExposure, ExposureCreateResponse, CreateExposureHandler>(CommandDescriptor.For("clm.Exposure.create") with { SupportsDryRun = true });
 
+        // Friendly Settlement case (SL4-CLM-FS-CASE, REQ-CLM-155..158): capability-gated, SPI-backed; the statement WP adds its own commands.
+        services.AddScoped<FsGate>();
+        services.AddScoped<FsCaseReader>();
+        services.AddScoped<IValidator<EvaluateFriendlySettlement>, EvaluateFriendlySettlementValidator>();
+        services.AddCommandAuditor<EvaluateFriendlySettlement, FsEvaluateResponse, EvaluateFriendlySettlementAuditor>();
+        services.AddCommand<EvaluateFriendlySettlement, FsEvaluateResponse, EvaluateFriendlySettlementHandler>(CommandDescriptor.For("clm.FriendlySettlement.evaluate"));
+        services.AddScoped<IValidator<OpenOwnSettlement>, OpenOwnSettlementValidator>();
+        services.AddCommandAuditor<OpenOwnSettlement, FsOpenOwnSettlementResponse, OpenOwnSettlementAuditor>();
+        services.AddCommand<OpenOwnSettlement, FsOpenOwnSettlementResponse, OpenOwnSettlementHandler>(CommandDescriptor.For("clm.FriendlySettlement.openOwnSettlement"));
+        services.AddScoped<IValidator<SubmitFriendlySettlement>, SubmitFriendlySettlementValidator>();
+        services.AddCommandAuditor<SubmitFriendlySettlement, FsSubmitResponse, SubmitFriendlySettlementAuditor>();
+        services.AddCommand<SubmitFriendlySettlement, FsSubmitResponse, SubmitFriendlySettlementHandler>(CommandDescriptor.For("clm.FriendlySettlement.submit"));
+        // Inbound clearing notification (dev endpoint only in slice 4); idempotent on the clearing reference, so no idempotency key.
+        services.AddCommandAuditor<ReceiveFsNotification, FsNotificationReceived, ReceiveFsNotificationAuditor>();
+        services.AddCommand<ReceiveFsNotification, FsNotificationReceived, ReceiveFsNotificationHandler>(
+            CommandDescriptor.For("clm.FriendlySettlement.receiveNotification") with { RequiresIdempotencyKey = false, Idempotent = false });
         // Recoveries (SL4-CLM-RECOVERY-OPS): cases, milestones, BIL demand, write-off; cash only from BIL evidence.
         services.AddScoped<RecoveryReader>();
         services.AddScoped<IValidator<CreateRecovery>, CreateRecoveryValidator>();
@@ -219,6 +239,8 @@ public static class ClaimsModule
             .Describe("Το νέο στιγμιότυπο δεν είναι πλέον ο διάδοχος του στιγμιοτύπου της ζημίας· φορτώστε ξανά τη ζημία και αποφασίστε με το τρέχον.", "The new snapshot is no longer the successor of the claim's snapshot; reload the claim and decide against the current one."),
         ErrorDefinition.For(ModuleCode.CLM, "COVERAGE-IN-QUESTION", 422, "Η κάλυψη της έκθεσης αμφισβητείται", "The exposure's cover is in question")
             .Describe("Το νέο στιγμιότυπο που υιοθετήθηκε δεν καλύπτει την έκθεση· δεν επιτρέπονται νέες πληρωμές μέχρι απόφαση κάλυψης.", "The adopted snapshot no longer covers the exposure; no new payments until a coverage decision."),
+        ErrorDefinition.For(ModuleCode.CLM, "FS-DISABLED", 422, "Ο Φιλικός Διακανονισμός δεν είναι διαθέσιμος", "Friendly Settlement is not available")
+            .Describe("Η δυνατότητα είναι ανενεργή για τη δικαιοδοσία ή δεν υπάρχει προσαρμογέας εκκαθάρισης.", "The capability is off for the jurisdiction or no clearing adapter is bound."),
         ErrorDefinition.For(ModuleCode.CLM, "RECOVERY-STATE", 422, "Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση της ανάκτησης", "The action is not allowed in the recovery state")
             .Describe("Δείτε το διάγραμμα καταστάσεων της ανάκτησης (Ανοιχτή, Αξιωθείσα, Αμφισβητούμενη, Συμφωνημένη, Κλειστή).", "See the recovery state model (Open, Demanded, Disputed, Agreed, Closed, Written off)."),
         ErrorDefinition.For(ModuleCode.CLM, "ALLOCATION", 422, "Μη έγκυρη κατανομή ανάκτησης", "The recovery allocation is invalid")
