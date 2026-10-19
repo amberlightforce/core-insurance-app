@@ -138,7 +138,7 @@ public sealed class FinanceServicingTests(PostgresFixture database) : IClassFixt
         // Rule set v3 (effective 2026-10-01), balanced in transaction and functional currency, in the IFRS17 book.
         (await ScalarAsync<long>(_db, $"""
             SELECT count(*) FROM fin.journal_entry WHERE journal_id IN (SELECT journal_id FROM fin.journal_line WHERE {lines})
-               AND (book <> 'IFRS17' OR rule_set_version <> 3 OR NOT (rule_codes <@ ARRAY['CW-UNBILLED', 'CW-PREMIUM', 'CB-BILLED', 'CB-UNBILLED']))
+               AND (book <> 'IFRS17' OR rule_set_version <> 4 OR NOT (rule_codes <@ ARRAY['CW-UNBILLED', 'CW-PREMIUM', 'CB-BILLED', 'CB-UNBILLED']))
             """)).ShouldBe(0);
         (await ScalarAsync<long>(_db, $"""
             SELECT count(*) FROM (SELECT journal_id FROM fin.journal_line WHERE journal_id IN (SELECT journal_id FROM fin.journal_line WHERE {lines})
@@ -483,7 +483,7 @@ public sealed class FinanceServicingTests(PostgresFixture database) : IClassFixt
         (await ScalarAsync<int>(_db, $"SELECT rule_set_version FROM fin.journal_entry WHERE journal_id IN (SELECT journal_id FROM fin.journal_line WHERE policy_number = '{policy.Number}')")).ShouldBe(2);
         (await StatusAsync(credit)).ShouldBe("SUSPENDED/NO_RULE");
         (await ScalarAsync<string>(_db, "SELECT string_agg(version_no::text || ':' || status || ':' || effective_from::text, ',' ORDER BY version_no) FROM fin.posting_rule_set"))
-            .ShouldBe("1:SUPERSEDED:2026-01-01,2:ACTIVE:2026-01-01,3:ACTIVE:2026-10-01");
+            .ShouldBe("1:SUPERSEDED:2026-01-01,2:ACTIVE:2026-01-01,3:ACTIVE:2026-10-01,4:ACTIVE:2026-10-01");
     }
 
     [Fact]

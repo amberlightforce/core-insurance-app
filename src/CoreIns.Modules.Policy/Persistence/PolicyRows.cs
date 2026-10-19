@@ -151,6 +151,9 @@ internal sealed class QuoteVersionRow
 
     public string? ConfigurationHash { get; set; }
 
+    /// <summary>PACK_ROLLBACK when the version was priced under a rolled-back pack version (D-SL5-10); null otherwise.</summary>
+    public string? StaleReason { get; set; }
+
     public Instant? QuotedAt { get; set; }
 
     public Instant? ValidUntil { get; set; }
@@ -393,4 +396,53 @@ internal sealed class ChargeLineRow
 
     /// <summary>The version of the treatment rule.</summary>
     public string? TreatmentRuleVersion { get; set; }
+}
+
+/// <summary>
+/// An exception raised when a <c>PackRolledBack</c> event found a bound transaction recorded under a rolled-back pack version
+/// (REQ-POL-354 subset, D-SL5-10). Unique per activation and transaction. Nothing on the transaction, term or charges changes.
+/// </summary>
+internal sealed class PackRollbackExceptionRow
+{
+    public Guid ExceptionId { get; set; }
+
+    public Guid ActivationId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public string Pack { get; set; } = string.Empty;
+
+    public string FromVersion { get; set; } = string.Empty;
+
+    public string ToVersion { get; set; } = string.Empty;
+
+    public PolicyId PolicyId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    public PolicyTransactionId TransactionId { get; set; }
+
+    public string TransactionKind { get; set; } = string.Empty;
+
+    public string ConfigurationHash { get; set; } = string.Empty;
+
+    public string ProductVersion { get; set; } = string.Empty;
+
+    public Instant IdentifiedAt { get; set; }
+
+    /// <summary>The event that raised it (consumers are idempotent on event id).</summary>
+    public Guid SourceEventId { get; set; }
+
+    /// <summary>OPEN or REVIEWED.</summary>
+    public string Status { get; set; } = "OPEN";
+
+    public string? ReviewOutcome { get; set; }
+
+    public string? ReviewReason { get; set; }
+
+    public string? ReviewedBy { get; set; }
+
+    public Instant? ReviewedAt { get; set; }
+
+    public int RecordVersion { get; set; } = 1;
 }

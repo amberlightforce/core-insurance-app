@@ -111,6 +111,11 @@ internal sealed class ChangeBindService(
             return DomainError.Of(ModuleCode.POL, "QUOTE-STALE", "The quote's validity has ended; requote it.");
         }
 
+        if (version.StaleReason is not null)
+        {
+            return DomainError.Of(ModuleCode.POL, "QUOTE-STALE", "The quote was priced under a rolled-back configuration; requote it before binding (D-SL5-10).");
+        }
+
         var current = (await marketConfiguration.Value.CurrentHashAsync(cancellationToken).ConfigureAwait(false)).Hash;
         if (current is { } currentHash && !string.Equals(version.ConfigurationHash, currentHash.Value, StringComparison.Ordinal))
         {

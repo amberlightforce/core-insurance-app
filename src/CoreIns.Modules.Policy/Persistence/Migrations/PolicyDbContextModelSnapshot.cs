@@ -387,9 +387,123 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                             t.HasCheckConstraint("ck_job_state", "state IN ('DRAFT', 'QUOTED', 'BOUND', 'SCHEDULED', 'RESCINDED', 'WITHDRAWN', 'DECLINED', 'NOT_TAKEN', 'EXPIRED')");
 
                             t.HasCheckConstraint("ck_job_sub_state", "sub_state IN ('QUICK_QUOTE', 'CONVERTING', 'OFFERED', 'ACCEPTED')");
+
                             t.HasCheckConstraint("ck_job_target_term", "job_type = 'SUBMISSION' OR (job_type IN ('POLICY_CHANGE', 'CANCELLATION') AND target_term_id IS NOT NULL) OR (job_type = 'RENEWAL' AND expiring_term_id IS NOT NULL)");
 
                             t.HasCheckConstraint("ck_job_type", "job_type IN ('SUBMISSION', 'POLICY_CHANGE', 'CANCELLATION', 'RENEWAL')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.PackRollbackExceptionRow", b =>
+                {
+                    b.Property<Guid>("ExceptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("exception_id");
+
+                    b.Property<Guid>("ActivationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("activation_id");
+
+                    b.Property<string>("ConfigurationHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("configuration_hash");
+
+                    b.Property<string>("FromVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("from_version");
+
+                    b.Property<DateTime>("IdentifiedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("identified_at");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Pack")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("pack");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<string>("ProductVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("product_version");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("ReviewOutcome")
+                        .HasColumnType("text")
+                        .HasColumnName("review_outcome");
+
+                    b.Property<string>("ReviewReason")
+                        .HasColumnType("text")
+                        .HasColumnName("review_reason");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("reviewed_at");
+
+                    b.Property<string>("ReviewedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_by");
+
+                    b.Property<Guid>("SourceEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_event_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.Property<string>("ToVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("to_version");
+
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_id");
+
+                    b.Property<string>("TransactionKind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("transaction_kind");
+
+                    b.HasKey("ExceptionId")
+                        .HasName("pk_pack_rollback_exception");
+
+                    b.HasIndex("TransactionId");
+
+                    b.HasIndex("ActivationId", "TransactionId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_pack_rollback_exception_activation_tx");
+
+                    b.HasIndex("LegalEntityId", "Status", "IdentifiedAt")
+                        .HasDatabaseName("ix_pack_rollback_exception_queue");
+
+                    b.ToTable("pack_rollback_exception", "pol", t =>
+                        {
+                            t.HasCheckConstraint("ck_pack_rollback_exception_outcome", "review_outcome IS NULL OR review_outcome IN ('NO_ACTION', 'CORRECTION_REQUIRED')");
+
+                            t.HasCheckConstraint("ck_pack_rollback_exception_review", "(status = 'OPEN') = (review_outcome IS NULL)");
+
+                            t.HasCheckConstraint("ck_pack_rollback_exception_status", "status IN ('OPEN', 'REVIEWED')");
                         });
                 });
 
@@ -764,6 +878,10 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("risk_tree");
 
+                    b.Property<string>("StaleReason")
+                        .HasColumnType("text")
+                        .HasColumnName("stale_reason");
+
                     b.Property<string>("State")
                         .IsRequired()
                         .HasColumnType("text")
@@ -815,6 +933,8 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                             t.HasCheckConstraint("ck_quote_version_no", "version_no >= 1 AND version_no <= 20");
 
                             t.HasCheckConstraint("ck_quote_version_quoted", "state <> 'QUOTED' OR (quoted_at IS NOT NULL AND charges IS NOT NULL AND total IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_quote_version_stale_reason", "stale_reason IS NULL OR stale_reason = 'PACK_ROLLBACK'");
 
                             t.HasCheckConstraint("ck_quote_version_state", "state IN ('DRAFT', 'QUOTED', 'SUPERSEDED', 'EXPIRED')");
                         });
@@ -898,6 +1018,16 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_charge_line_transaction");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.PackRollbackExceptionRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Policy.Persistence.PolicyTransactionRow", null)
+                        .WithMany()
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_pack_rollback_exception_transaction");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.PolicyTermRow", b =>
