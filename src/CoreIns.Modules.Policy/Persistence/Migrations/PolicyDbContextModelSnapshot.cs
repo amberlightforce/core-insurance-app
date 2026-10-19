@@ -19,7 +19,7 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("pol")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -88,6 +88,12 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                     b.Property<string>("LegalStatus")
                         .HasColumnType("text")
                         .HasColumnName("legal_status");
+
+                    b.Property<bool>("Opening")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("opening");
 
                     b.Property<Guid>("PolicyId")
                         .HasColumnType("uuid")
@@ -441,6 +447,58 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                             t.HasCheckConstraint("ck_job_target_term", "job_type = 'SUBMISSION' OR (job_type IN ('POLICY_CHANGE', 'CANCELLATION') AND target_term_id IS NOT NULL) OR (job_type = 'RENEWAL' AND expiring_term_id IS NOT NULL)");
 
                             t.HasCheckConstraint("ck_job_type", "job_type IN ('SUBMISSION', 'POLICY_CHANGE', 'CANCELLATION', 'RENEWAL')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.MigrationImportRow", b =>
+                {
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<string>("BaselineHash")
+                        .HasColumnType("text")
+                        .HasColumnName("baseline_hash");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<DateTime>("ImportedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("imported_at");
+
+                    b.Property<string>("LegacyNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legacy_number");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mode");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.HasKey("PolicyId")
+                        .HasName("pk_migration_import");
+
+                    b.HasIndex("BatchId")
+                        .HasDatabaseName("ix_migration_import_batch");
+
+                    b.HasIndex("LegalEntityId", "LegacyNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ux_migration_import_legacy");
+
+                    b.ToTable("migration_import", "pol", t =>
+                        {
+                            t.HasCheckConstraint("ck_migration_import_mode", "mode IN ('OPENING', 'RENEWAL_BASED')");
                         });
                 });
 
@@ -1038,7 +1096,7 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
 
                     b.ToTable("policy_transaction", "pol", t =>
                         {
-                            t.HasCheckConstraint("ck_policy_transaction_kind", "kind IN ('ISSUANCE', 'CHANGE', 'CANCELLATION', 'REINSTATEMENT', 'REWRITE', 'RENEWAL', 'CARRY_FORWARD', 'SUSPENSION', 'REACTIVATION', 'VOID', 'REVERSAL')");
+                            t.HasCheckConstraint("ck_policy_transaction_kind", "kind IN ('ISSUANCE', 'CHANGE', 'CANCELLATION', 'REINSTATEMENT', 'REWRITE', 'RENEWAL', 'CARRY_FORWARD', 'SUSPENSION', 'REACTIVATION', 'VOID', 'REVERSAL', 'OPENING')");
 
                             t.HasCheckConstraint("ck_policy_transaction_sequence", "sequence >= 1");
 

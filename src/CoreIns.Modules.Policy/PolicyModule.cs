@@ -6,6 +6,7 @@ using CoreIns.Modules.Policy.Commands.Withdrawal;
 using CoreIns.Modules.Policy.Commands.Renewal;
 using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Commands.Change.Oos;
+using CoreIns.Modules.Migration.Contracts.Spi;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Domain;
@@ -57,7 +58,7 @@ public static class PolicyModule
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.job, {Schema}.quote_version, {Schema}.policy_term, {Schema}.segment, {Schema}.pack_rollback_exception, {Schema}.dsar_restriction, {Schema}.nonpay_cancellation, {Schema}.psr_exception TO {appRole}",
-                $"GRANT SELECT, INSERT ON {Schema}.policy, {Schema}.policy_transaction, {Schema}.charge_line, {Schema}.oos_correction, {Schema}.withdrawal TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.policy, {Schema}.policy_transaction, {Schema}.charge_line, {Schema}.oos_correction, {Schema}.withdrawal, {Schema}.migration_import TO {appRole}",
                 // The policy row is frozen (trigger); the one thing a command changes is the record-time watermark (D-SL3-03).
                 $"GRANT UPDATE (last_recorded_at, record_version) ON {Schema}.policy TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
@@ -125,6 +126,8 @@ public static class PolicyModule
         services.AddErrorDefinitions(ChangeErrors.Definitions);
 
         // In-process contracts other modules call (D-ARC-16).
+        services.AddScoped<IMigrationImporter, MigrationImport.PolicyMigrationImporter>();
+        services.AddScoped<IMigrationReverser, MigrationImport.PolicyMigrationReverser>();
         services.AddScoped<IPolicySubmissionService, PolicySubmissionService>();
         services.AddScoped<IPolicyJobService, PolicyJobService>();
         services.AddScoped<IPolicyPolicyService, PolicyPolicyService>();

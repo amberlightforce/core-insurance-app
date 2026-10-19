@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Policy.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class NonPaymentCancellation : Migration
+    public partial class NonPaymentCancellation : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -25,6 +25,8 @@
     <ProjectReference Include="..\CoreIns.Modules.Underwriting.Contracts\CoreIns.Modules.Underwriting.Contracts.csproj" />
     <!-- Rounding service and country-pack SPIs (IdValidator VEHICLE_PLATE): contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
+    <!-- Migration SPI (IMigrationImporter / IMigrationReverser): contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Migration.Contracts\CoreIns.Modules.Migration.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
   </ItemGroup>
