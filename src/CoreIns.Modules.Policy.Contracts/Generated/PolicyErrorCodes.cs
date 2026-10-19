@@ -10,7 +10,7 @@ public static class PolicyErrorCodes
 {
     /// <summary>POL-ERR-AFTER-CANCELLATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.quote, pol.PolicyChange.create, pol.Reactivation.create, pol.Suspension.create.</para>
+    /// <para>Declared by 7 operation(s): pol.Cancellation.create, pol.Change.createOutOfSequence, pol.Job.bind, pol.Job.quote, pol.PolicyChange.create, pol.Reactivation.create, pol.Suspension.create.</para>
     /// </remarks>
     public const string AfterCancellation = "POL-ERR-AFTER-CANCELLATION";
 
@@ -34,7 +34,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-EFFDATE-LIMIT (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 7 operation(s): pol.Cancellation.create, pol.Cancellation.rescind, pol.Cancellation.schedule, pol.Job.bind, pol.Job.quote, pol.PolicyChange.create, pol.Submission.create.</para>
+    /// <para>Declared by 8 operation(s): pol.Cancellation.create, pol.Cancellation.rescind, pol.Cancellation.schedule, pol.Change.createOutOfSequence, pol.Job.bind, pol.Job.quote, pol.PolicyChange.create, pol.Submission.create.</para>
     /// </remarks>
     public const string EffdateLimit = "POL-ERR-EFFDATE-LIMIT";
 
@@ -52,19 +52,19 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 38 operation(s): pol.Cancellation.create, pol.Cancellation.rescind, pol.Cancellation.schedule, pol.Dsar.export, pol.Dsar.restrict, pol.Import.convertCurrency, pol.Import.policy, pol.Import.reverse, pol.Import.term, pol.Job.bind, pol.Job.copyVersion, pol.Job.lease, ….</para>
+    /// <para>Declared by 39 operation(s): pol.Cancellation.create, pol.Cancellation.rescind, pol.Cancellation.schedule, pol.Change.createOutOfSequence, pol.Dsar.export, pol.Dsar.restrict, pol.Import.convertCurrency, pol.Import.policy, pol.Import.reverse, pol.Import.term, pol.Job.bind, pol.Job.copyVersion, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "POL-ERR-IDEMPOTENCY-MISMATCH";
 
     /// <summary>POL-ERR-ILLEGAL-TRANSITION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 13 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.notTaken, pol.Job.quote, pol.Job.updateDraft, pol.Job.withdraw, pol.PackRollbackException.review, pol.PolicyChange.create, pol.Reinstatement.create, pol.Renewal.accept, pol.Renewal.create, pol.Renewal.offer, ….</para>
+    /// <para>Declared by 14 operation(s): pol.Cancellation.create, pol.Change.createOutOfSequence, pol.Job.bind, pol.Job.notTaken, pol.Job.quote, pol.Job.updateDraft, pol.Job.withdraw, pol.PackRollbackException.review, pol.PolicyChange.create, pol.Reinstatement.create, pol.Renewal.accept, pol.Renewal.create, ….</para>
     /// </remarks>
     public const string IllegalTransition = "POL-ERR-ILLEGAL-TRANSITION";
 
     /// <summary>POL-ERR-JOB-CONFLICT (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): pol.Cancellation.create, pol.Cancellation.rescind, pol.Cancellation.schedule, pol.PolicyChange.create.</para>
+    /// <para>Declared by 5 operation(s): pol.Cancellation.create, pol.Cancellation.rescind, pol.Cancellation.schedule, pol.Change.createOutOfSequence, pol.PolicyChange.create.</para>
     /// </remarks>
     public const string JobConflict = "POL-ERR-JOB-CONFLICT";
 
@@ -82,7 +82,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 16 operation(s): pol.Cancellation.create, pol.Job.bind, pol.Job.get, pol.Job.quote, pol.Job.updateDraft, pol.PackRollbackException.get, pol.PackRollbackException.review, pol.Policy.get, pol.PolicyChange.create, pol.Renewal.accept, pol.Renewal.create, pol.Renewal.offer, ….</para>
+    /// <para>Declared by 17 operation(s): pol.Cancellation.create, pol.Change.createOutOfSequence, pol.Job.bind, pol.Job.get, pol.Job.quote, pol.Job.updateDraft, pol.PackRollbackException.get, pol.PackRollbackException.review, pol.Policy.get, pol.PolicyChange.create, pol.Renewal.accept, pol.Renewal.create, ….</para>
     /// </remarks>
     public const string NotFound = "POL-ERR-NOT-FOUND";
 
@@ -178,7 +178,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): pol.Job.quote, pol.Job.updateDraft, pol.PackRollbackException.list, pol.Policy.search, pol.Policy.searchByCriteria, pol.Renewal.create, pol.Snapshot.get, pol.Submission.create.</para>
+    /// <para>Declared by 9 operation(s): pol.Change.createOutOfSequence, pol.Job.quote, pol.Job.updateDraft, pol.PackRollbackException.list, pol.Policy.search, pol.Policy.searchByCriteria, pol.Renewal.create, pol.Snapshot.get, pol.Submission.create.</para>
     /// </remarks>
     public const string Validation = "POL-ERR-VALIDATION";
 

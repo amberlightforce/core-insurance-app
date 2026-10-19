@@ -210,6 +210,30 @@
           ],
           "description": "Version of the treatment rule; always set with treatmentRuleId.",
           "x-classification": "P0"
+        },
+        "correctionOf": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Transaction this delta corrects (out-of-sequence reverse-and-reapply, REQ-POL-006, REQ-POL-108); null for an ordinary delta. A correction is booked in the first open finance period, never into a locked one.",
+          "x-classification": "P0"
+        },
+        "oosSetId": {
+          "oneOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/Uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Out-of-sequence correction set this delta belongs to (pol.oos_correction.set_id); null for an ordinary delta",
+          "x-classification": "P0"
         }
       }
     }
