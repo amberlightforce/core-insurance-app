@@ -1,8 +1,11 @@
 {
   "responses": {
     "dat.BiasTest.run": {
-      "biasreportId": "0192559c-cfa3-7c79-8c62-1e311634fdb1",
-      "ratios": "unspecified"
+      "biasReportId": "0192c902-4b62-7c58-811d-57079138033e",
+      "ratio": "12.50",
+      "band": "sample",
+      "breached": true,
+      "modelStatus": "sample"
     },
     "dat.Coverage.status": {
       "governed": "unspecified",
@@ -14,7 +17,17 @@
       "compatibilityResult": "unspecified"
     },
     "dat.Erasure.execute": {
-      "evidence": "unspecified"
+      "subjectToken": "sample",
+      "status": "ACTIVE",
+      "factCount": 1,
+      "keyDestroyed": true,
+      "facts": [
+        {
+          "category": "sample",
+          "key": "sample",
+          "value": "sample"
+        }
+      ]
     },
     "dat.Kpi.get": {
       "values": "unspecified",
@@ -22,7 +35,8 @@
       "as": "unspecified"
     },
     "dat.Model.register": {
-      "status": "unspecified"
+      "modelId": "0192ccc4-4199-7756-88c1-d16c64f0df95",
+      "status": "ACTIVE"
     },
     "dat.Monitor.metrics": {
       "acceptedCounts": "unspecified"
@@ -36,10 +50,30 @@
       "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     },
     "dat.Restriction.apply": {
-      "evidence": "unspecified"
+      "subjectToken": "sample",
+      "status": "ACTIVE",
+      "factCount": 1,
+      "keyDestroyed": true,
+      "facts": [
+        {
+          "category": "sample",
+          "key": "sample",
+          "value": "sample"
+        }
+      ]
     },
     "dat.Subject.export": {
-      "evidence": "unspecified"
+      "subjectToken": "sample",
+      "status": "ACTIVE",
+      "factCount": 1,
+      "keyDestroyed": true,
+      "facts": [
+        {
+          "category": "sample",
+          "key": "sample",
+          "value": "sample"
+        }
+      ]
     }
   },
   "schemas": {
@@ -97,12 +131,19 @@
       "resultAfterUserRunsIt": "unspecified"
     },
     "BiasTestRunRequest": {
-      "feature": "unspecified",
-      "populationRef": "unspecified"
+      "feature": "AI-CLM-01",
+      "populationRef": "sample",
+      "metric": "SAMPLE_CODE",
+      "proxyGroup": "SAMPLE_CODE",
+      "ratio": "12.50",
+      "sampleSize": 1
     },
     "BiasTestRunResponse": {
-      "biasreportId": "01924c92-de99-7c58-8788-f4c8e75ed0b1",
-      "ratios": "unspecified"
+      "biasReportId": "01923476-1a34-78ab-8a65-de67dd866de3",
+      "ratio": "12.50",
+      "band": "sample",
+      "breached": true,
+      "modelStatus": "sample"
     },
     "CoverageStatusResponse": {
       "governed": "unspecified",
@@ -132,12 +173,23 @@
       "compatibilityResult": "unspecified"
     },
     "ErasureExecuteRequest": {
-      "dsarRef": "unspecified",
-      "subjectToken": "unspecified",
-      "scope": "unspecified"
+      "requestId": "sample",
+      "subjectToken": "sample",
+      "dsarRef": "019266d1-f220-7b79-8c17-51a43c63928a",
+      "scope": "sample"
     },
     "ErasureExecuteResponse": {
-      "evidence": "unspecified"
+      "subjectToken": "sample",
+      "status": "ACTIVE",
+      "factCount": 1,
+      "keyDestroyed": true,
+      "facts": [
+        {
+          "category": "sample",
+          "key": "sample",
+          "value": "sample"
+        }
+      ]
     },
     "FeatureStoreBuildTrainingSetRequest": {
       "entityKeys": "unspecified",
@@ -229,7 +281,11 @@
       "status": "unspecified"
     },
     "ModelGetResponse": {
-      "status": "unspecified"
+      "modelId": "01922d48-c468-7398-884a-bcfc8a1de87d",
+      "featureKey": "sample",
+      "version": "sample",
+      "status": "ACTIVE",
+      "suspendedReason": "sample"
     },
     "ModelRecordValidationRequest": {
       "modelCard": "unspecified",
@@ -239,11 +295,15 @@
       "status": "unspecified"
     },
     "ModelRegisterRequest": {
-      "modelCard": "unspecified",
-      "version": "unspecified"
+      "featureKey": "sample",
+      "version": "sample",
+      "modelCard": {
+        "key": "value"
+      }
     },
     "ModelRegisterResponse": {
-      "status": "unspecified"
+      "modelId": "0192fd0e-413f-75db-8bca-bac3b560bff5",
+      "status": "ACTIVE"
     },
     "ModelRetireRequest": {
       "modelCard": "unspecified",
@@ -327,12 +387,23 @@
       "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     },
     "RestrictionApplyRequest": {
-      "dsarRef": "unspecified",
-      "subjectToken": "unspecified",
-      "scope": "unspecified"
+      "requestId": "sample",
+      "subjectToken": "sample",
+      "dsarRef": "01924fdb-573d-7db3-8dbb-7e730b38abeb",
+      "scope": "sample"
     },
     "RestrictionApplyResponse": {
-      "evidence": "unspecified"
+      "subjectToken": "sample",
+      "status": "ACTIVE",
+      "factCount": 1,
+      "keyDestroyed": true,
+      "facts": [
+        {
+          "category": "sample",
+          "key": "sample",
+          "value": "sample"
+        }
+      ]
     },
     "ScrResultsAcceptRequest": {
       "entity": "unspecified",
@@ -362,12 +433,23 @@
       "status": "unspecified"
     },
     "SubjectExportRequest": {
-      "dsarRef": "unspecified",
-      "subjectToken": "unspecified",
-      "scope": "unspecified"
+      "requestId": "sample",
+      "subjectToken": "sample",
+      "dsarRef": "019277d8-393c-70cf-828a-f571b6ddd0fa",
+      "scope": "sample"
     },
     "SubjectExportResponse": {
-      "evidence": "unspecified"
+      "subjectToken": "sample",
+      "status": "ACTIVE",
+      "factCount": 1,
+      "keyDestroyed": true,
+      "facts": [
+        {
+          "category": "sample",
+          "key": "sample",
+          "value": "sample"
+        }
+      ]
     },
     "SyntheticGenerateRequest": {
       "spec": "unspecified"

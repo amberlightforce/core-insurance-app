@@ -1,0 +1,14 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "dat.Subject.export": [ "Platform.Admin" ],
+        "dat.Erasure.execute": [ "Platform.Admin" ],
+        "dat.Restriction.apply": [ "Platform.Admin" ],
+        "dat.BiasTest.run": [ "Platform.Admin" ],
+        "dat.Model.register": [ "Platform.Admin" ],
+        "dat.Model.get": [ "Platform.Admin" ]
+      }
+    }
+  }
+}

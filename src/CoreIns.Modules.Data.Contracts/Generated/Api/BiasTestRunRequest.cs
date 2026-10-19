@@ -4,34 +4,44 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.BiasTest.run request. PRD inputs: "feature or artefact, population ref"</summary>
+/// <summary>dat.BiasTest.run request (DAT-CORE: the caller supplies the measured ratio; no lakehouse sampling yet)</summary>
 /// <remarks>
 /// <para>Exactly one of: feature | artefact.</para>
 /// </remarks>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BiasTestRunRequest
 {
-    /// <summary>PRD: "feature or artefact" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>AI feature id under test, for example AI-CLM-04</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("feature")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Feature { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.AiFeatureId? Feature { get; init; }
 
-    /// <summary>PRD: "feature or artefact" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Rating artefact hash under test</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("artefact")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Artefact { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? Artefact { get; init; }
 
-    /// <summary>PRD: "population ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Population reference (informational)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("populationRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PopulationRef { get; init; }
+    public string? PopulationRef { get; init; }
+
+    /// <summary>Bias metric code, for example DISPARATE_IMPACT</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("metric")]
+    public required string Metric { get; init; }
+
+    /// <summary>Protected-group proxy (default UNSPECIFIED)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("proxyGroup")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ProxyGroup { get; init; }
+
+    /// <summary>Measured ratio; the band is 0.8 to 1.25 inclusive (illustrative, PRD-15 REQ-DAT-218)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ratio")]
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::CoreIns.Platform.Contracts.DecimalStringJsonConverter))]
+    public required decimal Ratio { get; init; }
+
+    /// <summary>Sample size behind the ratio</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sampleSize")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? SampleSize { get; init; }
 }

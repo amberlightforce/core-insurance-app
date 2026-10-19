@@ -22,6 +22,7 @@
     <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Product.Contracts\CoreIns.Modules.Product.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Reinsurance.Contracts\CoreIns.Modules.Reinsurance.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
   </ItemGroup>
@@ -31,6 +32,7 @@
     <EmbeddedResource Include="Seed\gr-test.finance.v1.json" LogicalName="CoreIns.Modules.Finance.Seed.gr-test.finance.v1.json" />
     <EmbeddedResource Include="Seed\gr-test.finance.v2.json" LogicalName="CoreIns.Modules.Finance.Seed.gr-test.finance.v2.json" />
     <EmbeddedResource Include="Seed\gr-test.finance.v3.json" LogicalName="CoreIns.Modules.Finance.Seed.gr-test.finance.v3.json" />
+    <EmbeddedResource Include="Seed\gr-test.finance.v4.json" LogicalName="CoreIns.Modules.Finance.Seed.gr-test.finance.v4.json" />
   </ItemGroup>
 
   <ItemGroup>

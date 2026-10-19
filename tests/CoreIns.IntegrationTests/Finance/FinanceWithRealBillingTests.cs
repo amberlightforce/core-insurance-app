@@ -86,7 +86,7 @@ public sealed class FinanceWithRealBillingTests(PostgresFixture database) : ICla
         (await _slice.ScalarAsync<string>($"""
             SELECT string_agg(DISTINCT je.rule_set_version::text, ',') FROM fin.journal_entry je
              WHERE EXISTS (SELECT 1 FROM fin.journal_line jl WHERE jl.journal_id = je.journal_id AND jl.billing_account_id = '{account}')
-            """)).ShouldBe("3");
+            """)).ShouldBe("4");
         (await _slice.ScalarAsync<string>($"""
             SELECT string_agg(jl.account_code || ' ' || jl.side, ',' ORDER BY jl.account_code, jl.side) FROM (
               SELECT DISTINCT jl.account_code, jl.side FROM fin.journal_line jl JOIN fin.journal_entry je USING (journal_id)
