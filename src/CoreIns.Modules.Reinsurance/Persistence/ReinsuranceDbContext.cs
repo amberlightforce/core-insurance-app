@@ -1,3 +1,4 @@
+using CoreIns.Modules.Reinsurance.Cession;
 using CoreIns.Platform.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -38,12 +39,21 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
 
     public DbSet<IntakeExceptionRow> IntakeExceptions => Set<IntakeExceptionRow>();
 
+    public DbSet<PremiumDeltaRow> PremiumDeltas => Set<PremiumDeltaRow>();
+
+    public DbSet<CessionRow> Cessions => Set<CessionRow>();
+
+    public DbSet<CessionExceptionRow> CessionExceptions => Set<CessionExceptionRow>();
+
+    public DbSet<TrackerRow> Trackers => Set<TrackerRow>();
+
     protected override string Schema => ReinsuranceModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         ConfigureRecovery(modelBuilder);
+        ConfigureCession(modelBuilder);
 
         modelBuilder.Entity<ContractRow>(entity =>
         {
@@ -204,6 +214,76 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.HasIndex(e => new { e.VersionId, e.Rev }).IsUnique().HasFilter("lead").HasDatabaseName("ux_participation_one_lead");
             entity.HasIndex(e => e.ReinsurerPartyId).HasDatabaseName("ix_participation_reinsurer");
             entity.HasOne<ContractVersionRow>().WithMany().HasForeignKey(e => e.VersionId).HasConstraintName("fk_participation_version").OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureCession(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<PremiumDeltaRow>(entity =>
+        {
+            entity.ToTable("premium_delta");
+            entity.HasKey(e => e.EventId).HasName("pk_premium_delta");
+            entity.Property(e => e.EventId).HasColumnName("event_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.CoverageCode).HasColumnName("coverage_code");
+            entity.Property(e => e.ChargeCategory).HasColumnName("charge_category");
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.ValidFrom).HasColumnName("valid_from").HasColumnType("date");
+            entity.Property(e => e.SetId).HasColumnName("set_id");
+            entity.Property(e => e.SetSize).HasColumnName("set_size");
+            entity.Property(e => e.CorrectionOf).HasColumnName("correction_of");
+            entity.Property(e => e.OosSetId).HasColumnName("oos_set_id");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.TermId).HasDatabaseName("ix_premium_delta_term");
+            entity.HasIndex(e => e.SetId).HasDatabaseName("ix_premium_delta_set");
+        });
+
+        modelBuilder.Entity<CessionRow>(entity =>
+        {
+            entity.ToTable("cession", table => table.HasCheckConstraint("ck_cession_mode", "mode IN ('NET', 'GROSS')"));
+            entity.HasKey(e => e.CessionId).HasName("pk_cession");
+            entity.Property(e => e.CessionId).HasColumnName("cession_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.TreatyId).HasColumnName("treaty_id");
+            entity.Property(e => e.ContractYear).HasColumnName("contract_year");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.SetKey).HasColumnName("set_key");
+            entity.Property(e => e.WrittenPremium).HasColumnName("written_premium").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Target).HasColumnName("target").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.BookedBefore).HasColumnName("booked_before").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Delta).HasColumnName("delta").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Mode).HasColumnName("mode");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.TermId, e.TreatyId, e.SetKey }).IsUnique().HasDatabaseName("ux_cession_set");
+        });
+
+        modelBuilder.Entity<CessionExceptionRow>(entity =>
+        {
+            entity.ToTable("cession_exception");
+            entity.HasKey(e => e.ExceptionId).HasName("pk_cession_exception");
+            entity.Property(e => e.ExceptionId).HasColumnName("exception_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.SourceEventId).HasColumnName("source_event_id");
+            entity.Property(e => e.Code).HasColumnName("code");
+            entity.Property(e => e.Detail).HasColumnName("detail");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.TermId).HasDatabaseName("ix_cession_exception_term");
+        });
+
+        modelBuilder.Entity<TrackerRow>(entity =>
+        {
+            entity.ToTable("tracker", table => table.HasCheckConstraint("ck_tracker_amount", "opening_aggregate >= 0"));
+            entity.HasKey(e => e.TrackerId).HasName("pk_tracker");
+            entity.Property(e => e.TrackerId).HasColumnName("tracker_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.TreatyId).HasColumnName("treaty_id");
+            entity.Property(e => e.ContractYear).HasColumnName("contract_year");
+            entity.Property(e => e.OpeningAggregate).HasColumnName("opening_aggregate").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.LegalEntityId, e.TreatyId, e.ContractYear }).IsUnique().HasDatabaseName("ux_tracker_treaty_year");
         });
     }
 

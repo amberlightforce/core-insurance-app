@@ -23,6 +23,224 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Cession.CessionExceptionRow", b =>
+                {
+                    b.Property<Guid>("ExceptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("exception_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Detail")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("detail");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<Guid>("SourceEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_event_id");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.HasKey("ExceptionId")
+                        .HasName("pk_cession_exception");
+
+                    b.HasIndex("TermId")
+                        .HasDatabaseName("ix_cession_exception_term");
+
+                    b.ToTable("cession_exception", "ri");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Cession.CessionRow", b =>
+                {
+                    b.Property<Guid>("CessionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("cession_id");
+
+                    b.Property<decimal>("BookedBefore")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("booked_before");
+
+                    b.Property<int>("ContractYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("contract_year");
+
+                    b.Property<decimal>("Delta")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("delta");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mode");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<Guid>("SetKey")
+                        .HasColumnType("uuid")
+                        .HasColumnName("set_key");
+
+                    b.Property<decimal>("Target")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("target");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.Property<string>("TreatyId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("treaty_id");
+
+                    b.Property<decimal>("WrittenPremium")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("written_premium");
+
+                    b.HasKey("CessionId")
+                        .HasName("pk_cession");
+
+                    b.HasIndex("TermId", "TreatyId", "SetKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_cession_set");
+
+                    b.ToTable("cession", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_cession_mode", "mode IN ('NET', 'GROSS')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Cession.PremiumDeltaRow", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("ChargeCategory")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("charge_category");
+
+                    b.Property<Guid?>("CorrectionOf")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correction_of");
+
+                    b.Property<string>("CoverageCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("coverage_code");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid?>("OosSetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("oos_set_id");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<Guid?>("SetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("set_id");
+
+                    b.Property<int>("SetSize")
+                        .HasColumnType("integer")
+                        .HasColumnName("set_size");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
+                    b.HasKey("EventId")
+                        .HasName("pk_premium_delta");
+
+                    b.HasIndex("SetId")
+                        .HasDatabaseName("ix_premium_delta_set");
+
+                    b.HasIndex("TermId")
+                        .HasDatabaseName("ix_premium_delta_term");
+
+                    b.ToTable("premium_delta", "ri");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Cession.TrackerRow", b =>
+                {
+                    b.Property<Guid>("TrackerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("tracker_id");
+
+                    b.Property<int>("ContractYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("contract_year");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<decimal>("OpeningAggregate")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("opening_aggregate");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<string>("TreatyId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("treaty_id");
+
+                    b.HasKey("TrackerId")
+                        .HasName("pk_tracker");
+
+                    b.HasIndex("LegalEntityId", "TreatyId", "ContractYear")
+                        .IsUnique()
+                        .HasDatabaseName("ux_tracker_treaty_year");
+
+                    b.ToTable("tracker", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_tracker_amount", "opening_aggregate >= 0");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ClaimAmountRow", b =>
                 {
                     b.Property<Guid>("ClaimId")
