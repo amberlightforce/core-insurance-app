@@ -4,23 +4,34 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Ai.killSwitch request. PRD inputs: "feature, inputs (allow-listed)"</summary>
+/// <summary>plt.Ai.killSwitch request (SL6-PLT-AI). Scope GLOBAL or an AI feature id.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AiKillSwitchRequest
 {
-    /// <summary>PRD: "feature"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("feature")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Feature { get; init; }
+    /// <summary>Contract member 'action'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("action")]
+    public required ActionValue Action { get; init; }
 
-    /// <summary>PRD: "inputs (allow-listed)"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("inputs")]
+    /// <summary>GLOBAL or an AI feature id</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("scope")]
+    public required string Scope { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Inputs { get; init; }
+    public string? Reason { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ActionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ActionValue
+    {
+        /// <summary><c>Activate</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Activate")]
+        Activate,
+
+        /// <summary><c>Clear</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Clear")]
+        Clear,
+    }
 }
