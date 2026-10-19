@@ -1,4 +1,5 @@
 using CoreIns.Modules.Claims.Contracts.Events;
+using CoreIns.Modules.Migration.Contracts.Spi;
 using CoreIns.Modules.Policy.Contracts.Events;
 using CoreIns.Modules.Reinsurance.Cession;
 using CoreIns.Modules.Reinsurance.Authority;
@@ -131,6 +132,7 @@ public static class ReinsuranceModule
         services.AddOptions<CessionOptions>().Bind(configuration.GetSection(CessionOptions.Section));
         services.AddScoped<CessionIntake>();
         services.AddScoped<TrackerService>();
+        services.AddScoped<IMigrationImporter, MigrationImport.ReinsuranceMigrationImporter>();
         services.AddEventHandler<ChargeDeltaEmittedV1, ChargeDeltaCessionHandler>(EventDescriptor.From(ChargeDeltaEmittedV1.Descriptor), ChargeDeltaCessionHandler.Name, ModuleCode.RI);
 
         services.AddErrorDefinitions(Errors);

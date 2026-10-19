@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Compliance.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class ClockEngine : Migration
+    public partial class ClockEngine : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
