@@ -356,11 +356,20 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
             entity.Property(e => e.ClaimPaymentId).HasColumnName("claim_payment_id");
             entity.Property(e => e.DisbursementId).HasColumnName("disbursement_id");
             entity.Property(e => e.RefundId).HasColumnName("refund_id");
+            entity.Property(e => e.RecoveryId).HasColumnName("recovery_id");
+            entity.Property(e => e.CounterpartyPartyId).HasColumnName("counterparty_party_id");
+            entity.Property(e => e.FsStatementRef).HasColumnName("fs_statement_ref");
+            entity.Property(e => e.RecoverableBasis).HasColumnName("recoverable_basis");
+            entity.Property(e => e.RiContractId).HasColumnName("ri_contract_id");
+            entity.Property(e => e.RiContractYear).HasColumnName("ri_contract_year");
+            entity.Property(e => e.RiHeldGroup).HasColumnName("ri_held_group");
             entity.HasIndex(e => new { e.JournalId, e.LineNo }).IsUnique().HasDatabaseName("ux_journal_line_no");
             entity.HasIndex(e => new { e.LegalEntityId, e.PolicyNumber }).HasFilter("policy_number IS NOT NULL").HasDatabaseName("ix_journal_line_policy");
             entity.HasIndex(e => new { e.LegalEntityId, e.ClaimId }).HasFilter("claim_id IS NOT NULL").HasDatabaseName("ix_journal_line_claim");
             entity.HasIndex(e => new { e.LegalEntityId, e.ClaimPaymentId, e.AccountCode }).HasFilter("claim_payment_id IS NOT NULL").HasDatabaseName("ix_journal_line_claim_payment");
             entity.HasIndex(e => new { e.LegalEntityId, e.RefundId, e.AccountCode }).HasFilter("refund_id IS NOT NULL").HasDatabaseName("ix_journal_line_refund");
+            entity.HasIndex(e => new { e.LegalEntityId, e.RecoveryId, e.AccountCode }).HasFilter("recovery_id IS NOT NULL").HasDatabaseName("ix_journal_line_recovery");
+            entity.HasIndex(e => new { e.LegalEntityId, e.CounterpartyPartyId, e.FsStatementRef, e.AccountCode }).HasFilter("fs_statement_ref IS NOT NULL").HasDatabaseName("ix_journal_line_fs_statement");
             entity.HasOne<JournalEntryRow>().WithMany().HasForeignKey(e => e.JournalId).HasConstraintName("fk_journal_line_entry").OnDelete(DeleteBehavior.Restrict);
         });
     }

@@ -4,16 +4,15 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.FeatureFlag.evaluate request. PRD inputs: "flag, context"</summary>
+/// <summary>plt.FeatureFlag.evaluate request (SL6-PLT-AI). AI features (AI-XXX-NN) answer with the AI gate; other flags come from Platform:FeatureFlags configuration.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FeatureFlagEvaluateRequest
 {
-    /// <summary>PRD: "flag"</summary>
+    /// <summary>Contract member 'flag'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("flag")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public bool? Flag { get; init; }
+    public required string Flag { get; init; }
 
-    /// <summary>PRD: "context"</summary>
+    /// <summary>Contract member 'context'.</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>

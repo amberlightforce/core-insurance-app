@@ -29,6 +29,8 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
 
     public DbSet<ChargeLineRow> ChargeLines => Set<ChargeLineRow>();
 
+    public DbSet<PackRollbackExceptionRow> PackRollbackExceptions => Set<PackRollbackExceptionRow>();
+
     protected override string Schema => PolicyModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -111,6 +113,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
                 table.HasCheckConstraint("ck_quote_version_state", Codes.CheckSql<QuoteState>("state"));
                 table.HasCheckConstraint("ck_quote_version_no", "version_no >= 1 AND version_no <= 20");
                 table.HasCheckConstraint("ck_quote_version_draft", "draft_version >= 0");
+                table.HasCheckConstraint("ck_quote_version_stale_reason", "stale_reason IS NULL OR stale_reason = 'PACK_ROLLBACK'");
                 table.HasCheckConstraint("ck_quote_version_quoted", "state <> 'QUOTED' OR (quoted_at IS NOT NULL AND charges IS NOT NULL AND total IS NOT NULL)");
             });
             entity.HasKey(e => e.QuoteId).HasName("pk_quote_version");
@@ -131,6 +134,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.Issues).HasColumnName("issues").HasColumnType("jsonb");
             entity.Property(e => e.UwEvaluationId).HasColumnName("uw_evaluation_id");
             entity.Property(e => e.ConfigurationHash).HasColumnName("configuration_hash");
+            entity.Property(e => e.StaleReason).HasColumnName("stale_reason");
             entity.Property(e => e.QuotedAt).HasColumnName("quoted_at").HasColumnType("timestamptz");
             entity.Property(e => e.ValidUntil).HasColumnName("valid_until").HasColumnType("timestamptz");
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
@@ -294,6 +298,41 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.HasIndex(e => e.TermId).HasDatabaseName("ix_charge_line_term");
             entity.HasOne<PolicyTransactionRow>().WithMany().HasForeignKey(e => e.TransactionId)
                 .HasConstraintName("fk_charge_line_transaction").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PackRollbackExceptionRow>(entity =>
+        {
+            entity.ToTable("pack_rollback_exception", table =>
+            {
+                table.HasCheckConstraint("ck_pack_rollback_exception_status", "status IN ('OPEN', 'REVIEWED')");
+                table.HasCheckConstraint("ck_pack_rollback_exception_outcome", "review_outcome IS NULL OR review_outcome IN ('NO_ACTION', 'CORRECTION_REQUIRED')");
+                table.HasCheckConstraint("ck_pack_rollback_exception_review", "(status = 'OPEN') = (review_outcome IS NULL)");
+            });
+            entity.HasKey(e => e.ExceptionId).HasName("pk_pack_rollback_exception");
+            entity.Property(e => e.ExceptionId).HasColumnName("exception_id");
+            entity.Property(e => e.ActivationId).HasColumnName("activation_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Pack).HasColumnName("pack");
+            entity.Property(e => e.FromVersion).HasColumnName("from_version");
+            entity.Property(e => e.ToVersion).HasColumnName("to_version");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
+            entity.Property(e => e.TransactionKind).HasColumnName("transaction_kind");
+            entity.Property(e => e.ConfigurationHash).HasColumnName("configuration_hash");
+            entity.Property(e => e.ProductVersion).HasColumnName("product_version");
+            entity.Property(e => e.IdentifiedAt).HasColumnName("identified_at").HasColumnType("timestamptz");
+            entity.Property(e => e.SourceEventId).HasColumnName("source_event_id");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.ReviewOutcome).HasColumnName("review_outcome");
+            entity.Property(e => e.ReviewReason).HasColumnName("review_reason");
+            entity.Property(e => e.ReviewedBy).HasColumnName("reviewed_by");
+            entity.Property(e => e.ReviewedAt).HasColumnName("reviewed_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.ActivationId, e.TransactionId }).IsUnique().HasDatabaseName("ux_pack_rollback_exception_activation_tx");
+            entity.HasIndex(e => new { e.LegalEntityId, e.Status, e.IdentifiedAt }).HasDatabaseName("ix_pack_rollback_exception_queue");
+            entity.HasOne<PolicyTransactionRow>().WithMany().HasForeignKey(e => e.TransactionId)
+                .HasConstraintName("fk_pack_rollback_exception_transaction").OnDelete(DeleteBehavior.Restrict);
         });
     }
 
