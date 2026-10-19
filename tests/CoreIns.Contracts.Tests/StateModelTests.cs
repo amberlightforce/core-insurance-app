@@ -91,7 +91,8 @@ public sealed class StateModelTests
         var d = DisbursementStateModel.Machine;
         Allows(d, DisbursementState.Released, DisbursementTrigger.Reject, DisbursementState.Rejected);
         Allows(d, DisbursementState.Cleared, DisbursementTrigger.Return, DisbursementState.Returned);
-        Forbids(d, DisbursementState.Released, DisbursementTrigger.Stop);
+        Allows(d, DisbursementState.Released, DisbursementTrigger.Stop, DisbursementState.Stopped);
+        Forbids(d, DisbursementState.Issued, DisbursementTrigger.Stop);
         d.TerminalStates.ShouldBe(
             [DisbursementState.Rejected, DisbursementState.Stopped, DisbursementState.Voided, DisbursementState.Returned], ignoreOrder: true);
     }

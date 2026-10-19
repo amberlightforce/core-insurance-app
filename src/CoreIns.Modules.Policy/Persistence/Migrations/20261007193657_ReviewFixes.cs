@@ -5,7 +5,7 @@
 namespace CoreIns.Modules.Policy.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class ReviewFixes : Migration
+    public partial class ReviewFixes : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

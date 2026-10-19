@@ -16,6 +16,8 @@
   <ItemGroup>
     <ProjectReference Include="..\CoreIns.Modules.Compliance.Contracts\CoreIns.Modules.Compliance.Contracts.csproj" />
     <!-- FiscalDocumentChannel SPI: contracts only. -->
+    <!-- dat.Erasure.execute / Subject.export / Restriction.apply for the DAT task. -->
+    <ProjectReference Include="..\CoreIns.Modules.Data.Contracts\CoreIns.Modules.Data.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />

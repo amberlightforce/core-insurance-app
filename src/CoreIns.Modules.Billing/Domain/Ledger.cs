@@ -51,6 +51,9 @@ internal static class EntryTypes
 
     /// <summary>The statement debit of an FS_CLEARING net: disbursements in transit LA-13 → cash at bank LA-10.</summary>
     public const string FsClearingCleared = "FS_CLEARING_CLEARED";
+
+    /// <summary>A stopped, voided, rejected or returned disbursement reversed: in transit LA-13 back to the source payable and, after clearing, cash LA-10 back to LA-13 (SL4-BIL-DISBOPS, D-SL4-13).</summary>
+    public const string DisbursementReversed = "DISBURSEMENT_REVERSED";
 }
 
 /// <summary>Sub-ledger accounts used by the slice (PRD-06 §7.1.4; the whole chart LA-01…LA-27 is seeded as data, REQ-BIL-282).</summary>

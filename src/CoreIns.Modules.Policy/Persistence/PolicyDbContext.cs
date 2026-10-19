@@ -37,6 +37,8 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
 
     public DbSet<OosCorrectionRow> OosCorrections => Set<OosCorrectionRow>();
 
+    public DbSet<MigrationImportRow> MigrationImports => Set<MigrationImportRow>();
+
     protected override string Schema => PolicyModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -316,9 +318,26 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.TreatmentRuleId).HasColumnName("treatment_rule_id");
             entity.Property(e => e.TreatmentRuleVersion).HasColumnName("treatment_rule_version");
             entity.HasIndex(e => new { e.TransactionId, e.SetIndex }).IsUnique().HasDatabaseName("ux_charge_line_set");
+            entity.Property(e => e.Opening).HasColumnName("opening").HasDefaultValue(false);
             entity.HasIndex(e => e.TermId).HasDatabaseName("ix_charge_line_term");
             entity.HasOne<PolicyTransactionRow>().WithMany().HasForeignKey(e => e.TransactionId)
                 .HasConstraintName("fk_charge_line_transaction").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<MigrationImportRow>(entity =>
+        {
+            entity.ToTable("migration_import", table => table.HasCheckConstraint("ck_migration_import_mode", "mode IN ('OPENING', 'RENEWAL_BASED')"));
+            entity.HasKey(e => e.PolicyId).HasName("pk_migration_import");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.BatchId).HasColumnName("batch_id");
+            entity.Property(e => e.LegacyNumber).HasColumnName("legacy_number");
+            entity.Property(e => e.Mode).HasColumnName("mode");
+            entity.Property(e => e.BaselineHash).HasColumnName("baseline_hash");
+            entity.Property(e => e.ImportedAt).HasColumnName("imported_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.BatchId).HasDatabaseName("ix_migration_import_batch");
+            entity.HasIndex(e => new { e.LegalEntityId, e.LegacyNumber }).IsUnique().HasDatabaseName("ux_migration_import_legacy");
         });
 
         modelBuilder.Entity<OosCorrectionRow>(entity =>
