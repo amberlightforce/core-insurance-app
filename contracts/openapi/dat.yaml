@@ -3523,28 +3523,48 @@ components:
           description: 'PRD: "aggregates"'
     ModelRegisterRequest:
       type: object
-      description: 'dat.Model.register request. PRD inputs: "model card, version"'
+      description: 'dat.Model.register request (DAT-CORE minimal registry)'
+      required: [featureKey, version]
       properties:
-        modelCard:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "model card"'
+        featureKey:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: AI feature id or rating artefact key the model serves
         version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
+          type: string
+          minLength: 1
+          maxLength: 64
+        modelCard:
+          type: object
+          additionalProperties: true
+          description: Free-form model card
     ModelRegisterResponse:
       type: object
-      description: 'dat.Model.register result. PRD outputs: "status"'
+      description: 'dat.Model.register result'
+      required: [modelId, status]
       properties:
+        modelId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum: [ACTIVE, SUSPENDED]
     ModelGetResponse:
       type: object
-      description: 'dat.Model.get result. PRD outputs: "status"'
+      description: 'dat.Model.get result'
+      required: [modelId, featureKey, version, status]
       properties:
+        modelId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        featureKey:
+          type: string
+        version:
+          type: string
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum: [ACTIVE, SUSPENDED]
+        suspendedReason:
+          type: string
     ModelSubmitValidationRequest:
       type: object
       description: 'dat.Model.submitValidation request. PRD inputs: "model card, version"'
@@ -3648,17 +3668,32 @@ components:
           description: 'PRD: "accepted counts"'
     BiasTestRunRequest:
       type: object
-      description: 'dat.BiasTest.run request. PRD inputs: "feature or artefact, population ref"'
+      description: 'dat.BiasTest.run request (DAT-CORE: the caller supplies the measured ratio; no lakehouse sampling yet)'
+      required: [metric, ratio]
       properties:
         feature:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "feature or artefact" (optional)'
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+          description: AI feature id under test, for example AI-CLM-04
         artefact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "feature or artefact" (optional)'
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: Rating artefact hash under test
         populationRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "population ref"'
+          type: string
+          maxLength: 128
+          description: Population reference (informational)
+        metric:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Bias metric code, for example DISPARATE_IMPACT
+        proxyGroup:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Protected-group proxy (default UNSPECIFIED)
+        ratio:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: Measured ratio; the band is 0.8 to 1.25 inclusive (illustrative, PRD-15 REQ-DAT-218)
+        sampleSize:
+          type: integer
+          minimum: 0
+          description: Sample size behind the ratio
       oneOf:
       - required:
         - feature
@@ -3666,14 +3701,21 @@ components:
         - artefact
     BiasTestRunResponse:
       type: object
-      description: 'dat.BiasTest.run result. PRD outputs: "BiasReport id, ratios"'
+      description: 'dat.BiasTest.run result'
+      required: [biasReportId, ratio, band, breached, modelStatus]
       properties:
-        biasreportId:
+        biasReportId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "BiasReport id"'
-        ratios:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "ratios"'
+        ratio:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        band:
+          type: string
+          description: Band as 'min..max'
+        breached:
+          type: boolean
+        modelStatus:
+          type: string
+          description: Status of the model after the test (SUSPENDED on breach)
     FeatureStoreGetOnlineResponse:
       type: object
       description: 'dat.FeatureStore.getOnline result. PRD outputs: "values / data set ref"'
@@ -3801,64 +3843,160 @@ components:
           description: 'PRD: "FIN ack"'
     SubjectExportRequest:
       type: object
-      description: 'dat.Subject.export request. PRD inputs: "DSAR ref, subject token, scope"'
+      description: 'dat.Subject.export request'
+      required: [requestId, subjectToken]
       properties:
-        dsarRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "DSAR ref"'
+        requestId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Idempotency key of the request (D-SL6 DAT-CORE); a repeat with the same id returns the stored result and acts once
         subjectToken:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "subject token"'
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Pseudonymous subject token (never a name or tax id)
+        dsarRef:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: DSAR case id (CMP)
         scope:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "scope"'
+          type: string
+          maxLength: 128
+          description: Optional scope label; no lakehouse layers exist yet, only dat.subject_fact
     SubjectExportResponse:
       type: object
-      description: 'dat.Subject.export result. PRD outputs: "evidence"'
+      description: 'dat.Subject.export result (DAT-CORE evidence)'
+      required: [subjectToken, status, factCount]
       properties:
-        evidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence"'
+        subjectToken:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, RESTRICTED, ERASED]
+        factCount:
+          type: integer
+          minimum: 0
+          description: Facts exported, blanked or restricted
+        keyDestroyed:
+          type: boolean
+          description: True once the subject key is destroyed (crypto-shred)
+        facts:
+          type: array
+          description: Exported facts (export only; empty once erased)
+          items:
+            type: object
+            required: [category, key, value]
+            properties:
+              category:
+                type: string
+              key:
+                type: string
+              value:
+                type: string
     ErasureExecuteRequest:
       type: object
-      description: 'dat.Erasure.execute request. PRD inputs: "DSAR ref, subject token, scope"'
+      description: 'dat.Erasure.execute request'
+      required: [requestId, subjectToken]
       properties:
-        dsarRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "DSAR ref"'
+        requestId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Idempotency key of the request (D-SL6 DAT-CORE); a repeat with the same id returns the stored result and acts once
         subjectToken:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "subject token"'
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Pseudonymous subject token (never a name or tax id)
+        dsarRef:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: DSAR case id (CMP)
         scope:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "scope"'
+          type: string
+          maxLength: 128
+          description: Optional scope label; no lakehouse layers exist yet, only dat.subject_fact
     ErasureExecuteResponse:
       type: object
-      description: 'dat.Erasure.execute result. PRD outputs: "evidence"'
+      description: 'dat.Erasure.execute result (DAT-CORE evidence)'
+      required: [subjectToken, status, factCount]
       properties:
-        evidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence"'
+        subjectToken:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, RESTRICTED, ERASED]
+        factCount:
+          type: integer
+          minimum: 0
+          description: Facts exported, blanked or restricted
+        keyDestroyed:
+          type: boolean
+          description: True once the subject key is destroyed (crypto-shred)
+        facts:
+          type: array
+          description: Exported facts (export only; empty once erased)
+          items:
+            type: object
+            required: [category, key, value]
+            properties:
+              category:
+                type: string
+              key:
+                type: string
+              value:
+                type: string
     RestrictionApplyRequest:
       type: object
-      description: 'dat.Restriction.apply request. PRD inputs: "DSAR ref, subject token, scope"'
+      description: 'dat.Restriction.apply request'
+      required: [requestId, subjectToken]
       properties:
-        dsarRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "DSAR ref"'
+        requestId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Idempotency key of the request (D-SL6 DAT-CORE); a repeat with the same id returns the stored result and acts once
         subjectToken:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "subject token"'
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Pseudonymous subject token (never a name or tax id)
+        dsarRef:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: DSAR case id (CMP)
         scope:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "scope"'
+          type: string
+          maxLength: 128
+          description: Optional scope label; no lakehouse layers exist yet, only dat.subject_fact
     RestrictionApplyResponse:
       type: object
-      description: 'dat.Restriction.apply result. PRD outputs: "evidence"'
+      description: 'dat.Restriction.apply result (DAT-CORE evidence)'
+      required: [subjectToken, status, factCount]
       properties:
-        evidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence"'
+        subjectToken:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, RESTRICTED, ERASED]
+        factCount:
+          type: integer
+          minimum: 0
+          description: Facts exported, blanked or restricted
+        keyDestroyed:
+          type: boolean
+          description: True once the subject key is destroyed (crypto-shred)
+        facts:
+          type: array
+          description: Exported facts (export only; empty once erased)
+          items:
+            type: object
+            required: [category, key, value]
+            properties:
+              category:
+                type: string
+              key:
+                type: string
+              value:
+                type: string
     PurposeGrantRequestRequest:
       type: object
       description: 'dat.PurposeGrant.request request. PRD inputs: "purpose, data set, columns, grantee, expiry"'

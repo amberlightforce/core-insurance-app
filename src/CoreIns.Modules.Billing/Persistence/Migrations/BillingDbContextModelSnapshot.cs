@@ -108,6 +108,13 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("account_number");
 
+                    b.Property<string>("AccountType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("PREMIUM")
+                        .HasColumnName("account_type");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
@@ -152,7 +159,7 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_billing_account_number");
 
-                    b.HasIndex("LegalEntityId", "PayerPartyId", "Currency")
+                    b.HasIndex("LegalEntityId", "PayerPartyId", "Currency", "AccountType")
                         .IsUnique()
                         .HasDatabaseName("ux_billing_account_active_payer")
                         .HasFilter("status = 'ACTIVE'");
@@ -677,6 +684,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("legal_entity_id");
 
+                    b.Property<string>("Lines")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("lines");
+
                     b.Property<string>("Method")
                         .IsRequired()
                         .HasColumnType("text")
@@ -698,6 +709,14 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("integer")
                         .HasColumnName("record_version");
+
+                    b.Property<Guid?>("ReleaseApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("release_approval_request_id");
+
+                    b.Property<string>("ReleaseApprovedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("release_approved_by");
 
                     b.Property<Guid?>("ReleaseEntryId")
                         .HasColumnType("uuid")
@@ -747,6 +766,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("state");
+
+                    b.Property<string>("StatementRef")
+                        .HasColumnType("text")
+                        .HasColumnName("statement_ref");
 
                     b.Property<DateOnly?>("ValueDate")
                         .HasColumnType("date")
@@ -1325,6 +1348,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("claim_id");
 
+                    b.Property<Guid?>("CounterpartyPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("counterparty_party_id");
+
                     b.Property<string>("CoverageCode")
                         .HasColumnType("text")
                         .HasColumnName("coverage_code");
@@ -1370,6 +1397,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("receipt_id");
 
+                    b.Property<Guid?>("RecoveryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recovery_id");
+
                     b.Property<string>("RuleId")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1387,6 +1418,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.Property<string>("SourceType")
                         .HasColumnType("text")
                         .HasColumnName("source_type");
+
+                    b.Property<string>("StatementRef")
+                        .HasColumnType("text")
+                        .HasColumnName("statement_ref");
 
                     b.Property<Guid?>("TermId")
                         .HasColumnType("uuid")
@@ -1864,6 +1899,158 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.ReceivableAllocationRow", b =>
+                {
+                    b.Property<Guid>("AllocationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("allocation_id");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actor");
+
+                    b.Property<DateTime>("AllocatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("allocated_at");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("ReceiptId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("receipt_id");
+
+                    b.Property<Guid>("ReceivableId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("receivable_id");
+
+                    b.Property<string>("RuleId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("rule_id");
+
+                    b.HasKey("AllocationId");
+
+                    b.HasIndex("ReceivableId");
+
+                    b.HasIndex("ReceiptId", "ReceivableId")
+                        .IsUnique();
+
+                    b.ToTable("receivable_allocation", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_receivable_allocation_amount", "amount > 0 AND amount = round(amount, 2)");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.ReceivableRow", b =>
+                {
+                    b.Property<Guid>("ReceivableId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("receivable_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("BillingAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("billing_account_id");
+
+                    b.Property<Guid?>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.Property<Guid>("CounterpartyPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("counterparty_party_id");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateOnly>("DueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("PaymentReference")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payment_reference");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("purpose");
+
+                    b.Property<int>("RecordVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<Guid?>("RecoveryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recovery_id");
+
+                    b.Property<DateTime>("RegisteredAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("registered_at");
+
+                    b.Property<string>("RegisteredBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("registered_by");
+
+                    b.Property<string>("SourceId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_id");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_type");
+
+                    b.Property<string>("StatementRef")
+                        .HasColumnType("text")
+                        .HasColumnName("statement_ref");
+
+                    b.HasKey("ReceivableId");
+
+                    b.HasIndex("BillingAccountId");
+
+                    b.HasIndex("PaymentReference")
+                        .IsUnique();
+
+                    b.HasIndex("LegalEntityId", "SourceType", "SourceId", "Purpose", "CounterpartyPartyId", "Amount")
+                        .IsUnique();
+
+                    b.ToTable("receivable", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_receivable_amount", "amount > 0 AND amount = round(amount, 2)");
+
+                            t.HasCheckConstraint("ck_receivable_currency", "currency = 'EUR'");
+
+                            t.HasCheckConstraint("ck_receivable_source", "(source_type = 'CLM_CLAIM_PAYMENT' AND purpose IN ('SALVAGE','SUBROGATION') AND claim_id IS NOT NULL AND recovery_id IS NOT NULL AND statement_ref IS NULL) OR (source_type = 'FS_CLEARING' AND purpose = 'FS_NET' AND statement_ref IS NOT NULL AND claim_id IS NULL AND recovery_id IS NULL)");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.RefundCreditRow", b =>
                 {
                     b.Property<Guid>("RefundCreditId")
@@ -2327,6 +2514,30 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_receipt_account");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.ReceivableAllocationRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.ReceiptRow", null)
+                        .WithMany()
+                        .HasForeignKey("ReceiptId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.ReceivableRow", null)
+                        .WithMany()
+                        .HasForeignKey("ReceivableId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.ReceivableRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.BillingAccountRow", null)
+                        .WithMany()
+                        .HasForeignKey("BillingAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.RefundCreditRow", b =>

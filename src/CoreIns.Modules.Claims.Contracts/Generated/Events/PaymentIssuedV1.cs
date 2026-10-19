@@ -99,4 +99,12 @@ public sealed record PaymentIssuedV1 : global::CoreIns.Platform.Contracts.Events
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("fsStatementId")]
     public global::System.Guid? FsStatementId { get; init; }
+
+    /// <summary>Always set for method CLEARING: insurer counterparty of the FS case, distinct from the clearing office cash payee. Null for ordinary disbursements.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'counterpartyInsurerPartyId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// <para>Personal data, class P1 (x-classification).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("counterpartyInsurerPartyId")]
+    public global::System.Guid? CounterpartyInsurerPartyId { get; init; }
 }
