@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Billing.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Respread : Migration
+    public partial class Respread : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
