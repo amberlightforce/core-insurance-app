@@ -1,3 +1,5 @@
+using CoreIns.Modules.Documents.Services.Dsar;
+using CoreIns.SharedKernel.Dsar;
 using CoreIns.Modules.Documents.Commands;
 using CoreIns.Modules.Documents.Contracts;
 using CoreIns.Modules.Documents.Contracts.Api;
@@ -39,6 +41,7 @@ public static class DocumentsModule
 
         services.Configure<DocumentsOptions>(configuration.GetSection(DocumentsOptions.Section));
         services.AddModuleDbContext<DocumentsDbContext>(Schema);
+        services.AddSingleton<IDsarParticipant, DocumentsDsarParticipant>();
         services.AddScoped<DocumentReader>();
 
         // The request is idempotent on (template key, request number) by itself; callers inside a unit of work pass no HTTP key.

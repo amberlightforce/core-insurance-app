@@ -53,7 +53,7 @@ public sealed class ModuleSettingsTests : IDisposable
 
         authority.Grants.Select(g => g.Id).Distinct().Count().ShouldBe(authority.Grants.Count);
         authority.Grants.Single(g => g.Id == "uw-manager-issue-approval-illustrative").Limits.Single().Codes.Count.ShouldBe(3);
-        authority.Grants.Single(g => g.Id == "clm-manager-payment-illustrative").Limits.Single().Amount.ShouldBe("50000.00");
+        authority.Grants.Single(g => g.Id == "clm-manager-payment-illustrative").Limits.Single().Amount.ShouldBe("1000000.00");
     }
 
     [Fact]

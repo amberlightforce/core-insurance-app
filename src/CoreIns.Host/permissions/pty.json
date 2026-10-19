@@ -2,6 +2,7 @@
   "Platform": {
     "Permissions": {
       "Grants": {
+        "pty.Party.explainDuplicate": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pty.Party.create": [ "Staff.Underwriter", "Staff.Billing" ],
         "pty.Party.get": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pty.Party.search": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],

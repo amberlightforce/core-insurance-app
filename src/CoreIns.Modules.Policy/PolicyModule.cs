@@ -55,7 +55,7 @@ public static class PolicyModule
             appRole =>
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
-                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.job, {Schema}.quote_version, {Schema}.policy_term, {Schema}.segment, {Schema}.pack_rollback_exception TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.job, {Schema}.quote_version, {Schema}.policy_term, {Schema}.segment, {Schema}.pack_rollback_exception, {Schema}.dsar_restriction TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.policy, {Schema}.policy_transaction, {Schema}.charge_line, {Schema}.oos_correction, {Schema}.withdrawal TO {appRole}",
                 // The policy row is frozen (trigger); the one thing a command changes is the record-time watermark (D-SL3-03).
                 $"GRANT UPDATE (last_recorded_at, record_version) ON {Schema}.policy TO {appRole}",
@@ -157,6 +157,7 @@ public static class PolicyModule
         // SL5-POL-ROLLBACK: PackRolledBack consumer, exception queue and review (REQ-POL-354 subset, D-SL5-10).
         services.AddPackRollback();
 
+        services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Policy.Services.Dsar.PolicyDsarParticipant>();
         services.AddErrorDefinitions(Errors);
         return services;
     }
