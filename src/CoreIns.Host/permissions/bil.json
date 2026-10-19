@@ -2,6 +2,7 @@
   "Platform": {
     "Permissions": {
       "Grants": {
+        "bil.Suspense.suggestMatch": [ "Staff.Billing", "Platform.Admin" ],
         "bil.BillingAccount.get": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],
         "bil.Invoice.get": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],
         "bil.Invoice.list": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],
@@ -14,14 +15,22 @@
         // SL2-BIL-DISB: Claims calls create/request in process; the API serves reads (claims roles: SL2-PLT).
         "bil.PayeeAccount.create": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "bil.PayeeAccount.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
-        "bil.Disbursement.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "bil.Disbursement.get": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "bil.Disbursement.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.Disbursement.approveRelease": [ "Staff.BillingManager" ],
         // SL3-PLT-SUPPORT: refunds are read by billing staff; only the billing manager decides them (SoD: maker != checker is enforced by plt.Approval).
         "bil.Refund.get": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.Refund.list": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.Refund.decide": [ "Staff.BillingManager" ],
         // SL3-BIL-REFUND: billing staff (and the manager) propose and resubmit; maker != checker is enforced by plt.Approval and by BIL.
         "bil.Refund.propose": [ "Staff.Billing", "Staff.BillingManager" ],
-        "bil.Refund.resubmit": [ "Staff.Billing", "Staff.BillingManager" ]
+        "bil.Refund.resubmit": [ "Staff.Billing", "Staff.BillingManager" ],
+        // SL6-BIL-DELINQ: collections staff work the non-payment cases; the manager also lifts holds.
+        "bil.Delinquency.get": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.Delinquency.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.Delinquency.recordContact": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Delinquency.arrange": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Delinquency.releaseHold": [ "Staff.Billing", "Staff.BillingManager" ]
       }
     },
     "Authority": {

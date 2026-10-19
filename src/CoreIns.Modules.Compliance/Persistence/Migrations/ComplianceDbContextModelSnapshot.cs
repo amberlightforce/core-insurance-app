@@ -23,6 +23,67 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Compliance.AiRegister.AiSystemRow", b =>
+                {
+                    b.Property<string>("FeatureId")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("feature_id");
+
+                    b.Property<string>("AiActClass")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("ai_act_class");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("approved_by");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("FeatureId")
+                        .HasName("pk_ai_system");
+
+                    b.ToTable("ai_system", "cmp", t =>
+                        {
+                            t.HasCheckConstraint("ck_ai_system_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_ai_system_status", "status IN ('DRAFT','IN_REVIEW','APPROVED','SUSPENDED','RETIRED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Compliance.Persistence.ClockEventRow", b =>
                 {
                     b.Property<Guid>("ClockEventId")
@@ -357,6 +418,51 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_fiscal_series_last", "last_number >= 0");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Platform.Persistence.DsarRestrictionRow", b =>
+                {
+                    b.Property<Guid>("RestrictionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("restriction_id");
+
+                    b.Property<string>("LegalBasis")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_basis");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("RecordClass")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("record_class");
+
+                    b.Property<DateTime>("RestrictedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("restricted_at");
+
+                    b.Property<string>("RetentionEnd")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("retention_end");
+
+                    b.HasKey("RestrictionId")
+                        .HasName("pk_dsar_restriction");
+
+                    b.HasIndex("PartyId", "RecordClass")
+                        .IsUnique()
+                        .HasDatabaseName("ux_dsar_restriction_subject_class");
+
+                    b.ToTable("dsar_restriction", "cmp");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Compliance.Persistence.ClockEventRow", b =>

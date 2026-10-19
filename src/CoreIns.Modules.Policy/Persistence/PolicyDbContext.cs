@@ -31,11 +31,32 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
 
     public DbSet<PackRollbackExceptionRow> PackRollbackExceptions => Set<PackRollbackExceptionRow>();
 
+    public DbSet<DsarRestrictionRow> DsarRestrictions => Set<DsarRestrictionRow>();
+
+    public DbSet<WithdrawalRow> Withdrawals => Set<WithdrawalRow>();
+
+    public DbSet<OosCorrectionRow> OosCorrections => Set<OosCorrectionRow>();
+
     protected override string Schema => PolicyModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<DsarRestrictionRow>(entity =>
+        {
+            entity.ToTable("dsar_restriction");
+            entity.HasKey(e => e.RestrictionId).HasName("pk_dsar_restriction");
+            entity.Property(e => e.RestrictionId).HasColumnName("restriction_id");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.RecordClass).HasColumnName("record_class");
+            entity.Property(e => e.LegalBasis).HasColumnName("legal_basis");
+            entity.Property(e => e.RetentionEnd).HasColumnName("retention_end");
+            entity.Property(e => e.Reason).HasColumnName("reason");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.HasIndex(e => new { e.PartyId, e.RecordClass }).IsUnique().HasDatabaseName("ux_dsar_restriction_subject_class");
+        });
 
         modelBuilder.Entity<JobRow>(entity =>
         {
@@ -300,6 +321,34 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
                 .HasConstraintName("fk_charge_line_transaction").OnDelete(DeleteBehavior.Restrict);
         });
 
+        modelBuilder.Entity<OosCorrectionRow>(entity =>
+        {
+            entity.ToTable("oos_correction", table =>
+            {
+                table.HasCheckConstraint("ck_oos_correction_mode", "mode IN ('NET', 'GROSS')");
+                table.HasCheckConstraint("ck_oos_correction_status", "status IN ('APPLIED')");
+            });
+            entity.HasKey(e => e.SetId).HasName("pk_oos_correction");
+            entity.Property(e => e.SetId).HasColumnName("set_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
+            entity.Property(e => e.JobId).HasColumnName("job_id");
+            entity.Property(e => e.Mode).HasColumnName("mode");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.OriginalRefs).HasColumnName("original_refs").HasColumnType("jsonb");
+            entity.Property(e => e.CorrectionOf).HasColumnName("correction_of");
+            entity.Property(e => e.BookingDate).HasColumnName("booking_date");
+            entity.Property(e => e.PeriodLocked).HasColumnName("period_locked");
+            entity.Property(e => e.NetPremium).HasColumnName("net_premium").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.TransactionId).IsUnique().HasDatabaseName("ux_oos_correction_transaction");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_oos_correction_policy");
+            entity.HasOne<PolicyTransactionRow>().WithMany().HasForeignKey(e => e.TransactionId)
+                .HasConstraintName("fk_oos_correction_transaction").OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<PackRollbackExceptionRow>(entity =>
         {
             entity.ToTable("pack_rollback_exception", table =>
@@ -333,6 +382,23 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.HasIndex(e => new { e.LegalEntityId, e.Status, e.IdentifiedAt }).HasDatabaseName("ix_pack_rollback_exception_queue");
             entity.HasOne<PolicyTransactionRow>().WithMany().HasForeignKey(e => e.TransactionId)
                 .HasConstraintName("fk_pack_rollback_exception_transaction").OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<WithdrawalRow>(entity =>
+        {
+            entity.ToTable("withdrawal", table => table.HasCheckConstraint("ck_withdrawal_right", "\"right\" IN ('WITHDRAWAL', 'OBJECTION')"));
+            entity.HasKey(e => e.WithdrawalId).HasName("pk_withdrawal");
+            entity.Property(e => e.WithdrawalId).HasColumnName("withdrawal_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.JobId).HasColumnName("job_id");
+            entity.Property(e => e.ChannelRef).HasColumnName("channel_ref");
+            entity.Property(e => e.Right).HasColumnName("right");
+            entity.Property(e => e.ReceivedAt).HasColumnName("received_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Actor).HasColumnName("actor");
+            entity.Property(e => e.Result).HasColumnName("result").HasColumnType("jsonb");
+            entity.HasIndex(e => new { e.PolicyId, e.ChannelRef }).IsUnique().HasDatabaseName("ux_withdrawal_policy_channel_ref");
         });
     }
 

@@ -1,5 +1,6 @@
 using CoreIns.Modules.Policy.Commands;
 using CoreIns.Modules.Policy.Commands.Change;
+using CoreIns.Modules.Policy.Commands.Withdrawal;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Domain;
@@ -158,4 +159,11 @@ internal sealed class PolicyTermService(RequestContext context, ILegalEntityDire
             JobSupport.LegalEntity(context, legalEntities), context.LegalEntity!.Value.Value, policyId.Value, termId?.Value,
             InProcess.Valid(validAt, clock, options.Value), knownAt ?? clock.Now, cancellationToken).ConfigureAwait(false)
         ?? throw new DomainException(JobSupport.NotFound("term"));
+}
+
+/// <summary>The in-process contract <see cref="IPolicyWithdrawalService"/> (SL6-POL-WITHDRAW): CHN declares a withdrawal, POL voids the term.</summary>
+internal sealed class PolicyWithdrawalService(RequestContext context, ICommandHandler<SubmitWithdrawal, WithdrawalSubmitResponse> submit) : IPolicyWithdrawalService
+{
+    public Task<WithdrawalSubmitResponse> SubmitAsync(WithdrawalSubmitRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        InProcess.RunAsync(context, submit, new SubmitWithdrawal(request), options, cancellationToken);
 }

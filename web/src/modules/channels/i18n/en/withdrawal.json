@@ -1,0 +1,72 @@
+{
+  "overline": "Channels",
+  "withdrawal": {
+    "status": {
+      "DECLARED": "Awaiting confirmation",
+      "CONFIRMED": "Confirmed",
+      "SUBMITTED": "In processing",
+      "PROCESSED": "Completed",
+      "REJECTED": "Rejected",
+      "DECLINED": "Out of time"
+    },
+    "fields": {
+      "requestNumber": "Request number",
+      "status": "Status",
+      "refundStatus": "Refund status",
+      "declaredAt": "Declared",
+      "confirmedAt": "Confirmed",
+      "confirmBy": "Last day to exercise the right",
+      "deadlineAt": "Deadline",
+      "policy": "Policy",
+      "channel": "Channel"
+    },
+    "declare": {
+      "title": "Withdraw from a distance contract",
+      "subtitle": "Declare that you withdraw from the policy within the withdrawal period. A confirmation code is sent to your e-mail.",
+      "formTitle": "Withdrawal declaration",
+      "name": "Full name",
+      "contractId": "Policy identifier",
+      "contractIdHelp": "The identifier (UUID) of your policy",
+      "eMail": "E-mail",
+      "reason": "Reason (optional)",
+      "submit": "Submit declaration",
+      "required": "This field is required.",
+      "badContract": "Enter a valid policy identifier.",
+      "badEmail": "Enter a valid e-mail address.",
+      "failed": "The declaration was not submitted",
+      "receipt": "Declaration receipt",
+      "confirmTitle": "Confirmation",
+      "confirmHelp": "Enter the confirmation code sent to your e-mail to complete the withdrawal.",
+      "token": "Confirmation code",
+      "tokenRequired": "Enter the code.",
+      "confirm": "Confirm withdrawal",
+      "confirmFailed": "Confirmation failed",
+      "confirmed": "Withdrawal confirmed",
+      "confirmedBody": "Request {number} was confirmed {at}. You will be told about the premium refund.",
+      "expiredTitle": "The withdrawal period has expired",
+      "expiredBody": "Request {number} was recorded but cannot be accepted because the withdrawal period has passed."
+    },
+    "list": {
+      "title": "Withdrawal requests",
+      "subtitle": "Customer withdrawal declarations and their progress.",
+      "section": "Requests",
+      "search": "Request number",
+      "searchAction": "Search",
+      "emptyTitle": "No requests",
+      "emptyBody": "There are no withdrawal requests for these criteria.",
+      "more": "More"
+    },
+    "detail": {
+      "title": "Request {number}",
+      "summary": "Request details",
+      "back": "Back to the list",
+      "openPolicy": "Open policy",
+      "outcome": "Outcome",
+      "markProcessed": "Refund completed",
+      "markRejected": "Reject",
+      "closed": "Request closed",
+      "closeFailed": "Closing failed",
+      "notFound": "Request not found."
+    }
+  }
+}

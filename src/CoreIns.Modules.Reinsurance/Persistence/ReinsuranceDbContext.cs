@@ -43,6 +43,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        DsarRestrictionModel.Configure(modelBuilder);
         ConfigureRecovery(modelBuilder);
 
         modelBuilder.Entity<ContractRow>(entity =>

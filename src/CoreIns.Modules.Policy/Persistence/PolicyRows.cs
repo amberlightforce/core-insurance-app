@@ -446,3 +446,94 @@ internal sealed class PackRollbackExceptionRow
 
     public int RecordVersion { get; set; } = 1;
 }
+
+/// <summary><c>pol.dsar_restriction</c>: a record class of a data subject restricted by a DSAR (D-SL6-07); one row per (subject, class).</summary>
+internal sealed class DsarRestrictionRow
+{
+    public Guid RestrictionId { get; set; }
+
+    public PartyId PartyId { get; set; }
+
+    public string RecordClass { get; set; } = string.Empty;
+
+    public string LegalBasis { get; set; } = string.Empty;
+
+    /// <summary>ISO date or UNSET_F404.</summary>
+    public string RetentionEnd { get; set; } = string.Empty;
+
+    public string Reason { get; set; } = string.Empty;
+
+    public Instant CreatedAt { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+}
+
+/// <summary><c>pol.oos_correction</c>: one out-of-sequence reverse-and-reapply (SL6-POL-OOS): what it reversed and re-applied, how it was booked.</summary>
+internal sealed class OosCorrectionRow
+{
+    public Guid SetId { get; set; }
+
+    public PolicyId PolicyId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    /// <summary>The out-of-sequence transaction that carries the corrected history.</summary>
+    public PolicyTransactionId TransactionId { get; set; }
+
+    public JobId JobId { get; set; }
+
+    /// <summary>NET (default, final for P1-P2) or GROSS.</summary>
+    public string Mode { get; set; } = "NET";
+
+    public string Status { get; set; } = "APPLIED";
+
+    /// <summary>The transactions reversed and re-applied, in effective order (jsonb array of uuids).</summary>
+    public string OriginalRefs { get; set; } = "[]";
+
+    /// <summary>The transaction the correction delta points at (<c>correctionOf</c>).</summary>
+    public Guid CorrectionOf { get; set; }
+
+    /// <summary>The booking date of the correction: the first open finance day (REQ-POL-108).</summary>
+    public BusinessDate BookingDate { get; set; }
+
+    /// <summary>True when the day of the record was in a locked finance period and the correction moved to the first open one.</summary>
+    public bool PeriodLocked { get; set; }
+
+    public decimal NetPremium { get; set; }
+
+    public Instant CreatedAt { get; set; }
+}
+
+/// <summary>
+/// A statutory withdrawal or objection that voided a term (SL6-POL-WITHDRAW, REQ-POL-307/308). Unique per policy and channel
+/// reference: that is the exactly-once key, and <c>Result</c> is the first response, returned verbatim on a replay.
+/// </summary>
+internal sealed class WithdrawalRow
+{
+    public Guid WithdrawalId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public PolicyId PolicyId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    public JobId JobId { get; set; }
+
+    /// <summary>The caller's channel reference (CHN withdrawal id, message id).</summary>
+    public string ChannelRef { get; set; } = string.Empty;
+
+    /// <summary>WITHDRAWAL or OBJECTION.</summary>
+    public string Right { get; set; } = string.Empty;
+
+    public Instant ReceivedAt { get; set; }
+
+    public Instant RecordedAt { get; set; }
+
+    public string Actor { get; set; } = string.Empty;
+
+    /// <summary>The first <c>WithdrawalSubmitResponse</c> as JSON.</summary>
+    public string Result { get; set; } = string.Empty;
+}

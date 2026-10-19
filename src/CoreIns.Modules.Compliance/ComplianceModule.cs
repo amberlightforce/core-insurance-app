@@ -1,3 +1,6 @@
+using CoreIns.Modules.Compliance.Services.Dsar;
+using CoreIns.SharedKernel.Dsar;
+using CoreIns.Modules.Compliance.AiRegister;
 using CoreIns.Modules.Compliance.Clocks;
 using CoreIns.Modules.Compliance.Commands;
 using CoreIns.Modules.Compliance.Contracts;
@@ -40,6 +43,7 @@ public static class ComplianceModule
         ArgumentNullException.ThrowIfNull(configuration);
 
         services.AddModuleDbContext<ComplianceDbContext>(Schema);
+        services.AddSingleton<IDsarParticipant, ComplianceDsarParticipant>();
         services.AddScoped<FiscalDocumentReader>();
 
         services.AddScoped<IValidator<RequestFiscalDocument>, RequestFiscalDocumentValidator>();
@@ -49,6 +53,7 @@ public static class ComplianceModule
 
         services.AddScoped<IComplianceFiscalDocumentService, ComplianceFiscalDocumentService>();
 
+        services.AddAiRegister();
         // Clock engine (SL6-CMP-CLOCK): commands, queries, in-process contracts and the sweeper (worker role only).
         services.AddOptions<ClockOptions>().Bind(configuration.GetSection(ClockOptions.Section));
         services.AddScoped<ClockEngine>();
@@ -95,6 +100,8 @@ public static class ComplianceModule
             .Describe("Το πιστωτικό πρέπει να αναφέρεται σε καταχωρημένο παραστατικό έκδοσης του ίδιου αντισυμβαλλομένου (όχι σε άλλο πιστωτικό).", "A credit must refer to a Registered ISSUE document of the same counterparty (not to another credit)."),
         ErrorDefinition.For(ModuleCode.CMP, "IDEMPOTENCY-MISMATCH", 409, "Το κλειδί παραστατικού χρησιμοποιήθηκε με διαφορετικό περιεχόμενο", "The fiscal key was already used with different content")
             .Describe("Η ίδια πηγή, ρόλος και αναθεώρηση υπάρχουν ήδη με άλλο αντισυμβαλλόμενο ή ποσά.", "The same source, role and revision already exist with another counterparty or amounts."),
+        ErrorDefinition.For(ModuleCode.CMP, "APPROVAL-SAME-USER", 403, "Ο εγκρίνων πρέπει να διαφέρει από τον υποβάλλοντα", "The approver must differ from the submitter")
+            .Describe("Η έγκριση απαιτεί δεύτερο χρήστη (αρχή των τεσσάρων ματιών).", "Approval needs a second user (four-eyes principle)."),
         ErrorDefinition.For(ModuleCode.CMP, "CLOCK-UNKNOWN", 422, "Άγνωστο ρολόι", "Unknown clock")
             .Describe("Δεν υπάρχει ορισμός ρολογιού με αυτόν τον κωδικό.", "No clock definition has this code."),
         ErrorDefinition.For(ModuleCode.CMP, "CLOCK-NO-VALUE", 422, "Το ρολόι δεν έχει τιμή για τη δικαιοδοσία", "The clock has no value for the jurisdiction")
