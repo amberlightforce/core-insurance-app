@@ -1,3 +1,4 @@
+using CoreIns.Modules.Compliance.AiRegister;
 using CoreIns.Modules.Compliance.Domain;
 using CoreIns.Platform.Persistence;
 using CoreIns.SharedKernel;
@@ -17,6 +18,7 @@ internal sealed class ComplianceDbContext(DbContextOptions<ComplianceDbContext> 
 
     public DbSet<FiscalSeriesRow> FiscalSeries => Set<FiscalSeriesRow>();
 
+    internal DbSet<AiSystemRow> AiSystems => Set<AiSystemRow>();
     public DbSet<ClockRow> Clocks => Set<ClockRow>();
 
     public DbSet<ClockEventRow> ClockEvents => Set<ClockEventRow>();
@@ -71,6 +73,26 @@ internal sealed class ComplianceDbContext(DbContextOptions<ComplianceDbContext> 
             // REQ-CMP-031: the fiscal idempotency key is source type + source id + role + revision.
             entity.HasIndex(e => new { e.LegalEntityId, e.SourceType, e.SourceId, e.Role, e.Revision }).IsUnique().HasDatabaseName("ux_fiscal_document_source");
             entity.HasIndex(e => new { e.LegalEntityId, e.Series, e.Number }).IsUnique().HasDatabaseName("ux_fiscal_document_number");
+        });
+
+        modelBuilder.Entity<AiSystemRow>(entity =>
+        {
+            entity.ToTable("ai_system", table =>
+            {
+                table.HasCheckConstraint("ck_ai_system_status", "status IN ('DRAFT','IN_REVIEW','APPROVED','SUSPENDED','RETIRED')");
+                table.HasCheckConstraint("ck_ai_system_record_version", "record_version >= 1");
+            });
+            entity.HasKey(e => e.FeatureId).HasName("pk_ai_system");
+            entity.Property(e => e.FeatureId).HasColumnName("feature_id").HasMaxLength(32);
+            entity.Property(e => e.Name).HasColumnName("name").HasMaxLength(200);
+            entity.Property(e => e.AiActClass).HasColumnName("ai_act_class").HasMaxLength(64);
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(16);
+            entity.Property(e => e.SubmittedBy).HasColumnName("submitted_by");
+            entity.Property(e => e.ApprovedBy).HasColumnName("approved_by");
+            entity.Property(e => e.Reason).HasColumnName("reason").HasMaxLength(512);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
         });
 
         modelBuilder.Entity<ClockRow>(entity =>

@@ -33,6 +33,8 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
 
     public DbSet<WithdrawalRow> Withdrawals => Set<WithdrawalRow>();
 
+    public DbSet<OosCorrectionRow> OosCorrections => Set<OosCorrectionRow>();
+
     protected override string Schema => PolicyModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -300,6 +302,34 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.HasIndex(e => e.TermId).HasDatabaseName("ix_charge_line_term");
             entity.HasOne<PolicyTransactionRow>().WithMany().HasForeignKey(e => e.TransactionId)
                 .HasConstraintName("fk_charge_line_transaction").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<OosCorrectionRow>(entity =>
+        {
+            entity.ToTable("oos_correction", table =>
+            {
+                table.HasCheckConstraint("ck_oos_correction_mode", "mode IN ('NET', 'GROSS')");
+                table.HasCheckConstraint("ck_oos_correction_status", "status IN ('APPLIED')");
+            });
+            entity.HasKey(e => e.SetId).HasName("pk_oos_correction");
+            entity.Property(e => e.SetId).HasColumnName("set_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
+            entity.Property(e => e.JobId).HasColumnName("job_id");
+            entity.Property(e => e.Mode).HasColumnName("mode");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.OriginalRefs).HasColumnName("original_refs").HasColumnType("jsonb");
+            entity.Property(e => e.CorrectionOf).HasColumnName("correction_of");
+            entity.Property(e => e.BookingDate).HasColumnName("booking_date");
+            entity.Property(e => e.PeriodLocked).HasColumnName("period_locked");
+            entity.Property(e => e.NetPremium).HasColumnName("net_premium").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.TransactionId).IsUnique().HasDatabaseName("ux_oos_correction_transaction");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_oos_correction_policy");
+            entity.HasOne<PolicyTransactionRow>().WithMany().HasForeignKey(e => e.TransactionId)
+                .HasConstraintName("fk_oos_correction_transaction").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<PackRollbackExceptionRow>(entity =>

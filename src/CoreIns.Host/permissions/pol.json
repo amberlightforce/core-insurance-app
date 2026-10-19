@@ -20,6 +20,7 @@
         "pol.Renewal.accept": [ "Staff.Underwriter" ],
         "pol.PolicyChange.create": [ "Staff.Underwriter" ],
         "pol.change": [ "Staff.Underwriter" ],
+        "pol.Change.createOutOfSequence": [ "Staff.Underwriter" ],
         "pol.Job.withdraw": [ "Staff.Underwriter" ],
         "pol.PackRollbackException.list": [ "Staff.UnderwritingManager", "Staff.Underwriter", "Platform.Admin" ],
         "pol.PackRollbackException.get": [ "Staff.UnderwritingManager", "Staff.Underwriter", "Platform.Admin" ],

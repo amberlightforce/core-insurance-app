@@ -1,3 +1,4 @@
+using CoreIns.Modules.Policy.Commands.Change.Oos;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Domain;
@@ -20,7 +21,9 @@ using Microsoft.Extensions.Options;
 namespace CoreIns.Modules.Policy.Commands.Change;
 
 /// <summary>A change job's term as of now: history, base risk, the engine for the term and the replayed state.</summary>
-internal sealed record ChangeContext(TermHistory History, SegmentRow BaseSegment, RiskTree BaseTree, ChangeEngine Engine, ServicingState State);
+/// <param name="OutOfSequence">The effective time is earlier than the term's latest bound transaction: priced and bound by reverse-and-reapply (SL6-POL-OOS).</param>
+internal sealed record ChangeContext(
+    TermHistory History, SegmentRow BaseSegment, RiskTree BaseTree, ChangeEngine Engine, ServicingState State, bool OutOfSequence = false);
 
 /// <summary>
 /// Loads what every step of a change job needs (quote, preview, bind) with the same checks in the same order: the cover is not
@@ -55,11 +58,9 @@ internal sealed class ChangeContextLoader(PolicyDbContext db, ChangeHistory hist
                 ModuleCode.POL, PolicyErrorNames.Preempted, "Another transaction was bound on the term since this change was started; start the change again.");
         }
 
-        refused = ChangeHistory.GuardSequence(term, job.EffectiveAt);
-        if (refused is not null)
-        {
-            return refused;
-        }
+        // An earlier effective time is only possible on a job started with pol.Change.createOutOfSequence (the plain create refuses it and the
+        // head check above proves nothing was bound since): it is priced and bound by reverse-and-reapply instead of refused.
+        var outOfSequence = ChangeHistory.GuardSequence(term, job.EffectiveAt) is not null;
 
         var segments = tracked ? db.Segments : db.Segments.AsNoTracking();
         var segment = await segments.SingleOrDefaultAsync(
@@ -77,7 +78,7 @@ internal sealed class ChangeContextLoader(PolicyDbContext db, ChangeHistory hist
         }
 
         var state = await history.ReplayAsync(term, engine.Value.Engine, engine.Value.Convention, zone, cancellationToken).ConfigureAwait(false);
-        return state.IsFailure ? state.Error! : new ChangeContext(term, segment, JobSupport.FromJson<RiskTree>(segment.Snapshot), engine.Value, state.Value);
+        return state.IsFailure ? state.Error! : new ChangeContext(term, segment, JobSupport.FromJson<RiskTree>(segment.Snapshot), engine.Value, state.Value, outOfSequence);
     }
 }
 
@@ -98,6 +99,7 @@ internal sealed class ChangeQuoteService(
     IClock clock,
     ChangeContextLoader loader,
     ChangePricer pricer,
+    OosPlanner oosPlanner,
     RatingInput ratingInput,
     Dependency<IRatingRateService> ratingService,
     IPermissionEvaluator permissions,
@@ -242,14 +244,38 @@ internal sealed class ChangeQuoteService(
             rates = Rates(JobSupport.FromJson<List<ChargeLine>>(version.Charges ?? "[]"));
         }
 
-        var pricing = await pricer.PriceAsync(change.Engine.Engine, change.State, rates, job.EffectiveAt, job.JobId.Value.ToString(), job.Jurisdiction, zone, cancellationToken)
-            .ConfigureAwait(false);
+        Result<ChangePricing> pricing;
+        if (change.OutOfSequence)
+        {
+            var planned = await oosPlanner.PlanAsync(
+                job, change, tree, rates, (t, at) => RateTreeAsync(job, version, t, at, cancellationToken), OosMode.Net, job.Jurisdiction, zone, cancellationToken).ConfigureAwait(false);
+            pricing = planned.IsFailure ? planned.Error! : planned.Value.Pricing;
+        }
+        else
+        {
+            pricing = await pricer.PriceAsync(change.Engine.Engine, change.State, rates, job.EffectiveAt, job.JobId.Value.ToString(), job.Jurisdiction, zone, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
         if (pricing.IsFailure)
         {
             return pricing.Error!;
         }
 
         return new PricedVersion(pricing.Value, Lines(pricing.Value, currency), rating, currency, change.Engine.Rounding);
+    }
+
+    /// <summary>The premium rates of a risk tree at an effective time under the term's pinned rating artefact (a later change re-rated out of sequence).</summary>
+    internal async Task<Result<IReadOnlyList<ChargeRate>>> RateTreeAsync(JobRow job, QuoteVersionRow version, RiskTree tree, Instant effectiveAt, CancellationToken cancellationToken)
+    {
+        var view = await ratingInput.BuildAsync(tree, effectiveAt, cancellationToken).ConfigureAwait(false);
+        if (view.IsFailure)
+        {
+            return view.Error!;
+        }
+
+        var rated = await RateAsync(job, version, view.Value, Currency.FromCode(job.Currency), options.Value.Zone, cancellationToken, effectiveAt).ConfigureAwait(false);
+        return rated.IsFailure ? rated.Error! : rated.Value.Rates;
     }
 
     /// <summary>The risk diff of a version against the base, with the violations of what a change may touch as a validation error.</summary>
@@ -298,8 +324,9 @@ internal sealed class ChangeQuoteService(
     }
 
     private async Task<Result<(RateRateResponse Response, List<ChargeRate> Rates)>> RateAsync(
-        JobRow job, QuoteVersionRow version, RatingView view, Currency currency, TimeZoneInfo zone, CancellationToken cancellationToken)
+        JobRow job, QuoteVersionRow version, RatingView view, Currency currency, TimeZoneInfo zone, CancellationToken cancellationToken, Instant? effectiveAt = null)
     {
+        var effective = effectiveAt ?? job.EffectiveAt;
         RateRateResponse response;
         try
         {
@@ -319,7 +346,7 @@ internal sealed class ChangeQuoteService(
                         PinnedRatingArtefactHash = job.RatingArtefactHash is null ? null : Sha256Hash.Parse(job.RatingArtefactHash),
                         Mode = RateRateRequest.EnvelopeDetail.ModeValue.Endorsement,
                         TransactionType = "Endorsement",
-                        RatingBasisDate = job.EffectiveAt.ToBusinessDate(zone),
+                        RatingBasisDate = effective.ToBusinessDate(zone),
                         Currency = currency,
                         Channel = job.Channel,
                         ProducerCode = job.ProducerCode,
@@ -331,7 +358,7 @@ internal sealed class ChangeQuoteService(
                         new RateRateRequest.SegmentItem
                         {
                             SegmentId = version.QuoteId.Value.ToString("D"),
-                            ValidPeriod = PolicyTime.Dates(job.EffectiveAt, job.ExpirationAt, zone),
+                            ValidPeriod = PolicyTime.Dates(effective, job.ExpirationAt, zone),
                             RiskTree = view.Input,
                         },
                     ],
