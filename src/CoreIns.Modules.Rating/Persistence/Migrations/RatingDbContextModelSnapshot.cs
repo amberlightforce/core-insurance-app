@@ -52,6 +52,10 @@ namespace CoreIns.Modules.Rating.Persistence.Migrations
                         .HasColumnType("date")
                         .HasColumnName("effective_to");
 
+                    b.Property<string>("FallbackSourceVersion")
+                        .HasColumnType("text")
+                        .HasColumnName("fallback_source_version");
+
                     b.Property<string>("ProductCode")
                         .IsRequired()
                         .HasColumnType("text")
@@ -61,6 +65,10 @@ namespace CoreIns.Modules.Rating.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("product_version");
+
+                    b.Property<Guid?>("SourceEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_event_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -72,12 +80,18 @@ namespace CoreIns.Modules.Rating.Persistence.Migrations
 
                     b.HasIndex("ArtefactHash");
 
+                    b.HasIndex("SourceEventId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_rate_activation_source_event");
+
                     b.HasIndex("ProductCode", "ProductVersion", "EffectiveFrom")
                         .IsUnique()
                         .HasDatabaseName("ux_rate_activation_product_from");
 
                     b.ToTable("rate_activation", "rat", t =>
                         {
+                            t.HasCheckConstraint("ck_rate_activation_fallback", "(fallback_source_version IS NULL) = (source_event_id IS NULL)");
+
                             t.HasCheckConstraint("ck_rate_activation_range", "effective_to IS NULL OR effective_to > effective_from");
 
                             t.HasCheckConstraint("ck_rate_activation_status", "status IN ('Scheduled', 'Active', 'Superseded', 'Cancelled', 'RolledBack')");
