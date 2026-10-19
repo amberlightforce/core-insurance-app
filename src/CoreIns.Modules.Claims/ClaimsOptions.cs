@@ -36,6 +36,9 @@ internal sealed class ClaimsOptions
     /// <summary>Claim financials (SL2-CLM-MONEY): illustrative cost categories and the reserve auto-adjust switch.</summary>
     public ClaimFinancialsOptions Financials { get; set; } = new();
 
+    /// <summary>Friendly Settlement statement hand-over (SL4-CLM-FS-STATEMENT).</summary>
+    public FriendlySettlementOptions FriendlySettlement { get; set; } = new();
+
     /// <summary>
     /// Re-verification reason codes per decision (REQ-CLM-058). ILLUSTRATIVE TEST DATA until the claims reason list is
     /// configured: KEEP and ADOPT codes; any other code is refused with CLM-ERR-VALIDATION.
@@ -96,4 +99,18 @@ internal sealed class ClaimFinancialsOptions
     public bool Allows(string costType, string category) =>
         (CostCategories.Count > 0 ? CostCategories : DefaultCostCategories).TryGetValue(costType, out var categories)
         && categories.Contains(category, StringComparer.Ordinal);
+}
+
+/// <summary>
+/// Configuration section <c>Claims:FriendlySettlement</c>. BIL has no lookup of a party's CLEARING payee account, so the account of
+/// each counterparty insurer that the FS_CLEARING disbursement pays is configured: counterparty code (lowercase "D" party id) → BIL
+/// payee account id (purpose CLEARING, verified). TODO(hardening): resolve it from BIL by party and purpose.
+/// </summary>
+internal sealed class FriendlySettlementOptions
+{
+    /// <summary>Counterparty code → BIL clearing payee account id.</summary>
+    public Dictionary<string, Guid> ClearingPayeeAccounts { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Days from the approval to the due date of an FS net receivable.</summary>
+    public int ReceivableDueDays { get; set; } = 30;
 }

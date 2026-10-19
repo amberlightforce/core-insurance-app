@@ -52,6 +52,9 @@ internal enum PaymentStatus
     Issued,
     Cleared,
     Rejected,
+    Voided,
+    Stopped,
+    Returned,
 }
 
 /// <summary>Reason codes the system writes on transactions and sets.</summary>

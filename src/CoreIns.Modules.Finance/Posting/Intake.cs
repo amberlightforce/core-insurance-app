@@ -39,6 +39,8 @@ internal sealed partial class Intake(
     ReferenceData reference,
     JournalWriter writer,
     TaxTreatmentCheck taxCheck,
+    FinancePeriods periods,
+    OosCorrections corrections,
     PaymentVoidPosting voids,
     ILegalEntityDirectory legalEntities,
     IEventPublisher events,
@@ -146,6 +148,7 @@ internal sealed partial class Intake(
         }
 
         SourceEntry entry;
+        List<BusinessEventRow> members = [row];
         if (row.RegistryName == BillingEntryPosted)
         {
             entry = Normalise(JsonSerializer.Deserialize<BillingEntryPostedV1>(row.Payload, SharedKernelJson.Options)
@@ -161,6 +164,37 @@ internal sealed partial class Intake(
             }
 
             entry = FsBilEntries.Adjust(entry);
+
+            // D4 set completeness: a set of deltas posts as one journal per book, and only once every member has arrived.
+            if (row.SetId is { } setId && row.SetSize is > 1)
+            {
+                var setKey = $"set:{setId:D}";
+                var siblings = await db.BusinessEvents
+                    .Where(b => b.SetId == setId && b.RegistryName == row.RegistryName && b.BusinessEventId != row.BusinessEventId)
+                    .ToListAsync(cancellationToken).ConfigureAwait(false);
+                if (siblings.Count + 1 < row.SetSize)
+                {
+                    row.Status = BusinessEventStatus.Waiting;
+                    row.WaitingOn = setKey;
+                    Touch(row);
+                    await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    return;
+                }
+
+                var lines = entry.Lines.ToList();
+                foreach (var sibling in siblings.Where(b => b.Status == BusinessEventStatus.Waiting && b.WaitingOn == setKey).OrderBy(b => b.AggregateSequence))
+                {
+                    var other = FsBilEntries.Adjust(Normalise(JsonSerializer.Deserialize<BillingEntryPostedV1>(sibling.Payload, SharedKernelJson.Options)
+                        ?? throw new JsonException("BillingEntryPosted payload is empty.")));
+                    lines.AddRange(other.Lines);
+                    members.Add(sibling);
+                }
+
+                if (members.Count > 1)
+                {
+                    entry = entry with { Lines = lines, SourceRef = $"set:{setId:D}" };
+                }
+            }
         }
         else if (row.RegistryName == RiFacts.RecoveryCalculated)
         {
@@ -186,6 +220,25 @@ internal sealed partial class Intake(
         }
 
         var legalEntity = new LegalEntityId(row.LegalEntityId!.Value);
+
+        // G5 (REQ-POL-108): nothing posts into a locked period. A correction posts on the first day of the first open period, with its
+        // reference; any other journal for a locked month is an intake exception (never a silent re-dating).
+        // TODO(hardening): a correction entry that overtakes its ChargeDeltaEmitted is suspended as PERIOD_LOCKED (re-run after the delta arrives); wait for the delta context instead.
+        var correction = await corrections.FindAsync(entry, cancellationToken).ConfigureAwait(false);
+        if (await periods.IsLockedAsync(legalEntity.Value, entry.AccountingDate, cancellationToken).ConfigureAwait(false))
+        {
+            var open = correction is null ? null : await periods.FirstOpenAsync(legalEntity.Value, entry.AccountingDate, cancellationToken).ConfigureAwait(false);
+            if (open is not { } openDate)
+            {
+                await SuspendAsync(row, ExceptionReasons.PeriodLocked,
+                    $"Accounting date {entry.AccountingDate} is in a locked finance period and the entry is {(correction is null ? "not a correction" : "without an open period")} (G5, REQ-POL-108).",
+                    entry, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            entry = entry with { AccountingDate = openDate };
+            row.AccountingDate = openDate;
+        }
 
         // REQ-FIN-182/-183 (D-SL3-05): a servicing entry may not move a tax or levy payable against the MKT treatment.
         // Checked before the policy context is awaited, so a forged entry is suspended at once and never waits.
@@ -267,17 +320,22 @@ internal sealed partial class Intake(
             drafts.Add((outcome.Journal, setup.FunctionalCurrency));
         }
 
-        var source = new JournalSource(legalEntity, row.LegalEntityCode, row.Jurisdiction, row.SourceModule, row.EventType, [row.SourceEventId], entry.SourceRef);
+        var source = new JournalSource(legalEntity, row.LegalEntityCode, row.Jurisdiction, row.SourceModule, row.EventType, [.. members.Select(m => m.SourceEventId)], entry.SourceRef) { Correction = correction };
         var written = new List<WrittenJournal>();
         foreach (var (draft, functional) in drafts)
         {
             written.Add(await writer.WriteAsync(draft, source, functional, null, null, cancellationToken).ConfigureAwait(false));
         }
 
-        row.Status = BusinessEventStatus.Posted;
-        row.WaitingOn = null;
-        row.JournalIds = [.. written.Select(w => w.JournalId)];
-        Touch(row);
+        foreach (var member in members)
+        {
+            member.AccountingDate = entry.AccountingDate;
+            member.Status = BusinessEventStatus.Posted;
+            member.WaitingOn = null;
+            member.JournalIds = [.. written.Select(w => w.JournalId)];
+            Touch(member);
+        }
+
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         // Last step: nothing after this can fail, so a rolled-back savepoint never leaves an event for a journal that does not exist.

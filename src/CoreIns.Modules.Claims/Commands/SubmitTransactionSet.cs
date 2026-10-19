@@ -249,10 +249,10 @@ internal sealed class SubmitTransactionSetHandler(
     {
         foreach (var payment in content.Payments.Where(p => p.Method != "CLEARING"))
         {
-            var rejected = Codes.Of(PaymentStatus.Rejected);
+            string[] rejected = [Codes.Of(PaymentStatus.Rejected), Codes.Of(PaymentStatus.Voided), Codes.Of(PaymentStatus.Stopped), Codes.Of(PaymentStatus.Returned)];
             var draft = Codes.Of(SetStatus.Draft);
             var exists = await db.ClaimPayments.AsNoTracking()
-                .Where(p => p.ClaimId == payment.ClaimId && p.SetId != payment.SetId && p.PayeeAccountId == payment.PayeeAccountId && p.Amount == payment.Amount && p.Status != rejected)
+                .Where(p => p.ClaimId == payment.ClaimId && p.SetId != payment.SetId && p.PayeeAccountId == payment.PayeeAccountId && p.Amount == payment.Amount && !rejected.Contains(p.Status))
                 .Join(db.TransactionSets.AsNoTracking().Where(s => s.Status != draft), p => p.SetId, s => s.SetId, (p, s) => p.ClaimPaymentId)
                 .AnyAsync(cancellationToken).ConfigureAwait(false);
             if (exists)

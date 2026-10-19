@@ -108,10 +108,10 @@ public static class PolicyModule
         services.AddScoped<ChangeEngineFactory>();
         services.AddScoped<ChangeContextLoader>();
         services.AddScoped<ChangePricer>();
-        // SL6-POL-OOS: out-of-sequence reverse-and-reapply. FIN-OOS-GUARD replaces the finance-period port.
+        // SL6-POL-OOS: out-of-sequence reverse-and-reapply. the finance-period port reads FIN's period service (FIN-OOS-GUARD).
         services.AddScoped<OosPlanner>();
         services.AddScoped<OosApplier>();
-        services.TryAddScoped<IOosFinancePeriods, UnlockedFinancePeriods>();
+        services.AddScoped<IOosFinancePeriods, FinancePeriodsAdapter>();
         services.AddScoped<ChangeQuoteService>();
         services.AddScoped<ChangeBindService>();
         services.AddScoped<ChangePreviewService>();
