@@ -126,6 +126,20 @@ public sealed record ChargeDeltaEmittedV1 : global::CoreIns.Platform.Contracts.E
     [global::System.Text.Json.Serialization.JsonPropertyName("treatmentRuleVersion")]
     public string? TreatmentRuleVersion { get; init; }
 
+    /// <summary>Transaction this delta corrects (out-of-sequence reverse-and-reapply, REQ-POL-006, REQ-POL-108); null for an ordinary delta. A correction is booked in the first open finance period, never into a locked one.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'correctionOf' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("correctionOf")]
+    public global::System.Guid? CorrectionOf { get; init; }
+
+    /// <summary>Out-of-sequence correction set this delta belongs to (pol.oos_correction.set_id); null for an ordinary delta</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'oosSetId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("oosSetId")]
+    public global::System.Guid? OosSetId { get; init; }
+
     /// <summary>Transaction kind of the bound transaction (the MKT TaxTransactionKind values, PRD-17 §7.5). Always set by POL from slice 3; BIL and FIN use it for the tax-treatment check (REQ-BIL-079, REQ-FIN-182). A renewal term is NEW_BUSINESS.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<TransactionKindValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

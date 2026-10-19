@@ -4,31 +4,28 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Erasure.execute request. PRD inputs: "DSAR ref, subject token, scope"</summary>
+/// <summary>dat.Erasure.execute request</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ErasureExecuteRequest
 {
-    /// <summary>PRD: "DSAR ref"</summary>
+    /// <summary>Idempotency key of the request (D-SL6 DAT-CORE); a repeat with the same id returns the stored result and acts once</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("requestId")]
+    public required string RequestId { get; init; }
+
+    /// <summary>Pseudonymous subject token (never a name or tax id)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("subjectToken")]
+    public required string SubjectToken { get; init; }
+
+    /// <summary>DSAR case id (CMP)</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'dsarRef' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("dsarRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DsarRef { get; init; }
+    public global::System.Guid? DsarRef { get; init; }
 
-    /// <summary>PRD: "subject token"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("subjectToken")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SubjectToken { get; init; }
-
-    /// <summary>PRD: "scope"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Optional scope label; no lakehouse layers exist yet, only dat.subject_fact</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("scope")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Scope { get; init; }
+    public string? Scope { get; init; }
 }

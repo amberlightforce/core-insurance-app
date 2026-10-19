@@ -4,23 +4,31 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.BiasTest.run result. PRD outputs: "BiasReport id, ratios"</summary>
+/// <summary>dat.BiasTest.run result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BiasTestRunResponse
 {
-    /// <summary>PRD: "BiasReport id"</summary>
+    /// <summary>Contract member 'biasReportId'.</summary>
     /// <remarks>
-    /// <para>Untyped id: no SharedKernel id type is mapped for 'biasreportId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'biasReportId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("biasreportId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? BiasreportId { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("biasReportId")]
+    public required global::System.Guid BiasReportId { get; init; }
 
-    /// <summary>PRD: "ratios"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("ratios")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Ratios { get; init; }
+    /// <summary>Contract member 'ratio'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ratio")]
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::CoreIns.Platform.Contracts.DecimalStringJsonConverter))]
+    public required decimal Ratio { get; init; }
+
+    /// <summary>Band as 'min..max'</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("band")]
+    public required string Band { get; init; }
+
+    /// <summary>Contract member 'breached'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("breached")]
+    public required bool Breached { get; init; }
+
+    /// <summary>Status of the model after the test (SUSPENDED on breach)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("modelStatus")]
+    public required string ModelStatus { get; init; }
 }
