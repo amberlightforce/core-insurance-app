@@ -4,23 +4,64 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.AiSystem.suspend result. PRD outputs: "entry, status"</summary>
+/// <summary>cmp.AiSystem.suspend result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AiSystemSuspendResponse
 {
-    /// <summary>PRD: "entry"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("entry")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Entry { get; init; }
+    /// <summary>Contract member 'featureId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("featureId")]
+    public required global::CoreIns.SharedKernel.Identifiers.AiFeatureId FeatureId { get; init; }
 
-    /// <summary>PRD: "status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    /// <summary>Contract member 'name'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("name")]
+    public required string Name { get; init; }
+
+    /// <summary>AI Act risk class label (illustrative; PRD-11 section 11)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("aiActClass")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Status { get; init; }
+    public string? AiActClass { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Contract member 'submittedBy'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("submittedBy")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? SubmittedBy { get; init; }
+
+    /// <summary>Contract member 'approvedBy'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvedBy")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ApprovedBy { get; init; }
+
+    /// <summary>Contract member 'recordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    public required int RecordVersion { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>DRAFT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DRAFT")]
+        Draft,
+
+        /// <summary><c>IN_REVIEW</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("IN_REVIEW")]
+        InReview,
+
+        /// <summary><c>APPROVED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVED")]
+        Approved,
+
+        /// <summary><c>SUSPENDED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUSPENDED")]
+        Suspended,
+
+        /// <summary><c>RETIRED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RETIRED")]
+        Retired,
+    }
 }

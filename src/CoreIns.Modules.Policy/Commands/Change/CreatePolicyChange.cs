@@ -20,7 +20,9 @@ using Npgsql;
 namespace CoreIns.Modules.Policy.Commands.Change;
 
 /// <summary><c>pol.PolicyChange.create</c>: starts a mid-term change job (Draft) on the term valid at the effective date.</summary>
-internal sealed record CreatePolicyChange(PolicyChangeCreateRequest Request) : ICommand<PolicyChangeCreateResponse>;
+/// <param name="Request">The request.</param>
+/// <param name="AllowOutOfSequence">Started with <c>pol.Change.createOutOfSequence</c> (SL6-POL-OOS): an effective time earlier than the term's latest bound transaction is accepted and bound by reverse-and-reapply.</param>
+internal sealed record CreatePolicyChange(PolicyChangeCreateRequest Request, bool AllowOutOfSequence = false) : ICommand<PolicyChangeCreateResponse>;
 
 internal sealed class CreatePolicyChangeValidator : AbstractValidator<CreatePolicyChange>
 {
@@ -89,7 +91,7 @@ internal sealed class CreatePolicyChangeHandler(
             return outside;
         }
 
-        var sequence = ChangeHistory.GuardSequence(loaded.Value, effectiveAt);
+        var sequence = command.AllowOutOfSequence ? null : ChangeHistory.GuardSequence(loaded.Value, effectiveAt);
         if (sequence is not null)
         {
             return sequence;

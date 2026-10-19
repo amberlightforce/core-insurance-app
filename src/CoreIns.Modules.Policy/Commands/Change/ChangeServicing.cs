@@ -190,11 +190,8 @@ internal sealed class ChangeHistory(PolicyDbContext db)
     /// <summary>Both guards, state first.</summary>
     public static DomainError? Guard(TermHistory history, Instant effectiveAt) => GuardState(history, effectiveAt) ?? GuardSequence(history, effectiveAt);
 
-    /// <summary>
-    /// Replays the term: the opening transaction's premium rates, then every Change intent in sequence order. Cross-checks that the
-    /// replayed segments add up to the premium charge lines written for the term (P7); anything else fails closed.
-    /// </summary>
-    public async Task<Result<ServicingState>> ReplayAsync(
+    /// <summary>The term as opened by its first transaction: the opening premium rates applied by the engine (the start of every replay).</summary>
+    public async Task<Result<(ServicingState State, DeltaCorrelation Correlation)>> OpenAsync(
         TermHistory history, ServicingEngine engine, DayCountConvention convention, TimeZoneInfo zone, CancellationToken cancellationToken)
     {
         var term = history.Term;
@@ -214,18 +211,46 @@ internal sealed class ChangeHistory(PolicyDbContext db)
                 new ServicingTerm(term.ValidFrom, term.ValidTo, currency, convention, zone),
                 [.. lines.Select(l => new ChargeRate(l.ElementLocator, l.CoverageCode, l.ChargeType, l.ChargeCategory, l.AnnualRate))]),
             correlation);
-        if (!opened.IsAccepted)
+        return opened.IsAccepted
+            ? (opened.State!, correlation)
+            : Invariant($"The opening of the term does not replay: {opened.Message}");
+    }
+
+    /// <summary>
+    /// Replays the term: the opening transaction's premium rates, then every Change intent in sequence order (an out-of-sequence
+    /// transaction restarts from the opening with its corrected chain, SL6-POL-OOS). Cross-checks that the replayed segments add up to
+    /// the premium charge lines written for the term (P7); anything else fails closed.
+    /// </summary>
+    public async Task<Result<ServicingState>> ReplayAsync(
+        TermHistory history, ServicingEngine engine, DayCountConvention convention, TimeZoneInfo zone, CancellationToken cancellationToken)
+    {
+        var term = history.Term;
+        var opening = await OpenAsync(history, engine, convention, zone, cancellationToken).ConfigureAwait(false);
+        if (opening.IsFailure)
         {
-            return Invariant($"The opening of the term does not replay: {opened.Message}");
+            return opening.Error!;
         }
 
-        var state = opened.State!;
+        var (opened, correlation) = opening.Value;
+        var state = opened;
         foreach (var transaction in history.Transactions.Skip(1))
         {
             if (Codes.Parse<PolicyTransactionKind>(transaction.Kind) != PolicyTransactionKind.Change)
             {
                 return DomainError.Of(
                     ModuleCode.POL, "ILLEGAL-TRANSITION", $"The term history holds a {transaction.Kind} transaction that a change cannot build on yet.");
+            }
+
+            if (Oos.OosIntents.TryRead(transaction.Intent) is { } oos)
+            {
+                var restated = Domain.Servicing.OosEngine.ApplyChain(engine, opened, oos.Chain.Select(e => new Domain.Servicing.OosStep(e.EffectiveAt, Oos.OosIntents.ToRates(e.Rates))), correlation);
+                if (!restated.IsAccepted)
+                {
+                    return Invariant($"Out-of-sequence transaction {transaction.TransactionId.Value} does not replay: {restated.Message}");
+                }
+
+                state = restated.State!;
+                continue;
             }
 
             var rates = ChangeJson.Rates(transaction.Intent, out var effectiveAt);
