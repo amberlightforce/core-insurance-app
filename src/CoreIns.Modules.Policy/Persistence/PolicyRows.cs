@@ -446,3 +446,41 @@ internal sealed class PackRollbackExceptionRow
 
     public int RecordVersion { get; set; } = 1;
 }
+
+/// <summary><c>pol.oos_correction</c>: one out-of-sequence reverse-and-reapply (SL6-POL-OOS): what it reversed and re-applied, how it was booked.</summary>
+internal sealed class OosCorrectionRow
+{
+    public Guid SetId { get; set; }
+
+    public PolicyId PolicyId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    /// <summary>The out-of-sequence transaction that carries the corrected history.</summary>
+    public PolicyTransactionId TransactionId { get; set; }
+
+    public JobId JobId { get; set; }
+
+    /// <summary>NET (default, final for P1-P2) or GROSS.</summary>
+    public string Mode { get; set; } = "NET";
+
+    public string Status { get; set; } = "APPLIED";
+
+    /// <summary>The transactions reversed and re-applied, in effective order (jsonb array of uuids).</summary>
+    public string OriginalRefs { get; set; } = "[]";
+
+    /// <summary>The transaction the correction delta points at (<c>correctionOf</c>).</summary>
+    public Guid CorrectionOf { get; set; }
+
+    /// <summary>The booking date of the correction: the first open finance day (REQ-POL-108).</summary>
+    public BusinessDate BookingDate { get; set; }
+
+    /// <summary>True when the day of the record was in a locked finance period and the correction moved to the first open one.</summary>
+    public bool PeriodLocked { get; set; }
+
+    public decimal NetPremium { get; set; }
+
+    public Instant CreatedAt { get; set; }
+}
