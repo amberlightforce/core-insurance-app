@@ -80,6 +80,64 @@ internal sealed class ProductVersionRow
     public string CreatedBy { get; set; } = string.Empty;
 
     public Instant? LockedAt { get; set; }
+
+    /// <summary>The earlier version whose content this fall-back version copies (REQ-PFC-213); null for an ordinary version. Write-once.</summary>
+    public ProductVersionId? FallbackOfVersionId { get; set; }
+
+    /// <summary>The defective version this fall-back version replaces for new business (REQ-PFC-213); null for an ordinary version. Write-once.</summary>
+    public ProductVersionId? ReplacesVersionId { get; set; }
+}
+
+/// <summary>
+/// <c>pfc.fallback_request</c>: one emergency fall-back (REQ-PFC-213, D-SL5-09) from request to decision. Everything the
+/// decision executes (source, new version number, date, reason) is derived by the server at request time and bound into
+/// <see cref="PayloadHash"/>, the content hash of the in-process PLT approval (type PFC.Fallback).
+/// </summary>
+internal sealed class FallbackRequestRow
+{
+    public Guid FallbackId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public string Jurisdiction { get; set; } = string.Empty;
+
+    public ProductId ProductId { get; set; }
+
+    public ProductVersionId DefectiveVersionId { get; set; }
+
+    public ProductVersionId SourceVersionId { get; set; }
+
+    public int NewMajor { get; set; }
+
+    public int NewMinor { get; set; }
+
+    /// <summary>The Athens business date the new version's new-business window starts and the defective version's ends.</summary>
+    public BusinessDate FallbackDate { get; set; }
+
+    public string Status { get; set; } = string.Empty;
+
+    public string Reason { get; set; } = string.Empty;
+
+    public string PayloadHash { get; set; } = string.Empty;
+
+    public Guid ApprovalRequestId { get; set; }
+
+    public string RequestedBy { get; set; } = string.Empty;
+
+    /// <summary>The maker's principal when the maker is a service or AI agent acting for a person (PITFALLS 5).</summary>
+    public string? RequestedByPrincipal { get; set; }
+
+    public Instant RequestedAt { get; set; }
+
+    public string? DecidedBy { get; set; }
+
+    public Instant? DecidedAt { get; set; }
+
+    public string? DecisionReason { get; set; }
+
+    public ProductVersionId? NewVersionId { get; set; }
+
+    public int RecordVersion { get; set; }
 }
 
 /// <summary><c>pfc.artifact</c>: the canonical JSON of a compiled version, keyed by its SHA-256; never changed (REQ-PFC-197, -227).</summary>

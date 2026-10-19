@@ -76,8 +76,8 @@ internal static class Dates
 {
     public static BusinessDate ValidDate(ValidAt? validAt, Instant now) =>
         validAt is { Date: { } date } ? date
-        : validAt is { Instant: { } instant } ? new BusinessDate(DateOnly.FromDateTime(instant.ToUtcDateTime()))
-        : new BusinessDate(DateOnly.FromDateTime(now.ToUtcDateTime()));
+        : validAt is { Instant: { } instant } ? Domain.FallbackPlanner.AthensDate(instant)
+        : Domain.FallbackPlanner.AthensDate(now);
 
     public static T Unwrap<T>(Result<T> result) => result.IsSuccess ? result.Value : throw new DomainException(result.Error);
 
