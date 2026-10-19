@@ -38,7 +38,7 @@
       "noProof": "Without delivery proof there is no notification date.",
       "returned": "The registered letter was returned. No clock starts.",
       "overdue": "The waiting period has ended",
-      "due": "Due: {{date}}"
+      "due": "Due: {date}"
     },
     "detail": {
       "title": "Delinquency case",
