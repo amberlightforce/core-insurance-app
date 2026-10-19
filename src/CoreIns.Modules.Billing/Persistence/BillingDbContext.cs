@@ -52,11 +52,16 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
     public DbSet<RefundNettingRow> RefundNettings => Set<RefundNettingRow>();
 
+    public DbSet<ReceivableRow> Receivables => Set<ReceivableRow>();
+
+    public DbSet<ReceivableAllocationRow> ReceivableAllocations => Set<ReceivableAllocationRow>();
+
     protected override string Schema => BillingModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        ReceivableModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BillingAccountRow>(entity =>
         {
@@ -72,6 +77,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.Jurisdiction).HasColumnName("jurisdiction").HasColumnType("char(2)");
             entity.Property(e => e.AccountNumber).HasColumnName("account_number");
+            entity.Property(e => e.AccountType).HasColumnName("account_type").HasDefaultValue("PREMIUM");
             entity.Property(e => e.PayerPartyId).HasColumnName("payer_party_id");
             entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
             entity.Property(e => e.Status).HasColumnName("status");
@@ -81,7 +87,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.HasIndex(e => new { e.LegalEntityId, e.AccountNumber }).IsUnique().HasDatabaseName("ux_billing_account_number");
 
             // REQ-BIL-033: one Active account per payer, legal entity and currency (the slice creates no standalone accounts).
-            entity.HasIndex(e => new { e.LegalEntityId, e.PayerPartyId, e.Currency }).IsUnique()
+            entity.HasIndex(e => new { e.LegalEntityId, e.PayerPartyId, e.Currency, e.AccountType }).IsUnique()
                 .HasFilter("status = 'ACTIVE'").HasDatabaseName("ux_billing_account_active_payer");
         });
 
@@ -450,6 +456,9 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.SourceType).HasColumnName("source_type");
             entity.Property(e => e.SourceId).HasColumnName("source_id");
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.RecoveryId).HasColumnName("recovery_id");
+            entity.Property(e => e.StatementRef).HasColumnName("statement_ref");
+            entity.Property(e => e.CounterpartyPartyId).HasColumnName("counterparty_party_id");
             entity.Property(e => e.TransactionKind).HasColumnName("transaction_kind");
             entity.Property(e => e.CancellationSource).HasColumnName("cancellation_source");
             entity.Property(e => e.TreatmentRuleId).HasColumnName("treatment_rule_id");
@@ -585,6 +594,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.SourceType).HasColumnName("source_type");
             entity.Property(e => e.SourceId).HasColumnName("source_id");
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+
             entity.Property(e => e.PayeePartyId).HasColumnName("payee_party_id");
             entity.Property(e => e.PayeeAccountId).HasColumnName("payee_account_id");
             entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
@@ -596,6 +606,10 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.ApprovalContentHash).HasColumnName("approval_content_hash").HasColumnType("char(64)");
             entity.Property(e => e.PurposeText).HasColumnName("purpose_text");
             entity.Property(e => e.BusinessRef).HasColumnName("business_ref");
+            entity.Property(e => e.StatementRef).HasColumnName("statement_ref");
+            entity.Property(e => e.Lines).HasColumnName("lines").HasColumnType("jsonb");
+            entity.Property(e => e.ReleaseApprovalRequestId).HasColumnName("release_approval_request_id");
+            entity.Property(e => e.ReleaseApprovedBy).HasColumnName("release_approved_by");
             entity.Property(e => e.State).HasColumnName("state");
             entity.Property(e => e.ScreeningResult).HasColumnName("screening_result");
             entity.Property(e => e.ScreeningListVersions).HasColumnName("screening_list_versions");
@@ -757,3 +771,8 @@ internal sealed class BillingDbContextDesignTimeFactory : IDesignTimeDbContextFa
     public BillingDbContext CreateDbContext(string[] args) =>
         new(ModuleDbContextRegistration.MigrationOptions<BillingDbContext>("Host=localhost;Database=coreins_design;Username=design", BillingModule.Schema));
 }
+
+
+
+
+

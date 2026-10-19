@@ -189,7 +189,8 @@ internal sealed class BillingReader(BillingDbContext db)
 
         var allocations = await db.Allocations.AsNoTracking().Where(a => a.ReceiptId == id).OrderBy(a => a.RecordedAt)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
-        return new ReceiptGetResponse { Receipt = Receipt(receipt, allocations.Sum(a => a.Amount)), Allocations = [.. allocations.Select(Allocation)], Reversals = [] };
+        var receivablePaid = await db.ReceivableAllocations.Where(a => a.ReceiptId == id).SumAsync(a => a.Amount, cancellationToken).ConfigureAwait(false);
+        return new ReceiptGetResponse { Receipt = Receipt(receipt, allocations.Sum(a => a.Amount) + receivablePaid), Allocations = [.. allocations.Select(Allocation)], Reversals = [] };
     }
 
     public static ReceiptView Receipt(ReceiptRow r, decimal allocated)
@@ -308,3 +309,4 @@ internal sealed class BillingReader(BillingDbContext db)
         RejectionCodes = i.FiscalRejectionCodes.Length == 0 ? null : i.FiscalRejectionCodes,
     };
 }
+

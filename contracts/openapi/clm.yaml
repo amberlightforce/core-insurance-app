@@ -7484,6 +7484,7 @@ components:
                 type: string
                 enum:
                 - EXPOSURE_TOTAL_RESERVE
+                - EXPOSURE_TOTAL_RECOVERY_RESERVE
                 - RESERVE_DECREASE
                 - PAYMENT
                 - CLAIM_CUMULATIVE_PAID

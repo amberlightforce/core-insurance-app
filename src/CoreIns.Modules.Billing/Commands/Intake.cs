@@ -151,7 +151,7 @@ internal sealed class AttachTermHandler(
                        ?? options.Value.Currency.Code;
         var active = Codes.Of(BillingAccountStatus.Active);
         var account = await db.Accounts.SingleOrDefaultAsync(
-            a => a.LegalEntityId == legalEntity && a.PayerPartyId == bound.PayerPartyId && a.Currency == currency && a.Status == active,
+            a => a.LegalEntityId == legalEntity && a.PayerPartyId == bound.PayerPartyId && a.Currency == currency && a.AccountType == "PREMIUM" && a.Status == active,
             cancellationToken).ConfigureAwait(false);
         var createdAccount = account is null;
         if (account is null)
@@ -230,3 +230,5 @@ internal sealed class AttachTermAuditor : ICommandAuditor<AttachTerm, IntakeOutc
             : [],
     };
 }
+
+
