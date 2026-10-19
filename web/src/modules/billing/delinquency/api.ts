@@ -5,17 +5,17 @@ import { apiRequest } from '../../../api/client';
 const base = '/api/bil/v1/delinquencies';
 
 /**
- * TODO(hardening): the bil.yaml Delinquency schemas are still untyped (`process`/`data` Unspecified) while
- * SL6-BIL-DELINQ is in flight. These thin local types follow the SL6 plan defaults (D-SL6-03/04); replace them
- * with `components['schemas']['Delinquency*']` from api/generated/bil once the contract is typed.
+ * Shapes of the SL6-BIL-DELINQ API. The bil.yaml schemas wrap everything in an untyped `process` / `data`
+ * (PRD wording), so these are hand-written from DelinquencyReader.ViewAsync and the command handlers.
+ * TODO(hardening): replace with generated types once bil.yaml types the delinquency view.
  */
-export type DelinquencyStatus =
-  | 'OPEN'
-  | 'NOTICE_SENT'
+export type DelinquencyState =
+  | 'NOTICE_REQUESTED'
+  | 'CLOCK_RUNNING'
   | 'NOTICE_RETURNED'
-  | 'ARRANGED'
   | 'ON_HOLD'
-  | 'CANCELLATION_PENDING'
+  | 'ARRANGED'
+  | 'CANCELLATION_REQUESTED'
   | 'RESOLVED';
 
 export interface Money {
@@ -23,81 +23,89 @@ export interface Money {
   currency: string;
 }
 
-export interface TimelineEntry {
-  at: string;
-  kind: string;
-  actor?: string | null;
+export interface DelinquencyContact {
+  contactId: string;
+  channel: string;
+  outcome: string;
   note?: string | null;
+  recordedBy?: string | null;
+  recordedAt: string;
 }
 
 export interface DelinquencyCase {
   delinquencyId: string;
   billingAccountId: string;
-  policyTermId?: string | null;
-  status: DelinquencyStatus;
-  openAmount: Money;
-  startedAt: string;
-  /** Notification date from registered-post proof; absent means no clock (D-SL6-03). */
+  policyId?: string | null;
+  termId?: string | null;
+  state: DelinquencyState;
+  trigger?: string | null;
+  overdueAmount: Money;
+  noticeDocumentId?: string | null;
+  /** yyyy-MM-dd from registered-post proof; absent means no clock (D-SL6-03). */
   notificationDate?: string | null;
-  /** End of the one-month waiting period, Europe/Athens (D-SL6-04). */
-  clockDueAt?: string | null;
-  onHold?: boolean;
-  timeline?: TimelineEntry[];
+  /** End of the one-month waiting period (D-SL6-04); absent when no clock runs. */
+  deadline?: string | null;
+  promiseDate?: string | null;
+  holdReason?: string | null;
+  outcome?: string | null;
+  openedAt: string;
+  resolvedAt?: string | null;
+  /** Only on the detail read. */
+  contacts?: DelinquencyContact[] | null;
 }
 
 export interface DelinquencyListPage {
-  items: DelinquencyCase[];
+  items: { process: DelinquencyCase }[];
 }
 
 export interface RecordContactRequest {
-  delinquencyId: string;
-  channel: 'PHONE' | 'EMAIL' | 'IN_PERSON';
-  outcome: string;
-  note?: string;
+  data: { delinquencyId: string; channel: string; outcome: string; note?: string };
 }
 export interface ArrangeRequest {
-  delinquencyId: string;
-  promisedDate: string;
-  note?: string;
+  data: { delinquencyId: string; promiseDate: string; note?: string };
 }
-export interface ReleaseHoldRequest {
-  delinquencyId: string;
-  reason: string;
+/** `release: true` lifts the hold; otherwise `reason` places one. */
+export interface HoldRequest {
+  data: { delinquencyId: string; release?: boolean; reason?: string };
 }
 
-export function useDelinquencies(status?: DelinquencyStatus) {
+export function useDelinquencies(state?: DelinquencyState) {
   return useQuery({
-    queryKey: ['bil', 'delinquencies', status ?? 'ALL'],
-    queryFn: ({ signal }) =>
-      apiRequest<DelinquencyListPage>(base, {
-        query: { ...(status ? { status } : {}), limit: 100 },
+    queryKey: ['bil', 'delinquencies', state ?? 'ALL'],
+    queryFn: async ({ signal }) => {
+      const page = await apiRequest<DelinquencyListPage>(base, {
+        query: { ...(state ? { state } : {}), limit: 100 },
         signal,
-      }),
+      });
+      return page.items.map((i) => i.process);
+    },
   });
 }
 
 export function useDelinquency(id: string) {
   return useQuery({
     queryKey: ['bil', 'delinquency', id],
-    queryFn: async ({ signal }) => {
-      const r = await apiRequest<{ delinquency?: DelinquencyCase } & Partial<DelinquencyCase>>(
-        `${base}/${encodeURIComponent(id)}`,
-        { signal },
-      );
-      return (r.delinquency ?? r) as DelinquencyCase;
-    },
+    queryFn: async ({ signal }) =>
+      (
+        await apiRequest<{ process: DelinquencyCase }>(`${base}/${encodeURIComponent(id)}`, {
+          signal,
+        })
+      ).process,
   });
 }
 
 type Action = 'record-contact' | 'arrange' | 'release-hold';
 
-export function useDelinquencyAction<T extends { delinquencyId: string }>(
-  action: Action,
-  onDone: () => void,
-) {
+export function useDelinquencyAction(action: Action, onDone: () => void) {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: ({ request, key }: { request: T; key: string }) =>
+    mutationFn: ({
+      request,
+      key,
+    }: {
+      request: RecordContactRequest | ArrangeRequest | HoldRequest;
+      key: string;
+    }) =>
       apiRequest<unknown>(`${base}/${action}`, {
         method: 'POST',
         body: request,
@@ -109,3 +117,13 @@ export function useDelinquencyAction<T extends { delinquencyId: string }>(
     },
   });
 }
+
+export const delinquencyStates: DelinquencyState[] = [
+  'NOTICE_REQUESTED',
+  'CLOCK_RUNNING',
+  'NOTICE_RETURNED',
+  'ARRANGED',
+  'ON_HOLD',
+  'CANCELLATION_REQUESTED',
+  'RESOLVED',
+];

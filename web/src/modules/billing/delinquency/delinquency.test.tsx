@@ -30,12 +30,12 @@ function kase(over: Partial<DelinquencyCase> = {}): DelinquencyCase {
   return {
     delinquencyId: id,
     billingAccountId: 'acc00000-1111-4222-8333-000000000001',
-    status: 'NOTICE_SENT',
-    openAmount: { amount: '120.00', currency: 'EUR' },
-    startedAt: '2026-10-01T09:00:00Z',
+    state: 'CLOCK_RUNNING',
+    overdueAmount: { amount: '120.00', currency: 'EUR' },
+    openedAt: '2026-10-01T09:00:00Z',
     notificationDate: '2026-10-05',
-    clockDueAt: new Date(Date.now() + 10 * 86_400_000).toISOString(),
-    timeline: [{ at: '2026-10-05T09:00:00Z', kind: 'NoticeDelivered', actor: 'system' }],
+    deadline: new Date(Date.now() + 10 * 86_400_000).toISOString(),
+    contacts: [],
     ...over,
   };
 }
@@ -46,7 +46,7 @@ describe('delinquency list', () => {
       {
         method: 'GET',
         path: '/api/bil/v1/delinquencies',
-        respond: () => ({ body: { items: [kase()], nextCursor: null, limit: 100 } }),
+        respond: () => ({ body: { items: [{ process: kase() }], nextCursor: null, limit: 100 } }),
       },
     ]);
     renderScreen(<DelinquencyListPage />, {
@@ -54,7 +54,7 @@ describe('delinquency list', () => {
       url: '/billing/delinquency',
     });
     const grid = await screen.findByRole('grid', { name: 'Υποθέσεις καθυστέρησης' });
-    expect(within(grid).getByText('Εστάλη ειδοποίηση')).toBeInTheDocument();
+    expect(within(grid).getByText('Τρέχει χρονόμετρο')).toBeInTheDocument();
     expect(within(grid).getByText('120,00 €')).toBeInTheDocument();
     expect(within(grid).getByText(/ημέρες απομένουν/)).toBeInTheDocument();
   });
@@ -67,7 +67,7 @@ describe('delinquency detail', () => {
       {
         method: 'GET',
         path: `/api/bil/v1/delinquencies/${id}`,
-        respond: () => ({ body: { delinquency: kase() } }),
+        respond: () => ({ body: { process: kase() } }),
       },
       {
         method: 'POST',
@@ -91,7 +91,7 @@ describe('delinquency detail', () => {
       expect(posts).toHaveLength(1);
     });
     expect(posts[0]?.key).toBeTruthy();
-    expect(posts[0]?.body).toMatchObject({ delinquencyId: id, channel: 'PHONE' });
+    expect(posts[0]?.body).toMatchObject({ data: { delinquencyId: id, channel: 'PHONE' } });
   });
 
   it('explains the missing clock when the letter was returned', async () => {
@@ -100,7 +100,7 @@ describe('delinquency detail', () => {
         method: 'GET',
         path: `/api/bil/v1/delinquencies/${id}`,
         respond: () => ({
-          body: { delinquency: kase({ status: 'NOTICE_RETURNED', clockDueAt: null }) },
+          body: { process: kase({ state: 'NOTICE_RETURNED', deadline: null }) },
         }),
       },
     ]);

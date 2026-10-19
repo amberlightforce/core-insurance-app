@@ -16,26 +16,21 @@ import { PageHeader, Section } from '../../staff/PageHeader';
 import { QueryView } from '../../staff/QueryView';
 import { SimpleTable } from '../../staff/SimpleTable';
 import styles from '../../staff/staff.module.css';
-import { useDelinquencies, type DelinquencyCase, type DelinquencyStatus } from './api';
+import {
+  delinquencyStates,
+  useDelinquencies,
+  type DelinquencyCase,
+  type DelinquencyState,
+} from './api';
 import { daysRemaining } from './roles';
 
 const ALL = 'ALL';
-export const delinquencyStatuses: DelinquencyStatus[] = [
-  'OPEN',
-  'NOTICE_SENT',
-  'NOTICE_RETURNED',
-  'ARRANGED',
-  'ON_HOLD',
-  'CANCELLATION_PENDING',
-  'RESOLVED',
-];
-
 /** Delinquency «Καθυστερήσεις»: non-payment cases with their waiting-period clock. */
 export function DelinquencyListPage() {
   const { t } = useTranslation('billing');
   const navigate = useNavigate();
   const [status, setStatus] = useState<string>(ALL);
-  const query = useDelinquencies(status !== ALL ? (status as DelinquencyStatus) : undefined);
+  const query = useDelinquencies(status !== ALL ? (status as DelinquencyState) : undefined);
 
   const columns = useMemo<DataColumn<DelinquencyCase>[]>(
     () => [
@@ -43,17 +38,17 @@ export function DelinquencyListPage() {
         r.billingAccountId.slice(0, 8),
       ),
       textColumn<DelinquencyCase>('status', t('delinquency.columns.status'), (r) =>
-        t(`delinquency.status.${r.status}`),
+        t(`delinquency.status.${r.state}`),
       ),
       moneyColumn<DelinquencyCase>(
         'open',
         t('delinquency.columns.open'),
-        (r) => r.openAmount.amount,
+        (r) => r.overdueAmount.amount,
         { currency: 'EUR' },
       ),
-      dateColumn<DelinquencyCase>('started', t('delinquency.columns.started'), (r) => r.startedAt),
+      dateColumn<DelinquencyCase>('started', t('delinquency.columns.started'), (r) => r.openedAt),
       textColumn<DelinquencyCase>('clock', t('delinquency.columns.clock'), (r) => {
-        const d = daysRemaining(r.clockDueAt);
+        const d = daysRemaining(r.deadline);
         return d === null ? t('delinquency.noClock') : t('delinquency.daysLeft', { count: d });
       }),
     ],
@@ -73,14 +68,14 @@ export function DelinquencyListPage() {
           </LinkButton>
         }
       />
-      <Section title={t('delinquency.listTitle')} family="teal" count={query.data?.items.length}>
+      <Section title={t('delinquency.listTitle')} family="teal" count={query.data?.length}>
         <div className={styles.grid}>
           <Select
             label={t('delinquency.filters.status')}
             id="delinquency-status"
             options={[
               { id: ALL, label: t('delinquency.filters.all') },
-              ...delinquencyStatuses.map((s) => ({ id: s, label: t(`delinquency.status.${s}`) })),
+              ...delinquencyStates.map((s) => ({ id: s, label: t(`delinquency.status.${s}`) })),
             ]}
             value={status}
             onChange={(v) => {
@@ -93,7 +88,7 @@ export function DelinquencyListPage() {
             <SimpleTable<DelinquencyCase>
               aria-label={t('delinquency.listTitle')}
               columns={columns}
-              data={page.items}
+              data={page}
               getRowId={(r) => r.delinquencyId}
               onOpen={(r) => {
                 void navigate(`/billing/delinquency/${r.delinquencyId}`);

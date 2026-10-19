@@ -9,13 +9,14 @@
     "emptyTitle": "No delinquency cases",
     "emptyBody": "Cases appear when a non-payment process starts.",
     "noClock": "No clock",
-    "daysLeft_one": "{{count}} day left",
-    "daysLeft_other": "{{count}} days left",
     "required": "Required",
     "note": "Note",
     "failed": "The action failed",
     "roleNote": "This action needs a billing role",
-    "filters": { "status": "Status", "all": "All" },
+    "filters": {
+      "status": "Status",
+      "all": "All"
+    },
     "columns": {
       "account": "Account",
       "status": "Status",
@@ -24,12 +25,12 @@
       "clock": "Clock"
     },
     "status": {
-      "OPEN": "Open",
-      "NOTICE_SENT": "Notice sent",
+      "NOTICE_REQUESTED": "Notice requested",
+      "CLOCK_RUNNING": "Clock running",
       "NOTICE_RETURNED": "Notice returned",
       "ARRANGED": "Arranged",
       "ON_HOLD": "On hold",
-      "CANCELLATION_PENDING": "Cancellation pending",
+      "CANCELLATION_REQUESTED": "Cancellation pending",
       "RESOLVED": "Resolved"
     },
     "clock": {
@@ -42,12 +43,17 @@
     "detail": {
       "title": "Delinquency case",
       "summary": "Summary",
-      "notified": "Notification date"
+      "notified": "Notification date",
+      "promise": "Promise date"
     },
     "timeline": {
       "title": "Timeline",
       "empty": "No events yet",
-      "kinds": {}
+      "kinds": {
+        "opened": "Case opened",
+        "notified": "Notice delivered",
+        "resolved": "Resolved"
+      }
     },
     "contact": {
       "title": "Record contact",
@@ -55,7 +61,11 @@
       "outcome": "Outcome",
       "submit": "Record",
       "done": "Contact recorded",
-      "channels": { "PHONE": "Phone", "EMAIL": "Email", "IN_PERSON": "In person" }
+      "channels": {
+        "PHONE": "Phone",
+        "EMAIL": "Email",
+        "IN_PERSON": "In person"
+      }
     },
     "arrange": {
       "title": "Payment arrangement",
@@ -67,7 +77,11 @@
       "title": "Release hold",
       "reason": "Reason",
       "submit": "Release hold",
-      "done": "Hold released"
-    }
+      "done": "Hold released",
+      "placeTitle": "Vulnerable-customer hold",
+      "place": "Place hold",
+      "placed": "Hold placed"
+    },
+    "daysLeft": "{count, plural, one {# day left} other {# days left}}"
   }
 }

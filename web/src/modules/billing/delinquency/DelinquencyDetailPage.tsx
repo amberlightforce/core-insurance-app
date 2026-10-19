@@ -1,4 +1,4 @@
-import { today } from '@internationalized/date';
+import { parseDate, today } from '@internationalized/date';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
@@ -25,18 +25,18 @@ import {
   type ArrangeRequest,
   type DelinquencyCase,
   type RecordContactRequest,
-  type ReleaseHoldRequest,
+  type HoldRequest,
 } from './api';
 import { canActOnDelinquency, daysRemaining } from './roles';
 
 function Countdown({ c }: { c: DelinquencyCase }) {
   const { t } = useTranslation('billing');
   const fmt = useFormat();
-  const days = daysRemaining(c.clockDueAt);
+  const days = daysRemaining(c.deadline);
   if (days === null) {
     return (
       <Banner variant="info" live="none" title={t('delinquency.clock.none')}>
-        {c.status === 'NOTICE_RETURNED'
+        {c.state === 'NOTICE_RETURNED'
           ? t('delinquency.clock.returned')
           : t('delinquency.clock.noProof')}
       </Banner>
@@ -44,11 +44,11 @@ function Countdown({ c }: { c: DelinquencyCase }) {
   }
   return (
     <Banner
-      variant={days < 0 ? 'error' : days <= 5 ? 'warning' : 'info'}
+      variant={days < 0 ? 'danger' : days <= 5 ? 'warning' : 'info'}
       live="none"
       title={days < 0 ? t('delinquency.clock.overdue') : t('delinquency.daysLeft', { count: days })}
     >
-      {t('delinquency.clock.due', { date: fmt.dateTime(c.clockDueAt) })}
+      {t('delinquency.clock.due', { date: fmt.dateTime(c.deadline) })}
     </Banner>
   );
 }
@@ -58,7 +58,7 @@ function ActionForms({ c }: { c: DelinquencyCase }) {
   const contactKey = useIdempotencyKey();
   const arrangeKey = useIdempotencyKey();
   const holdKey = useIdempotencyKey();
-  const [channel, setChannel] = useState<RecordContactRequest['channel']>('PHONE');
+  const [channel, setChannel] = useState('PHONE');
   const [outcome, setOutcome] = useState('');
   const [note, setNote] = useState('');
   const [promised, setPromised] = useState(today('Europe/Athens').add({ days: 7 }).toString());
@@ -66,22 +66,23 @@ function ActionForms({ c }: { c: DelinquencyCase }) {
   const [reason, setReason] = useState('');
   const [tried, setTried] = useState(false);
   const allowed = canActOnDelinquency();
-  const resolved = c.status === 'RESOLVED';
+  const resolved = c.state === 'RESOLVED';
 
-  const contact = useDelinquencyAction<RecordContactRequest>('record-contact', () => {
+  const contact = useDelinquencyAction('record-contact', () => {
     contactKey.release();
     setOutcome('');
     setNote('');
     announce(t('delinquency.contact.done'));
   });
-  const arrange = useDelinquencyAction<ArrangeRequest>('arrange', () => {
+  const arrange = useDelinquencyAction('arrange', () => {
     arrangeKey.release();
     announce(t('delinquency.arrange.done'));
   });
-  const release = useDelinquencyAction<ReleaseHoldRequest>('release-hold', () => {
+  const onHold = c.state === 'ON_HOLD';
+  const hold = useDelinquencyAction('release-hold', () => {
     holdKey.release();
     setReason('');
-    announce(t('delinquency.hold.done'));
+    announce(onHold ? t('delinquency.hold.done') : t('delinquency.hold.placed'));
   });
 
   return (
@@ -105,7 +106,7 @@ function ActionForms({ c }: { c: DelinquencyCase }) {
             }))}
             value={channel}
             onChange={(v) => {
-              if (v) setChannel(v as RecordContactRequest['channel']);
+              if (v) setChannel(v);
             }}
           />
           <TextField
@@ -125,10 +126,12 @@ function ActionForms({ c }: { c: DelinquencyCase }) {
               setTried(true);
               if (outcome.trim() === '') return;
               const request: RecordContactRequest = {
-                delinquencyId: c.delinquencyId,
-                channel,
-                outcome: outcome.trim(),
-                ...(note.trim() ? { note: note.trim() } : {}),
+                data: {
+                  delinquencyId: c.delinquencyId,
+                  channel,
+                  outcome: outcome.trim(),
+                  ...(note.trim() ? { note: note.trim() } : {}),
+                },
               };
               contact.mutate({ request, key: contactKey.keyFor(request) });
             }}
@@ -148,9 +151,9 @@ function ActionForms({ c }: { c: DelinquencyCase }) {
         >
           <DatePicker
             label={t('delinquency.arrange.promisedDate')}
-            value={promised}
+            value={parseDate(promised)}
             onChange={(v) => {
-              if (v) setPromised(v);
+              if (v) setPromised(v.toString());
             }}
           />
           <TextField
@@ -167,9 +170,11 @@ function ActionForms({ c }: { c: DelinquencyCase }) {
             isDisabled={!allowed || resolved || arrange.isPending}
             onPress={() => {
               const request: ArrangeRequest = {
-                delinquencyId: c.delinquencyId,
-                promisedDate: promised,
-                ...(arrangeNote.trim() ? { note: arrangeNote.trim() } : {}),
+                data: {
+                  delinquencyId: c.delinquencyId,
+                  promiseDate: promised,
+                  ...(arrangeNote.trim() ? { note: arrangeNote.trim() } : {}),
+                },
               };
               arrange.mutate({ request, key: arrangeKey.keyFor(request) });
             }}
@@ -178,33 +183,43 @@ function ActionForms({ c }: { c: DelinquencyCase }) {
           </Button>
         </form>
       </Section>
-      {c.onHold || c.status === 'ON_HOLD' ? (
-        <Section title={t('delinquency.hold.title')} family="plum">
+      {!resolved && c.state !== 'CANCELLATION_REQUESTED' ? (
+        <Section
+          title={onHold ? t('delinquency.hold.title') : t('delinquency.hold.placeTitle')}
+          family="plum"
+        >
           <div className={styles.stack}>
-            <TextField
-              label={t('delinquency.hold.reason')}
-              multiline
-              value={reason}
-              onChange={setReason}
-              errorMessage={tried && reason.trim() === '' ? t('delinquency.required') : undefined}
-            />
-            {release.isError ? (
-              <ProblemBanner error={release.error} title={t('delinquency.failed')} />
+            {onHold ? (
+              c.holdReason ? (
+                <p className={styles.muted}>{c.holdReason}</p>
+              ) : null
+            ) : (
+              <TextField
+                label={t('delinquency.hold.reason')}
+                multiline
+                value={reason}
+                onChange={setReason}
+                errorMessage={tried && reason.trim() === '' ? t('delinquency.required') : undefined}
+              />
+            )}
+            {hold.isError ? (
+              <ProblemBanner error={hold.error} title={t('delinquency.failed')} />
             ) : null}
             <Button
-              variant="danger"
-              isDisabled={!allowed || release.isPending}
+              variant={onHold ? 'primary' : 'danger'}
+              isDisabled={!allowed || hold.isPending}
               onPress={() => {
                 setTried(true);
-                if (reason.trim() === '') return;
-                const request: ReleaseHoldRequest = {
-                  delinquencyId: c.delinquencyId,
-                  reason: reason.trim(),
+                if (!onHold && reason.trim() === '') return;
+                const request: HoldRequest = {
+                  data: onHold
+                    ? { delinquencyId: c.delinquencyId, release: true }
+                    : { delinquencyId: c.delinquencyId, reason: reason.trim() },
                 };
-                release.mutate({ request, key: holdKey.keyFor(request) });
+                hold.mutate({ request, key: holdKey.keyFor(request) });
               }}
             >
-              {t('delinquency.hold.submit')}
+              {onHold ? t('delinquency.hold.submit') : t('delinquency.hold.place')}
             </Button>
           </div>
         </Section>
@@ -216,14 +231,26 @@ function ActionForms({ c }: { c: DelinquencyCase }) {
 function Details({ c }: { c: DelinquencyCase }) {
   const { t } = useTranslation('billing');
   const fmt = useFormat();
-  const timeline = [...(c.timeline ?? [])].sort((a, b) => a.at.localeCompare(b.at));
+  const timeline = [
+    { at: c.openedAt, kind: 'opened', actor: null, note: null },
+    ...(c.notificationDate
+      ? [{ at: c.notificationDate, kind: 'notified', actor: null, note: null }]
+      : []),
+    ...(c.contacts ?? []).map((k) => ({
+      at: k.recordedAt,
+      kind: `${k.channel} · ${k.outcome}`,
+      actor: k.recordedBy ?? null,
+      note: k.note ?? null,
+    })),
+    ...(c.resolvedAt ? [{ at: c.resolvedAt, kind: 'resolved', actor: null, note: null }] : []),
+  ].sort((x, y) => x.at.localeCompare(y.at));
   return (
     <div className={styles.stack}>
       <PageHeader
         overline={t('overline')}
         title={t('delinquency.detail.title')}
         recordId={c.delinquencyId.slice(0, 8)}
-        subtitle={t(`delinquency.status.${c.status}`)}
+        subtitle={t(`delinquency.status.${c.state}`)}
         actions={
           <LinkButton variant="secondary" to="/billing/delinquency">
             {t('delinquency.backToList')}
@@ -238,13 +265,18 @@ function Details({ c }: { c: DelinquencyCase }) {
             {
               id: 'open',
               label: t('delinquency.columns.open'),
-              value: fmt.money(c.openAmount),
+              value: fmt.money(c.overdueAmount),
               kind: 'money',
             },
             {
               id: 'started',
               label: t('delinquency.columns.started'),
-              value: fmt.dateTime(c.startedAt),
+              value: fmt.dateTime(c.openedAt),
+            },
+            {
+              id: 'promise',
+              label: t('delinquency.detail.promise'),
+              value: c.promiseDate ? fmt.date(c.promiseDate) : null,
             },
             {
               id: 'notified',
@@ -260,7 +292,7 @@ function Details({ c }: { c: DelinquencyCase }) {
         ) : (
           <ol aria-label={t('delinquency.timeline.title')}>
             {timeline.map((e, i) => (
-              <li key={`${e.at}-${i}`}>
+              <li key={`${e.at}-${String(i)}`}>
                 <strong>
                   {t(`delinquency.timeline.kinds.${e.kind}`, { defaultValue: e.kind })}
                 </strong>{' '}
