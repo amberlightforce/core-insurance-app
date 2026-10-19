@@ -251,6 +251,9 @@ internal static class Sl4Entries
 
     /// <summary>Cash at bank (BIL LA-10) and the FS clearing sub-ledger account (LA-24).</summary>
     public const string CashAccount = "LA-10";
+
+    /// <summary>Unapplied cash (BIL LA-11): the receipt intake debits cash and credits this account; RECEIVABLE_COLLECTED releases it to the receivable.</summary>
+    public const string UnappliedCashAccount = "LA-11";
     public const string FsClearingAccount = "LA-24";
 
     /// <summary>
