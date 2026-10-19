@@ -40,7 +40,7 @@ public static class ChannelsErrorCodes
 
     /// <summary>CHN-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 56 operation(s): chn.Agent.mcp, chn.Aggregator.quote, chn.ApiProduct.create, chn.ApiProduct.deprecate, chn.ApiProduct.publish, chn.ApiProduct.retire, chn.Change.confirm, chn.Change.refer, chn.Client.approve, chn.Client.request, chn.Client.revoke, chn.Client.suspend, ….</para>
+    /// <para>Declared by 58 operation(s): chn.Agent.mcp, chn.Aggregator.quote, chn.ApiProduct.create, chn.ApiProduct.deprecate, chn.ApiProduct.publish, chn.ApiProduct.retire, chn.Change.confirm, chn.Change.refer, chn.Client.approve, chn.Client.request, chn.Client.revoke, chn.Client.suspend, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "CHN-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -64,7 +64,7 @@ public static class ChannelsErrorCodes
 
     /// <summary>CHN-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): chn.Dsar.erase, chn.Dsar.export, chn.Dsar.restrict, chn.Withdrawal.get, chn.Withdrawal.list.</para>
+    /// <para>Declared by 8 operation(s): chn.Dsar.erase, chn.Dsar.export, chn.Dsar.restrict, chn.Withdrawal.close, chn.Withdrawal.confirm, chn.Withdrawal.declare, chn.Withdrawal.get, chn.Withdrawal.list.</para>
     /// </remarks>
     public const string NotFound = "CHN-ERR-NOT-FOUND";
 
@@ -79,6 +79,12 @@ public static class ChannelsErrorCodes
     /// <para>Declared by 2 operation(s): chn.Quote.startHome, chn.Quote.startMotor.</para>
     /// </remarks>
     public const string Pol = "CHN-ERR-POL";
+
+    /// <summary>CHN-ERR-RIGHT-EXPIRED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): chn.Withdrawal.confirm, chn.Withdrawal.declare.</para>
+    /// </remarks>
+    public const string RightExpired = "CHN-ERR-RIGHT-EXPIRED";
 
     /// <summary>CHN-ERR-SCENARIO-FAILED (HTTP 422).</summary>
     /// <remarks>
@@ -98,6 +104,12 @@ public static class ChannelsErrorCodes
     /// </remarks>
     public const string TicketStale = "CHN-ERR-TICKET-STALE";
 
+    /// <summary>CHN-ERR-TOKEN-INVALID (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): chn.Withdrawal.confirm.</para>
+    /// </remarks>
+    public const string TokenInvalid = "CHN-ERR-TOKEN-INVALID";
+
     /// <summary>CHN-ERR-UNKNOWN-TRANSACTION (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 1 operation(s): chn.Permission.evaluate.</para>
@@ -116,11 +128,17 @@ public static class ChannelsErrorCodes
     /// </remarks>
     public const string WalletUnavailable = "CHN-ERR-WALLET-UNAVAILABLE";
 
+    /// <summary>CHN-ERR-WRONG-STATE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): chn.Withdrawal.close.</para>
+    /// </remarks>
+    public const string WrongState = "CHN-ERR-WRONG-STATE";
+
     /// <summary>The code prefix of this module.</summary>
     public const string Prefix = "CHN-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [ChannelDisabled, CodeExpired, DeeplinkInvalid, EndpointNotHttps, FinalEntry, IdempotencyMismatch, LanguageNotEnabled, LimitExceeded, Mapping, NotFound, NotPermitted, Pol, ScenarioFailed, TicketExpired, TicketStale, UnknownTransaction, WalletTimeout, WalletUnavailable];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [ChannelDisabled, CodeExpired, DeeplinkInvalid, EndpointNotHttps, FinalEntry, IdempotencyMismatch, LanguageNotEnabled, LimitExceeded, Mapping, NotFound, NotPermitted, Pol, RightExpired, ScenarioFailed, TicketExpired, TicketStale, TokenInvalid, UnknownTransaction, WalletTimeout, WalletUnavailable, WrongState];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -137,11 +155,14 @@ public static class ChannelsErrorCodes
         [NotFound] = 404,
         [NotPermitted] = 403,
         [Pol] = 422,
+        [RightExpired] = 422,
         [ScenarioFailed] = 422,
         [TicketExpired] = 422,
         [TicketStale] = 409,
+        [TokenInvalid] = 422,
         [UnknownTransaction] = 422,
         [WalletTimeout] = 503,
         [WalletUnavailable] = 503,
+        [WrongState] = 409,
     };
 }
