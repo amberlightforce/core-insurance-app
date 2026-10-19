@@ -162,10 +162,10 @@ internal sealed class TermBilling(
 
         if (amount.IsNegative)
         {
-            if (charge.ChargeCategory is ChargeCategories.Tax or ChargeCategories.Levy)
+            if (charge.ChargeCategory == ChargeCategories.Levy)
             {
-                // The treatment allows it (REDUCE / VOID), but the slice has no tested mechanics for reducing IPT or levy payable
-                // (D-SL3-05/06): fail closed. KEEP_NOT_REDUCED credits are zero and never reach this point (INV-05).
+                // The treatment allows it (REDUCE / VOID), but there are no tested mechanics for reducing a levy payable
+                // (D-SL3-06): fail closed. IPT credits are supported (GAP-SL3-BIL-VOID); KEEP_NOT_REDUCED credits are zero (INV-05).
                 await QuarantineAsync(charge, QuarantineReasons.TaxCreditNotSupported, cancellationToken).ConfigureAwait(false);
                 return;
             }

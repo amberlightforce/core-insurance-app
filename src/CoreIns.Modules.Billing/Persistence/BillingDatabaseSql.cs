@@ -271,7 +271,7 @@ internal static class BillingDatabaseSql
     /// <summary>
     /// SL3-BIL-CREDIT: the billing-ledger rules of credits (CREDIT_WRITTEN premium, surcharge and fee clearing → written
     /// unbilled; CREDIT_BILLED written unbilled → billed receivable; there is deliberately no tax or levy rule, so a tax or
-    /// levy credit fails closed, D-SL3-05/06) and the database guards of credit notes:
+    /// levy credit fails closed, D-SL3-06) and the database guards of credit notes:
     /// a credit item credits exactly one invoice item of the original invoice its credit note references, and Σ credit items
     /// per invoice item ≤ that item (SQLSTATE BL006); a credit application offsets exactly the invoice item its credit item
     /// credits, Σ per credit item ≤ the credit item and Σ (cash allocations + credit applications) per invoice item ≤ the item

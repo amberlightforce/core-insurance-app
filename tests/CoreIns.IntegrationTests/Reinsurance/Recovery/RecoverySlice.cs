@@ -143,6 +143,7 @@ internal sealed class RecoverySlice : IAsyncDisposable
             ["costType"] = cost, ["costCategory"] = "BODILY_INJURY", ["eroding"] = true,
         });
         payload["amount"] = Eur3(amount);
+        payload["exGratia"] = false; // an ordinary (eroding) payment
         payload["method"] = method;
         payload["disbursementId"] = method == "CLEARING" ? null : Guid.CreateVersion7().ToString();
         payload["fsStatementId"] = method == "CLEARING" ? Guid.CreateVersion7().ToString() : null;

@@ -178,7 +178,12 @@ internal sealed class ReceiveFsNotificationHandler(
         }
 
         var coverage = "MTPL";
-        var lossAt = Instant.FromDateTimeOffset(new DateTimeOffset(notification.AccidentDate.ToDateTime(new TimeOnly(9, 0)), TimeSpan.Zero));
+        // A notification carries a date only: the loss instant is 09:00 UTC of that day. An accident of today is dated just before now, so it is
+        // neither in the future nor before a policy that started this morning.
+        var justBefore = clock.Now.Minus(TimeSpan.FromSeconds(1));
+        var lossAt = notification.AccidentDate >= DateOnly.FromDateTime(justBefore.ToUtcDateTime())
+            ? justBefore
+            : Instant.FromDateTimeOffset(new DateTimeOffset(notification.AccidentDate.ToDateTime(new TimeOnly(9, 0)), TimeSpan.Zero));
         var response = await submitFnol.HandleAsync(new SubmitFnol(new FnolSubmitRequest
         {
             LineOfBusiness = "MOTOR", PolicyId = found.Items[0].PolicyId, PolicyNumber = policyNumber, LossAt = lossAt, LossCause = "COLLISION",
