@@ -138,37 +138,416 @@
       "deadlines": "unspecified"
     },
     "cmp.Dsar.approve": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "01928811-6015-7da9-82bf-024cc4c7e587",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "019213e3-015f-79d0-891c-44a93ef758d3",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "0192fb9b-1ca0-742d-8742-1821767845ff",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "cmp.Dsar.create": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "01929ee0-76cf-7af1-83a0-02620f8cd03a",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "01925bf3-d6ba-7cfd-89c9-9f36be5c7cfc",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "019250b3-ae1b-7262-81a2-a62a6136f400",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "cmp.Dsar.decideItem": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "0192fd42-aa85-7395-8d58-0063af38a196",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192624a-ca66-7140-84f7-c7211cc92fb1",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "01923e9b-1e33-7aee-87af-58261ef5032a",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "cmp.Dsar.erase": {
-      "package": "unspecified",
-      "perItemOutcome": "unspecified"
+      "request": {
+        "dsarId": "01920950-e795-740a-8f0e-1ec78b8fb7a8",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "01925cda-6755-78bc-847b-252a46405c72",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      },
+      "perItemOutcome": [
+        {
+          "module": "sample",
+          "recordClass": "sample",
+          "kind": "sample",
+          "recordCount": 1,
+          "legalBasis": "sample",
+          "retentionEnd": "sample",
+          "exported": true,
+          "detail": "sample"
+        }
+      ]
     },
     "cmp.Dsar.export": {
-      "package": "unspecified",
-      "perItemOutcome": "unspecified"
+      "request": {
+        "dsarId": "0192a49d-8bd1-73fd-8360-6e1a7febde95",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "01920157-b0f7-7597-8db4-4060c25ad5b3",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      },
+      "perItemOutcome": [
+        {
+          "module": "sample",
+          "recordClass": "sample",
+          "kind": "sample",
+          "recordCount": 1,
+          "legalBasis": "sample",
+          "retentionEnd": "sample",
+          "exported": true,
+          "detail": "sample"
+        }
+      ]
     },
     "cmp.Dsar.extend": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "01925a0c-63d7-747a-84c7-5bcfcace0b0c",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192fe61-d1f1-778e-894a-76c50df2f34b",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "0192cf3c-55ce-7393-863d-c2afe970e5be",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "cmp.Dsar.get": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "01922022-a9d3-729c-83a8-8f1c29b2d02a",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "01924cad-773e-758c-85e6-ca64af59b958",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "0192ee46-2127-7266-8c05-f5c78710c5ac",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "cmp.Dsar.import": {
       "key": "value"
@@ -176,37 +555,369 @@
     "cmp.Dsar.query": {
       "items": [
         {
-          "request": "unspecified",
-          "tasks": "unspecified",
-          "package": "unspecified"
+          "request": {
+            "dsarId": "0192c3a4-995a-7859-8254-d19c1269a15b",
+            "requestType": "sample",
+            "status": "sample",
+            "subjectPartyId": "0192933b-8b7d-7682-87f3-544298dcb036",
+            "createdBy": "sample",
+            "receivedAt": "2026-10-07T09:00:00Z",
+            "deadline": "2026-10-07T09:00:00Z",
+            "extended": true,
+            "identityVerified": true,
+            "legalHold": true,
+            "approvedBy": "sample",
+            "approvalAction": "sample",
+            "completedAt": "2026-10-07T09:00:00Z",
+            "refusalReason": "sample",
+            "blockers": [
+              "sample"
+            ]
+          },
+          "tasks": [
+            {
+              "taskId": "0192c2da-d5b9-74f6-8675-e1e7d2ec5e64",
+              "module": "sample",
+              "status": "sample",
+              "phase": "sample",
+              "outcomes": [
+                {
+                  "module": "sample",
+                  "recordClass": "sample",
+                  "kind": "sample",
+                  "recordCount": 1,
+                  "legalBasis": "sample",
+                  "retentionEnd": "sample",
+                  "exported": true,
+                  "detail": "sample"
+                }
+              ],
+              "redactThirdParty": true,
+              "attempts": 1,
+              "error": "sample"
+            }
+          ],
+          "package": {
+            "generatedAt": "2026-10-07T09:00:00Z",
+            "index": [
+              {
+                "module": "sample",
+                "recordClass": "sample",
+                "kind": "sample",
+                "recordCount": 1,
+                "legalBasis": "sample",
+                "retentionEnd": "sample",
+                "exported": true,
+                "detail": "sample"
+              }
+            ],
+            "entries": [
+              "unspecified"
+            ]
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "cmp.Dsar.refuse": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "019225fc-7e0d-71f3-87ca-52bbf018f3b4",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "01927de6-b29b-7635-8f45-2cd60521255b",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "01929815-dd41-79a6-85e6-4a65399decb8",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "cmp.Dsar.restrict": {
-      "package": "unspecified",
-      "perItemOutcome": "unspecified"
+      "request": {
+        "dsarId": "01920060-01c4-7292-8138-ed1c3ff0ccc4",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192f149-2813-7f75-8950-cff7c72e7e0a",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      },
+      "perItemOutcome": [
+        {
+          "module": "sample",
+          "recordClass": "sample",
+          "kind": "sample",
+          "recordCount": 1,
+          "legalBasis": "sample",
+          "retentionEnd": "sample",
+          "exported": true,
+          "detail": "sample"
+        }
+      ]
     },
     "cmp.Dsar.retryTask": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "01920c77-2d1b-7d6b-8000-405fdaaee39a",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192e7b5-ca2a-778d-8e98-64ed3ff89a63",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "01923e81-838a-70f0-8464-d2f2d6af1e1c",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "cmp.Dsar.startFanOut": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "01922bac-13ab-7038-8f81-4ca8957bb173",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192a572-b959-70e8-81fe-ccd28add8c67",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "01924c9a-0a76-760c-8921-a32347fce16b",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "cmp.Dsar.verifyIdentity": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "01922b78-209a-738f-8ca9-2308a89ee1df",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192159c-8d4f-7bdd-8a20-591dd8399373",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "0192fa5a-194e-7f7a-8991-1556a6666727",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "cmp.EnfiaConfirmation.import": {
       "confirmations": "unspecified"
@@ -815,94 +1526,967 @@
         "unspecified"
       ]
     },
+    "DsarApproveRequest": {
+      "id": "01925275-41d7-7f47-8ae9-d70547b5bed9",
+      "action": "ERASE",
+      "reason": "sample"
+    },
     "DsarApproveResponse": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "0192dea9-60e2-7541-8236-f33bdd84e271",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192c156-0e5e-75e4-89d3-73b10bc51d81",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "01921a42-d258-7f62-8d80-0665277e0086",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
+    },
+    "DsarCreateRequest": {
+      "subjectPartyId": "01924776-5107-76e0-8fea-99ee46f3ce95",
+      "requestType": "ACCESS",
+      "legalHold": true,
+      "notes": "sample"
     },
     "DsarCreateResponse": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "019227f3-0a17-7872-8363-b800271d9831",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192acb7-9d4b-7384-8d05-47c2773ff4d1",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "0192e5b7-5749-7337-8a7d-f28c7e95150a",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
+    },
+    "DsarDecideItemRequest": {
+      "id": "0192e1bf-d22c-712a-8677-01b497c4bb68",
+      "taskId": "01929ff4-f25c-7959-893b-edc8a5bdfe89",
+      "redactThirdParty": true,
+      "legalHold": true,
+      "note": "sample"
     },
     "DsarDecideItemResponse": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "0192e691-d80a-7afc-8abb-b51b938e7997",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192fb4a-a754-7476-87a7-03c70155a575",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "01923b49-8548-71ab-8901-60960b6631a5",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "DsarEraseRequest": {
-      "partyId": "019299b7-16a5-7821-8bab-d7e7ae2c9410",
-      "scope": "unspecified"
+      "dsarId": "0192dccf-e4a5-778e-84a9-4f4588fb1763"
     },
     "DsarEraseResponse": {
-      "package": "unspecified",
-      "perItemOutcome": "unspecified"
+      "request": {
+        "dsarId": "01923b99-ab46-7a72-83d5-449917cdcd09",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "01921e30-9a3b-7a44-89a1-103c9ab3ebaf",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      },
+      "perItemOutcome": [
+        {
+          "module": "sample",
+          "recordClass": "sample",
+          "kind": "sample",
+          "recordCount": 1,
+          "legalBasis": "sample",
+          "retentionEnd": "sample",
+          "exported": true,
+          "detail": "sample"
+        }
+      ]
     },
     "DsarExportRequest": {
-      "partyId": "0192d509-1c95-7c62-8589-bfeeed57d497",
-      "scope": "unspecified"
+      "dsarId": "0192894f-7219-7d4a-89f7-725ca26f0560"
     },
     "DsarExportResponse": {
-      "package": "unspecified",
-      "perItemOutcome": "unspecified"
+      "request": {
+        "dsarId": "0192bf3b-68f3-7b72-8aba-4c5b9f88cd2e",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192d44e-de4b-7787-8b9a-40cea569554c",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      },
+      "perItemOutcome": [
+        {
+          "module": "sample",
+          "recordClass": "sample",
+          "kind": "sample",
+          "recordCount": 1,
+          "legalBasis": "sample",
+          "retentionEnd": "sample",
+          "exported": true,
+          "detail": "sample"
+        }
+      ]
+    },
+    "DsarExtendRequest": {
+      "id": "01921484-aedb-7453-849c-add464a9bf5a",
+      "extension": "sample",
+      "reason": "sample"
     },
     "DsarExtendResponse": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "01927c62-a4b1-7de7-887a-048ddd5cd003",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "019297b0-79b9-7cf6-82a9-e4271def834d",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "0192a776-9ba2-783f-8fa1-895746154fb7",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "DsarGetResponse": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "0192cfdd-f75a-7be7-8169-986aa1fdd72b",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "019239e1-4864-7581-8adf-fb7884002bc0",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "01926253-238e-7588-800d-14c6ac3a1345",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "DsarImportRequest": {
       "legacyRecords": "unspecified",
       "handOverDates": "unspecified"
     },
+    "DsarOutcomeView": {
+      "module": "sample",
+      "recordClass": "sample",
+      "kind": "sample",
+      "recordCount": 1,
+      "legalBasis": "sample",
+      "retentionEnd": "sample",
+      "exported": true,
+      "detail": "sample"
+    },
+    "DsarPackageView": {
+      "generatedAt": "2026-10-07T09:00:00Z",
+      "index": [
+        {
+          "module": "sample",
+          "recordClass": "sample",
+          "kind": "sample",
+          "recordCount": 1,
+          "legalBasis": "sample",
+          "retentionEnd": "sample",
+          "exported": true,
+          "detail": "sample"
+        }
+      ],
+      "entries": [
+        "unspecified"
+      ]
+    },
     "DsarQueryItem": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "019270b2-803b-7622-8062-e4cc0a0da39f",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "019283bb-2616-794c-8d41-450c656f290b",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "0192dda3-d36d-7b09-8cee-4f42cbf9a7bf",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "DsarQueryPage": {
       "items": [
         {
-          "request": "unspecified",
-          "tasks": "unspecified",
-          "package": "unspecified"
+          "request": {
+            "dsarId": "0192fe63-eced-74a8-8447-7909185a31dd",
+            "requestType": "sample",
+            "status": "sample",
+            "subjectPartyId": "01925a65-a4a3-710a-8684-5ae033891b99",
+            "createdBy": "sample",
+            "receivedAt": "2026-10-07T09:00:00Z",
+            "deadline": "2026-10-07T09:00:00Z",
+            "extended": true,
+            "identityVerified": true,
+            "legalHold": true,
+            "approvedBy": "sample",
+            "approvalAction": "sample",
+            "completedAt": "2026-10-07T09:00:00Z",
+            "refusalReason": "sample",
+            "blockers": [
+              "sample"
+            ]
+          },
+          "tasks": [
+            {
+              "taskId": "0192b813-6747-74b6-8672-cd45ebb54eae",
+              "module": "sample",
+              "status": "sample",
+              "phase": "sample",
+              "outcomes": [
+                {
+                  "module": "sample",
+                  "recordClass": "sample",
+                  "kind": "sample",
+                  "recordCount": 1,
+                  "legalBasis": "sample",
+                  "retentionEnd": "sample",
+                  "exported": true,
+                  "detail": "sample"
+                }
+              ],
+              "redactThirdParty": true,
+              "attempts": 1,
+              "error": "sample"
+            }
+          ],
+          "package": {
+            "generatedAt": "2026-10-07T09:00:00Z",
+            "index": [
+              {
+                "module": "sample",
+                "recordClass": "sample",
+                "kind": "sample",
+                "recordCount": 1,
+                "legalBasis": "sample",
+                "retentionEnd": "sample",
+                "exported": true,
+                "detail": "sample"
+              }
+            ],
+            "entries": [
+              "unspecified"
+            ]
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
+    "DsarRefuseRequest": {
+      "id": "019259ef-e7d5-7011-869c-38f3ad05d03f",
+      "reason": "sample"
+    },
     "DsarRefuseResponse": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "019283f3-cd7f-758a-8d4e-bfa7f3dd7434",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192a209-a807-7489-896b-18a84a0f70ff",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "0192cf93-c138-7d23-8bd4-1854f4385368",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
+    },
+    "DsarRequestView": {
+      "dsarId": "019247ed-86e7-7d14-8dd4-0ebd31945b86",
+      "requestType": "sample",
+      "status": "sample",
+      "subjectPartyId": "0192812e-f632-79f5-8977-500ba72e4eec",
+      "createdBy": "sample",
+      "receivedAt": "2026-10-07T09:00:00Z",
+      "deadline": "2026-10-07T09:00:00Z",
+      "extended": true,
+      "identityVerified": true,
+      "legalHold": true,
+      "approvedBy": "sample",
+      "approvalAction": "sample",
+      "completedAt": "2026-10-07T09:00:00Z",
+      "refusalReason": "sample",
+      "blockers": [
+        "sample"
+      ]
     },
     "DsarRestrictRequest": {
-      "partyId": "0192f3ac-cd90-75e3-8f0a-06f6a67203da",
-      "scope": "unspecified"
+      "dsarId": "01925d8b-2310-70dc-8206-94078d0242c6",
+      "legalBasis": "sample"
     },
     "DsarRestrictResponse": {
-      "package": "unspecified",
-      "perItemOutcome": "unspecified"
+      "request": {
+        "dsarId": "0192ef3b-8aed-7d8a-8e6a-f1c2605c1fc6",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192dd89-2990-7b85-8d58-c7429be9bbb4",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      },
+      "perItemOutcome": [
+        {
+          "module": "sample",
+          "recordClass": "sample",
+          "kind": "sample",
+          "recordCount": 1,
+          "legalBasis": "sample",
+          "retentionEnd": "sample",
+          "exported": true,
+          "detail": "sample"
+        }
+      ]
+    },
+    "DsarRetryTaskRequest": {
+      "id": "01926661-9a54-78dc-84e5-eeb0adbbee79",
+      "taskId": "019291c7-39f9-71d0-864e-2585c9e8b509"
     },
     "DsarRetryTaskResponse": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "0192573e-fbc0-7103-8560-5e15806c2ec3",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192e34e-72a6-73bb-82a6-cedc4d058e5c",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "019224f7-0e33-7ff6-869c-faaea71b243f",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
+    },
+    "DsarStartFanOutRequest": {
+      "id": "01929384-b676-7d3a-8f97-677e936e9dc3"
     },
     "DsarStartFanOutResponse": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "019268b5-21a7-7125-8d89-dbf0389d6d61",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "0192adbc-f925-7e19-8ae6-8503bc1b823d",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "0192ea5d-1e73-74ae-87ae-45b279402980",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
+    },
+    "DsarTaskView": {
+      "taskId": "01922455-1966-736c-8838-026ce09a1114",
+      "module": "sample",
+      "status": "sample",
+      "phase": "sample",
+      "outcomes": [
+        {
+          "module": "sample",
+          "recordClass": "sample",
+          "kind": "sample",
+          "recordCount": 1,
+          "legalBasis": "sample",
+          "retentionEnd": "sample",
+          "exported": true,
+          "detail": "sample"
+        }
+      ],
+      "redactThirdParty": true,
+      "attempts": 1,
+      "error": "sample"
+    },
+    "DsarVerifyIdentityRequest": {
+      "id": "0192b883-af08-72e2-8544-b715149a5c97",
+      "method": "sample",
+      "evidenceRef": "sample"
     },
     "DsarVerifyIdentityResponse": {
-      "request": "unspecified",
-      "tasks": "unspecified",
-      "package": "unspecified"
+      "request": {
+        "dsarId": "019213ca-074b-7f34-8c5b-125b3127c39e",
+        "requestType": "sample",
+        "status": "sample",
+        "subjectPartyId": "019226c7-b87e-71f5-8173-394c94c6f1b1",
+        "createdBy": "sample",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "deadline": "2026-10-07T09:00:00Z",
+        "extended": true,
+        "identityVerified": true,
+        "legalHold": true,
+        "approvedBy": "sample",
+        "approvalAction": "sample",
+        "completedAt": "2026-10-07T09:00:00Z",
+        "refusalReason": "sample",
+        "blockers": [
+          "sample"
+        ]
+      },
+      "tasks": [
+        {
+          "taskId": "0192fb65-2125-7e29-841f-d56612cfb28f",
+          "module": "sample",
+          "status": "sample",
+          "phase": "sample",
+          "outcomes": [
+            {
+              "module": "sample",
+              "recordClass": "sample",
+              "kind": "sample",
+              "recordCount": 1,
+              "legalBasis": "sample",
+              "retentionEnd": "sample",
+              "exported": true,
+              "detail": "sample"
+            }
+          ],
+          "redactThirdParty": true,
+          "attempts": 1,
+          "error": "sample"
+        }
+      ],
+      "package": {
+        "generatedAt": "2026-10-07T09:00:00Z",
+        "index": [
+          {
+            "module": "sample",
+            "recordClass": "sample",
+            "kind": "sample",
+            "recordCount": 1,
+            "legalBasis": "sample",
+            "retentionEnd": "sample",
+            "exported": true,
+            "detail": "sample"
+          }
+        ],
+        "entries": [
+          "unspecified"
+        ]
+      }
     },
     "EnfiaConfirmationDecideRequest": {
       "file": "unspecified",

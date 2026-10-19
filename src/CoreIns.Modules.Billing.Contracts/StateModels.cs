@@ -300,7 +300,7 @@ public static class DisbursementStateModel
             .Permit(DisbursementState.Requested, DisbursementTrigger.EnterApproval, DisbursementState.PendingApproval)
             .Permit(DisbursementState.PendingApproval, DisbursementTrigger.Approve, DisbursementState.Approved)
             .Permit([DisbursementState.PendingApproval, DisbursementState.Released], DisbursementTrigger.Reject, DisbursementState.Rejected)
-            .Permit([DisbursementState.PendingApproval, DisbursementState.Approved], DisbursementTrigger.Stop, DisbursementState.Stopped)
+            .Permit([DisbursementState.PendingApproval, DisbursementState.Approved, DisbursementState.Released], DisbursementTrigger.Stop, DisbursementState.Stopped)
             .Permit(DisbursementState.Approved, DisbursementTrigger.Release, DisbursementState.Released)
             .Permit(DisbursementState.Released, DisbursementTrigger.Issue, DisbursementState.Issued)
             .Permit(DisbursementState.Issued, DisbursementTrigger.Clear, DisbursementState.Cleared)
