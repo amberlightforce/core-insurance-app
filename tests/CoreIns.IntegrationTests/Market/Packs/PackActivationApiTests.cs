@@ -25,7 +25,8 @@ public sealed class PackActivationApiTests(PostgresFixture database) : IClassFix
         request.Headers.Add("Idempotency-Key", (key ?? Guid.NewGuid()).ToString());
         request.Content = JsonContent.Create(body);
         using var response = await _client.SendAsync(request, TestContext.Current.CancellationToken);
-        return (response.StatusCode, JsonNode.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))!);
+        var text = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        return (response.StatusCode, string.IsNullOrWhiteSpace(text) ? new JsonObject() : JsonNode.Parse(text)!);
     }
 
     [Fact]

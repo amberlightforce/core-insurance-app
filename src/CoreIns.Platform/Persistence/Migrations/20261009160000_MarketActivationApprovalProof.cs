@@ -13,7 +13,7 @@ public sealed class MarketActivationApprovalProof : Migration
         CREATE FUNCTION plt.market_activation_approval_verified(
             p_request uuid, p_entity uuid, p_activation uuid, p_hash text, p_checker text,
             p_pack text, p_entity_code text, p_decided_at timestamptz, p_participants text[])
-        RETURNS boolean LANGUAGE sql SECURITY DEFINER SET search_path = pg_catalog, plt AS $$
+        RETURNS boolean LANGUAGE sql SECURITY DEFINER SET search_path = pg_catalog, plt AS $fn$
           SELECT EXISTS (
             SELECT 1 FROM plt.approval_request r
             JOIN plt.audit_event a ON a.object_id = r.request_id::text
@@ -42,7 +42,7 @@ public sealed class MarketActivationApprovalProof : Migration
                 AND a.on_behalf_of <> r.maker_kind || ':' || r.maker_id
                 AND (r.maker_on_behalf_of_id IS NULL OR a.on_behalf_of <> r.maker_on_behalf_of_kind || ':' || r.maker_on_behalf_of_id)))
           );
-        $$;
+        $fn$;
         REVOKE ALL ON FUNCTION plt.market_activation_approval_verified(uuid, uuid, uuid, text, text, text, text, timestamptz, text[]) FROM PUBLIC;
         """);
 
