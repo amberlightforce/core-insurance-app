@@ -6019,7 +6019,8 @@
       "status": "full",
       "dataClassification": "P1",
       "personalDataFields": [
-        "payeePartyId"
+        "payeePartyId",
+        "counterpartyInsurerPartyId"
       ],
       "x-business-keys": [
         "claimId",

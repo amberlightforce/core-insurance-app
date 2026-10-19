@@ -47,8 +47,9 @@ export function AiControlPage() {
   const setToggle = useSetToggle();
   const killSwitch = useKillSwitch();
 
-  const record = (action: LogEntry['action'], target: string, ok: boolean) =>
+  const record = (action: LogEntry['action'], target: string, ok: boolean) => {
     setLog((prev) => [{ id: prev.length + 1, at: new Date(), action, target, ok }, ...prev]);
+  };
 
   const loaded = states.flatMap((s) => (s.data ? [s.data] : []));
   // TODO(hardening): the server has no read of the GLOBAL scope alone; it is inferred from every feature being killed.
@@ -68,6 +69,7 @@ export function AiControlPage() {
       record(enabled ? 'enabled' : 'disabled', featureId, false);
       throw new Error(
         t('ai.features.toggleFailed', { feature: featureId, message: problemOf(e).title ?? '' }),
+        { cause: e },
       );
     }
   };
@@ -126,11 +128,21 @@ export function AiControlPage() {
         )}
         <div className={styles.actions}>
           {globalActive ? (
-            <Button variant="secondary" onPress={() => setConfirm('Clear')}>
+            <Button
+              variant="secondary"
+              onPress={() => {
+                setConfirm('Clear');
+              }}
+            >
               {t('ai.killSwitch.clear')}
             </Button>
           ) : (
-            <Button variant="danger" onPress={() => setConfirm('Activate')}>
+            <Button
+              variant="danger"
+              onPress={() => {
+                setConfirm('Activate');
+              }}
+            >
               {t('ai.killSwitch.activate')}
             </Button>
           )}
@@ -183,7 +195,9 @@ export function AiControlPage() {
                         labelText={t('ai.features.toggleLabel', { feature: featureId })}
                         isSelected={state?.enabled ?? false}
                         onChangeAsync={(next) => toggle(featureId, next)}
-                        onError={(e) => setNotice(e instanceof Error ? e.message : undefined)}
+                        onError={(e) => {
+                          setNotice(e instanceof Error ? e.message : undefined);
+                        }}
                         {...(state ? {} : { isPending: true })}
                       >
                         {t('ai.features.toggleLabel', { feature: featureId })}
@@ -247,7 +261,9 @@ export function AiControlPage() {
         onOpenChange={(open) => {
           if (!open) setConfirm(null);
         }}
-        onCancel={() => setConfirm(null)}
+        onCancel={() => {
+          setConfirm(null);
+        }}
         cancelLabel={t('ai.killSwitch.cancel')}
         closeOnAction={false}
         {...(dialogError ? { error: dialogError } : {})}

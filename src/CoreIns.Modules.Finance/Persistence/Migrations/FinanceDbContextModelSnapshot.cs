@@ -330,6 +330,60 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.DsarRestrictionRow", b =>
+                {
+                    b.Property<Guid>("RestrictionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("restriction_id");
+
+                    b.Property<string>("LegalBasis")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_basis");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("RecordClass")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("record_class");
+
+                    b.Property<int>("RecordCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("record_count");
+
+                    b.Property<DateTime>("RestrictedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("restricted_at");
+
+                    b.Property<string>("RestrictedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("restricted_by");
+
+                    b.Property<string>("RetentionEnd")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("retention_end");
+
+                    b.Property<Guid>("SubjectPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("subject_party_id");
+
+                    b.HasKey("RestrictionId")
+                        .HasName("pk_dsar_restriction");
+
+                    b.HasIndex("SubjectPartyId", "RecordClass")
+                        .IsUnique()
+                        .HasDatabaseName("ux_dsar_restriction_subject_class");
+
+                    b.ToTable("dsar_restriction", "fin");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.EventCatalogueRow", b =>
                 {
                     b.Property<string>("RegistryName")

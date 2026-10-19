@@ -15,4 +15,9 @@ public sealed record RoutingResolveRequest
     /// <summary>Core id, legacy key, plate, AFM or payment reference</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("key")]
     public required string Key { get; init; }
+
+    /// <summary>Business date (yyyy-MM-dd); defaults to today. The ValidAt query parameter is the in-process alternative.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("date")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.BusinessDate? Date { get; init; }
 }

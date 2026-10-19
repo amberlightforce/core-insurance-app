@@ -1,3 +1,5 @@
+using CoreIns.Modules.Migration.Services.Dsar;
+using CoreIns.SharedKernel.Dsar;
 using CoreIns.Modules.Migration.Authority;
 using CoreIns.Modules.Migration.Commands;
 using CoreIns.Modules.Migration.Contracts;
@@ -40,6 +42,7 @@ public static class MigrationModule
         ArgumentNullException.ThrowIfNull(configuration);
 
         services.AddModuleDbContext<MigrationDbContext>(Schema);
+        services.AddSingleton<IDsarParticipant, MigrationDsarParticipant>();
         services.AddMigrationAuthorityTypes();
         services.AddOwnerDecidedApprovalType(BatchApproval.Type);
         services.AddScoped<BatchRunner>();

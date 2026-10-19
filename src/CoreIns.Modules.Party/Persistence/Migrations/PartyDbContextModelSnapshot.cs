@@ -23,6 +23,56 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.DsarRestrictionRow", b =>
+                {
+                    b.Property<Guid>("RestrictionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("restriction_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("LegalBasis")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_basis");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("RecordClass")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("record_class");
+
+                    b.Property<string>("RetentionEnd")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("retention_end");
+
+                    b.HasKey("RestrictionId")
+                        .HasName("pk_dsar_restriction");
+
+                    b.HasIndex("PartyId", "RecordClass")
+                        .IsUnique()
+                        .HasDatabaseName("ux_dsar_restriction_subject_class");
+
+                    b.ToTable("dsar_restriction", "pty");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryRow", b =>
                 {
                     b.Property<Guid>("IntermediaryId")

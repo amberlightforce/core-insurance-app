@@ -405,6 +405,136 @@ paths:
           $ref: common.yaml#/components/responses/InternalError
         '503':
           $ref: common.yaml#/components/responses/ServiceUnavailable
+  /api/mig/v1/batches:
+    post:
+      operationId: mig.Batch.create
+      summary: Create a migration batch (stores items, records baseline hash)
+      description: |-
+        Create a migration batch (stores items, records baseline hash)
+
+        PRD inputs: batch id
+        PRD outputs: status, outcomes
+      tags:
+      - Batch
+      x-requirement:
+      - REQ-MIG-066..REQ-MIG-078
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: `reverse` supports dry-run; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: mig.Batch.create
+      x-error-codes:
+      - code: MIG-ERR-DRYRUN-REQUIRED
+        status: 422
+      - code: MIG-ERR-DEPENDENCY
+        status: 422
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1287
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchCreateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/batches/approve:
+    post:
+      operationId: mig.Batch.approve
+      summary: Decide the MIG.BATCH_RUN approval of a batch
+      description: |-
+        Decide the MIG.BATCH_RUN approval of a batch
+
+        PRD inputs: batch id
+        PRD outputs: status, outcomes
+      tags:
+      - Batch
+      x-requirement:
+      - REQ-MIG-066..REQ-MIG-078
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: `reverse` supports dry-run; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: mig.Batch.approve
+      x-error-codes:
+      - code: MIG-ERR-DRYRUN-REQUIRED
+        status: 422
+      - code: MIG-ERR-DEPENDENCY
+        status: 422
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-16 §9.1 l.1287
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchApproveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/mig/v1/batches/start:
     post:
       operationId: mig.Batch.start
@@ -457,7 +587,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchStartResponse'
+                $ref: '#/components/schemas/BatchResponse'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -1525,11 +1655,25 @@ components:
           description: 'PRD: "history"'
     XrefListItem:
       type: object
-      description: 'mig.Xref.list result. PRD outputs: "page"'
+      description: 'mig.Xref.list result item.'
       properties:
-        page:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "page"'
+        xrefId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        source:
+          type: string
+        objectType:
+          type: string
+        legacyKey:
+          type: string
+        coreId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        origin:
+          type: string
+        status:
+          type: string
+      required: [xrefId, source, objectType, legacyKey, coreId, origin, status]
     XrefListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -1549,6 +1693,9 @@ components:
         key:
           type: string
           description: Core id, legacy key, plate, AFM or payment reference
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Business date (yyyy-MM-dd); defaults to today. The ValidAt query parameter is the in-process alternative.
       required:
       - objectType
       - key
@@ -1572,6 +1719,12 @@ components:
           description: 'Transitioning: expiring legacy term and core renewal'
         legacyKey:
           type: string
+        validFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        validTo:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        reason:
+          type: string
         deepLink:
           type: string
           format: uri
@@ -1580,30 +1733,38 @@ components:
       description: 'Typed from REQ-MIG-004, REQ-MIG-149. PRD outputs: "master state, term split, deep link"'
     RoutingOverrideRequest:
       type: object
-      description: 'mig.Routing.override request. PRD inputs: "object, target state, reason, until"'
+      description: 'mig.Routing.override request (SL6-MIG-FRAME): sets the master state of an object over [from, to); overlapping periods are refused.'
       properties:
-        object:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "object"'
-        targetState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "target state"'
+        objectType:
+          type: string
+        key:
+          type: string
+        masterState:
+          type: string
+          enum: [NONE, TRANSITIONING, CORE]
+        from:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        to:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-        until:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "until"'
+          type: string
+      required: [objectType, key, masterState, from, reason]
     RoutingOverrideResponse:
       type: object
-      description: 'mig.Routing.override result. PRD outputs: "route, approval ref"'
+      description: 'mig.Routing.override result: the stored route.'
       properties:
-        route:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "route"'
-        approvalRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval ref"'
+        masterState:
+          type: string
+          enum: [NONE, TRANSITIONING, CORE]
+        routeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        validFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        validTo:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        reason:
+          type: string
+      required: [masterState]
     EnquiryGetResponse:
       type: object
       description: 'mig.Enquiry.get result. PRD outputs: "summary with master marks, freshness"'
@@ -1614,74 +1775,121 @@ components:
         freshness:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "freshness"'
+    BatchItemInput:
+      type: object
+      properties:
+        module:
+          type: string
+        objectType:
+          type: string
+        legacyId:
+          type: string
+        payload: {}
+      required: [module, objectType, legacyId, payload]
+    BatchCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchItemInput'
+      required: [name, items]
+    BatchApproveRequest:
+      type: object
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum: [APPROVE, REJECT]
+        comment:
+          type: [string, 'null']
+      required: [batchId, decision]
+    BatchView:
+      type: object
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        name:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, PENDING_APPROVAL, REJECTED, RUNNING, COMPLETED, COMPLETED_WITH_ERRORS, PAUSED, REVERSED, REVERSAL_BLOCKED, NOT_REVERSIBLE]
+        baselineHash:
+          type: [string, 'null']
+        contentHash:
+          type: string
+        dryRunDone:
+          type: boolean
+        startedBy:
+          type: [string, 'null']
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        itemCount:
+          type: integer
+          format: int32
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+      required: [batchId, name, status, contentHash, dryRunDone, itemCount, counts]
+    BatchResponse:
+      type: object
+      properties:
+        batch:
+          $ref: '#/components/schemas/BatchView'
+        outcomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchOutcomesItem'
+      required: [batch, outcomes]
     BatchStartRequest:
       type: object
-      description: 'mig.Batch.start request. PRD inputs: "batch id"'
+      description: 'mig.Batch.start request. dryRun=true simulates; a real run needs a prior matching dry run and an approved MIG.BATCH_RUN approval.'
       properties:
         batchId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "batch id"'
+        dryRun:
+          type: boolean
+      required:
+      - batchId
+      - dryRun
     BatchStartResponse:
-      type: object
-      description: 'mig.Batch.start result. PRD outputs: "status, outcomes"'
-      properties:
-        status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
-        outcomes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcomes"'
+      $ref: '#/components/schemas/BatchResponse'
     BatchPauseRequest:
       type: object
-      description: 'mig.Batch.pause request. PRD inputs: "batch id"'
       properties:
         batchId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "batch id"'
+      required:
+      - batchId
     BatchPauseResponse:
-      type: object
-      description: 'mig.Batch.pause result. PRD outputs: "status, outcomes"'
-      properties:
-        status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
-        outcomes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcomes"'
+      $ref: '#/components/schemas/BatchResponse'
     BatchResumeRequest:
       type: object
-      description: 'mig.Batch.resume request. PRD inputs: "batch id"'
       properties:
         batchId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "batch id"'
+      required:
+      - batchId
     BatchResumeResponse:
-      type: object
-      description: 'mig.Batch.resume result. PRD outputs: "status, outcomes"'
-      properties:
-        status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
-        outcomes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcomes"'
+      $ref: '#/components/schemas/BatchResponse'
     BatchReverseRequest:
       type: object
-      description: 'mig.Batch.reverse request. PRD inputs: "batch id"'
+      description: 'mig.Batch.reverse request (dryRun supported).'
       properties:
         batchId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "batch id"'
+        dryRun:
+          type: boolean
+      required:
+      - batchId
+      - dryRun
     BatchReverseResponse:
-      type: object
-      description: 'mig.Batch.reverse result. PRD outputs: "status, outcomes"'
-      properties:
-        status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
-        outcomes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcomes"'
+      $ref: '#/components/schemas/BatchResponse'
     BatchRedriveRequest:
       type: object
       description: 'mig.Batch.redrive request. PRD inputs: "batch id"'
@@ -1700,25 +1908,30 @@ components:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "outcomes"'
     BatchGetResponse:
-      type: object
-      description: 'mig.Batch.get result. PRD outputs: "status, outcomes"'
-      properties:
-        status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
-        outcomes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcomes"'
+      $ref: '#/components/schemas/BatchResponse'
     BatchOutcomesItem:
       type: object
-      description: 'mig.Batch.outcomes result. PRD outputs: "status, outcomes"'
+      description: One item outcome of a batch.
       properties:
-        status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
-        outcomes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcomes"'
+        seq:
+          type: integer
+          format: int32
+        module:
+          type: string
+        objectType:
+          type: string
+        legacyId:
+          type: string
+        outcome:
+          type: string
+          enum: [PENDING, IMPORTED, SKIPPED_EXISTING, FAILED, REVERSED, REVERSAL_BLOCKED]
+        coreId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        errorCode:
+          type: [string, 'null']
+        message:
+          type: [string, 'null']
+      required: [seq, module, objectType, legacyId, outcome]
     BatchOutcomesPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope

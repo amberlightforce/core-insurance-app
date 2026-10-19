@@ -85,6 +85,7 @@ internal sealed class ClaimReader(DbSession session, ClaimProtection protection,
                     RaisedAt = Instant.FromUtcDateTime(pending.RaisedAt),
                 },
             Summary = Summary(record),
+            LiabilityFacts = await LiabilityAsync(connection, claimId, cancellationToken).ConfigureAwait(false),
             LegalEntity = legalEntityCode,
             Jurisdiction = record.Jurisdiction,
             LossLocation = await protection.DecryptAsync(legalEntity, ClaimProtection.LossLocationField, claimId.Value, texts.LossLocation, cancellationToken).ConfigureAwait(false),
@@ -105,6 +106,24 @@ internal sealed class ClaimReader(DbSession session, ClaimProtection protection,
                 DamageAreas = i.DamageAreas ?? [],
             })],
         };
+    }
+
+    private async Task<LiabilityFacts?> LiabilityAsync(NpgsqlConnection connection, ClaimId claimId, CancellationToken cancellationToken)
+    {
+        var r = await connection.QuerySingleAsync<LiabilityRecord>(new CommandDefinition(
+            """
+            SELECT fault_insured_pct AS FaultInsuredPct, fault_source AS FaultSource, counterparty_insurer_party_id AS CounterpartyInsurerPartyId,
+                   joint_accident_report AS JointAccidentReport, vehicle_count AS VehicleCount, accident_in_greece AS AccidentInGreece
+              FROM clm.claim WHERE claim_id = @claim
+            """, new { claim = claimId.Value }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        return r.FaultInsuredPct is null && r.FaultSource is null && r.CounterpartyInsurerPartyId is null && r.JointAccidentReport is null
+            && r.VehicleCount is null && r.AccidentInGreece is null
+            ? null
+            : new LiabilityFacts
+            {
+                InsuredFaultPct = r.FaultInsuredPct, FaultSource = r.FaultSource, CounterpartyInsurerPartyId = r.CounterpartyInsurerPartyId,
+                JointReportFlag = r.JointAccidentReport, VehicleCount = r.VehicleCount, AccidentInGreece = r.AccidentInGreece,
+            };
     }
 
     /// <summary>The exposures of a claim in sequence order.</summary>
@@ -293,6 +312,21 @@ internal sealed class ClaimReader(DbSession session, ClaimProtection protection,
 
     // Dapper targets (classes with setters; plain column types).
 #pragma warning disable CA1812 // Instantiated by Dapper.
+    internal sealed class LiabilityRecord
+    {
+        public decimal? FaultInsuredPct { get; set; }
+
+        public string? FaultSource { get; set; }
+
+        public Guid? CounterpartyInsurerPartyId { get; set; }
+
+        public bool? JointAccidentReport { get; set; }
+
+        public int? VehicleCount { get; set; }
+
+        public bool? AccidentInGreece { get; set; }
+    }
+
     internal sealed class ClaimRecord
     {
         public Guid ClaimId { get; set; }
