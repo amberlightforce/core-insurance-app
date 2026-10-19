@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Finance.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class ServicingPostings : Migration
+    public partial class ServicingPostings : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

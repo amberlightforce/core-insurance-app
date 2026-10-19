@@ -46,6 +46,7 @@ import { ClaimStatusPill } from './ClaimStatusPill';
 import { closeGuardFindings } from './closeGuard';
 import { closeOutcomes, exposureDuplicateReasons } from './codes';
 import { FinancialsTab } from './FinancialsTab';
+import { FsCasePanel, useFsHeaderFact } from './fs';
 import { LiabilityFactsEditor } from './recoveries/LiabilityFactsEditor';
 import { RecoveriesTab } from './recoveries/RecoveriesTab';
 import { RiRecoverableCard } from './recoveries/RiRecoverableCard';
@@ -315,6 +316,7 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
   // The insured's name is the file's title (mockup «Φάκελος ζημίας»); the claim number stays next to it in mono.
   const insured = useParty(summary.insuredPartyId);
   const insuredName = insured.data ? partyName(insured.data.party) : null;
+  const fsFact = useFsHeaderFact(summary.claimId);
   const financials = useFinancials(summary.claimId);
   const payments = usePayments(summary.claimId);
   const stages = claimStages(claim, {
@@ -362,6 +364,7 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
             label: t('file.facts.open'),
             value: t('file.facts.days', { count: summary.openDays }),
           },
+          ...(fsFact ? [fsFact] : []),
           ...(summary.handler
             ? [{ id: 'handler', label: t('file.facts.handler'), value: summary.handler }]
             : []),
@@ -566,6 +569,7 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
                   />
                 </Section>
                 <RiRecoverableCard claimId={summary.claimId} />
+                <FsCasePanel claim={claim} />
                 <Section title={t('file.history.title')}>
                   <ClaimHistory claim={claim} />
                 </Section>

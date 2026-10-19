@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Finance.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class OosGuard : Migration
+    public partial class OosGuard : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

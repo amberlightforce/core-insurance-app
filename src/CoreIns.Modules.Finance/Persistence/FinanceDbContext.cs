@@ -36,6 +36,8 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
 
     public DbSet<JournalLineRow> JournalLines => Set<JournalLineRow>();
 
+    public DbSet<MigrationImport.MigrationImportRow> MigrationImports => Set<MigrationImport.MigrationImportRow>();
+
     protected override string Schema => FinanceModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -267,6 +269,8 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.HasIndex(e => new { e.LegalEntityId, e.PeriodCode }).IsUnique().HasDatabaseName("ux_financial_period_code");
         });
+
+        MigrationImport.FinanceMigrationModel.Configure(modelBuilder);
 
         modelBuilder.Entity<JournalEntryRow>(entity =>
         {
