@@ -18,7 +18,7 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
 
     private static readonly string[] SuperRoles =
     [
-        "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority", "Staff.RecoverySpecialist", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager",
+        "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority", "Staff.RecoverySpecialist", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.ComplianceOfficer",
     ];
 
     private static readonly Dictionary<string, string?> Enabled = new() { ["DevAuthentication:Enabled"] = "true" };

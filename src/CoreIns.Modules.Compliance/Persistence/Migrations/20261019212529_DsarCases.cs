@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Compliance.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class DsarCases : Migration
+    public partial class DsarCases : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

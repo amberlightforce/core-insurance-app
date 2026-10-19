@@ -5,6 +5,9 @@ using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts;
 using CoreIns.Platform.Errors;
+using CoreIns.Platform.Time;
+using CoreIns.SharedKernel;
+using CoreIns.SharedKernel.Json;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
 
@@ -24,7 +27,8 @@ internal sealed class ComplianceClockService(
     ICommandHandler<StopClock, ClockStopResponse> stop,
     ICommandHandler<CancelClock, ClockCancelResponse> cancel,
     ICommandHandler<ExtendClock, ClockExtendResponse> extend,
-    ClockReader reader) : IComplianceClockService
+    ClockReader reader,
+    IClock engineClock) : IComplianceClockService
 {
     public Task<ClockStartResponse> StartAsync(ClockStartRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         RunAsync(options, () => start.HandleAsync(new StartClock(request), cancellationToken));
@@ -44,8 +48,49 @@ internal sealed class ComplianceClockService(
     public Task<ClockExtendResponse> ExtendAsync(ClockExtendRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         RunAsync(options, () => extend.HandleAsync(new ExtendClock(request), cancellationToken));
 
-    public Task<JsonElement> ImportAsync(ClockImportRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw new DomainException(DomainError.Of(ModuleCode.CMP, "NOT-AVAILABLE", "cmp.Clock.import is not built yet (SL6-MIG-CLM-RI-IMPORT)."));
+    /// <summary>
+    /// <c>cmp.Clock.import</c> (CMP-009): re-creates each running clock from its original start so the deadline equals the legacy one.
+    /// <c>legacyRecords</c> is an array of <c>{ clockCode, subjectRef: { module, type, id }, key?, startedAt, variant? }</c>. Idempotent on
+    /// (definition, subject, key): a repeat returns the clock that exists. A deadline already in the past is kept; the sweeper breaches it.
+    /// TODO(hardening): <c>handOverDates</c> (bureau handover) is recorded by the CMP migration importer, not here.
+    /// </summary>
+    public async Task<JsonElement> ImportAsync(ClockImportRequest request, CommandOptions options, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(options);
+        var records = request.LegacyRecords is { ValueKind: JsonValueKind.Array } array
+            ? array.Deserialize<List<LegacyClockRecord>>(SharedKernelJson.Options)
+            : null;
+        if (records is not { Count: > 0 })
+        {
+            throw new DomainException(DomainError.Of(ModuleCode.CMP, "VALIDATION", "legacyRecords must be a non-empty array of clocks."));
+        }
+
+        var imported = new List<object>(records.Count);
+        foreach (var record in records)
+        {
+            if (string.IsNullOrWhiteSpace(record.ClockCode) || record.SubjectRef is null || record.StartedAt is null)
+            {
+                throw new DomainException(DomainError.Of(ModuleCode.CMP, "VALIDATION", "Every legacy clock needs clockCode, subjectRef and startedAt."));
+            }
+
+            if (record.StartedAt.Value > engineClock.Now)
+            {
+                throw new DomainException(DomainError.Of(ModuleCode.CMP, "VALIDATION", "A running legacy clock cannot start in the future."));
+            }
+
+            var started = await StartAsync(
+                new ClockStartRequest
+                {
+                    ClockCode = ClockCode.Parse(record.ClockCode), SubjectRef = record.SubjectRef, Key = record.Key, Variant = record.Variant,
+                    StartTime = record.StartedAt, Reason = "Imported from legacy",
+                },
+                options.DryRun ? CommandOptions.New() with { DryRun = true } : CommandOptions.New(), cancellationToken).ConfigureAwait(false);
+            imported.Add(new { instanceId = started.InstanceId, status = started.Status.ToString().ToUpperInvariant(), deadline = started.Deadline.ToString() });
+        }
+
+        return JsonSerializer.SerializeToElement(new { instances = imported }, SharedKernelJson.Options);
+    }
 
     public async Task<ClockGetResponse> GetAsync(
         string id, string? subject = null, string? code = null, string? status = null, string? deadlineRange = null, CancellationToken cancellationToken = default)
@@ -90,3 +135,6 @@ internal sealed class ComplianceClockDefService : IComplianceClockDefService
     public Task<ClockDefListPage> ListAsync(string? cursor = null, int? limit = null, CancellationToken cancellationToken = default) =>
         Task.FromResult(new ClockDefListPage { Items = [.. ClockDefinitions.All.Select(ClockReader.ToItem)], NextCursor = null, Limit = limit });
 }
+
+/// <summary>One legacy running clock of <c>cmp.Clock.import</c>.</summary>
+internal sealed record LegacyClockRecord(string ClockCode, ObjectRef? SubjectRef, string? Key, Instant? StartedAt, string? Variant);

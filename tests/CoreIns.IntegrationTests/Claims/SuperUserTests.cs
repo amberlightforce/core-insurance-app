@@ -29,7 +29,7 @@ public sealed class SuperUserTests(PostgresFixture database) : IClassFixture<Pos
             documentOptions: new System.Text.Json.JsonDocumentOptions { CommentHandling = System.Text.Json.JsonCommentHandling.Skip })!["DevAuthentication"]!["Users"]!.AsArray();
         var roles = users.Single(u => u!["Id"]!.GetValue<string>() == "superuser")!["Roles"]!.AsArray().Select(r => r!.GetValue<string>()).ToList();
         roles.ShouldBe(
-            ["Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority", "Staff.RecoverySpecialist", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager"], ignoreOrder: true);
+            ["Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority", "Staff.RecoverySpecialist", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.ComplianceOfficer"], ignoreOrder: true);
         _roles = string.Join(',', roles);
 
         _policy = new PolicySlice(
@@ -87,14 +87,14 @@ public sealed class SuperUserTests(PostgresFixture database) : IClassFixture<Pos
         var (inbox, items) = await _money.SendAsync(HttpMethod.Get, "/api/plt/v1/approval", roles: _roles, user: SuperUser);
         inbox.StatusCode.ShouldBe(HttpStatusCode.OK, items?.ToJsonString());
 
-        // The best grant among the roles applies (the manager's 50,000 ceiling), and there is nobody above to refer to:
+        // The best grant among the roles applies (the manager's 1,000,000 ceiling), and there is nobody above to refer to:
         // a reserve over it is refused, never self-approved.
         var (exposed, exposure) = await _money.SendAsync(HttpMethod.Post, "/api/clm/v1/exposures",
             new { claimId = fnol.Text("claimId"), expectedRecordVersion = 1, kind = "OWN_DAMAGE", coverageCode = "OWN-DAMAGE" }, _roles, SuperUser);
         exposed.StatusCode.ShouldBe(HttpStatusCode.Created, exposure?.ToJsonString());
         var claim = new MoneyClaim(fnol.Text("claimId"), fnol.Text("claimNumber"), exposure.Text("exposure.exposureId"), partyId);
         (await _money.BuildAndSubmitAsync(claim, [Reserve(claim, 5300m)], _roles, SuperUser)).Text("status").ShouldBe("APPROVED");
-        var (built, build) = await _money.BuildAsync(claim, [Reserve(claim, 50000.01m)], _roles, SuperUser);
+        var (built, build) = await _money.BuildAsync(claim, [Reserve(claim, 1000000.01m)], _roles, SuperUser);
         built.StatusCode.ShouldBe(HttpStatusCode.OK, build?.ToJsonString());
         var (denied, deny) = await _money.SubmitAsync(build.Text("setId"), _roles, SuperUser);
         denied.StatusCode.ShouldBe(HttpStatusCode.Forbidden, deny?.ToJsonString());

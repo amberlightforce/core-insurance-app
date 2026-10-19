@@ -25,6 +25,8 @@
     <!-- cmp.FiscalDocument.request (settlement receipt) and FiscalDocRegistered (SL4-CLM-PAYOPS). Contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Compliance.Contracts\CoreIns.Modules.Compliance.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
+    <!-- Migration SPI (IMigrationImporter / IMigrationReverser): contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Migration.Contracts\CoreIns.Modules.Migration.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.Platform.DataProtection\CoreIns.Platform.DataProtection.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />

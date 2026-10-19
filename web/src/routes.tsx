@@ -208,6 +208,13 @@ const moduleRoutes: RouteObject[] = [
         }),
       },
       {
+        path: 'fs-statements',
+        lazy: async () => ({
+          Component: (await import('./modules/claims/fs-statements/FsStatementsPage'))
+            .FsStatementsPage,
+        }),
+      },
+      {
         path: ':claimId',
         lazy: async () => ({
           Component: (await import('./modules/claims/ClaimViewPage')).ClaimViewPage,
@@ -354,6 +361,27 @@ moduleRoutes.push({
   ],
 });
 
+moduleRoutes.push({
+  path: 'compliance/dsar',
+  lazy: async () => ({
+    Component: (await import('./modules/compliance/dsar/RequireDsarRole')).RequireDsarRole,
+  }),
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/compliance/dsar/DsarListPage')).DsarListPage,
+      }),
+    },
+    {
+      path: ':dsarId',
+      lazy: async () => ({
+        Component: (await import('./modules/compliance/dsar/DsarCasePage')).DsarCasePage,
+      }),
+    },
+  ],
+});
+
 moduleRoutes.push(
   {
     // Customer withdrawal declaration + confirmation (SL6-UI-CHN-WITHDRAW).
@@ -391,6 +419,7 @@ moduleRoutes.push(
 const implemented = new Set([
   '/admin/packs',
   '/admin/migration',
+  '/compliance/dsar',
   '/channels/withdrawals',
   '/policies/pack-rollback',
   '/parties',

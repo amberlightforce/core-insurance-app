@@ -1,0 +1,122 @@
+{
+  "fs": {
+    "title": "Friendly settlement",
+    "fact": "Friendly settlement",
+    "eligible": "Eligible ✓",
+    "notEligible": "Not eligible",
+    "notApplicable": "Not applicable",
+    "reasons": "Reasons",
+    "reason": {
+      "COUNTERPARTY_NOT_MEMBER": "The counterparty insurer is not a member of the scheme",
+      "AMOUNT_ABOVE_LIMIT": "The amount is above the limit",
+      "VEHICLE_COUNT": "More than two vehicles involved",
+      "NOT_IN_GREECE": "The accident did not happen in Greece",
+      "LIABILITY_NOT_CLEAR": "Liability is not clear (0 or 100 %)"
+    },
+    "basis": {
+      "ACTUAL": "actual",
+      "AVERAGE": "average"
+    },
+    "clearingBasis": "Clearing value {value} ({basis})",
+    "provisional": "Provisional: values not legally verified ({status}, rule {rule}).",
+    "role": {
+      "OWN_INSURER": "Our insured is the injured party",
+      "AT_FAULT_INSURER": "Our insured is at fault"
+    },
+    "state": {
+      "ELIGIBILITY_PENDING": "Eligibility pending",
+      "ELIGIBLE": "Eligible",
+      "NOT_ELIGIBLE": "Not eligible",
+      "SUBMITTED": "Submitted",
+      "ACCEPTED": "Accepted",
+      "DISPUTED": "Disputed",
+      "REJECTED": "Rejected",
+      "SETTLED": "Settled",
+      "RECONCILED": "Reconciled"
+    },
+    "counterparty": "Counterparty insurer",
+    "recoverable": "Recoverable from counterparty",
+    "payable": "Payable to counterparty",
+    "expectedGainLoss": "Expected gain / loss",
+    "clearingRef": "Clearing reference",
+    "notificationRef": "Notification reference",
+    "notSubmitted": "Not submitted",
+    "statementLine": "Statement line",
+    "inStatement": "In statement",
+    "atFaultHint": "Created from the counterparty's notification. The payment is settled by clearing statement.",
+    "empty": "No friendly settlement case yet.",
+    "evaluate": "Check eligibility",
+    "openOwn": "Open own settlement",
+    "submit": "Submit to clearing",
+    "opened": "Own settlement opened",
+    "submitted": "Submitted to clearing",
+    "evaluated": "Eligibility checked",
+    "disabled": "Friendly settlement is not available here",
+    "loadFailed": "Could not load the friendly settlement case"
+  },
+  "fsStatements": {
+    "title": "Friendly settlement statements",
+    "importTitle": "Import a statement",
+    "month": "Month (YYYY-MM)",
+    "monthInvalid": "Enter a month like 2026-10",
+    "import": "Import statement",
+    "imported": "Statement imported",
+    "pick": "Import a month to see its statement.",
+    "notFound": "Statement not found",
+    "linesTitle": "Statement lines",
+    "noLines": "No lines in this statement",
+    "exceptionCount": "{count, plural, =0 {No exceptions} one {# exception} other {# exceptions}}",
+    "netsTitle": "Net per counterparty",
+    "noNets": "No nets yet",
+    "reconciliation": {
+      "MATCHED": "All lines matched",
+      "EXCEPTIONS_OPEN": "Exceptions open"
+    },
+    "lines": {
+      "ref": "Line",
+      "counterparty": "Counterparty",
+      "direction": "Direction",
+      "amount": "Amount",
+      "match": "Match",
+      "reason": "Exception reason"
+    },
+    "direction": {
+      "RECEIVABLE": "Receivable",
+      "PAYABLE": "Payable"
+    },
+    "match": {
+      "MATCHED": "Matched",
+      "UNMATCHED": "Unmatched",
+      "DIFFERENCE": "Difference"
+    },
+    "reason": {
+      "NO_CASE": "No matching case",
+      "DIFFERENCE": "Amount difference",
+      "DIRECTION_MISMATCH": "Direction mismatch",
+      "PAYMENT_NOT_APPROVED": "Payment not approved"
+    },
+    "netStatus": {
+      "PENDING": "Pending",
+      "APPROVAL_REQUESTED": "Approval requested",
+      "REQUESTED": "Handed to billing",
+      "SETTLED": "Settled",
+      "REJECTED": "Rejected"
+    },
+    "net": {
+      "payable": "We pay",
+      "receivable": "We receive",
+      "amount": "Net",
+      "approve": "Approve net",
+      "approved": "Net approved and handed to billing",
+      "pendingApproval": "Above your authority: waiting for approval",
+      "blocked": "Resolve the exceptions of this counterparty before approving the net.",
+      "stale": "The net changed. The statement was reloaded; check the new net and approve again.",
+      "allocation": "Lines are still unmatched for this counterparty."
+    },
+    "bil": {
+      "payable": "Disbursement requested in billing",
+      "receivable": "Receivable registered in billing",
+      "openReleases": "Open payment releases"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 using CoreIns.Modules.Claims.Authority;
+using CoreIns.Modules.Migration.Contracts.Spi;
 using CoreIns.Modules.Claims.Commands;
 using CoreIns.Modules.Claims.Commands.Payments;
 using CoreIns.Modules.Claims.Commands.FriendlySettlement;
@@ -58,6 +59,7 @@ public static class ClaimsModule
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.claim, {Schema}.exposure, {Schema}.claimant, {Schema}.incident TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.dsar_restriction TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.migration_import TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.fnol_snapshot TO {appRole}",
 
                 // Claim financials (SL2-CLM-MONEY, D-ARC-34): the ledger lines are insert-only; the set header, line flags,
@@ -88,6 +90,8 @@ public static class ClaimsModule
         services.AddScoped<FnolAssessment>();
         services.AddScoped<FnolValidation>();
         services.AddScoped<ICoverageSource, PolicySnapshotAdapter>();
+        services.AddScoped<IMigrationImporter, MigrationImport.ClaimMigrationImporter>();
+        services.AddScoped<IMigrationReverser, MigrationImport.ClaimMigrationReverser>();
 
         // Claim financials (SL2-CLM-MONEY): derived balances, the set lifecycle and the close guard over them (REQ-CLM-072/073).
         services.AddScoped<FinancialsReader>();

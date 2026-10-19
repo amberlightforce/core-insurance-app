@@ -75,8 +75,11 @@ internal sealed class TaxTreatmentCheck(IServiceProvider services)
         var result = await EvaluateAsync(entryType, movements, entry.AccountingDate, legalEntityId, jurisdiction, cancellationToken).ConfigureAwait(false);
 
         // Whatever the netting said: a debit on the IPT payable is never allowed on any entry type. There is no IPT remittance
-        // rule yet, and only the release of not-yet-due IPT (credit on LA-06) may touch it (REQ-FIN-182).
-        return !result.Passed || !items.Any(i => i.Account == "LA-06" && i.Side == Sides.Debit)
+        // rule yet, and only the release of not-yet-due IPT (credit on LA-06) may touch it (REQ-FIN-182). The one exception is the
+        // CREDIT_WRITTEN of a void or pro-rata reduction (GAP-SL3-BIL-VOID): its LA-06 debit is a reduction that EvaluateAsync has just
+        // proved against the treatment (AuthorityLiability REDUCE, transactionKind set on every servicing line) and is not a transfer
+        // inside the payable (no credit on LA-27).
+        return !result.Passed || !items.Any(i => i.Account == "LA-06" && i.Side == Sides.Debit) || (entryType == ServicingEntryTypes.CreditWritten && !items.Any(i => i.Account == "LA-27" && i.Side == Sides.Credit))
             ? result
             : TaxCheckResult.Fail($"{entryType} debits the IPT payable LA-06; no entry type may (there is no IPT remittance rule), IPT_DUE only releases the not-yet-due IPT into it (REQ-FIN-182).");
     }
@@ -89,7 +92,7 @@ internal sealed class TaxTreatmentCheck(IServiceProvider services)
             .Select(l => (l.Account, ResolvedCategory(l.Account)!.Value, l.Side, l.Amount.Amount, l.Dimensions.ChargeType, l.Dimensions.TransactionKind, l.Dimensions.CancellationSource))
             .ToList();
         var result = await EvaluateAsync(entryType, Movements(items), draft.AccountingDate, legalEntityId, jurisdiction, cancellationToken).ConfigureAwait(false);
-        return !result.Passed || !items.Any(i => i.Account == "GL-2410" && i.Side == Sides.Debit)
+        return !result.Passed || !items.Any(i => i.Account == "GL-2410" && i.Side == Sides.Debit) || (entryType == ServicingEntryTypes.CreditWritten && !items.Any(i => i.Account == "GL-2411" && i.Side == Sides.Credit))
             ? result
             : TaxCheckResult.Fail($"{entryType} debits the IPT payable GL-2410; no entry type may (there is no IPT remittance rule) (REQ-FIN-182).");
     }

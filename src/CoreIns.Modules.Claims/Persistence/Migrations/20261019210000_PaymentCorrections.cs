@@ -9,7 +9,7 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
     /// <summary>SL4-CLM-PAYOPS: a claim payment can end Voided, Stopped or Returned (REQ-CLM-125..127).</summary>
     [DbContext(typeof(ClaimsDbContext))]
     [Migration("20261019210000_PaymentCorrections")]
-    public partial class PaymentCorrections : Migration
+    public partial class PaymentCorrections : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

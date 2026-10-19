@@ -46,6 +46,7 @@ export const defaultNavItems: NavItem[] = [
   },
   { id: 'policies', to: '/channels/withdrawals', label: 'withdrawals', roles: withdrawalRoles },
   { id: 'claims', to: '/claims', roles: claimsRoles },
+  { id: 'claims', to: '/claims/fs-statements', label: 'fsStatements', roles: claimsRoles },
   { id: 'billing', to: '/billing' },
   {
     id: 'reinsurance',
@@ -60,6 +61,12 @@ export const defaultNavItems: NavItem[] = [
   { id: 'finance', to: '/finance' },
   { id: 'documents', to: '/documents' },
   { id: 'compliance', to: '/compliance' },
+  {
+    id: 'compliance',
+    to: '/compliance/dsar',
+    label: 'dsar',
+    roles: ['Staff.ComplianceOfficer', 'Platform.Admin'],
+  },
   { id: 'reports', to: '/reports' },
   { id: 'products', to: '/products' },
   { id: 'admin', to: '/admin/packs', label: 'packs', roles: packRoles },

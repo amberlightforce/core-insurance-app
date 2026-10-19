@@ -24,6 +24,10 @@ internal sealed class ComplianceDbContext(DbContextOptions<ComplianceDbContext> 
 
     public DbSet<ClockEventRow> ClockEvents => Set<ClockEventRow>();
 
+    public DbSet<BureauHandoverRow> BureauHandovers => Set<BureauHandoverRow>();
+
+    public DbSet<LegacyFiscalMarkRow> LegacyFiscalMarks => Set<LegacyFiscalMarkRow>();
+
     protected override string Schema => ComplianceModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -151,6 +155,35 @@ internal sealed class ComplianceDbContext(DbContextOptions<ComplianceDbContext> 
             entity.HasOne<ClockRow>().WithMany().HasForeignKey(e => e.ClockId).HasConstraintName("fk_clock_event_clock");
         });
 
+        modelBuilder.Entity<BureauHandoverRow>(entity =>
+        {
+            entity.ToTable("bureau_handover");
+            entity.HasKey(e => e.HandoverId).HasName("pk_bureau_handover");
+            entity.Property(e => e.HandoverId).HasColumnName("handover_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.VehicleRef).HasColumnName("vehicle_ref");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.HandoverDate).HasColumnName("handover_date");
+            entity.Property(e => e.BatchId).HasColumnName("batch_id");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.LegalEntityId, e.VehicleRef }).IsUnique().HasDatabaseName("ux_bureau_handover_vehicle");
+        });
+
+        modelBuilder.Entity<LegacyFiscalMarkRow>(entity =>
+        {
+            entity.ToTable("legacy_fiscal_mark");
+            entity.HasKey(e => e.MarkId).HasName("pk_legacy_fiscal_mark");
+            entity.Property(e => e.MarkId).HasColumnName("mark_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.SeriesId).HasColumnName("series_id");
+            entity.Property(e => e.LegacyNumber).HasColumnName("legacy_number");
+            entity.Property(e => e.Mark).HasColumnName("mark");
+            entity.Property(e => e.BatchId).HasColumnName("batch_id");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.LegalEntityId, e.SeriesId, e.LegacyNumber }).IsUnique().HasDatabaseName("ux_legacy_fiscal_mark_number");
+            entity.HasIndex(e => new { e.LegalEntityId, e.Mark }).HasDatabaseName("ix_legacy_fiscal_mark_mark");
+        });
+
         modelBuilder.Entity<FiscalSeriesRow>(entity =>
         {
             entity.ToTable("fiscal_series", table => table.HasCheckConstraint("ck_fiscal_series_last", "last_number >= 0"));
@@ -222,6 +255,43 @@ internal sealed class FiscalDocumentRow
     public Instant? RegisteredAt { get; set; }
 
     public int RecordVersion { get; set; }
+}
+
+/// <summary>The bureau handover date recorded for a migrated vehicle (record only, no transmission; SL6-MIG-CLM-RI-IMPORT).</summary>
+internal sealed class BureauHandoverRow
+{
+    public Guid HandoverId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    /// <summary>Normalised plate (the vehicle reference).</summary>
+    public string VehicleRef { get; set; } = string.Empty;
+
+    public Guid? PolicyId { get; set; }
+
+    public BusinessDate HandoverDate { get; set; }
+
+    public Guid BatchId { get; set; }
+
+    public Instant RecordedAt { get; set; }
+}
+
+/// <summary>A legacy fiscal document mark kept so a credit note can still look up the original (SL6-MIG-CLM-RI-IMPORT).</summary>
+internal sealed class LegacyFiscalMarkRow
+{
+    public Guid MarkId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public string SeriesId { get; set; } = string.Empty;
+
+    public long LegacyNumber { get; set; }
+
+    public string Mark { get; set; } = string.Empty;
+
+    public Guid BatchId { get; set; }
+
+    public Instant RecordedAt { get; set; }
 }
 
 /// <summary>The last number CMP issued in a fiscal series (gapless under a row lock in the caller's transaction).</summary>
