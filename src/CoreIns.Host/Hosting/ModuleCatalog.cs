@@ -61,6 +61,7 @@ internal static class ModuleCatalog
         .. FinanceModule.Databases,
         .. ClaimsModule.Databases,
         .. ReinsuranceModule.Databases,
+        .. MigrationModule.Databases,
     ];
 
     /// <summary>Module assemblies whose (internal) <c>[ApiController]</c>s the api serves.</summary>
@@ -78,6 +79,7 @@ internal static class ModuleCatalog
         typeof(FinanceModule).Assembly,
         typeof(ClaimsModule).Assembly,
         typeof(ReinsuranceModule).Assembly,
+        typeof(MigrationModule).Assembly,
     ];
 
     /// <summary>Calls every module's registration hook. The platform registers first.</summary>
