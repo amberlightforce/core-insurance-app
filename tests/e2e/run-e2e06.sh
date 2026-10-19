@@ -2,17 +2,17 @@
 # Automated E2E-06 (claims slice 4) happy path (API level) on a fresh Docker Compose stack.
 #
 #   tests/e2e/run-e2e06.sh                  # build the image, start project "coreins-e2e06", run the test, tear down (down -v)
-#   KEEP_STACK=1 tests/e2e/run-e2e06.sh     # leave the stack running afterwards (http://127.0.0.1:28000)
+#   KEEP_STACK=1 tests/e2e/run-e2e06.sh     # leave the stack running afterwards (http://127.0.0.1:32000)
 #   SKIP_BUILD=1 tests/e2e/run-e2e06.sh     # reuse an already built coreins-host:e2e06 image
 #
-# The stack uses its own compose project name, host ports in the 28000 range (tests/e2e/stack/e2e06.env) and its own image
+# The stack uses its own compose project name, host ports in the 32000 range (tests/e2e/stack/e2e06.env) and its own image
 # tag, so it runs beside a developer's own "coreins" stack without touching it. Needs docker (compose v2.24+), node >= 24, curl.
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT=$(cd "$HERE/../.." && pwd)
 PROJECT=coreins-e2e06
-API=${E2E_BASE_URL:-http://127.0.0.1:28000}
+API=${E2E_BASE_URL:-http://127.0.0.1:32000}
 COMPOSE=(docker compose -p "$PROJECT" --project-directory "$ROOT/infra/local"
   -f "$ROOT/infra/local/compose.yaml" -f "$ROOT/tests/e2e/stack/compose.e2e06.yaml" --env-file "$ROOT/tests/e2e/stack/e2e06.env")
 

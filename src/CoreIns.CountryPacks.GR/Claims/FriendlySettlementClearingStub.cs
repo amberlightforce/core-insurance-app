@@ -57,13 +57,14 @@ public sealed class FriendlySettlementClearingStub : IFriendlySettlementClearing
     {
         ArgumentNullException.ThrowIfNull(claimFacts);
         var members = new HashSet<string>(_options.MemberCodes, StringComparer.Ordinal);
+        var anyMember = members.Contains(FriendlySettlementStubOptions.AnyMember);
         var reasons = new List<string>();
-        if (!members.Contains(_options.OwnInsurerCode))
+        if (!anyMember && !members.Contains(_options.OwnInsurerCode))
         {
             reasons.Add("OWN_INSURER_NOT_MEMBER");
         }
 
-        if (string.IsNullOrEmpty(claimFacts.CounterpartyInsurerCode) || !members.Contains(claimFacts.CounterpartyInsurerCode))
+        if (string.IsNullOrEmpty(claimFacts.CounterpartyInsurerCode) || (!anyMember && !members.Contains(claimFacts.CounterpartyInsurerCode)))
         {
             reasons.Add("COUNTERPARTY_NOT_MEMBER");
         }
