@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CoreIns.Modules.Claims.Commands;
 using CoreIns.Modules.Claims.Contracts.Api;
 using CoreIns.Modules.Claims.Domain;
@@ -97,8 +98,20 @@ internal sealed class ClaimsController : ControllerBase
     [HttpPost("claims/close")]
     [Authorize(Policy = ClaimsPermissions.ClaimClose)]
     public async Task<IResult> CloseAsync(
-        [FromBody] ClaimCloseRequest request, [FromServices] ICommandHandler<CloseClaim, ClaimCloseResponse> handler, CancellationToken cancellationToken) =>
-        (await handler.HandleAsync(new CloseClaim(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+        [FromBody] ClaimCloseRequest request, [FromServices] ICommandHandler<CloseClaim, ClaimCloseResponse> handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new CloseClaim(request), cancellationToken).ConfigureAwait(false);
+        if (result.IsFailure && result.Error!.Code.Value == "CLM-ERR-CLOSE-GUARD"
+            && result.Error.Metadata.TryGetValue("closeGuardErrors", out var json))
+        {
+            var problem = HttpContext.RequestServices.GetRequiredService<ProblemDetailsMapper>().Create(result.Error, HttpContext);
+            problem.Extensions.Remove("closeGuardErrors");
+            problem.Extensions["errors"] = JsonSerializer.Deserialize<CloseGuardError[]>(json, CoreIns.SharedKernel.Json.SharedKernelJson.Options);
+            return Results.Problem(problem);
+        }
+
+        return result.ToHttpResult(HttpContext);
+    }
 
     /// <summary>clm.Exposure.create → 201 (REQ-CLM-062, -063).</summary>
     [HttpPost("exposures")]

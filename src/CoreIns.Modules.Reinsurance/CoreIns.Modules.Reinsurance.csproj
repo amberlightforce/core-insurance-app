@@ -16,6 +16,8 @@
     <ProjectReference Include="..\CoreIns.Modules.Reinsurance.Contracts\CoreIns.Modules.Reinsurance.Contracts.csproj" />
     <!-- pty.Party.get: reinsurers and brokers must be organisation parties (REQ-RI-046). Contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Party.Contracts\CoreIns.Modules.Party.Contracts.csproj" />
+    <!-- clm events for the claim view (REQ-RI-113). Contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Claims.Contracts\CoreIns.Modules.Claims.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
   </ItemGroup>

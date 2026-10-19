@@ -579,34 +579,81 @@
       "subscription": "unspecified",
       "deliveries": "unspecified"
     },
+    "WithdrawalCloseRequest": {
+      "outcome": "PROCESSED"
+    },
+    "WithdrawalCloseResponse": {
+      "requestNumber": "SAMPLE-000001",
+      "status": "DECLARED"
+    },
+    "WithdrawalConfirmRequest": {
+      "requestNumber": "SAMPLE-000001",
+      "token": "sample"
+    },
+    "WithdrawalConfirmResponse": {
+      "requestNumber": "SAMPLE-000001",
+      "status": "DECLARED",
+      "confirmedAt": "2026-10-07T09:00:00Z",
+      "declineCode": "sample"
+    },
     "WithdrawalDeclareRequest": {
-      "name": "unspecified",
+      "name": "sample",
       "contractId": "0192fed8-00b6-7a22-8abf-f9d3d51cf0e5",
-      "eMail": "unspecified",
-      "reason": "unspecified"
+      "eMail": "sample",
+      "reason": "sample"
     },
     "WithdrawalDeclareResponse": {
-      "requestNumber": "unspecified",
+      "requestNumber": "SAMPLE-000001",
+      "status": "DECLARED",
       "confirmedAt": "2026-10-07T09:00:00Z",
-      "receipt": "unspecified"
+      "confirmToken": "sample",
+      "declineCode": "sample",
+      "receipt": {
+        "requestNumber": "SAMPLE-000001",
+        "declaredAt": "2026-10-07T09:00:00Z",
+        "confirmBy": "2026-10-07T09:00:00Z"
+      }
     },
     "WithdrawalGetResponse": {
-      "status": "unspecified",
-      "refundStatus": "unspecified"
+      "withdrawalRequestId": "0192729c-cdce-7c6c-8664-df62b8b9edb6",
+      "requestNumber": "SAMPLE-000001",
+      "policyId": "01927ad1-5f13-7cac-80f7-33cabe823111",
+      "status": "DECLARED",
+      "refundStatus": "sample",
+      "declaredAt": "2026-10-07T09:00:00Z",
+      "confirmedAt": "2026-10-07T09:00:00Z",
+      "deadlineAt": "2026-10-07T09:00:00Z",
+      "declineCode": "sample",
+      "channel": "SAMPLE_CODE"
     },
     "WithdrawalListItem": {
-      "status": "unspecified",
-      "refundStatus": "unspecified"
+      "withdrawalRequestId": "0192fa09-2875-763a-8a6a-77bf78b54968",
+      "requestNumber": "SAMPLE-000001",
+      "policyId": "019232ef-4751-7c14-8d6f-720066b4594a",
+      "status": "DECLARED",
+      "refundStatus": "sample",
+      "declaredAt": "2026-10-07T09:00:00Z",
+      "confirmedAt": "2026-10-07T09:00:00Z"
     },
     "WithdrawalListPage": {
       "items": [
         {
-          "status": "unspecified",
-          "refundStatus": "unspecified"
+          "withdrawalRequestId": "0192a79c-a26f-7f63-8892-24ca35ceadbb",
+          "requestNumber": "SAMPLE-000001",
+          "policyId": "01922c82-47f1-7fa7-89a9-6e1db3154f1a",
+          "status": "DECLARED",
+          "refundStatus": "sample",
+          "declaredAt": "2026-10-07T09:00:00Z",
+          "confirmedAt": "2026-10-07T09:00:00Z"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "WithdrawalReceipt": {
+      "requestNumber": "SAMPLE-000001",
+      "declaredAt": "2026-10-07T09:00:00Z",
+      "confirmBy": "2026-10-07T09:00:00Z"
     }
   }
 }

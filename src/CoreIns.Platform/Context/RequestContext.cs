@@ -56,6 +56,9 @@ public sealed class RequestContext
     /// <summary>Trusted registered command identity; restored across nested commands and never supplied by a DTO.</summary>
     internal ModuleCode? CurrentCommandModule { get; set; }
 
+    /// <summary>The registered module currently executing a command; callers cannot set this authority.</summary>
+    public ModuleCode? ExecutingCommandModule => CurrentCommandModule;
+
     /// <summary>The acting user, service or AI agent. Defaults to the platform service identity.</summary>
     public ActorRef Actor { get; set; } = ActorRef.Service("coreins");
 
@@ -112,3 +115,4 @@ public sealed class RequestContext
             ? id
             : CorrelationId.New();
 }
+

@@ -1,5 +1,6 @@
 using CoreIns.Modules.Claims.Commands;
 using CoreIns.Modules.Claims.Contracts.Api;
+using CoreIns.Modules.Claims.Domain;
 using CoreIns.Modules.Claims.Queries;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Errors;
@@ -21,6 +22,7 @@ internal static class ClaimsFinancialPermissions
     public const string SetBuild = "clm.TransactionSet.build";
     public const string SetSubmit = "clm.TransactionSet.submit";
     public const string SetGet = "clm.TransactionSet.get";
+    public const string SetList = "clm.TransactionSet.list";
     public const string FinancialsGet = "clm.Financials.get";
     public const string PaymentList = "clm.Payment.list";
     public const string PayeeCapture = "clm.PayeeAccount.capture";
@@ -35,6 +37,26 @@ internal static class ClaimsFinancialPermissions
 [Route("api/clm/v1")]
 internal sealed class FinancialsController : ControllerBase
 {
+    [HttpGet("transaction-sets")]
+    [Authorize(Policy = ClaimsFinancialPermissions.SetList)]
+    public async Task<IResult> ListSetsAsync([FromQuery] string? claimId, [FromQuery] string? status, [FromQuery] string? cursor,
+        [FromQuery] int? limit, [FromServices] FinancialsReader reader, CancellationToken cancellationToken)
+    {
+        Guid last = default;
+        if (!Guid.TryParse(claimId, out var claim) || !ClaimReader.TryPage(limit, out var take)
+            || (cursor is not null && !Guid.TryParse(cursor, out last))
+            || (status is not null && !Enum.GetValues<SetStatus>().Any(s => Codes.Of(s) == status)))
+        {
+            return HttpResults.Problem(DomainError.Of(ModuleCode.CLM, "VALIDATION", "Invalid claim, status, cursor or limit."), HttpContext);
+        }
+
+        var entity = ClaimsQueryContext.LegalEntity(HttpContext.RequestServices);
+        var id = new ClaimId(claim);
+        return await reader.ClaimExistsAsync(entity, id, cancellationToken).ConfigureAwait(false)
+            ? Results.Ok(await reader.SetsAsync(entity, id, status, cursor is null ? null : last, take, cancellationToken).ConfigureAwait(false))
+            : HttpResults.Problem(ClaimSupport.NotFound("claim"), HttpContext);
+    }
+
     /// <summary>clm.TransactionSet.build (dry-run: preview only).</summary>
     [HttpPost("transaction-sets/build")]
     [Authorize(Policy = ClaimsFinancialPermissions.SetBuild)]
