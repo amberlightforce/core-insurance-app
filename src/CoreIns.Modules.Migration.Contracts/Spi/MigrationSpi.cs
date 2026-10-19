@@ -36,14 +36,14 @@ public sealed record ImportOutcome(ImportStatus Status, Guid? CoreId = null, str
 
 /// <summary>
 /// Implemented by a module that accepts migrated data, registered as a scoped service. The framework dispatches batch items by
-/// <see cref="Module"/>. An importer must stamp origin=MIGRATION and the batch id on what it creates and must write nothing when
+/// <see cref="IMigrationImporter.ModuleName"/>. An importer must stamp origin=MIGRATION and the batch id on what it creates and must write nothing when
 /// <see cref="MigrationImportContext.DryRun"/> is set. Idempotency is the framework's (xref registry): the importer is never
 /// called for a legacy id that is already imported.
 /// </summary>
 public interface IMigrationImporter
 {
     /// <summary>The module code items are routed by, e.g. <c>PTY</c>.</summary>
-    string Module { get; }
+    string ModuleName { get; }
 
     /// <summary>Imports (or in a dry run, validates) one object.</summary>
     Task<ImportOutcome> ImportAsync(MigrationImportItem item, MigrationImportContext context, CancellationToken cancellationToken);
@@ -65,7 +65,7 @@ public sealed record ReversalOutcome(string ObjectType, Guid CoreId, bool Revers
 public interface IMigrationReverser
 {
     /// <summary>The module code.</summary>
-    string Module { get; }
+    string ModuleName { get; }
 
     /// <summary>Reverses the module's objects of the batch (writes nothing when <paramref name="dryRun"/>).</summary>
     Task<IReadOnlyList<ReversalOutcome>> ReverseAsync(Guid batchId, bool dryRun, CancellationToken cancellationToken);
