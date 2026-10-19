@@ -6,7 +6,21 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const modules = ['pty', 'pfc', 'pol', 'bil', 'fin', 'clm', 'plt', 'uw', 'ri', 'mkt', 'chn', 'mig'];
+const modules = [
+  'pty',
+  'pfc',
+  'pol',
+  'bil',
+  'fin',
+  'clm',
+  'plt',
+  'uw',
+  'ri',
+  'mkt',
+  'chn',
+  'mig',
+  'cmp',
+];
 mkdirSync(join(root, 'src', 'api', 'generated'), { recursive: true });
 for (const module of modules) {
   const input = join(root, '..', 'contracts', 'openapi', `${module}.yaml`);

@@ -191,7 +191,7 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_claim_payment_record_version", "record_version >= 1");
 
-                            t.HasCheckConstraint("ck_claim_payment_status", "status IN ('PENDING', 'APPROVED', 'ON_HOLD', 'SUBMITTED', 'ISSUED', 'CLEARED', 'REJECTED')");
+                            t.HasCheckConstraint("ck_claim_payment_status", "status IN ('PENDING', 'APPROVED', 'ON_HOLD', 'SUBMITTED', 'ISSUED', 'CLEARED', 'REJECTED', 'VOIDED', 'STOPPED', 'RETURNED')");
 
                             t.HasCheckConstraint("ck_claim_payment_submitted_shape", "status NOT IN ('SUBMITTED', 'ISSUED', 'CLEARED') OR disbursement_id IS NOT NULL OR (method = 'CLEARING' AND fs_statement_id IS NOT NULL)");
 

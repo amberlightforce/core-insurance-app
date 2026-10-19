@@ -81,6 +81,7 @@ internal sealed class CancelPolicyHandler(
     {
         var request = command.Request;
         var withdrawal = command.Withdrawal;
+        var nonPayment = command.NonPayment;
         var zone = options.Value.Zone;
         var now = PolicyWriteLock.Truncate(clock.Now);
         var kind = CancellationText.Kind(request.Kind);
@@ -96,14 +97,15 @@ internal sealed class CancelPolicyHandler(
             return Validation("source", "SOURCE_NOT_AVAILABLE", $"Cancellation by source {request.Source} is not available in this release (no refund method is declared for it).");
         }
 
-        if (withdrawal is null
-            ? request.Source != CancellationSources.Policyholder
-            : request.Source != CancellationSources.DistanceWithdrawal)
+        var expectedSource = withdrawal is not null ? CancellationSources.DistanceWithdrawal
+            : nonPayment is not null ? CancellationSources.NonPayment
+            : CancellationSources.Policyholder;
+        if (request.Source != expectedSource)
         {
             return Validation("source", "SOURCE_NOT_AVAILABLE", $"Cancellation by source {request.Source} is not available in this release.");
         }
 
-        if (kind == CancellationKind.Standard && withdrawal is null)
+        if (kind == CancellationKind.Standard && withdrawal is null && nonPayment is null)
         {
             // REQ-POL-208/209: "cancel now" only. The effective time is the request receipt time; the requested date must be today
             // (Athens). A later date is a scheduled cancellation, an earlier one a backdated cancellation: both are refused.
@@ -139,7 +141,9 @@ internal sealed class CancelPolicyHandler(
         // ---- the head of the policy, under the lock ------------------------------------------------------------------
         var policy = await db.Policies.AsNoTracking().SingleAsync(p => p.PolicyId == request.PolicyId && p.LegalEntityId == legalEntity, cancellationToken).ConfigureAwait(false);
         var terms = await db.Terms.Where(x => x.PolicyId == request.PolicyId && x.LegalEntityId == legalEntity && x.RecordedTo == null).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var picked = withdrawal is null
+        var picked = nonPayment is not null
+            ? PickNonPaymentTerm(terms, nonPayment)
+            : withdrawal is null
             ? PickTerm(terms, kind, now)
             : terms.FirstOrDefault(x => x.TermId == withdrawal.TermId) is { } target
                 ? (Result<(PolicyTermRow Term, Instant Effective)>)(target, target.ValidFrom)
@@ -210,7 +214,10 @@ internal sealed class CancelPolicyHandler(
         }
 
         // ---- tax and levy lines: the MKT treatment decides (REQ-POL-215) -----------------------------------------------
-        var taxLines = await TreatTaxLinesAsync(policy, lines, request.Source, effective, zone, withdrawal is not null, cancellationToken).ConfigureAwait(false);
+        // NonPayment looks up the Policyholder cancellation row: IPT is kept (KEEP_NOT_REDUCED) as for any cancellation; the GR pack carries no
+        // NonPayment row yet. TODO(hardening): D2 opinion and a TAX.CANCELLATION.NonPayment pack row, then look it up under its own source.
+        var taxSource = request.Source == CancellationSources.NonPayment ? CancellationSources.Policyholder : request.Source;
+        var taxLines = await TreatTaxLinesAsync(policy, lines, taxSource, effective, zone, withdrawal is not null, cancellationToken).ConfigureAwait(false);
         if (taxLines.IsFailure)
         {
             return taxLines.Error!;
@@ -443,6 +450,22 @@ internal sealed class CancelPolicyHandler(
             OccurredAt = t,
             Set = new EventSet(transactionId.Value, count, index),
         });
+
+    /// <summary>The term a non-payment cancellation applies to: the request's term, effective at the start of the day after the clock due date.</summary>
+    private static Result<(PolicyTermRow Term, Instant Effective)> PickNonPaymentTerm(IReadOnlyList<PolicyTermRow> terms, NonPaymentCase nonPayment)
+    {
+        var target = terms.FirstOrDefault(x => x.TermId == nonPayment.TermId);
+        if (target is null)
+        {
+            return DomainError.Of(ModuleCode.POL, CancellationErrors.IllegalTransition, "The term of the non-payment request has no current version.");
+        }
+
+        // A term that starts after the effective date is cancelled flat from its start; one that has ended cannot be cancelled.
+        var effective = nonPayment.Effective < target.ValidFrom ? target.ValidFrom : nonPayment.Effective;
+        return effective >= target.ValidTo
+            ? DomainError.Of(ModuleCode.POL, CancellationErrors.IllegalTransition, "The policy term has already ended.")
+            : (target, effective);
+    }
 
     /// <summary>The term a cancellation applies to and its effective instant.</summary>
     private static Result<(PolicyTermRow Term, Instant Effective)> PickTerm(IReadOnlyList<PolicyTermRow> terms, CancellationKind kind, Instant now)

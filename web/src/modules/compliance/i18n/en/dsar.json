@@ -1,0 +1,183 @@
+{
+  "dsar": {
+    "overline": "Compliance · Data-subject requests",
+    "title": "Data-subject requests",
+    "lead": "Open, verify and fulfil GDPR requests: access, portability, erasure, restriction and objection. Erase and restrict need the approval of a second DPO.",
+    "back": "All requests",
+    "notFound": "This data-subject request does not exist in your legal entity.",
+    "yes": "Yes",
+    "no": "No",
+    "created": "Request opened",
+    "decision": "Decision",
+    "refused": "Request refused",
+    "type": {
+      "ACCESS": "Access (Art 15)",
+      "PORTABILITY": "Portability (Art 20)",
+      "ERASURE": "Erasure (Art 17)",
+      "RESTRICTION": "Restriction (Art 18)",
+      "OBJECTION": "Objection (Art 21)"
+    },
+    "status": {
+      "RECEIVED": "Received",
+      "IDENTITY_VERIFIED": "Identity verified",
+      "IN_REVIEW": "In review",
+      "COMPLETED": "Completed",
+      "REFUSED": "Refused"
+    },
+    "task": {
+      "PENDING": "Pending",
+      "DONE": "Done",
+      "FAILED": "Failed",
+      "NOT_BUILT": "Not built"
+    },
+    "kind": {
+      "ERASED": "Erased",
+      "ANONYMISED": "Anonymised",
+      "RESTRICTED": "Restricted",
+      "NOT_HELD": "Not held",
+      "NOT_BUILT": "Not built"
+    },
+    "help": {
+      "COMPLETED": "The request is completed.",
+      "REFUSED": "The request was refused."
+    },
+    "new": {
+      "title": "Open a request",
+      "subject": "Data subject (party id)",
+      "subjectHelp": "The party the request is about.",
+      "subjectInvalid": "Enter the party id (a UUID).",
+      "type": "Request type",
+      "notes": "Notes",
+      "legalHold": "Legal hold",
+      "submit": "Open request"
+    },
+    "list": {
+      "title": "Requests",
+      "empty": "No data-subject requests yet.",
+      "columns": {
+        "id": "Request",
+        "type": "Type",
+        "subject": "Data subject",
+        "status": "Status",
+        "deadline": "Deadline",
+        "blockers": "Blockers"
+      }
+    },
+    "facts": {
+      "subject": "Data subject",
+      "deadline": "Deadline",
+      "creator": "Opened by",
+      "identity": "Identity verified",
+      "legalHold": "Legal hold",
+      "approval": "DPO approval"
+    },
+    "identity": {
+      "method": "Verification method",
+      "evidence": "Evidence reference",
+      "verify": "Verify identity",
+      "methods": {
+        "ID_DOCUMENT": "Identity document",
+        "IN_PERSON": "In person",
+        "EXISTING_CREDENTIALS": "Existing credentials"
+      }
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "reason": "Reason",
+      "startFanOut": "Start fan-out to all modules",
+      "approve": {
+        "ERASE": "Approve erasure (second DPO)",
+        "RESTRICT": "Approve restriction (second DPO)"
+      },
+      "approved": "Approved by {who}",
+      "confirmApprove": "Approve",
+      "erase": "Erase data",
+      "confirmErase": "Erase now",
+      "restrict": "Restrict processing",
+      "confirmRestrict": "Restrict now",
+      "export": "Compile and download the export",
+      "download": "Download package",
+      "extend": "Extend deadline (once)",
+      "confirmExtend": "Extend",
+      "refuse": "Refuse request",
+      "confirmRefuse": "Refuse"
+    },
+    "confirm": {
+      "title": "Confirm",
+      "approve": {
+        "ERASE": "You approve erasing the data of this subject. The approver must differ from the person who opened the case.",
+        "RESTRICT": "You approve restricting the processing of this subject's data. The approver must differ from the person who opened the case."
+      },
+      "erase": "Erasure of the data across all modules cannot be undone. Records under a legal retention duty are anonymised or kept.",
+      "restrict": "Processing of the data across all modules will be restricted.",
+      "extend": "Extend the deadline once (GDPR Art 12(3)); state the reason.",
+      "refuse": "Refuse the request; state the reason given to the data subject."
+    },
+    "fourEyes": {
+      "title": "You opened this case",
+      "body": "Erase and restrict need the approval of a different DPO; the server will refuse your own approval."
+    },
+    "notBuilt": {
+      "title": "Not every module is covered",
+      "body": "These modules have no DSAR handler yet and block completion: {modules}."
+    },
+    "blockers": {
+      "title": "Blocking completion"
+    },
+    "tasks": {
+      "title": "Fan-out per module",
+      "none": "The fan-out has not started.",
+      "module": "Module",
+      "status": "Status",
+      "phase": "Phase",
+      "attempts": "Attempts",
+      "detail": "Detail",
+      "actions": "Actions",
+      "notBuilt": "No handler built yet",
+      "retry": "Retry",
+      "redact": "Redact third parties",
+      "decide": "Save decision"
+    },
+    "outcomes": {
+      "title": "Outcomes",
+      "none": "No outcomes yet.",
+      "module": "Module",
+      "recordClass": "Record class",
+      "kind": "Outcome",
+      "count": "Records",
+      "legalBasis": "Legal basis",
+      "retentionEnd": "Retention end"
+    },
+    "disclosure": {
+      "title": "Disclosure log",
+      "none": "No disclosures recorded for this data subject.",
+      "recipient": "Recipient",
+      "purpose": "Purpose",
+      "legalBasis": "Legal basis",
+      "categories": "Data categories",
+      "categoriesHelp": "Comma separated.",
+      "recordedAt": "Recorded",
+      "required": "Required.",
+      "record": "Record disclosure",
+      "recorded": "Disclosure recorded"
+    },
+    "done": {
+      "verify": "Identity verified",
+      "fanOut": "Fan-out started",
+      "retry": "Task retried",
+      "decide": "Decision saved",
+      "approve": "Approval recorded",
+      "extend": "Deadline extended",
+      "refuse": "Request refused",
+      "export": "Export compiled",
+      "erase": "Erasure executed",
+      "restrict": "Restriction executed"
+    },
+    "errors": {
+      "title": "The action failed",
+      "generic": "The action could not be completed.",
+      "forbidden": "You do not have permission for this action.",
+      "trace": "Trace {id}"
+    }
+  }
+}
