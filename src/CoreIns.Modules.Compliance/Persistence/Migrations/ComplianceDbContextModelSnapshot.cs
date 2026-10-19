@@ -18,7 +18,7 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("cmp")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -81,6 +81,247 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
                             t.HasCheckConstraint("ck_ai_system_record_version", "record_version >= 1");
 
                             t.HasCheckConstraint("ck_ai_system_status", "status IN ('DRAFT','IN_REVIEW','APPROVED','SUSPENDED','RETIRED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Dsar.DisclosureLogRow", b =>
+                {
+                    b.Property<Guid>("EntryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("entry_id");
+
+                    b.Property<string>("Categories")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("categories");
+
+                    b.Property<Guid?>("DsarId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("dsar_id");
+
+                    b.Property<string>("LegalBasis")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_basis");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("purpose");
+
+                    b.Property<string>("Recipient")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("recipient");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<string>("RecordedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("recorded_by");
+
+                    b.Property<Guid?>("SubjectPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("subject_party_id");
+
+                    b.HasKey("EntryId")
+                        .HasName("pk_disclosure_log");
+
+                    b.HasIndex("LegalEntityId", "SubjectPartyId")
+                        .HasDatabaseName("ix_disclosure_log_subject");
+
+                    b.ToTable("disclosure_log", "cmp");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Dsar.DsarRow", b =>
+                {
+                    b.Property<Guid>("DsarId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("dsar_id");
+
+                    b.Property<string>("ActionResult")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("action_result");
+
+                    b.Property<string>("ApprovalAction")
+                        .HasColumnType("text")
+                        .HasColumnName("approval_action");
+
+                    b.Property<string>("ApprovalReason")
+                        .HasColumnType("text")
+                        .HasColumnName("approval_reason");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("approved_by");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("completed_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("Deadline")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("deadline");
+
+                    b.Property<bool>("Extended")
+                        .HasColumnType("boolean")
+                        .HasColumnName("extended");
+
+                    b.Property<string>("IdentityMethod")
+                        .HasColumnType("text")
+                        .HasColumnName("identity_method");
+
+                    b.Property<bool>("IdentityVerified")
+                        .HasColumnType("boolean")
+                        .HasColumnName("identity_verified");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<bool>("LegalHold")
+                        .HasColumnType("boolean")
+                        .HasColumnName("legal_hold");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("Package")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("package");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("received_at");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("RefusalReason")
+                        .HasColumnType("text")
+                        .HasColumnName("refusal_reason");
+
+                    b.Property<string>("RequestType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("request_type");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("SubjectPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("subject_party_id");
+
+                    b.Property<string>("VerifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("verified_by");
+
+                    b.HasKey("DsarId")
+                        .HasName("pk_dsar");
+
+                    b.HasIndex("LegalEntityId", "SubjectPartyId")
+                        .HasDatabaseName("ix_dsar_subject");
+
+                    b.ToTable("dsar", "cmp", t =>
+                        {
+                            t.HasCheckConstraint("ck_dsar_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_dsar_request_type", "request_type IN ('ACCESS','PORTABILITY','ERASURE','RESTRICTION','OBJECTION')");
+
+                            t.HasCheckConstraint("ck_dsar_status", "status IN ('RECEIVED','IDENTITY_VERIFIED','IN_REVIEW','COMPLETED','REFUSED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Dsar.DsarTaskRow", b =>
+                {
+                    b.Property<Guid>("TaskId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("task_id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<string>("DecisionNote")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_note");
+
+                    b.Property<Guid>("DsarId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("dsar_id");
+
+                    b.Property<string>("Error")
+                        .HasColumnType("text")
+                        .HasColumnName("error");
+
+                    b.Property<bool>("ExportOnly")
+                        .HasColumnType("boolean")
+                        .HasColumnName("export_only");
+
+                    b.Property<string>("ExportPayload")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("export_payload");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("module");
+
+                    b.Property<string>("Outcomes")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("outcomes");
+
+                    b.Property<string>("Phase")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("phase");
+
+                    b.Property<bool>("RedactThirdParty")
+                        .HasColumnType("boolean")
+                        .HasColumnName("redact_third_party");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("TaskId")
+                        .HasName("pk_dsar_task");
+
+                    b.HasIndex("DsarId", "Module")
+                        .IsUnique()
+                        .HasDatabaseName("ux_dsar_task_module");
+
+                    b.ToTable("dsar_task", "cmp", t =>
+                        {
+                            t.HasCheckConstraint("ck_dsar_task_phase", "phase IN ('EXPORT','RESTRICT','ERASE')");
+
+                            t.HasCheckConstraint("ck_dsar_task_status", "status IN ('PENDING','DONE','FAILED','NOT_BUILT')");
                         });
                 });
 
@@ -463,6 +704,16 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
                         .HasDatabaseName("ux_dsar_restriction_subject_class");
 
                     b.ToTable("dsar_restriction", "cmp");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Dsar.DsarTaskRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Compliance.Dsar.DsarRow", null)
+                        .WithMany()
+                        .HasForeignKey("DsarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_dsar_task_dsar");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Compliance.Persistence.ClockEventRow", b =>

@@ -7497,166 +7497,265 @@ components:
           description: 'PRD: "version"'
     DsarCreateRequest:
       type: object
-      description: 'cmp.Dsar.create request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Dsar.create request: the data subject and the kind of request'
+      properties:
+        subjectPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "Party the request is about"
+        requestType:
+          type: string
+          enum:
+          - ACCESS
+          - PORTABILITY
+          - ERASURE
+          - RESTRICTION
+          - OBJECTION
+          description: "Kind of data-subject request"
+        legalHold:
+          type: boolean
+          description: "Legal hold: blocks erasure of the subject data"
+        notes:
+          type: string
+          description: "Free text, no personal data"
+          maxLength: 512
+      required:
+      - subjectPartyId
+      - requestType
     DsarCreateResponse:
       type: object
-      description: 'cmp.Dsar.create result. PRD outputs: "request, tasks, package"'
+      description: 'cmp.Dsar.create result: the case, its tasks and the package once compiled'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/DsarRequestView'
         tasks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tasks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarTaskView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
     DsarVerifyIdentityRequest:
       type: object
-      description: 'cmp.Dsar.verifyIdentity request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Dsar.verifyIdentity request'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "DSAR case id"
+        method:
+          type: string
+          description: "How identity was verified"
+          maxLength: 64
+        evidenceRef:
+          type: string
+          description: "Reference to the evidence (no personal data)"
+          maxLength: 128
+      required:
+      - id
+      - method
     DsarVerifyIdentityResponse:
       type: object
-      description: 'cmp.Dsar.verifyIdentity result. PRD outputs: "request, tasks, package"'
+      description: 'cmp.Dsar.verifyIdentity result: the case, its tasks and the package once compiled'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/DsarRequestView'
         tasks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tasks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarTaskView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
     DsarStartFanOutRequest:
       type: object
-      description: 'cmp.Dsar.startFanOut request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Dsar.startFanOut request'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "DSAR case id"
+      required:
+      - id
     DsarStartFanOutResponse:
       type: object
-      description: 'cmp.Dsar.startFanOut result. PRD outputs: "request, tasks, package"'
+      description: 'cmp.Dsar.startFanOut result: the case, its tasks and the package once compiled'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/DsarRequestView'
         tasks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tasks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarTaskView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
     DsarRetryTaskRequest:
       type: object
-      description: 'cmp.Dsar.retryTask request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Dsar.retryTask request'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "DSAR case id"
+        taskId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "Task id"
+      required:
+      - id
+      - taskId
     DsarRetryTaskResponse:
       type: object
-      description: 'cmp.Dsar.retryTask result. PRD outputs: "request, tasks, package"'
+      description: 'cmp.Dsar.retryTask result: the case, its tasks and the package once compiled'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/DsarRequestView'
         tasks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tasks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarTaskView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
     DsarDecideItemRequest:
       type: object
-      description: 'cmp.Dsar.decideItem request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Dsar.decideItem request (DPO decision on one task; the legal hold flag is case level)'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "DSAR case id"
+        taskId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "Task id; omit to set only the legal hold"
+        redactThirdParty:
+          type: boolean
+          description: "Third-party data in this item is redacted from the export"
+        legalHold:
+          type: boolean
+          description: "Set or clear the legal hold on the case"
+        note:
+          type: string
+          description: "Decision note, no personal data"
+          maxLength: 512
+      required:
+      - id
     DsarDecideItemResponse:
       type: object
-      description: 'cmp.Dsar.decideItem result. PRD outputs: "request, tasks, package"'
+      description: 'cmp.Dsar.decideItem result: the case, its tasks and the package once compiled'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/DsarRequestView'
         tasks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tasks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarTaskView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
     DsarApproveRequest:
       type: object
-      description: 'cmp.Dsar.approve request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Dsar.approve request: a DPO who is not the case creator approves erase or restrict'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "DSAR case id"
+        action:
+          type: string
+          enum:
+          - ERASE
+          - RESTRICT
+          description: "What is approved"
+        reason:
+          type: string
+          description: "Reason"
+          maxLength: 512
+      required:
+      - id
+      - action
+      - reason
     DsarApproveResponse:
       type: object
-      description: 'cmp.Dsar.approve result. PRD outputs: "request, tasks, package"'
+      description: 'cmp.Dsar.approve result: the case, its tasks and the package once compiled'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/DsarRequestView'
         tasks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tasks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarTaskView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
     DsarExtendRequest:
       type: object
-      description: 'cmp.Dsar.extend request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Dsar.extend request (GDPR Art 12(3): by two further months, once)'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "DSAR case id"
+        extension:
+          type: string
+          description: "ISO 8601 period, default P2M"
+          maxLength: 16
+        reason:
+          type: string
+          description: "Why the request is complex"
+          maxLength: 512
+      required:
+      - id
+      - reason
     DsarExtendResponse:
       type: object
-      description: 'cmp.Dsar.extend result. PRD outputs: "request, tasks, package"'
+      description: 'cmp.Dsar.extend result: the case, its tasks and the package once compiled'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/DsarRequestView'
         tasks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tasks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarTaskView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
     DsarRefuseRequest:
       type: object
-      description: 'cmp.Dsar.refuse request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Dsar.refuse request'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "DSAR case id"
+        reason:
+          type: string
+          description: "Reason"
+          maxLength: 512
+      required:
+      - id
+      - reason
     DsarRefuseResponse:
       type: object
-      description: 'cmp.Dsar.refuse result. PRD outputs: "request, tasks, package"'
+      description: 'cmp.Dsar.refuse result: the case, its tasks and the package once compiled'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/DsarRequestView'
         tasks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tasks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarTaskView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
     DsarGetResponse:
       type: object
-      description: 'cmp.Dsar.get result. PRD outputs: "request, tasks, package"'
+      description: 'cmp.Dsar.get result: the case, its tasks and the package once compiled'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/DsarRequestView'
         tasks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tasks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarTaskView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
     DsarQueryItem:
       type: object
-      description: 'cmp.Dsar.query result. PRD outputs: "request, tasks, package"'
+      description: 'cmp.Dsar.query result'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/DsarRequestView'
         tasks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tasks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarTaskView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
     DsarQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7707,64 +7806,71 @@ components:
       description: Page of cmp.DisclosureLog.query results (cursor pagination, contract §3.5.5)
     DsarExportRequest:
       type: object
-      description: 'cmp.Dsar.export request. PRD inputs: "party id, scope"'
+      description: 'cmp.Dsar.export request: compile the export package of a case'
       properties:
-        partyId:
+        dsarId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "party id"'
-        scope:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "scope"'
+          description: "DSAR case id"
+      required:
+      - dsarId
     DsarExportResponse:
       type: object
-      description: 'cmp.Dsar.export result. PRD outputs: "package / per-item outcome"'
+      description: 'cmp.Dsar.export result'
       properties:
+        request:
+          $ref: '#/components/schemas/DsarRequestView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
         perItemOutcome:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "per-item outcome"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarOutcomeView'
     DsarRestrictRequest:
       type: object
-      description: 'cmp.Dsar.restrict request. PRD inputs: "party id, scope"'
+      description: 'cmp.Dsar.restrict request (needs an approval for RESTRICT)'
       properties:
-        partyId:
+        dsarId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "party id"'
-        scope:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "scope"'
+          description: "DSAR case id"
+        legalBasis:
+          type: string
+          description: "Legal basis"
+          maxLength: 256
+      required:
+      - dsarId
     DsarRestrictResponse:
       type: object
-      description: 'cmp.Dsar.restrict result. PRD outputs: "package / per-item outcome"'
+      description: 'cmp.Dsar.restrict result'
       properties:
+        request:
+          $ref: '#/components/schemas/DsarRequestView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
         perItemOutcome:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "per-item outcome"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarOutcomeView'
     DsarEraseRequest:
       type: object
-      description: 'cmp.Dsar.erase request. PRD inputs: "party id, scope"'
+      description: 'cmp.Dsar.erase request (needs an approval for ERASE; regulated classes are restricted instead)'
       properties:
-        partyId:
+        dsarId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "party id"'
-        scope:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "scope"'
+          description: "DSAR case id"
+      required:
+      - dsarId
     DsarEraseResponse:
       type: object
-      description: 'cmp.Dsar.erase result. PRD outputs: "package / per-item outcome"'
+      description: 'cmp.Dsar.erase result'
       properties:
+        request:
+          $ref: '#/components/schemas/DsarRequestView'
         package:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package"'
+          $ref: '#/components/schemas/DsarPackageView'
         perItemOutcome:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "per-item outcome"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarOutcomeView'
     AnnualReturnGenerateRequest:
       type: object
       description: 'cmp.AnnualReturn.generate request. PRD inputs: "type, period"'
@@ -8482,6 +8588,124 @@ components:
       type: object
       description: 'cmp.Complaint.import result. PRD outputs: "outcomes"'
       x-status: minimal
+    DsarRequestView:
+      type: object
+      description: 'A DSAR case'
+      properties:
+        dsarId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "Case id"
+        requestType:
+          type: string
+          description: "ACCESS, PORTABILITY, ERASURE, RESTRICTION or OBJECTION"
+        status:
+          type: string
+          description: "RECEIVED, IDENTITY_VERIFIED, IN_REVIEW, COMPLETED or REFUSED"
+        subjectPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "Party"
+        createdBy:
+          type: string
+          description: "Case creator"
+        receivedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        deadline:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        extended:
+          type: boolean
+          description: "Deadline extended once"
+        identityVerified:
+          type: boolean
+          description: "Identity verified"
+        legalHold:
+          type: boolean
+          description: "Legal hold set"
+        approvedBy:
+          type: string
+          description: "DPO who approved erase or restrict"
+        approvalAction:
+          type: string
+          description: "ERASE or RESTRICT"
+        completedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        refusalReason:
+          type: string
+          description: "Refusal reason"
+        blockers:
+          type: array
+          items:
+            type: string
+    DsarOutcomeView:
+      type: object
+      description: 'Outcome for one record class'
+      properties:
+        module:
+          type: string
+          description: "Module code"
+        recordClass:
+          type: string
+          description: "Record class"
+        kind:
+          type: string
+          description: "ERASED, ANONYMISED, RESTRICTED, NOT_HELD or NOT_BUILT"
+        recordCount:
+          type: integer
+          description: "Records"
+        legalBasis:
+          type: string
+          description: "Legal basis for retention"
+        retentionEnd:
+          type: string
+          description: "Retention end or UNSET_F404"
+        exported:
+          type: boolean
+          description: "Data of this class is in the export"
+        detail:
+          type: string
+          description: "Neutral detail"
+    DsarTaskView:
+      type: object
+      description: 'One module task of a case'
+      properties:
+        taskId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: "Task id"
+        module:
+          type: string
+          description: "Module code"
+        status:
+          type: string
+          description: "PENDING, DONE, FAILED or NOT_BUILT"
+        phase:
+          type: string
+          description: "EXPORT, RESTRICT or ERASE: the last phase run"
+        outcomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarOutcomeView'
+        redactThirdParty:
+          type: boolean
+          description: "Third-party redaction decided"
+        attempts:
+          type: integer
+          description: "Runs so far"
+        error:
+          type: string
+          description: "Last failure, no personal data"
+    DsarPackageView:
+      type: object
+      description: 'Export package: index plus one entry per module'
+      properties:
+        generatedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        index:
+          type: array
+          items:
+            $ref: '#/components/schemas/DsarOutcomeView'
+        entries:
+          type: array
+          items:
+            $ref: common.yaml#/components/schemas/Unspecified
     DsarImportRequest:
       type: object
       description: 'cmp.Dsar.import request. PRD inputs: "legacy records, hand-over dates"'
