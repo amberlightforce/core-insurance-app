@@ -259,7 +259,7 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
             entity.ToTable("financial_period", t =>
             {
                 t.HasCheckConstraint("ck_financial_period_code", "period_code ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'");
-                t.HasCheckConstraint("ck_financial_period_status", In("status", ["OPEN"]));
+                t.HasCheckConstraint("ck_financial_period_status", In("status", ["OPEN", "LOCKED"]));
             });
             entity.HasKey(e => e.PeriodId).HasName("pk_financial_period");
             entity.Property(e => e.PeriodId).HasColumnName("period_id");
@@ -304,6 +304,8 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
             entity.Property(e => e.CorrelationId).HasColumnName("correlation_id");
             entity.Property(e => e.PostedAt).HasColumnName("posted_at").HasColumnType("timestamptz");
             entity.Property(e => e.PostedBy).HasColumnName("posted_by");
+            entity.Property(e => e.CorrectionOf).HasColumnName("correction_of");
+            entity.Property(e => e.OosSetId).HasColumnName("oos_set_id");
 
             // REQ-FIN-069: unique journal number per legal entity (the JOURNAL series is gapless and yearly).
             entity.HasIndex(e => new { e.LegalEntityId, e.JournalNumber }).IsUnique().HasDatabaseName("ux_journal_entry_number");
