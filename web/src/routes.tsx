@@ -210,6 +210,45 @@ moduleRoutes.push(
     ],
   },
 );
+moduleRoutes.push({
+  path: 'reinsurance',
+  lazy: async () => ({
+    Component: (await import('./modules/reinsurance/RequireReinsuranceRole'))
+      .RequireReinsuranceRole,
+  }),
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/reinsurance/ReinsuranceHomePage')).ReinsuranceHomePage,
+      }),
+    },
+    {
+      path: 'contracts/new',
+      lazy: async () => ({
+        Component: (await import('./modules/reinsurance/ContractEditorPage')).NewContractPage,
+      }),
+    },
+    {
+      path: 'contracts/:contractId',
+      lazy: async () => ({
+        Component: (await import('./modules/reinsurance/ContractPage')).ContractPage,
+      }),
+    },
+    {
+      path: 'contracts/:contractId/edit',
+      lazy: async () => ({
+        Component: (await import('./modules/reinsurance/ContractEditorPage')).EditContractPage,
+      }),
+    },
+    {
+      path: 'claims/:claimId',
+      lazy: async () => ({
+        Component: (await import('./modules/reinsurance/ClaimRecoveriesPage')).ClaimRecoveriesPage,
+      }),
+    },
+  ],
+});
 
 const implemented = new Set([
   '/admin/packs',
@@ -220,6 +259,7 @@ const implemented = new Set([
   '/finance',
   '/claims',
   '/underwriting',
+  '/reinsurance',
 ]);
 
 /** Placeholder routes for modules whose work packages have not landed, plus the thin-slice staff screens. */

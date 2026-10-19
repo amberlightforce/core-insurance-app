@@ -356,6 +356,46 @@ public sealed class ApprovalTests(PostgresFixture database) : IClassFixture<Post
     }
 
     [Fact]
+    public async Task Owning_module_editors_are_deduplicated_inherited_and_refuse_delegated_decisions()
+    {
+        var subject = Guid.NewGuid().ToString();
+        var hash = NewHash();
+        var body = RequestBody(subject, hash, "100.00") with { Editors = ["USER:editor-a", "USER:editor-a"] };
+        var first = await RequestInProcessAsync("maker-a", body);
+        (await ScalarAsync<string[]>($"SELECT editors FROM plt.approval_request WHERE request_id = '{first.RequestId}'")).Length.ShouldBe(1);
+        var same = await RequestInProcessAsync("maker-a", body with { Editors = [] });
+        same.RequestId.ShouldBe(first.RequestId); // Dropping supplied editors cannot remove frozen participants.
+        var added = await RequestInProcessAsync("maker-b", body with { Editors = ["USER:editor-b"] });
+        added.RequestId.ShouldNotBe(first.RequestId); // Even at the same hash, a new participant must be frozen.
+        var frozenEditors = await ScalarAsync<string[]>($"SELECT editors FROM plt.approval_request WHERE request_id = '{added.RequestId}'");
+        frozenEditors.ShouldContain("USER:editor-a");
+        frozenEditors.ShouldContain("USER:editor-b");
+        frozenEditors.ShouldContain("USER:maker-a");
+        foreach (var editor in new[] { "editor-a", "editor-b", "maker-a" })
+        {
+            var (refused, refusal) = await DecideAsync(editor, Manager, added.RequestId.ToString(), hash);
+            refused.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+            refusal!["code"]!.GetValue<string>().ShouldBe("PLT-ERR-EDITOR-CANNOT-APPROVE");
+        }
+        await using var scope = Scope("independent-user", Manager, out var services);
+        services.GetRequiredService<RequestContext>().OnBehalfOf = ActorRef.User("editor-a");
+        var error = await Should.ThrowAsync<DomainException>(() => services.GetRequiredService<IPlatformApprovalService>().DecideAsync(
+            new ApprovalDecideRequest { RequestId = added.RequestId, Decision = ApprovalDecideRequest.DecisionValue.Approve, PayloadHash = Sha256Hash.Parse(hash) },
+            CommandOptions.New(), TestContext.Current.CancellationToken));
+        error.Error.Code.Value.ShouldBe("PLT-ERR-EDITOR-CANNOT-APPROVE");
+    }
+
+    [Theory]
+    [InlineData("USER:")]
+    [InlineData("UNKNOWN:editor")]
+    [InlineData("USER:has space")]
+    public async Task Owning_module_editor_actor_keys_are_validated(string editor)
+    {
+        var error = await Should.ThrowAsync<DomainException>(() => RequestInProcessAsync("maker", RequestBody(Guid.NewGuid().ToString(), NewHash(), "10.00") with { Editors = [editor] }));
+        error.Error.Code.Value.ShouldBe("PLT-ERR-VALIDATION");
+    }
+
+    [Fact]
     public async Task REQ_PLT_121_a_service_or_AI_identity_can_never_decide()
     {
         var ct = TestContext.Current.CancellationToken;

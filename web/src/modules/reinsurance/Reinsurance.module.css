@@ -1,0 +1,241 @@
+/* Reinsurance treaty screens: stage strip, layer diagram, responsive record body (v3 mockup «Φάκελος ζημίας»). */
+
+/* ---------- Record body: wide main column + side column, one column when narrow ---------- */
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (width <= 1100px) {
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Stage strip (`.strip`, `.stage`, `.conn`) ---------- */
+.strip {
+  --_node: 22px;
+
+  display: flex;
+  inline-size: 100%;
+  margin: var(--space-0);
+  padding: var(--space-2) var(--space-0) var(--space-0);
+  overflow-x: auto;
+  list-style: none;
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--space-1_5);
+  align-items: center;
+  min-inline-size: 84px;
+  color: var(--color-text-tertiary);
+  font: var(--type-caption);
+  text-align: center;
+}
+
+.stage[data-state='done'],
+.stage[data-state='current'] {
+  color: var(--color-text-primary);
+}
+
+.node {
+  position: relative;
+  z-index: var(--z-raised);
+  display: grid;
+  place-items: center;
+  inline-size: var(--_node);
+  block-size: var(--_node);
+  border: var(--border-width-control) solid var(--color-border-control);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-on-accent);
+}
+
+.stage[data-state='done'] .node {
+  border-color: var(--color-status-success-solid);
+  background-color: var(--color-status-success-solid);
+}
+
+.stage[data-state='current'] .node {
+  border-color: var(--color-interactive-accent-bg);
+  background-color: var(--color-interactive-accent-bg);
+  box-shadow: 0 0 0 var(--space-1) var(--color-state-focus-halo);
+}
+
+.connector {
+  position: absolute;
+  inset-block-start: calc(var(--_node) / 2 - var(--border-width-hairline));
+  inset-inline: calc(-50% + var(--_node) / 2 + var(--space-2))
+    calc(50% + var(--_node) / 2 + var(--space-2));
+  block-size: var(--border-width-thick);
+  overflow: hidden;
+  border-radius: var(--radius-xs);
+  background-color: var(--color-border-default);
+}
+
+.connector::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-tide);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-duration-transition-lg) var(--motion-ease-enter);
+}
+
+.connector[data-filled]::after {
+  transform: scaleX(1);
+}
+
+:dir(rtl) .connector::after {
+  transform-origin: right;
+}
+
+/* ---------- Layer diagram: a ladder of attachment / limit, lowest layer at the bottom ---------- */
+.ladder {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-0_5);
+  min-block-size: 220px;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.rung {
+  --_fill: var(--color-status-info-solid);
+  --_bg: var(--color-status-info-bg);
+
+  display: flex;
+  gap: var(--space-3);
+  align-items: stretch;
+  min-block-size: 52px;
+}
+
+.rung[data-tone='1'] {
+  --_fill: var(--color-status-teal-solid);
+  --_bg: var(--color-status-teal-bg);
+}
+
+.rung[data-tone='2'] {
+  --_fill: var(--color-status-brand-solid);
+  --_bg: var(--color-status-brand-bg);
+}
+
+.rung[data-tone='3'] {
+  --_fill: var(--color-status-plum-solid);
+  --_bg: var(--color-status-plum-bg);
+}
+
+.rung[data-retention] {
+  --_fill: var(--color-status-neutral-solid);
+  --_bg: var(--color-status-neutral-bg);
+}
+
+.rungBar {
+  flex: 0 0 var(--space-12);
+  border: var(--border-width-hairline) solid var(--_fill);
+  border-radius: var(--radius-sm);
+  background-color: var(--_bg);
+  box-shadow: inset 0 var(--space-1) 0 var(--_fill);
+}
+
+.rung[data-retention] .rungBar {
+  border-style: dashed;
+  box-shadow: none;
+}
+
+.rungText {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  min-inline-size: 0;
+  font: var(--type-body-compact);
+}
+
+.rungTitle {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.rungRange {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+  font-variant-numeric: tabular-nums lining-nums;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Money summary tiles (layer-year figures) ---------- */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: var(--space-3);
+  margin: var(--space-0);
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0_5);
+  min-inline-size: 0;
+}
+
+.tileLabel {
+  color: var(--color-text-secondary);
+  font: var(--type-label);
+}
+
+.tileValue {
+  color: var(--color-text-primary);
+  font: var(--type-heading-2);
+  letter-spacing: var(--type-heading-2-tracking);
+  font-variant-numeric: tabular-nums lining-nums;
+  overflow-wrap: anywhere;
+}
+
+.note {
+  margin: var(--space-0);
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+/* A full identifier that may wrap rather than be cut (claim and party ids). */
+.wrapId {
+  font: var(--type-mono-sm);
+  font-variant-numeric: tabular-nums slashed-zero;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Decision bar (mockup `.decision`) ---------- */
+.decision {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.reasonActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.sodNote {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+  max-inline-size: 320px;
+}

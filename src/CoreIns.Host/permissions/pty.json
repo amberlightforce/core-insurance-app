@@ -3,8 +3,8 @@
     "Permissions": {
       "Grants": {
         "pty.Party.create": [ "Staff.Underwriter", "Staff.Billing" ],
-        "pty.Party.get": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
-        "pty.Party.search": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "pty.Party.get": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
+        "pty.Party.search": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pty.Screening.screen": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "pty.Party.revealP2": [ "Staff.Underwriter" ],
         "pty.Intermediary.create": [ "Staff.Underwriter", "Platform.Admin" ],

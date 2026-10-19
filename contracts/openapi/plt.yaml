@@ -7498,6 +7498,14 @@ components:
         reason:
           type: string
           maxLength: 1024
+        editors:
+          type: array
+          description: Authoritative participant actor keys supplied by the owning module in process; added to inherited editors and frozen on submission
+          items:
+            type: string
+            pattern: '^(USER|SERVICE|AI_AGENT):[^\s:]+$'
+            maxLength: 256
+            examples: ['USER:participant-1']
       required:
       - type
       - objectRef

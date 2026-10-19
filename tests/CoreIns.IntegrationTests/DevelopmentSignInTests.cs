@@ -18,10 +18,41 @@ public sealed class DevelopmentSignInTests(PostgresFixture database) : IClassFix
 
     private static readonly string[] SuperRoles =
     [
-        "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority",
+        "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority", "Staff.RecoverySpecialist", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager",
     ];
 
     private static readonly Dictionary<string, string?> Enabled = new() { ["DevAuthentication:Enabled"] = "true" };
+
+    [Theory]
+    [InlineData("recovery", "Dev Recovery Specialist (synthetic)", "Staff.RecoverySpecialist")]
+    [InlineData("riacct", "Dev Reinsurance Accountant (synthetic)", "Staff.ReinsuranceAccountant")]
+    [InlineData("rimgr", "Dev Reinsurance Manager (synthetic)", "Staff.ReinsuranceManager")]
+    public async Task SL4_users_return_the_server_actor_key_matching_the_JWT(string id, string name, string role)
+    {
+        await using var factory = new ApiHostFactory(database.AppConnectionString, "Development", Enabled, testAuthentication: false);
+        using var client = factory.CreateClient();
+        var ct = TestContext.Current.CancellationToken;
+        var users = (await client.GetFromJsonAsync<JsonNode>(new Uri("/api/plt/v1/dev/users", UriKind.Relative), ct))!["items"]!.AsArray();
+        var user = users.Single(u => u!["id"]!.GetValue<string>() == id)!;
+        user["name"]!.GetValue<string>().ShouldBe(name);
+        user["roles"]!.AsArray().Select(r => r!.GetValue<string>()).ShouldBe([role]);
+        var names = users.Select(u => u!["name"]!.GetValue<string>()).ToArray();
+        names.Distinct(StringComparer.Ordinal).Count().ShouldBe(names.Length);
+        foreach (var other in names.Where(n => n != name))
+        {
+            name.Contains(other, StringComparison.Ordinal).ShouldBeFalse();
+            other.Contains(name, StringComparison.Ordinal).ShouldBeFalse();
+        }
+
+        using var response = await client.PostAsJsonAsync(new Uri("/api/plt/v1/dev/sign-in", UriKind.Relative), new { userId = id }, ct);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var body = (await response.Content.ReadFromJsonAsync<JsonNode>(ct))!;
+        var token = new JsonWebToken(body["accessToken"]!.GetValue<string>());
+        var actorKey = "USER:" + token.GetClaim("oid").Value;
+        user["actorKey"]!.GetValue<string>().ShouldBe(actorKey);
+        body["user"]!["actorKey"]!.GetValue<string>().ShouldBe(actorKey);
+        body["user"]!["id"]!.GetValue<string>().ShouldBe(id);
+    }
 
     [Theory]
     [InlineData("Production")]

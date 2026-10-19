@@ -693,7 +693,10 @@
         }
       },
       "referralRole": "SAMPLE_CODE",
-      "reason": "sample"
+      "reason": "sample",
+      "editors": [
+        "USER:participant-1"
+      ]
     },
     "ApprovalRequestResponse": {
       "request": {

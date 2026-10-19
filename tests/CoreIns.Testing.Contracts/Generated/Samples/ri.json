@@ -184,7 +184,28 @@
           },
           "placedPct": "12.50",
           "status": "DRAFT",
-          "recordVersion": 1
+          "recordVersion": 1,
+          "layers": [
+            {
+              "layerNo": 1,
+              "attachment": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "limit": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "aad": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "aal": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ]
         }
       ],
       "nextCursor": "sample",
@@ -1009,7 +1030,28 @@
       },
       "placedPct": "12.50",
       "status": "DRAFT",
-      "recordVersion": 1
+      "recordVersion": 1,
+      "layers": [
+        {
+          "layerNo": 1,
+          "attachment": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "limit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "aad": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "aal": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
     },
     "ContractListPage": {
       "items": [
@@ -1025,7 +1067,28 @@
           },
           "placedPct": "12.50",
           "status": "DRAFT",
-          "recordVersion": 1
+          "recordVersion": 1,
+          "layers": [
+            {
+              "layerNo": 1,
+              "attachment": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "limit": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "aad": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "aal": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ]
         }
       ],
       "nextCursor": "sample",

@@ -48,4 +48,9 @@ public sealed record ContractListItem
     /// <summary>Contract member 'recordVersion'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
     public required int RecordVersion { get; init; }
+
+    /// <summary>Current revision layers, ordered by layer number, for registry attachment and limit summaries</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("layers")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Common.RiLayer>? Layers { get; init; }
 }

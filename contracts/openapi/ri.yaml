@@ -8180,6 +8180,11 @@ components:
         recordVersion:
           type: integer
           minimum: 1
+        layers:
+          type: array
+          description: Current revision layers, ordered by layer number, for registry attachment and limit summaries
+          items:
+            $ref: ../events/common.schema.json#/$defs/RiLayer
       required:
       - contractId
       - contractType
