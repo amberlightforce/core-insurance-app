@@ -33,7 +33,7 @@ export function NavRail({ items, expanded, onToggleExpanded }: NavRailProps) {
   const { pathname } = useLocation();
 
   const renderLink = (item: NavItem, extraClass?: string) => {
-    const label = t(`nav.${item.id}`);
+    const label = t(`nav.${item.label ?? item.id}`);
     const current = isActivePath(pathname, item.to);
     const link = (
       <Link
@@ -42,12 +42,12 @@ export function NavRail({ items, expanded, onToggleExpanded }: NavRailProps) {
         {...(current ? { 'aria-current': 'page' as const } : {})}
         {...(expanded ? {} : { 'aria-label': label })}
       >
-        <Icon icon={moduleIcons[item.id]} size={20} />
+        <Icon icon={moduleIcons[item.icon ?? item.id]} size={20} />
         <span className={cx(styles.railLabel)}>{label}</span>
       </Link>
     );
     return (
-      <li key={item.id} className={cx(styles.railItem, extraClass)}>
+      <li key={item.to} className={cx(styles.railItem, extraClass)}>
         {expanded ? (
           link
         ) : (
@@ -87,13 +87,13 @@ export function NavRail({ items, expanded, onToggleExpanded }: NavRailProps) {
               <Menu className={cx(styles.menu)} aria-label={t('nav.more')}>
                 {overflow.map((item) => (
                   <MenuItem
-                    key={item.id}
-                    id={item.id}
+                    key={item.to}
+                    id={item.to}
                     href={item.to}
                     className={cx(styles.menuItem)}
                   >
-                    <Icon icon={moduleIcons[item.id]} size={16} />
-                    {t(`nav.${item.id}`)}
+                    <Icon icon={moduleIcons[item.icon ?? item.id]} size={16} />
+                    {t(`nav.${item.label ?? item.id}`)}
                   </MenuItem>
                 ))}
               </Menu>

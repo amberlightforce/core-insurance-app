@@ -18,7 +18,9 @@ import { SimpleTable } from '../staff/SimpleTable';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
 import { useFinancials, usePayeeAccounts, usePayments, useRefreshMoney } from './api';
-import { PaymentStatusPill } from './MoneyPills';
+import { PaymentCorrections } from './payments/PaymentCorrections';
+import { SetStatusPill, PaymentStatusPill } from './MoneyPills';
+import { useTransactionSets, type TransactionSetListItem } from './recoveries/api';
 import { PayeeAccountForm } from './PayeeAccountForm';
 import { SetCard } from './SetViews';
 import { TransactionBuilder } from './TransactionBuilder';
@@ -193,6 +195,50 @@ function Payments({ claim }: { claim: ClaimView }) {
   );
 }
 
+function SetList({ claimId }: { claimId: string }) {
+  const { t } = useTranslation('claims');
+  const query = useTransactionSets(claimId);
+  const rows = useMemo<TransactionSetListItem[]>(() => query.data?.items ?? [], [query.data]);
+  const columns = useMemo<DataColumn<TransactionSetListItem>[]>(
+    () => [
+      textColumn<TransactionSetListItem>('count', t('setList.columns.count'), (r) =>
+        t('setList.transactions', { count: r.transactionCount }),
+      ),
+      statusColumn<TransactionSetListItem>(
+        'status',
+        t('setList.columns.status'),
+        (r) => r.status,
+        (r) => <SetStatusPill status={r.status} />,
+      ),
+      textColumn<TransactionSetListItem>('kind', t('setList.columns.kind'), (r) =>
+        r.hasPayment ? t('setList.payment') : t('setList.reserve'),
+      ),
+      textColumn<TransactionSetListItem>('maker', t('setList.columns.maker'), (r) =>
+        r.systemRecorded ? t('setList.system') : r.maker,
+      ),
+      dateColumn<TransactionSetListItem>(
+        'created',
+        t('setList.columns.created'),
+        (r) => r.createdAt,
+      ),
+    ],
+    [t],
+  );
+  return (
+    <QueryView query={query}>
+      {() => (
+        <SimpleTable<TransactionSetListItem>
+          aria-label={t('setList.title')}
+          columns={columns}
+          data={rows}
+          getRowId={(r) => r.setId}
+          emptyState={<p className={styles.muted}>{t('setList.none')}</p>}
+        />
+      )}
+    </QueryView>
+  );
+}
+
 /** Financials tab: balances per line and totals, payments, the claim's transaction sets, and (while open) the builder. */
 export function FinancialsTab({ claim }: { claim: ClaimView }) {
   const { t } = useTranslation('claims');
@@ -224,6 +270,20 @@ export function FinancialsTab({ claim }: { claim: ClaimView }) {
       </Section>
       <Section title={t('payments.title')}>
         <Payments claim={claim} />
+      </Section>
+      {(payments.data?.items ?? []).length > 0 ? (
+        <Section title={t('payFix.sectionTitle')}>
+          <PaymentCorrections
+            claimId={claimId}
+            claimPartyId={insured}
+            payments={payments.data?.items ?? []}
+            accounts={accountItems}
+            open={open}
+          />
+        </Section>
+      ) : null}
+      <Section title={t('setList.title')}>
+        <SetList claimId={claimId} />
       </Section>
       <Section title={t('set.title')}>
         {setIds.length === 0 ? (

@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Clock.get result. PRD outputs: "instances"</summary>
+/// <summary>cmp.Clock.get result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClockGetResponse
 {
-    /// <summary>PRD: "instances"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'instances'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("instances")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Instances { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Compliance.Contracts.Api.ClockInstanceView> Instances { get; init; }
 }
