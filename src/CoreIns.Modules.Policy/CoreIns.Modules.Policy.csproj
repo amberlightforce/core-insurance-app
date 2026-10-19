@@ -17,12 +17,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Finance.Contracts\CoreIns.Modules.Finance.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Party.Contracts\CoreIns.Modules.Party.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Product.Contracts\CoreIns.Modules.Product.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Rating.Contracts\CoreIns.Modules.Rating.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Underwriting.Contracts\CoreIns.Modules.Underwriting.Contracts.csproj" />
     <!-- Rounding service and country-pack SPIs (IdValidator VEHICLE_PLATE): contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
+    <!-- Migration SPI (IMigrationImporter / IMigrationReverser): contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Migration.Contracts\CoreIns.Modules.Migration.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
   </ItemGroup>

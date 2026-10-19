@@ -36,7 +36,7 @@ internal static class TermHead
         IReadOnlyDictionary<string, ChargeHandlingInfo> handling)
     {
         var ordered = transactions.OrderBy(t => t.Sequence).ToList();
-        if (ordered.Count == 0 || Codes.Parse<PolicyTransactionKind>(ordered[0].Kind) != PolicyTransactionKind.Issuance)
+        if (ordered.Count == 0 || Codes.Parse<PolicyTransactionKind>(ordered[0].Kind) is not (PolicyTransactionKind.Issuance or PolicyTransactionKind.Opening))
         {
             return Inconsistent("the term has no issuance transaction");
         }

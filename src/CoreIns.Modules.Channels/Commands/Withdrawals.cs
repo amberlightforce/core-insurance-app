@@ -4,6 +4,7 @@ using CoreIns.Modules.Channels.Contracts.Api;
 using CoreIns.Modules.Channels.Contracts.Events;
 using CoreIns.Modules.Channels.Domain;
 using CoreIns.Modules.Channels.Persistence;
+using CoreIns.Modules.Documents.Contracts;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Audit;
 using CoreIns.Platform.Context;
@@ -15,6 +16,7 @@ using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace CoreIns.Modules.Channels.Commands;
@@ -216,6 +218,7 @@ internal sealed class ConfirmWithdrawalHandler(
     IClock clock,
     IEventPublisher events,
     IWithdrawalPolicyPort policies,
+    IServiceProvider services,
     IOptions<ChannelsOptions> options) : ICommandHandler<ConfirmWithdrawal, WithdrawalConfirmResponse>
 {
     public async Task<Result<WithdrawalConfirmResponse>> HandleAsync(ConfirmWithdrawal command, CancellationToken cancellationToken)
@@ -286,7 +289,37 @@ internal sealed class ConfirmWithdrawalHandler(
         }
 
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await AcknowledgeAsync(row, now, cancellationToken).ConfigureAwait(false);
         return Response(row);
+    }
+
+    /// <summary>
+    /// The acknowledgement letter (DT-WITHDRAWAL-ACK) of the received declaration. DOC de-duplicates on (template, request number),
+    /// so the letter is rendered once however often the request is confirmed. No DOC binding means no letter (TODO(hardening): outbox retry).
+    /// </summary>
+    private async Task AcknowledgeAsync(WithdrawalRequestRow row, Instant now, CancellationToken cancellationToken)
+    {
+        var documents = services.GetService<IDocumentRequestService>();
+        var facts = documents is null ? null : await policies.FindAsync(row.PolicyId, cancellationToken).ConfigureAwait(false);
+        if (documents is null || facts is null)
+        {
+            return;
+        }
+
+        await documents.RequestAsync(
+            new DocumentRequestSpec(
+                "DT-WITHDRAWAL-ACK",
+                row.RequestNumber,
+                new ObjectRef(ModuleCode.CHN, "WithdrawalRequest", row.WithdrawalRequestId.ToString("D")),
+                facts.PolicyholderPartyId,
+                "el",
+                new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["customerName"] = row.DeclarantName,
+                    ["policyNo"] = facts.PolicyNumber,
+                    ["withdrawalDate"] = now.ToBusinessDate(options.Value.Zone).ToString(),
+                }),
+            cancellationToken).ConfigureAwait(false);
     }
 
     private static WithdrawalConfirmResponse Response(WithdrawalRequestRow row) => new()

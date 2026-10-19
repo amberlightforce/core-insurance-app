@@ -272,6 +272,9 @@ public enum PolicyTransactionKind
 
     /// <summary>Reversal of an earlier transaction.</summary>
     Reversal,
+
+    /// <summary>Opening transaction of a migrated in-force policy (SL6-MIG-POL-IMPORT): premium taken as given, deltas flagged opening.</summary>
+    Opening,
 }
 
 /// <summary>The canonical PolicyTransaction lifecycle.</summary>

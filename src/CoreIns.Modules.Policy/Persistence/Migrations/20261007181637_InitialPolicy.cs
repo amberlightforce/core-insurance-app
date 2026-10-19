@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Policy.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialPolicy : Migration
+    public partial class InitialPolicy : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

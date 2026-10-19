@@ -72,7 +72,7 @@ public sealed class WithdrawalTests(PostgresFixture database) : IClassFixture<Po
     private sealed class FakePort(Fakes fakes) : IWithdrawalPolicyPort
     {
         public Task<WithdrawalPolicyFacts?> FindAsync(PolicyId policyId, CancellationToken cancellationToken) =>
-            Task.FromResult(fakes.PolKnown ? new WithdrawalPolicyFacts(fakes.Concluded) : null);
+            Task.FromResult(fakes.PolKnown ? new WithdrawalPolicyFacts(fakes.Concluded, new PartyId(Guid.NewGuid()), "POL-TEST") : null);
 
         public Task<PolicySubmitOutcome> SubmitAsync(PolicyId policyId, Instant receivedAt, string channelRef, CancellationToken cancellationToken)
         {

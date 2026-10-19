@@ -315,6 +315,12 @@ internal sealed class JournalEntryRow
     public Instant PostedAt { get; set; }
 
     public string PostedBy { get; set; } = string.Empty;
+
+    /// <summary>The POL transaction this out-of-sequence correction corrects (REQ-POL-108); null for an ordinary journal.</summary>
+    public Guid? CorrectionOf { get; set; }
+
+    /// <summary>The out-of-sequence correction set the journal settles (one journal per set).</summary>
+    public Guid? OosSetId { get; set; }
 }
 
 /// <summary><c>fin.journal_line</c> (REQ-FIN-067, -075): append-only line with amounts and dimensions.</summary>

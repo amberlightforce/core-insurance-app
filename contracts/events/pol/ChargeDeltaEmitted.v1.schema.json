@@ -158,6 +158,11 @@
           "description": "True when the line rests on a value that is not Settled (D-REG-02)",
           "x-classification": "P0"
         },
+        "opening": {
+          "type": "boolean",
+          "description": "True when the delta carries a migrated opening balance (SL6-MIG-POL-IMPORT): BIL and FIN treat it as an opening balance of an in-force policy, not as new business",
+          "x-classification": "P0"
+        },
         "transactionKind": {
           "type": "string",
           "enum": [
