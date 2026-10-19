@@ -5,6 +5,13 @@
         "plt.Approval.decide": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "plt.Approval.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "plt.Approval.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        // SL6-PLT-AI: AI control plane. Toggles and the kill switch are administrator-only; invoking and the reads are staff.
+        "plt.AiToggle.set": [ "Platform.Admin" ],
+        "plt.AiToggle.resolve": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "plt.Ai.killSwitch": [ "Platform.Admin" ],
+        "plt.Ai.invoke": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "plt.Ai.recordOutcome": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "plt.FeatureFlag.evaluate": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         // SL3-PLT-SUPPORT (D-SL3-12): the Development dev clock; the routes exist only in Development with Platform:Time:Mode=Shiftable.
         "plt.DevClock.advance": [ "Platform.Admin" ],
         "plt.DevClock.get": [ "Platform.Admin" ]
