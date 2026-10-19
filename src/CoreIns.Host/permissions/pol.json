@@ -25,6 +25,8 @@
         "pol.PackRollbackException.list": [ "Staff.UnderwritingManager", "Staff.Underwriter", "Platform.Admin" ],
         "pol.PackRollbackException.get": [ "Staff.UnderwritingManager", "Staff.Underwriter", "Platform.Admin" ],
         "pol.PackRollbackException.review": [ "Staff.UnderwritingManager" ],
+        "pol.Psr.list": [ "Staff.UnderwritingManager", "Staff.Underwriter", "Platform.Admin" ],
+        "pol.Psr.decide": [ "Staff.UnderwritingManager" ],
         "pol.Term.timeline": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Platform.Admin" ]
       }
     }

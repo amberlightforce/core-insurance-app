@@ -6,7 +6,13 @@ using CoreIns.SharedKernel.Identifiers;
 namespace CoreIns.Modules.Policy.Commands.Cancellation;
 
 /// <summary>The command wrapper (<c>pol.Cancellation.create</c>); the request and response are the generated contract types (SL3-CONTRACTS).</summary>
-internal sealed record CancelPolicy(CancellationCreateRequest Request, WithdrawalCase? Withdrawal = null) : CoreIns.Platform.Commands.ICommand<CancellationCreateResponse>;
+internal sealed record CancelPolicy(CancellationCreateRequest Request, WithdrawalCase? Withdrawal = null, NonPaymentCase? NonPayment = null) : CoreIns.Platform.Commands.ICommand<CancellationCreateResponse>;
+
+/// <summary>
+/// Set by the non-payment consumer (SL6-POL-NONPAY): cancel <paramref name="TermId"/> for non-payment, effective at the start of the day after the
+/// clock due date (D-SL6-04), by the pro-rata path. Never reachable from <c>pol.Cancellation.create</c>.
+/// </summary>
+internal sealed record NonPaymentCase(PolicyTermId TermId, Instant Effective, Guid ClockInstanceId, Guid RequestId);
 
 /// <summary>
 /// Set by <c>pol.Withdrawal.submit</c> (SL6-POL-WITHDRAW) when the cancellation machinery is used to void a term ab initio: the
@@ -47,6 +53,8 @@ internal sealed class IllustrativeRefundMethods : ICancellationRefundMethods
         Domain.CancellationSources.Policyholder => RefundMethod.ProRata,
         // Law 5317/2026 Art. 72; the pinned MOTOR-GR 1.1 artefact declares the same (SL6-POL-WITHDRAW).
         Domain.CancellationSources.DistanceWithdrawal => RefundMethod.FullRefund,
+        // Pro-rata for cover not provided (ILLUSTRATIVE, commercial; E2E-03 steps 4-9) (SL6-POL-NONPAY).
+        Domain.CancellationSources.NonPayment => RefundMethod.ProRata,
         _ => null,
     };
 }

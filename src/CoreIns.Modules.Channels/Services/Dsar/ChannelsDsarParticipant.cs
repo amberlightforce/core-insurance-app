@@ -27,7 +27,7 @@ internal sealed class ChannelsDsarParticipant(IServiceScopeFactory scopes) : IDs
         ArgumentNullException.ThrowIfNull(subject);
         await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<ChannelsDbContext>();
-        var rows = await CollectAsync(db, subject, ct).ConfigureAwait(false);
+        var rows = await CollectAsync(scope.ServiceProvider, db, subject, ct).ConfigureAwait(false);
         var outcome = rows.Count == 0
             ? DsarRecordOutcome.NotHeld(WithdrawalClass)
             : DsarRecordOutcome.Restricted(WithdrawalClass, Basis, rows.Count) with { Detail = "exported" };
@@ -45,12 +45,12 @@ internal sealed class ChannelsDsarParticipant(IServiceScopeFactory scopes) : IDs
         ArgumentNullException.ThrowIfNull(subject);
         await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<ChannelsDbContext>();
-        var count = (await CollectAsync(db, subject, ct).ConfigureAwait(false)).Count;
+        var count = (await CollectAsync(scope.ServiceProvider, db, subject, ct).ConfigureAwait(false)).Count;
         var outcome = await DsarRestrictions.RestrictAsync(db, scope.ServiceProvider.GetRequiredService<IClock>(), subject.PartyId, WithdrawalClass, count, reason, legalBasis, retentionEnd, ct).ConfigureAwait(false);
         return new DsarModuleResult(Module, [outcome]);
     }
 
-    private static async Task<List<object>> CollectAsync(ChannelsDbContext db, SubjectRef subject, CancellationToken ct)
+    private static async Task<List<object>> CollectAsync(IServiceProvider services, ChannelsDbContext db, SubjectRef subject, CancellationToken ct)
     {
         // TODO(hardening): withdrawal rows hold no party id; match by the party's other identifiers once CHN stores the party.
         var policyIds = new List<PolicyId>();
@@ -59,6 +59,20 @@ internal sealed class ChannelsDsarParticipant(IServiceScopeFactory scopes) : IDs
             if (Guid.TryParse(text, out var guid))
             {
                 policyIds.Add(new PolicyId(guid));
+            }
+        }
+
+        // The fan-out knows the party only: the withdrawals are found through the policies the party holds (read-only lookup in POL).
+        if (policyIds.Count == 0)
+        {
+            var session = services.GetRequiredService<DbSession>();
+            var connection = await session.OpenConnectionAsync(ct).ConfigureAwait(false);
+            await using var command = new Npgsql.NpgsqlCommand("SELECT policy_id FROM pol.policy WHERE policyholder_party_id = @p", connection, session.Transaction);
+            command.Parameters.AddWithValue("p", NpgsqlTypes.NpgsqlDbType.Uuid, subject.PartyId.Value);
+            await using var reader = await command.ExecuteReaderAsync(ct).ConfigureAwait(false);
+            while (await reader.ReadAsync(ct).ConfigureAwait(false))
+            {
+                policyIds.Add(new PolicyId(reader.GetGuid(0)));
             }
         }
 

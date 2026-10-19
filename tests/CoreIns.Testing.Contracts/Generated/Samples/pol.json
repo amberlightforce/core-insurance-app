@@ -2796,6 +2796,47 @@
       "status": "SCHEDULED",
       "recordedAt": "2026-10-07T09:00:00Z"
     },
+    "PsrDecideRequest": {
+      "exceptionId": "019291a8-295e-74a7-86b8-461c693506ca",
+      "decision": "PROCEED",
+      "note": "sample"
+    },
+    "PsrExceptionListPage": {
+      "items": [
+        {
+          "exceptionId": "0192cce7-e8e3-7b08-8868-f184e982bd1e",
+          "policyId": "01924eb8-dd1e-754d-8efd-55eb2e4316c7",
+          "policyNumber": "SAMPLE-000001",
+          "termId": "019256e1-fe90-7cef-8903-7b43d1e1c485",
+          "requestId": "01925686-9b21-7318-885a-c4f17eb05c47",
+          "reason": "VULNERABLE_CUSTOMER",
+          "status": "PENDING",
+          "effectiveAt": "2026-10-07T09:00:00Z",
+          "raisedAt": "2026-10-07T09:00:00Z",
+          "decidedBy": "Sample text",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "decisionNote": "Sample text",
+          "jobId": "01925ca9-48ea-70f2-86c7-9be8c25c3ab5"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PsrExceptionView": {
+      "exceptionId": "019228e6-2f37-738e-857e-417d7151db36",
+      "policyId": "019296bf-d5f5-7071-89fe-4a34d320e515",
+      "policyNumber": "SAMPLE-000001",
+      "termId": "0192e170-58f4-7dd9-8c20-4cceb86d4813",
+      "requestId": "0192887b-f820-7975-8ec8-6886baf88666",
+      "reason": "VULNERABLE_CUSTOMER",
+      "status": "PENDING",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "raisedAt": "2026-10-07T09:00:00Z",
+      "decidedBy": "Sample text",
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "decisionNote": "Sample text",
+      "jobId": "0192d308-2fd3-7e89-88db-175e339da016"
+    },
     "QuestionAnswers": {
       "questionSetCode": "SAMPLE_CODE",
       "questionSetVersion": "Sample text",
