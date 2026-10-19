@@ -18,7 +18,13 @@
         "bil.Refund.decide": [ "Staff.BillingManager" ],
         // SL3-BIL-REFUND: billing staff (and the manager) propose and resubmit; maker != checker is enforced by plt.Approval and by BIL.
         "bil.Refund.propose": [ "Staff.Billing", "Staff.BillingManager" ],
-        "bil.Refund.resubmit": [ "Staff.Billing", "Staff.BillingManager" ]
+        "bil.Refund.resubmit": [ "Staff.Billing", "Staff.BillingManager" ],
+        // SL6-BIL-DELINQ: collections staff work the non-payment cases; the manager also lifts holds.
+        "bil.Delinquency.get": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.Delinquency.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.Delinquency.recordContact": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Delinquency.arrange": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Delinquency.releaseHold": [ "Staff.Billing", "Staff.BillingManager" ]
       }
     },
     "Authority": {
