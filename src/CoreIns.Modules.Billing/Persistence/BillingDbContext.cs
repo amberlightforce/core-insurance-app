@@ -61,6 +61,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        DsarRestrictionModel.Configure(modelBuilder);
         ReceivableModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BillingAccountRow>(entity =>

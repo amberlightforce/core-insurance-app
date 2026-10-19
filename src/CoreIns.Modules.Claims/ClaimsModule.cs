@@ -52,6 +52,7 @@ public static class ClaimsModule
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.claim, {Schema}.exposure, {Schema}.claimant, {Schema}.incident TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.dsar_restriction TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.fnol_snapshot TO {appRole}",
 
                 // Claim financials (SL2-CLM-MONEY, D-ARC-34): the ledger lines are insert-only; the set header, line flags,
@@ -75,6 +76,7 @@ public static class ClaimsModule
 
         services.AddOptions<ClaimsOptions>().Bind(configuration.GetSection(ClaimsOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
         services.AddModuleDbContext<ClaimsDbContext>(Schema);
+        services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Claims.Services.Dsar.ClaimsDsarParticipant>();
 
         services.AddScoped<ClaimProtection>();
         services.AddScoped<ClaimReader>();
