@@ -122,6 +122,17 @@ public static class BillingModule
         services.AddCommandAuditor<ApproveDisbursementRelease, DisbursementApproveReleaseResponse, ApproveDisbursementReleaseAuditor>();
         services.AddCommand<ApproveDisbursementRelease, DisbursementApproveReleaseResponse, ApproveDisbursementReleaseHandler>(
             CommandDescriptor.For("bil.Disbursement.approveRelease") with { SupportsDryRun = true });
+        services.AddScoped<DisbursementOperator>();
+        services.AddCommandAuditor<DevBankOperation, DevBankResult, DevBankOperationAuditor>();
+        services.AddCommand<DevBankOperation, DevBankResult, DevBankOperationHandler>(CommandDescriptor.For("bil.DevBank.operate"));
+        services.AddScoped<IValidator<StopDisbursement>, StopDisbursementValidator>();
+        services.AddCommandAuditor<StopDisbursement, DisbursementStopResponse, StopDisbursementAuditor>();
+        services.AddCommand<StopDisbursement, DisbursementStopResponse, StopDisbursementHandler>(
+            CommandDescriptor.For("bil.Disbursement.stop") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<VoidDisbursement>, VoidDisbursementValidator>();
+        services.AddCommandAuditor<VoidDisbursement, DisbursementVoidResponse, VoidDisbursementAuditor>();
+        services.AddCommand<VoidDisbursement, DisbursementVoidResponse, VoidDisbursementHandler>(
+            CommandDescriptor.For("bil.Disbursement.void") with { SupportsDryRun = true });
         services.AddScoped<IValidator<RequestDisbursement>, RequestDisbursementValidator>();
         services.AddCommandAuditor<RequestDisbursement, DisbursementRequestResponse, RequestDisbursementAuditor>();
         services.AddCommand<RequestDisbursement, DisbursementRequestResponse, RequestDisbursementHandler>(

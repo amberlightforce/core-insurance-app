@@ -17,6 +17,11 @@
         "bil.Disbursement.get": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "bil.Disbursement.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
         "bil.Disbursement.approveRelease": [ "Staff.BillingManager" ],
+        // SL4-BIL-DISBOPS: stop/void need BIL.DisbursementStop authority (checked again by the handler); CLM calls them in process for payment corrections.
+        "bil.Disbursement.stop": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "bil.Disbursement.void": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        // Development-only manual stub bank (Billing:StubBank:Mode=Manual); the controller answers 404 elsewhere.
+        "bil.DevBank.operate": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
         // SL3-PLT-SUPPORT: refunds are read by billing staff; only the billing manager decides them (SoD: maker != checker is enforced by plt.Approval).
         "bil.Refund.get": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.Refund.list": [ "Staff.Billing", "Staff.BillingManager" ],

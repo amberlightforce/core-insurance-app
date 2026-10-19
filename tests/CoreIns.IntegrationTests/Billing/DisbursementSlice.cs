@@ -13,6 +13,7 @@ using CoreIns.SharedKernel.Identifiers;
 using CoreIns.Testing.Contracts.Fakes.Party;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
@@ -29,29 +30,37 @@ internal sealed class DisbursementSlice : IAsyncDisposable
 {
     private readonly ApiHostFactory _host;
 
-    public DisbursementSlice(PostgresFixture database, bool screening = true, bool payeeVerifier = true, bool bankChannel = true)
+    public DisbursementSlice(PostgresFixture database, bool screening = true, bool payeeVerifier = true, bool bankChannel = true, bool manualBank = false)
     {
         Database = database;
         _host = new ApiHostFactory(database.AppConnectionString);
         Screening.Setup("pty.Screening.screen", Clear());
-        Factory = _host.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
+        Factory = _host.WithWebHostBuilder(builder =>
         {
-            services.RemoveAll<IPartyScreeningService>();
-            if (screening)
+            if (manualBank)
             {
-                services.AddSingleton<IPartyScreeningService>(Screening);
+                builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?> { ["Billing:StubBank:Mode"] = "Manual" }));
             }
 
-            if (!payeeVerifier)
+            builder.ConfigureTestServices(services =>
             {
-                services.RemoveAll<IPayeeVerifier>();
-            }
+                services.RemoveAll<IPartyScreeningService>();
+                if (screening)
+                {
+                    services.AddSingleton<IPartyScreeningService>(Screening);
+                }
 
-            if (!bankChannel)
-            {
-                services.RemoveAll<IBankChannel>();
-            }
-        }));
+                if (!payeeVerifier)
+                {
+                    services.RemoveAll<IPayeeVerifier>();
+                }
+
+                if (!bankChannel)
+                {
+                    services.RemoveAll<IBankChannel>();
+                }
+            });
+        });
         Client = Factory.CreateClient();
         DataSource = NpgsqlDataSource.Create(database.SuperuserConnectionString);
     }
