@@ -3,7 +3,18 @@
     "Permissions": {
       "Grants": {
         "cmp.FiscalDocument.request": [ "Platform.Admin" ],
-        "cmp.FiscalDocument.get": [ "Staff.Billing", "Platform.Admin" ]
+        "cmp.FiscalDocument.get": [ "Staff.Billing", "Platform.Admin" ],
+        // Clock engine (SL6-CMP-CLOCK): modules start and stop clocks in-process; the REST facade is for administration and reads.
+        "cmp.Clock.start": [ "Platform.Admin" ],
+        "cmp.Clock.pause": [ "Platform.Admin" ],
+        "cmp.Clock.resume": [ "Platform.Admin" ],
+        "cmp.Clock.stop": [ "Platform.Admin" ],
+        "cmp.Clock.cancel": [ "Platform.Admin" ],
+        "cmp.Clock.extend": [ "Platform.Admin" ],
+        "cmp.Clock.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "cmp.Clock.query": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "cmp.ClockDef.list": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "cmp.ClockDef.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ]
       }
     }
   }

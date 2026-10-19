@@ -61,6 +61,7 @@ builder.Services.AddBillingPaymentAdapters(builder.Environment);
 // D-SL2-05: PTY sanctions screening is a stub (Clear, marked) outside Production; in Production it fails closed.
 builder.Services.AddPartyScreening(builder.Environment);
 builder.Services.AddCoreInsDataProtection(builder.Configuration, builder.Environment);
+builder.Services.AddCoreInsDsar();
 
 if (role == AppRole.Worker)
 {

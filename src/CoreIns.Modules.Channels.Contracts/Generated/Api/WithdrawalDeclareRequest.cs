@@ -4,39 +4,27 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>chn.Withdrawal.declare request. PRD inputs: "name, contract id, e-mail, reason"</summary>
+/// <summary>chn.Withdrawal.declare request (typed by SL6-CHN-WITHDRAW, D-SL6-06). PRD inputs: "name, contract id, e-mail, reason"</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record WithdrawalDeclareRequest
 {
-    /// <summary>PRD: "name"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>PRD: "name" (declarant)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("name")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Name { get; init; }
+    public required string Name { get; init; }
 
-    /// <summary>PRD: "contract id"</summary>
+    /// <summary>PRD: "contract id" = the policy id</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'contractId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? ContractId { get; init; }
+    public required global::System.Guid ContractId { get; init; }
 
-    /// <summary>PRD: "e-mail"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>PRD: "e-mail" (the confirmation token is sent here)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("eMail")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? EMail { get; init; }
+    public required string EMail { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>PRD: "reason" (optional)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
 }

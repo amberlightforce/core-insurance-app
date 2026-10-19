@@ -152,6 +152,12 @@ internal sealed record LineDimensions
 
     public ClaimId? ClaimId { get; init; }
 
+    public Guid? RecoveryId { get; init; }
+
+    public string? StatementRef { get; init; }
+
+    public PartyId? CounterpartyPartyId { get; init; }
+
     /// <summary>Transaction kind code of the POL transaction (MKT TaxTransactionKind); set on servicing entries, null otherwise (contract LedgerDimensions).</summary>
     public string? TransactionKind { get; init; }
 
@@ -252,3 +258,4 @@ internal static class Posting
 
     private static DomainError NoRule(string detail) => DomainError.Of(ModuleCode.BIL, "NO-RULE", detail);
 }
+

@@ -2585,6 +2585,8 @@ export interface components {
             /** @description Role that works the request (the referral target of the maker's authority check) */
             referralRole: components["schemas"]["Code"];
             reason?: string;
+            /** @description Authoritative participant actor keys supplied by the owning module in process; added to inherited editors and frozen on submission */
+            editors?: string[];
         };
         /** @description plt.Approval.request result. PRD outputs: "request; decision" */
         ApprovalRequestResponse: {
@@ -2610,23 +2612,19 @@ export interface components {
             /** @description PRD: "decision" */
             decision: components["schemas"]["ApprovalDecisionView"];
         };
-        /** @description plt.Approval.withdraw request. PRD inputs: "type, object ref, payload hash, diff" */
+        /** @description plt.Approval.withdraw request (SL4-CONTRACTS, D-SL4-14). In-process only: IPlatformApprovalService.WithdrawAsync(request, options). Callable only by the module that created the request (PLT-ERR-NOT-OWNER); no REST route is mapped by the host. */
         ApprovalWithdrawRequest: {
-            /** @description PRD: "type" */
-            type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "object ref" */
-            objectRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payload hash" */
-            payloadHash?: components["schemas"]["Sha256"];
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
+            /** @description The pending approval request to withdraw */
+            approvalRequestId: components["schemas"]["Uuid"];
+            /** @description Why it is withdrawn (e.g. APPROVAL_WITHDRAWN: the set was rejected or went stale); audited */
+            reason: components["schemas"]["Text"];
         };
-        /** @description plt.Approval.withdraw result. PRD outputs: "request; decision" */
+        /** @description plt.Approval.withdraw result. Publishes ApprovalDecided with decision WITHDRAWN once. Withdrawing an already withdrawn request is a no-op returning the same result. */
         ApprovalWithdrawResponse: {
-            /** @description PRD: "request" */
-            request?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            approvalRequestId: components["schemas"]["Uuid"];
+            /** @description Withdrawn */
+            status: components["schemas"]["ApprovalStatus"];
+            withdrawnAt: components["schemas"]["Instant"];
         };
         /** @description plt.Approval.get result. PRD outputs: "request; decision" */
         ApprovalGetResponse: {
@@ -2953,17 +2951,15 @@ export interface components {
             /** @description PRD: "evaluation id" */
             evaluationId?: components["schemas"]["Uuid"];
         };
-        /** @description plt.FeatureFlag.evaluate request. PRD inputs: "flag, context" */
+        /** @description plt.FeatureFlag.evaluate request (SL6-PLT-AI). AI features (AI-XXX-NN) answer with the AI gate; other flags come from Platform:FeatureFlags configuration. */
         FeatureFlagEvaluateRequest: {
-            /** @description PRD: "flag" */
-            flag?: boolean;
-            /** @description PRD: "context" */
+            flag: string;
             context?: components["schemas"]["Unspecified"];
         };
-        /** @description plt.FeatureFlag.evaluate result. PRD outputs: "state" */
+        /** @description plt.FeatureFlag.evaluate result. */
         FeatureFlagEvaluateResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
+            state: boolean;
+            reason?: string;
         };
         /** @description plt.Calendar.isBusinessDay result. PRD outputs: "date or count, calendar versions" */
         CalendarIsBusinessDayResponse: {
@@ -3111,85 +3107,73 @@ export interface components {
             /** @description PRD: "number" */
             number?: components["schemas"]["Unspecified"];
         };
-        /** @description plt.Ai.invoke request. PRD inputs: "feature, inputs (allow-listed)" */
+        /** @description plt.Ai.invoke request (SL6-PLT-AI). Inputs are an allow-listed JSON object; the provider is a deterministic fake (D-SL6-09). Refused with PLT-ERR-AI-DISABLED (503) when the gate is closed before or after the provider call. */
         AiInvokeRequest: {
-            /** @description PRD: "feature" */
-            feature?: components["schemas"]["Unspecified"];
-            /** @description PRD: "inputs (allow-listed)" */
-            inputs?: components["schemas"]["Unspecified"];
+            featureId: components["schemas"]["AiFeatureId"];
+            /** @description JSON object of allow-listed inputs; kept on the interaction row */
+            inputs: components["schemas"]["Unspecified"];
         };
-        /** @description plt.Ai.invoke result. PRD outputs: "output, interaction id; outcome" */
+        /** @description plt.Ai.invoke result. The output is a suggestion; nothing writes state from it (D-SL6-08). */
         AiInvokeResponse: {
-            /** @description PRD: "output" */
-            output?: components["schemas"]["Unspecified"];
-            /** @description PRD: "interaction id" */
-            interactionId?: components["schemas"]["Uuid"];
-            /** @description PRD: "outcome" */
-            outcome?: components["schemas"]["Unspecified"];
+            output: components["schemas"]["Unspecified"];
+            interactionId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "Suggested";
         };
-        /** @description plt.Ai.recordOutcome request. PRD inputs: "feature, inputs (allow-listed)" */
+        /** @description plt.Ai.recordOutcome request (SL6-PLT-AI): the human decision on a suggestion. */
         AiRecordOutcomeRequest: {
-            /** @description PRD: "feature" */
-            feature?: components["schemas"]["Unspecified"];
-            /** @description PRD: "inputs (allow-listed)" */
-            inputs?: components["schemas"]["Unspecified"];
+            interactionId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "Accepted" | "Rejected" | "Modified";
+            comment?: string;
         };
-        /** @description plt.Ai.recordOutcome result. PRD outputs: "output, interaction id; outcome" */
+        /** @description plt.Ai.recordOutcome result. */
         AiRecordOutcomeResponse: {
-            /** @description PRD: "output" */
-            output?: components["schemas"]["Unspecified"];
-            /** @description PRD: "interaction id" */
-            interactionId?: components["schemas"]["Uuid"];
-            /** @description PRD: "outcome" */
-            outcome?: components["schemas"]["Unspecified"];
+            interactionId: components["schemas"]["Uuid"];
+            outcome: string;
         };
-        /** @description plt.AiToggle.resolve request. PRD inputs: "feature, inputs (allow-listed)" */
+        /** @description plt.AiToggle.resolve request (SL6-PLT-AI). */
         AiToggleResolveRequest: {
-            /** @description PRD: "feature" */
-            feature?: components["schemas"]["Unspecified"];
-            /** @description PRD: "inputs (allow-listed)" */
-            inputs?: components["schemas"]["Unspecified"];
+            featureId: components["schemas"]["AiFeatureId"];
         };
-        /** @description plt.AiToggle.resolve result. PRD outputs: "output, interaction id; outcome" */
+        /** @description plt.AiToggle.resolve result: the effective state the gate would answer now. */
         AiToggleResolveResponse: {
-            /** @description PRD: "output" */
-            output?: components["schemas"]["Unspecified"];
-            /** @description PRD: "interaction id" */
-            interactionId?: components["schemas"]["Uuid"];
-            /** @description PRD: "outcome" */
-            outcome?: components["schemas"]["Unspecified"];
+            featureId: components["schemas"]["AiFeatureId"];
+            /** @description The feature's own toggle */
+            enabled: boolean;
+            /** @description Toggle on and no kill switch active */
+            allowed: boolean;
+            /** @description Gate reason code when not allowed */
+            reason?: string;
+            /** @description AI register status last seen (null when no register) */
+            registerStatus?: string;
+            killSwitchActive: boolean;
         };
-        /** @description plt.AiToggle.set request. PRD inputs: "feature, inputs (allow-listed)" */
+        /** @description plt.AiToggle.set request (SL6-PLT-AI). Enabling needs register status APPROVED (D-SL6-08); disabling is always allowed. */
         AiToggleSetRequest: {
-            /** @description PRD: "feature" */
-            feature?: components["schemas"]["Unspecified"];
-            /** @description PRD: "inputs (allow-listed)" */
-            inputs?: components["schemas"]["Unspecified"];
+            featureId: components["schemas"]["AiFeatureId"];
+            enabled: boolean;
+            reason?: string;
         };
-        /** @description plt.AiToggle.set result. PRD outputs: "output, interaction id; outcome" */
+        /** @description plt.AiToggle.set result. */
         AiToggleSetResponse: {
-            /** @description PRD: "output" */
-            output?: components["schemas"]["Unspecified"];
-            /** @description PRD: "interaction id" */
-            interactionId?: components["schemas"]["Uuid"];
-            /** @description PRD: "outcome" */
-            outcome?: components["schemas"]["Unspecified"];
+            featureId: components["schemas"]["AiFeatureId"];
+            enabled: boolean;
+            /** Format: int64 */
+            version: number;
         };
-        /** @description plt.Ai.killSwitch request. PRD inputs: "feature, inputs (allow-listed)" */
+        /** @description plt.Ai.killSwitch request (SL6-PLT-AI). Scope GLOBAL or an AI feature id. */
         AiKillSwitchRequest: {
-            /** @description PRD: "feature" */
-            feature?: components["schemas"]["Unspecified"];
-            /** @description PRD: "inputs (allow-listed)" */
-            inputs?: components["schemas"]["Unspecified"];
+            /** @enum {string} */
+            action: "Activate" | "Clear";
+            /** @description GLOBAL or an AI feature id */
+            scope: string;
+            reason?: string;
         };
-        /** @description plt.Ai.killSwitch result. PRD outputs: "output, interaction id; outcome" */
+        /** @description plt.Ai.killSwitch result. */
         AiKillSwitchResponse: {
-            /** @description PRD: "output" */
-            output?: components["schemas"]["Unspecified"];
-            /** @description PRD: "interaction id" */
-            interactionId?: components["schemas"]["Uuid"];
-            /** @description PRD: "outcome" */
-            outcome?: components["schemas"]["Unspecified"];
+            scope: string;
+            active: boolean;
         };
         /** @description plt.Retention.registerDataset request. PRD inputs: "per op" */
         RetentionRegisterDatasetRequest: Record<string, never>;
@@ -3510,6 +3494,9 @@ export interface components {
         OpenObject: {
             [key: string]: components["schemas"]["OpenValue"];
         };
+        Text: string;
+        /** @description AI feature id `AI-<MOD>-<NN>` (contract §3.6.1). */
+        AiFeatureId: string;
         /** @description BCP 47 language tag (el, en, el-GR). */
         LanguageCode: string;
     };
@@ -4773,6 +4760,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
