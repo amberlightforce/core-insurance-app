@@ -23,6 +23,7 @@
     "packs": "Market packs",
     "withdrawals": "Withdrawals",
     "packRollback": "Pack-rollback exceptions",
+    "migration": "Migration",
     "aiControl": "AI control",
     "admin": "Administration",
     "more": "More",

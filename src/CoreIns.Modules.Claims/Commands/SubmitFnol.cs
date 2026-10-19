@@ -169,6 +169,11 @@ internal sealed class SubmitFnolHandler(
             UpdatedAt = now,
         };
 
+        if (request.LiabilityFacts is { } liability)
+        {
+            LiabilityMapping.Apply(claim, liability);
+        }
+
         var insured = new ClaimantRow
         {
             ClaimantId = ClaimantId.New(), ClaimId = claimId, LegalEntityId = legalEntity, Jurisdiction = jurisdiction,

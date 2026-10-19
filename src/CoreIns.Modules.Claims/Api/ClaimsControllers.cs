@@ -27,6 +27,7 @@ internal static class ClaimsPermissions
     public const string ClaimClose = "clm.Claim.close";
     public const string ExposureCreate = "clm.Exposure.create";
     public const string CoverageReverify = "clm.Coverage.reverify";
+    public const string ClaimUpdate = "clm.Claim.update";
 }
 
 /// <summary>REST facade of <c>clm.Fnol.*</c> (contracts/openapi/clm.yaml): thin; commands through the pipeline.</summary>
@@ -93,6 +94,15 @@ internal sealed class ClaimsController : ControllerBase
             : null;
         return view is null ? HttpResults.Problem(ClaimSupport.NotFound("claim"), HttpContext) : Results.Ok(new ClaimGetResponse { Claim = view });
     }
+
+    /// <summary>clm.Claim.update: slice 4 types the liability facts (D-SL4-17).</summary>
+    [HttpPatch("claims/{id}")]
+    [Authorize(Policy = ClaimsPermissions.ClaimUpdate)]
+    public async Task<IResult> UpdateAsync(
+        string id, [FromBody] ClaimUpdateRequest request, [FromServices] ICommandHandler<UpdateClaim, ClaimUpdateResponse> handler, CancellationToken cancellationToken) =>
+        Guid.TryParse(id, out var claimId)
+            ? (await handler.HandleAsync(new UpdateClaim(new ClaimId(claimId), request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext)
+            : HttpResults.Problem(ClaimSupport.NotFound("claim"), HttpContext);
 
     /// <summary>clm.Claim.close (REQ-CLM-071..073).</summary>
     [HttpPost("claims/close")]
