@@ -12,7 +12,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [PFC](#pfc) | 34 | 31 | 3 | 18 | 16 | 1 | 1 | 0 |
 | [RAT](#rat) | 47 | 47 | 0 | 24 | 23 | 3 | 2 | 0 |
 | [UW](#uw) | 82 | 55 | 27 | 57 | 25 | 3 | 2 | 4 |
-| [POL](#pol) | 55 | 51 | 4 | 38 | 17 | 8 | 10 | 0 |
+| [POL](#pol) | 56 | 52 | 4 | 39 | 17 | 8 | 10 | 0 |
 | [BIL](#bil) | 90 | 90 | 0 | 56 | 34 | 6 | 5 | 1 |
 | [CLM](#clm) | 73 | 73 | 0 | 53 | 20 | 10 | 9 | 5 |
 | [RI](#ri) | 116 | 110 | 6 | 82 | 34 | 9 | 0 | 0 |
@@ -25,7 +25,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
 | [MIG](#mig) | 20 | 20 | 0 | 12 | 8 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 36 | 12 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1142 | 928 | 214 | 742 | 400 | 129 | 69 | 65 |
+| **Total** | 1143 | 929 | 214 | 743 | 400 | 129 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -315,6 +315,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `pol.Cancellation.create` | POST `/api/pol/v1/cancellations` | C | yes | ui, partner | CHN | W6 | full | REQ-POL-012, REQ-POL-205..REQ-POL-211 |
 | `pol.Cancellation.rescind` | POST `/api/pol/v1/cancellations/rescind` | C | yes | ui |  | W6 | full | REQ-POL-012, REQ-POL-205..REQ-POL-211 |
 | `pol.Cancellation.schedule` | POST `/api/pol/v1/cancellations/schedule` | C | yes | ui |  | W6 | full | REQ-POL-012, REQ-POL-205..REQ-POL-211 |
+| `pol.Change.createOutOfSequence` | POST `/api/pol/v1/policy-changes/out-of-sequence` | C | yes | ui | BIL | W6 | full | REQ-POL-006, REQ-POL-108 |
 | `pol.Charges.reconcile` | POST `/api/pol/v1/charges/reconcile` | Q |  | internal | BIL, FIN, RI | W4 | full | REQ-POL-122, REQ-POL-355 |
 | `pol.Dsar.export` | POST `/api/pol/v1/dsar/export` | C |  | internal | CMP | W4 | full | REQ-POL-338 |
 | `pol.Dsar.restrict` | POST `/api/pol/v1/dsar/restrict` | C |  | internal | CMP | W4 | full | REQ-POL-339 |
@@ -1462,7 +1463,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-POL-003 | `chn.PartnerQuote.bind`, `pol.Job.bind` |  |
 | REQ-POL-004 | `pol.StatusModel.get` | mapped by builder |
 | REQ-POL-005 | — | event contract only (ChargeDeltaEmitted in contracts/events/pol) |
-| REQ-POL-006 | `pol.Job.rebase`, `pol.Job.resolveConflicts` | mapped by builder |
+| REQ-POL-006 | `pol.Change.createOutOfSequence`, `pol.Job.rebase`, `pol.Job.resolveConflicts` | mapped by builder |
 | REQ-POL-007 | `pol.Snapshot.get` |  |
 | REQ-POL-008 | `pol.EffectiveDate.limits` | mapped by builder |
 | REQ-POL-009 | `pol.Renewal.accept`, `pol.Renewal.create`, `pol.Renewal.decline`, `pol.Renewal.nonRenew` (+1) |  |
