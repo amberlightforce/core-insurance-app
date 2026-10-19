@@ -2,6 +2,7 @@ using CoreIns.Host.Database;
 using CoreIns.Host.Health;
 using CoreIns.Host.Hosting;
 using CoreIns.Modules.Billing.Services;
+using CoreIns.Modules.Claims.Api;
 using CoreIns.Modules.Party.Services;
 using CoreIns.Platform;
 using CoreIns.Platform.Errors;
@@ -99,6 +100,12 @@ if (role == AppRole.Api)
     if (devClock)
     {
         app.MapDevClock();
+    }
+
+    if (!app.Environment.IsProduction())
+    {
+        // Development-only inbound clearing notifications (D-SL4-18); the GR stub is bound only outside Production too.
+        app.MapDevFsClearing();
     }
 
     if (devSignIn)
