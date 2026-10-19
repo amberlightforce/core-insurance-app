@@ -6,17 +6,19 @@
     "plt.Ai.invoke": {
       "output": "unspecified",
       "interactionId": "01923b39-0a10-7f66-8f31-872cf825524b",
-      "outcome": "unspecified"
+      "outcome": "Suggested"
     },
     "plt.Ai.recordOutcome": {
-      "output": "unspecified",
       "interactionId": "0192c282-319b-7349-8f20-7f26b327b8de",
-      "outcome": "unspecified"
+      "outcome": "sample"
     },
     "plt.AiToggle.resolve": {
-      "output": "unspecified",
-      "interactionId": "01921023-b8d4-71fc-88c7-dc7646e37a9e",
-      "outcome": "unspecified"
+      "featureId": "AI-CLM-01",
+      "enabled": true,
+      "allowed": true,
+      "reason": "sample",
+      "registerStatus": "sample",
+      "killSwitchActive": true
     },
     "plt.Approval.decide": {
       "request": {
@@ -298,7 +300,8 @@
       "key": "value"
     },
     "plt.FeatureFlag.evaluate": {
-      "state": "unspecified"
+      "state": true,
+      "reason": "sample"
     },
     "plt.Fx.getRate": {
       "rate": "unspecified",
@@ -415,49 +418,52 @@
       "response": "unspecified"
     },
     "AiInvokeRequest": {
-      "feature": "unspecified",
+      "featureId": "AI-CLM-01",
       "inputs": "unspecified"
     },
     "AiInvokeResponse": {
       "output": "unspecified",
       "interactionId": "01928f78-0608-72ad-812b-a95d36090731",
-      "outcome": "unspecified"
+      "outcome": "Suggested"
     },
     "AiKillSwitchRequest": {
-      "feature": "unspecified",
-      "inputs": "unspecified"
+      "action": "Activate",
+      "scope": "sample",
+      "reason": "sample"
     },
     "AiKillSwitchResponse": {
-      "output": "unspecified",
-      "interactionId": "01923303-01ed-7d9c-8c7e-b019434796bd",
-      "outcome": "unspecified"
+      "scope": "sample",
+      "active": true
     },
     "AiRecordOutcomeRequest": {
-      "feature": "unspecified",
-      "inputs": "unspecified"
+      "interactionId": "01922607-9fcc-7c85-8d26-c01e1c8ec60c",
+      "outcome": "Accepted",
+      "comment": "sample"
     },
     "AiRecordOutcomeResponse": {
-      "output": "unspecified",
       "interactionId": "0192bfb2-3fa8-77e8-891f-b967220faa87",
-      "outcome": "unspecified"
+      "outcome": "sample"
     },
     "AiToggleResolveRequest": {
-      "feature": "unspecified",
-      "inputs": "unspecified"
+      "featureId": "AI-CLM-01"
     },
     "AiToggleResolveResponse": {
-      "output": "unspecified",
-      "interactionId": "0192fcff-28d4-7ae6-8101-525bbe6643e0",
-      "outcome": "unspecified"
+      "featureId": "AI-CLM-01",
+      "enabled": true,
+      "allowed": true,
+      "reason": "sample",
+      "registerStatus": "sample",
+      "killSwitchActive": true
     },
     "AiToggleSetRequest": {
-      "feature": "unspecified",
-      "inputs": "unspecified"
+      "featureId": "AI-CLM-01",
+      "enabled": true,
+      "reason": "sample"
     },
     "AiToggleSetResponse": {
-      "output": "unspecified",
-      "interactionId": "0192091b-c952-7407-820f-6e30e5dcbba1",
-      "outcome": "unspecified"
+      "featureId": "AI-CLM-01",
+      "enabled": true,
+      "version": 1
     },
     "ApprovalAuthority": {
       "type": "SAMPLE_CODE",
@@ -1042,11 +1048,12 @@
       "invitation": "unspecified"
     },
     "FeatureFlagEvaluateRequest": {
-      "flag": true,
+      "flag": "sample",
       "context": "unspecified"
     },
     "FeatureFlagEvaluateResponse": {
-      "state": "unspecified"
+      "state": true,
+      "reason": "sample"
     },
     "FxCorrectRequest": {
       "pair": "unspecified",
