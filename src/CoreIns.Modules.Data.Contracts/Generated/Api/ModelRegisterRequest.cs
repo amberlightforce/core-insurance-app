@@ -4,23 +4,23 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Model.register request. PRD inputs: "model card, version"</summary>
+/// <summary>dat.Model.register request (DAT-CORE minimal registry)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ModelRegisterRequest
 {
-    /// <summary>PRD: "model card"</summary>
+    /// <summary>AI feature id or rating artefact key the model serves</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("featureKey")]
+    public required string FeatureKey { get; init; }
+
+    /// <summary>Contract member 'version'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    public required string Version { get; init; }
+
+    /// <summary>Free-form model card</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Open object: members not defined by the contract yet.</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("modelCard")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? ModelCard { get; init; }
-
-    /// <summary>PRD: "version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Version { get; init; }
 }

@@ -4,23 +4,20 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.AiSystem.register request. PRD inputs: "feature id, entry"</summary>
+/// <summary>cmp.AiSystem.register request (SL6-CMP-AIREG). New entries start in DRAFT.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AiSystemRegisterRequest
 {
-    /// <summary>PRD: "feature id"</summary>
-    /// <remarks>
-    /// <para>Untyped id: no SharedKernel id type is mapped for 'featureId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
-    /// </remarks>
+    /// <summary>Contract member 'featureId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("featureId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? FeatureId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.AiFeatureId FeatureId { get; init; }
 
-    /// <summary>PRD: "entry"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("entry")]
+    /// <summary>Contract member 'name'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("name")]
+    public required string Name { get; init; }
+
+    /// <summary>Contract member 'aiActClass'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("aiActClass")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Entry { get; init; }
+    public string? AiActClass { get; init; }
 }
