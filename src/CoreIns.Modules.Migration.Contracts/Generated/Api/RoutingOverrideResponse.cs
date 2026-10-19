@@ -4,23 +4,52 @@
 
 namespace CoreIns.Modules.Migration.Contracts.Api;
 
-/// <summary>mig.Routing.override result. PRD outputs: "route, approval ref"</summary>
+/// <summary>mig.Routing.override result: the stored route.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RoutingOverrideResponse
 {
-    /// <summary>PRD: "route"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("route")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Route { get; init; }
+    /// <summary>Contract member 'masterState'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("masterState")]
+    public required MasterStateValue MasterState { get; init; }
 
-    /// <summary>PRD: "approval ref"</summary>
+    /// <summary>Contract member 'routeId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'routeId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRef")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("routeId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ApprovalRef { get; init; }
+    public global::System.Guid? RouteId { get; init; }
+
+    /// <summary>Contract member 'validFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validFrom")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidFrom { get; init; }
+
+    /// <summary>Contract member 'validTo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validTo")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidTo { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Reason { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<MasterStateValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum MasterStateValue
+    {
+        /// <summary><c>NONE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NONE")]
+        None,
+
+        /// <summary><c>TRANSITIONING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("TRANSITIONING")]
+        Transitioning,
+
+        /// <summary><c>CORE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CORE")]
+        Core,
+    }
 }
