@@ -45,7 +45,7 @@ public sealed record PaymentTakeRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? PaymentReference { get; init; }
 
-    /// <summary>Receivable the payer referenced (alternative to paymentReference); the amount must equal its open amount (BIL-ERR-AMOUNT-MISMATCH, REQ-BIL-135)</summary>
+    /// <summary>Receivable the payer referenced (alternative to paymentReference); partial receipts leave the remainder open and surplus remains unapplied on the account (REQ-BIL-130, -133, -356)</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'receivableId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
