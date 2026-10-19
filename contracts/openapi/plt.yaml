@@ -5030,6 +5030,9 @@ paths:
       - PTY
       x-permission: plt.Ai.invoke
       x-error-codes:
+      - code: PLT-ERR-AI-DISABLED
+        note: D-SL6-08 gate closed (kill switch, toggle off, unreadable state)
+        status: 503
       - code: PLT-ERR-AI-OFF
         status: 422
       - code: PLT-ERR-AI-DATA-CLASS
@@ -8144,21 +8147,25 @@ components:
           description: 'PRD: "evaluation id"'
     FeatureFlagEvaluateRequest:
       type: object
-      description: 'plt.FeatureFlag.evaluate request. PRD inputs: "flag, context"'
+      description: 'plt.FeatureFlag.evaluate request (SL6-PLT-AI). AI features (AI-XXX-NN) answer with the AI gate; other flags come from Platform:FeatureFlags configuration.'
       properties:
         flag:
-          type: boolean
-          description: 'PRD: "flag"'
+          type: string
+          maxLength: 128
         context:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "context"'
+      required:
+      - flag
     FeatureFlagEvaluateResponse:
       type: object
-      description: 'plt.FeatureFlag.evaluate result. PRD outputs: "state"'
+      description: 'plt.FeatureFlag.evaluate result.'
       properties:
         state:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "state"'
+          type: boolean
+        reason:
+          type: string
+      required:
+      - state
     CalendarIsBusinessDayResponse:
       type: object
       description: 'plt.Calendar.isBusinessDay result. PRD outputs: "date or count, calendar versions"'
@@ -8378,119 +8385,154 @@ components:
           description: 'PRD: "number"'
     AiInvokeRequest:
       type: object
-      description: 'plt.Ai.invoke request. PRD inputs: "feature, inputs (allow-listed)"'
+      description: 'plt.Ai.invoke request (SL6-PLT-AI). Inputs are an allow-listed JSON object; the provider is a deterministic
+        fake (D-SL6-09). Refused with PLT-ERR-AI-DISABLED (503) when the gate is closed before or after the provider call.'
       properties:
-        feature:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "feature"'
+        featureId:
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
         inputs:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "inputs (allow-listed)"'
+          description: JSON object of allow-listed inputs; kept on the interaction row
+      required:
+      - featureId
+      - inputs
     AiInvokeResponse:
       type: object
-      description: 'plt.Ai.invoke result. PRD outputs: "output, interaction id; outcome"'
+      description: 'plt.Ai.invoke result. The output is a suggestion; nothing writes state from it (D-SL6-08).'
       properties:
         output:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "output"'
         interactionId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "interaction id"'
         outcome:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcome"'
+          type: string
+          enum:
+          - Suggested
+      required:
+      - output
+      - interactionId
+      - outcome
     AiRecordOutcomeRequest:
       type: object
-      description: 'plt.Ai.recordOutcome request. PRD inputs: "feature, inputs (allow-listed)"'
+      description: 'plt.Ai.recordOutcome request (SL6-PLT-AI): the human decision on a suggestion.'
       properties:
-        feature:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "feature"'
-        inputs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "inputs (allow-listed)"'
+        interactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        outcome:
+          type: string
+          enum:
+          - Accepted
+          - Rejected
+          - Modified
+        comment:
+          type: string
+          maxLength: 1024
+      required:
+      - interactionId
+      - outcome
     AiRecordOutcomeResponse:
       type: object
-      description: 'plt.Ai.recordOutcome result. PRD outputs: "output, interaction id; outcome"'
+      description: 'plt.Ai.recordOutcome result.'
       properties:
-        output:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "output"'
         interactionId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "interaction id"'
         outcome:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcome"'
+          type: string
+      required:
+      - interactionId
+      - outcome
     AiToggleResolveRequest:
       type: object
-      description: 'plt.AiToggle.resolve request. PRD inputs: "feature, inputs (allow-listed)"'
+      description: 'plt.AiToggle.resolve request (SL6-PLT-AI).'
       properties:
-        feature:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "feature"'
-        inputs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "inputs (allow-listed)"'
+        featureId:
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+      required:
+      - featureId
     AiToggleResolveResponse:
       type: object
-      description: 'plt.AiToggle.resolve result. PRD outputs: "output, interaction id; outcome"'
+      description: 'plt.AiToggle.resolve result: the effective state the gate would answer now.'
       properties:
-        output:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "output"'
-        interactionId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "interaction id"'
-        outcome:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcome"'
+        featureId:
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        enabled:
+          type: boolean
+          description: The feature's own toggle
+        allowed:
+          type: boolean
+          description: Toggle on and no kill switch active
+        reason:
+          type: string
+          description: Gate reason code when not allowed
+        registerStatus:
+          type: string
+          description: AI register status last seen (null when no register)
+        killSwitchActive:
+          type: boolean
+      required:
+      - featureId
+      - enabled
+      - allowed
+      - killSwitchActive
     AiToggleSetRequest:
       type: object
-      description: 'plt.AiToggle.set request. PRD inputs: "feature, inputs (allow-listed)"'
+      description: 'plt.AiToggle.set request (SL6-PLT-AI). Enabling needs register status APPROVED (D-SL6-08); disabling is always allowed.'
       properties:
-        feature:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "feature"'
-        inputs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "inputs (allow-listed)"'
+        featureId:
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        enabled:
+          type: boolean
+        reason:
+          type: string
+          maxLength: 256
+      required:
+      - featureId
+      - enabled
     AiToggleSetResponse:
       type: object
-      description: 'plt.AiToggle.set result. PRD outputs: "output, interaction id; outcome"'
+      description: 'plt.AiToggle.set result.'
       properties:
-        output:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "output"'
-        interactionId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "interaction id"'
-        outcome:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcome"'
+        featureId:
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        enabled:
+          type: boolean
+        version:
+          type: integer
+          format: int64
+      required:
+      - featureId
+      - enabled
+      - version
     AiKillSwitchRequest:
       type: object
-      description: 'plt.Ai.killSwitch request. PRD inputs: "feature, inputs (allow-listed)"'
+      description: 'plt.Ai.killSwitch request (SL6-PLT-AI). Scope GLOBAL or an AI feature id.'
       properties:
-        feature:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "feature"'
-        inputs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "inputs (allow-listed)"'
+        action:
+          type: string
+          enum:
+          - Activate
+          - Clear
+        scope:
+          type: string
+          maxLength: 32
+          description: GLOBAL or an AI feature id
+        reason:
+          type: string
+          maxLength: 256
+      required:
+      - action
+      - scope
     AiKillSwitchResponse:
       type: object
-      description: 'plt.Ai.killSwitch result. PRD outputs: "output, interaction id; outcome"'
+      description: 'plt.Ai.killSwitch result.'
       properties:
-        output:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "output"'
-        interactionId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "interaction id"'
-        outcome:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcome"'
+        scope:
+          type: string
+        active:
+          type: boolean
+      required:
+      - scope
+      - active
     RetentionRegisterDatasetRequest:
       type: object
       description: 'plt.Retention.registerDataset request. PRD inputs: "per op"'

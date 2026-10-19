@@ -1,0 +1,128 @@
+{
+  "receivables": {
+    "title": "Receivables",
+    "open": "Receivables",
+    "subtitle": "Amounts owed from claim recoveries and Friendly Settlement, payable by payment reference",
+    "listTitle": "Receivables",
+    "backToList": "Receivables",
+    "notFound": "Receivable not found",
+    "emptyTitle": "No receivables",
+    "emptyBody": "Receivables appear when a claim recovery or a Friendly Settlement net balance is registered.",
+    "none": "—",
+    "filters": { "status": "Status", "source": "Source", "all": "All" },
+    "columns": {
+      "source": "Source",
+      "purpose": "Purpose",
+      "counterparty": "Counterparty",
+      "claim": "Claim",
+      "reference": "Payment reference",
+      "amount": "Amount",
+      "open": "Open amount",
+      "due": "Due",
+      "status": "Status"
+    },
+    "source": {
+      "CLM_CLAIM_PAYMENT": "Claim recovery",
+      "FS_CLEARING": "Friendly Settlement"
+    },
+    "purpose": {
+      "SALVAGE": "Salvage",
+      "SUBROGATION": "Subrogation",
+      "FS_NET": "Friendly Settlement net"
+    },
+    "status": {
+      "OPEN": "Open",
+      "PARTIALLY_PAID": "Partially paid",
+      "PAID": "Paid",
+      "CANCELLED": "Cancelled"
+    },
+    "detail": {
+      "title": "Receivable",
+      "facts": "Facts",
+      "amounts": "Amounts",
+      "paid": "Received",
+      "statementRef": "Clearing statement",
+      "registeredAt": "Registered",
+      "allocations": "Allocation history",
+      "allocationsNote": "Allocations of this session; the received amount is the amount less the open balance.",
+      "noAllocations": "No receipt in this session.",
+      "allocationLine": "Receipt {number} · {amount}"
+    },
+    "receipt": {
+      "title": "Record a receipt",
+      "intro": "The receipt is matched to the receivable by its payment reference. A partial receipt leaves the remainder open.",
+      "amount": "Receipt amount",
+      "valueDate": "Value date",
+      "reference": "Payment reference",
+      "submit": "Record receipt",
+      "recorded": "Receipt recorded (receipt {number})",
+      "openAfter": "Open balance after the receipt: {open}",
+      "failed": "The receipt was not recorded",
+      "notPayable": "The receivable does not accept receipts in its current state.",
+      "errors": {
+        "amount": "Enter an amount greater than zero.",
+        "overOpen": "The amount cannot exceed the open balance ({open}).",
+        "reference": "Enter the payment reference."
+      }
+    }
+  },
+  "releases": {
+    "title": "Release approvals",
+    "open": "Release approvals",
+    "subtitle": "Friendly Settlement clearing disbursements waiting for a second user to approve",
+    "pendingTitle": "Awaiting approval",
+    "allTitle": "All releases",
+    "backToInbox": "Release approvals",
+    "queuePrimary": "Clearing release",
+    "emptyPendingTitle": "No release awaiting approval",
+    "emptyPendingBody": "Every Friendly Settlement clearing disbursement appears here for the billing manager.",
+    "emptyAllTitle": "No releases yet",
+    "emptyAllBody": "They appear when Friendly Settlement asks to pay out a net balance.",
+    "notFound": "Release not found",
+    "columns": {
+      "release": "Release",
+      "amount": "Net amount",
+      "method": "Method",
+      "status": "Status"
+    },
+    "detail": {
+      "title": "Clearing release",
+      "summary": "Facts",
+      "statementRef": "Clearing statement",
+      "counterparty": "Clearing office",
+      "net": "Net payable",
+      "method": "Method",
+      "maskedPayee": "Payee account (masked)",
+      "requestedBy": "Requested by",
+      "requestedAt": "Requested",
+      "checks": "Checks",
+      "screening": "Sanctions screening",
+      "vop": "Payee verification (VoP)",
+      "stub": "Test result (stub)",
+      "checksNote": "No per-claimant verification is made; the clearing is checked as a whole."
+    },
+    "lines": {
+      "title": "Claim-level lines",
+      "claim": "Claim",
+      "case": "FS case",
+      "amount": "Amount",
+      "sum": "Sum of lines",
+      "matches": "The sum of the lines equals the net amount.",
+      "mismatch": "The sum of the lines does not equal the net amount.",
+      "mismatchBody": "Sum {sum} against net {net}. Do not approve until corrected."
+    },
+    "decision": {
+      "title": "Decision",
+      "reason": "Reason",
+      "reasonHelp": "Required to reject.",
+      "reasonRequired": "Give a reason for the rejection.",
+      "approve": "Approve release",
+      "reject": "Reject",
+      "approved": "Release approved",
+      "rejected": "Release rejected",
+      "failed": "The decision was not recorded",
+      "sod": "You requested this release; another user must approve it (separation of duties).",
+      "roleNote": "Only the billing manager approves a release."
+    }
+  }
+}

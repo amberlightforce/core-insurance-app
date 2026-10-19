@@ -38,7 +38,7 @@ internal sealed class JobReader(DbSession session)
             """
             SELECT quote_id AS QuoteId, version_no AS VersionNo, state AS State, draft_version AS DraftVersion, risk_tree::text AS RiskTree,
                    charges::text AS Charges, issues::text AS Issues, premium AS Premium, taxes AS Taxes, total AS Total,
-                   worksheet_id AS WorksheetId, quoted_at AS QuotedAt, valid_until AS ValidUntil
+                   worksheet_id AS WorksheetId, stale_reason AS StaleReason, quoted_at AS QuotedAt, valid_until AS ValidUntil
               FROM pol.quote_version WHERE job_id = @jobId ORDER BY version_no
             """, new { jobId }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
 
@@ -78,6 +78,7 @@ internal sealed class JobReader(DbSession session)
                 Charges = v.Charges is null ? [] : JobSupport.FromJson<List<ChargeLine>>(v.Charges),
                 Issues = v.Issues is null ? [] : JobSupport.FromJson<List<UwIssue>>(v.Issues),
                 WorksheetId = v.WorksheetId is null ? null : Sha256Hash.Parse(v.WorksheetId),
+                StaleReason = v.StaleReason == "PACK_ROLLBACK" ? QuoteVersionView.StaleReasonValue.PackRollback : null,
                 QuotedAt = v.QuotedAt is { } quotedAt ? Time(quotedAt) : null,
                 ValidUntil = v.ValidUntil is { } validUntil ? Time(validUntil) : null,
             })],
@@ -131,6 +132,8 @@ internal sealed class JobReader(DbSession session)
 
     private sealed class VersionRecord
     {
+        public string? StaleReason { get; set; }
+
         public Guid QuoteId { get; set; }
 
         public int VersionNo { get; set; }

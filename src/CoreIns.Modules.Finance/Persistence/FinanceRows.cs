@@ -389,4 +389,18 @@ internal sealed class JournalLineRow
     public Guid? DisbursementId { get; set; }
 
     public Guid? RefundId { get; set; }
+
+    public Guid? RecoveryId { get; set; }
+
+    public Guid? CounterpartyPartyId { get; set; }
+
+    public string? FsStatementRef { get; set; }
+
+    public string? RecoverableBasis { get; set; }
+
+    public Guid? RiContractId { get; set; }
+
+    public int? RiContractYear { get; set; }
+
+    public string? RiHeldGroup { get; set; }
 }

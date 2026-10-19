@@ -4,31 +4,35 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Ai.invoke result. PRD outputs: "output, interaction id; outcome"</summary>
+/// <summary>plt.Ai.invoke result. The output is a suggestion; nothing writes state from it (D-SL6-08).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AiInvokeResponse
 {
-    /// <summary>PRD: "output"</summary>
+    /// <summary>Contract member 'output'.</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("output")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Output { get; init; }
+    public required global::System.Text.Json.JsonElement Output { get; init; }
 
-    /// <summary>PRD: "interaction id"</summary>
+    /// <summary>Contract member 'interactionId'.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'interactionId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("interactionId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? InteractionId { get; init; }
+    public required global::System.Guid InteractionId { get; init; }
 
-    /// <summary>PRD: "outcome"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'outcome'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Outcome { get; init; }
+    public required OutcomeValue Outcome { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum OutcomeValue
+    {
+        /// <summary><c>Suggested</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Suggested")]
+        Suggested,
+    }
 }
