@@ -68,6 +68,7 @@ public static class PartyModule
 
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IPartyPartyService, PartyPartyService>();
+        services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Party.Services.Dsar.PartyDsarParticipant>();
         services.AddScoped<IPartyProducerCodeService, PartyProducerCodeService>();
 
         services.AddErrorDefinitions(Errors);
