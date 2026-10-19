@@ -397,7 +397,7 @@ public sealed class FinanceClaimsTests(PostgresFixture database) : IClassFixture
     public async Task DSL212a_FS_clearing_payments_missing_lines_unknown_eroding_and_FX_amounts_are_suspended_never_guessed()
     {
         var claim = ClaimCase.New();
-        var fs = await PaymentAsync(claim, Guid.CreateVersion7(), Guid.CreateVersion7(), "100.00", edit: p => p["method"] = "CLEARING");
+        var fs = await PaymentAsync(claim, Guid.CreateVersion7(), Guid.CreateVersion7(), "100.00", edit: p => { p["method"] = "CLEARING"; p["fsStatementId"] = null; });
         var noLines = await PaymentAsync(claim, Guid.CreateVersion7(), Guid.CreateVersion7(), "100.00", edit: p => p["lines"] = new JsonArray());
         var unknownEroding = await PaymentAsync(claim, Guid.CreateVersion7(), Guid.CreateVersion7(), "100.00", edit: p => p["lines"]![0]!["eroding"] = null);
         var fxPayment = await PaymentAsync(claim, Guid.CreateVersion7(), Guid.CreateVersion7(), "100.00",
@@ -418,7 +418,7 @@ public sealed class FinanceClaimsTests(PostgresFixture database) : IClassFixture
     public async Task REQ_FIN_080_unmapped_or_inconsistent_claim_facts_are_intake_exceptions_never_journals()
     {
         var claim = ClaimCase.New();
-        var recovery = await ReserveAsync(claim, "800.00", "800.00", kind: "RECOVERY_RESERVE");
+        var recovery = await ReserveAsync(claim, "800.00", "800.00", kind: "RECOVERY_RESERVE", edit: p => p["recoveryId"] = null);
         var mismatch = await PaymentAsync(claim, Guid.CreateVersion7(), Guid.CreateVersion7(), "100.00", lineAmount: "90.00");
         await _slice.DrainAsync();
 
