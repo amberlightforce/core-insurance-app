@@ -4,15 +4,16 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.FeatureFlag.evaluate result. PRD outputs: "state"</summary>
+/// <summary>plt.FeatureFlag.evaluate result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FeatureFlagEvaluateResponse
 {
-    /// <summary>PRD: "state"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'state'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required bool State { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? State { get; init; }
+    public string? Reason { get; init; }
 }

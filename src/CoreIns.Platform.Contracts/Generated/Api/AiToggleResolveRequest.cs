@@ -4,23 +4,11 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.AiToggle.resolve request. PRD inputs: "feature, inputs (allow-listed)"</summary>
+/// <summary>plt.AiToggle.resolve request (SL6-PLT-AI).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AiToggleResolveRequest
 {
-    /// <summary>PRD: "feature"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("feature")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Feature { get; init; }
-
-    /// <summary>PRD: "inputs (allow-listed)"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("inputs")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Inputs { get; init; }
+    /// <summary>Contract member 'featureId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("featureId")]
+    public required global::CoreIns.SharedKernel.Identifiers.AiFeatureId FeatureId { get; init; }
 }
