@@ -157,7 +157,8 @@ internal static class FinanceSql
     [
         $"REVOKE ALL ON ALL TABLES IN SCHEMA {FinanceModule.Schema} FROM {appRole}",
         $"GRANT SELECT ON fin.book_profile, fin.gl_account, fin.account_derivation, fin.event_catalogue, fin.posting_rule_set, fin.posting_rule TO {appRole}",
-        $"GRANT SELECT, INSERT ON fin.journal_entry, fin.journal_line, fin.financial_period, fin.charge_type_view TO {appRole}",
+        $"GRANT SELECT, INSERT ON fin.journal_entry, fin.journal_line, fin.charge_type_view TO {appRole}",
+        $"GRANT SELECT, INSERT, UPDATE ON fin.financial_period TO {appRole}",
         $"GRANT SELECT, INSERT, UPDATE ON fin.business_event, fin.policy_context TO {appRole}",
         $"GRANT SELECT, INSERT, UPDATE ON fin.dsar_restriction TO {appRole}",
         $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {FinanceModule.Schema} TO {appRole}",

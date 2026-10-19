@@ -1,4 +1,6 @@
 using CoreIns.Modules.Claims.Contracts.Events;
+using CoreIns.Modules.Policy.Contracts.Events;
+using CoreIns.Modules.Reinsurance.Cession;
 using CoreIns.Modules.Reinsurance.Authority;
 using CoreIns.Modules.Reinsurance.Intake;
 using CoreIns.Modules.Reinsurance.Recovery;
@@ -60,6 +62,8 @@ public static class ReinsuranceModule
                 // SL4-RI-RECOVERY: the claim view moves; the recovery rows, their batch and the exception log are sealed (SELECT, INSERT only).
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.claim_view, {Schema}.claim_exposure, {Schema}.claim_amount TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.claim_event, {Schema}.recovery_batch, {Schema}.recovery, {Schema}.intake_exception TO {appRole}",
+                // SL6-RI-CESSION-DELTA: the premium ledger, cession rows, exception log and tracker are sealed (SELECT, INSERT only).
+                $"GRANT SELECT, INSERT ON {Schema}.premium_delta, {Schema}.cession, {Schema}.cession_exception, {Schema}.tracker TO {appRole}",
             ]),
     ];
 
@@ -122,6 +126,12 @@ public static class ReinsuranceModule
         services.AddEventHandler<RecoveryRecordedV1, RecoveryRecordedHandler>(EventDescriptor.From(RecoveryRecordedV1.Descriptor), RecoveryRecordedHandler.Name, ModuleCode.RI);
         services.AddEventHandler<ClaimClosedV1, ClaimClosedHandler>(EventDescriptor.From(ClaimClosedV1.Descriptor), ClaimClosedHandler.Name, ModuleCode.RI);
         services.AddEventHandler<ClaimReopenedV1, ClaimReopenedHandler>(EventDescriptor.From(ClaimReopenedV1.Descriptor), ClaimReopenedHandler.Name, ModuleCode.RI);
+
+        // SL6-RI-CESSION-DELTA: premium cession (target minus booked) from POL premium delta sets; the opening-aggregate tracker.
+        services.AddOptions<CessionOptions>().Bind(configuration.GetSection(CessionOptions.Section));
+        services.AddScoped<CessionIntake>();
+        services.AddScoped<TrackerService>();
+        services.AddEventHandler<ChargeDeltaEmittedV1, ChargeDeltaCessionHandler>(EventDescriptor.From(ChargeDeltaEmittedV1.Descriptor), ChargeDeltaCessionHandler.Name, ModuleCode.RI);
 
         services.AddErrorDefinitions(Errors);
         return services;

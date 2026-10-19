@@ -5,6 +5,7 @@ using CoreIns.Modules.Compliance.Clocks;
 using CoreIns.Modules.Compliance.Commands;
 using CoreIns.Modules.Compliance.Contracts;
 using CoreIns.Modules.Compliance.Contracts.Api;
+using CoreIns.Modules.Compliance.Dsar;
 using CoreIns.Modules.Compliance.Persistence;
 using CoreIns.Modules.Compliance.Queries;
 using CoreIns.Modules.Compliance.Services;
@@ -79,6 +80,24 @@ public static class ComplianceModule
             services.AddHostedService<ClockSweeper>();
         }
 
+        // DSAR case orchestration and disclosure log (SL6-CMP-DSAR).
+        services.AddOptions<DsarOptions>();
+        services.AddScoped<DsarEngine>();
+        services.AddScoped<DsarReader>();
+        services.AddScoped<IValidator<CreateDsar>, CreateDsarValidator>();
+        services.AddCommand<CreateDsar, DsarCreateResponse, CreateDsarHandler>(CommandDescriptor.For("cmp.Dsar.create"));
+        services.AddCommand<VerifyDsarIdentity, DsarVerifyIdentityResponse, VerifyDsarIdentityHandler>(CommandDescriptor.For("cmp.Dsar.verifyIdentity"));
+        services.AddCommand<StartDsarFanOut, DsarStartFanOutResponse, StartDsarFanOutHandler>(CommandDescriptor.For("cmp.Dsar.startFanOut"));
+        services.AddCommand<RetryDsarTask, DsarRetryTaskResponse, RetryDsarTaskHandler>(CommandDescriptor.For("cmp.Dsar.retryTask"));
+        services.AddCommand<DecideDsarItem, DsarDecideItemResponse, DecideDsarItemHandler>(CommandDescriptor.For("cmp.Dsar.decideItem"));
+        services.AddCommand<ApproveDsar, DsarApproveResponse, ApproveDsarHandler>(CommandDescriptor.For("cmp.Dsar.approve"));
+        services.AddCommand<ExtendDsar, DsarExtendResponse, ExtendDsarHandler>(CommandDescriptor.For("cmp.Dsar.extend"));
+        services.AddCommand<RefuseDsar, DsarRefuseResponse, RefuseDsarHandler>(CommandDescriptor.For("cmp.Dsar.refuse"));
+        services.AddCommand<ExportDsar, DsarExportResponse, ExportDsarHandler>(CommandDescriptor.For("cmp.Dsar.export"));
+        services.AddCommand<RestrictDsar, DsarRestrictResponse, RestrictDsarHandler>(CommandDescriptor.For("cmp.Dsar.restrict"));
+        services.AddCommand<EraseDsar, DsarEraseResponse, EraseDsarHandler>(CommandDescriptor.For("cmp.Dsar.erase"));
+        services.AddCommand<RecordDisclosure, DisclosureLogRecordResponse, RecordDisclosureHandler>(CommandDescriptor.For("cmp.DisclosureLog.record"));
+
         services.AddErrorDefinitions(Errors);
         return services;
     }
@@ -112,6 +131,14 @@ public static class ComplianceModule
             .Describe("Η ακύρωση ρολογιού χρειάζεται αιτιολογία.", "Cancelling a clock needs a reason."),
         ErrorDefinition.For(ModuleCode.CMP, "EXTENSION-NOT-ALLOWED", 422, "Το ρολόι δεν επιδέχεται παράταση", "The clock cannot be extended")
             .Describe("Ο ορισμός του ρολογιού δεν προβλέπει παράταση.", "The clock definition does not allow an extension."),
+        ErrorDefinition.For(ModuleCode.CMP, "IDENTITY-NOT-VERIFIED", 422, "Η ταυτότητα του υποκειμένου δεν έχει επαληθευτεί", "The data subject's identity is not verified")
+            .Describe("Η επαλήθευση ταυτότητας πρέπει να προηγηθεί της διανομής του αιτήματος.", "Identity verification must come before the fan-out."),
+        ErrorDefinition.For(ModuleCode.CMP, "DSAR-STATE", 422, "Η ενέργεια δεν επιτρέπεται στην κατάσταση του αιτήματος", "The action is not allowed in the request's state")
+            .Describe("Η τρέχουσα κατάσταση του αιτήματος υποκειμένου δεν επιτρέπει αυτή την ενέργεια.", "The data-subject request's current state does not allow this action."),
+        ErrorDefinition.For(ModuleCode.CMP, "APPROVAL-REQUIRED", 422, "Απαιτείται έγκριση DPO", "A DPO approval is required")
+            .Describe("Η διαγραφή ή ο περιορισμός χρειάζεται έγκριση από DPO που δεν δημιούργησε το αίτημα.", "Erase or restrict needs the approval of a DPO who did not create the request."),
+        ErrorDefinition.For(ModuleCode.CMP, "LEGAL-HOLD", 422, "Η διαγραφή μπλοκάρεται από νομική δέσμευση", "A legal hold blocks the purge")
+            .Describe("Το αίτημα φέρει νομική δέσμευση· τα δεδομένα μπορούν μόνο να περιοριστούν.", "The request carries a legal hold; the data can only be restricted."),
         ErrorDefinition.For(ModuleCode.CMP, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

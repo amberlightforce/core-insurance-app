@@ -20,7 +20,7 @@ public interface IComplianceDsarService
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: CMP-ERR-IDENTITY-NOT-VERIFIED (422), CMP-ERR-EXTENSION-NOT-ALLOWED (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarApproveResponse> ApproveAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarApproveResponse> ApproveAsync(global::CoreIns.Modules.Compliance.Contracts.Api.DsarApproveRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>DSAR orchestration</summary>
     /// <remarks>
@@ -31,7 +31,7 @@ public interface IComplianceDsarService
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: CMP-ERR-IDENTITY-NOT-VERIFIED (422), CMP-ERR-EXTENSION-NOT-ALLOWED (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarCreateResponse> CreateAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarCreateResponse> CreateAsync(global::CoreIns.Modules.Compliance.Contracts.Api.DsarCreateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>DSAR orchestration</summary>
     /// <remarks>
@@ -42,7 +42,7 @@ public interface IComplianceDsarService
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: CMP-ERR-IDENTITY-NOT-VERIFIED (422), CMP-ERR-EXTENSION-NOT-ALLOWED (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarDecideItemResponse> DecideItemAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarDecideItemResponse> DecideItemAsync(global::CoreIns.Modules.Compliance.Contracts.Api.DsarDecideItemRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>CMP's own data-subject operations</summary>
     /// <remarks>
@@ -75,7 +75,7 @@ public interface IComplianceDsarService
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: CMP-ERR-IDENTITY-NOT-VERIFIED (422), CMP-ERR-EXTENSION-NOT-ALLOWED (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarExtendResponse> ExtendAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarExtendResponse> ExtendAsync(global::CoreIns.Modules.Compliance.Contracts.Api.DsarExtendRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>DSAR orchestration</summary>
     /// <remarks>
@@ -120,7 +120,7 @@ public interface IComplianceDsarService
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: CMP-ERR-IDENTITY-NOT-VERIFIED (422), CMP-ERR-EXTENSION-NOT-ALLOWED (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarRefuseResponse> RefuseAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarRefuseResponse> RefuseAsync(global::CoreIns.Modules.Compliance.Contracts.Api.DsarRefuseRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>CMP's own data-subject operations</summary>
     /// <remarks>
@@ -142,7 +142,7 @@ public interface IComplianceDsarService
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: CMP-ERR-IDENTITY-NOT-VERIFIED (422), CMP-ERR-EXTENSION-NOT-ALLOWED (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarRetryTaskResponse> RetryTaskAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarRetryTaskResponse> RetryTaskAsync(global::CoreIns.Modules.Compliance.Contracts.Api.DsarRetryTaskRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>DSAR orchestration</summary>
     /// <remarks>
@@ -153,7 +153,7 @@ public interface IComplianceDsarService
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
     /// <para>Errors: CMP-ERR-IDENTITY-NOT-VERIFIED (422), CMP-ERR-EXTENSION-NOT-ALLOWED (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarStartFanOutResponse> StartFanOutAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarStartFanOutResponse> StartFanOutAsync(global::CoreIns.Modules.Compliance.Contracts.Api.DsarStartFanOutRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>DSAR orchestration</summary>
     /// <remarks>
@@ -164,5 +164,5 @@ public interface IComplianceDsarService
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: CMP-ERR-IDENTITY-NOT-VERIFIED (422), CMP-ERR-EXTENSION-NOT-ALLOWED (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarVerifyIdentityResponse> VerifyIdentityAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.DsarVerifyIdentityResponse> VerifyIdentityAsync(global::CoreIns.Modules.Compliance.Contracts.Api.DsarVerifyIdentityRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

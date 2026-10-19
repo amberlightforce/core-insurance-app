@@ -111,6 +111,8 @@ internal sealed class DisbursementService(
     ILegalEntityDirectory legalEntities,
     ICommandHandler<RequestDisbursement, DisbursementRequestResponse> requestHandler,
     ICommandHandler<ApproveDisbursementRelease, DisbursementApproveReleaseResponse> approveReleaseHandler,
+    ICommandHandler<StopDisbursement, DisbursementStopResponse> stopHandler,
+    ICommandHandler<VoidDisbursement, DisbursementVoidResponse> voidHandler,
     DisbursementReader reader) : IBillingDisbursementService
 {
     public Task<DisbursementRequestResponse> RequestAsync(DisbursementRequestRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
@@ -128,10 +130,10 @@ internal sealed class DisbursementService(
         reader.ListAsync(InProcess.LegalEntity(context, legalEntities), cursor, limit, cancellationToken);
 
     public Task<DisbursementStopResponse> StopAsync(DisbursementStopRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw InProcess.NotAvailable("bil.Disbursement.stop");
+        InProcess.RunAsync(context, stopHandler, new StopDisbursement(request), options, cancellationToken);
 
     public Task<DisbursementVoidResponse> VoidAsync(DisbursementVoidRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw InProcess.NotAvailable("bil.Disbursement.void");
+        InProcess.RunAsync(context, voidHandler, new VoidDisbursement(request), options, cancellationToken);
 
     public Task<DisbursementApproveReleaseResponse> ApproveReleaseAsync(DisbursementApproveReleaseRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         InProcess.RunAsync(context, approveReleaseHandler, new ApproveDisbursementRelease(request), options, cancellationToken);

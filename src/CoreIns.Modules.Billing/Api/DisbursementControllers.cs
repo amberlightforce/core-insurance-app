@@ -23,6 +23,9 @@ internal static class DisbursementPermissions
     public const string DisbursementGet = "bil.Disbursement.get";
     public const string DisbursementList = "bil.Disbursement.list";
     public const string DisbursementApproveRelease = "bil.Disbursement.approveRelease";
+    public const string DisbursementStop = "bil.Disbursement.stop";
+    public const string DisbursementVoid = "bil.Disbursement.void";
+    public const string DevBank = "bil.DevBank.operate";
 }
 
 /// <summary>
@@ -110,6 +113,22 @@ internal sealed class DisbursementController : ControllerBase
         [FromBody] DisbursementApproveReleaseRequest request, [FromServices] ICommandHandler<ApproveDisbursementRelease, DisbursementApproveReleaseResponse> handler,
         CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new ApproveDisbursementRelease(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>bil.Disbursement.stop (SL4-BIL-DISBOPS): before the bank has the payment; BIL-ERR-NOT-STOPPABLE once issued.</summary>
+    [HttpPost("disbursements/stop")]
+    [Authorize(Policy = DisbursementPermissions.DisbursementStop)]
+    public async Task<IResult> StopAsync(
+        [FromBody] DisbursementStopRequest request, [FromServices] ICommandHandler<StopDisbursement, DisbursementStopResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new StopDisbursement(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>bil.Disbursement.void (SL4-BIL-DISBOPS): an Issued payment that has not cleared.</summary>
+    [HttpPost("disbursements/void")]
+    [Authorize(Policy = DisbursementPermissions.DisbursementVoid)]
+    public async Task<IResult> VoidAsync(
+        [FromBody] DisbursementVoidRequest request, [FromServices] ICommandHandler<VoidDisbursement, DisbursementVoidResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new VoidDisbursement(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
     private LegalEntityId LegalEntity()
     {
