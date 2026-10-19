@@ -2,6 +2,7 @@ using CoreIns.Modules.Compliance.Services.Dsar;
 using CoreIns.SharedKernel.Dsar;
 using CoreIns.Modules.Compliance.AiRegister;
 using CoreIns.Modules.Compliance.Clocks;
+using CoreIns.Modules.Migration.Contracts.Spi;
 using CoreIns.Modules.Compliance.Commands;
 using CoreIns.Modules.Compliance.Contracts;
 using CoreIns.Modules.Compliance.Contracts.Api;
@@ -73,6 +74,7 @@ public static class ComplianceModule
         services.AddCommand<ExtendClock, ClockExtendResponse, ExtendClockHandler>(CommandDescriptor.For("cmp.Clock.extend"));
         services.AddCommand<SweepClock, string, SweepClockHandler>(CommandDescriptor.For("cmp.Clock.sweep") with { RequiresIdempotencyKey = false, Idempotent = false });
         services.AddScoped<IComplianceClockService, ComplianceClockService>();
+        services.AddScoped<IMigrationImporter, MigrationImport.ComplianceMigrationImporter>();
         services.AddScoped<IComplianceClockDefService, ComplianceClockDefService>();
         services.AddSingleton<ClockSweepRunner>();
         if (string.Equals(configuration["APP_ROLE"], "worker", StringComparison.OrdinalIgnoreCase))

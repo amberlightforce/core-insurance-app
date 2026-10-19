@@ -325,6 +325,48 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Persistence.BureauHandoverRow", b =>
+                {
+                    b.Property<Guid>("HandoverId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("handover_id");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<DateOnly>("HandoverDate")
+                        .HasColumnType("date")
+                        .HasColumnName("handover_date");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid?>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<string>("VehicleRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("vehicle_ref");
+
+                    b.HasKey("HandoverId")
+                        .HasName("pk_bureau_handover");
+
+                    b.HasIndex("LegalEntityId", "VehicleRef")
+                        .IsUnique()
+                        .HasDatabaseName("ux_bureau_handover_vehicle");
+
+                    b.ToTable("bureau_handover", "cmp");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Compliance.Persistence.ClockEventRow", b =>
                 {
                     b.Property<Guid>("ClockEventId")
@@ -659,6 +701,52 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_fiscal_series_last", "last_number >= 0");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Persistence.LegacyFiscalMarkRow", b =>
+                {
+                    b.Property<Guid>("MarkId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("mark_id");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<long>("LegacyNumber")
+                        .HasColumnType("bigint")
+                        .HasColumnName("legacy_number");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Mark")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mark");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<string>("SeriesId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("series_id");
+
+                    b.HasKey("MarkId")
+                        .HasName("pk_legacy_fiscal_mark");
+
+                    b.HasIndex("LegalEntityId", "Mark")
+                        .HasDatabaseName("ix_legacy_fiscal_mark_mark");
+
+                    b.HasIndex("LegalEntityId", "SeriesId", "LegacyNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ux_legacy_fiscal_mark_number");
+
+                    b.ToTable("legacy_fiscal_mark", "cmp");
                 });
 
             modelBuilder.Entity("CoreIns.Platform.Persistence.DsarRestrictionRow", b =>

@@ -11,7 +11,7 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
     /// </summary>
     [DbContext(typeof(BillingDbContext))]
     [Migration("20261019220000_DisbursementOps")]
-    public partial class DisbursementOps : Migration
+    public partial class DisbursementOps : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder) => migrationBuilder.Sql(DisbursementOpsDatabaseSql.Rules);

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialReinsurance : Migration
+    public partial class InitialReinsurance : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

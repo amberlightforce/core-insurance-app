@@ -60,6 +60,12 @@ export const defaultNavItems: NavItem[] = [
   { id: 'finance', to: '/finance' },
   { id: 'documents', to: '/documents' },
   { id: 'compliance', to: '/compliance' },
+  {
+    id: 'compliance',
+    to: '/compliance/dsar',
+    label: 'dsar',
+    roles: ['Staff.ComplianceOfficer', 'Platform.Admin'],
+  },
   { id: 'reports', to: '/reports' },
   { id: 'products', to: '/products' },
   { id: 'admin', to: '/admin/packs', label: 'packs', roles: packRoles },

@@ -18,10 +18,66 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("fin")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("CoreIns.Modules.Finance.MigrationImport.MigrationImportRow", b =>
+                {
+                    b.Property<Guid>("JournalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("journal_id");
+
+                    b.Property<DateOnly>("AccountingDate")
+                        .HasColumnType("date")
+                        .HasColumnName("accounting_date");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<string>("Book")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("book");
+
+                    b.Property<DateTime>("ImportedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("imported_at");
+
+                    b.Property<string>("LegacyId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legacy_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<decimal>("TrialBalanceCredit")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("trial_balance_credit");
+
+                    b.Property<decimal>("TrialBalanceDebit")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("trial_balance_debit");
+
+                    b.HasKey("JournalId")
+                        .HasName("pk_migration_import");
+
+                    b.HasIndex("BatchId")
+                        .HasDatabaseName("ix_migration_import_batch");
+
+                    b.HasIndex("LegalEntityId", "LegacyId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_migration_import_legacy");
+
+                    b.ToTable("migration_import", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_migration_import_reconciled", "trial_balance_debit = trial_balance_credit");
+                        });
+                });
 
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.AccountDerivationRow", b =>
                 {
@@ -1103,6 +1159,16 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_posting_rule_set_version", "version_no >= 1");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Finance.MigrationImport.MigrationImportRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Finance.Persistence.JournalEntryRow", null)
+                        .WithMany()
+                        .HasForeignKey("JournalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_migration_import_journal");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.AccountDerivationRow", b =>
