@@ -82,6 +82,32 @@ internal sealed class RequestFiscalDocumentHandler(
         };
         var roleCode = FiscalDocuments.Code(role);
         var revision = request.Revision ?? 0;
+        var isClaimReceipt = request.SourceType == FiscalDocuments.ClaimPaymentSource;
+
+        // Claim settlement receipt (SL4-CMP-RECEIPT, D-SL4-11): ISSUE only, fixed category, never for a CLEARING payment.
+        if (isClaimReceipt)
+        {
+            if (role != FiscalDocumentRole.Issue)
+            {
+                return DomainError.Of(ModuleCode.CMP, "VALIDATION", "A claim payment receipt has role ISSUE only; there is no correction flow in this release.");
+            }
+
+            if (request.DocumentCategory != FiscalDocuments.ClaimSettlementReceipt)
+            {
+                return DomainError.Of(ModuleCode.CMP, "VALIDATION", $"A claim payment receipt has documentCategory {FiscalDocuments.ClaimSettlementReceipt}.");
+            }
+
+            if (request.Lines.Any(l => l.FiscalCategoryKey.Contains(FiscalDocuments.ClearingMarker, StringComparison.OrdinalIgnoreCase)))
+            {
+                return DomainError.Of(ModuleCode.CMP, "VALIDATION", "A CLEARING payment never gets a fiscal receipt.");
+            }
+
+            // Cyprus resolves NotRequired: no document, no number consumed, nothing stored.
+            if (context.Jurisdiction is { } jurisdiction && jurisdiction.Value == "CY")
+            {
+                return new FiscalDocumentRequestResponse { FiscalDocumentId = new FiscalDocumentId(Guid.Empty), Status = "NOT_REQUIRED" };
+            }
+        }
 
         // Credit notes (SL3-CMP-CREDIT, REQ-CMP-032): the correlated document is the original ISSUE the credit corrects.
         if (role != FiscalDocumentRole.Credit && request.CorrelatedDocumentId is not null)
@@ -94,11 +120,18 @@ internal sealed class RequestFiscalDocumentHandler(
             return DomainError.Of(ModuleCode.CMP, "VALIDATION", "correlatedDocumentId and originalFiscalDocumentId must be equal when both are given.");
         }
 
+        var total0 = Money.Sum(request.Lines.Select(l => l.Amount), currency).Amount;
         var existing = await db.FiscalDocuments.AsNoTracking().SingleOrDefaultAsync(
             d => d.LegalEntityId == legalEntity && d.SourceType == request.SourceType && d.SourceId == request.SourceId && d.Role == roleCode && d.Revision == revision,
             cancellationToken).ConfigureAwait(false);
         if (existing is not null)
         {
+            // TODO(hardening): compare line detail too; the total, currency and counterparty identify the payload for now.
+            if (isClaimReceipt && (existing.Total != total0 || existing.Currency != currency.Code || existing.CounterpartyPartyId != request.CounterpartyPartyId))
+            {
+                return DomainError.Of(ModuleCode.CMP, "IDEMPOTENCY-MISMATCH", "The same source, role and revision were already used with a different payload.");
+            }
+
             return new FiscalDocumentRequestResponse { FiscalDocumentId = existing.FiscalDocumentId, Status = existing.Status, DocumentType = existing.DocumentType };
         }
 
