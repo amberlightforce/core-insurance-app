@@ -1,0 +1,58 @@
+{
+  "ai": {
+    "overline": "Platform · AI control",
+    "title": "AI features",
+    "description": "Switch AI features on or off and stop all AI at once. Suggestions never change records by themselves.",
+    "killSwitch": {
+      "title": "Global kill switch",
+      "activeTitle": "All AI is stopped",
+      "activeBody": "The global kill switch is active: every AI feature refuses requests until it is cleared.",
+      "inactiveBody": "The global kill switch is off. Each feature follows its own toggle.",
+      "unknownBody": "The kill switch state is shown once a feature state has loaded.",
+      "activate": "Stop all AI",
+      "clear": "Clear kill switch",
+      "confirmActivateTitle": "Stop all AI features?",
+      "confirmActivateBody": "Every AI feature will refuse requests immediately. Staff keep working without suggestions.",
+      "confirmClearTitle": "Resume AI features?",
+      "confirmClearBody": "Features whose own toggle is on will answer again.",
+      "reason": "Reason (recorded in the audit trail)",
+      "reasonRequired": "Enter a reason.",
+      "cancel": "Cancel",
+      "done": "Kill switch updated.",
+      "failed": "The kill switch could not be changed."
+    },
+    "features": {
+      "title": "Features",
+      "empty": "No AI features.",
+      "feature": "Feature",
+      "register": "Register status",
+      "state": "Effective state",
+      "toggle": "Enabled",
+      "toggleLabel": "Enable {feature}",
+      "noRegister": "Not registered",
+      "allowed": "Available",
+      "blocked": "Blocked",
+      "needsApproval": "Needs an approved register entry before it can be enabled.",
+      "loadFailed": "State unavailable",
+      "toggleFailed": "{feature} could not be changed: {message}",
+      "toggled": "{feature} updated.",
+      "addLabel": "Add a feature id",
+      "add": "Add",
+      "addInvalid": "Use the form AI-XXX-NN."
+    },
+    "log": {
+      "title": "Interaction log (this session)",
+      "empty": "No changes made in this session.",
+      "time": "Time",
+      "action": "Action",
+      "target": "Target",
+      "result": "Result",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "killOn": "Kill switch on",
+      "killOff": "Kill switch cleared",
+      "ok": "Done",
+      "error": "Refused"
+    }
+  }
+}
