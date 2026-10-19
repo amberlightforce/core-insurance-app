@@ -8218,124 +8218,246 @@ components:
           description: 'PRD: "file"'
     AiSystemRegisterRequest:
       type: object
-      description: 'cmp.AiSystem.register request. PRD inputs: "feature id, entry"'
+      description: 'cmp.AiSystem.register request (SL6-CMP-AIREG). New entries start in DRAFT.'
       properties:
         featureId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "feature id"'
-        entry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry"'
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        aiActClass:
+          type: string
+          maxLength: 64
+      required:
+      - featureId
+      - name
     AiSystemRegisterResponse:
       type: object
-      description: 'cmp.AiSystem.register result. PRD outputs: "entry, status"'
+      description: 'cmp.AiSystem.register result.'
       properties:
-        entry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry"'
+        featureId:
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        name:
+          type: string
+        aiActClass:
+          type: string
+          description: 'AI Act risk class label (illustrative; PRD-11 section 11)'
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SUSPENDED, RETIRED]
+        submittedBy:
+          type: string
+        approvedBy:
+          type: string
+        recordVersion:
+          type: integer
+          format: int64
+      required:
+      - featureId
+      - name
+      - status
+      - recordVersion
     AiSystemSubmitForReviewRequest:
       type: object
-      description: 'cmp.AiSystem.submitForReview request. PRD inputs: "feature id, entry"'
+      description: 'cmp.AiSystem.submitForReview request.'
       properties:
         featureId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "feature id"'
-        entry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry"'
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        reason:
+          type: string
+          maxLength: 512
+      required:
+      - featureId
     AiSystemSubmitForReviewResponse:
       type: object
-      description: 'cmp.AiSystem.submitForReview result. PRD outputs: "entry, status"'
+      description: 'cmp.AiSystem.submitForReview result.'
       properties:
-        entry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry"'
+        featureId:
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        name:
+          type: string
+        aiActClass:
+          type: string
+          description: 'AI Act risk class label (illustrative; PRD-11 section 11)'
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SUSPENDED, RETIRED]
+        submittedBy:
+          type: string
+        approvedBy:
+          type: string
+        recordVersion:
+          type: integer
+          format: int64
+      required:
+      - featureId
+      - name
+      - status
+      - recordVersion
     AiSystemApproveRequest:
       type: object
-      description: 'cmp.AiSystem.approve request. PRD inputs: "feature id, entry"'
+      description: 'cmp.AiSystem.approve request. The approver must differ from the submitter.'
       properties:
         featureId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "feature id"'
-        entry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry"'
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        reason:
+          type: string
+          maxLength: 512
+      required:
+      - featureId
     AiSystemApproveResponse:
       type: object
-      description: 'cmp.AiSystem.approve result. PRD outputs: "entry, status"'
+      description: 'cmp.AiSystem.approve result.'
       properties:
-        entry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry"'
+        featureId:
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        name:
+          type: string
+        aiActClass:
+          type: string
+          description: 'AI Act risk class label (illustrative; PRD-11 section 11)'
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SUSPENDED, RETIRED]
+        submittedBy:
+          type: string
+        approvedBy:
+          type: string
+        recordVersion:
+          type: integer
+          format: int64
+      required:
+      - featureId
+      - name
+      - status
+      - recordVersion
     AiSystemSuspendRequest:
       type: object
-      description: 'cmp.AiSystem.suspend request. PRD inputs: "feature id, entry"'
+      description: 'cmp.AiSystem.suspend request.'
       properties:
         featureId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "feature id"'
-        entry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry"'
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        reason:
+          type: string
+          maxLength: 512
+      required:
+      - featureId
     AiSystemSuspendResponse:
       type: object
-      description: 'cmp.AiSystem.suspend result. PRD outputs: "entry, status"'
-      properties:
-        entry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry"'
-        status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
-    AiSystemRetireRequest:
-      type: object
-      description: 'cmp.AiSystem.retire request. PRD inputs: "feature id, entry"'
+      description: 'cmp.AiSystem.suspend result.'
       properties:
         featureId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "feature id"'
-        entry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry"'
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        name:
+          type: string
+        aiActClass:
+          type: string
+          description: 'AI Act risk class label (illustrative; PRD-11 section 11)'
+        status:
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SUSPENDED, RETIRED]
+        submittedBy:
+          type: string
+        approvedBy:
+          type: string
+        recordVersion:
+          type: integer
+          format: int64
+      required:
+      - featureId
+      - name
+      - status
+      - recordVersion
+    AiSystemRetireRequest:
+      type: object
+      description: 'cmp.AiSystem.retire request.'
+      properties:
+        featureId:
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        reason:
+          type: string
+          maxLength: 512
+      required:
+      - featureId
     AiSystemRetireResponse:
       type: object
-      description: 'cmp.AiSystem.retire result. PRD outputs: "entry, status"'
+      description: 'cmp.AiSystem.retire result.'
       properties:
-        entry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry"'
+        featureId:
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        name:
+          type: string
+        aiActClass:
+          type: string
+          description: 'AI Act risk class label (illustrative; PRD-11 section 11)'
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SUSPENDED, RETIRED]
+        submittedBy:
+          type: string
+        approvedBy:
+          type: string
+        recordVersion:
+          type: integer
+          format: int64
+      required:
+      - featureId
+      - name
+      - status
+      - recordVersion
     AiSystemGetResponse:
       type: object
-      description: 'cmp.AiSystem.get result. PRD outputs: "entry, status"'
+      description: 'cmp.AiSystem.get result.'
       properties:
-        entry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry"'
+        featureId:
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        name:
+          type: string
+        aiActClass:
+          type: string
+          description: 'AI Act risk class label (illustrative; PRD-11 section 11)'
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SUSPENDED, RETIRED]
+        submittedBy:
+          type: string
+        approvedBy:
+          type: string
+        recordVersion:
+          type: integer
+          format: int64
+      required:
+      - featureId
+      - name
+      - status
+      - recordVersion
     AiSystemListItem:
       type: object
-      description: 'cmp.AiSystem.list result. PRD outputs: "entry, status"'
+      description: 'cmp.AiSystem.list item.'
       properties:
-        entry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry"'
+        featureId:
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
+        name:
+          type: string
+        aiActClass:
+          type: string
+          description: 'AI Act risk class label (illustrative; PRD-11 section 11)'
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum: [DRAFT, IN_REVIEW, APPROVED, SUSPENDED, RETIRED]
+        submittedBy:
+          type: string
+        approvedBy:
+          type: string
+        recordVersion:
+          type: integer
+          format: int64
+      required:
+      - featureId
+      - name
+      - status
+      - recordVersion
     AiSystemListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
