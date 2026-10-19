@@ -187,6 +187,7 @@
       "taxTreatmentRef": "Sample text",
       "legalStatus": "SAMPLE_CODE",
       "provisional": true,
+      "opening": true,
       "transactionKind": "NEW_BUSINESS",
       "cancellationSource": "SAMPLE_CODE",
       "treatmentRuleId": "SAMPLE_CODE",
