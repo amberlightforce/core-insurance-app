@@ -103,6 +103,26 @@ public sealed class ReceivableTests(PostgresFixture database) : IClassFixture<Po
     }
 
     [Fact]
+    public async Task REQ_BIL_286_paying_a_receivable_nets_unapplied_cash_LA11_and_the_receivable_LA28_to_zero_and_cash_is_debited_once()
+    {
+        var registered = (await RegisterAsync(Request(1700m))).Value;
+        await PayAsync(registered, 1700m);
+        await using var source = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        async Task<decimal> NetAsync(string account)
+        {
+            await using var query = source.CreateCommand("SELECT coalesce(sum(CASE side WHEN 'DEBIT' THEN amount ELSE -amount END), 0) FROM bil.ledger_line WHERE billing_account_id = @a AND account_code = @c");
+            query.Parameters.AddWithValue("a", registered.BillingAccountId.Value);
+            query.Parameters.AddWithValue("c", account);
+            return (decimal)(await query.ExecuteScalarAsync(Ct))!;
+        }
+
+        (await NetAsync("LA-11")).ShouldBe(0m, "the receipt credit to unapplied cash is released by RECEIVABLE_COLLECTED");
+        (await NetAsync("LA-10")).ShouldBe(1700m, "cash at bank is debited once, by the receipt");
+        (await NetAsync("LA-28")).ShouldBe(0m, "registered Dr, collected Cr");
+        (await NetAsync("LA-17")).ShouldBe(-1700m);
+    }
+
+    [Fact]
     public async Task REQ_BIL_356_FS_partial_cash_leaves_fifty_open_on_clearing_account()
     {
         var registered = (await RegisterAsync(Request(8150m, true))).Value;

@@ -254,6 +254,23 @@ internal sealed class FakeTaxCalculator : ITaxCalculator
                 throw new DomainException(DomainError.Of(ModuleCode.MKT, "CFG-NOT-SETTLED", "Production refuses values that are not Settled."));
         }
 
+        if (request.TransactionKind == TaxTransactionKind.DistanceWithdrawalVoid && Behaviour == Mode.Gr)
+        {
+            // GR-TRT-IPT-WITHDRAWAL-VOID: REVERSE_AS_VOID, full customer credit, the authority liability is reduced (SL6-POL-WITHDRAW).
+            return ValueTask.FromResult(new TaxTreatmentResult
+            {
+                ChargeType = request.ChargeType,
+                Action = TreatmentAction.ReverseAsVoid,
+                CustomerCredit = CustomerCredit.Full,
+                AuthorityLiability = AuthorityLiability.Reduce,
+                FiscalDocument = FiscalDocumentTreatment.CreditNote,
+                RuleId = "GR-TRT-IPT-WITHDRAWAL-VOID",
+                RuleVersion = "0.1.0",
+                LegalStatus = TreatmentLegalStatus.Pending,
+                LegalSourceRef = "PRD-17 REQ-MKT-331 (test double)",
+            });
+        }
+
         var apply = Behaviour == Mode.ApplyAction;
         return ValueTask.FromResult(new TaxTreatmentResult
         {

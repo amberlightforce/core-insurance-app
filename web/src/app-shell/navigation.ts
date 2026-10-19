@@ -18,12 +18,18 @@ const claimsRoles = ['Staff.ClaimsHandler', 'Staff.ClaimsManager'] as const;
 /** Roles that work underwriting referrals (permission uw.Referral.list; dev users `uwsenior`, `superuser`). */
 const underwritingRoles = ['Staff.UnderwritingManager', 'Platform.Admin'] as const;
 
+/** Roles that work distance-withdrawal requests (permission chn.Withdrawal.list). */
+const withdrawalRoles = ['Staff.Underwriter', 'Staff.Billing', 'Platform.Admin'] as const;
+
 /** Roles that manage pack activation (illustrative; permission mkt.Pack.list). */
 const packRoles = [
   'Platform.ReleaseManager',
   'Platform.DesignAuthority',
   'Platform.Admin',
 ] as const;
+
+/** Roles that work data migration (permissions mig.Batch.*, mig.Routing.*; dev role Staff.MigrationManager). */
+const migrationRoles = ['Staff.MigrationManager', 'Platform.Admin'] as const;
 
 /** Default staff navigation (role-configured order arrives with PLT; Part 1 §3.4). */
 export const defaultNavItems: NavItem[] = [
@@ -38,6 +44,7 @@ export const defaultNavItems: NavItem[] = [
     label: 'packRollback',
     roles: underwritingRoles,
   },
+  { id: 'policies', to: '/channels/withdrawals', label: 'withdrawals', roles: withdrawalRoles },
   { id: 'claims', to: '/claims', roles: claimsRoles },
   { id: 'billing', to: '/billing' },
   {
@@ -56,6 +63,7 @@ export const defaultNavItems: NavItem[] = [
   { id: 'reports', to: '/reports' },
   { id: 'products', to: '/products' },
   { id: 'admin', to: '/admin/packs', label: 'packs', roles: packRoles },
+  { id: 'admin', to: '/admin/migration', label: 'migration', roles: migrationRoles },
   {
     id: 'admin',
     to: '/admin/ai',

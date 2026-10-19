@@ -80,6 +80,7 @@ internal sealed class CancelPolicyHandler(
     public async Task<Result<CancellationCreateResponse>> HandleAsync(CancelPolicy command, CancellationToken cancellationToken)
     {
         var request = command.Request;
+        var withdrawal = command.Withdrawal;
         var zone = options.Value.Zone;
         var now = PolicyWriteLock.Truncate(clock.Now);
         var kind = CancellationText.Kind(request.Kind);
@@ -95,12 +96,14 @@ internal sealed class CancelPolicyHandler(
             return Validation("source", "SOURCE_NOT_AVAILABLE", $"Cancellation by source {request.Source} is not available in this release (no refund method is declared for it).");
         }
 
-        if (request.Source != CancellationSources.Policyholder)
+        if (withdrawal is null
+            ? request.Source != CancellationSources.Policyholder
+            : request.Source != CancellationSources.DistanceWithdrawal)
         {
             return Validation("source", "SOURCE_NOT_AVAILABLE", $"Cancellation by source {request.Source} is not available in this release.");
         }
 
-        if (kind == CancellationKind.Standard)
+        if (kind == CancellationKind.Standard && withdrawal is null)
         {
             // REQ-POL-208/209: "cancel now" only. The effective time is the request receipt time; the requested date must be today
             // (Athens). A later date is a scheduled cancellation, an earlier one a backdated cancellation: both are refused.
@@ -136,7 +139,11 @@ internal sealed class CancelPolicyHandler(
         // ---- the head of the policy, under the lock ------------------------------------------------------------------
         var policy = await db.Policies.AsNoTracking().SingleAsync(p => p.PolicyId == request.PolicyId && p.LegalEntityId == legalEntity, cancellationToken).ConfigureAwait(false);
         var terms = await db.Terms.Where(x => x.PolicyId == request.PolicyId && x.LegalEntityId == legalEntity && x.RecordedTo == null).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var picked = PickTerm(terms, kind, now);
+        var picked = withdrawal is null
+            ? PickTerm(terms, kind, now)
+            : terms.FirstOrDefault(x => x.TermId == withdrawal.TermId) is { } target
+                ? (Result<(PolicyTermRow Term, Instant Effective)>)(target, target.ValidFrom)
+                : DomainError.Of(ModuleCode.POL, CancellationErrors.IllegalTransition, "The term of the withdrawal has no current version.");
         if (picked.IsFailure)
         {
             return picked.Error!;
@@ -156,7 +163,7 @@ internal sealed class CancelPolicyHandler(
 
         var storedState = Codes.Parse<PolicyTermState>(term.State);
         var derived = DerivedState(storedState, term, effective);
-        var fired = PolicyTermStateModel.Machine.Fire(derived, PolicyTermTrigger.Cancel);
+        var fired = PolicyTermStateModel.Machine.Fire(derived, withdrawal is null ? PolicyTermTrigger.Cancel : PolicyTermTrigger.Void);
         if (fired.IsFailure)
         {
             return DomainError.Of(ModuleCode.POL, CancellationErrors.IllegalTransition, $"A {derived} term cannot be cancelled.");
@@ -203,7 +210,7 @@ internal sealed class CancelPolicyHandler(
         }
 
         // ---- tax and levy lines: the MKT treatment decides (REQ-POL-215) -----------------------------------------------
-        var taxLines = await TreatTaxLinesAsync(policy, lines, request.Source, effective, zone, cancellationToken).ConfigureAwait(false);
+        var taxLines = await TreatTaxLinesAsync(policy, lines, request.Source, effective, zone, withdrawal is not null, cancellationToken).ConfigureAwait(false);
         if (taxLines.IsFailure)
         {
             return taxLines.Error!;
@@ -211,9 +218,13 @@ internal sealed class CancelPolicyHandler(
 
         var premiumDeltas = result.Deltas;
         var treated = taxLines.Value;
-        if (treated.Any(x => x.Amount != 0m || x.Treatment.Action != "KEEP_NOT_REDUCED"))
+        // A withdrawal reverses every tax and levy line in full (REVERSE_AS_VOID, D-SL6-02): a refund net of tax is never offered.
+        var gateOk = withdrawal is null
+            ? treated.All(x => x.Amount == 0m && x.Treatment.Action == "KEEP_NOT_REDUCED")
+            : treated.All(x => x.Treatment.Action == "REVERSE_AS_VOID" && x.Amount == -x.Written);
+        if (!gateOk)
         {
-            return DomainError.Of(ModuleCode.POL, "GATE-FAILED", "A credit may only carry KEEP_NOT_REDUCED tax lines at 0.00 in this release. Nothing was changed.");
+            return DomainError.Of(ModuleCode.POL, "GATE-FAILED", "A credit may only carry KEEP_NOT_REDUCED tax lines at 0.00 (a withdrawal: REVERSE_AS_VOID in full) in this release. Nothing was changed.");
         }
 
         // ---- the rows --------------------------------------------------------------------------------------------------
@@ -226,6 +237,7 @@ internal sealed class CancelPolicyHandler(
         var count = premiumDeltas.Count + taxToWrite.Count;
         var premium = premiumDeltas.Sum(d => d.Amount);
         var taxes = taxToWrite.Sum(x => x.Amount);
+        var lineKind = withdrawal is null ? Domain.TaxTransactionKind.Cancellation : Domain.TaxTransactionKind.DistanceWithdrawalVoid;
         var sequence = (transactions.Count == 0 ? 0 : transactions[^1].Sequence) + 1;
 
         // First close what is superseded (the exclusion constraints forbid overlapping record periods), then insert.
@@ -255,16 +267,17 @@ internal sealed class CancelPolicyHandler(
 
         var jobId = JobId.New();
         var jobNumber = await numbering.NextAsync(new NumberRequest(NumberingSchemes.Job, now.ToBusinessDate(zone)), cancellationToken).ConfigureAwait(false);
-        var preview = Preview(term, servicingTerm, state, premiumDeltas, treated, includeTax, request.Source, applied, currency);
+        var preview = Preview(term, servicingTerm, state, premiumDeltas, treated, includeTax, request.Source, applied, currency, withdrawal is not null);
         var intent = JobSupport.Json(new
         {
             kind = Codes.Of(kind), source = request.Source, reasonCode = request.ReasonCode, refundMethod = CancellationText.Code(applied),
             effectiveAt = effective, notices = CancellationText.NoticesNotSent, refundDue = preview.RefundDue.Amount,
+            right = withdrawal?.Right, channelRef = withdrawal?.ChannelRef, receivedAt = withdrawal?.ReceivedAt,
         });
         db.Transactions.Add(new PolicyTransactionRow
         {
             TransactionId = transactionId, PolicyId = term.PolicyId, TermId = term.TermId, JobId = jobId, LegalEntityId = legalEntity,
-            Kind = Codes.Of(PolicyTransactionKind.Cancellation), Sequence = sequence, EffectiveAt = effective, RecordedAt = t,
+            Kind = Codes.Of(withdrawal is null ? PolicyTransactionKind.Cancellation : PolicyTransactionKind.Void), Sequence = sequence, EffectiveAt = effective, RecordedAt = t,
             ConfigurationHash = term.ConfigurationHash, ArtefactHash = term.ArtefactHash, RatingArtefactHash = term.RatingArtefactHash,
             ResolutionHash = term.ResolutionHash, Intent = intent, Premium = premium, Taxes = taxes, Total = premium + taxes,
             Currency = term.Currency, Actor = actor, CorrelationId = context.CorrelationId.ToString(), Origin = context.Origin.ToCode(),
@@ -302,21 +315,21 @@ internal sealed class CancelPolicyHandler(
                 ChargeCategory = delta.ChargeCategory, DeltaKind = DeltaKinds.Net, AnnualRate = RateOf(state, delta.Key), Amount = delta.Amount,
                 Currency = term.Currency, ValidFrom = new BusinessDate(delta.DateFrom), ValidTo = new BusinessDate(delta.DateTo), BookingDate = booking,
                 CorrelationKey = transactionId.Value.ToString(), SetIndex = index, SetSize = count, RecordedAt = t,
-                TransactionKind = Codes.Of(Domain.TaxTransactionKind.Cancellation), CancellationSource = request.Source,
+                TransactionKind = Codes.Of(lineKind), CancellationSource = request.Source,
             });
             frozen.Add(new ChargeLine
             {
                 ChargeId = chargeId, TransactionId = transactionId, ElementLocator = delta.Key.ElementLocator, CoverageCode = delta.Key.CoverageCode,
                 ChargeType = delta.Key.ChargeType, ChargeCategory = delta.ChargeCategory, AnnualRate = RateOf(state, delta.Key), Amount = credit,
             });
-            Emit(policy, term, transactionId, chargeId, delta.Key, delta.ChargeCategory, credit, new DateRange(new BusinessDate(delta.DateFrom), new BusinessDate(delta.DateTo)), booking, null, index, count, t, request.Source);
+            Emit(policy, term, transactionId, chargeId, delta.Key, delta.ChargeCategory, credit, new DateRange(new BusinessDate(delta.DateFrom), new BusinessDate(delta.DateTo)), booking, null, index, count, t, request.Source, withdrawal is not null);
         }
 
         foreach (var line in taxToWrite)
         {
             index++;
             var chargeId = ChargeId.New();
-            var treatmentRef = $"{line.Treatment.RuleId}/{line.Treatment.RuleVersion}/KEEP_NOT_REDUCED";
+            var treatmentRef = $"{line.Treatment.RuleId}/{line.Treatment.RuleVersion}/{line.Treatment.Action}";
             db.ChargeLines.Add(new ChargeLineRow
             {
                 ChargeId = chargeId, TransactionId = transactionId, TermId = term.TermId, PolicyId = term.PolicyId, LegalEntityId = legalEntity,
@@ -325,7 +338,7 @@ internal sealed class CancelPolicyHandler(
                 Currency = term.Currency, ValidFrom = new BusinessDate(effectiveDate), ValidTo = new BusinessDate(termEndDate), BookingDate = booking,
                 CorrelationKey = transactionId.Value.ToString(), SetIndex = index, SetSize = count, RecordedAt = t, TaxTreatmentRef = treatmentRef,
                 LegalStatus = line.Treatment.LegalStatus, Provisional = line.Treatment.Provisional,
-                TransactionKind = Codes.Of(Domain.TaxTransactionKind.Cancellation), CancellationSource = request.Source,
+                TransactionKind = Codes.Of(lineKind), CancellationSource = request.Source,
                 TreatmentRuleId = line.Treatment.RuleId, TreatmentRuleVersion = line.Treatment.RuleVersion,
             });
             frozen.Add(new ChargeLine
@@ -337,7 +350,7 @@ internal sealed class CancelPolicyHandler(
             Emit(
                 policy, term, transactionId, chargeId, line.Key, line.ChargeCategory, new Money(line.Amount, currency),
                 new DateRange(new BusinessDate(effectiveDate), new BusinessDate(termEndDate)), booking,
-                (treatmentRef, line.Treatment.LegalStatus, line.Treatment.Provisional, line.Treatment.RuleId, line.Treatment.RuleVersion), index, count, t, request.Source);
+                (treatmentRef, line.Treatment.LegalStatus, line.Treatment.Provisional, line.Treatment.RuleId, line.Treatment.RuleVersion), index, count, t, request.Source, withdrawal is not null);
         }
 
         events.Publish(new OutgoingEvent(
@@ -352,6 +365,24 @@ internal sealed class CancelPolicyHandler(
         {
             OccurredAt = t,
         });
+
+        if (withdrawal is not null)
+        {
+            events.Publish(new OutgoingEvent(
+                EventDescriptor.From(PolicyVoidedV1.Descriptor), "Policy", policy.PolicyId.Value.ToString(),
+                new PolicyVoidedV1
+                {
+                    TransactionId = transactionId, TermId = term.TermId,
+                    StatutoryReason = withdrawal.Right == "OBJECTION" ? PolicyVoidedV1.StatutoryReasonValue.Objection : PolicyVoidedV1.StatutoryReasonValue.Withdrawal,
+                    CostOfCoverRule = "NONE_FULL_REFUND",
+                },
+                BusinessKeys.Empty.With("policyId", policy.PolicyId.Value.ToString()).With("policyTermId", term.TermId.Value.ToString())
+                    .With("transactionId", transactionId.Value.ToString()).With("jobId", jobId.Value.ToString()))
+            {
+                OccurredAt = t,
+            });
+            // TODO(hardening): request DT-WITHDRAWAL-ACK via DocumentRequested once DOC can be called in-process (no-op while DOC is absent).
+        }
 
         // ---- the job: Draft → Quoted → Bound in one step (the quote is deterministic) --------------------------------------
         var draft = JobState.Draft;
@@ -393,7 +424,7 @@ internal sealed class CancelPolicyHandler(
 
     private void Emit(
         PolicyRow policy, PolicyTermRow term, PolicyTransactionId transactionId, ChargeId chargeId, ChargeKey key, string category, Money amount,
-        DateRange period, BusinessDate booking, (string Ref, string Status, bool Provisional, string RuleId, string RuleVersion)? treatment, int index, int count, Instant t, string source) =>
+        DateRange period, BusinessDate booking, (string Ref, string Status, bool Provisional, string RuleId, string RuleVersion)? treatment, int index, int count, Instant t, string source, bool isWithdrawal) =>
         events.Publish(new OutgoingEvent(
             EventDescriptor.From(ChargeDeltaEmittedV1.Descriptor), "Policy", policy.PolicyId.Value.ToString(),
             new ChargeDeltaEmittedV1
@@ -402,7 +433,8 @@ internal sealed class CancelPolicyHandler(
                 ChargeCategory = category, DeltaKind = DeltaKinds.Net, NetAmount = amount, ValidPeriod = period, BookingDate = booking,
                 TransactionId = transactionId, CorrelationKey = transactionId.Value.ToString(),
                 TaxTreatmentRef = treatment?.Ref, LegalStatus = treatment?.Status, Provisional = treatment?.Provisional,
-                TransactionKind = ChargeDeltaEmittedV1.TransactionKindValue.Cancellation, CancellationSource = source,
+                TransactionKind = isWithdrawal ? ChargeDeltaEmittedV1.TransactionKindValue.DistanceWithdrawalVoid : ChargeDeltaEmittedV1.TransactionKindValue.Cancellation,
+                CancellationSource = source,
                 TreatmentRuleId = treatment?.RuleId, TreatmentRuleVersion = treatment?.RuleVersion,
             },
             BusinessKeys.Empty.With("policyId", policy.PolicyId.Value.ToString()).With("chargeId", chargeId.Value.ToString())
@@ -450,7 +482,7 @@ internal sealed class CancelPolicyHandler(
     }
 
     private async Task<Result<IReadOnlyList<TreatedTaxLine>>> TreatTaxLinesAsync(
-        PolicyRow policy, IReadOnlyList<ChargeLineRow> lines, string source, Instant effective, TimeZoneInfo zone, CancellationToken cancellationToken)
+        PolicyRow policy, IReadOnlyList<ChargeLineRow> lines, string source, Instant effective, TimeZoneInfo zone, bool isWithdrawal, CancellationToken cancellationToken)
     {
         var keys = lines.Where(l => TermHead.IsTaxLike(l.ChargeCategory))
             .GroupBy(l => new ChargeKey(l.ElementLocator, l.CoverageCode, l.ChargeType))
@@ -475,7 +507,8 @@ internal sealed class CancelPolicyHandler(
                     {
                         LegalEntityId = legalEntity.Value, RiskJurisdiction = policy.Jurisdiction.Trim(), TaxPointDate = DayCount.Date(effective, zone),
                         ChargeType = group.Key.ChargeType, Category = first.ChargeCategory == ChargeCategories.Levy ? TaxCategory.Levy : TaxCategory.Tax,
-                        ChargeOrigin = ChargeOrigin.Pol, TransactionKind = Market.Contracts.Spi.TaxTransactionKind.Cancellation, CancellationSource = source,
+                        ChargeOrigin = ChargeOrigin.Pol, TransactionKind = isWithdrawal ? Market.Contracts.Spi.TaxTransactionKind.DistanceWithdrawalVoid : Market.Contracts.Spi.TaxTransactionKind.Cancellation,
+                        CancellationSource = source,
                         PolicyholderType = PolicyholderType.Consumer, BusinessBasis = BusinessBasis,
                     },
                     cancellationToken).ConfigureAwait(false);
@@ -490,6 +523,15 @@ internal sealed class CancelPolicyHandler(
             {
                 // E.g. MKT refuses a value that is not Settled in Production (D-REG-02): the cancellation fails closed with MKT's own error.
                 return ex.Error;
+            }
+
+            if (isWithdrawal && treatment.Action == TreatmentAction.ReverseAsVoid)
+            {
+                var pending = treatment.LegalStatus != TreatmentLegalStatus.Settled;
+                treated.Add(new TreatedTaxLine(
+                    group.Key, first.ChargeCategory, first.AnnualRate, -group.Sum(l => l.Amount), group.Sum(l => l.Amount),
+                    new TreatmentInfo("REVERSE_AS_VOID", treatment.RuleId, treatment.RuleVersion, pending ? "PendingOpinion" : "Settled", pending, treatment.LegalSourceRef)));
+                continue;
             }
 
             if (treatment.Action != TreatmentAction.KeepNotReduced)
@@ -511,7 +553,7 @@ internal sealed class CancelPolicyHandler(
     /// <summary>The contract's servicing preview of the cancellation: what the bind writes, line by line (REQ-POL-207).</summary>
     private static ServicingPreview Preview(
         PolicyTermRow term, ServicingTerm servicingTerm, ServicingState before, IReadOnlyList<ServicingDelta> premiumDeltas,
-        IReadOnlyList<TreatedTaxLine> tax, bool includeTax, string source, RefundMethod method, Currency currency)
+        IReadOnlyList<TreatedTaxLine> tax, bool includeTax, string source, RefundMethod method, Currency currency, bool isWithdrawal)
     {
         static Money M(decimal amount, Currency c)
         {
@@ -535,7 +577,7 @@ internal sealed class CancelPolicyHandler(
         var taxLines = tax.Select(line => new ServicingTaxLine
         {
             ElementLocator = line.Key.ElementLocator, ChargeType = line.Key.ChargeType, ChargeCategory = line.ChargeCategory.ToUpperInvariant(),
-            Amount = M(includeTax ? line.Amount : 0m, currency), TreatmentAction = TreatmentActionCode.KeepNotReduced,
+            Amount = M(includeTax ? line.Amount : 0m, currency), TreatmentAction = isWithdrawal ? TreatmentActionCode.ReverseAsVoid : TreatmentActionCode.KeepNotReduced,
             RuleId = line.Treatment.RuleId, RuleVersion = line.Treatment.RuleVersion, LegalStatus = line.Treatment.LegalStatus,
             Provisional = line.Treatment.Provisional, LegalSourceRef = line.Treatment.LegalSourceRef,
         }).ToList();
@@ -555,7 +597,7 @@ internal sealed class CancelPolicyHandler(
             TotalChange = M(total, currency),
             RefundDue = M(total < 0m ? -total : 0m, currency),
             AdditionalDue = M(0m, currency),
-            TransactionKind = TransactionKindCode.Cancellation,
+            TransactionKind = isWithdrawal ? TransactionKindCode.DistanceWithdrawalVoid : TransactionKindCode.Cancellation,
             CancellationSource = source,
             RefundMethod = CancellationText.Code(method),
             ConfigurationHash = ConfigurationHash.Parse(term.ConfigurationHash),

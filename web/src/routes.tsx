@@ -310,8 +310,65 @@ moduleRoutes.push({
   ],
 });
 
+moduleRoutes.push({
+  path: 'admin/migration',
+  lazy: async () => ({
+    Component: (await import('./modules/migration/RequireMigrationRole')).RequireMigrationRole,
+  }),
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/migration/MigrationHomePage')).MigrationHomePage,
+      }),
+    },
+    {
+      path: 'batches/:batchId',
+      lazy: async () => ({
+        Component: (await import('./modules/migration/BatchPage')).BatchPage,
+      }),
+    },
+  ],
+});
+
+moduleRoutes.push(
+  {
+    // Customer withdrawal declaration + confirmation (SL6-UI-CHN-WITHDRAW).
+    path: 'channels/withdrawal',
+    lazy: async () => ({
+      Component: (await import('./modules/channels/withdrawal/WithdrawalDeclarePage'))
+        .WithdrawalDeclarePage,
+    }),
+  },
+  {
+    path: 'channels/withdrawals',
+    lazy: async () => ({
+      Component: (await import('./modules/channels/withdrawal/RequireWithdrawalRole'))
+        .RequireWithdrawalRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/channels/withdrawal/WithdrawalListPage'))
+            .WithdrawalListPage,
+        }),
+      },
+      {
+        path: ':id',
+        lazy: async () => ({
+          Component: (await import('./modules/channels/withdrawal/WithdrawalDetailPage'))
+            .WithdrawalDetailPage,
+        }),
+      },
+    ],
+  },
+);
+
 const implemented = new Set([
   '/admin/packs',
+  '/admin/migration',
+  '/channels/withdrawals',
   '/policies/pack-rollback',
   '/parties',
   '/policies',

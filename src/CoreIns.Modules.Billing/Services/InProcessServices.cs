@@ -110,6 +110,7 @@ internal sealed class DisbursementService(
     RequestContext context,
     ILegalEntityDirectory legalEntities,
     ICommandHandler<RequestDisbursement, DisbursementRequestResponse> requestHandler,
+    ICommandHandler<ApproveDisbursementRelease, DisbursementApproveReleaseResponse> approveReleaseHandler,
     DisbursementReader reader) : IBillingDisbursementService
 {
     public Task<DisbursementRequestResponse> RequestAsync(DisbursementRequestRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
@@ -124,7 +125,7 @@ internal sealed class DisbursementService(
     }
 
     public Task<DisbursementListPage> ListAsync(string? cursor = null, int? limit = null, CancellationToken cancellationToken = default) =>
-        throw InProcess.NotAvailable("bil.Disbursement.list");
+        reader.ListAsync(InProcess.LegalEntity(context, legalEntities), cursor, limit, cancellationToken);
 
     public Task<DisbursementStopResponse> StopAsync(DisbursementStopRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         throw InProcess.NotAvailable("bil.Disbursement.stop");
@@ -133,7 +134,7 @@ internal sealed class DisbursementService(
         throw InProcess.NotAvailable("bil.Disbursement.void");
 
     public Task<DisbursementApproveReleaseResponse> ApproveReleaseAsync(DisbursementApproveReleaseRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw InProcess.NotAvailable("bil.Disbursement.approveRelease");
+        InProcess.RunAsync(context, approveReleaseHandler, new ApproveDisbursementRelease(request), options, cancellationToken);
 }
 
 /// <summary><see cref="IBillingRefundService"/>: propose, decide, resubmit, get and list refunds (REQ-BIL-007, -181…-191).</summary>
@@ -179,4 +180,16 @@ internal sealed class ReceiptService(RequestContext context, ILegalEntityDirecto
                 ? await reader.ReceiptAsync(InProcess.LegalEntity(context, legalEntities), new PaymentId(guid), cancellationToken).ConfigureAwait(false)
                 : null,
             "receipt");
+}
+
+/// <summary><see cref="IBillingDelinquencyService"/>: <c>get</c> (REQ-BIL-006); cases are opened and moved by events, the API and the sweep.</summary>
+internal sealed class DelinquencyService(RequestContext context, ILegalEntityDirectory legalEntities, DelinquencyReader reader) : IBillingDelinquencyService
+{
+    public async Task<DelinquencyGetResponse> GetAsync(string id, CancellationToken cancellationToken = default) =>
+        new()
+        {
+            Process = (Guid.TryParse(id, out var guid)
+                ? await reader.GetAsync(InProcess.LegalEntity(context, legalEntities), guid, cancellationToken).ConfigureAwait(false)
+                : null) ?? throw new DomainException(BillingErrors.NotFound("delinquency case")),
+        };
 }

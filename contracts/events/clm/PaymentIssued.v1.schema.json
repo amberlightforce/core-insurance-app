@@ -197,7 +197,8 @@
               "type": "null"
             }
           ],
-          "x-classification": "P1"
+          "x-classification": "P1",
+          "x-personal-data": true
         }
       }
     }

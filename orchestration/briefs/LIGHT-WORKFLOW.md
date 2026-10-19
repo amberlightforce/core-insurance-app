@@ -12,6 +12,8 @@ The user wants a **working system first**, cheaply. Supersedes the deep-review /
 - No reviewer agents. You self-check.
 
 ## Setup
+**Every git command after `worktree add` must run inside your own worktree** (`git -C <your worktree> ...`). If your worktree vanished, recreate it — never run merge/reset/checkout in the main checkout.
+
 Repo: `C:/Users/Karl/Projects/coreinsurance/core-insurance-app`. **Never** touch the main checkout (it is on
 branch `training-portal`, used by another session) and never touch `.claude/worktrees/orchestrator`.
 Create your own worktree from origin/main:

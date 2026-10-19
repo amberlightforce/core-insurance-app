@@ -4,23 +4,73 @@
 
 namespace CoreIns.Modules.Migration.Contracts.Api;
 
-/// <summary>mig.Batch.outcomes result. PRD outputs: "status, outcomes"</summary>
+/// <summary>One item outcome of a batch.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BatchOutcomesItem
 {
-    /// <summary>PRD: "status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Status { get; init; }
+    /// <summary>Contract member 'seq'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("seq")]
+    public required int Seq { get; init; }
 
-    /// <summary>PRD: "outcomes"</summary>
+    /// <summary>Contract member 'module'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("module")]
+    public required string Module { get; init; }
+
+    /// <summary>Contract member 'objectType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("objectType")]
+    public required string ObjectType { get; init; }
+
+    /// <summary>Contract member 'legacyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legacyId")]
+    public required string LegacyId { get; init; }
+
+    /// <summary>Contract member 'outcome'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    public required OutcomeValue Outcome { get; init; }
+
+    /// <summary>Contract member 'coreId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'coreId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("outcomes")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("coreId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Outcomes { get; init; }
+    public global::System.Guid? CoreId { get; init; }
+
+    /// <summary>Contract member 'errorCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("errorCode")]
+    public string? ErrorCode { get; init; }
+
+    /// <summary>Contract member 'message'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("message")]
+    public string? Message { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum OutcomeValue
+    {
+        /// <summary><c>PENDING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PENDING")]
+        Pending,
+
+        /// <summary><c>IMPORTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("IMPORTED")]
+        Imported,
+
+        /// <summary><c>SKIPPED_EXISTING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SKIPPED_EXISTING")]
+        SkippedExisting,
+
+        /// <summary><c>FAILED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("FAILED")]
+        Failed,
+
+        /// <summary><c>REVERSED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REVERSED")]
+        Reversed,
+
+        /// <summary><c>REVERSAL_BLOCKED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REVERSAL_BLOCKED")]
+        ReversalBlocked,
+    }
 }
