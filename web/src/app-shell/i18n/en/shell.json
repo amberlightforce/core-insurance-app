@@ -21,6 +21,7 @@
     "reports": "Reports",
     "products": "Products",
     "packs": "Market packs",
+    "fsStatements": "FS statements",
     "withdrawals": "Withdrawals",
     "packRollback": "Pack-rollback exceptions",
     "migration": "Migration",

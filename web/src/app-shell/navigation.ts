@@ -46,6 +46,7 @@ export const defaultNavItems: NavItem[] = [
   },
   { id: 'policies', to: '/channels/withdrawals', label: 'withdrawals', roles: withdrawalRoles },
   { id: 'claims', to: '/claims', roles: claimsRoles },
+  { id: 'claims', to: '/claims/fs-statements', label: 'fsStatements', roles: claimsRoles },
   { id: 'billing', to: '/billing' },
   {
     id: 'reinsurance',
