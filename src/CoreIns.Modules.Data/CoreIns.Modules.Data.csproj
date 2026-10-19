@@ -7,6 +7,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CoreIns.IntegrationTests" />
+    <InternalsVisibleTo Include="CoreIns.ArchitectureTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CoreIns.Modules.Data.Contracts\CoreIns.Modules.Data.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />

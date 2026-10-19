@@ -4,15 +4,64 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Restriction.apply result. PRD outputs: "evidence"</summary>
+/// <summary>dat.Restriction.apply result (DAT-CORE evidence)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RestrictionApplyResponse
 {
-    /// <summary>PRD: "evidence"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("evidence")]
+    /// <summary>Contract member 'subjectToken'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("subjectToken")]
+    public required string SubjectToken { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Facts exported, blanked or restricted</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("factCount")]
+    public required int FactCount { get; init; }
+
+    /// <summary>True once the subject key is destroyed (crypto-shred)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("keyDestroyed")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Evidence { get; init; }
+    public bool? KeyDestroyed { get; init; }
+
+    /// <summary>Exported facts (export only; empty once erased)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("facts")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<FactItem>? Facts { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>ACTIVE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ACTIVE")]
+        Active,
+
+        /// <summary><c>RESTRICTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RESTRICTED")]
+        Restricted,
+
+        /// <summary><c>ERASED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ERASED")]
+        Erased,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record FactItem
+    {
+        /// <summary>Contract member 'category'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("category")]
+        public required string Category { get; init; }
+
+        /// <summary>Contract member 'key'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("key")]
+        public required string Key { get; init; }
+
+        /// <summary>Contract member 'value'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("value")]
+        public required string Value { get; init; }
+    }
 }

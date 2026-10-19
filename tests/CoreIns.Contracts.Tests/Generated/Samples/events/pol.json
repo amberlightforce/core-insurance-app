@@ -190,7 +190,9 @@
       "transactionKind": "NEW_BUSINESS",
       "cancellationSource": "SAMPLE_CODE",
       "treatmentRuleId": "SAMPLE_CODE",
-      "treatmentRuleVersion": "SAMPLE_CODE"
+      "treatmentRuleVersion": "SAMPLE_CODE",
+      "correctionOf": "01929d03-8f4a-7fac-8161-4db29f6fe835",
+      "oosSetId": "01928956-1c26-7996-8c30-19418900dadd"
     },
     "set_id": "01925a23-1611-75b1-8a5a-4eede0a6ae14",
     "set_size": 1,
@@ -246,7 +248,9 @@
       "taxTreatmentRef": null,
       "cancellationSource": null,
       "treatmentRuleId": null,
-      "treatmentRuleVersion": null
+      "treatmentRuleVersion": null,
+      "correctionOf": null,
+      "oosSetId": null
     },
     "set_id": "01924953-bf0a-7bda-8c69-3d75a8587a78",
     "set_size": 1,
