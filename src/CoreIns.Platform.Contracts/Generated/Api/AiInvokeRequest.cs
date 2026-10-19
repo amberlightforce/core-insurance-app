@@ -4,23 +4,18 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Ai.invoke request. PRD inputs: "feature, inputs (allow-listed)"</summary>
+/// <summary>plt.Ai.invoke request (SL6-PLT-AI). Inputs are an allow-listed JSON object; the provider is a deterministic fake (D-SL6-09). Refused with PLT-ERR-AI-DISABLED (503) when the gate is closed before or after the provider call.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AiInvokeRequest
 {
-    /// <summary>PRD: "feature"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("feature")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Feature { get; init; }
+    /// <summary>Contract member 'featureId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("featureId")]
+    public required global::CoreIns.SharedKernel.Identifiers.AiFeatureId FeatureId { get; init; }
 
-    /// <summary>PRD: "inputs (allow-listed)"</summary>
+    /// <summary>JSON object of allow-listed inputs; kept on the interaction row</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("inputs")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Inputs { get; init; }
+    public required global::System.Text.Json.JsonElement Inputs { get; init; }
 }

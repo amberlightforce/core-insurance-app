@@ -4,23 +4,41 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Ai.recordOutcome request. PRD inputs: "feature, inputs (allow-listed)"</summary>
+/// <summary>plt.Ai.recordOutcome request (SL6-PLT-AI): the human decision on a suggestion.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AiRecordOutcomeRequest
 {
-    /// <summary>PRD: "feature"</summary>
+    /// <summary>Contract member 'interactionId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'interactionId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("feature")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Feature { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("interactionId")]
+    public required global::System.Guid InteractionId { get; init; }
 
-    /// <summary>PRD: "inputs (allow-listed)"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("inputs")]
+    /// <summary>Contract member 'outcome'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    public required OutcomeValue Outcome { get; init; }
+
+    /// <summary>Contract member 'comment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Inputs { get; init; }
+    public string? Comment { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum OutcomeValue
+    {
+        /// <summary><c>Accepted</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Accepted")]
+        Accepted,
+
+        /// <summary><c>Rejected</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Rejected")]
+        Rejected,
+
+        /// <summary><c>Modified</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Modified")]
+        Modified,
+    }
 }
