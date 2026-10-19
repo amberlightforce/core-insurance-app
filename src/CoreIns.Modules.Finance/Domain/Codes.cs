@@ -54,6 +54,9 @@ internal static class ExceptionReasons
 
     /// <summary>A PaymentVoided for a payment journal that was already reversed, or a partial void.</summary>
     public const string VoidRefused = "VOID_REFUSED";
+
+    /// <summary>A journal dated in a locked finance period that is not a correction (G5, REQ-POL-108): never posted into a closed period.</summary>
+    public const string PeriodLocked = "PERIOD_LOCKED";
 }
 
 /// <summary>Journal-line side.</summary>
