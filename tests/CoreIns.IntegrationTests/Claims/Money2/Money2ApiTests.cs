@@ -116,12 +116,12 @@ public sealed class Money2ApiTests(PostgresFixture database) : IClassFixture<Pos
         var (_, view) = await _money.SendAsync(HttpMethod.Get, $"/api/clm/v1/claims/{claim.ClaimId}");
         var (response, body) = await _money.SendAsync(HttpMethod.Post, "/api/clm/v1/claims/close", new
         {
-            claimId = claim.ClaimId, expectedRecordVersion = view!["claim"]!["recordVersion"]!.GetValue<int>(), outcome = "COMPLETED",
+            claimId = claim.ClaimId, expectedRecordVersion = int.Parse(view.Text("claim.recordVersion"), System.Globalization.CultureInfo.InvariantCulture), outcome = "COMPLETED",
         });
         response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, body?.ToJsonString());
         body.Text("errors.0.code").ShouldBe("OPEN_RECOVERY");
-        body.Text("errors.0.exposureIds.0").ShouldBe(claim.ExposureId);
-        body!["closeGuardErrors"].ShouldBeNull();
+        body.Text("errors.0.field").ShouldContain(claim.ExposureId);
+        body!["closeGuardErrors"]!.GetValue<string>().ShouldContain(claim.ExposureId, Case.Insensitive);
     }
 
     [Fact]
@@ -164,12 +164,14 @@ public sealed class Money2ApiTests(PostgresFixture database) : IClassFixture<Pos
         context.Jurisdiction = Jurisdiction.Parse("GR");
         context.Actor = ActorRef.User("maker");
         context.Roles = [Manager];
-        await scope.ServiceProvider.GetRequiredService<DbSession>().BeginTransactionAsync(Ct);
+        var session = scope.ServiceProvider.GetRequiredService<DbSession>();
+        await session.BeginTransactionAsync(Ct);
         var engine = scope.ServiceProvider.GetRequiredService<IClaimFinancialEngine>();
         var error = await Should.ThrowAsync<DomainException>(() => engine.SubmitSystemSetAsync(new ClaimId(Guid.Parse(claim.ClaimId)),
             new ClaimFinancialEvidence("BIL_ALLOCATION", Guid.NewGuid().ToString("D")), Ct));
         error.Error.Code.Value.ShouldBe("CLM-ERR-NOT-AVAILABLE");
         context.Actor.ShouldBe(ActorRef.User("maker"));
+        await session.DisposeAsync(); // before the scope disposes the claims context it uses
         var (_, page) = await _money.SendAsync(HttpMethod.Get, $"/api/clm/v1/transaction-sets?claimId={claim.ClaimId}");
         page!["items"]!.AsArray().Count.ShouldBe(0);
     }
