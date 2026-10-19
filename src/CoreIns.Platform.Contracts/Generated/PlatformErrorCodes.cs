@@ -20,6 +20,12 @@ public static class PlatformErrorCodes
     /// </remarks>
     public const string AiDataClass = "PLT-ERR-AI-DATA-CLASS";
 
+    /// <summary>PLT-ERR-AI-DISABLED (HTTP 503).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): plt.Ai.invoke.</para>
+    /// </remarks>
+    public const string AiDisabled = "PLT-ERR-AI-DISABLED";
+
     /// <summary>PLT-ERR-AI-NOT-REGISTERED (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 5 operation(s): plt.Ai.invoke, plt.Ai.killSwitch, plt.Ai.recordOutcome, plt.AiToggle.resolve, plt.AiToggle.set.</para>
@@ -354,13 +360,14 @@ public static class PlatformErrorCodes
     public const string Prefix = "PLT-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, ApprovalSubjectMismatch, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotOwner, NotRetryable, NotRunnable, OutOfOrgScope, OwnerDecided, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownType, UnsupportedLanguage, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiDisabled, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, ApprovalSubjectMismatch, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotOwner, NotRetryable, NotRunnable, OutOfOrgScope, OwnerDecided, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownType, UnsupportedLanguage, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
     {
         [AgentClientNotRegistered] = 422,
         [AiDataClass] = 422,
+        [AiDisabled] = 503,
         [AiNotRegistered] = 422,
         [AiOff] = 422,
         [ApprovalHashMismatch] = 422,

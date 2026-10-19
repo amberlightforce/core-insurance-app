@@ -52,6 +52,25 @@ internal sealed record LineDimensions
     /// <summary>BIL policy refund: the refund payable nets to zero per refund (SL3-FIN-RULES, like GL-2510 per claim payment).</summary>
     public Guid? RefundId { get; init; }
 
+    /// <summary>CLM recovery (SL4-FIN-V4): the recovery clearing account nets to zero per recovery (REQ-FIN-160).</summary>
+    public Guid? RecoveryId { get; init; }
+
+    /// <summary>Organisation counterparty of a recovery, a Friendly Settlement line or an RI recoverable (the reinsurer participant).</summary>
+    public Guid? CounterpartyPartyId { get; init; }
+
+    /// <summary>Friendly Settlement statement reference: GL-2515 nets to zero per counterparty and statement (REQ-FIN-299, BR-FIN-097).</summary>
+    public string? FsStatementRef { get; init; }
+
+    /// <summary>RI recoverable basis, PAID or OUTSTANDING (REQ-FIN-164).</summary>
+    public string? RecoverableBasis { get; init; }
+
+    public Guid? RiContractId { get; init; }
+
+    public int? RiContractYear { get; init; }
+
+    /// <summary>IFRS 17 RI-held group; UNASSIGNED until FIN IFRS 17 exists (D-SL4-10).</summary>
+    public string? RiHeldGroup { get; init; }
+
     /// <summary>Servicing context of the source line (in memory only, not a journal column): what the tax-treatment check needs on the resolved account.</summary>
     public string? TransactionKind { get; init; }
 

@@ -4,31 +4,61 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Clock.start result. PRD outputs: "instance id, deadline, value version"</summary>
+/// <summary>cmp.Clock.start result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClockStartResponse
 {
-    /// <summary>PRD: "instance id"</summary>
+    /// <summary>Clock instance id</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'instanceId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("instanceId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? InstanceId { get; init; }
+    public required global::System.Guid InstanceId { get; init; }
 
-    /// <summary>PRD: "deadline"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Instance state after the call</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Due instant (absent for none)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("deadline")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Deadline { get; init; }
+    public global::CoreIns.SharedKernel.Instant? Deadline { get; init; }
 
-    /// <summary>PRD: "value version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Version of the clock value (increments on pause, resume, extend)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("valueVersion")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ValueVersion { get; init; }
+    public required int ValueVersion { get; init; }
+
+    /// <summary>Instance state after the call</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>RUNNING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RUNNING")]
+        Running,
+
+        /// <summary><c>WARNED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("WARNED")]
+        Warned,
+
+        /// <summary><c>PAUSED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PAUSED")]
+        Paused,
+
+        /// <summary><c>MET</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MET")]
+        Met,
+
+        /// <summary><c>BREACHED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("BREACHED")]
+        Breached,
+
+        /// <summary><c>ELAPSED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ELAPSED")]
+        Elapsed,
+
+        /// <summary><c>CANCELLED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CANCELLED")]
+        Cancelled,
+    }
 }

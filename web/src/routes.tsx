@@ -90,6 +90,51 @@ const moduleRoutes: RouteObject[] = [
     lazy: async () => ({ Component: (await import('./modules/billing/InvoicePage')).InvoicePage }),
   },
   {
+    // SL4-UI-BIL: receivables and FS_CLEARING release approvals (billing roles; the guard is shared with refunds).
+    path: 'billing/receivables',
+    lazy: async () => ({
+      Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/receivables/ReceivablesListPage'))
+            .ReceivablesListPage,
+        }),
+      },
+      {
+        path: ':receivableId',
+        lazy: async () => ({
+          Component: (await import('./modules/billing/receivables/ReceivableDetailPage'))
+            .ReceivableDetailPage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'billing/releases',
+    lazy: async () => ({
+      Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/receivables/ReleasesInboxPage'))
+            .ReleasesInboxPage,
+        }),
+      },
+      {
+        path: ':disbursementId',
+        lazy: async () => ({
+          Component: (await import('./modules/billing/receivables/ReleaseDetailPage'))
+            .ReleaseDetailPage,
+        }),
+      },
+    ],
+  },
+  {
     // Refund screens: billing roles see them, everyone else the no-permission state (RequireRefundRole).
     path: 'billing/refunds',
     lazy: async () => ({
@@ -159,6 +204,57 @@ const moduleRoutes: RouteObject[] = [
   },
 ];
 
+moduleRoutes.push(
+  {
+    path: 'admin/packs',
+    lazy: async () => ({
+      Component: (await import('./modules/market/packs/RequirePackRole')).RequirePackRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/market/packs/PackRegistryPage')).PackRegistryPage,
+        }),
+      },
+      {
+        path: ':packId',
+        lazy: async () => ({
+          Component: (await import('./modules/market/packs/PackDetailPage')).PackDetailPage,
+        }),
+      },
+      {
+        path: ':packId/activations/:activationId',
+        lazy: async () => ({
+          Component: (await import('./modules/market/packs/ActivationPage')).ActivationPage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'policies/pack-rollback',
+    lazy: async () => ({
+      Component: (await import('./modules/policy/packRollback/RequireReviewerRole'))
+        .RequireReviewerRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/policy/packRollback/ExceptionQueuePage'))
+            .ExceptionQueuePage,
+        }),
+      },
+      {
+        path: ':exceptionId',
+        lazy: async () => ({
+          Component: (await import('./modules/policy/packRollback/ExceptionDetailPage'))
+            .ExceptionDetailPage,
+        }),
+      },
+    ],
+  },
+);
 moduleRoutes.push({
   path: 'reinsurance',
   lazy: async () => ({
@@ -200,6 +296,8 @@ moduleRoutes.push({
 });
 
 const implemented = new Set([
+  '/admin/packs',
+  '/policies/pack-rollback',
   '/parties',
   '/policies',
   '/billing',
