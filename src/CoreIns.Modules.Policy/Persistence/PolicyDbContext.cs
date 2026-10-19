@@ -31,6 +31,8 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
 
     public DbSet<PackRollbackExceptionRow> PackRollbackExceptions => Set<PackRollbackExceptionRow>();
 
+    public DbSet<DsarRestrictionRow> DsarRestrictions => Set<DsarRestrictionRow>();
+
     public DbSet<WithdrawalRow> Withdrawals => Set<WithdrawalRow>();
 
     public DbSet<OosCorrectionRow> OosCorrections => Set<OosCorrectionRow>();
@@ -40,6 +42,21 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<DsarRestrictionRow>(entity =>
+        {
+            entity.ToTable("dsar_restriction");
+            entity.HasKey(e => e.RestrictionId).HasName("pk_dsar_restriction");
+            entity.Property(e => e.RestrictionId).HasColumnName("restriction_id");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.RecordClass).HasColumnName("record_class");
+            entity.Property(e => e.LegalBasis).HasColumnName("legal_basis");
+            entity.Property(e => e.RetentionEnd).HasColumnName("retention_end");
+            entity.Property(e => e.Reason).HasColumnName("reason");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.HasIndex(e => new { e.PartyId, e.RecordClass }).IsUnique().HasDatabaseName("ux_dsar_restriction_subject_class");
+        });
 
         modelBuilder.Entity<JobRow>(entity =>
         {

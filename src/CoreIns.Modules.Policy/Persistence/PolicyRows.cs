@@ -447,6 +447,27 @@ internal sealed class PackRollbackExceptionRow
     public int RecordVersion { get; set; } = 1;
 }
 
+/// <summary><c>pol.dsar_restriction</c>: a record class of a data subject restricted by a DSAR (D-SL6-07); one row per (subject, class).</summary>
+internal sealed class DsarRestrictionRow
+{
+    public Guid RestrictionId { get; set; }
+
+    public PartyId PartyId { get; set; }
+
+    public string RecordClass { get; set; } = string.Empty;
+
+    public string LegalBasis { get; set; } = string.Empty;
+
+    /// <summary>ISO date or UNSET_F404.</summary>
+    public string RetentionEnd { get; set; } = string.Empty;
+
+    public string Reason { get; set; } = string.Empty;
+
+    public Instant CreatedAt { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+}
+
 /// <summary><c>pol.oos_correction</c>: one out-of-sequence reverse-and-reapply (SL6-POL-OOS): what it reversed and re-applied, how it was booked.</summary>
 internal sealed class OosCorrectionRow
 {

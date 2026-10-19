@@ -2,6 +2,7 @@
   "Platform": {
     "Permissions": {
       "Grants": {
+        "clm.Fnol.assist": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "clm.Fnol.submit": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.Fnol.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.Fnol.validate": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
@@ -17,7 +18,14 @@
         "clm.Payment.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.PayeeAccount.capture": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.PayeeAccount.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
-        "clm.Coverage.reverify": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
+        "clm.Coverage.reverify": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Recovery.create": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Recovery.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Recovery.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Recovery.recordMilestone": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Recovery.demand": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Recovery.writeOff": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Claim.update": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
       }
     },
     "Authority": {

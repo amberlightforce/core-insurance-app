@@ -28,6 +28,9 @@ const packRoles = [
   'Platform.Admin',
 ] as const;
 
+/** Roles that work data migration (permissions mig.Batch.*, mig.Routing.*; dev role Staff.MigrationManager). */
+const migrationRoles = ['Staff.MigrationManager', 'Platform.Admin'] as const;
+
 /** Default staff navigation (role-configured order arrives with PLT; Part 1 §3.4). */
 export const defaultNavItems: NavItem[] = [
   { id: 'home', to: '/' },
@@ -60,6 +63,7 @@ export const defaultNavItems: NavItem[] = [
   { id: 'reports', to: '/reports' },
   { id: 'products', to: '/products' },
   { id: 'admin', to: '/admin/packs', label: 'packs', roles: packRoles },
+  { id: 'admin', to: '/admin/migration', label: 'migration', roles: migrationRoles },
   {
     id: 'admin',
     to: '/admin/ai',

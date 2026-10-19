@@ -44,7 +44,7 @@ test('E2E-02a claims happy path: FNOL, reserves, four-eyes approval, final payme
   // past, REQ-POL-137) and the loss is dated inside it, so the policy is in force at the loss date.
   await test.step('import and lock the MOTOR-GR product version', async () => {
     const imported = await call(admin, 'POST', '/api/pfc/v1/product-versions/import', { definition: seed, lock: true });
-    expect(imported.status, imported.text).toBeLessThan(300);
+    expect([200, 201, 409], imported.text).toContain(imported.status); // 409: imported by an earlier spec on the same stack (E2E-10 re-run)
   });
 
   const party = await test.step('create the policyholder', async () => {

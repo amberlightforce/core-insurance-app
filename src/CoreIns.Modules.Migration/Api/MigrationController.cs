@@ -76,7 +76,8 @@ internal sealed class MigrationController : ControllerBase
         }
 
         _ = services;
-        return (await reader.ResolveRouteAsync(body.ObjectType, body.Key, date, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+        var resolved = await reader.ResolveRouteAsync(body.ObjectType, body.Key, date, cancellationToken).ConfigureAwait(false);
+        return resolved.IsSuccess ? Results.Ok(MigrationRoutingService.ToResponse(resolved.Value, body.Key)) : resolved.ToHttpResult(HttpContext);
     }
 
     [HttpPost("routing/override")]
