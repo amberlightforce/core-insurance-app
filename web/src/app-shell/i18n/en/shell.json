@@ -24,6 +24,7 @@
     "withdrawals": "Withdrawals",
     "packRollback": "Pack-rollback exceptions",
     "migration": "Migration",
+    "dsar": "Data-subject requests",
     "aiControl": "AI control",
     "admin": "Administration",
     "more": "More",

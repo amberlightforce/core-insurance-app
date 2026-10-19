@@ -59,6 +59,7 @@ public static class BillingModule
                 $"GRANT SELECT, INSERT ON {Schema}.refund_credit, {Schema}.refund_netting TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.respread TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.receivable, {Schema}.receivable_allocation, {Schema}.allocation, {Schema}.credit_application, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.migration_receivable, {Schema}.migration_mandate TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
@@ -75,6 +76,8 @@ public static class BillingModule
         services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Billing.Services.Dsar.BillingDsarParticipant>();
 
         services.AddScoped<LedgerWriter>();
+        services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationImporter, MigrationImport.BillingMigrationImporter>();
+        services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationReverser, MigrationImport.BillingMigrationReverser>();
         services.AddScoped<TermBilling>();
         services.AddScoped<Allocator>();
         services.AddScoped<BillingReader>();

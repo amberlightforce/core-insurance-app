@@ -13,7 +13,7 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
     /// </summary>
     [DbContext(typeof(BillingDbContext))]
     [Migration("20261019200000_FsClearingOut")]
-    public partial class FsClearingOut : Migration
+    public partial class FsClearingOut : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder) => migrationBuilder.Sql(FsClearingDatabaseSql.Rules);

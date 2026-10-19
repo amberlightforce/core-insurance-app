@@ -62,6 +62,10 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
     public DbSet<ReceivableAllocationRow> ReceivableAllocations => Set<ReceivableAllocationRow>();
 
+    public DbSet<MigrationImport.MigrationReceivableRow> MigrationReceivables => Set<MigrationImport.MigrationReceivableRow>();
+
+    public DbSet<MigrationImport.MigrationMandateRow> MigrationMandates => Set<MigrationImport.MigrationMandateRow>();
+
     protected override string Schema => BillingModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -69,6 +73,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
         base.OnModelCreating(modelBuilder);
         DsarRestrictionModel.Configure(modelBuilder);
         ReceivableModel.Configure(modelBuilder);
+        MigrationImport.BillingMigrationModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BillingAccountRow>(entity =>
         {

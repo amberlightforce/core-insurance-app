@@ -23,6 +23,180 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Billing.MigrationImport.MigrationMandateRow", b =>
+                {
+                    b.Property<Guid>("MandateId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("mandate_id");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<Guid>("BillingAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("billing_account_id");
+
+                    b.Property<DateTime?>("FirstUsedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("first_used_at");
+
+                    b.Property<string>("IbanMasked")
+                        .HasColumnType("text")
+                        .HasColumnName("iban_masked");
+
+                    b.Property<DateTime>("ImportedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("imported_at");
+
+                    b.Property<string>("ImportedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("imported_by");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("MandateReference")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mandate_reference");
+
+                    b.Property<string>("Origin")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("MIGRATION")
+                        .HasColumnName("origin");
+
+                    b.Property<Guid>("PayerPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payer_party_id");
+
+                    b.Property<DateOnly>("SignatureDate")
+                        .HasColumnType("date")
+                        .HasColumnName("signature_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("ACTIVE")
+                        .HasColumnName("status");
+
+                    b.HasKey("MandateId")
+                        .HasName("pk_migration_mandate");
+
+                    b.HasIndex("BatchId")
+                        .HasDatabaseName("ix_migration_mandate_batch");
+
+                    b.HasIndex("BillingAccountId");
+
+                    b.HasIndex("LegalEntityId", "MandateReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_migration_mandate_reference");
+
+                    b.ToTable("migration_mandate", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_migration_mandate_origin", "origin = 'MIGRATION'");
+
+                            t.HasCheckConstraint("ck_migration_mandate_status", "status IN ('ACTIVE', 'CANCELLED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.MigrationImport.MigrationReceivableRow", b =>
+                {
+                    b.Property<Guid>("ReceivableId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("receivable_id");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<Guid>("BillingAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("billing_account_id");
+
+                    b.Property<decimal>("CollectedAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(19,4)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("collected_amount");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateOnly>("DueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
+
+                    b.Property<DateTime>("ImportedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("imported_at");
+
+                    b.Property<string>("ImportedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("imported_by");
+
+                    b.Property<string>("LegacyInvoiceNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legacy_invoice_number");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Origin")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("MIGRATION")
+                        .HasColumnName("origin");
+
+                    b.Property<decimal>("OriginalAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("original_amount");
+
+                    b.Property<decimal>("OutstandingAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("outstanding_amount");
+
+                    b.Property<Guid>("PayerPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payer_party_id");
+
+                    b.Property<string>("PolicyLegacyNumber")
+                        .HasColumnType("text")
+                        .HasColumnName("policy_legacy_number");
+
+                    b.HasKey("ReceivableId")
+                        .HasName("pk_migration_receivable");
+
+                    b.HasIndex("BatchId")
+                        .HasDatabaseName("ix_migration_receivable_batch");
+
+                    b.HasIndex("BillingAccountId");
+
+                    b.HasIndex("LegalEntityId", "LegacyInvoiceNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ux_migration_receivable_legacy");
+
+                    b.ToTable("migration_receivable", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_migration_receivable_amounts", "original_amount >= outstanding_amount AND outstanding_amount > 0 AND collected_amount >= 0 AND outstanding_amount = round(outstanding_amount, 2) AND original_amount = round(original_amount, 2)");
+
+                            t.HasCheckConstraint("ck_migration_receivable_origin", "origin = 'MIGRATION'");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.AllocationRow", b =>
                 {
                     b.Property<Guid>("AllocationId")
@@ -2484,6 +2658,24 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_respread_net", "net_amount = invoiced_amount - credited_amount");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.MigrationImport.MigrationMandateRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.BillingAccountRow", null)
+                        .WithMany()
+                        .HasForeignKey("BillingAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.MigrationImport.MigrationReceivableRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.BillingAccountRow", null)
+                        .WithMany()
+                        .HasForeignKey("BillingAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.AllocationRow", b =>
