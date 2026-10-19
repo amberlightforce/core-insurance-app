@@ -21,7 +21,7 @@ namespace CoreIns.Modules.Claims.Commands;
 
 /// <summary><c>clm.TransactionSet.build</c> as a command of the platform pipeline.</summary>
 internal sealed record BuildTransactionSet(TransactionSetBuildRequest Request, ClaimFinancialEvidence? Evidence = null,
-    string PaymentMethod = "SEPA_CT", PartyId? CounterpartyInsurerPartyId = null) : ICommand<TransactionSetBuildResponse>;
+    string PaymentMethod = "SEPA_CT", PartyId? CounterpartyInsurerPartyId = null, ClaimPaymentId? ReissueOf = null) : ICommand<TransactionSetBuildResponse>;
 
 /// <summary>Shape rules (CLM-ERR-VALIDATION): EUR only (D-SL2-06), minor units, codes, at most 20 transactions.</summary>
 internal sealed class BuildTransactionSetValidator : AbstractValidator<BuildTransactionSet>
@@ -181,9 +181,9 @@ internal sealed class BuildTransactionSetHandler(
         if (!clearing && drafts.SingleOrDefault(d => d.Kind == TransactionKind.Payment) is { } paymentDraft)
         {
             var account = paymentDraft.Source!.PayeeAccountId!.Value;
-            var rejected = Codes.Of(PaymentStatus.Rejected);
+            string[] rejected = [Codes.Of(PaymentStatus.Rejected), Codes.Of(PaymentStatus.Voided), Codes.Of(PaymentStatus.Stopped), Codes.Of(PaymentStatus.Returned)];
             var duplicate = await db.ClaimPayments.AsNoTracking()
-                .Where(p => p.ClaimId == claim.ClaimId && p.PayeeAccountId == account && p.Amount == paymentDraft.Amount && p.Status != rejected)
+                .Where(p => p.ClaimId == claim.ClaimId && p.PayeeAccountId == account && p.Amount == paymentDraft.Amount && !rejected.Contains(p.Status))
                 .Join(db.TransactionSets.AsNoTracking().Where(s => s.Status != Codes.Of(SetStatus.Draft)), p => p.SetId, s => s.SetId, (p, s) => p.ClaimPaymentId)
                 .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
             if (duplicate != default)
@@ -278,7 +278,7 @@ internal sealed class BuildTransactionSetHandler(
                 {
                     ClaimPaymentId = id, ClaimId = claim.ClaimId, SetId = set.SetId, ExposureId = draft.Line.ExposureId, PayeePartyId = source.PayeePartyId!.Value,
                     PayeeAccountId = source.PayeeAccountId!.Value, MaskedAccount = view?.MaskedIban, Method = command.PaymentMethod,
-                    CounterpartyInsurerPartyId = command.CounterpartyInsurerPartyId,
+                    CounterpartyInsurerPartyId = command.CounterpartyInsurerPartyId, ReissueOf = command.ReissueOf,
                     PaymentType = Codes.Of(draft.PaymentType!.Value), Amount = draft.Amount, Currency = draft.Line.Currency, Status = Codes.Of(PaymentStatus.Pending),
                     DisbursementContentHash = DisbursementContent.Hash(DisbursementCodes.ClaimPayment, id.Value.ToString("D"), source.PayeePartyId!.Value, source.PayeeAccountId!.Value, amount).Value,
                     LegalEntityId = legalEntity, Jurisdiction = claim.Jurisdiction, CreatedAt = now, CreatedBy = actor, UpdatedAt = now,

@@ -12,8 +12,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CoreIns.Modules.Policy.Commands.Change.Oos;
 
 /// <summary>
-/// Port: is a finance period locked (REQ-POL-108, G5)? FIN-OOS-GUARD supplies the real adapter over <c>IFinancePeriodService</c> (replace
-/// this registration); until then no period is locked.
+/// Port: is a finance period locked (REQ-POL-108, G5)? <see cref="FinancePeriodsAdapter"/> is the registered adapter over FIN's <c>IFinancePeriodService</c>.
 /// </summary>
 internal interface IOosFinancePeriods
 {
@@ -21,7 +20,7 @@ internal interface IOosFinancePeriods
     Task<bool> IsLockedAsync(BusinessDate date, CancellationToken cancellationToken);
 }
 
-/// <summary>The registered port until FIN-OOS-GUARD is on main: nothing is locked.</summary>
+/// <summary>A port double in which nothing is locked (tests).</summary>
 internal sealed class UnlockedFinancePeriods : IOosFinancePeriods
 {
     public Task<bool> IsLockedAsync(BusinessDate date, CancellationToken cancellationToken) => Task.FromResult(false);

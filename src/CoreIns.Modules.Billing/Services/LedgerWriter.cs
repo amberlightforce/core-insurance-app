@@ -41,6 +41,8 @@ internal sealed class LedgerWriter(
     IOptions<BillingOptions> options)
 {
     private IReadOnlyList<LedgerRule>? _rules;
+    private List<OutgoingEvent>? _setBuffer;
+    private BusinessKeys _setKeys = BusinessKeys.Empty;
 
     /// <summary>Today's business date in the legal entity's zone (the accounting date: no cut-off in the slice).</summary>
     public BusinessDate Today => clock.Now.ToBusinessDate(options.Value.Zone);
@@ -65,6 +67,31 @@ internal sealed class LedgerWriter(
     public PostingKey Key(string entryType, string chargeCategory, string qualifier) =>
         new(entryType, chargeCategory, PaymentPlans.DirectBill, Jurisdiction.Value, qualifier);
 
+    /// <summary>
+    /// Starts collecting the entries of one delta set (SL6-BIL-RESPREAD): every entry posted until <see cref="EndSet"/> carries
+    /// <paramref name="extraKeys"/> (<c>correctionOf</c>, <c>oosSetId</c>) and is published as a member of one D4 set, so FIN posts
+    /// the whole set as one balanced journal (FIN-OOS-GUARD).
+    /// </summary>
+    public void BeginSet(BusinessKeys extraKeys)
+    {
+        _setBuffer = [];
+        _setKeys = extraKeys;
+    }
+
+    /// <summary>Publishes the collected entries as the members of the set <paramref name="setId"/>.</summary>
+    public int EndSet(Guid setId)
+    {
+        var buffer = _setBuffer ?? throw new InvalidOperationException("EndSet without BeginSet.");
+        _setBuffer = null;
+        _setKeys = BusinessKeys.Empty;
+        for (var i = 0; i < buffer.Count; i++)
+        {
+            events.Publish(buffer[i] with { Set = new EventSet(setId, buffer.Count, i + 1) });
+        }
+
+        return buffer.Count;
+    }
+
     /// <summary>Stages the entry, its lines and its <c>BillingEntryPosted</c>; returns the entry id.</summary>
     public Guid Post(EntrySpec spec)
     {
@@ -87,6 +114,11 @@ internal sealed class LedgerWriter(
             _ => throw new InvalidOperationException($"A {spec.EntryType} entry needs a billing account or a disbursement."),
         };
         var keys = spec.Lineage.With("entryId", entryId.ToString());
+        foreach (var extra in _setKeys)
+        {
+            keys = keys.With(extra.Key, extra.Value);
+        }
+
         keys = spec.BillingAccountId is { } accountId ? keys.With("billingAccountId", accountId.Value.ToString()) : keys;
         keys = spec.DisbursementId is { } disbursementId ? keys.With("disbursementId", disbursementId.Value.ToString()) : keys;
 
@@ -157,10 +189,19 @@ internal sealed class LedgerWriter(
             });
         }
 
-        events.Publish(new OutgoingEvent(
+        var posted = new OutgoingEvent(
             EventDescriptor.From(BillingEntryPostedV1.Descriptor), aggregateType, aggregateId,
             new BillingEntryPostedV1 { EntryId = entryId, EventTypeValue = spec.EntryType, AccountingDate = today, BusinessDate = today, Lines = published },
-            keys) { OccurredAt = now });
+            keys) { OccurredAt = now };
+        if (_setBuffer is { } buffer)
+        {
+            buffer.Add(posted);
+        }
+        else
+        {
+            events.Publish(posted);
+        }
+
         return entryId;
     }
 

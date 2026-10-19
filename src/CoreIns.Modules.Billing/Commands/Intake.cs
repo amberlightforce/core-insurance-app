@@ -81,6 +81,8 @@ internal sealed class IntakeChargeHandler(
             CancellationSource = delta.CancellationSource,
             TreatmentRuleId = delta.TreatmentRuleId,
             TreatmentRuleVersion = delta.TreatmentRuleVersion,
+            CorrectionOf = delta.CorrectionOf,
+            OosSetId = delta.OosSetId,
             SourceEventId = command.Source.EventId,
             SourceSequence = command.Source.AggregateSequence,
             ReceivedAt = clock.Now,

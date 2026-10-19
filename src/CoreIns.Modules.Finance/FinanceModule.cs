@@ -53,9 +53,14 @@ public static class FinanceModule
         services.AddScoped<ReferenceData>();
         services.AddScoped<JournalWriter>();
         services.AddScoped<JournalReversal>();
+        services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationImporter, MigrationImport.FinanceMigrationImporter>();
+        services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationReverser, MigrationImport.FinanceMigrationReverser>();
         services.AddScoped<PaymentVoidPosting>();
         services.AddScoped<TaxTreatmentCheck>();
         services.AddScoped<Intake>();
+        services.AddScoped<FinancePeriods>();
+        services.AddScoped<OosCorrections>();
+        services.AddScoped<CoreIns.Modules.Finance.Contracts.IFinancePeriodService, FinancePeriodService>();
         services.AddScoped<JournalReader>();
         services.AddScoped<ClearingInvariants>();
         services.AddScoped<PostingRuleReader>();

@@ -72,3 +72,30 @@ internal sealed class DataController : ControllerBase
             : Results.Ok(found);
     }
 }
+
+/// <summary>Development-only seed (SL6-E2E-09): writes one encrypted subject fact so a DSAR journey has something to export and erase. 404 elsewhere.</summary>
+[ApiController]
+[Route("api/dat/v1/dev/subject-facts")]
+#pragma warning disable CA1822 // Not static: ASP.NET does not route static controller methods.
+internal sealed class DevSubjectFactsController : ControllerBase
+{
+    /// <summary>Request body of the seed endpoint.</summary>
+    public sealed record SeedFact(string SubjectToken, string Category, string Key, string Value);
+
+    [HttpPost]
+    [Authorize(Policy = "dat.Erasure.execute")]
+    public async Task<IResult> SeedAsync(
+        [FromBody] SeedFact fact,
+        [FromServices] SubjectFactStore store,
+        [FromServices] Microsoft.Extensions.Hosting.IHostEnvironment environment,
+        CancellationToken cancellationToken)
+    {
+        if (!Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsDevelopment(environment))
+        {
+            return Results.NotFound();
+        }
+
+        var written = await store.RecordAsync(fact.SubjectToken, fact.Category, fact.Key, fact.Value, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(new { written });
+    }
+}

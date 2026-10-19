@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Billing.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Receivables : Migration
+    public partial class Receivables : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

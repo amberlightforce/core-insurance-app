@@ -4,20 +4,11 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Dsar.erase request. PRD inputs: "party id, scope"</summary>
+/// <summary>cmp.Dsar.erase request (needs an approval for ERASE; regulated classes are restricted instead)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DsarEraseRequest
 {
-    /// <summary>PRD: "party id"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.PartyId? PartyId { get; init; }
-
-    /// <summary>PRD: "scope"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("scope")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Scope { get; init; }
+    /// <summary>DSAR case id</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dsarId")]
+    public required global::CoreIns.SharedKernel.Identifiers.DsarId DsarId { get; init; }
 }

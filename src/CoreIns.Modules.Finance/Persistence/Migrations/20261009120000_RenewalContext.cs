@@ -11,7 +11,7 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
     /// </summary>
     [DbContext(typeof(FinanceDbContext))]
     [Migration("20261009120000_RenewalContext")]
-    public partial class RenewalContext : Migration
+    public partial class RenewalContext : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

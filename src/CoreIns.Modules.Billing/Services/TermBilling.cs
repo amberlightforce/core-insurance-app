@@ -218,10 +218,41 @@ internal sealed class TermBilling(
             return;
         }
 
+        if (charge.OosSetId is not null)
+        {
+            return; // an out-of-sequence delta posts with the other entries of its set once the set is complete (PostDeferredWrittenAsync)
+        }
+
         charge.WrittenEntryId = ledger.Post(new EntrySpec(
             entryType,
             account.BillingAccountId,
             [new PostingLeg(rule.Value, posted.Value, ChargeDimensions(charge, plan))],
+            Lineage(charge.PolicyId, charge.TermId, charge.TransactionId).With("chargeId", charge.ChargeId.Value.ToString()),
+            "bil.Charge.intake"));
+    }
+
+    /// <summary>
+    /// SL6-BIL-RESPREAD: the WRITTEN / ACCRUED entry of an out-of-sequence delta, posted inside the set scope with the set entries
+    /// (the rules were checked when the charge was written).
+    /// </summary>
+    private async Task PostDeferredWrittenAsync(ChargeRow charge, PlanInstanceRow plan, BillingAccountRow account, CancellationToken cancellationToken)
+    {
+        var accrued = charge.Status == Codes.Of(ChargeStatus.Accrued);
+        var entryType = accrued ? EntryTypes.Accrued : EntryTypes.Written;
+        var qualifier = charge.ChargeCategory == ChargeCategories.Tax
+            ? await LiabilityQualifierAsync(cancellationToken).ConfigureAwait(false) ?? string.Empty
+            : RuleQualifiers.Any;
+        var rule = Unwrap(await ledger.RuleAsync(ledger.Key(entryType, charge.ChargeCategory, qualifier), cancellationToken).ConfigureAwait(false));
+        var posted = Posting.Amount(rule, new Money(charge.Amount, Currency.FromCode(charge.Currency)));
+        if (posted.IsFailure || posted.Value.IsZero)
+        {
+            return;
+        }
+
+        charge.WrittenEntryId = ledger.Post(new EntrySpec(
+            entryType,
+            account.BillingAccountId,
+            [new PostingLeg(rule, posted.Value, ChargeDimensions(charge, plan))],
             Lineage(charge.PolicyId, charge.TermId, charge.TransactionId).With("chargeId", charge.ChargeId.Value.ToString()),
             "bil.Charge.intake"));
     }
@@ -249,7 +280,9 @@ internal sealed class TermBilling(
             var written = Codes.Of(ChargeStatus.Written);
             var billable = members.Where(m => m.Status == written && m.Amount > 0m).ToList();
             var credits = members.Where(m => m.Status == written && m.Amount < 0m).ToList();
-            if (billable.Count == 0 && credits.Count == 0)
+            var accruedCode = Codes.Of(ChargeStatus.Accrued);
+            var deferred = members.Where(m => m.OosSetId is not null && m.WrittenEntryId is null && m.Amount > 0m && (m.Status == written || m.Status == accruedCode)).ToList();
+            if (billable.Count == 0 && credits.Count == 0 && deferred.Count == 0)
             {
                 continue;
             }
@@ -274,6 +307,19 @@ internal sealed class TermBilling(
                 allocations = resolution.Allocations;
             }
 
+            // SL6-BIL-RESPREAD: the entries of an out-of-sequence delta set are collected and published as one D4 set carrying
+            // correctionOf / oosSetId, so FIN posts the set as one balanced journal (first open period when its month is locked).
+            var oos = members.FirstOrDefault(m => m.OosSetId is not null);
+            if (oos is not null)
+            {
+                var keys = BusinessKeys.Empty.With("oosSetId", oos.OosSetId!.Value.ToString());
+                ledger.BeginSet(oos.CorrectionOf is { } corrected ? keys.With("correctionOf", corrected.ToString()) : keys);
+                foreach (var member in deferred.OrderBy(m => m.SetIndex))
+                {
+                    await PostDeferredWrittenAsync(member, plan, account, cancellationToken).ConfigureAwait(false);
+                }
+            }
+
             if (billable.Count > 0)
             {
                 await BillAsync(plan, account, billable, cancellationToken).ConfigureAwait(false);
@@ -284,9 +330,51 @@ internal sealed class TermBilling(
             {
                 created += await BillCreditsAsync(plan, account, credits, allocations, cancellationToken).ConfigureAwait(false);
             }
+
+            if (oos is not null)
+            {
+                ledger.EndSet(set.Key);
+                await RecordRespreadAsync(plan, account, oos, billable, allocations, cancellationToken).ConfigureAwait(false);
+            }
         }
 
         return created;
+    }
+
+    /// <summary>
+    /// SL6-BIL-RESPREAD: the one billing correction of an out-of-sequence delta set, idempotent on the delta set. Invoices already
+    /// paid are never touched: the difference falls on a new invoice (debit) or on credit notes against the invoices the credits
+    /// correct (credit), so the term's billed total equals the re-rated premium. No notification (D-SL6).
+    /// TODO(hardening): the slice bills ANNUAL only (D-SLC-10c); instalment plans would re-spread the unpaid instalments here.
+    /// </summary>
+    private async Task RecordRespreadAsync(
+        PlanInstanceRow plan, BillingAccountRow account, ChargeRow oos, List<ChargeRow> billable, IReadOnlyList<CreditAllocation> allocations, CancellationToken cancellationToken)
+    {
+        if (await db.Respreads.AnyAsync(r => r.SetId == oos.SetId, cancellationToken).ConfigureAwait(false))
+        {
+            return;
+        }
+
+        var invoiced = billable.Sum(c => c.Amount);
+        var credited = allocations.Sum(a => a.Amount);
+        var paid = Codes.Of(InvoiceState.Paid);
+        db.Respreads.Add(new RespreadRow
+        {
+            SetId = oos.SetId,
+            OosSetId = oos.OosSetId,
+            CorrectionOf = oos.CorrectionOf,
+            LegalEntityId = account.LegalEntityId,
+            BillingAccountId = account.BillingAccountId,
+            TermId = plan.TermId,
+            TransactionId = oos.TransactionId,
+            NetAmount = invoiced - credited,
+            InvoicedAmount = invoiced,
+            CreditedAmount = credited,
+            PaidInvoicesUntouched = await db.Invoices.CountAsync(i => i.TermId == plan.TermId && i.Kind == "INVOICE" && i.State == paid, cancellationToken).ConfigureAwait(false),
+            Currency = account.Currency,
+            CreatedAt = clock.Now,
+        });
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>ANNUAL: one invoice for the transaction's charges, billed and due on the billing date.</summary>

@@ -4,23 +4,22 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Dsar.erase result. PRD outputs: "package / per-item outcome"</summary>
+/// <summary>cmp.Dsar.erase result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DsarEraseResponse
 {
-    /// <summary>PRD: "package"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'request'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("request")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Compliance.Contracts.Api.DsarRequestView? Request { get; init; }
+
+    /// <summary>Contract member 'package'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("package")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Package { get; init; }
+    public global::CoreIns.Modules.Compliance.Contracts.Api.DsarPackageView? Package { get; init; }
 
-    /// <summary>PRD: "per-item outcome"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'perItemOutcome'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("perItemOutcome")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PerItemOutcome { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Compliance.Contracts.Api.DsarOutcomeView>? PerItemOutcome { get; init; }
 }
