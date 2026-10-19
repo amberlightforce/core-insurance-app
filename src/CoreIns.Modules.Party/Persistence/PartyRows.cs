@@ -280,3 +280,24 @@ internal sealed class ProducerCodeRow
 
     public string CreatedBy { get; set; } = string.Empty;
 }
+
+/// <summary><c>pty.dsar_restriction</c>: a record class of a data subject restricted by a DSAR (D-SL6-07); one row per (subject, class).</summary>
+internal sealed class DsarRestrictionRow
+{
+    public Guid RestrictionId { get; set; }
+
+    public PartyId PartyId { get; set; }
+
+    public string RecordClass { get; set; } = string.Empty;
+
+    public string LegalBasis { get; set; } = string.Empty;
+
+    /// <summary>ISO date or UNSET_F404.</summary>
+    public string RetentionEnd { get; set; } = string.Empty;
+
+    public string Reason { get; set; } = string.Empty;
+
+    public Instant CreatedAt { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+}

@@ -810,13 +810,13 @@
         "en": "Friendly Settlement payable (method CLEARING): FS clearing GL-2515, never GL-2510 (REQ-FIN-299)"
       },
       {
-        "code": "RCV-CASH",
+        "code": "RCV-UNALLOCATED",
         "sourceEvent": "bil.BillingEntryPosted",
         "entryType": "RECEIVABLE_COLLECTED",
-        "sourceAccount": "LA-10",
-        "account": "GL-1110",
-        "el": "Είσπραξη απαίτησης: διαθέσιμα",
-        "en": "Receivable collected: cash at bank (BIL LA-10; cash only from BIL)"
+        "sourceAccount": "LA-11",
+        "account": "GL-2540",
+        "el": "Είσπραξη απαίτησης: εκκαθάριση μη κατανεμημένης είσπραξης",
+        "en": "Receivable collected: release of the unallocated receipt (BIL LA-11; the cash itself came with the RECEIVED entry, REQ-FIN-037)"
       },
       {
         "code": "RCV-RECOVERY-CLEARING",

@@ -1,0 +1,141 @@
+using System.Text.Json;
+using CoreIns.Modules.Claims.Persistence;
+using CoreIns.Platform.Time;
+using CoreIns.SharedKernel.Dsar;
+using CoreIns.SharedKernel.Identifiers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace CoreIns.Modules.Claims.Services.Dsar;
+
+/// <summary>
+/// Claims participant in data-subject requests (SL6-DSAR-PART-B, D-SL6-07). Every record class this module holds is
+/// regulated (CLAIM_FILE): export returns the subject's records as JSON; erase and restrict never destroy them, they
+/// write one <c>dsar_restriction</c> row per (subject, class) with the legal basis and retentionEnd UNSET_F404 (F-404).
+/// A class with no data for the subject is reported NOT_HELD; no class is skipped silently. Idempotent: a second call
+/// finds the existing restriction row and reports the same outcome.
+/// </summary>
+internal sealed class ClaimsDsarParticipant(IServiceScopeFactory scopes, IClock clock) : IDsarParticipant
+{
+    private const string RetentionBasis = "GDPR Art 17(3)(b): legal obligation to retain; retention period pending F-404";
+
+    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = false };
+
+    /// <inheritdoc />
+    public string Module => "CLM";
+
+    /// <inheritdoc />
+    public async Task<DsarModuleResult> ExportAsync(SubjectRef subject, DsarContext context, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+        await using var scope = scopes.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<ClaimsDbContext>();
+        var held = await CollectAsync(db, subject.PartyId, ct).ConfigureAwait(false);
+        var payload = JsonSerializer.Serialize(
+            new { module = Module, partyId = subject.PartyId, records = held.ToDictionary(h => h.RecordClass, h => h.Rows) },
+            Json);
+        var outcomes = held
+            .Select(h => h.Rows.Count == 0
+                ? DsarRecordOutcome.NotHeld(h.RecordClass)
+                : DsarRecordOutcome.Restricted(h.RecordClass, h.LegalBasis, h.Rows.Count) with { Detail = "exported" })
+            .ToList();
+        return new DsarModuleResult(Module, outcomes, payload);
+    }
+
+    /// <inheritdoc />
+    public Task<DsarModuleResult> RestrictAsync(
+        SubjectRef subject, string reason, string legalBasis, DateOnly? retentionEnd, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+        return ApplyAsync(subject, reason, string.IsNullOrWhiteSpace(legalBasis) ? null : legalBasis, retentionEnd, "dsar", ct);
+    }
+
+    /// <inheritdoc />
+    public Task<DsarModuleResult> EraseAsync(SubjectRef subject, DsarContext context, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+        ArgumentNullException.ThrowIfNull(context);
+
+        // Every class here is restrict-only (ledger, invoice, claim file, policy/fiscal document); nothing is erasable.
+        // TODO(hardening): erase non-regulated classes (none exist in this module today) through DsarRetentionPolicy.
+        return ApplyAsync(subject, "ERASURE_REQUEST", null, null, context.ApprovedBy ?? context.RequestedBy, ct);
+    }
+
+    private async Task<DsarModuleResult> ApplyAsync(
+        SubjectRef subject, string reason, string? legalBasis, DateOnly? retentionEnd, string actor, CancellationToken ct)
+    {
+        await using var scope = scopes.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<ClaimsDbContext>();
+        var held = await CollectAsync(db, subject.PartyId, ct).ConfigureAwait(false);
+        var existing = await db.Set<DsarRestrictionRow>().Where(r => r.SubjectPartyId == subject.PartyId).ToListAsync(ct).ConfigureAwait(false);
+        var requestedEnd = retentionEnd?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) ?? DsarRetention.UnsetF404;
+        var outcomes = new List<DsarRecordOutcome>();
+        foreach (var h in held)
+        {
+            if (h.Rows.Count == 0)
+            {
+                outcomes.Add(DsarRecordOutcome.NotHeld(h.RecordClass));
+                continue;
+            }
+
+            var row = existing.FirstOrDefault(r => string.Equals(r.RecordClass, h.RecordClass, StringComparison.Ordinal));
+            if (row is null)
+            {
+                row = new DsarRestrictionRow
+                {
+                    RestrictionId = Guid.NewGuid(),
+                    SubjectPartyId = subject.PartyId,
+                    RecordClass = h.RecordClass,
+                    LegalBasis = legalBasis ?? h.LegalBasis,
+                    RetentionEnd = requestedEnd,
+                    Reason = reason,
+                    RecordCount = h.Rows.Count,
+                    RestrictedBy = actor,
+                    RestrictedAt = clock.Now,
+                };
+                db.Set<DsarRestrictionRow>().Add(row);
+            }
+            else
+            {
+                // Idempotent: keep the original basis and end; only the record count follows new data of the same class.
+                row.RecordCount = h.Rows.Count;
+            }
+
+            outcomes.Add(DsarRecordOutcome.Restricted(h.RecordClass, row.LegalBasis, h.Rows.Count, row.RetentionEnd));
+        }
+
+        await db.SaveChangesAsync(ct).ConfigureAwait(false);
+        return new DsarModuleResult(Module, outcomes);
+    }
+
+    private sealed record Held(string RecordClass, string LegalBasis, IReadOnlyList<object> Rows);
+
+    private static async Task<List<Held>> CollectAsync(ClaimsDbContext db, PartyId p, CancellationToken ct)
+    {
+        var claimantRows = await db.Claimants.AsNoTracking().Where(c => c.PartyId == p).ToListAsync(ct).ConfigureAwait(false);
+        var claimantClaimIds = claimantRows.Select(c => c.ClaimId).ToList();
+        var claims = await db.Claims.AsNoTracking()
+            .Where(c => c.InsuredPartyId == p || claimantClaimIds.Contains(c.ClaimId))
+            .ToListAsync(ct).ConfigureAwait(false);
+        var payments = await db.ClaimPayments.AsNoTracking().Where(x => x.PayeePartyId == p).ToListAsync(ct).ConfigureAwait(false);
+        var recoveries = await db.Recoveries.AsNoTracking().Where(r => r.CounterpartyPartyId == p || r.BuyerPartyId == p).ToListAsync(ct).ConfigureAwait(false);
+
+        var rows = new List<object>();
+        rows.AddRange(claims.Select(c => new
+        {
+            kind = "claim",
+            id = c.ClaimId,
+            number = c.ClaimNumber,
+            policyId = c.PolicyId,
+            policyNumber = c.PolicyNumber,
+            role = c.InsuredPartyId == p ? "INSURED" : "CLAIMANT",
+            lossDate = c.LossDate,
+            c.Status,
+        }));
+        rows.AddRange(claimantRows.Select(c => new { kind = "claimant", id = c.ClaimantId, claimId = c.ClaimId, c.ClaimantType }));
+        rows.AddRange(payments.Select(x => new { kind = "payment", id = x.ClaimPaymentId, claimId = x.ClaimId, x.PaymentType, x.Amount, x.Currency, x.Status, disbursementId = x.DisbursementId, issuedAt = x.IssuedAt }));
+        rows.AddRange(recoveries.Select(r => new { kind = "recovery", id = r.RecoveryId, claimId = r.ClaimId, r.Type, r.Status, r.ExpectedAmount, r.Currency }));
+
+        return [new Held(DsarRetentionPolicy.ClaimFile, RetentionBasis, rows)];
+    }
+}

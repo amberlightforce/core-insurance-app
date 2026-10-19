@@ -2,6 +2,7 @@
   "Platform": {
     "Permissions": {
       "Grants": {
+        "clm.Fnol.assist": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "clm.Fnol.submit": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.Fnol.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.Fnol.validate": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],

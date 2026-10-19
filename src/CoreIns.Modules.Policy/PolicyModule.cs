@@ -1,6 +1,7 @@
 using CoreIns.Modules.Policy.Api;
 using CoreIns.Modules.Policy.Commands;
 using CoreIns.Modules.Policy.Commands.Cancellation;
+using CoreIns.Modules.Policy.Commands.Withdrawal;
 using CoreIns.Modules.Policy.Commands.Renewal;
 using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Commands.Change.Oos;
@@ -54,8 +55,8 @@ public static class PolicyModule
             appRole =>
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
-                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.job, {Schema}.quote_version, {Schema}.policy_term, {Schema}.segment, {Schema}.pack_rollback_exception TO {appRole}",
-                $"GRANT SELECT, INSERT ON {Schema}.policy, {Schema}.policy_transaction, {Schema}.charge_line, {Schema}.oos_correction TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.job, {Schema}.quote_version, {Schema}.policy_term, {Schema}.segment, {Schema}.pack_rollback_exception, {Schema}.dsar_restriction TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.policy, {Schema}.policy_transaction, {Schema}.charge_line, {Schema}.oos_correction, {Schema}.withdrawal TO {appRole}",
                 // The policy row is frozen (trigger); the one thing a command changes is the record-time watermark (D-SL3-03).
                 $"GRANT UPDATE (last_recorded_at, record_version) ON {Schema}.policy TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
@@ -145,9 +146,18 @@ public static class PolicyModule
         services.AddCommandAuditor<CancelPolicy, CancellationCreateResponse, CancelPolicyAuditor>();
         services.AddCommand<CancelPolicy, CancellationCreateResponse, CancelPolicyHandler>(CommandDescriptor.For("pol.Cancellation.create") with { SupportsDryRun = true });
 
+        // SL6-POL-WITHDRAW: statutory withdrawal / objection voids the term ab initio (pol.Withdrawal.submit). The cancellation handler is
+        // resolved directly: the withdrawal command's own pipeline provides the transaction, dry run and idempotency.
+        services.AddScoped<CancelPolicyHandler>();
+        services.AddScoped<IValidator<SubmitWithdrawal>, SubmitWithdrawalValidator>();
+        services.AddCommandAuditor<SubmitWithdrawal, WithdrawalSubmitResponse, SubmitWithdrawalAuditor>();
+        services.AddCommand<SubmitWithdrawal, WithdrawalSubmitResponse, SubmitWithdrawalHandler>(CommandDescriptor.For("pol.Withdrawal.submit") with { SupportsDryRun = true });
+        services.AddScoped<IPolicyWithdrawalService, PolicyWithdrawalService>();
+
         // SL5-POL-ROLLBACK: PackRolledBack consumer, exception queue and review (REQ-POL-354 subset, D-SL5-10).
         services.AddPackRollback();
 
+        services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Policy.Services.Dsar.PolicyDsarParticipant>();
         services.AddErrorDefinitions(Errors);
         return services;
     }
@@ -167,6 +177,8 @@ public static class PolicyModule
             .Describe("Κάποιος άλλος άλλαξε την εργασία. Φορτώστε τη νεότερη έκδοση και επαναλάβετε.", "Someone else changed the job. Load the newer version and try again."),
         ErrorDefinition.For(ModuleCode.POL, "ILLEGAL-TRANSITION", 409, "Η ενέργεια δεν επιτρέπεται σε αυτή την κατάσταση", "The action is not allowed in this state")
             .Describe("Η κατάσταση της εργασίας δεν επιτρέπει αυτή την ενέργεια.", "The job's state does not allow this action."),
+        ErrorDefinition.For(ModuleCode.POL, "RIGHT-EXPIRED", 422, "Το δικαίωμα υπαναχώρησης έχει λήξει", "The right of withdrawal has expired")
+            .Describe("Η δήλωση ελήφθη μετά το τέλος της προθεσμίας υπαναχώρησης ή ένστασης.", "The declaration was received after the withdrawal or objection window closed."),
         ErrorDefinition.For(ModuleCode.POL, "EFFDATE-LIMIT", 422, "Η ημερομηνία έναρξης δεν επιτρέπεται", "The effective date is not allowed")
             .Describe("Νέα ασφάλιση δεν μπορεί να αρχίζει πριν από τώρα.", "New business cannot start before now."),
         ErrorDefinition.For(ModuleCode.POL, "PRODUCT-UNAVAILABLE", 503, "Το προϊόν δεν είναι διαθέσιμο", "The product is not available", retryable: true)

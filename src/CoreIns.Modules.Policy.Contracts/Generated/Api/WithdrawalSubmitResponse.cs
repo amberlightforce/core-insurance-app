@@ -4,23 +4,19 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Withdrawal.submit result. PRD outputs: "void job, refund preview"</summary>
+/// <summary>pol.Withdrawal.submit result. PRD outputs: "void job, refund preview". The refund is the whole premium paid including IPT and levies, with no cost-of-cover deduction (D-SL6-02).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record WithdrawalSubmitResponse
 {
-    /// <summary>PRD: "void job"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'voidJob'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("voidJob")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? VoidJob { get; init; }
+    public required global::CoreIns.Modules.Policy.Contracts.Api.WithdrawalVoidJob VoidJob { get; init; }
 
-    /// <summary>PRD: "refund preview"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'refundPreview'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("refundPreview")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RefundPreview { get; init; }
+    public required global::CoreIns.Modules.Policy.Contracts.Api.ServicingPreview RefundPreview { get; init; }
+
+    /// <summary>True when this is the stored first result of the same (policyId, channelRef)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("replayed")]
+    public required bool Replayed { get; init; }
 }

@@ -47,6 +47,7 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        DsarRestrictionModel.Configure(modelBuilder);
 
         modelBuilder.Entity<ClaimRow>(entity =>
         {

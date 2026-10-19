@@ -48,6 +48,7 @@ public static class RatingModule
         services.AddScoped<IRatingProrationEngine, RatingProrationEngine>(); // SL3-RAT-PRORATE
         services.AddScoped<IRatingServicingTax, RatingServicingTax>();
 
+        services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Rating.Services.Dsar.RatingDsarParticipant>();
         services.AddErrorDefinitions(Errors);
         return services;
     }
