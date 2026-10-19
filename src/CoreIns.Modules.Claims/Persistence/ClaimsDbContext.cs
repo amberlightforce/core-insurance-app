@@ -41,6 +41,7 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
     public DbSet<FsCaseRow> FsCases => Set<FsCaseRow>();
     public DbSet<FsStatementRow> FsStatements => Set<FsStatementRow>();
     public DbSet<FsStatementLineRow> FsStatementLines => Set<FsStatementLineRow>();
+    public DbSet<MigrationImport.ClaimMigrationImportRow> MigrationImports => Set<MigrationImport.ClaimMigrationImportRow>();
 
     protected override string Schema => ClaimsModule.Schema;
 
@@ -48,6 +49,7 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
     {
         base.OnModelCreating(modelBuilder);
         DsarRestrictionModel.Configure(modelBuilder);
+        MigrationImport.ClaimMigrationModel.Configure(modelBuilder);
 
         modelBuilder.Entity<ClaimRow>(entity =>
         {
