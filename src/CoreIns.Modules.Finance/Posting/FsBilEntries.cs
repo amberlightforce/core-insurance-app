@@ -6,7 +6,8 @@ namespace CoreIns.Modules.Finance.Posting;
 /// Slice-4 BIL entries (D-SL4-02, -06, -13): the cash side of recoveries and Friendly Settlement. FIN books cash only from BIL
 /// (REQ-FIN-037), so these entries are what close the clearing accounts:
 /// <list type="bullet">
-/// <item><c>RECEIVABLE_COLLECTED</c>: Dr cash (LA-10) / Cr the receivable's clearing leg. For a CLM salvage or subrogation receivable
+/// <item><c>RECEIVABLE_COLLECTED</c>: Dr unapplied cash (LA-11; the cash itself is booked by the receipt's RECEIVED entry, so the
+/// entry only releases it) / Cr the receivable's clearing leg. For a CLM salvage or subrogation receivable
 /// (source CLM_CLAIM_PAYMENT, with a recovery id) the clearing leg becomes the role <see cref="Sl4Entries.RecoveryClearingRole"/>
 /// (recovery clearing, nets to zero per recovery); for an FS net receivable (source FS_CLEARING, statement reference) it becomes
 /// LA-24 (GL-2515, nets per counterparty and statement).</item>
@@ -41,7 +42,7 @@ internal static class FsBilEntries
         var lines = new List<SourceLine>();
         foreach (var line in entry.Lines)
         {
-            if (line.Account == Sl4Entries.CashAccount)
+            if (line.Account is Sl4Entries.CashAccount or Sl4Entries.UnappliedCashAccount)
             {
                 lines.Add(line);
                 continue;

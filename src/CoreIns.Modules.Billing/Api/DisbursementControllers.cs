@@ -21,6 +21,8 @@ internal static class DisbursementPermissions
     public const string PayeeAccountCreate = "bil.PayeeAccount.create";
     public const string PayeeAccountGet = "bil.PayeeAccount.get";
     public const string DisbursementGet = "bil.Disbursement.get";
+    public const string DisbursementList = "bil.Disbursement.list";
+    public const string DisbursementApproveRelease = "bil.Disbursement.approveRelease";
 }
 
 /// <summary>
@@ -87,6 +89,27 @@ internal sealed class DisbursementController : ControllerBase
             ? HttpResults.Problem(BillingErrors.NotFound("disbursement"), HttpContext)
             : Results.Ok(new DisbursementGetResponse { Disbursement = found });
     }
+
+    /// <summary>bil.Disbursement.list: newest first, cursor-paged (the release inbox narrows to FS_CLEARING client-side).</summary>
+    [HttpGet("disbursements")]
+    [Authorize(Policy = DisbursementPermissions.DisbursementList)]
+    public async Task<IResult> ListDisbursementsAsync([FromQuery] string? cursor, [FromQuery] int? limit, [FromServices] DisbursementReader reader, CancellationToken cancellationToken)
+    {
+        if (cursor is not null && !int.TryParse(cursor, out _))
+        {
+            return HttpResults.Problem(new DomainError(ErrorCode.For(ModuleCode.BIL, PlatformErrors.Validation), "Invalid cursor."), HttpContext);
+        }
+
+        return Results.Ok(await reader.ListAsync(LegalEntity(), cursor, limit, cancellationToken).ConfigureAwait(false));
+    }
+
+    /// <summary>bil.Disbursement.approveRelease: the maker/checker release of an FS_CLEARING net (Staff.BillingManager, never the requester).</summary>
+    [HttpPost("disbursements/approve-release")]
+    [Authorize(Policy = DisbursementPermissions.DisbursementApproveRelease)]
+    public async Task<IResult> ApproveReleaseAsync(
+        [FromBody] DisbursementApproveReleaseRequest request, [FromServices] ICommandHandler<ApproveDisbursementRelease, DisbursementApproveReleaseResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ApproveDisbursementRelease(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
     private LegalEntityId LegalEntity()
     {
