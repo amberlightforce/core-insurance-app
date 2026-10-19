@@ -84,7 +84,15 @@ internal sealed class ClaimIntake(
     /// <summary>Method CLEARING counts as paid; a Friendly Settlement payable is claims cost like any other (REQ-RI-113).</summary>
     public Task OnPaymentIssuedAsync(EventEnvelope envelope, PaymentIssuedV1 payload, CancellationToken cancellationToken) =>
         ApplyAsync(envelope, ClaimOf(envelope, payload.ClaimId?.Value), (_, claimId) =>
-            AddLinesAsync(claimId, envelope, payload.Lines, sign: 1, (row, amount) => row.Paid += amount, cancellationToken), cancellationToken);
+            AddLinesAsync(claimId, envelope, payload.Lines, sign: 1, (row, amount) =>
+            {
+                row.Paid += amount;
+                if (!payload.ExGratia)
+                {
+                    // An eroding payment reduces the open reserve (REQ-CLM-097); CLM sends no ReserveChanged for it, so incurred = paid + open stays right.
+                    row.OpenReserve = Math.Max(0m, row.OpenReserve - amount);
+                }
+            }, cancellationToken), cancellationToken);
 
     public Task OnPaymentVoidedAsync(EventEnvelope envelope, PaymentVoidedV1 payload, CancellationToken cancellationToken) =>
         ApplyAsync(envelope, ClaimOf(envelope, payload.ClaimId?.Value), async (_, claimId) =>
@@ -95,7 +103,12 @@ internal sealed class ClaimIntake(
                 return;
             }
 
-            await AddLinesAsync(claimId, envelope, lines, sign: -1, (row, amount) => row.Paid += amount, cancellationToken).ConfigureAwait(false);
+            // TODO(hardening): PaymentVoided carries no ex-gratia flag; a voided ex-gratia payment would wrongly restore open reserve.
+            await AddLinesAsync(claimId, envelope, lines, sign: -1, (row, amount) =>
+            {
+                row.Paid += amount;
+                row.OpenReserve -= amount; // amount is negative: the reserve the payment had eroded comes back
+            }, cancellationToken).ConfigureAwait(false);
         }, cancellationToken);
 
     public Task OnRecoveryRecordedAsync(EventEnvelope envelope, RecoveryRecordedV1 payload, CancellationToken cancellationToken) =>

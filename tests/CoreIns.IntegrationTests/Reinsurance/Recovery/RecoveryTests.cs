@@ -43,7 +43,7 @@ public sealed class RecoveryTests(PostgresFixture database) : IClassFixture<Post
         a[follow].ShouldBe((120000m, 0m));
 
         // b: 600,000 paid, 200,000 still open → incurred unchanged, paid layer loss 100,000 → 60,000 / 40,000 paid.
-        await slice.ReserveAsync(claim, exposure, "200000.00");
+        // CLM publishes no ReserveChanged for an eroding payment: RI erodes the open reserve itself.
         await slice.PaidAsync(claim, exposure, "600000.00");
         var b = RecoverySlice.PerParticipant((await slice.ByClaimAsync(claim)).Body);
         b[lead].ShouldBe((180000m, 60000m));
@@ -123,7 +123,7 @@ public sealed class RecoveryTests(PostgresFixture database) : IClassFixture<Post
 
         // A fresh event that changes nothing for the treaty (own damage reserve elsewhere) books no new delta either.
         var before = await slice.ScalarAsync<long>($"SELECT count(*) FROM ri.recovery_batch WHERE contract_id = '{contract}'");
-        await slice.ReserveAsync(claim, exposure, "800000.00");
+        await slice.ReserveAsync(claim, exposure, "500000.00"); // the open reserve CLM reports after the 300,000 payment
         (await slice.ScalarAsync<long>($"SELECT count(*) FROM ri.recovery_batch WHERE contract_id = '{contract}'")).ShouldBe(before);
     }
 
@@ -291,7 +291,7 @@ public sealed class RecoveryTests(PostgresFixture database) : IClassFixture<Post
         var exposure = Guid.CreateVersion7();
         await slice.ReportedAsync(claim, product);
         await slice.ExposureAsync(claim, exposure);
-        await slice.ReserveAsync(claim, exposure, "200000.00");
+        await slice.ReserveAsync(claim, exposure, "900000.00");
         await slice.PaidAsync(claim, exposure, "700000.00", method: "CLEARING");
 
         RecoverySlice.PerParticipant((await slice.ByClaimAsync(claim)).Body)[lead].ShouldBe((240000m, 120000m)); // incurred UNL 900,000 → layer 400,000 x 60%; paid UNL 700,000 → layer 200,000 x 60%

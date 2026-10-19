@@ -6,6 +6,9 @@ public sealed class FriendlySettlementStubOptions
     /// <summary>Configuration section name.</summary>
     public const string Section = "FriendlySettlement:Stub";
 
+    /// <summary>Member-list entry that makes every code a member (E2E stacks, where the counterparty party ids are created at run time).</summary>
+    public const string AnyMember = "*";
+
     /// <summary>Insurer code of our own legal entity on the clearing house member list.</summary>
     public string OwnInsurerCode { get; set; } = "OWN-INSURER";
 

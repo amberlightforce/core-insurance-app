@@ -11,20 +11,22 @@ export interface XolOptions {
   coverageCodes?: string[];
   /** Reinsurer party; a synthetic organisation is created when omitted. */
   reinsurerPartyId?: string;
+  /** Several reinsurers (signed lines summing to 100); overrides reinsurerPartyId. The first is the lead. */
+  participations?: { reinsurerPartyId: string; signedLinePct: string }[];
 }
 
 const money = (amount: string) => ({ amount, currency: 'EUR' });
 
 /**
  * `riacct` creates and submits a per-risk XoL treaty, `rimgr` (a different person; SoD) approves it. Returns the contract id.
- * Defaults to a far-future contract year so it never collides with other journeys' treaties.
+ * Defaults to the current contract year, so the treaty is Active for today's losses.
  */
 export async function createAndApproveXolTreaty(request: APIRequestContext, options: XolOptions = {}): Promise<string> {
-  const year = options.contractYear ?? 2035;
+  const year = options.contractYear ?? new Date().getUTCFullYear();
   const accountant = await tokenFor(request, 'riacct');
   const manager = await tokenFor(request, 'rimgr');
   let reinsurer = options.reinsurerPartyId;
-  if (!reinsurer) {
+  if (!reinsurer && !options.participations) {
     const underwriter = await signIn(request, 'underwriter');
     const name = `Synthetic Reinsurer ${randomUUID().slice(0, 8)}`;
     const party = await call(request, underwriter, 'POST', '/api/pty/v1/parties', { partyType: 'ORGANISATION', organisation: { legalName: name } });
@@ -37,7 +39,7 @@ export async function createAndApproveXolTreaty(request: APIRequestContext, opti
     scope: { productCodes: options.productCodes ?? ['MOTOR-GR'], coverageCodes: options.coverageCodes ?? ['OWN-DAMAGE'] },
     clause: { alaeIncluded: true, statutoryInterestIncluded: false, recoveriesInure: 'REALISED_ONLY' },
     layers: [{ layerNo: 1, attachment: money(options.attachment ?? '500000.00'), limit: money(options.limit ?? '500000.00'), aad: money('0.00') }],
-    participations: [{ reinsurerPartyId: reinsurer, signedLinePct: '100', lead: true }], placedPct: '100',
+    participations: options.participations?.map((p, i) => ({ ...p, lead: i === 0 })) ?? [{ reinsurerPartyId: reinsurer!, signedLinePct: '100', lead: true }], placedPct: '100',
   });
   expect(created.status, `create treaty: ${created.text}`).toBe(201);
   const contract = created.body['contract'] as Json;

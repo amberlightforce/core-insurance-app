@@ -208,6 +208,13 @@ const moduleRoutes: RouteObject[] = [
         }),
       },
       {
+        path: 'fs-statements',
+        lazy: async () => ({
+          Component: (await import('./modules/claims/fs-statements/FsStatementsPage'))
+            .FsStatementsPage,
+        }),
+      },
+      {
         path: ':claimId',
         lazy: async () => ({
           Component: (await import('./modules/claims/ClaimViewPage')).ClaimViewPage,
