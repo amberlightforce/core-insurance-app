@@ -48,6 +48,12 @@ internal static class ExceptionReasons
     /// is missing or cannot be obtained, or that lacks the dimensions the check needs (REQ-FIN-182, -183, D-SL3-05).
     /// </summary>
     public const string TaxRuleViolation = "TAX_RULE_VIOLATION";
+
+    /// <summary>A PaymentVoided whose payment journal does not exist (yet): nothing to reverse (REQ-FIN-159, SL4-FIN-V4).</summary>
+    public const string NoOriginalJournal = "NO_ORIGINAL_JOURNAL";
+
+    /// <summary>A PaymentVoided for a payment journal that was already reversed, or a partial void.</summary>
+    public const string VoidRefused = "VOID_REFUSED";
 }
 
 /// <summary>Journal-line side.</summary>
@@ -111,6 +117,15 @@ internal static class LineDimensionKeys
     public const string TransactionKind = "transactionKind";
     public const string CancellationSource = "cancellationSource";
     public const string TreatmentRuleId = "treatmentRuleId";
+
+    /// <summary>SL4 dimensions (BIL receivable and FS_CLEARING entries, SL4-CONTRACTS; FIN sets the same keys on its CLM and RI legs).</summary>
+    public const string RecoveryId = "recoveryId";
+    public const string StatementRef = "statementRef";
+    public const string CounterpartyPartyId = "counterpartyPartyId";
+    public const string RecoverableBasis = "recoverableBasis";
+    public const string RiContractId = "riContractId";
+    public const string RiContractYear = "riContractYear";
+    public const string RiHeldGroup = "riHeldGroup";
 }
 
 /// <summary>Disbursement source types FIN reads on BIL disbursement entries (PRD-06 source register, D-SL2-10b).</summary>
@@ -121,6 +136,9 @@ internal static class DisbursementSources
 
     /// <summary>A policy refund (SL3, D-SL3-14): the entry's <c>sourceId</c> is the refund id; FIN nets the refund payable per refund on it.</summary>
     public const string BilRefund = "BIL_REFUND";
+
+    /// <summary>A Friendly Settlement net (SL4, D-SL4-02): BIL FS_CLEARING entries; the clearing leg is LA-24.</summary>
+    public const string FsClearing = "FS_CLEARING";
 }
 
 /// <summary>
@@ -190,4 +208,63 @@ internal static class ClaimLegs
 
     /// <summary>Claim payment method of a Friendly Settlement payable (PRD-07 REQ-CLM-264).</summary>
     public const string FsClearingMethod = "CLEARING";
+
+    /// <summary>Leg role: Friendly Settlement clearing GL-2515 (payables credited, FS recoveries debited; BIL FS_CLEARING entries settle it).</summary>
+    public const string FsClearing = "CLM-FS-CLEARING";
+
+    /// <summary>Leg role: claim recovery clearing (salvage, subrogation): debited when recorded, credited by BIL's receipt (REQ-FIN-160).</summary>
+    public const string RecoveryClearing = "CLM-RECOVERY-CLEARING";
+
+    /// <summary>Leg role: recovery income of the recovery type (the entry type picks the account).</summary>
+    public const string RecoveryIncome = "CLM-RECOVERY-INCOME";
+}
+
+/// <summary>Recovery entry types FIN posts (SL4-FIN-V4): one per CLM recovery type, so the rules can choose the income account per type.</summary>
+internal static class RecoveryTypes
+{
+    public const string Subrogation = "SUBROGATION";
+    public const string Salvage = "SALVAGE";
+    public const string FriendlySettlement = "FRIENDLY_SETTLEMENT";
+
+    public const string EntrySubrogation = "RECOVERY_SUBROGATION";
+    public const string EntrySalvage = "RECOVERY_SALVAGE";
+    public const string EntryFriendlySettlement = "RECOVERY_FRIENDLY_SETTLEMENT";
+
+    /// <summary>The entry type of a recovery type, or null when the type is unknown (the fact is then an intake exception).</summary>
+    public static string? EntryTypeOf(string recoveryType) => recoveryType switch
+    {
+        Subrogation => EntrySubrogation,
+        Salvage => EntrySalvage,
+        FriendlySettlement => EntryFriendlySettlement,
+        _ => null,
+    };
+}
+
+/// <summary>BIL entry types and sub-ledger accounts of the slice-4 postings (SL4-CONTRACTS, D-SL4-02, -06, -13) and the RI legs.</summary>
+internal static class Sl4Entries
+{
+    public const string ReceivableRegistered = "RECEIVABLE_REGISTERED";
+    public const string ReceivableCollected = "RECEIVABLE_COLLECTED";
+    public const string FsClearingReleased = "FS_CLEARING_RELEASED";
+    public const string FsClearingCleared = "FS_CLEARING_CLEARED";
+    public const string DisbursementReversed = "DISBURSEMENT_REVERSED";
+
+    /// <summary>Cash at bank (BIL LA-10) and the FS clearing sub-ledger account (LA-24).</summary>
+    public const string CashAccount = "LA-10";
+    public const string FsClearingAccount = "LA-24";
+
+    /// <summary>
+    /// Memo entries: the receivable is registered in the BIL sub-ledger but FIN books nothing, because the CLM RecoveryRecorded
+    /// fact already debited the recovery clearing and the cash comes from the RECEIVABLE_COLLECTED entry (REQ-FIN-037).
+    /// </summary>
+    public static readonly string[] Memo = [ReceivableRegistered];
+
+    /// <summary>Entry type and leg roles of a RI recoverable (REQ-FIN-164).</summary>
+    public const string RiRecovery = "RECOVERY";
+    public const string RiHeld = "RI-HELD-ASSET";
+    public const string RiRecovered = "RI-RECOVERED";
+    public const string Paid = "PAID";
+    public const string Outstanding = "OUTSTANDING";
+    public const string Unassigned = "UNASSIGNED";
+    public const string RecoveryClearingRole = "RECOVERY-CLEARING";
 }

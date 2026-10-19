@@ -56,6 +56,12 @@ export const defaultNavItems: NavItem[] = [
   { id: 'reports', to: '/reports' },
   { id: 'products', to: '/products' },
   { id: 'admin', to: '/admin/packs', label: 'packs', roles: packRoles },
+  {
+    id: 'admin',
+    to: '/admin/ai',
+    label: 'aiControl',
+    roles: ['Platform.Admin', 'Platform.AiGovernor'],
+  },
 ];
 
 /** Entries without a `roles` restriction are visible to everyone; restricted ones need one of their roles. */

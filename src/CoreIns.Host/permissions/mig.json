@@ -1,0 +1,31 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "mig.Xref.register": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Xref.resolve": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Xref.list": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Routing.resolve": [ "Staff.MigrationManager", "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Platform.Admin" ],
+        "mig.Routing.override": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Batch.create": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Batch.start": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Batch.approve": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Batch.pause": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Batch.resume": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Batch.reverse": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Batch.get": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Batch.outcomes": [ "Staff.MigrationManager", "Platform.Admin" ]
+      }
+    },
+    "Authority": {
+      // ILLUSTRATIVE TEST DATA (D-SL6-14): the migration manager may approve the real run of a batch. Separation of duties is not
+      // configuration: the starter can never approve the batch they started (platform maker-checker, MIG-005).
+      "Grants": [
+        {
+          "Id": "mig-manager-batch-run-illustrative", "Role": "Staff.MigrationManager", "Type": "MIG.BATCH_RUN", "Illustrative": true,
+          "Limits": [ { "Dimension": "scope", "Comparison": "InSet", "Codes": [ "BATCH" ] } ]
+        }
+      ]
+    }
+  }
+}

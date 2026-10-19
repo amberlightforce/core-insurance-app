@@ -4,23 +4,20 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.AiToggle.set request. PRD inputs: "feature, inputs (allow-listed)"</summary>
+/// <summary>plt.AiToggle.set request (SL6-PLT-AI). Enabling needs register status APPROVED (D-SL6-08); disabling is always allowed.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AiToggleSetRequest
 {
-    /// <summary>PRD: "feature"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("feature")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Feature { get; init; }
+    /// <summary>Contract member 'featureId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("featureId")]
+    public required global::CoreIns.SharedKernel.Identifiers.AiFeatureId FeatureId { get; init; }
 
-    /// <summary>PRD: "inputs (allow-listed)"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("inputs")]
+    /// <summary>Contract member 'enabled'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("enabled")]
+    public required bool Enabled { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Inputs { get; init; }
+    public string? Reason { get; init; }
 }

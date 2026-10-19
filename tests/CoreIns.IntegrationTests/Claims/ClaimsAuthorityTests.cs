@@ -28,10 +28,10 @@ public sealed class ClaimsAuthorityTests(PostgresFixture database) : IClassFixtu
     public async Task D_SL2_13_D1_A_reserve_split_into_many_transactions_is_checked_on_the_exposure_total()
     {
         var claim = await ClaimAsync();
-        var (built, build) = await _money.BuildAsync(claim, [.. Enumerable.Range(0, 20).Select(_ => Reserve(claim, 5000m))]);
+        var (built, build) = await _money.BuildAsync(claim, [.. Enumerable.Range(0, 20).Select(_ => Reserve(claim, 50000.01m))]);
         built.StatusCode.ShouldBe(HttpStatusCode.OK, build?.ToJsonString());
 
-        // 100,000.00 total: above the manager's 50,000.00 as well → DENY, even for the manager.
+        // 1,000,000.20 total: above the manager's 1,000,000.00 as well → DENY, even for the manager.
         var (handler, handlerBody) = await _money.SubmitAsync(build.Text("setId"));
         handler.StatusCode.ShouldBe(HttpStatusCode.Forbidden, handlerBody?.ToJsonString());
         handlerBody.Text("code").ShouldBe("CLM-ERR-AUTHORITY");

@@ -1,3 +1,4 @@
+using CoreIns.Platform.Ai;
 using CoreIns.Platform.Approvals;
 using CoreIns.Platform.Audit;
 using CoreIns.Platform.Authorization;
@@ -108,6 +109,7 @@ public static class PlatformModule
             ErrorDefinition.For(ModuleCode.PLT, NumberingErrors.UnknownScheme, 500, "Δεν έχει οριστεί σειρά αρίθμησης", "No numbering series is defined")
                 .Describe("Ο τύπος αναγνωριστικού δεν έχει ορισμό σειράς στις ρυθμίσεις της πλατφόρμας.", "The identifier type has no series definition in the platform settings."));
         services.AddApprovals();
+        services.AddAiControlPlane();
         services.AddSupportAuthorityTypes();
         return services;
     }
@@ -196,6 +198,9 @@ public static class PlatformModule
             + $"{Schema}.outbox_dead_letter, {Schema}.event_archive, {Schema}.idempotency_record TO {appRole}",
         $"GRANT SELECT, INSERT, UPDATE ON {Schema}.number_series, {Schema}.data_key TO {appRole}",
 
+        // AI control plane (SL6-PLT-AI): registry, toggles, kill switches and the interaction log; never deleted.
+        $"GRANT SELECT, INSERT, UPDATE ON {Schema}.ai_feature, {Schema}.ai_toggle, {Schema}.ai_kill_switch, {Schema}.ai_interaction TO {appRole}",
+
         // Approval requests: no DELETE; a decided request is frozen by trigger (decided once, REQ-PLT-114).
         $"GRANT SELECT, INSERT, UPDATE ON {Schema}.approval_request TO {appRole}",
         // Dev clock offset (D-SL3-12): never deleted (trigger); only read/advanced when the Development dev clock is registered.
@@ -205,6 +210,7 @@ public static class PlatformModule
         $"REVOKE ALL ON FUNCTION {Schema}.audit_chain_lock(date) FROM PUBLIC",
         $"GRANT EXECUTE ON FUNCTION {Schema}.audit_chain_lock(date) TO {appRole}",
         $"GRANT EXECUTE ON FUNCTION {Schema}.pfc_fallback_approval_verified(uuid, uuid, uuid, text, text, text, text, timestamptz, text[]) TO {appRole}",
+        $"GRANT EXECUTE ON FUNCTION {Schema}.market_activation_approval_verified(uuid, uuid, uuid, text, text, text, text, timestamptz, text[]) TO {appRole}",
         $"GRANT EXECUTE ON FUNCTION {Schema}.ri_contract_approval_verified(uuid, uuid, uuid, text, text, text, text[]) TO {appRole}",
         $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
     ];

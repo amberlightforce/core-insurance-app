@@ -114,6 +114,17 @@ internal sealed class MarketDbContext(DbContextOptions<MarketDbContext> options)
             entity.Property(e => e.ResultingHash).HasColumnName("resulting_hash").HasColumnType("char(64)");
             entity.Property(e => e.SupersedesId).HasColumnName("supersedes_id");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.FromVersion).HasColumnName("from_version").HasMaxLength(32);
+            entity.Property(e => e.ParentHash).HasColumnName("parent_hash").HasColumnType("char(64)");
+            entity.Property(e => e.TargetDigest).HasColumnName("target_digest").HasColumnType("char(64)");
+            entity.Property(e => e.Reason).HasColumnName("reason").HasMaxLength(128).HasDefaultValue("");
+            entity.Property(e => e.RequestedPrincipal).HasColumnName("requested_principal").HasMaxLength(200);
+            entity.Property(e => e.ContentHash).HasColumnName("content_hash").HasColumnType("char(64)");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken().HasDefaultValue(1L);
+            entity.Property(e => e.WindowFrom).HasColumnName("window_from").HasColumnType("timestamptz");
+            entity.Property(e => e.WindowTo).HasColumnName("window_to").HasColumnType("timestamptz");
+            entity.Property(e => e.HashesIssued).HasColumnName("hashes_issued").HasColumnType("text[]").HasDefaultValueSql("ARRAY[]::text[]");
+            entity.Property(e => e.DecisionReason).HasColumnName("decision_reason").HasMaxLength(128);
             entity.HasIndex(e => new { e.LegalEntityId, e.PackId, e.ActivatedAt }).HasDatabaseName("ix_pack_activation_entity_pack");
             entity.HasOne<LegalEntityRow>().WithMany().HasForeignKey(e => e.LegalEntityId).HasConstraintName("fk_pack_activation_legal_entity").OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<PackVersionRow>().WithMany().HasForeignKey(e => new { e.PackId, e.Version }).HasConstraintName("fk_pack_activation_pack_version").OnDelete(DeleteBehavior.Restrict);
@@ -198,6 +209,28 @@ internal sealed class ConfigStateRow
 /// <summary><c>mkt.pack_activation</c>: a request to activate or roll back a pack version for a legal entity, and its decision.</summary>
 internal sealed class PackActivationRow
 {
+    public string? FromVersion { get; set; }
+
+    public string? ParentHash { get; set; }
+
+    public string? TargetDigest { get; set; }
+
+    public string Reason { get; set; } = string.Empty;
+
+    public string? RequestedPrincipal { get; set; }
+
+    public string? ContentHash { get; set; }
+
+    public long RecordVersion { get; set; } = 1;
+
+    public Instant? WindowFrom { get; set; }
+
+    public Instant? WindowTo { get; set; }
+
+    public string[] HashesIssued { get; set; } = [];
+
+    public string? DecisionReason { get; set; }
+
     public Guid Id { get; set; }
 
     public LegalEntityId LegalEntityId { get; set; }

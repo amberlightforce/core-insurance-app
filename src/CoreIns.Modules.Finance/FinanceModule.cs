@@ -5,6 +5,7 @@ using CoreIns.Modules.Finance.Persistence;
 using CoreIns.Modules.Finance.Posting;
 using CoreIns.Modules.Finance.Queries;
 using CoreIns.Modules.Policy.Contracts.Events;
+using CoreIns.Modules.Reinsurance.Contracts.Events;
 using CoreIns.Platform;
 using CoreIns.Platform.Contracts.Events;
 using CoreIns.Platform.Errors;
@@ -51,9 +52,11 @@ public static class FinanceModule
         services.AddScoped<ReferenceData>();
         services.AddScoped<JournalWriter>();
         services.AddScoped<JournalReversal>();
+        services.AddScoped<PaymentVoidPosting>();
         services.AddScoped<TaxTreatmentCheck>();
         services.AddScoped<Intake>();
         services.AddScoped<JournalReader>();
+        services.AddScoped<ClearingInvariants>();
         services.AddScoped<PostingRuleReader>();
 
         // Intake (worker): the posting source, the policy context and the context-only events (REQ-FIN-001, -036).
@@ -70,6 +73,11 @@ public static class FinanceModule
         // entries (BillingEntryPosted above); BIL Disbursement* and the other CLM events are context only.
         services.AddEventHandler<JsonElement, ClaimFactHandler>(Descriptor(ReserveChangedV1.Descriptor), "FIN.Intake.ReserveChanged", ModuleCode.FIN);
         services.AddEventHandler<JsonElement, ClaimFactHandler>(Descriptor(PaymentIssuedV1.Descriptor), "FIN.Intake.PaymentIssued", ModuleCode.FIN);
+
+        // SL4-FIN-V4: recoveries by type, payment voids and RI recoverables (REQ-FIN-159, -160, -164).
+        services.AddEventHandler<JsonElement, ClaimFactHandler>(Descriptor(RecoveryRecordedV1.Descriptor), "FIN.Intake.RecoveryRecorded", ModuleCode.FIN);
+        services.AddEventHandler<JsonElement, ClaimFactHandler>(Descriptor(PaymentVoidedV1.Descriptor), "FIN.Intake.PaymentVoided", ModuleCode.FIN);
+        services.AddEventHandler<JsonElement, ClaimFactHandler>(Descriptor(RecoveryCalculatedV1.Descriptor), "FIN.Intake.RecoveryCalculated", ModuleCode.FIN);
         foreach (var (contract, name) in new (EventContract, string)[]
                  {
                      (ClaimReportedV1.Descriptor, "ClaimReported"),
