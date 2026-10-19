@@ -40,9 +40,14 @@ export function BillingHomePage() {
         description={t('home.lead')}
         actions={
           currentRoles().some((role) => refundViewRoles.includes(role)) ? (
-            <LinkButton variant="secondary" to="/billing/refunds">
-              {t('refunds.open')}
-            </LinkButton>
+            <>
+              <LinkButton variant="secondary" to="/billing/receivables">
+                {t('receivables.open')}
+              </LinkButton>
+              <LinkButton variant="secondary" to="/billing/refunds">
+                {t('refunds.open')}
+              </LinkButton>
+            </>
           ) : undefined
         }
       />

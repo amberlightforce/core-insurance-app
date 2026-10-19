@@ -182,6 +182,19 @@ internal static class FinanceSeed
     /// </summary>
     public const string GrTestV3 = "gr-test.finance.v3";
 
+    /// <summary>
+    /// The seed of migration RecoveryPostings: v3 plus recovery reserves, recoveries by type, Friendly Settlement clearing (GL-2515),
+    /// RI recoverables and payment-void support (SL4-FIN-V4, D-SL4-10). Rule set v4 is effective from 2026-10-01 like v3 and wins the tie
+    /// by version number; v1-v3 stay in the table and their journals keep the version they were posted with.
+    /// </summary>
+    public const string GrTestV4 = "gr-test.finance.v4";
+
+    /// <summary>Migration Down of RecoveryPostings: v4 superseded (rule rows are append-only, REQ-FIN-070); v3 governs again.</summary>
+    public const string SupersedeV4 = """
+        UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'
+         WHERE legal_entity_code = 'GR-TEST' AND book = 'IFRS17' AND version_no = 4;
+        """;
+
     /// <summary>Migration Down of ServicingPostings: v3 superseded (rule rows are append-only, REQ-FIN-070); v2 governs every date again.</summary>
     public const string SupersedeV3 = """
         UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'

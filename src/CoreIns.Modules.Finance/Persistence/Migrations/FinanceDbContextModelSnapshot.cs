@@ -673,6 +673,10 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("cost_type");
 
+                    b.Property<Guid?>("CounterpartyPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("counterparty_party_id");
+
                     b.Property<string>("CoverageCode")
                         .HasColumnType("text")
                         .HasColumnName("coverage_code");
@@ -689,6 +693,10 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                     b.Property<Guid?>("ExposureId")
                         .HasColumnType("uuid")
                         .HasColumnName("exposure_id");
+
+                    b.Property<string>("FsStatementRef")
+                        .HasColumnType("text")
+                        .HasColumnName("fs_statement_ref");
 
                     b.Property<string>("FunctionalCurrency")
                         .IsRequired()
@@ -743,6 +751,14 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("receipt_id");
 
+                    b.Property<string>("RecoverableBasis")
+                        .HasColumnType("text")
+                        .HasColumnName("recoverable_basis");
+
+                    b.Property<Guid?>("RecoveryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recovery_id");
+
                     b.Property<Guid?>("RefundId")
                         .HasColumnType("uuid")
                         .HasColumnName("refund_id");
@@ -750,6 +766,18 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                     b.Property<Guid?>("ReserveLineId")
                         .HasColumnType("uuid")
                         .HasColumnName("reserve_line_id");
+
+                    b.Property<Guid?>("RiContractId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ri_contract_id");
+
+                    b.Property<int?>("RiContractYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("ri_contract_year");
+
+                    b.Property<string>("RiHeldGroup")
+                        .HasColumnType("text")
+                        .HasColumnName("ri_held_group");
 
                     b.Property<string>("RuleCode")
                         .IsRequired()
@@ -780,9 +808,17 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .HasDatabaseName("ix_journal_line_claim_payment")
                         .HasFilter("claim_payment_id IS NOT NULL");
 
+                    b.HasIndex("LegalEntityId", "RecoveryId", "AccountCode")
+                        .HasDatabaseName("ix_journal_line_recovery")
+                        .HasFilter("recovery_id IS NOT NULL");
+
                     b.HasIndex("LegalEntityId", "RefundId", "AccountCode")
                         .HasDatabaseName("ix_journal_line_refund")
                         .HasFilter("refund_id IS NOT NULL");
+
+                    b.HasIndex("LegalEntityId", "CounterpartyPartyId", "FsStatementRef", "AccountCode")
+                        .HasDatabaseName("ix_journal_line_fs_statement")
+                        .HasFilter("fs_statement_ref IS NOT NULL");
 
                     b.ToTable("journal_line", "fin", t =>
                         {

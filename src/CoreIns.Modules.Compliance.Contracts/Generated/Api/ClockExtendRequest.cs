@@ -4,60 +4,42 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Clock.extend request. PRD inputs: "clock code, subject ref, jurisdiction, start time, variant, causation id, reason"</summary>
+/// <summary>cmp.Clock.extend request; identify by instanceId or subjectRef + clockCode (+ key).</summary>
+/// <remarks>
+/// <para>Exactly one of: instanceId | subjectRef + clockCode.</para>
+/// </remarks>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClockExtendRequest
 {
-    /// <summary>PRD: "clock code"</summary>
+    /// <summary>Clock instance id (or give subjectRef + clockCode + key)</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'instanceId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("instanceId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? InstanceId { get; init; }
+
+    /// <summary>Clock code</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("clockCode")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ClockCode { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.ClockCode? ClockCode { get; init; }
 
-    /// <summary>PRD: "subject ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Subject of the clock</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("subjectRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SubjectRef { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.ObjectRef? SubjectRef { get; init; }
 
-    /// <summary>PRD: "jurisdiction"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("jurisdiction")]
+    /// <summary>Instance key within definition and subject (default empty)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("key")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Jurisdiction { get; init; }
+    public string? Key { get; init; }
 
-    /// <summary>PRD: "start time"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("startTime")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? StartTime { get; init; }
+    /// <summary>ISO 8601 period added to the deadline (PnYnMnWnD)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("extension")]
+    public required string Extension { get; init; }
 
-    /// <summary>PRD: "variant"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("variant")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Variant { get; init; }
-
-    /// <summary>PRD: "causation id"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("causationId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.EventId? CausationId { get; init; }
-
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'reason'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
 }

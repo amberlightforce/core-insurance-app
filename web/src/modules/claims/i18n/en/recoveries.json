@@ -1,0 +1,265 @@
+{
+  "builder": { "kinds": { "RECOVERY_RESERVE": "Recovery reserve" } },
+  "close": { "guard": { "open": "Open {number}" } },
+  "exposure": { "clocksNotTracked": "Statutory deadlines: not tracked (temporary)" },
+  "moneyx": {
+    "recoveries": "Recoveries",
+    "received": "Recovery · {type}",
+    "expected": "Recovery · {type} (expected)",
+    "net": "Net claim cost"
+  },
+  "authorityPreview": {
+    "label": "Authority check",
+    "title": {
+      "WITHIN": "Within your authority",
+      "REFER": "Approval will be needed",
+      "DENY": "Exceeds your authority"
+    },
+    "line": {
+      "WITHIN": "{type}: {amount}, within authority.",
+      "REFER": "{type}: {amount}. Approval will be needed from {role}.",
+      "DENY": "{type}: {amount}. Not allowed with your current authority."
+    },
+    "types": {
+      "CLM_RESERVE": "Reserve",
+      "CLM_PAYMENT": "Payment",
+      "CLM_RECOVERY_WRITEOFF": "Recovery write-off"
+    },
+    "roles": {
+      "Staff_ClaimsManager": "the Claims Manager",
+      "Staff_ClaimsHandler": "a Claims Handler"
+    }
+  },
+  "setList": {
+    "title": "Transaction sets",
+    "none": "There are no transaction sets.",
+    "transactions": "{count, plural, one {# transaction} other {# transactions}}",
+    "payment": "With payment",
+    "reserve": "Reserve",
+    "system": "System",
+    "columns": {
+      "count": "Content",
+      "status": "Status",
+      "kind": "Kind",
+      "maker": "Recorded by",
+      "created": "Created"
+    }
+  },
+  "riRec": {
+    "title": "Reinsurance recoverable",
+    "noContract": "No active reinsurance contract covers this claim.",
+    "contract": "Contract {year} · Layer {layer}",
+    "columns": {
+      "contract": "Contract",
+      "incurred": "Incurred",
+      "paid": "Paid",
+      "outstanding": "Outstanding"
+    },
+    "trace": {
+      "open": "See the calculation",
+      "title": "Calculation steps",
+      "loading": "Loading…",
+      "failed": "The calculation did not load.",
+      "engine": "Engine version: {version}",
+      "kind": {
+        "UNL_INCURRED": "Unlimited incurred",
+        "UNL_PAID": "Unlimited paid",
+        "LAYER_LOSS": "Layer loss",
+        "AGGREGATE": "Aggregate limit",
+        "SPLIT_BY_LINE": "Split by line",
+        "ROUNDING": "Rounding",
+        "DELTA": "Change",
+        "CLAIM_TOTAL": "Claim total"
+      }
+    }
+  },
+  "liability": {
+    "title": "Liability facts",
+    "fault": "Insured's fault (%)",
+    "faultHelp": "0 to 100. Below 100 a subrogation is proposed.",
+    "source": "Source of the figure",
+    "sources": {
+      "INSURED_STATEMENT": "Insured's statement",
+      "JOINT_REPORT": "Joint accident report",
+      "POLICE_REPORT": "Police report",
+      "COUNTERPARTY_INSURER": "Counterparty insurer",
+      "HANDLER": "Handler's assessment"
+    },
+    "vehicles": "Number of vehicles",
+    "insurer": "Counterparty insurer",
+    "insurerSearch": "Search for the insurer",
+    "pickInsurer": "Pick insurer",
+    "changeInsurer": "Change",
+    "joint": "A joint accident report exists",
+    "greece": "The accident happened in Greece",
+    "save": "Save facts",
+    "saved": "Liability facts saved.",
+    "failed": "Liability facts were not saved",
+    "errors": {
+      "fault": "Enter a figure from 0 to 100 with up to 2 decimals.",
+      "vehicles": "Enter a number of vehicles from 1 to 99."
+    }
+  },
+  "payFix": {
+    "sectionTitle": "Payment corrections",
+    "list": "Payments and corrections",
+    "linked": "Linked to payment {number}",
+    "mark": "MARK",
+    "reason": "Reason",
+    "newAccount": "New payee account",
+    "newAccountHelp": "Optional. Otherwise the payment is reissued to the same account.",
+    "captureAccount": "Add a new account",
+    "cancel": "Cancel",
+    "failed": "The correction was not completed",
+    "action": { "void": "Void", "stop": "Stop", "reissue": "Reissue" },
+    "title": { "void": "Void payment", "stop": "Stop payment", "reissue": "Reissue payment" },
+    "intro": {
+      "void": "The payment has not been sent yet. Voiding puts the amount back in the reserve.",
+      "stop": "Asks the bank to stop a payment that has already been sent.",
+      "reissue": "Creates a new payment for the same amount, optionally to a new account."
+    },
+    "submit": { "void": "Void payment", "stop": "Stop payment", "reissue": "Reissue" },
+    "done": {
+      "void": "The payment was voided.",
+      "stop": "The payment stop was requested.",
+      "reissue": "The payment was reissued."
+    },
+    "reasons": {
+      "ISSUED_IN_ERROR": "Issued in error",
+      "WRONG_AMOUNT": "Wrong amount",
+      "WRONG_PAYEE": "Wrong payee",
+      "PAYEE_ACCOUNT_REJECTED": "Account rejected",
+      "CUSTOMER_REQUEST": "Customer request"
+    },
+    "errors": { "reason": "Choose a reason." },
+    "notStoppable": {
+      "title": "The payment can no longer be stopped",
+      "body": "The bank has already executed it or is executing it right now. If needed, ask the payee to return the money, then reissue."
+    }
+  },
+  "recovery": {
+    "tab": "Recoveries",
+    "title": "Recovery cases",
+    "emptyTitle": "No recoveries",
+    "emptyBody": "There is no subrogation or salvage on this claim.",
+    "created": "The recovery case was created.",
+    "paymentReference": "Payment reference for the payer:",
+    "type": {
+      "SUBROGATION": "Subrogation",
+      "SALVAGE": "Salvage",
+      "DEDUCTIBLE": "Deductible",
+      "FRIENDLY_SETTLEMENT": "Friendly settlement",
+      "GUARANTEE_FUND": "Guarantee fund",
+      "GREEN_CARD": "Green card",
+      "CONTRIBUTION": "Contribution",
+      "OTHER": "Other"
+    },
+    "state": {
+      "OPEN": "Open",
+      "DEMANDED": "Demanded",
+      "DISPUTED": "Disputed",
+      "AGREED": "Agreed",
+      "IN_ARBITRATION": "In arbitration",
+      "IN_LITIGATION": "In litigation",
+      "CLOSED": "Closed",
+      "WRITTEN_OFF": "Written off"
+    },
+    "reason": {
+      "THIRD_PARTY_LIABILITY": "Third-party liability",
+      "SALVAGE_AVAILABLE": "Salvage available",
+      "OTHER": "Other"
+    },
+    "columns": { "expected": "Expected", "received": "Received", "reserve": "Recovery reserve" },
+    "actions": {
+      "milestone": "Milestone",
+      "reserve": "Reserve",
+      "demand": "Demand",
+      "writeOff": "Write off"
+    },
+    "proposal": {
+      "title": "A subrogation is proposed",
+      "body": "The insured's fault is {fault}%. Consider whether there is a right of recovery against the other party's insurer.",
+      "action": "New subrogation"
+    },
+    "create": {
+      "open": "New recovery",
+      "title": "New recovery case",
+      "type": "Type",
+      "expected": "Expected amount",
+      "estimate": "Estimated salvage value",
+      "reason": "Reason",
+      "counterparty": "Counterparty (insurer)",
+      "buyer": "Salvage buyer",
+      "search": "Search for an organisation",
+      "change": "Change",
+      "submit": "Create recovery",
+      "failed": "The recovery was not created",
+      "errors": {
+        "amount": "Enter an amount greater than zero.",
+        "reason": "Choose a reason.",
+        "counterparty": "Choose a counterparty."
+      }
+    },
+    "milestone": {
+      "list": "Milestones",
+      "title": "Record a milestone",
+      "kind": "Milestone",
+      "date": "Date",
+      "salePrice": "Sale price",
+      "submit": "Record",
+      "recorded": "The milestone was recorded.",
+      "failed": "The milestone was not recorded",
+      "codes": {
+        "COUNTERPARTY_ACKNOWLEDGED": "Counterparty acknowledged",
+        "LIABILITY_ACCEPTED": "Liability accepted",
+        "SETTLEMENT_AGREED": "Settlement agreed",
+        "SALVAGE_SOLD": "Salvage sold"
+      },
+      "errors": {
+        "kind": "Choose a milestone.",
+        "date": "Enter a date.",
+        "price": "Enter the sale price."
+      }
+    },
+    "demand": {
+      "title": "Demand an amount",
+      "intro": "The demand creates a receivable in billing and gives you the payment reference to pass to the counterparty. The receipt is recorded by finance, not from here.",
+      "amount": "Amount demanded",
+      "dueDate": "Due date",
+      "submit": "Create demand",
+      "done": "The demand was created.",
+      "close": "Close",
+      "failed": "The demand was not created",
+      "referenceTitle": "The demand was created",
+      "referenceBody": "Give the counterparty this payment reference:",
+      "errors": {
+        "amount": "Enter an amount above zero and not more than expected.",
+        "dueDate": "Enter a due date."
+      }
+    },
+    "writeOff": {
+      "title": "Write off a recovery",
+      "authorityTitle": "Authority check",
+      "authorityBody": "The write-off is checked on the total. Above your authority it is referred for approval. Open recovery reserve: {open}.",
+      "amount": "Amount to write off",
+      "reason": "Write-off reason",
+      "submit": "Write off",
+      "done": "The write-off was submitted.",
+      "failed": "The write-off was not completed",
+      "reasons": {
+        "UNCOLLECTABLE": "Uncollectable",
+        "COUNTERPARTY_INSOLVENT": "Counterparty insolvent",
+        "COST_EXCEEDS_RECOVERY": "Cost exceeds recovery"
+      },
+      "errors": {
+        "amount": "Enter an amount greater than zero.",
+        "reason": "Choose a reason."
+      }
+    },
+    "builder": {
+      "title": "Change a recovery reserve",
+      "recovery": "Recovery case",
+      "errors": { "recovery": "Choose a recovery case." }
+    }
+  }
+}

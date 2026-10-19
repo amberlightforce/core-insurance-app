@@ -39,6 +39,7 @@ internal sealed partial class Intake(
     ReferenceData reference,
     JournalWriter writer,
     TaxTreatmentCheck taxCheck,
+    PaymentVoidPosting voids,
     ILegalEntityDirectory legalEntities,
     IEventPublisher events,
     DbSession session,
@@ -138,11 +139,32 @@ internal sealed partial class Intake(
     /// </summary>
     public async Task PostAsync(BusinessEventRow row, CancellationToken cancellationToken)
     {
+        if (row.RegistryName == PaymentVoidPosting.PaymentVoided)
+        {
+            await VoidPaymentAsync(row, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
         SourceEntry entry;
         if (row.RegistryName == BillingEntryPosted)
         {
             entry = Normalise(JsonSerializer.Deserialize<BillingEntryPostedV1>(row.Payload, SharedKernelJson.Options)
                 ?? throw new JsonException("BillingEntryPosted payload is empty."));
+            if (FsBilEntries.IsMemo(entry))
+            {
+                // RECEIVABLE_REGISTERED: a BIL sub-ledger memo; the CLM recovery fact is the accounting fact (SL4-FIN-V4).
+                row.AccountingDate = entry.AccountingDate;
+                row.Status = BusinessEventStatus.NoPosting;
+                Touch(row);
+                await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            entry = FsBilEntries.Adjust(entry);
+        }
+        else if (row.RegistryName == RiFacts.RecoveryCalculated)
+        {
+            entry = RiFacts.Normalise(row.Payload, row.SourceEventId, row.OccurredAt.ToBusinessDate(options.Value.Zone));
         }
         else if (ClaimFacts.IsClaimSource(row.RegistryName))
         {
@@ -263,6 +285,25 @@ internal sealed partial class Intake(
         {
             events.Publish(journal.Posted);
         }
+    }
+
+    /// <summary>PaymentVoided (REQ-FIN-159): reverses the payment journal; any failure is an intake exception, never a guess.</summary>
+    private async Task VoidPaymentAsync(BusinessEventRow row, CancellationToken cancellationToken)
+    {
+        var legalEntity = new LegalEntityId(row.LegalEntityId!.Value);
+        var outcome = await voids.ReverseAsync(row.Payload, legalEntity, row.OccurredAt.ToBusinessDate(options.Value.Zone), cancellationToken).ConfigureAwait(false);
+        if (outcome.Reason is not null)
+        {
+            await SuspendAsync(row, outcome.Reason, outcome.Detail!, null, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        row.AccountingDate = row.OccurredAt.ToBusinessDate(options.Value.Zone);
+        row.Status = BusinessEventStatus.Posted;
+        row.WaitingOn = null;
+        row.JournalIds = [.. outcome.JournalIds];
+        Touch(row);
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>Re-attempts every event waiting on one of <paramref name="dependencies"/> (REQ-FIN-040: "dependency arrived").</summary>
