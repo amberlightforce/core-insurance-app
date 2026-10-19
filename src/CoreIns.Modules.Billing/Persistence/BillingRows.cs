@@ -154,6 +154,49 @@ internal sealed class ChargeRow
 
     /// <summary>Version of <see cref="TreatmentRuleId"/>.</summary>
     public string? TreatmentRuleVersion { get; set; }
+
+    /// <summary>Transaction this delta corrects (out-of-sequence reverse-and-reapply, REQ-POL-108); null for an ordinary delta.</summary>
+    public Guid? CorrectionOf { get; set; }
+
+    /// <summary>Out-of-sequence correction set the delta belongs to (pol.oos_correction.set_id); null for an ordinary delta.</summary>
+    public Guid? OosSetId { get; set; }
+}
+
+/// <summary>
+/// SL6-BIL-RESPREAD: the one billing correction of an out-of-sequence delta set (idempotent on the delta set): what the set
+/// invoiced, what it credited, and how many invoices of the term were already paid and stayed untouched.
+/// </summary>
+internal sealed class RespreadRow
+{
+    public Guid SetId { get; set; }
+
+    public Guid? OosSetId { get; set; }
+
+    public Guid? CorrectionOf { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public BillingAccountId BillingAccountId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    public PolicyTransactionId TransactionId { get; set; }
+
+    /// <summary>Net of the set (invoiced minus credited).</summary>
+    public decimal NetAmount { get; set; }
+
+    /// <summary>Debits billed as a new invoice (the difference that falls due).</summary>
+    public decimal InvoicedAmount { get; set; }
+
+    /// <summary>Credits given as credit notes against the invoices they correct.</summary>
+    public decimal CreditedAmount { get; set; }
+
+    /// <summary>Invoices of the term already paid (or part paid) when the set was applied; they are never modified.</summary>
+    public int PaidInvoicesUntouched { get; set; }
+
+    public string Currency { get; set; } = string.Empty;
+
+    public Instant CreatedAt { get; set; }
 }
 
 /// <summary>An invoice — a non-fiscal payment demand (D3, REQ-BIL-086, REQ-BIL-087).</summary>

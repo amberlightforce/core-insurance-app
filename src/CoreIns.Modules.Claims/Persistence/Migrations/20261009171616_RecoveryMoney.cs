@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Claims.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class RecoveryMoney : Migration
+    public partial class RecoveryMoney : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

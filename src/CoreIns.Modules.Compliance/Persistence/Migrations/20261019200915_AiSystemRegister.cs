@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Compliance.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AiSystemRegister : Migration
+    public partial class AiSystemRegister : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
