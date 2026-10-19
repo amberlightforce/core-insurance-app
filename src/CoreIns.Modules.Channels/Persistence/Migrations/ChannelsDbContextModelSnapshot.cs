@@ -23,6 +23,73 @@ namespace CoreIns.Modules.Channels.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Channels.Ai.TicketRow", b =>
+                {
+                    b.Property<Guid>("TicketId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("ticket_id");
+
+                    b.Property<string>("Arguments")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("arguments");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("ExecutedCommandRef")
+                        .HasColumnType("text")
+                        .HasColumnName("executed_command_ref");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("expires_at");
+
+                    b.Property<Guid?>("InteractionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("interaction_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("RequestedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("requested_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Tool")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("tool");
+
+                    b.HasKey("TicketId")
+                        .HasName("pk_ticket");
+
+                    b.HasIndex("LegalEntityId", "Status")
+                        .HasDatabaseName("ix_ticket_status");
+
+                    b.ToTable("ticket", "chn", t =>
+                        {
+                            t.HasCheckConstraint("ck_ticket_status", "status IN ('PENDING', 'APPROVED', 'REJECTED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Channels.Persistence.WithdrawalRequestRow", b =>
                 {
                     b.Property<Guid>("WithdrawalRequestId")

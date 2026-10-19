@@ -2,6 +2,7 @@
   "Platform": {
     "Permissions": {
       "Grants": {
+        "bil.Suspense.suggestMatch": [ "Staff.Billing", "Platform.Admin" ],
         "bil.BillingAccount.get": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],
         "bil.Invoice.get": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],
         "bil.Invoice.list": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],

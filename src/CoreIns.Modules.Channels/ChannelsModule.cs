@@ -41,6 +41,7 @@ public static class ChannelsModule
         services.AddOptions<ChannelsOptions>().Bind(configuration.GetSection(ChannelsOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
         services.AddModuleDbContext<ChannelsDbContext>(Schema);
         services.AddScoped<WithdrawalReader>();
+        services.AddScoped<CoreIns.Modules.Channels.Ai.TicketService>();
         services.TryAddScoped<IWithdrawalPolicyPort, PolicyContractWithdrawalPort>();
 
         services.AddScoped<IValidator<DeclareWithdrawal>, DeclareWithdrawalValidator>();
@@ -68,5 +69,9 @@ public static class ChannelsModule
             .Describe("Η προθεσμία υπαναχώρησης έχει παρέλθει.", "The withdrawal period has passed."),
         ErrorDefinition.For(ModuleCode.CHN, "WRONG-STATE", 409, "Μη επιτρεπτή κατάσταση", "The request is in the wrong state")
             .Describe("Το αίτημα δεν μπορεί να κλείσει από την τρέχουσα κατάστασή του.", "The request cannot be closed from its current state."),
+        ErrorDefinition.For(ModuleCode.CHN, "TICKET-EXPIRED", 422, "Το δελτίο επιβεβαίωσης έχει λήξει", "The confirmation ticket has expired")
+            .Describe("Το δελτίο δεν μπορεί πλέον να εγκριθεί ή να απορριφθεί.", "The ticket can no longer be approved or rejected."),
+        ErrorDefinition.For(ModuleCode.CHN, "TICKET-STALE", 409, "Το δελτίο έχει ήδη κριθεί", "The ticket has already been decided")
+            .Describe("Το δελτίο έχει ήδη εγκριθεί ή απορριφθεί.", "The ticket was already approved or rejected."),
     ];
 }

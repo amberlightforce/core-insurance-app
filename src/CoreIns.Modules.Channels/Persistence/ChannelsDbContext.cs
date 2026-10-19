@@ -1,3 +1,4 @@
+using CoreIns.Modules.Channels.Ai;
 using CoreIns.Modules.Channels.Domain;
 using CoreIns.Platform.Persistence;
 using CoreIns.SharedKernel;
@@ -11,6 +12,8 @@ namespace CoreIns.Modules.Channels.Persistence;
 internal sealed class ChannelsDbContext(DbContextOptions<ChannelsDbContext> options) : ModuleDbContext(options)
 {
     public DbSet<WithdrawalRequestRow> WithdrawalRequests => Set<WithdrawalRequestRow>();
+
+    public DbSet<TicketRow> Tickets => Set<TicketRow>();
 
     protected override string Schema => ChannelsModule.Schema;
 
@@ -55,6 +58,29 @@ internal sealed class ChannelsDbContext(DbContextOptions<ChannelsDbContext> opti
             entity.HasIndex(e => e.RequestNumber).IsUnique().HasDatabaseName("ux_withdrawal_request_no");
             entity.HasIndex(e => e.ChannelRef).IsUnique().HasDatabaseName("ux_withdrawal_request_channel_ref");
             entity.HasIndex(e => new { e.LegalEntityId, e.PolicyId }).HasDatabaseName("ix_withdrawal_request_policy");
+        });
+
+        modelBuilder.Entity<TicketRow>(entity =>
+        {
+            entity.ToTable("ticket", table =>
+            {
+                var states = string.Join(", ", TicketStatuses.All.Select(s => $"'{s}'"));
+                table.HasCheckConstraint("ck_ticket_status", $"status IN ({states})");
+            });
+            entity.HasKey(e => e.TicketId).HasName("pk_ticket");
+            entity.Property(e => e.TicketId).HasColumnName("ticket_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Tool).HasColumnName("tool");
+            entity.Property(e => e.Arguments).HasColumnName("arguments").HasColumnType("jsonb");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.InteractionId).HasColumnName("interaction_id");
+            entity.Property(e => e.RequestedBy).HasColumnName("requested_by");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ExpiresAt).HasColumnName("expires_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecidedBy).HasColumnName("decided_by");
+            entity.Property(e => e.ExecutedCommandRef).HasColumnName("executed_command_ref");
+            entity.HasIndex(e => new { e.LegalEntityId, e.Status }).HasDatabaseName("ix_ticket_status");
         });
     }
 }
