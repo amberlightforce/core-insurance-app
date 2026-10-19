@@ -43,12 +43,16 @@ internal static class ClaimsFinancialModel
                 table.HasCheckConstraint("ck_transaction_set_approved_shape", "status NOT IN ('APPROVED', 'POSTED') OR approved_at IS NOT NULL");
                 table.HasCheckConstraint("ck_transaction_set_rejected_shape", "status <> 'REJECTED' OR rejection_reason IS NOT NULL");
                 table.HasCheckConstraint("ck_transaction_set_pending_shape", "status <> 'PENDING_APPROVAL' OR (approval_request_id IS NOT NULL AND approval_payload_hash IS NOT NULL)");
+                table.HasCheckConstraint("ck_transaction_set_evidence", "(evidence_kind IS NULL AND evidence_ref IS NULL) OR (evidence_kind IN ('BIL_ALLOCATION','FS_NOTIFICATION','FS_STATEMENT_LINE','DISBURSEMENT_OUTCOME') AND evidence_ref IS NOT NULL)");
             });
             entity.HasKey(e => e.SetId).HasName("pk_transaction_set");
             entity.Property(e => e.SetId).HasColumnName("set_id");
             ClaimsDbContext.MapCommon(entity);
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
             entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.EvidenceKind).HasColumnName("evidence_kind");
+            entity.Property(e => e.EvidenceRef).HasColumnName("evidence_ref");
+            entity.HasIndex(e => new { e.LegalEntityId, e.EvidenceKind, e.EvidenceRef }).IsUnique().HasFilter("evidence_ref IS NOT NULL").HasDatabaseName("ux_transaction_set_evidence");
             entity.Property(e => e.ContentHash).HasColumnName("content_hash").HasColumnType("char(64)");
             entity.Property(e => e.BasisHash).HasColumnName("basis_hash").HasColumnType("char(64)");
             entity.Property(e => e.Submitter).HasColumnName("submitter");
@@ -84,8 +88,9 @@ internal static class ClaimsFinancialModel
                 table.HasCheckConstraint("ck_financial_transaction_kind", Codes.CheckSql<TransactionKind>("kind"));
                 table.HasCheckConstraint("ck_financial_transaction_amount", "amount <> 0");
                 table.HasCheckConstraint("ck_financial_transaction_payment_shape",
-                    "kind <> 'PAYMENT' OR (amount > 0 AND eroding IS NOT NULL AND payment_type IS NOT NULL AND claim_payment_id IS NOT NULL)");
+                    "kind <> 'PAYMENT' OR ((amount > 0 OR (amount < 0 AND reverses_txn_id IS NOT NULL)) AND eroding IS NOT NULL AND payment_type IS NOT NULL AND claim_payment_id IS NOT NULL)");
                 table.HasCheckConstraint("ck_financial_transaction_reserve_shape", "kind <> 'RESERVE' OR (eroding IS NULL AND payment_type IS NULL AND claim_payment_id IS NULL)");
+                table.HasCheckConstraint("ck_financial_transaction_recovery_shape", "kind NOT IN ('RECOVERY_RESERVE','RECOVERY') OR (recovery_id IS NOT NULL AND eroding IS NULL AND payment_type IS NULL AND claim_payment_id IS NULL)");
 
                 // D-SL2-06: one currency in the slice; the three-currency columns exist and are filled.
                 table.HasCheckConstraint("ck_financial_transaction_currencies", "currency ~ '^[A-Z]{3}$' AND functional_currency ~ '^[A-Z]{3}$' AND group_currency ~ '^[A-Z]{3}$'");
@@ -97,6 +102,8 @@ internal static class ClaimsFinancialModel
             entity.Property(e => e.SetId).HasColumnName("set_id");
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
             entity.Property(e => e.ReserveLineId).HasColumnName("reserve_line_id");
+            entity.Property(e => e.RecoveryId).HasColumnName("recovery_id");
+            entity.HasOne<RecoveryRow>().WithMany().HasForeignKey(e => e.RecoveryId).OnDelete(DeleteBehavior.Restrict).HasConstraintName("fk_financial_transaction_recovery");
             entity.Property(e => e.ExposureId).HasColumnName("exposure_id");
             entity.Property(e => e.Sequence).HasColumnName("sequence");
             entity.Property(e => e.TxnNumber).HasColumnName("txn_number");
@@ -132,7 +139,9 @@ internal static class ClaimsFinancialModel
                 table.HasCheckConstraint("ck_claim_payment_type", Codes.CheckSql<PaymentType>("payment_type"));
                 table.HasCheckConstraint("ck_claim_payment_amount", "amount > 0");
                 table.HasCheckConstraint("ck_claim_payment_hold_shape", "status <> 'ON_HOLD' OR hold_reason IS NOT NULL");
-                table.HasCheckConstraint("ck_claim_payment_submitted_shape", "status NOT IN ('SUBMITTED', 'ISSUED', 'CLEARED') OR disbursement_id IS NOT NULL");
+                table.HasCheckConstraint("ck_claim_payment_submitted_shape", "status NOT IN ('SUBMITTED', 'ISSUED', 'CLEARED') OR disbursement_id IS NOT NULL OR (method = 'CLEARING' AND fs_statement_id IS NOT NULL)");
+                table.HasCheckConstraint("ck_claim_payment_clearing", "method <> 'CLEARING' OR disbursement_id IS NULL");
+                table.HasCheckConstraint("ck_claim_payment_clearing_counterparty", "method <> 'CLEARING' OR counterparty_insurer_party_id IS NOT NULL");
             });
             entity.HasKey(e => e.ClaimPaymentId).HasName("pk_claim_payment");
             entity.Property(e => e.ClaimPaymentId).HasColumnName("claim_payment_id");
@@ -144,6 +153,14 @@ internal static class ClaimsFinancialModel
             entity.Property(e => e.PayeeAccountId).HasColumnName("payee_account_id");
             entity.Property(e => e.MaskedAccount).HasColumnName("masked_account");
             entity.Property(e => e.Method).HasColumnName("method");
+            entity.Property(e => e.FsStatementId).HasColumnName("fs_statement_id");
+            entity.Property(e => e.CounterpartyInsurerPartyId).HasColumnName("counterparty_insurer_party_id");
+            entity.Property(e => e.ReissueOf).HasColumnName("reissue_of");
+            entity.Property(e => e.ReversalOf).HasColumnName("reversal_of");
+            entity.Property(e => e.FiscalMark).HasColumnName("fiscal_mark");
+            entity.HasIndex(e => e.ReissueOf).IsUnique().HasFilter("reissue_of IS NOT NULL").HasDatabaseName("ux_claim_payment_reissue");
+            entity.HasOne<ClaimPaymentRow>().WithMany().HasForeignKey(e => e.ReissueOf).OnDelete(DeleteBehavior.Restrict).HasConstraintName("fk_claim_payment_reissue");
+            entity.HasOne<ClaimPaymentRow>().WithMany().HasForeignKey(e => e.ReversalOf).OnDelete(DeleteBehavior.Restrict).HasConstraintName("fk_claim_payment_reversal");
             entity.Property(e => e.PaymentType).HasColumnName("payment_type");
             entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType(MoneyType);
             entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
