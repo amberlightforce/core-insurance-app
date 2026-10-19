@@ -10,6 +10,9 @@
     <!-- Zero-warning policy: every warning fails the build. -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+    <!-- D-USR-20: NuGet audit advisories stay visible as warnings but do not break builds; dependabot handles bumps. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
+    <MSBuildWarningsNotAsErrors>$(MSBuildWarningsNotAsErrors);NU1901;NU1902;NU1903;NU1904</MSBuildWarningsNotAsErrors>
 
     <!-- Latest .NET analysers with the recommended rule set; code-style rules run in the build too. -->
     <AnalysisLevel>latest-recommended</AnalysisLevel>
