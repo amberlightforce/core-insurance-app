@@ -58,6 +58,7 @@ internal static class ModuleCatalog
         .. PolicyModule.Databases,
         .. BillingModule.Databases,
         .. ComplianceModule.Databases,
+        .. DataModule.Databases,
         .. FinanceModule.Databases,
         .. ClaimsModule.Databases,
         .. ReinsuranceModule.Databases,
