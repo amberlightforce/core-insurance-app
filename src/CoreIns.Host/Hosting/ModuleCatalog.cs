@@ -76,6 +76,7 @@ internal static class ModuleCatalog
         typeof(PolicyModule).Assembly,
         typeof(BillingModule).Assembly,
         typeof(ComplianceModule).Assembly,
+        typeof(DataModule).Assembly,
         typeof(FinanceModule).Assembly,
         typeof(ClaimsModule).Assembly,
         typeof(ReinsuranceModule).Assembly,

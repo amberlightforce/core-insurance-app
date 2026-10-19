@@ -16,7 +16,7 @@ public sealed class DataCoreTests(PostgresFixture database) : IClassFixture<Post
 
     private async Task SeedAsync(string subject)
     {
-        using var scope = _factory.Services.CreateScope();
+        await using var scope = _factory.Services.CreateAsyncScope();
         var store = scope.ServiceProvider.GetRequiredService<SubjectFactStore>();
         (await store.RecordAsync(subject, "PARTY", "email", "a@example.org", TestContext.Current.CancellationToken)).ShouldBeTrue();
         (await store.RecordAsync(subject, "CLAIM", "note", "whiplash", TestContext.Current.CancellationToken)).ShouldBeTrue();
@@ -40,7 +40,7 @@ public sealed class DataCoreTests(PostgresFixture database) : IClassFixture<Post
         var (exported, before) = await SendAsync(client, HttpMethod.Post, "/api/dat/v1/subject/export", new { requestId = "x", subjectToken = subject }, roles: Admin);
         exported.StatusCode.ShouldBe(HttpStatusCode.OK, before?.ToJsonString());
         before.Text("factCount").ShouldBe("2");
-        before.Text("facts[0].category").ShouldBe("PARTY");
+        before.Text("facts.0.category").ShouldBe("PARTY");
 
         var requestId = "req-" + Guid.NewGuid().ToString("N");
         var body = new { requestId, subjectToken = subject, dsarRef = Guid.CreateVersion7() };
@@ -50,7 +50,7 @@ public sealed class DataCoreTests(PostgresFixture database) : IClassFixture<Post
         second.StatusCode.ShouldBe(HttpStatusCode.OK, two?.ToJsonString());
         one.Text("status").ShouldBe("ERASED");
         one.Text("factCount").ShouldBe("2");
-        two.ToJsonString().ShouldBe(one!.ToJsonString());
+        two!.ToJsonString().ShouldBe(one!.ToJsonString());
 
         (await CountAsync($"SELECT count(*) FROM dat.subject_key WHERE subject_token = '{subject}' AND key_material IS NULL AND destroyed_at IS NOT NULL")).ShouldBe(1);
         (await CountAsync($"SELECT count(*) FROM dat.subject_fact WHERE subject_token = '{subject}' AND cipher IS NULL AND blanked")).ShouldBe(2);
