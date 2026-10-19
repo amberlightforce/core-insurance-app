@@ -22,6 +22,14 @@ internal sealed class ChargeDeltaEmittedHandler(ICommandHandler<IntakeCharge, In
     {
         ArgumentNullException.ThrowIfNull(envelope);
         ArgumentNullException.ThrowIfNull(payload);
+
+        // Opening deltas of a migrated in-force policy are history, not new business: no invoice (the legacy receivable is imported
+        // by bil.Receivable import). E2E-05 step 3.
+        if (payload.Opening == true)
+        {
+            return;
+        }
+
         var policyId = envelope.BusinessKeys.TryGetValue("policyId", out var value) && Guid.TryParse(value, out var id)
             ? new PolicyId(id)
             : throw new InvalidOperationException("ChargeDeltaEmitted without the policyId business key (catalogue x-business-keys).");

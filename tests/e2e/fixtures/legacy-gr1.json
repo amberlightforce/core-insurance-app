@@ -1,0 +1,32 @@
+{
+  "_comment": "Fixture GR-1 (SL6-E2E-05): a synthetic legacy in-force motor policy. All names, plates and amounts are illustrative test data. Dates are day offsets from the conversion day T0 (the dev clock's Athens date when the journey starts) so the journey runs on any day: the term runs T0-184d .. T0+181d, i.e. 2026-07-01 .. 2027-06-30 when T0 is 2027-01-01 (mid-term conversion); the renewal-based conversion happens 31 days before term end (the importer only takes an in-force term).",
+  "id": "GR-1",
+  "termStartOffsetDays": -184,
+  "renewalBasedClockOffsetDays": 150,
+  "routing": { "transitioningFromOffsetDays": -17, "coreMasterFromOffsetDays": 31 },
+  "policyholder": { "givenNames": "Νικόλαος", "familyName": "Δημητρίου", "fatherName": "Γεώργιος", "birthDate": "1978-02-11" },
+  "secondDriver": { "givenNames": "Ελένη", "familyName": "Δημητρίου", "fatherName": "Νικόλαος", "birthDate": "1992-03-02" },
+  "vehicle": { "plate": "ikx-5001", "make": "Toyota", "model": "Yaris", "firstRegistrationYear": 2021, "engineCapacityCc": 1400, "use": "PRIVATE", "value": { "amount": "15000.00", "currency": "EUR" } },
+  "drivers": [
+    { "driverType": "MAIN", "yearFirstLicensed": 2010, "usagePercent": 70, "claimsLast5Years": 0 },
+    { "driverType": "OCCASIONAL", "yearFirstLicensed": 2014, "usagePercent": 30, "claimsLast5Years": 0 }
+  ],
+  "coverages": ["MTPL", "OWN-DAMAGE"],
+  "charges": [
+    { "coverageCode": "MTPL", "chargeType": "PREM-MTPL", "chargeCategory": "PREMIUM", "amount": 312.35 },
+    { "coverageCode": "OWN-DAMAGE", "chargeType": "PREM-OD", "chargeCategory": "PREMIUM", "amount": 120.01 },
+    { "coverageCode": "MTPL", "chargeType": "GR-IPT", "chargeCategory": "TAX", "amount": 46.85, "rate": 0.15, "legalStatus": "Unverified", "provisional": true }
+  ],
+  "mandate": { "signatureDate": "2024-03-15", "ibanMasked": "GR16 **** **** **** **** *** 7890" },
+  "receivable": { "outstanding": 250.35, "openItems": [200.00, 50.35], "dueOffsetDays": 20 },
+  "claim": { "lossOffsetDays": -20, "notifiedOffsetDays": -10, "lossCause": "COLLISION", "coverageCode": "MTPL", "reserve": 18000.00, "clockDays": 30 },
+  "treaty": { "id": "XOL-MOTOR", "contractYear": 2026, "openingAggregate": 125000.50 },
+  "openingBalance": {
+    "lines": [
+      { "accountCode": "GL-1210", "debit": 600.50, "credit": 0 },
+      { "accountCode": "GL-1215", "debit": 399.50, "credit": 0 },
+      { "accountCode": "GL-2110", "debit": 0, "credit": 1000.00 }
+    ],
+    "trialBalance": { "debit": 1000.00, "credit": 1000.00 }
+  }
+}

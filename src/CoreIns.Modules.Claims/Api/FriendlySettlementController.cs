@@ -184,5 +184,25 @@ public static class DevFsClearingEndpoints
                 return result.ToHttpResult(http);
             })
             .RequireAuthorization(FriendlySettlementPermissions.DevNotify);
+
+        // The counterparty insurers of an E2E run are organisation parties created at run time, so the configured counterparty code ->
+        // BIL clearing payee account map (Claims:FriendlySettlement:ClearingPayeeAccounts) is extended through this endpoint. It changes
+        // the api process's options only, which is the process that hands an approved net to BIL.
+        endpoints.MapPost(
+            "/api/clm/v1/dev/fs-clearing/clearing-payee-accounts",
+            (DevClearingPayeeAccount body, Microsoft.Extensions.Options.IOptions<ClaimsOptions> options) =>
+            {
+                if (!FsCases.TryParty(body.CounterpartyCode, out var party) || body.PayeeAccountId == Guid.Empty)
+                {
+                    return Results.BadRequest();
+                }
+
+                options.Value.FriendlySettlement.ClearingPayeeAccounts[FsCases.Code(party)] = body.PayeeAccountId;
+                return Results.NoContent();
+            })
+            .RequireAuthorization(FriendlySettlementPermissions.DevNotify);
     }
 }
+
+/// <summary>Body of the development-only clearing payee account registration.</summary>
+public sealed record DevClearingPayeeAccount(string CounterpartyCode, Guid PayeeAccountId);
