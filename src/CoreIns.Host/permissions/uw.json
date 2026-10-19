@@ -2,6 +2,7 @@
   "Platform": {
     "Permissions": {
       "Grants": {
+        "uw.Referral.summarize": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Rules.evaluate": [ "Staff.Underwriter" ],
         "uw.Issue.blockingStatus": [ "Staff.Underwriter", "Staff.Billing" ],
         "uw.Issue.list": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],

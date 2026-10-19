@@ -38,7 +38,7 @@ public sealed record PaymentIssuedV1 : global::CoreIns.Platform.Contracts.Events
         SetCompleteness = false,
         OrderingKey = "claim_id",
         PayloadStatus = global::CoreIns.Platform.Contracts.Events.PayloadStatus.Full,
-        PersonalDataFields = ["payeePartyId"],
+        PersonalDataFields = ["payeePartyId", "counterpartyInsurerPartyId"],
         Consumers = [global::CoreIns.SharedKernel.Identifiers.ModuleCode.CHN, global::CoreIns.SharedKernel.Identifiers.ModuleCode.DAT, global::CoreIns.SharedKernel.Identifiers.ModuleCode.FIN, global::CoreIns.SharedKernel.Identifiers.ModuleCode.POL, global::CoreIns.SharedKernel.Identifiers.ModuleCode.RI],
         SchemaPath = "clm/PaymentIssued.v1.schema.json",
     };
