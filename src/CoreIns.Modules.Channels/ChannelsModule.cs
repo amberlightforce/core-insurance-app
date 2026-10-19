@@ -1,3 +1,5 @@
+using CoreIns.Modules.Channels.Services.Dsar;
+using CoreIns.SharedKernel.Dsar;
 using CoreIns.Modules.Channels.Commands;
 using CoreIns.Modules.Channels.Contracts.Api;
 using CoreIns.Modules.Channels.Domain;
@@ -40,6 +42,7 @@ public static class ChannelsModule
 
         services.AddOptions<ChannelsOptions>().Bind(configuration.GetSection(ChannelsOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
         services.AddModuleDbContext<ChannelsDbContext>(Schema);
+        services.AddSingleton<IDsarParticipant, ChannelsDsarParticipant>();
         services.AddScoped<WithdrawalReader>();
         services.AddScoped<CoreIns.Modules.Channels.Ai.TicketService>();
         services.TryAddScoped<IWithdrawalPolicyPort, PolicyContractWithdrawalPort>();

@@ -22,6 +22,7 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.MapDsarRestrictions();
 
         modelBuilder.Entity<BatchRow>(entity =>
         {

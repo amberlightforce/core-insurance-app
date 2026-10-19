@@ -61,6 +61,7 @@ public static class UnderwritingModule
         services.AddScoped<IUnderwritingRulesService, UnderwritingRulesService>();
         services.AddScoped<IUnderwritingIssueService, UnderwritingIssueService>();
 
+        services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Underwriting.Services.Dsar.UnderwritingDsarParticipant>();
         services.AddErrorDefinitions(Errors);
         return services;
     }
