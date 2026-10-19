@@ -37,6 +37,12 @@ public sealed record DevClockAdvanceRequest
 
     /// <summary>Whole hours to add (0 or more).</summary>
     public int? Hours { get; init; }
+
+    /// <summary>Whole minutes to add (0 or more); lets a journey land on a given second of a day.</summary>
+    public int? Minutes { get; init; }
+
+    /// <summary>Whole seconds to add (0 or more).</summary>
+    public int? Seconds { get; init; }
 }
 
 /// <summary>The dev clock as seen by the caller (no personal data).</summary>
@@ -125,7 +131,7 @@ public sealed class DevClockStore(NpgsqlDataSource dataSource) : IClockOffsetSou
 internal sealed record AdvanceDevClock(DevClockAdvanceRequest? Request) : ICommand<DevClockState>
 {
     /// <summary>The requested advance in seconds (0 when the body is missing).</summary>
-    public long Seconds => (((long)(Request?.Days ?? 0) * 24) + (Request?.Hours ?? 0)) * 3600;
+    public long Seconds => ((((long)(Request?.Days ?? 0) * 24) + (Request?.Hours ?? 0)) * 3600) + ((long)(Request?.Minutes ?? 0) * 60) + (Request?.Seconds ?? 0);
 }
 
 internal sealed class AdvanceDevClockValidator : AbstractValidator<AdvanceDevClock>
@@ -140,6 +146,8 @@ internal sealed class AdvanceDevClockValidator : AbstractValidator<AdvanceDevClo
         {
             RuleFor(c => c.Request!.Days).InclusiveBetween(0, MaxDays).When(c => c.Request!.Days is not null);
             RuleFor(c => c.Request!.Hours).InclusiveBetween(0, MaxDays * 24).When(c => c.Request!.Hours is not null);
+            RuleFor(c => c.Request!.Minutes).InclusiveBetween(0, MaxDays * 24 * 60).When(c => c.Request!.Minutes is not null);
+            RuleFor(c => c.Request!.Seconds).InclusiveBetween(0, MaxDays * 24 * 3600).When(c => c.Request!.Seconds is not null);
             RuleFor(c => c.Seconds)
                 .GreaterThan(0)
                 .WithName("days")

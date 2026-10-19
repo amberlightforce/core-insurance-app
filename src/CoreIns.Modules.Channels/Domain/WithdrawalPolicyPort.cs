@@ -13,7 +13,9 @@ namespace CoreIns.Modules.Channels.Domain;
 
 /// <summary>What CHN needs to know about the policy of a withdrawal.</summary>
 /// <param name="ConcludedAt">When the contract was concluded (the window starts on that day).</param>
-internal sealed record WithdrawalPolicyFacts(Instant ConcludedAt);
+/// <param name="PolicyholderPartyId">The addressee of the acknowledgement.</param>
+/// <param name="PolicyNumber">For the acknowledgement text.</param>
+internal sealed record WithdrawalPolicyFacts(Instant ConcludedAt, PartyId PolicyholderPartyId, string PolicyNumber);
 
 /// <summary>Result of the handoff to POL.</summary>
 internal enum PolicySubmitOutcome
@@ -56,7 +58,7 @@ internal sealed class PolicyContractWithdrawalPort(IServiceProvider services) : 
         {
             var response = await policies.GetAsync(policyId.Value.ToString("D"), cancellationToken: cancellationToken).ConfigureAwait(false);
             // TODO(hardening): use the bind/issue date of the contract when POL exposes it; RecordedAt is when POL recorded the policy.
-            return new WithdrawalPolicyFacts(response.Policy.RecordedAt);
+            return new WithdrawalPolicyFacts(response.Policy.RecordedAt, response.Policy.PolicyholderPartyId, response.Policy.PolicyNumber.ToString());
         }
         catch (DomainException)
         {
