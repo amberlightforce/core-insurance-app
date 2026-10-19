@@ -1,4 +1,5 @@
 using CoreIns.Modules.Compliance.AiRegister;
+using CoreIns.Modules.Compliance.Clocks;
 using CoreIns.Modules.Compliance.Commands;
 using CoreIns.Modules.Compliance.Contracts;
 using CoreIns.Modules.Compliance.Contracts.Api;
@@ -50,6 +51,30 @@ public static class ComplianceModule
         services.AddScoped<IComplianceFiscalDocumentService, ComplianceFiscalDocumentService>();
 
         services.AddAiRegister();
+        // Clock engine (SL6-CMP-CLOCK): commands, queries, in-process contracts and the sweeper (worker role only).
+        services.AddOptions<ClockOptions>().Bind(configuration.GetSection(ClockOptions.Section));
+        services.AddScoped<ClockEngine>();
+        services.AddScoped<ClockReader>();
+        services.AddScoped<IValidator<StartClock>, StartClockValidator>();
+        services.AddScoped<IValidator<PauseClock>, PauseClockValidator>();
+        services.AddScoped<IValidator<ResumeClock>, ResumeClockValidator>();
+        services.AddScoped<IValidator<StopClock>, StopClockValidator>();
+        services.AddScoped<IValidator<CancelClock>, CancelClockValidator>();
+        services.AddScoped<IValidator<ExtendClock>, ExtendClockValidator>();
+        services.AddCommand<StartClock, ClockStartResponse, StartClockHandler>(CommandDescriptor.For("cmp.Clock.start") with { SupportsDryRun = true });
+        services.AddCommand<PauseClock, ClockPauseResponse, PauseClockHandler>(CommandDescriptor.For("cmp.Clock.pause"));
+        services.AddCommand<ResumeClock, ClockResumeResponse, ResumeClockHandler>(CommandDescriptor.For("cmp.Clock.resume"));
+        services.AddCommand<StopClock, ClockStopResponse, StopClockHandler>(CommandDescriptor.For("cmp.Clock.stop"));
+        services.AddCommand<CancelClock, ClockCancelResponse, CancelClockHandler>(CommandDescriptor.For("cmp.Clock.cancel"));
+        services.AddCommand<ExtendClock, ClockExtendResponse, ExtendClockHandler>(CommandDescriptor.For("cmp.Clock.extend"));
+        services.AddCommand<SweepClock, string, SweepClockHandler>(CommandDescriptor.For("cmp.Clock.sweep") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddScoped<IComplianceClockService, ComplianceClockService>();
+        services.AddScoped<IComplianceClockDefService, ComplianceClockDefService>();
+        services.AddSingleton<ClockSweepRunner>();
+        if (string.Equals(configuration["APP_ROLE"], "worker", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddHostedService<ClockSweeper>();
+        }
 
         services.AddErrorDefinitions(Errors);
         return services;
@@ -74,6 +99,16 @@ public static class ComplianceModule
             .Describe("Η ίδια πηγή, ρόλος και αναθεώρηση υπάρχουν ήδη με άλλο αντισυμβαλλόμενο ή ποσά.", "The same source, role and revision already exist with another counterparty or amounts."),
         ErrorDefinition.For(ModuleCode.CMP, "APPROVAL-SAME-USER", 403, "Ο εγκρίνων πρέπει να διαφέρει από τον υποβάλλοντα", "The approver must differ from the submitter")
             .Describe("Η έγκριση απαιτεί δεύτερο χρήστη (αρχή των τεσσάρων ματιών).", "Approval needs a second user (four-eyes principle)."),
+        ErrorDefinition.For(ModuleCode.CMP, "CLOCK-UNKNOWN", 422, "Άγνωστο ρολόι", "Unknown clock")
+            .Describe("Δεν υπάρχει ορισμός ρολογιού με αυτόν τον κωδικό.", "No clock definition has this code."),
+        ErrorDefinition.For(ModuleCode.CMP, "CLOCK-NO-VALUE", 422, "Το ρολόι δεν έχει τιμή για τη δικαιοδοσία", "The clock has no value for the jurisdiction")
+            .Describe("Ο ορισμός δεν ισχύει για τη δικαιοδοσία της νομικής οντότητας.", "The definition does not apply to the legal entity's jurisdiction."),
+        ErrorDefinition.For(ModuleCode.CMP, "CLOCK-STATE", 422, "Η ενέργεια δεν επιτρέπεται στην κατάσταση του ρολογιού", "The action is not allowed in the clock's state")
+            .Describe("Η τρέχουσα κατάσταση του ρολογιού δεν επιτρέπει αυτή την ενέργεια.", "The clock's current state does not allow this action."),
+        ErrorDefinition.For(ModuleCode.CMP, "CLOCK-CANCEL-REASON", 422, "Απαιτείται αιτιολογία ακύρωσης", "A cancellation reason is required")
+            .Describe("Η ακύρωση ρολογιού χρειάζεται αιτιολογία.", "Cancelling a clock needs a reason."),
+        ErrorDefinition.For(ModuleCode.CMP, "EXTENSION-NOT-ALLOWED", 422, "Το ρολόι δεν επιδέχεται παράταση", "The clock cannot be extended")
+            .Describe("Ο ορισμός του ρολογιού δεν προβλέπει παράταση.", "The clock definition does not allow an extension."),
         ErrorDefinition.For(ModuleCode.CMP, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

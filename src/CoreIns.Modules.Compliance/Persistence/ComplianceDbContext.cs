@@ -19,6 +19,9 @@ internal sealed class ComplianceDbContext(DbContextOptions<ComplianceDbContext> 
     public DbSet<FiscalSeriesRow> FiscalSeries => Set<FiscalSeriesRow>();
 
     internal DbSet<AiSystemRow> AiSystems => Set<AiSystemRow>();
+    public DbSet<ClockRow> Clocks => Set<ClockRow>();
+
+    public DbSet<ClockEventRow> ClockEvents => Set<ClockEventRow>();
 
     protected override string Schema => ComplianceModule.Schema;
 
@@ -90,6 +93,59 @@ internal sealed class ComplianceDbContext(DbContextOptions<ComplianceDbContext> 
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+        });
+
+        modelBuilder.Entity<ClockRow>(entity =>
+        {
+            entity.ToTable("clock", table =>
+            {
+                table.HasCheckConstraint("ck_clock_status", "status IN ('RUNNING','WARNED','PAUSED','MET','BREACHED','ELAPSED','CANCELLED')");
+                table.HasCheckConstraint("ck_clock_kind", "kind IN ('WAITING_PERIOD','DEADLINE')");
+                table.HasCheckConstraint("ck_clock_value_version", "value_version >= 1");
+                table.HasCheckConstraint("ck_clock_record_version", "record_version >= 1");
+            });
+            entity.HasKey(e => e.ClockId).HasName("pk_clock");
+            entity.Property(e => e.ClockId).HasColumnName("clock_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Jurisdiction).HasColumnName("jurisdiction").HasColumnType("char(2)");
+            entity.Property(e => e.ClockCode).HasColumnName("clock_code");
+            entity.Property(e => e.SubjectModule).HasColumnName("subject_module");
+            entity.Property(e => e.SubjectType).HasColumnName("subject_type");
+            entity.Property(e => e.SubjectId).HasColumnName("subject_id");
+            entity.Property(e => e.Key).HasColumnName("key");
+            entity.Property(e => e.Variant).HasColumnName("variant");
+            entity.Property(e => e.Kind).HasColumnName("kind");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.StartedAt).HasColumnName("started_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Deadline).HasColumnName("deadline").HasColumnType("timestamptz");
+            entity.Property(e => e.WarnAt).HasColumnName("warn_at").HasColumnType("timestamptz");
+            entity.Property(e => e.PausedAt).HasColumnName("paused_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ClosedAt).HasColumnName("closed_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Outcome).HasColumnName("outcome");
+            entity.Property(e => e.MetLate).HasColumnName("met_late");
+            entity.Property(e => e.ValueVersion).HasColumnName("value_version");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+
+            // Idempotent start: one instance per definition, subject and key.
+            entity.HasIndex(e => new { e.LegalEntityId, e.ClockCode, e.SubjectModule, e.SubjectType, e.SubjectId, e.Key }).IsUnique().HasDatabaseName("ux_clock_instance");
+            // The sweeper's due scan.
+            entity.HasIndex(e => new { e.Status, e.Deadline }).HasDatabaseName("ix_clock_status_deadline");
+            entity.HasIndex(e => new { e.SubjectModule, e.SubjectType, e.SubjectId }).HasDatabaseName("ix_clock_subject");
+        });
+
+        modelBuilder.Entity<ClockEventRow>(entity =>
+        {
+            entity.ToTable("clock_event");
+            entity.HasKey(e => e.ClockEventId).HasName("pk_clock_event");
+            entity.Property(e => e.ClockEventId).HasColumnName("clock_event_id");
+            entity.Property(e => e.ClockId).HasColumnName("clock_id");
+            entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.OccurredAt).HasColumnName("occurred_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Actor).HasColumnName("actor");
+            entity.Property(e => e.Detail).HasColumnName("detail").HasColumnType("jsonb");
+            entity.HasIndex(e => new { e.ClockId, e.OccurredAt }).HasDatabaseName("ix_clock_event_clock");
+            entity.HasOne<ClockRow>().WithMany().HasForeignKey(e => e.ClockId).HasConstraintName("fk_clock_event_clock");
         });
 
         modelBuilder.Entity<FiscalSeriesRow>(entity =>
@@ -173,6 +229,71 @@ internal sealed class FiscalSeriesRow
     public string SeriesId { get; set; } = string.Empty;
 
     public long LastNumber { get; set; }
+}
+
+/// <summary>One running or finished clock (REQ-CMP-095..104): a definition applied to a subject.</summary>
+internal sealed class ClockRow
+{
+    public StatutoryClockId ClockId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public string Jurisdiction { get; set; } = string.Empty;
+
+    public string ClockCode { get; set; } = string.Empty;
+
+    public string SubjectModule { get; set; } = string.Empty;
+
+    public string SubjectType { get; set; } = string.Empty;
+
+    public string SubjectId { get; set; } = string.Empty;
+
+    /// <summary>Instance key within definition and subject; empty by default.</summary>
+    public string Key { get; set; } = string.Empty;
+
+    public string? Variant { get; set; }
+
+    public string Kind { get; set; } = string.Empty;
+
+    public string Status { get; set; } = string.Empty;
+
+    public Instant StartedAt { get; set; }
+
+    /// <summary>Current due instant; moves on resume and extend.</summary>
+    public Instant Deadline { get; set; }
+
+    /// <summary>When the warning is due (null: none or already given).</summary>
+    public Instant? WarnAt { get; set; }
+
+    public Instant? PausedAt { get; set; }
+
+    public Instant? ClosedAt { get; set; }
+
+    public string? Outcome { get; set; }
+
+    public bool MetLate { get; set; }
+
+    public int ValueVersion { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public int RecordVersion { get; set; }
+}
+
+/// <summary>The history of a clock: every transition, with its business time.</summary>
+internal sealed class ClockEventRow
+{
+    public Guid ClockEventId { get; set; }
+
+    public StatutoryClockId ClockId { get; set; }
+
+    public string Type { get; set; } = string.Empty;
+
+    public Instant OccurredAt { get; set; }
+
+    public string Actor { get; set; } = string.Empty;
+
+    public string Detail { get; set; } = "{}";
 }
 
 /// <summary>Design-time factory for <c>dotnet ef migrations add … --project src/CoreIns.Modules.Compliance</c>.</summary>
