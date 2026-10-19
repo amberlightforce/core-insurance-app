@@ -1,0 +1,13 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "chn.Withdrawal.declare": [ "Customer.Portal", "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "chn.Withdrawal.confirm": [ "Customer.Portal", "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "chn.Withdrawal.close": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "chn.Withdrawal.get": [ "Customer.Portal", "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "chn.Withdrawal.list": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ]
+      }
+    }
+  }
+}
