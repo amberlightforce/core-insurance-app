@@ -14,7 +14,9 @@
         // SL2-BIL-DISB: Claims calls create/request in process; the API serves reads (claims roles: SL2-PLT).
         "bil.PayeeAccount.create": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "bil.PayeeAccount.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
-        "bil.Disbursement.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "bil.Disbursement.get": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "bil.Disbursement.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.Disbursement.approveRelease": [ "Staff.BillingManager" ],
         // SL3-PLT-SUPPORT: refunds are read by billing staff; only the billing manager decides them (SoD: maker != checker is enforced by plt.Approval).
         "bil.Refund.get": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.Refund.list": [ "Staff.Billing", "Staff.BillingManager" ],

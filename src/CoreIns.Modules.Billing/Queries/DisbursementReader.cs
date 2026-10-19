@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CoreIns.Modules.Billing.Commands;
 using CoreIns.Modules.Billing.Contracts;
 using CoreIns.Modules.Billing.Contracts.Api;
@@ -63,6 +64,25 @@ internal sealed class DisbursementReader(BillingDbContext db)
         return View(row, last4);
     }
 
+    /// <summary>A page of the entity's disbursements, newest first (cursor = the offset of the next page).</summary>
+    public async Task<DisbursementListPage> ListAsync(LegalEntityId legalEntity, string? cursor, int? limit, CancellationToken cancellationToken)
+    {
+        var size = Math.Clamp(limit ?? 50, 1, 200);
+        var query = db.Disbursements.AsNoTracking().Where(d => d.LegalEntityId == legalEntity);
+        var offset = int.TryParse(cursor, out var skip) && skip > 0 ? skip : 0;
+        var rows = await query.OrderByDescending(d => d.RequestedAt).ThenByDescending(d => d.DisbursementId).Skip(offset).Take(size + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var page = rows.Take(size).ToList();
+        var accounts = page.Select(r => r.PayeeAccountId).Distinct().ToList();
+        var last4 = await db.PayeeAccounts.AsNoTracking().Where(a => accounts.Contains(a.PayeeAccountId))
+            .ToDictionaryAsync(a => a.PayeeAccountId, a => a.IbanLast4, cancellationToken).ConfigureAwait(false);
+        return new DisbursementListPage
+        {
+            Items = [.. page.Select(r => new DisbursementListItem { Disbursement = JsonSerializer.SerializeToElement(View(r, last4.GetValueOrDefault(r.PayeeAccountId, string.Empty)), JsonSerializerOptions.Web) })],
+            NextCursor = rows.Count > size ? (offset + size).ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
+            Limit = size,
+        };
+    }
+
     /// <summary>The contract view of a disbursement row.</summary>
     public static DisbursementRequestResponse View(DisbursementRow row, string ibanLast4)
     {
@@ -88,6 +108,16 @@ internal sealed class DisbursementReader(BillingDbContext db)
             ReleasedAt = row.ReleasedAt,
             IssuedAt = row.IssuedAt,
             ClearedAt = row.ClearedAt,
+            StatementReference = row.StatementRef,
+            Lines = FsLines.Deserialize(row.Lines),
+            ReleaseApproval = row.SourceType == DisbursementCodes.FsClearing
+                ? new DisbursementRequestResponse.ReleaseApprovalDetail
+                {
+                    Required = true,
+                    ApprovalRequestId = row.ReleaseApprovalRequestId is { } id ? new ApprovalRequestId(id) : null,
+                    RequestedBy = row.CreatedBy,
+                }
+                : null,
         };
     }
 }

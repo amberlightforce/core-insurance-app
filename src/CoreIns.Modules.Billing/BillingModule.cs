@@ -114,6 +114,11 @@ public static class BillingModule
         services.AddCommandAuditor<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountAuditor>();
         services.AddCommand<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountHandler>(
             CommandDescriptor.For("bil.PayeeAccount.create") with { SupportsDryRun = true });
+        services.AddScoped<DisbursementReleaser>();
+        services.AddScoped<IValidator<ApproveDisbursementRelease>, ApproveDisbursementReleaseValidator>();
+        services.AddCommandAuditor<ApproveDisbursementRelease, DisbursementApproveReleaseResponse, ApproveDisbursementReleaseAuditor>();
+        services.AddCommand<ApproveDisbursementRelease, DisbursementApproveReleaseResponse, ApproveDisbursementReleaseHandler>(
+            CommandDescriptor.For("bil.Disbursement.approveRelease") with { SupportsDryRun = true });
         services.AddScoped<IValidator<RequestDisbursement>, RequestDisbursementValidator>();
         services.AddCommandAuditor<RequestDisbursement, DisbursementRequestResponse, RequestDisbursementAuditor>();
         services.AddCommand<RequestDisbursement, DisbursementRequestResponse, RequestDisbursementHandler>(
@@ -214,6 +219,10 @@ public static class BillingModule
         ErrorDefinition.For(ModuleCode.BIL, "NOT-PERMITTED", 403, "Δεν έχετε εξουσιοδότηση για αυτό το ποσό", "No authority for this amount")
             .Describe("Δεν υπάρχει εξουσιοδότηση επιστροφής για αυτό το ποσό.", "No refund authority covers this amount."),
         ErrorDefinition.For(ModuleCode.BIL, "FISCAL-TREATMENT-OPEN", 422, "Ανοικτή φορολογική μεταχείριση", "Fiscal treatment is open"),
+        ErrorDefinition.For(ModuleCode.BIL, "LINES-MISMATCH", 422, "Οι γραμμές δεν αντιστοιχούν στο καθαρό ποσό", "The lines do not match the net")
+            .Describe("Οι γραμμές της κατάστασης φιλικού διακανονισμού πρέπει να είναι μοναδικές και να αθροίζουν στο καθαρό ποσό.", "The Friendly Settlement statement lines must be unique and add up to the net amount."),
+        ErrorDefinition.For(ModuleCode.BIL, "APPROVAL-REQUIRED", 422, "Δεν εκκρεμεί έγκριση αποδέσμευσης", "No release approval is pending")
+            .Describe("Η πληρωμή δεν περιμένει έγκριση αποδέσμευσης.", "The disbursement is not awaiting a release approval."),
         ErrorDefinition.For(ModuleCode.BIL, "DUPLICATE", 409, "Πιθανή διπλή πληρωμή", "Possible duplicate payment")
             .Describe("Υπάρχει ήδη πληρωμή για την ίδια πηγή ή με τον ίδιο λογαριασμό, ποσό και αναφορά.", "A payment already exists for the same source or with the same account, amount and reference."),
     ];
