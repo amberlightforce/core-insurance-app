@@ -55,7 +55,7 @@ public static class PolicyModule
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.job, {Schema}.quote_version, {Schema}.policy_term, {Schema}.segment, {Schema}.pack_rollback_exception TO {appRole}",
-                $"GRANT SELECT, INSERT ON {Schema}.policy, {Schema}.policy_transaction, {Schema}.charge_line TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.policy, {Schema}.policy_transaction, {Schema}.charge_line, {Schema}.withdrawal TO {appRole}",
                 // The policy row is frozen (trigger); the one thing a command changes is the record-time watermark (D-SL3-03).
                 $"GRANT UPDATE (last_recorded_at, record_version) ON {Schema}.policy TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
