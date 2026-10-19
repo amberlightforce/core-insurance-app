@@ -73,7 +73,13 @@ internal static class SetAuthority
                 result.Add(new AuthorityRequirement(ClaimsAuthorityTypes.Reserve, costType.Key, total, costType.First().Currency, "EXPOSURE_TOTAL_RECOVERY_RESERVE"));
             }
 
-            foreach (var decrease in exposure.Where(t => t.Amount < 0m && !t.Proposed))
+            // A recovery write-off (REQ-CLM-150) releases the open recovery reserve under CLM.RECOVERY_WRITEOFF, on the aggregate released.
+            foreach (var writeOff in exposure.Where(t => t.Amount < 0m && !t.Proposed && t.ReasonCode == "WRITE_OFF").GroupBy(CostTypeOf))
+            {
+                result.Add(new AuthorityRequirement(ClaimsAuthorityTypes.RecoveryWriteOff, writeOff.Key, -writeOff.Sum(t => t.Amount), writeOff.First().Currency, "RESERVE_DECREASE"));
+            }
+
+            foreach (var decrease in exposure.Where(t => t.Amount < 0m && !t.Proposed && t.ReasonCode != "WRITE_OFF"))
             {
                 result.Add(new AuthorityRequirement(ClaimsAuthorityTypes.Reserve, CostTypeOf(decrease), -decrease.Amount, decrease.Currency, "RESERVE_DECREASE"));
             }

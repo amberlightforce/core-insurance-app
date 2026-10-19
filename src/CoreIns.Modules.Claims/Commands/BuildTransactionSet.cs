@@ -109,7 +109,7 @@ internal sealed class BuildTransactionSetHandler(
                 return ClaimSupport.NotFound("exposure");
             }
 
-            if (exposure.Status != ClaimStates.Open && item.Kind != Item.KindValue.RecoveryReserve)
+            if (exposure.Status != ClaimStates.Open && item.Kind is not (Item.KindValue.RecoveryReserve or Item.KindValue.Recovery))
             {
                 return DomainError.Of(ModuleCode.CLM, "ILLEGAL-TRANSITION", $"Exposure {exposure.ExposureNumber} is not open.");
             }

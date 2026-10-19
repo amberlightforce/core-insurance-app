@@ -69,7 +69,9 @@ describe('AI control page', () => {
     const sw = await screen.findByRole('switch', { name: 'Enable AI-CLM-01' });
     await waitFor(() => expect(sw).not.toBeDisabled());
     await user.click(sw);
-    await waitFor(() => expect(api.callsTo('POST', '/api/plt/v1/ai-toggle/set')).toHaveLength(1));
+    await waitFor(() => {
+      expect(api.callsTo('POST', '/api/plt/v1/ai-toggle/set')).toHaveLength(1);
+    });
     expect(api.callsTo('POST', '/api/plt/v1/ai-toggle/set')[0]?.body).toEqual({
       featureId: 'AI-CLM-01',
       enabled: true,
@@ -88,7 +90,9 @@ describe('AI control page', () => {
     expect(await within(dialog).findByText('Enter a reason.')).toBeInTheDocument();
     await user.type(within(dialog).getByRole('textbox'), 'Incident 42');
     await user.click(within(dialog).getByRole('button', { name: 'Stop all AI' }));
-    await waitFor(() => expect(api.callsTo('POST', '/api/plt/v1/ai/kill-switch')).toHaveLength(1));
+    await waitFor(() => {
+      expect(api.callsTo('POST', '/api/plt/v1/ai/kill-switch')).toHaveLength(1);
+    });
     expect(api.callsTo('POST', '/api/plt/v1/ai/kill-switch')[0]?.body).toEqual({
       action: 'Activate',
       scope: 'GLOBAL',

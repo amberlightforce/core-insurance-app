@@ -19,6 +19,9 @@
         "note": "sample"
       },
       "legacyKey": "sample",
+      "validFrom": "2026-10-07",
+      "validTo": "2026-10-07",
+      "reason": "sample",
       "deepLink": "https://contracts.invalid/sample"
     },
     "mig.Xref.register": {
@@ -85,19 +88,49 @@
     "ArchiveSubjectExportResponse": {
       "perItemOutcomes": "unspecified"
     },
-    "BatchGetResponse": {
-      "status": "unspecified",
-      "outcomes": "unspecified"
+    "BatchApproveRequest": {
+      "batchId": "0192a676-5ab6-7f1d-8911-ae31ca92f63b",
+      "decision": "APPROVE",
+      "comment": "sample"
+    },
+    "BatchCreateRequest": {
+      "name": "sample",
+      "items": [
+        {
+          "module": "sample",
+          "objectType": "sample",
+          "legacyId": "sample",
+          "payload": "unspecified"
+        }
+      ]
+    },
+    "BatchItemInput": {
+      "module": "sample",
+      "objectType": "sample",
+      "legacyId": "sample",
+      "payload": "unspecified"
     },
     "BatchOutcomesItem": {
-      "status": "unspecified",
-      "outcomes": "unspecified"
+      "seq": 1,
+      "module": "sample",
+      "objectType": "sample",
+      "legacyId": "sample",
+      "outcome": "PENDING",
+      "coreId": "0192a656-0cf6-739b-8ed8-24f54b7b65fd",
+      "errorCode": "sample",
+      "message": "sample"
     },
     "BatchOutcomesPage": {
       "items": [
         {
-          "status": "unspecified",
-          "outcomes": "unspecified"
+          "seq": 1,
+          "module": "sample",
+          "objectType": "sample",
+          "legacyId": "sample",
+          "outcome": "PENDING",
+          "coreId": "0192fccc-728e-790a-8c2c-7bb4a35b9a0e",
+          "errorCode": "sample",
+          "message": "sample"
         }
       ],
       "nextCursor": "sample",
@@ -106,10 +139,6 @@
     "BatchPauseRequest": {
       "batchId": "019247b4-aca9-7c30-8791-fc4eafa1183b"
     },
-    "BatchPauseResponse": {
-      "status": "unspecified",
-      "outcomes": "unspecified"
-    },
     "BatchRedriveRequest": {
       "batchId": "019254da-c18d-7d73-87f8-a47262a76aaf"
     },
@@ -117,26 +146,58 @@
       "status": "unspecified",
       "outcomes": "unspecified"
     },
+    "BatchResponse": {
+      "batch": {
+        "batchId": "01926a42-9422-7c6a-808b-aaa47911903a",
+        "name": "sample",
+        "status": "DRAFT",
+        "baselineHash": "sample",
+        "contentHash": "sample",
+        "dryRunDone": true,
+        "startedBy": "sample",
+        "approvalRequestId": "019295fb-1b58-7da1-819d-18682c029b2d",
+        "itemCount": 1,
+        "counts": {
+          "sample": 1
+        }
+      },
+      "outcomes": [
+        {
+          "seq": 1,
+          "module": "sample",
+          "objectType": "sample",
+          "legacyId": "sample",
+          "outcome": "PENDING",
+          "coreId": "0192aba9-dd1b-72f0-8ff9-c3081eb358a1",
+          "errorCode": "sample",
+          "message": "sample"
+        }
+      ]
+    },
     "BatchResumeRequest": {
       "batchId": "019201d5-f594-74db-8515-8650896f598b"
     },
-    "BatchResumeResponse": {
-      "status": "unspecified",
-      "outcomes": "unspecified"
-    },
     "BatchReverseRequest": {
-      "batchId": "01928d2a-9c8e-79f1-8ce5-70f7debe64ee"
-    },
-    "BatchReverseResponse": {
-      "status": "unspecified",
-      "outcomes": "unspecified"
+      "batchId": "01928d2a-9c8e-79f1-8ce5-70f7debe64ee",
+      "dryRun": true
     },
     "BatchStartRequest": {
-      "batchId": "0192dea9-fe42-7c53-8e24-b7cca8c8aa04"
+      "batchId": "0192dea9-fe42-7c53-8e24-b7cca8c8aa04",
+      "dryRun": true
     },
-    "BatchStartResponse": {
-      "status": "unspecified",
-      "outcomes": "unspecified"
+    "BatchView": {
+      "batchId": "0192a6fc-3f91-76e7-85d8-6fa7b837bd7f",
+      "name": "sample",
+      "status": "DRAFT",
+      "baselineHash": "sample",
+      "contentHash": "sample",
+      "dryRunDone": true,
+      "startedBy": "sample",
+      "approvalRequestId": "01929d18-ed41-763d-857d-c7b0485568c5",
+      "itemCount": 1,
+      "counts": {
+        "sample": 1
+      }
     },
     "EnquiryGetResponse": {
       "summaryMasterMarks": "unspecified",
@@ -150,18 +211,24 @@
       "passFailPerContractElement": "unspecified"
     },
     "RoutingOverrideRequest": {
-      "object": "unspecified",
-      "targetState": "unspecified",
-      "reason": "unspecified",
-      "until": "unspecified"
+      "objectType": "sample",
+      "key": "sample",
+      "masterState": "NONE",
+      "from": "2026-10-07",
+      "to": "2026-10-07",
+      "reason": "sample"
     },
     "RoutingOverrideResponse": {
-      "route": "unspecified",
-      "approvalRef": "unspecified"
+      "masterState": "NONE",
+      "routeId": "01922965-a261-76f4-8fb5-2a178080e045",
+      "validFrom": "2026-10-07",
+      "validTo": "2026-10-07",
+      "reason": "sample"
     },
     "RoutingResolveRequest": {
       "objectType": "SAMPLE_CODE",
-      "key": "sample"
+      "key": "sample",
+      "date": "2026-10-07"
     },
     "RoutingResolveResponse": {
       "masterState": "LegacyMaster",
@@ -170,15 +237,32 @@
         "note": "sample"
       },
       "legacyKey": "sample",
+      "validFrom": "2026-10-07",
+      "validTo": "2026-10-07",
+      "reason": "sample",
       "deepLink": "https://contracts.invalid/sample"
     },
     "XrefListItem": {
-      "page": "unspecified"
+      "xrefId": "0192b4e4-42aa-77e2-82e3-a37def07dfd2",
+      "source": "sample",
+      "objectType": "sample",
+      "legacyKey": "sample",
+      "coreId": "019252d9-b4b7-779c-84e1-a09f3c7f7fd4",
+      "batchId": "01922c2f-8c5d-7d81-861b-9330f15b3fde",
+      "origin": "sample",
+      "status": "sample"
     },
     "XrefListPage": {
       "items": [
         {
-          "page": "unspecified"
+          "xrefId": "019209d9-f388-7f5c-8f82-ea9f3755c87f",
+          "source": "sample",
+          "objectType": "sample",
+          "legacyKey": "sample",
+          "coreId": "0192c9b3-d33f-7ec5-8921-b9863bf69bf4",
+          "batchId": "0192ef83-fe32-7cc7-8abc-baafba7cf38d",
+          "origin": "sample",
+          "status": "sample"
         }
       ],
       "nextCursor": "sample",

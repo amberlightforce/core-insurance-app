@@ -1,5 +1,8 @@
 using CoreIns.Modules.Claims.Authority;
 using CoreIns.Modules.Claims.Commands;
+using CoreIns.Modules.Claims.Commands.FriendlySettlement;
+using CoreIns.Modules.Claims.Api;
+using CoreIns.Modules.Claims.Commands.Recoveries;
 using CoreIns.Modules.Claims.Contracts;
 using CoreIns.Modules.Claims.Contracts.Api;
 using CoreIns.Modules.Billing.Contracts.Events;
@@ -52,6 +55,7 @@ public static class ClaimsModule
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.claim, {Schema}.exposure, {Schema}.claimant, {Schema}.incident TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.dsar_restriction TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.fnol_snapshot TO {appRole}",
 
                 // Claim financials (SL2-CLM-MONEY, D-ARC-34): the ledger lines are insert-only; the set header, line flags,
@@ -75,6 +79,7 @@ public static class ClaimsModule
 
         services.AddOptions<ClaimsOptions>().Bind(configuration.GetSection(ClaimsOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
         services.AddModuleDbContext<ClaimsDbContext>(Schema);
+        services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Claims.Services.Dsar.ClaimsDsarParticipant>();
 
         services.AddScoped<ClaimProtection>();
         services.AddScoped<ClaimReader>();
@@ -86,7 +91,10 @@ public static class ClaimsModule
         services.AddScoped<FinancialsReader>();
         services.AddScoped<SetLifecycle>();
         services.AddScoped<IClaimFinancialEngine, ClaimFinancialEngine>();
-        services.TryAddScoped<IClaimFinancialEvidenceSource, UnavailableClaimFinancialEvidenceSource>();
+        services.TryAddScoped<IClaimFinancialEvidenceSource, ChainedClaimFinancialEvidenceSource>();
+        services.AddScoped<IClaimFinancialEvidenceProvider, FsEvidenceProvider>();
+        services.AddScoped<RecoveryCashBuffer>();
+        services.AddScoped<IClaimFinancialEvidenceProvider, RecoveryEvidenceSource>();
         services.TryAddScoped<IClaimFinancialGuard, DerivedClaimFinancials>();
 
         services.AddScoped<IValidator<BuildTransactionSet>, BuildTransactionSetValidator>();
@@ -139,6 +147,44 @@ public static class ClaimsModule
         services.AddScoped<IValidator<CreateExposure>, CreateExposureValidator>();
         services.AddCommandAuditor<CreateExposure, ExposureCreateResponse, CreateExposureAuditor>();
         services.AddCommand<CreateExposure, ExposureCreateResponse, CreateExposureHandler>(CommandDescriptor.For("clm.Exposure.create") with { SupportsDryRun = true });
+
+        // Friendly Settlement case (SL4-CLM-FS-CASE, REQ-CLM-155..158): capability-gated, SPI-backed; the statement WP adds its own commands.
+        services.AddScoped<FsGate>();
+        services.AddScoped<FsCaseReader>();
+        services.AddScoped<IValidator<EvaluateFriendlySettlement>, EvaluateFriendlySettlementValidator>();
+        services.AddCommandAuditor<EvaluateFriendlySettlement, FsEvaluateResponse, EvaluateFriendlySettlementAuditor>();
+        services.AddCommand<EvaluateFriendlySettlement, FsEvaluateResponse, EvaluateFriendlySettlementHandler>(CommandDescriptor.For("clm.FriendlySettlement.evaluate"));
+        services.AddScoped<IValidator<OpenOwnSettlement>, OpenOwnSettlementValidator>();
+        services.AddCommandAuditor<OpenOwnSettlement, FsOpenOwnSettlementResponse, OpenOwnSettlementAuditor>();
+        services.AddCommand<OpenOwnSettlement, FsOpenOwnSettlementResponse, OpenOwnSettlementHandler>(CommandDescriptor.For("clm.FriendlySettlement.openOwnSettlement"));
+        services.AddScoped<IValidator<SubmitFriendlySettlement>, SubmitFriendlySettlementValidator>();
+        services.AddCommandAuditor<SubmitFriendlySettlement, FsSubmitResponse, SubmitFriendlySettlementAuditor>();
+        services.AddCommand<SubmitFriendlySettlement, FsSubmitResponse, SubmitFriendlySettlementHandler>(CommandDescriptor.For("clm.FriendlySettlement.submit"));
+        // Inbound clearing notification (dev endpoint only in slice 4); idempotent on the clearing reference, so no idempotency key.
+        services.AddCommandAuditor<ReceiveFsNotification, FsNotificationReceived, ReceiveFsNotificationAuditor>();
+        services.AddCommand<ReceiveFsNotification, FsNotificationReceived, ReceiveFsNotificationHandler>(
+            CommandDescriptor.For("clm.FriendlySettlement.receiveNotification") with { RequiresIdempotencyKey = false, Idempotent = false });
+        // Recoveries (SL4-CLM-RECOVERY-OPS): cases, milestones, BIL demand, write-off; cash only from BIL evidence.
+        services.AddScoped<RecoveryReader>();
+        services.AddScoped<IValidator<CreateRecovery>, CreateRecoveryValidator>();
+        services.AddCommandAuditor<CreateRecovery, RecoveryCreateResponse, CreateRecoveryAuditor>();
+        services.AddCommand<CreateRecovery, RecoveryCreateResponse, CreateRecoveryHandler>(CommandDescriptor.For("clm.Recovery.create") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<RecordRecoveryMilestone>, RecordRecoveryMilestoneValidator>();
+        services.AddCommandAuditor<RecordRecoveryMilestone, RecoveryRecordMilestoneResponse, RecordRecoveryMilestoneAuditor>();
+        services.AddCommand<RecordRecoveryMilestone, RecoveryRecordMilestoneResponse, RecordRecoveryMilestoneHandler>(
+            CommandDescriptor.For("clm.Recovery.recordMilestone") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<DemandRecovery>, DemandRecoveryValidator>();
+        services.AddCommandAuditor<DemandRecovery, RecoveryDemandResponse, DemandRecoveryAuditor>();
+        services.AddCommand<DemandRecovery, RecoveryDemandResponse, DemandRecoveryHandler>(CommandDescriptor.For("clm.Recovery.demand") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<WriteOffRecovery>, WriteOffRecoveryValidator>();
+        services.AddCommandAuditor<WriteOffRecovery, RecoveryWriteOffResponse, WriteOffRecoveryAuditor>();
+        services.AddCommand<WriteOffRecovery, RecoveryWriteOffResponse, WriteOffRecoveryHandler>(CommandDescriptor.For("clm.Recovery.writeOff") with { SupportsDryRun = true });
+        services.AddEventHandler<CashAllocatedV1, CashAllocatedHandler>(EventDescriptor.From(CashAllocatedV1.Descriptor), CashAllocatedHandler.Name, ModuleCode.CLM);
+
+        // Liability facts (D-SL4-17).
+        services.AddScoped<IValidator<UpdateClaim>, UpdateClaimValidator>();
+        services.AddCommandAuditor<UpdateClaim, ClaimUpdateResponse, UpdateClaimAuditor>();
+        services.AddCommand<UpdateClaim, ClaimUpdateResponse, UpdateClaimHandler>(CommandDescriptor.For("clm.Claim.update") with { SupportsDryRun = true });
 
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IClaimsFnolService, ClaimsFnolService>();
@@ -193,6 +239,14 @@ public static class ClaimsModule
             .Describe("Το νέο στιγμιότυπο δεν είναι πλέον ο διάδοχος του στιγμιοτύπου της ζημίας· φορτώστε ξανά τη ζημία και αποφασίστε με το τρέχον.", "The new snapshot is no longer the successor of the claim's snapshot; reload the claim and decide against the current one."),
         ErrorDefinition.For(ModuleCode.CLM, "COVERAGE-IN-QUESTION", 422, "Η κάλυψη της έκθεσης αμφισβητείται", "The exposure's cover is in question")
             .Describe("Το νέο στιγμιότυπο που υιοθετήθηκε δεν καλύπτει την έκθεση· δεν επιτρέπονται νέες πληρωμές μέχρι απόφαση κάλυψης.", "The adopted snapshot no longer covers the exposure; no new payments until a coverage decision."),
+        ErrorDefinition.For(ModuleCode.CLM, "FS-DISABLED", 422, "Ο Φιλικός Διακανονισμός δεν είναι διαθέσιμος", "Friendly Settlement is not available")
+            .Describe("Η δυνατότητα είναι ανενεργή για τη δικαιοδοσία ή δεν υπάρχει προσαρμογέας εκκαθάρισης.", "The capability is off for the jurisdiction or no clearing adapter is bound."),
+        ErrorDefinition.For(ModuleCode.CLM, "RECOVERY-STATE", 422, "Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση της ανάκτησης", "The action is not allowed in the recovery state")
+            .Describe("Δείτε το διάγραμμα καταστάσεων της ανάκτησης (Ανοιχτή, Αξιωθείσα, Αμφισβητούμενη, Συμφωνημένη, Κλειστή).", "See the recovery state model (Open, Demanded, Disputed, Agreed, Closed, Written off)."),
+        ErrorDefinition.For(ModuleCode.CLM, "ALLOCATION", 422, "Μη έγκυρη κατανομή ανάκτησης", "The recovery allocation is invalid")
+            .Describe("Η κατανομή πρέπει να αθροίζει στο ποσό και να αναφέρεται σε εκθέσεις της ζημίας.", "The allocation must sum to the amount and name exposures of the claim."),
+        ErrorDefinition.For(ModuleCode.CLM, "MTPL-CLOCKS-REQUIRED", 422, "Οι νόμιμες προθεσμίες ΑΠΟ δεν παρακολουθούνται", "MTPL statutory clocks are not tracked")
+            .Describe("Στην παραγωγή δεν δημιουργούνται εκθέσεις αστικής ευθύνης τρίτων μέχρι να υλοποιηθούν οι προθεσμίες.", "Production does not create third-party MTPL exposures until the statutory clocks exist."),
         ErrorDefinition.For(ModuleCode.CLM, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

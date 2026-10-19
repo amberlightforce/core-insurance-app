@@ -41,6 +41,7 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        DsarRestrictionModel.Configure(modelBuilder);
         ReferenceData(modelBuilder);
         Intake(modelBuilder);
         JournalTables(modelBuilder);

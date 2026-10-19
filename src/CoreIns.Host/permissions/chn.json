@@ -2,6 +2,10 @@
   "Platform": {
     "Permissions": {
       "Grants": {
+        "chn.Agent.mcp": [ "Customer.Portal", "Staff.Underwriter", "Platform.Admin" ],
+        "chn.Ticket.get": [ "Customer.Portal", "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "chn.Ticket.approve": [ "Customer.Portal", "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "chn.Ticket.reject": [ "Customer.Portal", "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "chn.Withdrawal.declare": [ "Customer.Portal", "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "chn.Withdrawal.confirm": [ "Customer.Portal", "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "chn.Withdrawal.close": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],

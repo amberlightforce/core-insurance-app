@@ -450,6 +450,27 @@ internal sealed class PackRollbackExceptionRow
     public int RecordVersion { get; set; } = 1;
 }
 
+/// <summary><c>pol.dsar_restriction</c>: a record class of a data subject restricted by a DSAR (D-SL6-07); one row per (subject, class).</summary>
+internal sealed class DsarRestrictionRow
+{
+    public Guid RestrictionId { get; set; }
+
+    public PartyId PartyId { get; set; }
+
+    public string RecordClass { get; set; } = string.Empty;
+
+    public string LegalBasis { get; set; } = string.Empty;
+
+    /// <summary>ISO date or UNSET_F404.</summary>
+    public string RetentionEnd { get; set; } = string.Empty;
+
+    public string Reason { get; set; } = string.Empty;
+
+    public Instant CreatedAt { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+}
+
 /// <summary><c>pol.oos_correction</c>: one out-of-sequence reverse-and-reapply (SL6-POL-OOS): what it reversed and re-applied, how it was booked.</summary>
 internal sealed class OosCorrectionRow
 {
@@ -486,6 +507,38 @@ internal sealed class OosCorrectionRow
     public decimal NetPremium { get; set; }
 
     public Instant CreatedAt { get; set; }
+}
+
+/// <summary>
+/// A statutory withdrawal or objection that voided a term (SL6-POL-WITHDRAW, REQ-POL-307/308). Unique per policy and channel
+/// reference: that is the exactly-once key, and <c>Result</c> is the first response, returned verbatim on a replay.
+/// </summary>
+internal sealed class WithdrawalRow
+{
+    public Guid WithdrawalId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public PolicyId PolicyId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    public JobId JobId { get; set; }
+
+    /// <summary>The caller's channel reference (CHN withdrawal id, message id).</summary>
+    public string ChannelRef { get; set; } = string.Empty;
+
+    /// <summary>WITHDRAWAL or OBJECTION.</summary>
+    public string Right { get; set; } = string.Empty;
+
+    public Instant ReceivedAt { get; set; }
+
+    public Instant RecordedAt { get; set; }
+
+    public string Actor { get; set; } = string.Empty;
+
+    /// <summary>The first <c>WithdrawalSubmitResponse</c> as JSON.</summary>
+    public string Result { get; set; } = string.Empty;
 }
 
 /// <summary>
