@@ -1,4 +1,5 @@
 using CoreIns.Modules.Market.Contracts;
+using CoreIns.Modules.Policy.Commands.Change.Oos;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Contracts.Events;
@@ -45,6 +46,9 @@ internal sealed class ChangeBindService(
     IEventPublisher events,
     ChangeContextLoader loader,
     ChangePricer pricer,
+    ChangeQuoteService quotes,
+    OosPlanner oosPlanner,
+    OosApplier oos,
     Dependency<IMarketConfigurationService> marketConfiguration,
     IPermissionEvaluator permissions,
     IOptions<PolicyOptions> options,
@@ -128,7 +132,7 @@ internal sealed class ChangeBindService(
             return change.Error!;
         }
 
-        var (history, baseSegment, baseTree, engine, state) = change.Value;
+        var (history, baseSegment, baseTree, engine, state, _) = change.Value;
 
         // The effective-date limits again, at the record time and for the binder's roles (REQ-POL-008, -135).
         var outside = ChangeLimits.Check(changeOptions.Value, context.Roles, t, history.Term, job.EffectiveAt, zone);
@@ -141,7 +145,22 @@ internal sealed class ChangeBindService(
         var currency = Currency.FromCode(job.Currency);
         var transactionId = PolicyTransactionId.New();
         var rates = ChangeQuoteService.Rates(JobSupport.FromJson<List<ChargeLine>>(version.Charges));
-        var priced = await pricer.PriceAsync(engine.Engine, state, rates, job.EffectiveAt, transactionId.Value.ToString(), job.Jurisdiction, zone, cancellationToken).ConfigureAwait(false);
+        // Out of sequence (SL6-POL-OOS): the later changes are reversed and re-applied after this one; the correction is the net difference.
+        OosPlan? plan = null;
+        Result<ChangePricing> priced;
+        if (change.Value.OutOfSequence)
+        {
+            var planned = await oosPlanner.PlanAsync(
+                job, change.Value, tree, rates, (t2, at) => quotes.RateTreeAsync(job, version, t2, at, cancellationToken), OosMode.Net, job.Jurisdiction, zone, cancellationToken)
+                .ConfigureAwait(false);
+            plan = planned.IsSuccess ? planned.Value.Plan : null;
+            priced = planned.IsFailure ? planned.Error! : planned.Value.Pricing;
+        }
+        else
+        {
+            priced = await pricer.PriceAsync(engine.Engine, state, rates, job.EffectiveAt, transactionId.Value.ToString(), job.Jurisdiction, zone, cancellationToken).ConfigureAwait(false);
+        }
+
         if (priced.IsFailure)
         {
             return priced.Error!;
@@ -157,6 +176,27 @@ internal sealed class ChangeBindService(
         var eff = job.EffectiveAt;
         var actor = context.Actor.ToString();
         var today = t.ToBusinessDate(zone);
+        var oosSetId = Guid.NewGuid();
+        var moved = false;
+        OosLineInfo? oosLine = null;
+        List<SegmentRow> closedLater = [];
+        if (plan is not null)
+        {
+            var booking = await oos.BookingDateAsync(today, cancellationToken).ConfigureAwait(false);
+            if (booking.IsFailure)
+            {
+                return booking.Error!;
+            }
+
+            (today, moved) = booking.Value;
+            oosLine = new OosLineInfo(plan.Reversed[0].Source, oosSetId);
+            closedLater = await oos.LaterSegmentsAsync(oldTerm.TermId, eff, cancellationToken).ConfigureAwait(false);
+            foreach (var later in closedLater)
+            {
+                later.RecordedTo = t;
+            }
+        }
+
         var sequence = (await db.Transactions.Where(x => x.PolicyId == policyId).MaxAsync(x => (int?)x.Sequence, cancellationToken).ConfigureAwait(false) ?? 0) + 1;
         var diff = RiskDiffs.Compute(baseTree, tree, changeOptions.Value.EditableVehicleFields);
 
@@ -184,13 +224,20 @@ internal sealed class ChangeBindService(
             TransactionId = transactionId, PolicyId = policyId, TermId = oldTerm.TermId, JobId = job.JobId, LegalEntityId = legalEntity,
             Kind = Codes.Of(PolicyTransactionKind.Change), Sequence = sequence, EffectiveAt = eff, RecordedAt = t,
             ConfigurationHash = version.ConfigurationHash!, ArtefactHash = job.ArtefactHash, RatingArtefactHash = job.RatingArtefactHash,
-            ResolutionHash = job.ResolutionHash, WorksheetId = version.WorksheetId, Intent = ChangeJson.Intent(eff, rates, tree),
+            ResolutionHash = job.ResolutionHash, WorksheetId = version.WorksheetId,
+            Intent = plan is null
+                ? ChangeJson.Intent(eff, rates, tree)
+                : OosIntents.Write(eff, rates, tree, oosSetId, plan.Chain.Select(e => e.Source == job.JobId.Value ? e with { Source = transactionId.Value } : e)),
             Premium = pricing.Premium.Amount, Taxes = pricing.Taxes.Amount, Total = pricing.Total.Amount, Currency = job.Currency, Actor = actor,
             CorrelationId = context.CorrelationId.ToString(), Origin = context.Origin.ToCode(),
         });
 
         // Segments: the part before the change is carried over unchanged (same content, new row), the remainder holds the new risk.
-        if (baseSegment.ValidFrom < eff)
+        if (plan is not null)
+        {
+            oos.AddSegments(plan, baseSegment, closedLater, transactionId, eff, t, version.WorksheetId, job.JobId.Value);
+        }
+        else if (baseSegment.ValidFrom < eff)
         {
             db.Segments.Add(new SegmentRow
             {
@@ -201,12 +248,15 @@ internal sealed class ChangeBindService(
         }
 
         var snapshot = JobSupport.Json(tree);
-        db.Segments.Add(new SegmentRow
+        if (plan is null)
         {
-            SegmentId = SegmentId.New(), TermId = oldTerm.TermId, PolicyId = policyId, TransactionId = transactionId, LegalEntityId = legalEntity,
-            ValidFrom = eff, ValidTo = baseSegment.ValidTo, RecordedFrom = t, SnapshotHash = CanonicalJson.Hash(snapshot).Value, Snapshot = snapshot,
-            WorksheetId = version.WorksheetId,
-        });
+            db.Segments.Add(new SegmentRow
+            {
+                SegmentId = SegmentId.New(), TermId = oldTerm.TermId, PolicyId = policyId, TransactionId = transactionId, LegalEntityId = legalEntity,
+                ValidFrom = eff, ValidTo = baseSegment.ValidTo, RecordedFrom = t, SnapshotHash = CanonicalJson.Hash(snapshot).Value, Snapshot = snapshot,
+                WorksheetId = version.WorksheetId,
+            });
+        }
 
         // NET charge deltas: one complete set per transaction (D4: set_id = transaction id); none for a no-premium change.
         var newRates = pricing.NewRates.ToDictionary(r => r.Key);
@@ -219,7 +269,7 @@ internal sealed class ChangeBindService(
             var kind = ChangeJson.Kind(delta.TransactionKind);
             lines.Add(AddCharge(
                 transactionId, oldTerm, policyId, legalEntity, today, t, index, total, delta.Key.ElementLocator, delta.Key.CoverageCode, delta.Key.ChargeType, delta.ChargeCategory,
-                newRates.TryGetValue(delta.Key, out var rate) ? rate.AnnualRate : 0m, delta.Amount, delta, kind, null, null, null, null, null, currency));
+                newRates.TryGetValue(delta.Key, out var rate) ? rate.AnnualRate : 0m, delta.Amount, delta, kind, null, null, null, null, null, currency, oosLine));
         }
 
         foreach (var tax in pricing.TaxLines)
@@ -228,7 +278,12 @@ internal sealed class ChangeBindService(
             var source = pricing.Deltas.First(d => d.Key == tax.SourceKey);
             lines.Add(AddCharge(
                 transactionId, oldTerm, policyId, legalEntity, today, t, index, total, tax.SourceKey.ElementLocator, tax.CoverageCode, tax.ChargeType, tax.ChargeCategory,
-                tax.Rate, tax.Amount, source, ChangeJson.Kind(source.TransactionKind), tax.Action, tax.RuleId, tax.RuleVersion, tax.LegalStatus, tax.Provisional, currency));
+                tax.Rate, tax.Amount, source, ChangeJson.Kind(source.TransactionKind), tax.Action, tax.RuleId, tax.RuleVersion, tax.LegalStatus, tax.Provisional, currency, oosLine));
+        }
+
+        if (plan is not null)
+        {
+            oos.Record(plan, closedLater, oldTerm, policyId, job.JobId, transactionId, oosSetId, plan.Reversed[0].Source, today, moved, pricing.Premium.Amount, t, transactionId.Value.ToString());
         }
 
         events.Publish(new OutgoingEvent(
@@ -287,7 +342,7 @@ internal sealed class ChangeBindService(
     private ChargeLine AddCharge(
         PolicyTransactionId transactionId, PolicyTermRow term, PolicyId policyId, LegalEntityId legalEntity, BusinessDate today, Instant t, int index, int total,
         string element, string coverage, string chargeType, string category, decimal annualRate, decimal amount, ServicingDelta source, TaxTransactionKind kind,
-        TreatmentActionCode? action, string? ruleId, string? ruleVersion, string? legalStatus, bool? provisional, Currency currency)
+        TreatmentActionCode? action, string? ruleId, string? ruleVersion, string? legalStatus, bool? provisional, Currency currency, OosLineInfo? correction = null)
     {
         var chargeId = ChargeId.New();
         var period = DateRange.Of(new BusinessDate(source.DateFrom), new BusinessDate(source.DateTo));
@@ -308,6 +363,7 @@ internal sealed class ChangeBindService(
                 DeltaKind = DeltaKinds.Net, NetAmount = new Money(amount, currency), ValidPeriod = period, BookingDate = today, TransactionId = transactionId,
                 CorrelationKey = transactionId.Value.ToString(), TaxTreatmentRef = action is { } code ? TreatmentActions.Code(code) : null, LegalStatus = legalStatus, Provisional = provisional,
                 TransactionKind = Enum.Parse<ChargeDeltaEmittedV1.TransactionKindValue>(kind.ToString()), TreatmentRuleId = ruleId, TreatmentRuleVersion = ruleVersion,
+                CorrectionOf = correction?.CorrectionOf, OosSetId = correction?.SetId,
             },
             BusinessKeys.Empty.With("policyId", policyId.Value.ToString()).With("chargeId", chargeId.Value.ToString())
                 .With("policyTermId", term.TermId.Value.ToString()).With("transactionId", transactionId.Value.ToString()))
