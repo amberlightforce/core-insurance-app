@@ -4,33 +4,23 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Withdrawal.submit request. PRD inputs: "policyId, right (WITHDRAWAL, OBJECTION), receivedAt, channelRef"</summary>
+/// <summary>pol.Withdrawal.submit request. PRD inputs: "policyId, right (WITHDRAWAL, OBJECTION), receivedAt, channelRef". The right window is checked from receivedAt, not from the time of the call. Exactly once per (policyId, channelRef): a replay returns the first result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record WithdrawalSubmitRequest
 {
     /// <summary>PRD: "policyId"</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.PolicyId? PolicyId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyId PolicyId { get; init; }
 
-    /// <summary>PRD: "right (WITHDRAWAL, OBJECTION)"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'right'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("right")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Right { get; init; }
+    public required global::CoreIns.Modules.Policy.Contracts.Api.WithdrawalRight Right { get; init; }
 
-    /// <summary>PRD: "receivedAt"</summary>
+    /// <summary>When the customer declared the right (the channel receipt time), PRD: "receivedAt"</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("receivedAt")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Instant? ReceivedAt { get; init; }
+    public required global::CoreIns.SharedKernel.Instant ReceivedAt { get; init; }
 
-    /// <summary>PRD: "channelRef"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Channel reference of the declaration (CHN withdrawal id or message id); no personal data. The exactly-once key with policyId, PRD: "channelRef"</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("channelRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ChannelRef { get; init; }
+    public required string ChannelRef { get; init; }
 }

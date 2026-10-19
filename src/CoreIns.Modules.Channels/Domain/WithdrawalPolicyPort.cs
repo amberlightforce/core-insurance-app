@@ -75,9 +75,9 @@ internal sealed class PolicyContractWithdrawalPort(IServiceProvider services) : 
         var request = new WithdrawalSubmitRequest
         {
             PolicyId = policyId,
-            Right = JsonSerializer.SerializeToElement("WITHDRAWAL"),
+            Right = WithdrawalRight.Withdrawal,
             ReceivedAt = receivedAt,
-            ChannelRef = JsonSerializer.SerializeToElement(channelRef),
+            ChannelRef = channelRef,
         };
         try
         {

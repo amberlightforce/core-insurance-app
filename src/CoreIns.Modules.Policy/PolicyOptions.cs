@@ -39,6 +39,14 @@ internal sealed class PolicyOptions
     [Range(1, 120)]
     public int LockWaitSeconds { get; set; } = 5;
 
+    /// <summary>
+    /// Days after the contract was written (bind date) during which the statutory right of withdrawal or objection can be exercised
+    /// (D-SL6-06; the last day ends 23:59:59 in the zone). ILLUSTRATIVE default 14 until PRD-05/PRD-17 fix the number per pack.
+    /// TODO(hardening): serve it from the MKT pack configuration (<c>withdrawal.days</c>) with its legal status.
+    /// </summary>
+    [Range(1, 365)]
+    public int WithdrawalDays { get; set; } = 14;
+
     /// <summary>The policy write-lock wait.</summary>
     public TimeSpan LockWait => TimeSpan.FromSeconds(LockWaitSeconds);
 

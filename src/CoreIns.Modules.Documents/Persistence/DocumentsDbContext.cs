@@ -22,6 +22,7 @@ internal sealed class DocumentsDbContext(DbContextOptions<DocumentsDbContext> op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.MapDsarRestrictions();
 
         modelBuilder.Entity<DocumentRow>(entity =>
         {
