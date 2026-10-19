@@ -40,22 +40,40 @@ internal sealed class RegisterReceivableHandler(BillingDbContext db, RequestCont
 {
     public async Task<Result<ReceivableRegisterResponse>> HandleAsync(RegisterReceivable command, CancellationToken ct)
     {
-        if (command.Caller != ModuleCode.CLM) return DomainError.Of(ModuleCode.BIL, "NOT-PERMITTED", "Only a registered CLM command may register receivables.");
+        if (command.Caller != ModuleCode.CLM)
+        {
+            return DomainError.Of(ModuleCode.BIL, "NOT-PERMITTED", "Only a registered CLM command may register receivables.");
+        }
+
         var r = command.Request;
         var isFs = r.SourceType == ReceivableSourceType.FsClearing;
         if ((isFs && (r.Purpose != ReceivablePurpose.FsNet || string.IsNullOrWhiteSpace(r.StatementRef) || r.ClaimId is not null || r.RecoveryId is not null))
             || (!isFs && (r.Purpose is not (ReceivablePurpose.Salvage or ReceivablePurpose.Subrogation) || r.ClaimId is null || r.RecoveryId is null || r.StatementRef is not null)))
+        {
             return DomainError.Of(ModuleCode.BIL, "SOURCE", "The receivable purpose and evidence do not match its source.");
-        if (environment.IsProduction()) return DomainError.Of(ModuleCode.BIL, isFs ? "SOURCE" : "FISCAL-TREATMENT-OPEN", "Claim fiscal treatment and FS stub clearing are unavailable in Production.");
+        }
+
+        if (environment.IsProduction())
+        {
+            return DomainError.Of(ModuleCode.BIL, isFs ? "SOURCE" : "FISCAL-TREATMENT-OPEN", "Claim fiscal treatment and FS stub clearing are unavailable in Production.");
+        }
+
         var entity = entities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("No legal entity."));
         var source = isFs ? "FS_CLEARING" : "CLM_CLAIM_PAYMENT";
-        if (!options.Value.Sources.TryGetValue(source, out var registered) || registered.CallingModule != "CLM" || registered.Direction is not ("in" or "both")) return DomainError.Of(ModuleCode.BIL, "SOURCE", "Incoming source is absent from the source register.");
+        if (!options.Value.Sources.TryGetValue(source, out var registered) || registered.CallingModule != "CLM" || registered.Direction is not ("in" or "both"))
+        {
+            return DomainError.Of(ModuleCode.BIL, "SOURCE", "Incoming source is absent from the source register.");
+        }
+
         var purpose = isFs ? "FS_NET" : r.Purpose == ReceivablePurpose.Salvage ? "SALVAGE" : "SUBROGATION";
         // Serialize account creation and duplicate detection for this payer, within the ambient transaction.
         var lockKey = entity.Value.ToString("D") + ":" + r.CounterpartyPartyId.Value.ToString("D");
         await db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({lockKey}, 0))", ct).ConfigureAwait(false);
         if (await db.Receivables.AnyAsync(x => x.LegalEntityId == entity && x.SourceType == source && x.SourceId == r.SourceId && x.Purpose == purpose && x.CounterpartyPartyId == r.CounterpartyPartyId && x.Amount == r.Amount.Amount, ct).ConfigureAwait(false))
+        {
             return DomainError.Of(ModuleCode.BIL, "DUPLICATE", "This receivable business key is already registered.");
+        }
+
         var type = isFs ? "CLEARING" : "CLAIM_RECOVERY";
         var account = await db.Accounts.SingleOrDefaultAsync(a => a.LegalEntityId == entity && a.PayerPartyId == r.CounterpartyPartyId && a.Currency == "EUR" && a.AccountType == type && a.Status == "ACTIVE", ct).ConfigureAwait(false);
         if (account is null)
@@ -73,7 +91,11 @@ internal sealed class RegisterReceivableHandler(BillingDbContext db, RequestCont
         };
         row.PaymentReference = ReceivableReference.Create(row.ReceivableId);
         var rule = await ledger.RuleAsync(ledger.Key("RECEIVABLE_REGISTERED", RuleQualifiers.Any, source), ct).ConfigureAwait(false);
-        if (rule.IsFailure) return rule.Error!;
+        if (rule.IsFailure)
+        {
+            return rule.Error!;
+        }
+
         db.Receivables.Add(row);
         ledger.Post(new EntrySpec("RECEIVABLE_REGISTERED", account.BillingAccountId,
             [new PostingLeg(rule.Value, r.Amount, new LineDimensions { BillingAccountId = account.BillingAccountId, SourceType = source, SourceId = row.SourceId, ClaimId = row.ClaimId, RecoveryId = row.RecoveryId, StatementRef = row.StatementRef, CounterpartyPartyId = row.CounterpartyPartyId })],

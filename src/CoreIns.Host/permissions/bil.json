@@ -43,21 +43,5 @@
         }
       ]
     }
-  },
-  "Billing": {
-    "Sources": {
-      "CLM_CLAIM_PAYMENT": {
-        "CallingModule": "CLM", "Direction": "both", "AllowedMethods": [ "SEPA_CT", "BANK_TRANSFER", "CASHIER" ],
-        "ApprovalEvidenceType": "CLM transaction-set approval for out; CLM recovery demand for in",
-        "LedgerRuleRows": [ "BLR-RECV-CLM", "BLR-COLLECT-CLM", "BLR-DISB-RELEASED-CLAIM" ],
-        "FinancePostingRuleReference": "FIN-V4 claim payment and recovery rules"
-      },
-      "FS_CLEARING": {
-        "CallingModule": "CLM", "Direction": "both", "AllowedMethods": [ "CLEARING" ],
-        "ApprovalEvidenceType": "CLM FS net approval",
-        "LedgerRuleRows": [ "BLR-RECV-FS", "BLR-COLLECT-FS" ],
-        "FinancePostingRuleReference": "FIN-V4 FS clearing by counterparty and statement"
-      }
-    }
   }
 }

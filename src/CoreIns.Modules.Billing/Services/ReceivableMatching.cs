@@ -1,9 +1,9 @@
 using CoreIns.Modules.Billing.Commands;
 using CoreIns.Modules.Billing.Contracts.Api;
-using CoreIns.Modules.Billing.Persistence;
-using CoreIns.Modules.Billing.Domain;
-using CoreIns.Platform.Events;
 using CoreIns.Modules.Billing.Contracts.Events;
+using CoreIns.Modules.Billing.Domain;
+using CoreIns.Modules.Billing.Persistence;
+using CoreIns.Platform.Events;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
@@ -16,9 +16,17 @@ internal sealed class ReceivableMatching(BillingDbContext db, LedgerWriter ledge
 {
     public async Task<Result<ReceivableRow>> ResolveAsync(PaymentTakeRequest r, LegalEntityId entity, CancellationToken ct)
     {
-        if (r.InvoiceId is not null) return DomainError.Of(ModuleCode.BIL, "VALIDATION", "Receivable matching cannot also reference an invoice.");
+        if (r.InvoiceId is not null)
+        {
+            return DomainError.Of(ModuleCode.BIL, "VALIDATION", "Receivable matching cannot also reference an invoice.");
+        }
+
         var reference = r.PaymentReference ?? (r.ReceivableId is null ? r.BankReference : null);
-        if (r.ReceivableId is null && string.IsNullOrWhiteSpace(reference)) return DomainError.Of(ModuleCode.BIL, "VALIDATION", "A receivable id, RF reference or FS statement reference is required.");
+        if (r.ReceivableId is null && string.IsNullOrWhiteSpace(reference))
+        {
+            return DomainError.Of(ModuleCode.BIL, "VALIDATION", "A receivable id, RF reference or FS statement reference is required.");
+        }
+
         var matches = await db.Receivables.Where(x => x.LegalEntityId == entity && x.BillingAccountId == r.BillingAccountId
             && (r.ReceivableId == null || x.ReceivableId == r.ReceivableId)
             && (reference == null || x.PaymentReference == reference || (x.SourceType == "FS_CLEARING" && x.StatementRef == reference)))
@@ -35,14 +43,23 @@ internal sealed class ReceivableMatching(BillingDbContext db, LedgerWriter ledge
     {
         // Lock order agrees with the database allocation guard: receipt, then receivable.
         await db.Database.ExecuteSqlInterpolatedAsync($"SELECT receipt_id FROM bil.receipt WHERE receipt_id = {receipt.ReceiptId.Value} FOR UPDATE", ct).ConfigureAwait(false);
-        await db.Database.ExecuteSqlInterpolatedAsync($"SELECT receivable_id FROM bil.receivable WHERE receivable_id = {row.ReceivableId} FOR UPDATE", ct).ConfigureAwait(false);
+        var lockKey = row.ReceivableId.ToString();
+        await db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock(hashtextextended({lockKey}, 0))", ct).ConfigureAwait(false);
         var paid = await db.ReceivableAllocations.Where(a => a.ReceivableId == row.ReceivableId).SumAsync(a => a.Amount, ct).ConfigureAwait(false);
         var used = await db.ReceivableAllocations.Where(a => a.ReceiptId == receipt.ReceiptId).SumAsync(a => a.Amount, ct).ConfigureAwait(false)
             + await db.Allocations.Where(a => a.ReceiptId == receipt.ReceiptId).SumAsync(a => a.Amount, ct).ConfigureAwait(false);
         var amount = Math.Min(row.Amount - paid, receipt.Amount - used);
-        if (amount <= 0) return 0m;
+        if (amount <= 0)
+        {
+            return 0m;
+        }
+
         var rule = await ledger.RuleAsync(ledger.Key("RECEIVABLE_COLLECTED", RuleQualifiers.Any, row.SourceType), ct).ConfigureAwait(false);
-        if (rule.IsFailure) return rule.Error!;
+        if (rule.IsFailure)
+        {
+            return rule.Error!;
+        }
+
         var allocation = new ReceivableAllocationRow { AllocationId = Guid.CreateVersion7(), LegalEntityId = row.LegalEntityId, ReceiptId = receipt.ReceiptId, ReceivableId = row.ReceivableId, Amount = amount, Currency = row.Currency, AllocatedAt = clock.Now, RuleId = rule.Value.RuleId, Actor = ledger.Actor };
         db.ReceivableAllocations.Add(allocation);
         var money = new Money(amount, Currency.FromCode(row.Currency));

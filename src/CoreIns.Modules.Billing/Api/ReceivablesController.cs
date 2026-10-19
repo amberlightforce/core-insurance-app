@@ -34,10 +34,18 @@ internal sealed class ReceivablesController : ControllerBase
     [Authorize(Policy = "bil.Receivable.list")]
     public async Task<IResult> ListAsync([FromQuery] Guid? billingAccountId, [FromQuery] Guid? counterpartyPartyId, [FromQuery] Guid? claimId, [FromQuery] Guid? recoveryId, [FromQuery] string? statementRef, [FromQuery] string? paymentReference, [FromQuery] string? sourceType, [FromQuery] string? status, [FromQuery] string? cursor, [FromQuery] int? limit, [FromServices] ReceivableReader reader, CancellationToken ct)
     {
-        if (cursor is not null && !Guid.TryParse(cursor, out _)) return HttpResults.Problem(DomainError.Of(ModuleCode.BIL, "VALIDATION", "Invalid cursor."), HttpContext);
+        if (cursor is not null && !Guid.TryParse(cursor, out _))
+        {
+            return HttpResults.Problem(DomainError.Of(ModuleCode.BIL, "VALIDATION", "Invalid cursor."), HttpContext);
+        }
+
         ReceivableSourceType? source = sourceType switch { null => null, "FS_CLEARING" => ReceivableSourceType.FsClearing, "CLM_CLAIM_PAYMENT" => ReceivableSourceType.ClmClaimPayment, _ => null };
         ReceivableStatus? state = status switch { null => null, "OPEN" => ReceivableStatus.Open, "PARTIALLY_PAID" => ReceivableStatus.PartiallyPaid, "PAID" => ReceivableStatus.Paid, "CANCELLED" => ReceivableStatus.Cancelled, _ => null };
-        if ((sourceType is not null && source is null) || (status is not null && state is null)) return HttpResults.Problem(DomainError.Of(ModuleCode.BIL, "VALIDATION", "Invalid source or status filter."), HttpContext);
+        if ((sourceType is not null && source is null) || (status is not null && state is null))
+        {
+            return HttpResults.Problem(DomainError.Of(ModuleCode.BIL, "VALIDATION", "Invalid source or status filter."), HttpContext);
+        }
+
         return Results.Ok(await reader.ListAsync(Entity(), billingAccountId is { } a ? new BillingAccountId(a) : null, counterpartyPartyId is { } p ? new PartyId(p) : null, claimId is { } c ? new ClaimId(c) : null, recoveryId, statementRef, paymentReference, source, state, cursor, limit, ct).ConfigureAwait(false));
     }
 

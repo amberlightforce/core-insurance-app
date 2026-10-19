@@ -43,12 +43,36 @@ internal sealed class ReceivableReader(BillingDbContext db)
     public async Task<ReceivableListPage> ListAsync(LegalEntityId entity, BillingAccountId? account, PartyId? counterparty, ClaimId? claim, Guid? recovery, string? statement, string? reference, ReceivableSourceType? source, ReceivableStatus? status, string? cursor, int? limit, CancellationToken ct)
     {
         var query = db.Receivables.AsNoTracking().Where(r => r.LegalEntityId == entity);
-        if (account is { } a) query = query.Where(r => r.BillingAccountId == a);
-        if (counterparty is { } p) query = query.Where(r => r.CounterpartyPartyId == p);
-        if (claim is { } c) query = query.Where(r => r.ClaimId == c);
-        if (recovery is { } id) query = query.Where(r => r.RecoveryId == id);
-        if (statement is not null) query = query.Where(r => r.StatementRef == statement);
-        if (reference is not null) query = query.Where(r => r.PaymentReference == reference);
+        if (account is { } a)
+        {
+            query = query.Where(r => r.BillingAccountId == a);
+        }
+
+        if (counterparty is { } p)
+        {
+            query = query.Where(r => r.CounterpartyPartyId == p);
+        }
+
+        if (claim is { } c)
+        {
+            query = query.Where(r => r.ClaimId == c);
+        }
+
+        if (recovery is { } id)
+        {
+            query = query.Where(r => r.RecoveryId == id);
+        }
+
+        if (statement is not null)
+        {
+            query = query.Where(r => r.StatementRef == statement);
+        }
+
+        if (reference is not null)
+        {
+            query = query.Where(r => r.PaymentReference == reference);
+        }
+
         if (source is { } s)
         {
             var code = s == ReceivableSourceType.FsClearing ? "FS_CLEARING" : "CLM_CLAIM_PAYMENT";
@@ -66,13 +90,21 @@ internal sealed class ReceivableReader(BillingDbContext db)
         }
         if (cursor is not null)
         {
-            if (!Guid.TryParse(cursor, out var after)) throw new ArgumentException("Invalid receivable cursor.", nameof(cursor));
+            if (!Guid.TryParse(cursor, out var after))
+            {
+                throw new ArgumentException("Invalid receivable cursor.", nameof(cursor));
+            }
+
             query = query.Where(r => r.ReceivableId.CompareTo(after) > 0);
         }
         var size = Math.Clamp(limit ?? 50, 1, 200);
         var rows = await query.OrderBy(r => r.ReceivableId).Take(size + 1).ToListAsync(ct).ConfigureAwait(false);
         var views = new List<ReceivableView>();
-        foreach (var row in rows.Take(size)) views.Add(await ViewAsync(row, ct).ConfigureAwait(false));
+        foreach (var row in rows.Take(size))
+        {
+            views.Add(await ViewAsync(row, ct).ConfigureAwait(false));
+        }
+
         return new ReceivableListPage { Items = views, NextCursor = rows.Count > size ? views[^1].ReceivableId.ToString("D") : null, Limit = size };
     }
 }

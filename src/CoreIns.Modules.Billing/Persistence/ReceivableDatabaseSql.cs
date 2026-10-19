@@ -13,7 +13,9 @@ internal static class ReceivableDatabaseSql
         DECLARE receipt_row bil.receipt; receivable_row bil.receivable; used numeric;
         BEGIN
             SELECT * INTO STRICT receipt_row FROM bil.receipt WHERE receipt_id = NEW.receipt_id FOR UPDATE;
-            SELECT * INTO STRICT receivable_row FROM bil.receivable WHERE receivable_id = NEW.receivable_id FOR UPDATE;
+            -- receivable is append-only (no UPDATE grant, so no row lock): serialise on an advisory lock after the receipt lock.
+            PERFORM pg_advisory_xact_lock(hashtextextended(NEW.receivable_id::text, 0));
+            SELECT * INTO STRICT receivable_row FROM bil.receivable WHERE receivable_id = NEW.receivable_id;
             IF NEW.legal_entity_id <> receipt_row.legal_entity_id OR NEW.legal_entity_id <> receivable_row.legal_entity_id
                OR receipt_row.billing_account_id <> receivable_row.billing_account_id
                OR NEW.currency <> receipt_row.currency OR NEW.currency <> receivable_row.currency THEN
@@ -56,11 +58,11 @@ internal static class ReceivableDatabaseSql
         VALUES ('LA-28','Non-premium receivable','Απαιτήσεις ανακτήσεων ζημιών','ASSET','DEBIT'),
                ('LA-24','Friendly Settlement clearing','Εκκαθάριση φιλικού διακανονισμού','CLEARING','DEBIT')
         ON CONFLICT DO NOTHING;
-        INSERT INTO bil.ledger_rule (rule_id, version, event_type, charge_category, bill_mode, jurisdiction, qualifier, debit_account, credit_account, amount_expression)
-        VALUES ('BLR-RECV-CLM',1,'RECEIVABLE_REGISTERED','*','DIRECT_BILL','*','CLM_CLAIM_PAYMENT','LA-28','LA-17','AMOUNT'),
-               ('BLR-RECV-FS',1,'RECEIVABLE_REGISTERED','*','DIRECT_BILL','*','FS_CLEARING','LA-28','LA-24','AMOUNT'),
-               ('BLR-COLLECT-CLM',1,'RECEIVABLE_COLLECTED','*','DIRECT_BILL','*','CLM_CLAIM_PAYMENT','LA-11','LA-28','AMOUNT'),
-               ('BLR-COLLECT-FS',1,'RECEIVABLE_COLLECTED','*','DIRECT_BILL','*','FS_CLEARING','LA-11','LA-28','AMOUNT');
+        INSERT INTO bil.ledger_rule (rule_id, version, event_type, charge_category, bill_mode, jurisdiction, qualifier, debit_account, credit_account, amount_expression, valid_from, valid_to, source)
+        VALUES ('BLR-RECV-CLM',1,'RECEIVABLE_REGISTERED','*','DIRECT_BILL','*','CLM_CLAIM_PAYMENT','LA-28','LA-17','AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-286; SL4-BIL-RECV'),
+               ('BLR-RECV-FS',1,'RECEIVABLE_REGISTERED','*','DIRECT_BILL','*','FS_CLEARING','LA-28','LA-24','AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-286; SL4-BIL-RECV'),
+               ('BLR-COLLECT-CLM',1,'RECEIVABLE_COLLECTED','*','DIRECT_BILL','*','CLM_CLAIM_PAYMENT','LA-11','LA-28','AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-286; SL4-BIL-RECV'),
+               ('BLR-COLLECT-FS',1,'RECEIVABLE_COLLECTED','*','DIRECT_BILL','*','FS_CLEARING','LA-11','LA-28','AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-286; SL4-BIL-RECV');
         """;
 }
 

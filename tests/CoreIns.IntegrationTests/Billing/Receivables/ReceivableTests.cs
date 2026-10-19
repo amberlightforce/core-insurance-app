@@ -99,7 +99,7 @@ public sealed class ReceivableTests(PostgresFixture database) : IClassFixture<Po
             view.Receivable.OpenAmount.Amount.ShouldBe(50000m); view.Receivable.Status.ShouldBe(ReceivableStatus.PartiallyPaid);
         }
         var payment = await PayAsync(registered, 50020m);
-        payment!["receipt"]!["unallocated"]!["amount"]!.GetValue<string>().ShouldBe("20.00");
+        decimal.Parse(payment!["receipt"]!["unallocated"]!["amount"]!.GetValue<string>(), System.Globalization.CultureInfo.InvariantCulture).ShouldBe(20m);
     }
 
     [Fact]
@@ -156,10 +156,10 @@ public sealed class ReceivableTests(PostgresFixture database) : IClassFixture<Po
     public sealed record ClmRegister(ReceivableRegisterRequest Request) : ICommand<ReceivableRegisterResponse>;
     public sealed class ClmRegisterHandler(IBillingReceivableService billing, RequestContext context) : ICommandHandler<ClmRegister, ReceivableRegisterResponse>
     {
-        public async Task<Result<ReceivableRegisterResponse>> HandleAsync(ClmRegister command, CancellationToken ct)
+        public async Task<Result<ReceivableRegisterResponse>> HandleAsync(ClmRegister command, CancellationToken cancellationToken)
         {
             context.ExecutingCommandModule.ShouldBe(ModuleCode.CLM);
-            try { return await billing.RegisterAsync(command.Request, new CommandOptions(context.IdempotencyKey!.Value), ct); }
+            try { return await billing.RegisterAsync(command.Request, new CommandOptions(context.IdempotencyKey!.Value), cancellationToken); }
             catch (DomainException e) { return e.Error; }
         }
     }

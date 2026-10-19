@@ -76,7 +76,11 @@ internal sealed class TakePaymentHandler(
         if (request.ReceivableId is not null || request.PaymentReference is not null || (account.AccountType == "CLEARING" && request.BankReference is not null))
         {
             var found = await receivables.ResolveAsync(request, legalEntity, cancellationToken).ConfigureAwait(false);
-            if (found.IsFailure) return found.Error!;
+            if (found.IsFailure)
+            {
+                return found.Error!;
+            }
+
             receivable = found.Value;
         }
 
@@ -153,7 +157,11 @@ internal sealed class TakePaymentHandler(
         if (receivable is not null)
         {
             var allocatedReceivable = await receivables.AllocateAsync(receipt, receivable, cancellationToken).ConfigureAwait(false);
-            if (allocatedReceivable.IsFailure) return allocatedReceivable.Error!;
+            if (allocatedReceivable.IsFailure)
+            {
+                return allocatedReceivable.Error!;
+            }
+
             return new PaymentTakeResponse { Receipt = BillingReader.Receipt(receipt, allocatedReceivable.Value), Allocations = [], AllocationOutcome = allocatedReceivable.Value > 0 ? PaymentTakeResponse.AllocationOutcomeValue.Allocated : PaymentTakeResponse.AllocationOutcomeValue.Suspense };
         }
 
