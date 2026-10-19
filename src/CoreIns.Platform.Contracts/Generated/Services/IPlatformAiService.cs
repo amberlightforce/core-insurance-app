@@ -18,7 +18,7 @@ public interface IPlatformAiService
     /// <para>Status: full. Wave W8.</para>
     /// <para>Exposure: ui; consumers: CHN, MKT, PFC, PTY.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
-    /// <para>Errors: PLT-ERR-AI-OFF (422), PLT-ERR-AI-DATA-CLASS (422), PLT-ERR-AI-NOT-REGISTERED (422), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PLT-ERR-AI-DISABLED (503), PLT-ERR-AI-OFF (422), PLT-ERR-AI-DATA-CLASS (422), PLT-ERR-AI-NOT-REGISTERED (422), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.AiInvokeResponse> InvokeAsync(global::CoreIns.Platform.Contracts.Api.AiInvokeRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
