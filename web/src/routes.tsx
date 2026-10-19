@@ -232,6 +232,21 @@ moduleRoutes.push(
     ],
   },
   {
+    // AI control plane (SL6-UI-PLT-AI): AI administrators only (RequireAiRole).
+    path: 'admin/ai',
+    lazy: async () => ({
+      Component: (await import('./modules/platform/ai/RequireAiRole')).RequireAiRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/platform/ai/AiControlPage')).AiControlPage,
+        }),
+      },
+    ],
+  },
+  {
     path: 'policies/pack-rollback',
     lazy: async () => ({
       Component: (await import('./modules/policy/packRollback/RequireReviewerRole'))

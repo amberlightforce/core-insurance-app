@@ -19,6 +19,8 @@ public static class ClaimsAuthorityTypes
 
     /// <summary>Claim payment (amount of the payment transaction, EUR in the slice).</summary>
     public static AuthorityTypeCode Payment { get; } = AuthorityTypeCode.Parse("CLM.PAYMENT");
+    public static AuthorityTypeCode RecoveryWriteOff { get; } = AuthorityTypeCode.Parse("CLM.RECOVERY_WRITEOFF");
+    public static AuthorityTypeCode FsNetSettlement { get; } = AuthorityTypeCode.Parse("CLM.FS_NET_SETTLEMENT");
 
     /// <summary>The money dimension.</summary>
     public const string AmountDimension = "amount";
@@ -34,6 +36,12 @@ public static class ClaimsAuthorityTypes
             [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money), new AuthorityDimensionDefinition(CostTypeDimension, DimensionKind.Code)]),
         new AuthorityTypeDefinition(
             Payment, ModuleCode.CLM, new LocalizedText("Πληρωμή ζημιάς", "Claim payment"),
+            [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money), new AuthorityDimensionDefinition(CostTypeDimension, DimensionKind.Code)]),
+        new AuthorityTypeDefinition(
+            RecoveryWriteOff, ModuleCode.CLM, new LocalizedText("Διαγραφή ανάκτησης", "Recovery write-off"),
+            [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money), new AuthorityDimensionDefinition(CostTypeDimension, DimensionKind.Code)]),
+        new AuthorityTypeDefinition(
+            FsNetSettlement, ModuleCode.CLM, new LocalizedText("Καθαρός φιλικός διακανονισμός", "Friendly settlement net"),
             [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money), new AuthorityDimensionDefinition(CostTypeDimension, DimensionKind.Code)]),
     ];
 

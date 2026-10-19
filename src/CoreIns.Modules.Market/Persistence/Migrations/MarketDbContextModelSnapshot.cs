@@ -228,6 +228,63 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("version");
 
+                    b.Property<string>("FromVersion")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("from_version");
+
+                    b.Property<string>("ParentHash")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("parent_hash");
+
+                    b.Property<string>("TargetDigest")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("target_digest");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue("")
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("RequestedPrincipal")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("requested_principal");
+
+                    b.Property<string>("ContentHash")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("content_hash");
+
+                    b.Property<long>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(1L)
+                        .HasColumnType("bigint")
+                        .HasColumnName("record_version");
+
+                    b.Property<DateTime?>("WindowFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("window_from");
+
+                    b.Property<DateTime?>("WindowTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("window_to");
+
+                    b.Property<string[]>("HashesIssued")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValueSql("ARRAY[]::text[]")
+                        .HasColumnType("text[]")
+                        .HasColumnName("hashes_issued");
+
+                    b.Property<string>("DecisionReason")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("decision_reason");
+
                     b.HasKey("Id")
                         .HasName("pk_pack_activation");
 

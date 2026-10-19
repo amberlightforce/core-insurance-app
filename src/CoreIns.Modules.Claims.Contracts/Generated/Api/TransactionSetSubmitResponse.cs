@@ -116,6 +116,10 @@ public sealed record TransactionSetSubmitResponse
             [global::System.Text.Json.Serialization.JsonStringEnumMemberName("EXPOSURE_TOTAL_RESERVE")]
             ExposureTotalReserve,
 
+            /// <summary><c>EXPOSURE_TOTAL_RECOVERY_RESERVE</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("EXPOSURE_TOTAL_RECOVERY_RESERVE")]
+            ExposureTotalRecoveryReserve,
+
             /// <summary><c>RESERVE_DECREASE</c></summary>
             [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RESERVE_DECREASE")]
             ReserveDecrease,
