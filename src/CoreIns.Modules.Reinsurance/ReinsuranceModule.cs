@@ -55,6 +55,7 @@ public static class ReinsuranceModule
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.contract, {Schema}.contract_version TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.dsar_restriction TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.section, {Schema}.layer, {Schema}.clause, {Schema}.participation TO {appRole}",
                 // SL4-RI-RECOVERY: the claim view moves; the recovery rows, their batch and the exception log are sealed (SELECT, INSERT only).
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.claim_view, {Schema}.claim_exposure, {Schema}.claim_amount TO {appRole}",
@@ -71,6 +72,7 @@ public static class ReinsuranceModule
 
         services.AddOptions<ReinsuranceOptions>().Bind(configuration.GetSection(ReinsuranceOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
         services.AddModuleDbContext<ReinsuranceDbContext>(Schema);
+        services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Reinsurance.Services.Dsar.ReinsuranceDsarParticipant>();
 
         services.AddScoped<PartyDirectory>();
         services.AddScoped<ContractLifecycleService>();

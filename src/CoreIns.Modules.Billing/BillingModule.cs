@@ -52,6 +52,7 @@ public static class BillingModule
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.billing_account, {Schema}.plan_instance, {Schema}.charge, {Schema}.invoice, {Schema}.invoice_item, {Schema}.receipt, {Schema}.intake_exception TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.dsar_restriction TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.payee_account, {Schema}.disbursement, {Schema}.refund TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.delinquency_case TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.delinquency_contact TO {appRole}",
@@ -70,6 +71,7 @@ public static class BillingModule
 
         services.AddOptions<BillingOptions>().Bind(configuration.GetSection(BillingOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
         services.AddModuleDbContext<BillingDbContext>(Schema);
+        services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Billing.Services.Dsar.BillingDsarParticipant>();
 
         services.AddScoped<LedgerWriter>();
         services.AddScoped<TermBilling>();
