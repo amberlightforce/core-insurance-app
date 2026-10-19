@@ -44,6 +44,9 @@ export function BillingHomePage() {
               <LinkButton variant="secondary" to="/billing/receivables">
                 {t('receivables.open')}
               </LinkButton>
+              <LinkButton variant="secondary" to="/billing/delinquency">
+                {t('delinquency.open')}
+              </LinkButton>
               <LinkButton variant="secondary" to="/billing/refunds">
                 {t('refunds.open')}
               </LinkButton>

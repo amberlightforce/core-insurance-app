@@ -156,17 +156,17 @@ public sealed class MigrationFrameTests(PostgresFixture database) : IClassFixtur
         async Task<string> MasterAsync(string routeKey, string date) =>
             (await SendAsync(HttpMethod.Post, "/api/mig/v1/routing/resolve", new { objectType = "Policy", key = routeKey, date }, "alice")).Body.Text("masterState");
 
-        (await MasterAsync(key, "2025-12-31")).ShouldBe("NONE");
-        (await MasterAsync(key, "2026-02-01")).ShouldBe("TRANSITIONING");
-        (await MasterAsync(key, "2026-06-01")).ShouldBe("CORE");
+        (await MasterAsync(key, "2025-12-31")).ShouldBe("LegacyMaster");
+        (await MasterAsync(key, "2026-02-01")).ShouldBe("Transitioning");
+        (await MasterAsync(key, "2026-06-01")).ShouldBe("CoreMaster");
 
         // A change inside the open-ended last period ends it where the new one starts.
         var open = $"POL-{Guid.NewGuid():N}";
         await SendAsync(HttpMethod.Post, "/api/mig/v1/routing/override", new { objectType = "Policy", key = open, masterState = "TRANSITIONING", from = "2026-01-01", reason = "start" }, "alice");
         (await SendAsync(HttpMethod.Post, "/api/mig/v1/routing/override", new { objectType = "Policy", key = open, masterState = "CORE", from = "2026-03-01", reason = "switch" }, "alice"))
             .Response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        (await MasterAsync(open, "2026-02-28")).ShouldBe("TRANSITIONING");
-        (await MasterAsync(open, "2026-03-01")).ShouldBe("CORE");
+        (await MasterAsync(open, "2026-02-28")).ShouldBe("Transitioning");
+        (await MasterAsync(open, "2026-03-01")).ShouldBe("CoreMaster");
     }
 
     [Fact]

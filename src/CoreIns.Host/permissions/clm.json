@@ -18,7 +18,20 @@
         "clm.Payment.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.PayeeAccount.capture": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.PayeeAccount.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
-        "clm.Coverage.reverify": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
+        "clm.Coverage.reverify": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.FriendlySettlement.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.FriendlySettlement.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.FriendlySettlement.evaluate": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.FriendlySettlement.openOwnSettlement": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.FriendlySettlement.submit": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.DevFsClearing.notify": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Recovery.create": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Recovery.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Recovery.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Recovery.recordMilestone": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Recovery.demand": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Recovery.writeOff": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
+        "clm.Claim.update": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
       }
     },
     "Authority": {

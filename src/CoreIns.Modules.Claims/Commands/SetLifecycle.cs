@@ -229,6 +229,34 @@ internal sealed partial class SetLifecycle(
                 }, BusinessKeys.Empty.With("claimId", claimKey).With("recoveryId", recoveryId.Value.ToString("D"))));
         }
 
+        // REQ-CLM-150: an approved write-off set that releases the whole open recovery reserve writes the case off.
+        foreach (var group in content.Transactions.Where(t => t.Kind == Codes.Of(TransactionKind.RecoveryReserve) && t.ReasonCode == "WRITE_OFF" && t.RecoveryId is not null)
+            .GroupBy(t => t.RecoveryId!.Value))
+        {
+            var recovery = await db.Recoveries.SingleOrDefaultAsync(r => r.RecoveryId == group.Key && r.ClaimId == claim.ClaimId, cancellationToken).ConfigureAwait(false);
+            if (recovery is null || recovery.Status is "CLOSED" or "WRITTEN_OFF")
+            {
+                continue;
+            }
+
+            var effective = new[] { Codes.Of(SetStatus.Approved), Codes.Of(SetStatus.Posted) };
+            var reserveKind = Codes.Of(TransactionKind.RecoveryReserve);
+            var recoveryKind = Codes.Of(TransactionKind.Recovery);
+            var reserved = await db.FinancialTransactions.AsNoTracking()
+                .Where(t => t.RecoveryId == group.Key && db.TransactionSets.Any(s => s.SetId == t.SetId && effective.Contains(s.Status)))
+                .SumAsync(t => t.Kind == reserveKind ? t.Amount : t.Kind == recoveryKind ? -t.Amount : 0m, cancellationToken).ConfigureAwait(false);
+            if (reserved + group.Sum(t => t.Amount) <= 0m)
+            {
+                recovery.Status = "WRITTEN_OFF";
+                recovery.WriteOffReason = "WRITE_OFF";
+                recovery.UpdatedAt = now;
+                recovery.RecordVersion++;
+                var list = CoreIns.Modules.Claims.Queries.RecoveryReader.ReadMilestones(recovery);
+                list.Add(new CoreIns.Modules.Claims.Contracts.Api.RecoveryMilestoneView { Milestone = "WRITTEN_OFF", OccurredOn = accountingDate, RecordedAt = now, RecordedBy = approver });
+                recovery.Milestones = System.Text.Json.JsonSerializer.SerializeToDocument(list, CoreIns.SharedKernel.Json.SharedKernelJson.Options);
+            }
+        }
+
         if (!context.DryRun)
         {
             foreach (var payment in content.Payments.Where(p => p.Method != "CLEARING"))

@@ -113,6 +113,29 @@ const moduleRoutes: RouteObject[] = [
     ],
   },
   {
+    // SL6-UI-BIL-DELINQ: delinquency cases (billing roles; guard shared with refunds).
+    path: 'billing/delinquency',
+    lazy: async () => ({
+      Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/delinquency/DelinquencyListPage'))
+            .DelinquencyListPage,
+        }),
+      },
+      {
+        path: ':delinquencyId',
+        lazy: async () => ({
+          Component: (await import('./modules/billing/delinquency/DelinquencyDetailPage'))
+            .DelinquencyDetailPage,
+        }),
+      },
+    ],
+  },
+  {
     path: 'billing/releases',
     lazy: async () => ({
       Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
@@ -310,6 +333,27 @@ moduleRoutes.push({
   ],
 });
 
+moduleRoutes.push({
+  path: 'admin/migration',
+  lazy: async () => ({
+    Component: (await import('./modules/migration/RequireMigrationRole')).RequireMigrationRole,
+  }),
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/migration/MigrationHomePage')).MigrationHomePage,
+      }),
+    },
+    {
+      path: 'batches/:batchId',
+      lazy: async () => ({
+        Component: (await import('./modules/migration/BatchPage')).BatchPage,
+      }),
+    },
+  ],
+});
+
 moduleRoutes.push(
   {
     // Customer withdrawal declaration + confirmation (SL6-UI-CHN-WITHDRAW).
@@ -346,6 +390,7 @@ moduleRoutes.push(
 
 const implemented = new Set([
   '/admin/packs',
+  '/admin/migration',
   '/channels/withdrawals',
   '/policies/pack-rollback',
   '/parties',
