@@ -46,6 +46,9 @@ import { ClaimStatusPill } from './ClaimStatusPill';
 import { closeGuardFindings } from './closeGuard';
 import { closeOutcomes, exposureDuplicateReasons } from './codes';
 import { FinancialsTab } from './FinancialsTab';
+import { LiabilityFactsEditor } from './recoveries/LiabilityFactsEditor';
+import { RecoveriesTab } from './recoveries/RecoveriesTab';
+import { RiRecoverableCard } from './recoveries/RiRecoverableCard';
 import { ReverifyBanner } from './reverify/ReverifyBanner';
 import { StageStrip } from './StageStrip';
 import { amountOf, claimStages } from './stages';
@@ -142,7 +145,7 @@ function ExposureForm({ claim }: { claim: ClaimView }) {
   );
 }
 
-function CloseForm({ claim }: { claim: ClaimView }) {
+function CloseForm({ claim, onOpenTab }: { claim: ClaimView; onOpenTab: (tab: string) => void }) {
   const { t } = useTranslation('claims');
   const { keyFor, release } = useIdempotencyKey();
   const [outcome, setOutcome] = useState<string | null>(null);
@@ -194,12 +197,39 @@ function CloseForm({ claim }: { claim: ClaimView }) {
         <Banner variant="danger" live="alert" title={t('close.guard.title')}>
           <p>{t('close.guard.body')}</p>
           <ul className={styles.problemList}>
-            {findings.map((f) => (
-              <li key={f.exposure}>
-                <span className="ds-mono">{f.exposure}</span>:{' '}
-                {f.reasons.map((r) => t(`close.guard.reason.${r}`)).join('; ')}
-              </li>
-            ))}
+            {findings.map((f) => {
+              const number =
+                claim.exposures.find((e) => e.exposureId === f.exposure)?.exposureNumber ??
+                f.exposure;
+              return (
+                <li key={f.exposure}>
+                  {f.exposure ? (
+                    <>
+                      <span className="ds-mono">{number}</span>:{' '}
+                    </>
+                  ) : null}
+                  {f.reasons
+                    .map((r) => t(`close.guard.reason.${r}`, { defaultValue: r }))
+                    .join('; ')}
+                  {f.exposure ? (
+                    <>
+                      {' '}
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onPress={() => {
+                          onOpenTab(
+                            f.reasons.includes('OPEN_EXPOSURE') ? 'overview' : 'financials',
+                          );
+                        }}
+                      >
+                        {t('close.guard.open', { number })}
+                      </Button>
+                    </>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         </Banner>
       ) : mutation.isError ? (
@@ -277,6 +307,7 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
     () => [
       { id: 'overview', label: t('view.tabs.overview') },
       { id: 'financials', label: t('view.tabs.financials') },
+      { id: 'recoveries', label: t('recovery.tab') },
     ],
     [t],
   );
@@ -363,6 +394,8 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
         {(item) =>
           item.id === 'financials' ? (
             <FinancialsTab claim={claim} />
+          ) : item.id === 'recoveries' ? (
+            <RecoveriesTab claim={claim} />
           ) : (
             <div className={styles.split}>
               <div className={styles.stack}>
@@ -371,6 +404,13 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
                   meta={t('file.exposuresMeta')}
                   count={claim.exposures.length}
                 >
+                  {claim.exposures.some(
+                    (e) =>
+                      (e.kind === 'MTPL_PD' || e.kind === 'MTPL_BI') &&
+                      (e as { statutoryClocks?: string }).statutoryClocks === 'NOT_TRACKED',
+                  ) ? (
+                    <p className={styles.muted}>{t('exposure.clocksNotTracked')}</p>
+                  ) : null}
                   <SimpleTable<ExposureView>
                     aria-label={t('exposure.title')}
                     columns={exposureColumns}
@@ -491,6 +531,11 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
                     />
                   </Section>
                 </div>
+                {summary.lineOfBusiness === 'MOTOR' ? (
+                  <Section title={t('liability.title')}>
+                    <LiabilityFactsEditor key={String(summary.recordVersion)} claim={claim} />
+                  </Section>
+                ) : null}
                 {open ? (
                   <Section title={t('exposure.new')}>
                     <ExposureForm claim={claim} />
@@ -498,7 +543,7 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
                 ) : null}
                 {open ? (
                   <Section title={t('close.title')}>
-                    <CloseForm claim={claim} />
+                    <CloseForm claim={claim} onOpenTab={setTab} />
                   </Section>
                 ) : (
                   <Banner variant="info" live="none" title={t('close.alreadyClosed')}>
@@ -520,6 +565,7 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
                     }}
                   />
                 </Section>
+                <RiRecoverableCard claimId={summary.claimId} />
                 <Section title={t('file.history.title')}>
                   <ClaimHistory claim={claim} />
                 </Section>

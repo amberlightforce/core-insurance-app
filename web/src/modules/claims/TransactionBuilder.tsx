@@ -33,6 +33,7 @@ import { useFormat } from '../staff/useFormat';
 import { buildSet, submitSet, useRefreshMoney } from './api';
 import { costCategories, costTypes, reserveReasons, verificationKey } from './codes';
 import { authorityHint } from './closeGuard';
+import { AuthorityPreview } from './recoveries/AuthorityPreview';
 import { SetTransactions } from './SetViews';
 
 type Preview = NonNullable<TransactionSetBuildResponse['preview']>[number];
@@ -43,6 +44,10 @@ export interface TransactionBuilderProps {
   accounts: readonly ClaimPayeeAccountView[];
   /** Called with the id of a set that was submitted, so the set list can show it at once. */
   onSubmitted?: (setId: string) => void;
+  /** Open recovery cases: when given, «Εφεδρεία ανάκτησης» (RECOVERY_RESERVE) is offered (SL4-UI-CLM-REC). */
+  recoveries?: readonly { recoveryId: string; label: string }[];
+  /** Preselects the recovery case (the Recoveries tab's «Εφεδρεία» action). */
+  initialRecoveryId?: string | null;
 }
 
 /**
@@ -56,6 +61,8 @@ export function TransactionBuilder({
   exposures,
   accounts,
   onSubmitted,
+  recoveries,
+  initialRecoveryId,
 }: TransactionBuilderProps) {
   const { t } = useTranslation('claims');
   const fmt = useFormat();
@@ -64,7 +71,10 @@ export function TransactionBuilder({
   const refresh = useRefreshMoney(claimId);
 
   const open = useMemo(() => exposures.filter((e) => e.status === 'OPEN'), [exposures]);
-  const [kind, setKind] = useState<'RESERVE' | 'PAYMENT'>('RESERVE');
+  const [kind, setKind] = useState<'RESERVE' | 'PAYMENT' | 'RECOVERY_RESERVE'>(
+    initialRecoveryId ? 'RECOVERY_RESERVE' : 'RESERVE',
+  );
+  const [recoveryId, setRecoveryId] = useState<string | null>(initialRecoveryId ?? null);
   const [exposureId, setExposureId] = useState<string | null>(open[0]?.exposureId ?? null);
   const [costType, setCostType] = useState<string | null>('INDEMNITY');
   const [category, setCategory] = useState<string | null>('VEHICLE_REPAIR');
@@ -87,7 +97,9 @@ export function TransactionBuilder({
   if (!costType || !category) errors['txn-category'] = t('builder.errors.category');
   if (amount === null || amount === '' || compareMoney(amount, '0.00') <= 0)
     errors['txn-amount'] = t('builder.errors.amount');
-  if (kind === 'RESERVE' && !reason) errors['txn-reason'] = t('builder.errors.reason');
+  if (kind !== 'PAYMENT' && !reason) errors['txn-reason'] = t('builder.errors.reason');
+  if (kind === 'RECOVERY_RESERVE' && !recoveryId)
+    errors['txn-recovery'] = t('recovery.builder.errors.recovery');
   if (kind === 'PAYMENT' && !accountId) errors['txn-account'] = t('builder.errors.account');
   const shown = attempts > 0 ? errors : {};
   const summary: ErrorSummaryItem[] =
@@ -97,7 +109,7 @@ export function TransactionBuilder({
     if (Object.keys(errors).length > 0 || !exposureId || !costType || !category || !amount)
       return null;
     const account = accounts.find((a) => a.payeeAccountId === accountId);
-    const signed = kind === 'RESERVE' && direction === 'DECREASE' ? `-${amount}` : amount;
+    const signed = kind !== 'PAYMENT' && direction === 'DECREASE' ? `-${amount}` : amount;
     return {
       claimId,
       transactions: [
@@ -107,7 +119,8 @@ export function TransactionBuilder({
           costType,
           costCategory: category,
           amount: { amount: signed, currency: 'EUR' },
-          ...(kind === 'RESERVE' && reason ? { reason } : {}),
+          ...(kind !== 'PAYMENT' && reason ? { reason } : {}),
+          ...(kind === 'RECOVERY_RESERVE' && recoveryId ? { recoveryId } : {}),
           ...(kind === 'PAYMENT' && account
             ? { payeePartyId: account.partyId, payeeAccountId: account.payeeAccountId, paymentType }
             : {}),
@@ -205,13 +218,36 @@ export function TransactionBuilder({
         orientation="horizontal"
         value={kind}
         onChange={(value) => {
-          setKind(value === 'PAYMENT' ? 'PAYMENT' : 'RESERVE');
+          setKind(
+            value === 'PAYMENT'
+              ? 'PAYMENT'
+              : value === 'RECOVERY_RESERVE'
+                ? 'RECOVERY_RESERVE'
+                : 'RESERVE',
+          );
           edited();
         }}
       >
         <Radio value="RESERVE">{t('builder.kinds.RESERVE')}</Radio>
         <Radio value="PAYMENT">{t('builder.kinds.PAYMENT')}</Radio>
+        {recoveries && recoveries.length > 0 ? (
+          <Radio value="RECOVERY_RESERVE">{t('builder.kinds.RECOVERY_RESERVE')}</Radio>
+        ) : null}
       </RadioGroup>
+      {kind === 'RECOVERY_RESERVE' ? (
+        <Select
+          id="txn-recovery"
+          label={t('recovery.builder.recovery')}
+          isRequired
+          options={(recoveries ?? []).map((r) => ({ id: r.recoveryId, label: r.label }))}
+          value={recoveryId}
+          onChange={(value) => {
+            setRecoveryId(value);
+            edited();
+          }}
+          errorMessage={shown['txn-recovery']}
+        />
+      ) : null}
       <div className={styles.grid}>
         <Select
           id="txn-exposure"
@@ -252,7 +288,7 @@ export function TransactionBuilder({
           }}
           errorMessage={shown['txn-category']}
         />
-        {kind === 'RESERVE' ? (
+        {kind !== 'PAYMENT' ? (
           <RadioGroup
             label={t('builder.direction')}
             orientation="horizontal"
@@ -267,7 +303,7 @@ export function TransactionBuilder({
           </RadioGroup>
         ) : null}
         <CurrencyField
-          label={kind === 'RESERVE' ? t('builder.reserveAmount') : t('builder.paymentAmount')}
+          label={kind !== 'PAYMENT' ? t('builder.reserveAmount') : t('builder.paymentAmount')}
           isRequired
           name="txn-amount"
           value={amount}
@@ -277,7 +313,7 @@ export function TransactionBuilder({
           }}
           {...(shown['txn-amount'] ? { errorMessage: shown['txn-amount'] } : {})}
         />
-        {kind === 'RESERVE' ? (
+        {kind !== 'PAYMENT' ? (
           <Select
             id="txn-reason"
             label={t('builder.reason')}
@@ -353,7 +389,11 @@ export function TransactionBuilder({
         </div>
       ) : null}
 
-      {hint ? (
+      {preview?.authorityPreview && preview.authorityPreview.length > 0 ? (
+        <AuthorityPreview items={preview.authorityPreview} />
+      ) : null}
+
+      {hint && !preview?.authorityPreview?.length ? (
         <Banner
           variant={hint === 'within' ? 'success' : 'warning'}
           live="none"

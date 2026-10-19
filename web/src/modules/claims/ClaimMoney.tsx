@@ -5,6 +5,7 @@ import { Button, SkeletonBlock } from '../../design-system';
 import { cx } from '../../design-system/utils/cx';
 import { useFormat } from '../staff/useFormat';
 import { useFinancials, usePayments } from './api';
+import { useRecoveries } from './recoveries/api';
 import styles from './ClaimFile.module.css';
 import { PaymentStatusPill } from './MoneyPills';
 
@@ -32,6 +33,9 @@ export function ClaimMoney({ claim, onNewPayment, onRelease }: ClaimMoneyProps) 
   const open = claim.summary.status === 'OPEN';
   const pending = items.filter((p) => awaitingRelease.has(p.status)).length;
   const totals = financials.data?.totals;
+  const recoveries = useRecoveries(claimId);
+  const cases = recoveries.data?.items ?? [];
+  const hasRecoveries = cases.length > 0;
 
   return (
     <div className={cx(styles.money)}>
@@ -54,6 +58,45 @@ export function ClaimMoney({ claim, onNewPayment, onRelease }: ClaimMoneyProps) 
           <SkeletonBlock width="70%" />
         </div>
       )}
+      {hasRecoveries ? (
+        <ul className={cx(styles.payments)} aria-label={t('moneyx.recoveries')}>
+          {cases
+            .flatMap((r) => {
+              const lines = [];
+              if (Number(r.recoveredAmount.amount) > 0)
+                lines.push({
+                  id: `${r.recoveryId}:rec`,
+                  label: t('moneyx.received', { type: t(`recovery.type.${r.type}`) }),
+                  amount: r.recoveredAmount,
+                });
+              if (Number(r.recoveryReserve.amount) > 0)
+                lines.push({
+                  id: `${r.recoveryId}:exp`,
+                  label: t('moneyx.expected', { type: t(`recovery.type.${r.type}`) }),
+                  amount: r.recoveryReserve,
+                });
+              return lines;
+            })
+            .map((line) => (
+              <li key={line.id} data-family="success">
+                <span className={cx(styles.paymentText)}>{line.label}</span>
+                <span className={cx(styles.paymentAmount)}>
+                  <span className="ds-num">{`−${fmt.money(line.amount)}`}</span>
+                </span>
+              </li>
+            ))}
+          {totals?.netIncurred ? (
+            <li>
+              <span className={cx(styles.paymentText)}>
+                <strong>{t('moneyx.net')}</strong>
+              </span>
+              <span className={cx(styles.paymentAmount)}>
+                <span className="ds-num">{fmt.money(totals.netIncurred)}</span>
+              </span>
+            </li>
+          ) : null}
+        </ul>
+      ) : null}
       {items.length > 0 ? (
         <ul className={cx(styles.payments)} aria-label={t('payments.title')}>
           {items.map((p) => (

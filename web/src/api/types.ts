@@ -2,6 +2,7 @@ import type { components as Bil } from './generated/bil';
 import type { components as Clm } from './generated/clm';
 import type { components as Fin } from './generated/fin';
 import type { components as Pfc } from './generated/pfc';
+import type { components as Mkt } from './generated/mkt';
 import type { components as Plt } from './generated/plt';
 import type { components as Pol } from './generated/pol';
 import type { components as Pty } from './generated/pty';
@@ -109,3 +110,31 @@ export type PayeeAccountCaptureResponse = Clm['schemas']['PayeeAccountCaptureRes
 export type FinancialsGetResponse = Clm['schemas']['FinancialsGetResponse'];
 export type FinancialLineBalance = Clm['schemas']['FinancialLineBalance'];
 export type FinancialBalance = Clm['schemas']['FinancialBalance'];
+
+// Market packs (mkt.yaml, SL5-UI-PACKS)
+export type PackListItem = Mkt['schemas']['PackListItem'];
+export type PackListPage = Omit<Mkt['schemas']['PackListPage'], 'items'> & {
+  items: PackListItem[];
+};
+export type PackGetResponse = Mkt['schemas']['PackGetResponse'];
+export type PackVersionView = Mkt['schemas']['PackVersionView'];
+export type PackActiveVersionView = Mkt['schemas']['PackActiveVersionView'];
+export type PackActivationView = Mkt['schemas']['PackActivationView'];
+export type PackActivationStatus = Mkt['schemas']['PackActivationStatus'];
+export type PackActivationPreview = Mkt['schemas']['PackActivationPreview'];
+export type PackActivationKeyDiff = Mkt['schemas']['PackActivationKeyDiff'];
+export type PackActivationDecideRequest = Mkt['schemas']['PackActivationDecideRequest'];
+export type PackActivationDecideResponse = Mkt['schemas']['PackActivationDecideResponse'];
+export type PackRollbackRequest = Mkt['schemas']['PackRollbackRequest'];
+export type PackRollbackResponse = Mkt['schemas']['PackRollbackResponse'];
+export type PackScheduleActivationRequest = Mkt['schemas']['PackScheduleActivationRequest'];
+export type PackScheduleActivationResponse = Mkt['schemas']['PackScheduleActivationResponse'];
+
+// Pack-rollback exceptions (pol.yaml, SL5-UI-PACKS)
+export type PackRollbackExceptionView = Pol['schemas']['PackRollbackExceptionView'];
+export type PackRollbackExceptionListPage = Omit<
+  Pol['schemas']['PackRollbackExceptionListPage'],
+  'items'
+> & { items: PackRollbackExceptionView[] };
+export type PackRollbackExceptionReviewRequest =
+  Pol['schemas']['PackRollbackExceptionReviewRequest'];

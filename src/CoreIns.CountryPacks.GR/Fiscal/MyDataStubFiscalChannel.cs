@@ -26,6 +26,15 @@ public sealed class MyDataStubFiscalChannel : IFiscalDocumentChannel
     /// <summary>Prefix of every synthetic identifier.</summary>
     public const string StubPrefix = "STUB-";
 
+    /// <summary>Source type of a claim payment settlement receipt.</summary>
+    public const string ClaimPaymentSource = "CLM_CLAIM_PAYMENT";
+
+    /// <summary>Placeholder document type / classification code (OQ-012, OI-CLM-04); never an AADE code.</summary>
+    public const string UnmappedCode = "UNMAPPED-OQ-012";
+
+    /// <summary>Legal source of the receipt candidates (PRD-07 section 9.1, market guidance, status Verify).</summary>
+    public const string ReceiptLegalSourceRef = "PRD-07 9.1 (candidates 13.1/13.2/2.1, market guidance, Verify); OI-CLM-04";
+
     /// <summary>Series the stub reports for every document type.</summary>
     public const string StubSeries = "STUB-A";
 
@@ -41,12 +50,18 @@ public sealed class MyDataStubFiscalChannel : IFiscalDocumentChannel
             throw new SpiException(new SpiError(SpiErrorCategory.Validation, "NO_LINES"), "A fiscal document needs at least one line.");
         }
 
+        // CLM_CLAIM_PAYMENT settlement receipt (D-SL4-11, OI-CLM-04): document type and classification stay placeholders.
+        // Market guidance for PRD-07 section 9.1 (B2C 13.1/13.2 with classification 2.3/2.5 or 2.95, B2B self-billing 2.1)
+        // is "not a decision" (status Verify) and is recorded only here and in legalSourceRef, never as a code.
+        var receipt = fiscalSource.SourceType == ClaimPaymentSource;
         var body = JsonSerializer.SerializeToUtf8Bytes(new
         {
             stub = true,
             sourceType = fiscalSource.SourceType,
             sourceId = fiscalSource.SourceId,
             documentType = fiscalSource.DocumentType,
+            classification = receipt ? UnmappedCode : null,
+            legalSourceRef = receipt ? ReceiptLegalSourceRef : null,
             issueDate = fiscalSource.IssueDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             lines = fiscalSource.Lines.Select(l => new { key = l.ChargeType, amount = l.NetAmount.Amount.ToString(CultureInfo.InvariantCulture), currency = l.NetAmount.Currency }),
         });
