@@ -85,6 +85,9 @@ internal sealed class FinancialsReader(ClaimsDbContext db)
                 Paid = ClaimMoney.Of(a.Paid, l.Currency),
                 OpenReserve = ClaimMoney.Of(a.OpenReserve, l.Currency),
                 Incurred = ClaimMoney.Of(a.Incurred, l.Currency),
+                RecoveryReserve = ClaimMoney.Of(a.RecoveryReserved, l.Currency),
+                Recoveries = ClaimMoney.Of(a.Recovered, l.Currency),
+                OpenRecoveryReserve = ClaimMoney.Of(a.OpenRecoveryReserve, l.Currency),
             };
         }).ToList();
         var exposures = visible.GroupBy(l => l.ExposureId).Select(g =>
@@ -181,6 +184,8 @@ internal sealed class FinancialsReader(ClaimsDbContext db)
         Eroding = t.Eroding,
         PaymentType = t.PaymentType,
         ClaimPaymentId = t.ClaimPaymentId?.Value,
+        RecoveryId = t.RecoveryId,
+        EvidenceRef = set.EvidenceRef,
         ReasonCode = t.ReasonCode,
         Proposed = t.Proposed,
         Status = StatusOf(set, payment),
@@ -238,6 +243,27 @@ internal sealed class FinancialsReader(ClaimsDbContext db)
     public Task<bool> ClaimExistsAsync(LegalEntityId legalEntity, ClaimId claimId, CancellationToken cancellationToken) =>
         db.Claims.AsNoTracking().AnyAsync(c => c.ClaimId == claimId && c.LegalEntityId == legalEntity, cancellationToken);
 
+    public async Task<TransactionSetListPage> SetsAsync(LegalEntityId entity, ClaimId claimId, string? status, Guid? cursor, int limit, CancellationToken cancellationToken)
+    {
+        // Stable total ordering on UUIDv7 set ids; no offset pagination under concurrent inserts.
+        var rows = await db.TransactionSets.FromSql($"SELECT * FROM clm.transaction_set WHERE legal_entity_id = {entity.Value} AND claim_id = {claimId.Value} AND ({status}::text IS NULL OR status = {status}) AND ({cursor}::uuid IS NULL OR set_id < {cursor}::uuid) ORDER BY set_id DESC LIMIT {limit + 1}")
+            .AsNoTracking().ToListAsync(cancellationToken).ConfigureAwait(false);
+        var page = rows.Take(limit).ToList();
+        var ids = page.Select(s => s.SetId).ToList();
+        var transactions = await db.FinancialTransactions.AsNoTracking().Where(t => ids.Contains(t.SetId)).ToListAsync(cancellationToken).ConfigureAwait(false);
+        return new TransactionSetListPage
+        {
+            Items = [.. page.Select(s => new TransactionSetListItem
+            {
+                SetId = s.SetId.Value, ClaimId = s.ClaimId, Status = Codes.Map<SetStatus, TransactionSetListItem.StatusValue>(Codes.Parse<SetStatus>(s.Status)),
+                ContentHash = Sha256Hash.Parse(s.ContentHash), Maker = s.CreatedBy, FourEyes = s.FourEyes,
+                TransactionCount = transactions.Count(t => t.SetId == s.SetId), HasPayment = transactions.Any(t => t.SetId == s.SetId && t.ClaimPaymentId != null),
+                SystemRecorded = s.EvidenceRef != null, CreatedAt = s.CreatedAt, SubmittedAt = s.SubmittedAt, DecidedAt = s.DecidedAt,
+            })],
+            Limit = limit, NextCursor = rows.Count > limit ? page[^1].SetId.Value.ToString("D") : null,
+        };
+    }
+
     private static FinancialBalance Balance(LineAmounts total, decimal open, string currency, ExposureId? exposure, bool paymentPending) => new()
     {
         ExposureId = exposure,
@@ -245,6 +271,10 @@ internal sealed class FinancialsReader(ClaimsDbContext db)
         Paid = ClaimMoney.Of(total.Paid, currency),
         OpenReserve = ClaimMoney.Of(open, currency),
         Incurred = ClaimMoney.Of(total.Paid + open, currency),
+        RecoveryReserve = ClaimMoney.Of(total.RecoveryReserved, currency),
+        Recoveries = ClaimMoney.Of(total.Recovered, currency),
+        OpenRecoveryReserve = ClaimMoney.Of(total.OpenRecoveryReserve, currency),
+        NetIncurred = ClaimMoney.Of(total.Paid + open - total.Recovered - total.OpenRecoveryReserve, currency),
         PaymentPending = paymentPending,
     };
 }
