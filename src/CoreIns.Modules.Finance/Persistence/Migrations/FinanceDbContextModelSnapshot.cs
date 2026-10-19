@@ -454,7 +454,7 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_financial_period_code", "period_code ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'");
 
-                            t.HasCheckConstraint("ck_financial_period_status", "status IN ('OPEN')");
+                            t.HasCheckConstraint("ck_financial_period_status", "status IN ('OPEN', 'LOCKED')");
                         });
                 });
 
@@ -546,6 +546,10 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .HasColumnType("date")
                         .HasColumnName("business_date");
 
+                    b.Property<Guid?>("CorrectionOf")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correction_of");
+
                     b.Property<string>("CorrelationId")
                         .IsRequired()
                         .HasColumnType("text")
@@ -574,6 +578,10 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                     b.Property<Guid>("LegalEntityId")
                         .HasColumnType("uuid")
                         .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid?>("OosSetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("oos_set_id");
 
                     b.Property<Guid>("PeriodId")
                         .HasColumnType("uuid")

@@ -26,6 +26,9 @@ internal static class FriendlySettlementPermissions
     public const string Evaluate = "clm.FriendlySettlement.evaluate";
     public const string OpenOwn = "clm.FriendlySettlement.openOwnSettlement";
     public const string Submit = "clm.FriendlySettlement.submit";
+    public const string ImportStatement = "clm.FriendlySettlement.importStatement";
+    public const string GetStatement = "clm.FriendlySettlement.getStatement";
+    public const string ApproveNet = "clm.FriendlySettlement.approveNet";
     public const string DevNotify = "clm.DevFsClearing.notify";
 }
 
@@ -105,6 +108,28 @@ internal sealed class FriendlySettlementController : ControllerBase
 
         return Results.Ok(await reader.ListAsync(ClaimsQueryContext.LegalEntity(HttpContext.RequestServices), claim, state, role, after, take, cancellationToken).ConfigureAwait(false));
     }
+
+    [HttpGet("statements/{id}")]
+    [Authorize(Policy = FriendlySettlementPermissions.GetStatement)]
+    public async Task<IResult> GetStatementAsync(string id, [FromServices] FsStatementReader reader, CancellationToken cancellationToken)
+    {
+        var view = Guid.TryParse(id, out var statementId)
+            ? await reader.GetAsync(ClaimsQueryContext.LegalEntity(HttpContext.RequestServices), statementId, cancellationToken).ConfigureAwait(false)
+            : null;
+        return view is null ? HttpResults.Problem(ClaimSupport.NotFound("Friendly Settlement statement"), HttpContext) : Results.Ok(new FsGetStatementResponse { Statement = view });
+    }
+
+    [HttpPost("import-statement")]
+    [Authorize(Policy = FriendlySettlementPermissions.ImportStatement)]
+    public async Task<IResult> ImportStatementAsync(
+        [FromBody] FsImportStatementRequest request, [FromServices] ICommandHandler<ImportFsStatement, FsImportStatementResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ImportFsStatement(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    [HttpPost("approve-net")]
+    [Authorize(Policy = FriendlySettlementPermissions.ApproveNet)]
+    public async Task<IResult> ApproveNetAsync(
+        [FromBody] FsApproveNetRequest request, [FromServices] ICommandHandler<ApproveFsNet, FsApproveNetResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ApproveFsNet(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
     [HttpGet("{id}")]
     [Authorize(Policy = FriendlySettlementPermissions.Get)]

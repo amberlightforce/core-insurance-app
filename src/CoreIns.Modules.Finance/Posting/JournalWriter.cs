@@ -18,7 +18,14 @@ namespace CoreIns.Modules.Finance.Posting;
 /// <summary>Where a journal comes from (REQ-FIN-079 lineage).</summary>
 internal sealed record JournalSource(
     LegalEntityId LegalEntityId, string LegalEntityCode, string Jurisdiction, string SourceModule, string SourceEventType,
-    IReadOnlyList<Guid> SourceEventIds, string SourceRef);
+    IReadOnlyList<Guid> SourceEventIds, string SourceRef)
+{
+    /// <summary>Set when the journal is an out-of-sequence correction (REQ-POL-108): the corrected transaction and the correction set.</summary>
+    public JournalCorrection? Correction { get; init; }
+}
+
+/// <summary>What an out-of-sequence correction journal references (<c>correctionOf</c>, <c>oosSetId</c>).</summary>
+internal sealed record JournalCorrection(Guid CorrectionOf, Guid? OosSetId);
 
 /// <summary>A journal as written, with its <c>JournalPosted</c> event (the caller publishes it once its unit of work cannot fail any more).</summary>
 internal sealed record WrittenJournal(Guid JournalId, string JournalNumber, OutgoingEvent Posted);
@@ -76,6 +83,8 @@ internal sealed class JournalWriter(
             CorrelationId = context.CorrelationId.Value,
             PostedAt = now,
             PostedBy = context.Actor.Id,
+            CorrectionOf = source.Correction?.CorrectionOf,
+            OosSetId = source.Correction?.OosSetId,
         });
         foreach (var line in draft.Lines)
         {
