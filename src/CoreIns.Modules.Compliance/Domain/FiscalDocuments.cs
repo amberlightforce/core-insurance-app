@@ -37,9 +37,18 @@ internal static class FiscalDocuments
     /// </summary>
     public const string CreditSeriesSuffix = "-CR";
 
+    /// <summary>Slice-4 source (D-SL4-11): a CLM claim payment settlement receipt, role ISSUE only, category <see cref="ClaimSettlementReceipt"/>.</summary>
+    public const string ClaimPaymentSource = "CLM_CLAIM_PAYMENT";
+
+    /// <summary>Document category of a claim payment settlement receipt.</summary>
+    public const string ClaimSettlementReceipt = "CLAIM_SETTLEMENT_RECEIPT";
+
+    /// <summary>Marker of a CLEARING (FS clearing) payment line: such a payment never gets a receipt (D1, SL4-CLM-PAYOPS).</summary>
+    public const string ClearingMarker = "CLEARING";
+
     /// <summary>Fiscal source types REQ-CMP-030 lists (open code until CMP settles one list).</summary>
     public static IReadOnlySet<string> SourceTypes { get; } =
-        new HashSet<string>(StringComparer.Ordinal) { "TRANSACTION", "INVOICE", "CREDIT", "FEE", "COMMISSION", "CLAIM_PAYMENT" };
+        new HashSet<string>(StringComparer.Ordinal) { "TRANSACTION", "INVOICE", "CREDIT", "FEE", "COMMISSION", "CLAIM_PAYMENT", ClaimPaymentSource };
 
     /// <summary>
     /// Media-type marker of a synthetic document built by a stub channel (the slice's myDATA stub): its identifiers are

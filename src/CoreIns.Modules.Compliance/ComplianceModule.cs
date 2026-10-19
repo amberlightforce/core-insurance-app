@@ -67,6 +67,8 @@ public static class ComplianceModule
             .Describe("Η συσχέτιση ισχύει μόνο για πιστωτικά και πρέπει να συμφωνεί με το αρχικό παραστατικό.", "A correlation applies to credits only and must match the original document."),
         ErrorDefinition.For(ModuleCode.CMP, "CORRELATED-NOT-FOUND", 422, "Δεν βρέθηκε το συσχετισμένο παραστατικό", "The correlated document was not found")
             .Describe("Το πιστωτικό πρέπει να αναφέρεται σε καταχωρημένο παραστατικό έκδοσης του ίδιου αντισυμβαλλομένου (όχι σε άλλο πιστωτικό).", "A credit must refer to a Registered ISSUE document of the same counterparty (not to another credit)."),
+        ErrorDefinition.For(ModuleCode.CMP, "IDEMPOTENCY-MISMATCH", 409, "Το κλειδί παραστατικού χρησιμοποιήθηκε με διαφορετικό περιεχόμενο", "The fiscal key was already used with different content")
+            .Describe("Η ίδια πηγή, ρόλος και αναθεώρηση υπάρχουν ήδη με άλλο αντισυμβαλλόμενο ή ποσά.", "The same source, role and revision already exist with another counterparty or amounts."),
         ErrorDefinition.For(ModuleCode.CMP, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];
