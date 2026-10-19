@@ -218,6 +218,7 @@ internal sealed class FinancialsReader(ClaimsDbContext db)
         SubmittedAt = p.SubmittedAt,
         IssuedAt = p.IssuedAt,
         ClearedAt = p.ClearedAt,
+        FiscalMark = p.FiscalMark,
     };
 
     /// <summary>The payee accounts captured on the claim (masked).</summary>

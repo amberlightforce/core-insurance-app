@@ -127,7 +127,7 @@ public sealed class PaymentOpsTests(PostgresFixture database) : IClassFixture<Po
         (await _money.ScalarAsync<string>($"SELECT reissue_of::text FROM clm.claim_payment WHERE claim_payment_id = '{newId}'")).ShouldBe(paymentId);
         (await _money.ScalarAsync<string>($"SELECT payee_account_id::text FROM clm.claim_payment WHERE claim_payment_id = '{newId}'")).ShouldBe(newAccount);
         await _money.DrainAsync();
-        (await _money.PaymentsAsync(claim)).Single(p => p.Text("claimPaymentId") == newId).Text("status").ShouldBe("CLEARED");
+        (await _money.PaymentsAsync(claim)).AsArray().Single(p => p.Text("claimPaymentId") == newId).Text("status").ShouldBe("ON_HOLD"); // a freshly captured account is in BIL's cooling-off
         Amount((await _money.FinancialsAsync(claim))["totals"]!["paid"]).ShouldBe(800m);
 
         // At most once, and only from a corrected state.

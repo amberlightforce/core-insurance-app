@@ -345,7 +345,7 @@ internal sealed class ReissuePaymentHandler(
         ClaimPaymentRow created;
         using (context.Use(PaymentSupport.Derived(context.IdempotencyKey, id, "reissue-build"), context.DryRun))
         {
-            var built = await build.HandleAsync(new BuildTransactionSet(buildRequest), cancellationToken).ConfigureAwait(false);
+            var built = await build.HandleAsync(new BuildTransactionSet(buildRequest, ReissueOf: id), cancellationToken).ConfigureAwait(false);
             if (built.IsFailure)
             {
                 return built.Error!;
@@ -353,8 +353,6 @@ internal sealed class ReissuePaymentHandler(
 
             await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             created = await db.ClaimPayments.SingleAsync(p => p.SetId == new ClaimTransactionSetId(built.Value.SetId), cancellationToken).ConfigureAwait(false);
-            created.ReissueOf = id;
-            await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             using (context.Use(PaymentSupport.Derived(context.IdempotencyKey, id, "reissue-submit"), context.DryRun))
             {
                 var result = await submit.HandleAsync(new SubmitTransactionSet(new TransactionSetSubmitRequest { SetId = built.Value.SetId }), cancellationToken).ConfigureAwait(false);
