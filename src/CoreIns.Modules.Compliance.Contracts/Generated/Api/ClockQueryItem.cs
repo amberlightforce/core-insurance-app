@@ -4,15 +4,124 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Clock.query result. PRD outputs: "instances"</summary>
+/// <summary>cmp.Clock.query item (one clock instance)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClockQueryItem
 {
-    /// <summary>PRD: "instances"</summary>
+    /// <summary>Contract member 'instanceId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'instanceId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("instances")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("instanceId")]
+    public required global::System.Guid InstanceId { get; init; }
+
+    /// <summary>Contract member 'clockCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("clockCode")]
+    public required global::CoreIns.SharedKernel.Identifiers.ClockCode ClockCode { get; init; }
+
+    /// <summary>Contract member 'subjectRef'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("subjectRef")]
+    public required global::CoreIns.SharedKernel.Identifiers.ObjectRef SubjectRef { get; init; }
+
+    /// <summary>Contract member 'key'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("key")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Instances { get; init; }
+    public string? Key { get; init; }
+
+    /// <summary>Contract member 'kind'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("kind")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public KindValue? Kind { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Contract member 'startedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("startedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? StartedAt { get; init; }
+
+    /// <summary>Current due instant</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("deadline")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? Deadline { get; init; }
+
+    /// <summary>Contract member 'pausedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("pausedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? PausedAt { get; init; }
+
+    /// <summary>Contract member 'closedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("closedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? ClosedAt { get; init; }
+
+    /// <summary>Contract member 'outcome'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Outcome { get; init; }
+
+    /// <summary>Contract member 'metLate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("metLate")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? MetLate { get; init; }
+
+    /// <summary>Contract member 'variant'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("variant")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Variant { get; init; }
+
+    /// <summary>Contract member 'valueVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("valueVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? ValueVersion { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<KindValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum KindValue
+    {
+        /// <summary><c>WAITING_PERIOD</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("WAITING_PERIOD")]
+        WaitingPeriod,
+
+        /// <summary><c>DEADLINE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DEADLINE")]
+        Deadline,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>RUNNING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RUNNING")]
+        Running,
+
+        /// <summary><c>WARNED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("WARNED")]
+        Warned,
+
+        /// <summary><c>PAUSED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PAUSED")]
+        Paused,
+
+        /// <summary><c>MET</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MET")]
+        Met,
+
+        /// <summary><c>BREACHED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("BREACHED")]
+        Breached,
+
+        /// <summary><c>ELAPSED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ELAPSED")]
+        Elapsed,
+
+        /// <summary><c>CANCELLED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CANCELLED")]
+        Cancelled,
+    }
 }
