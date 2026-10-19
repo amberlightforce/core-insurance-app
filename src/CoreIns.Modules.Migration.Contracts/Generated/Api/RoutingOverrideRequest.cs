@@ -4,39 +4,50 @@
 
 namespace CoreIns.Modules.Migration.Contracts.Api;
 
-/// <summary>mig.Routing.override request. PRD inputs: "object, target state, reason, until"</summary>
+/// <summary>mig.Routing.override request (SL6-MIG-FRAME): sets the master state of an object over [from, to); overlapping periods are refused.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RoutingOverrideRequest
 {
-    /// <summary>PRD: "object"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("object")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Object { get; init; }
+    /// <summary>Contract member 'objectType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("objectType")]
+    public required string ObjectType { get; init; }
 
-    /// <summary>PRD: "target state"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("targetState")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? TargetState { get; init; }
+    /// <summary>Contract member 'key'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("key")]
+    public required string Key { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'masterState'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("masterState")]
+    public required MasterStateValue MasterState { get; init; }
+
+    /// <summary>Contract member 'from'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("from")]
+    public required global::CoreIns.SharedKernel.BusinessDate From { get; init; }
+
+    /// <summary>Contract member 'to'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("to")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.BusinessDate? To { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public required string Reason { get; init; }
 
-    /// <summary>PRD: "until"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("until")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Until { get; init; }
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<MasterStateValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum MasterStateValue
+    {
+        /// <summary><c>NONE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NONE")]
+        None,
+
+        /// <summary><c>TRANSITIONING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("TRANSITIONING")]
+        Transitioning,
+
+        /// <summary><c>CORE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CORE")]
+        Core,
+    }
 }

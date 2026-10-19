@@ -45,7 +45,8 @@ internal sealed class CreateExposureHandler(
     IEventPublisher events,
     ClaimProtection protection,
     ClaimReader reader,
-    IOptions<ClaimsOptions> options) : ICommandHandler<CreateExposure, ExposureCreateResponse>
+    IOptions<ClaimsOptions> options,
+    Microsoft.Extensions.Hosting.IHostEnvironment environment) : ICommandHandler<CreateExposure, ExposureCreateResponse>
 {
     private const string OpenUniqueIndex = "ux_exposure_open_coverage_claimant_incident";
 
@@ -79,6 +80,13 @@ internal sealed class CreateExposureHandler(
         var now = clock.Now;
         var actor = context.Actor.ToString();
         var partyId = request.ClaimantPartyId ?? claim.InsuredPartyId;
+
+        // D-SL4-09: MTPL exposures of third parties have no statutory clocks yet (statutory_clocks = NOT_TRACKED); Production refuses them.
+        if (request.Kind is ExposureKind.MtplPd or ExposureKind.MtplBi && partyId != claim.InsuredPartyId
+            && Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsProduction(environment))
+        {
+            return DomainError.Of(ModuleCode.CLM, "MTPL-CLOCKS-REQUIRED", "Third-party MTPL exposures need statutory clocks, which are not available yet.");
+        }
         var claimant = await db.Claimants.SingleOrDefaultAsync(c => c.ClaimId == claim.ClaimId && c.PartyId == partyId, cancellationToken).ConfigureAwait(false);
         if (claimant is null)
         {

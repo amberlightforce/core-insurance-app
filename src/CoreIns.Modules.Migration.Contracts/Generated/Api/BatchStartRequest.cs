@@ -4,15 +4,18 @@
 
 namespace CoreIns.Modules.Migration.Contracts.Api;
 
-/// <summary>mig.Batch.start request. PRD inputs: "batch id"</summary>
+/// <summary>mig.Batch.start request. dryRun=true simulates; a real run needs a prior matching dry run and an approved MIG.BATCH_RUN approval.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BatchStartRequest
 {
-    /// <summary>PRD: "batch id"</summary>
+    /// <summary>Contract member 'batchId'.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'batchId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("batchId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? BatchId { get; init; }
+    public required global::System.Guid BatchId { get; init; }
+
+    /// <summary>Contract member 'dryRun'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dryRun")]
+    public required bool DryRun { get; init; }
 }

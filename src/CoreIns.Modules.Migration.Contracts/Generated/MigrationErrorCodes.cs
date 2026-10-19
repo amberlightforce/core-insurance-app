@@ -22,19 +22,19 @@ public static class MigrationErrorCodes
 
     /// <summary>MIG-ERR-DEPENDENCY (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 7 operation(s): mig.Batch.get, mig.Batch.outcomes, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start.</para>
+    /// <para>Declared by 9 operation(s): mig.Batch.approve, mig.Batch.create, mig.Batch.get, mig.Batch.outcomes, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start.</para>
     /// </remarks>
     public const string Dependency = "MIG-ERR-DEPENDENCY";
 
     /// <summary>MIG-ERR-DRYRUN-REQUIRED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 7 operation(s): mig.Batch.get, mig.Batch.outcomes, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start.</para>
+    /// <para>Declared by 9 operation(s): mig.Batch.approve, mig.Batch.create, mig.Batch.get, mig.Batch.outcomes, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start.</para>
     /// </remarks>
     public const string DryrunRequired = "MIG-ERR-DRYRUN-REQUIRED";
 
     /// <summary>MIG-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 12 operation(s): mig.Archive.erase, mig.Archive.rectificationNote, mig.Archive.restrict, mig.Archive.subjectExport, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start, mig.ImportContract.conformance, mig.Routing.override, mig.Xref.register.</para>
+    /// <para>Declared by 14 operation(s): mig.Archive.erase, mig.Archive.rectificationNote, mig.Archive.restrict, mig.Archive.subjectExport, mig.Batch.approve, mig.Batch.create, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start, mig.ImportContract.conformance, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "MIG-ERR-IDEMPOTENCY-MISMATCH";
 
