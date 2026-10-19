@@ -565,3 +565,79 @@ internal sealed class MigrationImportRow
 
     public Instant ImportedAt { get; set; }
 }
+
+/// <summary>
+/// <c>pol.nonpay_cancellation</c>: one cancellation for non-payment asked for by BIL (SL6-POL-NONPAY). Unique per policy, term and clock, so a
+/// redelivery of the request returns the existing row (POL X-12). Status SCHEDULED (effective in the future), EXECUTED (the cancellation
+/// exists), EXCEPTION (a PSR exception decides), RESCINDED (the arrears were cured before it took effect, REQ-POL-211) or HELD (staff decided to hold).
+/// </summary>
+internal sealed class NonPaymentCancellationRow
+{
+    public Guid NonPaymentId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public PolicyId PolicyId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    /// <summary>The BIL clock instance (the exactly-once key with policy and term).</summary>
+    public Guid ClockInstanceId { get; set; }
+
+    /// <summary>BIL's request id (= its delinquency case id).</summary>
+    public Guid RequestId { get; set; }
+
+    public Guid SourceEventId { get; set; }
+
+    public string Status { get; set; } = "SCHEDULED";
+
+    /// <summary>Start of the day after the clock due date, Europe/Athens (D-SL6-04).</summary>
+    public Instant EffectiveAt { get; set; }
+
+    public decimal OverdueAmount { get; set; }
+
+    public string Currency { get; set; } = string.Empty;
+
+    public Guid NoticeDocumentId { get; set; }
+
+    public string ProofRef { get; set; } = string.Empty;
+
+    /// <summary>The cancellation job once EXECUTED.</summary>
+    public JobId? JobId { get; set; }
+
+    public Instant CreatedAt { get; set; }
+
+    public Instant UpdatedAt { get; set; }
+
+    public int RecordVersion { get; set; } = 1;
+}
+
+/// <summary><c>pol.psr_exception</c>: the PSR queue entry of a non-payment cancellation that a vulnerable-customer flag or a hold stopped (D-SL6-04).</summary>
+internal sealed class PsrExceptionRow
+{
+    public Guid ExceptionId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public Guid NonPaymentId { get; set; }
+
+    public PolicyId PolicyId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    /// <summary>VULNERABLE_CUSTOMER or HOLD.</summary>
+    public string Reason { get; set; } = string.Empty;
+
+    /// <summary>PENDING, PROCEED, HOLD or RESCINDED.</summary>
+    public string Status { get; set; } = "PENDING";
+
+    public Instant RaisedAt { get; set; }
+
+    public string? DecidedBy { get; set; }
+
+    public Instant? DecidedAt { get; set; }
+
+    public string? DecisionNote { get; set; }
+
+    public int RecordVersion { get; set; } = 1;
+}
