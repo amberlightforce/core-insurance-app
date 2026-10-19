@@ -394,6 +394,86 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.OosCorrectionRow", b =>
+                {
+                    b.Property<Guid>("SetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("set_id");
+
+                    b.Property<DateOnly>("BookingDate")
+                        .HasColumnType("date")
+                        .HasColumnName("booking_date");
+
+                    b.Property<Guid>("CorrectionOf")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correction_of");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("job_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mode");
+
+                    b.Property<decimal>("NetPremium")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("net_premium");
+
+                    b.Property<string>("OriginalRefs")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("original_refs");
+
+                    b.Property<bool>("PeriodLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("period_locked");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_id");
+
+                    b.HasKey("SetId")
+                        .HasName("pk_oos_correction");
+
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_oos_correction_policy");
+
+                    b.HasIndex("TransactionId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_oos_correction_transaction");
+
+                    b.ToTable("oos_correction", "pol", t =>
+                        {
+                            t.HasCheckConstraint("ck_oos_correction_mode", "mode IN ('NET', 'GROSS')");
+
+                            t.HasCheckConstraint("ck_oos_correction_status", "status IN ('APPLIED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.PackRollbackExceptionRow", b =>
                 {
                     b.Property<Guid>("ExceptionId")
@@ -1018,6 +1098,16 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_charge_line_transaction");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.OosCorrectionRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Policy.Persistence.PolicyTransactionRow", null)
+                        .WithMany()
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_oos_correction_transaction");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.PackRollbackExceptionRow", b =>

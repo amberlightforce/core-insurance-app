@@ -310,8 +310,43 @@ moduleRoutes.push({
   ],
 });
 
+moduleRoutes.push(
+  {
+    // Customer withdrawal declaration + confirmation (SL6-UI-CHN-WITHDRAW).
+    path: 'channels/withdrawal',
+    lazy: async () => ({
+      Component: (await import('./modules/channels/withdrawal/WithdrawalDeclarePage'))
+        .WithdrawalDeclarePage,
+    }),
+  },
+  {
+    path: 'channels/withdrawals',
+    lazy: async () => ({
+      Component: (await import('./modules/channels/withdrawal/RequireWithdrawalRole'))
+        .RequireWithdrawalRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/channels/withdrawal/WithdrawalListPage'))
+            .WithdrawalListPage,
+        }),
+      },
+      {
+        path: ':id',
+        lazy: async () => ({
+          Component: (await import('./modules/channels/withdrawal/WithdrawalDetailPage'))
+            .WithdrawalDetailPage,
+        }),
+      },
+    ],
+  },
+);
+
 const implemented = new Set([
   '/admin/packs',
+  '/channels/withdrawals',
   '/policies/pack-rollback',
   '/parties',
   '/policies',

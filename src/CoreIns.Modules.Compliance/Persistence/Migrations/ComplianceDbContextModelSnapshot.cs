@@ -23,6 +23,227 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Compliance.AiRegister.AiSystemRow", b =>
+                {
+                    b.Property<string>("FeatureId")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("feature_id");
+
+                    b.Property<string>("AiActClass")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("ai_act_class");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("approved_by");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("FeatureId")
+                        .HasName("pk_ai_system");
+
+                    b.ToTable("ai_system", "cmp", t =>
+                        {
+                            t.HasCheckConstraint("ck_ai_system_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_ai_system_status", "status IN ('DRAFT','IN_REVIEW','APPROVED','SUSPENDED','RETIRED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Persistence.ClockEventRow", b =>
+                {
+                    b.Property<Guid>("ClockEventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("clock_event_id");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actor");
+
+                    b.Property<Guid>("ClockId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("clock_id");
+
+                    b.Property<string>("Detail")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("detail");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.HasKey("ClockEventId")
+                        .HasName("pk_clock_event");
+
+                    b.HasIndex("ClockId", "OccurredAt")
+                        .HasDatabaseName("ix_clock_event_clock");
+
+                    b.ToTable("clock_event", "cmp");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Persistence.ClockRow", b =>
+                {
+                    b.Property<Guid>("ClockId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("clock_id");
+
+                    b.Property<string>("ClockCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("clock_code");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("closed_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("Deadline")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("deadline");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<bool>("MetLate")
+                        .HasColumnType("boolean")
+                        .HasColumnName("met_late");
+
+                    b.Property<string>("Outcome")
+                        .HasColumnType("text")
+                        .HasColumnName("outcome");
+
+                    b.Property<DateTime?>("PausedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("paused_at");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("SubjectId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("subject_id");
+
+                    b.Property<string>("SubjectModule")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("subject_module");
+
+                    b.Property<string>("SubjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("subject_type");
+
+                    b.Property<int>("ValueVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("value_version");
+
+                    b.Property<string>("Variant")
+                        .HasColumnType("text")
+                        .HasColumnName("variant");
+
+                    b.Property<DateTime?>("WarnAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("warn_at");
+
+                    b.HasKey("ClockId")
+                        .HasName("pk_clock");
+
+                    b.HasIndex("Status", "Deadline")
+                        .HasDatabaseName("ix_clock_status_deadline");
+
+                    b.HasIndex("SubjectModule", "SubjectType", "SubjectId")
+                        .HasDatabaseName("ix_clock_subject");
+
+                    b.HasIndex("LegalEntityId", "ClockCode", "SubjectModule", "SubjectType", "SubjectId", "Key")
+                        .IsUnique()
+                        .HasDatabaseName("ux_clock_instance");
+
+                    b.ToTable("clock", "cmp", t =>
+                        {
+                            t.HasCheckConstraint("ck_clock_kind", "kind IN ('WAITING_PERIOD','DEADLINE')");
+
+                            t.HasCheckConstraint("ck_clock_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_clock_status", "status IN ('RUNNING','WARNED','PAUSED','MET','BREACHED','ELAPSED','CANCELLED')");
+
+                            t.HasCheckConstraint("ck_clock_value_version", "value_version >= 1");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Compliance.Persistence.FiscalDocumentRow", b =>
                 {
                     b.Property<Guid>("FiscalDocumentId")
@@ -242,6 +463,16 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
                         .HasDatabaseName("ux_dsar_restriction_subject_class");
 
                     b.ToTable("dsar_restriction", "cmp");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Persistence.ClockEventRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Compliance.Persistence.ClockRow", null)
+                        .WithMany()
+                        .HasForeignKey("ClockId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_clock_event_clock");
                 });
 #pragma warning restore 612, 618
         }
