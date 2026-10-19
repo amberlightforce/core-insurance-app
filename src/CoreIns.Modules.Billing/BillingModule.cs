@@ -57,6 +57,7 @@ public static class BillingModule
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.delinquency_case TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.delinquency_contact TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.refund_credit, {Schema}.refund_netting TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.respread TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.receivable, {Schema}.receivable_allocation, {Schema}.allocation, {Schema}.credit_application, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",

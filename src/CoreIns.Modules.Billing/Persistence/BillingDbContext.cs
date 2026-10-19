@@ -22,6 +22,8 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
     public DbSet<ChargeRow> Charges => Set<ChargeRow>();
 
+    public DbSet<RespreadRow> Respreads => Set<RespreadRow>();
+
     public DbSet<InvoiceRow> Invoices => Set<InvoiceRow>();
 
     public DbSet<InvoiceItemRow> InvoiceItems => Set<InvoiceItemRow>();
@@ -178,8 +180,31 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.CancellationSource).HasColumnName("cancellation_source");
             entity.Property(e => e.TreatmentRuleId).HasColumnName("treatment_rule_id");
             entity.Property(e => e.TreatmentRuleVersion).HasColumnName("treatment_rule_version");
+            entity.Property(e => e.CorrectionOf).HasColumnName("correction_of");
+            entity.Property(e => e.OosSetId).HasColumnName("oos_set_id");
             entity.HasIndex(e => new { e.SetId, e.SetIndex }).IsUnique().HasDatabaseName("ux_charge_set_member");
             entity.HasIndex(e => e.TermId).HasDatabaseName("ix_charge_term");
+        });
+
+        modelBuilder.Entity<RespreadRow>(entity =>
+        {
+            entity.ToTable("respread", table => table.HasCheckConstraint("ck_respread_net", "net_amount = invoiced_amount - credited_amount"));
+            entity.HasKey(e => e.SetId).HasName("pk_respread");
+            entity.Property(e => e.SetId).HasColumnName("set_id");
+            entity.Property(e => e.OosSetId).HasColumnName("oos_set_id");
+            entity.Property(e => e.CorrectionOf).HasColumnName("correction_of");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.BillingAccountId).HasColumnName("billing_account_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
+            entity.Property(e => e.NetAmount).HasColumnName("net_amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.InvoicedAmount).HasColumnName("invoiced_amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.CreditedAmount).HasColumnName("credited_amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.PaidInvoicesUntouched).HasColumnName("paid_invoices_untouched");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.OosSetId).HasDatabaseName("ix_respread_oos_set");
+            entity.HasIndex(e => e.TermId).HasDatabaseName("ix_respread_term");
         });
 
         modelBuilder.Entity<InvoiceRow>(entity =>

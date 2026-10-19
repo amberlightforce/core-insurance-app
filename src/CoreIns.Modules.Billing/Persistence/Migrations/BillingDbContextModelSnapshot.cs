@@ -18,7 +18,7 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("bil")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -204,6 +204,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("charge_type");
 
+                    b.Property<Guid?>("CorrectionOf")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correction_of");
+
                     b.Property<string>("CorrelationKey")
                         .IsRequired()
                         .HasColumnType("text")
@@ -240,6 +244,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.Property<string>("LegalStatus")
                         .HasColumnType("text")
                         .HasColumnName("legal_status");
+
+                    b.Property<Guid?>("OosSetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("oos_set_id");
 
                     b.Property<Guid>("PolicyId")
                         .HasColumnType("uuid")
@@ -2404,6 +2412,77 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                             t.HasCheckConstraint("ck_refund_record_version", "record_version >= 1");
 
                             t.HasCheckConstraint("ck_refund_state", "state IN ('PROPOSED', 'PENDING_APPROVAL', 'APPROVED', 'HELD', 'DISBURSING', 'AWAITING_PROOF', 'PAID', 'REJECTED', 'RETURNED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.RespreadRow", b =>
+                {
+                    b.Property<Guid>("SetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("set_id");
+
+                    b.Property<Guid>("BillingAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("billing_account_id");
+
+                    b.Property<Guid?>("CorrectionOf")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correction_of");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<decimal>("CreditedAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("credited_amount");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<decimal>("InvoicedAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("invoiced_amount");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<decimal>("NetAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("net_amount");
+
+                    b.Property<Guid?>("OosSetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("oos_set_id");
+
+                    b.Property<int>("PaidInvoicesUntouched")
+                        .HasColumnType("integer")
+                        .HasColumnName("paid_invoices_untouched");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_id");
+
+                    b.HasKey("SetId")
+                        .HasName("pk_respread");
+
+                    b.HasIndex("OosSetId")
+                        .HasDatabaseName("ix_respread_oos_set");
+
+                    b.HasIndex("TermId")
+                        .HasDatabaseName("ix_respread_term");
+
+                    b.ToTable("respread", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_respread_net", "net_amount = invoiced_amount - credited_amount");
                         });
                 });
 
