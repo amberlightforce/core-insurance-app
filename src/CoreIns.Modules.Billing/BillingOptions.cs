@@ -57,6 +57,20 @@ internal sealed class BillingOptions
     [Required]
     public string TreatmentBusinessBasis { get; set; } = "ESTABLISHMENT";
 
+    /// <summary>
+    /// ILLUSTRATIVE (D-SL6-04; <c>bil.delinq.grace</c>): days an invoice may stay unpaid after its due date before a delinquency case
+    /// is opened.
+    /// </summary>
+    [Range(0, 365)]
+    public int DelinquencyGraceDays { get; set; } = 5;
+
+    /// <summary>
+    /// ILLUSTRATIVE (D-SL6-04, INV-11; <c>bil.delinq.tolerance</c>): arrears up to this amount do not lead to a cancellation request
+    /// when the waiting period elapses. The PRD names no value.
+    /// </summary>
+    [Range(typeof(decimal), "0", "100000")]
+    public decimal DelinquencyTolerance { get; set; } = 5.00m;
+
     /// <summary>Core money-source register rows (REQ-BIL-354); an absent row fails closed.</summary>
     public Dictionary<string, BillingSourceRow> Sources { get; set; } = new(StringComparer.Ordinal);
 

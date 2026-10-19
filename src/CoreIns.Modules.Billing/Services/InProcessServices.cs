@@ -181,3 +181,15 @@ internal sealed class ReceiptService(RequestContext context, ILegalEntityDirecto
                 : null,
             "receipt");
 }
+
+/// <summary><see cref="IBillingDelinquencyService"/>: <c>get</c> (REQ-BIL-006); cases are opened and moved by events, the API and the sweep.</summary>
+internal sealed class DelinquencyService(RequestContext context, ILegalEntityDirectory legalEntities, DelinquencyReader reader) : IBillingDelinquencyService
+{
+    public async Task<DelinquencyGetResponse> GetAsync(string id, CancellationToken cancellationToken = default) =>
+        new()
+        {
+            Process = (Guid.TryParse(id, out var guid)
+                ? await reader.GetAsync(InProcess.LegalEntity(context, legalEntities), guid, cancellationToken).ConfigureAwait(false)
+                : null) ?? throw new DomainException(BillingErrors.NotFound("delinquency case")),
+        };
+}
