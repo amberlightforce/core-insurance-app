@@ -4,9 +4,9 @@ import { call, eventually, signIn, type Json } from './api.js';
 // Slice 3 helpers (SL3-E2E-HARNESS): the time-shifted environment and complete-set journal waits.
 
 /** Advances the shiftable dev clock (POST /api/plt/v1/dev/clock/advance, Platform.Admin, forward-only; D-SL3-12). */
-export async function advanceClock(request: APIRequestContext, advance: { days?: number; hours?: number }): Promise<Json> {
+export async function advanceClock(request: APIRequestContext, advance: { days?: number; hours?: number; minutes?: number; seconds?: number }): Promise<Json> {
   const admin = await signIn(request, 'admin');
-  const result = await call(request, admin, 'POST', '/api/plt/v1/dev/clock/advance', { days: advance.days ?? 0, hours: advance.hours ?? 0 });
+  const result = await call(request, admin, 'POST', '/api/plt/v1/dev/clock/advance', { days: advance.days ?? 0, hours: advance.hours ?? 0, minutes: advance.minutes ?? 0, seconds: advance.seconds ?? 0 });
   expect(result.status, `advance the dev clock: ${result.text}`).toBe(200);
   return result.body;
 }

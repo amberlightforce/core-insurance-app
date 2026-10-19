@@ -1,6 +1,10 @@
 using CoreIns.Modules.Claims.Authority;
 using CoreIns.Modules.Claims.Commands;
+using CoreIns.Modules.Claims.Commands.Payments;
+using CoreIns.Modules.Claims.Commands.FriendlySettlement;
+using CoreIns.Modules.Claims.Api;
 using CoreIns.Modules.Claims.Commands.Recoveries;
+using CoreIns.Modules.Compliance.Contracts.Events;
 using CoreIns.Modules.Claims.Contracts;
 using CoreIns.Modules.Claims.Contracts.Api;
 using CoreIns.Modules.Billing.Contracts.Events;
@@ -89,8 +93,11 @@ public static class ClaimsModule
         services.AddScoped<FinancialsReader>();
         services.AddScoped<SetLifecycle>();
         services.AddScoped<IClaimFinancialEngine, ClaimFinancialEngine>();
+        services.TryAddScoped<IClaimFinancialEvidenceSource, ChainedClaimFinancialEvidenceSource>();
+        services.AddScoped<IClaimFinancialEvidenceProvider, FsEvidenceProvider>();
+        services.AddScoped<IClaimFinancialEvidenceProvider, FsStatementEvidenceProvider>();
         services.AddScoped<RecoveryCashBuffer>();
-        services.AddScoped<IClaimFinancialEvidenceSource, RecoveryEvidenceSource>();
+        services.AddScoped<IClaimFinancialEvidenceProvider, RecoveryEvidenceSource>();
         services.TryAddScoped<IClaimFinancialGuard, DerivedClaimFinancials>();
 
         services.AddScoped<IValidator<BuildTransactionSet>, BuildTransactionSetValidator>();
@@ -120,6 +127,35 @@ public static class ClaimsModule
         services.AddEventHandler<DisbursementClearedV1, DisbursementClearedHandler>(
             EventDescriptor.From(DisbursementClearedV1.Descriptor), DisbursementClearedHandler.Name, ModuleCode.CLM);
 
+        // Payment corrections (SL4-CLM-PAYOPS): void, stop, reissue, BIL's correction facts, the settlement receipt and its MARK.
+        services.AddScoped<PaymentCorrections>();
+        services.AddScoped<SettlementReceipt>();
+        services.AddScoped<IValidator<VoidPayment>, VoidPaymentValidator>();
+        services.AddCommandAuditor<VoidPayment, PaymentVoidResponse, VoidPaymentAuditor>();
+        services.AddCommand<VoidPayment, PaymentVoidResponse, VoidPaymentHandler>(CommandDescriptor.For("clm.Payment.void") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<StopPayment>, StopPaymentValidator>();
+        services.AddCommandAuditor<StopPayment, PaymentStopResponse, StopPaymentAuditor>();
+        services.AddCommand<StopPayment, PaymentStopResponse, StopPaymentHandler>(CommandDescriptor.For("clm.Payment.stop") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ReissuePayment>, ReissuePaymentValidator>();
+        services.AddCommandAuditor<ReissuePayment, PaymentReissueResponse, ReissuePaymentAuditor>();
+        services.AddCommand<ReissuePayment, PaymentReissueResponse, ReissuePaymentHandler>(CommandDescriptor.For("clm.Payment.reissue") with { SupportsDryRun = true });
+        services.AddCommandAuditor<RecordDisbursementCorrection, string, RecordDisbursementCorrectionAuditor>();
+        services.AddCommand<RecordDisbursementCorrection, string, RecordDisbursementCorrectionHandler>(
+            CommandDescriptor.For("clm.Payment.recordCorrection") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddCommandAuditor<RecordPaymentFiscalMark, string, RecordPaymentFiscalMarkAuditor>();
+        services.AddCommand<RecordPaymentFiscalMark, string, RecordPaymentFiscalMarkHandler>(
+            CommandDescriptor.For("clm.Payment.recordFiscalMark") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddEventHandler<DisbursementStoppedV1, DisbursementStoppedHandler>(
+            EventDescriptor.From(DisbursementStoppedV1.Descriptor), DisbursementStoppedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementVoidedV1, DisbursementVoidedHandler>(
+            EventDescriptor.From(DisbursementVoidedV1.Descriptor), DisbursementVoidedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementReturnedV1, DisbursementReturnedHandler>(
+            EventDescriptor.From(DisbursementReturnedV1.Descriptor), DisbursementReturnedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementRejectedV1, DisbursementRejectedHandler>(
+            EventDescriptor.From(DisbursementRejectedV1.Descriptor), DisbursementRejectedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<FiscalDocRegisteredV1, FiscalDocRegisteredHandler>(
+            EventDescriptor.From(FiscalDocRegisteredV1.Descriptor), FiscalDocRegisteredHandler.Name, ModuleCode.CLM);
+
         // Re-verification (SL3-CLM-REVERIFY, REQ-CLM-057/058): POL changes raise a demand, a human keeps or adopts (REQ-CLM-002).
         services.AddCommandAuditor<RaiseReverification, int, RaiseReverificationAuditor>();
         services.AddCommand<RaiseReverification, int, RaiseReverificationHandler>(
@@ -144,6 +180,38 @@ public static class ClaimsModule
         services.AddCommandAuditor<CreateExposure, ExposureCreateResponse, CreateExposureAuditor>();
         services.AddCommand<CreateExposure, ExposureCreateResponse, CreateExposureHandler>(CommandDescriptor.For("clm.Exposure.create") with { SupportsDryRun = true });
 
+        // Friendly Settlement case (SL4-CLM-FS-CASE, REQ-CLM-155..158): capability-gated, SPI-backed; the statement WP adds its own commands.
+        services.AddScoped<FsGate>();
+        services.AddScoped<FsCaseReader>();
+        services.AddScoped<IValidator<EvaluateFriendlySettlement>, EvaluateFriendlySettlementValidator>();
+        services.AddCommandAuditor<EvaluateFriendlySettlement, FsEvaluateResponse, EvaluateFriendlySettlementAuditor>();
+        services.AddCommand<EvaluateFriendlySettlement, FsEvaluateResponse, EvaluateFriendlySettlementHandler>(CommandDescriptor.For("clm.FriendlySettlement.evaluate"));
+        services.AddScoped<IValidator<OpenOwnSettlement>, OpenOwnSettlementValidator>();
+        services.AddCommandAuditor<OpenOwnSettlement, FsOpenOwnSettlementResponse, OpenOwnSettlementAuditor>();
+        services.AddCommand<OpenOwnSettlement, FsOpenOwnSettlementResponse, OpenOwnSettlementHandler>(CommandDescriptor.For("clm.FriendlySettlement.openOwnSettlement"));
+        services.AddScoped<IValidator<SubmitFriendlySettlement>, SubmitFriendlySettlementValidator>();
+        services.AddCommandAuditor<SubmitFriendlySettlement, FsSubmitResponse, SubmitFriendlySettlementAuditor>();
+        services.AddCommand<SubmitFriendlySettlement, FsSubmitResponse, SubmitFriendlySettlementHandler>(CommandDescriptor.For("clm.FriendlySettlement.submit"));
+        // Inbound clearing notification (dev endpoint only in slice 4); idempotent on the clearing reference, so no idempotency key.
+        services.AddCommandAuditor<ReceiveFsNotification, FsNotificationReceived, ReceiveFsNotificationAuditor>();
+        services.AddCommand<ReceiveFsNotification, FsNotificationReceived, ReceiveFsNotificationHandler>(
+            CommandDescriptor.For("clm.FriendlySettlement.receiveNotification") with { RequiresIdempotencyKey = false, Idempotent = false });
+        // Clearing statement (SL4-CLM-FS-STATEMENT, REQ-CLM-160/-264): import + match, net per counterparty, approval, hand-over to BIL, outcome.
+        services.AddScoped<FsStatementReader>();
+        services.AddScoped<FsStatementMatcher>();
+        services.AddScoped<FsNetHandOver>();
+        services.AddScoped<FsNetSettler>();
+        services.AddScoped<IValidator<ImportFsStatement>, ImportFsStatementValidator>();
+        services.AddCommandAuditor<ImportFsStatement, FsImportStatementResponse, ImportFsStatementAuditor>();
+        services.AddCommand<ImportFsStatement, FsImportStatementResponse, ImportFsStatementHandler>(CommandDescriptor.For("clm.FriendlySettlement.importStatement"));
+        services.AddScoped<IValidator<ApproveFsNet>, ApproveFsNetValidator>();
+        services.AddCommandAuditor<ApproveFsNet, FsApproveNetResponse, ApproveFsNetAuditor>();
+        services.AddCommand<ApproveFsNet, FsApproveNetResponse, ApproveFsNetHandler>(CommandDescriptor.For("clm.FriendlySettlement.approveNet") with { SupportsDryRun = true });
+        services.AddEventHandler<ApprovalDecidedV1, FsNetApprovalDecidedHandler>(EventDescriptor.From(ApprovalDecidedV1.Descriptor), FsNetApprovalDecidedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementClearedV1, FsDisbursementClearedHandler>(EventDescriptor.From(DisbursementClearedV1.Descriptor), FsDisbursementClearedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementRejectedV1, FsDisbursementRejectedHandler>(EventDescriptor.From(DisbursementRejectedV1.Descriptor), FsDisbursementRejectedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementStoppedV1, FsDisbursementStoppedHandler>(EventDescriptor.From(DisbursementStoppedV1.Descriptor), FsDisbursementStoppedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<CashAllocatedV1, FsReceivableCollectedHandler>(EventDescriptor.From(CashAllocatedV1.Descriptor), FsReceivableCollectedHandler.Name, ModuleCode.CLM);
         // Recoveries (SL4-CLM-RECOVERY-OPS): cases, milestones, BIL demand, write-off; cash only from BIL evidence.
         services.AddScoped<RecoveryReader>();
         services.AddScoped<IValidator<CreateRecovery>, CreateRecoveryValidator>();
@@ -219,12 +287,16 @@ public static class ClaimsModule
             .Describe("Το νέο στιγμιότυπο δεν είναι πλέον ο διάδοχος του στιγμιοτύπου της ζημίας· φορτώστε ξανά τη ζημία και αποφασίστε με το τρέχον.", "The new snapshot is no longer the successor of the claim's snapshot; reload the claim and decide against the current one."),
         ErrorDefinition.For(ModuleCode.CLM, "COVERAGE-IN-QUESTION", 422, "Η κάλυψη της έκθεσης αμφισβητείται", "The exposure's cover is in question")
             .Describe("Το νέο στιγμιότυπο που υιοθετήθηκε δεν καλύπτει την έκθεση· δεν επιτρέπονται νέες πληρωμές μέχρι απόφαση κάλυψης.", "The adopted snapshot no longer covers the exposure; no new payments until a coverage decision."),
+        ErrorDefinition.For(ModuleCode.CLM, "FS-DISABLED", 422, "Ο Φιλικός Διακανονισμός δεν είναι διαθέσιμος", "Friendly Settlement is not available")
+            .Describe("Η δυνατότητα είναι ανενεργή για τη δικαιοδοσία ή δεν υπάρχει προσαρμογέας εκκαθάρισης.", "The capability is off for the jurisdiction or no clearing adapter is bound."),
         ErrorDefinition.For(ModuleCode.CLM, "RECOVERY-STATE", 422, "Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση της ανάκτησης", "The action is not allowed in the recovery state")
             .Describe("Δείτε το διάγραμμα καταστάσεων της ανάκτησης (Ανοιχτή, Αξιωθείσα, Αμφισβητούμενη, Συμφωνημένη, Κλειστή).", "See the recovery state model (Open, Demanded, Disputed, Agreed, Closed, Written off)."),
         ErrorDefinition.For(ModuleCode.CLM, "ALLOCATION", 422, "Μη έγκυρη κατανομή ανάκτησης", "The recovery allocation is invalid")
             .Describe("Η κατανομή πρέπει να αθροίζει στο ποσό και να αναφέρεται σε εκθέσεις της ζημίας.", "The allocation must sum to the amount and name exposures of the claim."),
         ErrorDefinition.For(ModuleCode.CLM, "MTPL-CLOCKS-REQUIRED", 422, "Οι νόμιμες προθεσμίες ΑΠΟ δεν παρακολουθούνται", "MTPL statutory clocks are not tracked")
             .Describe("Στην παραγωγή δεν δημιουργούνται εκθέσεις αστικής ευθύνης τρίτων μέχρι να υλοποιηθούν οι προθεσμίες.", "Production does not create third-party MTPL exposures until the statutory clocks exist."),
+        ErrorDefinition.For(ModuleCode.CLM, "NOT-STOPPABLE", 422, "Η πληρωμή δεν μπορεί πλέον να σταματήσει", "The payment can no longer be stopped")
+            .Describe("Η εντολή έχει ήδη εκτελεστεί ή εκκαθαριστεί στην τράπεζα· δεν ακυρώνεται. Αναμείνατε επιστροφή ή ξεκινήστε ανάκτηση.", "The disbursement has been executed or cleared; it cannot be stopped. Wait for a return or start a recovery."),
         ErrorDefinition.For(ModuleCode.CLM, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

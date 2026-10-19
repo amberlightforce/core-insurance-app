@@ -1,6 +1,7 @@
 using CoreIns.Modules.Billing.Domain;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -49,14 +50,25 @@ internal sealed class StubPayeeVerifier : IPayeeVerifier
 /// file and no external call, so Released → Issued → Cleared happens deterministically in the releasing transaction.
 /// Never bound in Production.
 /// </summary>
-internal sealed class StubBankChannel : IBankChannel
+internal sealed class StubBankChannel(IConfiguration? configuration = null) : IBankChannel
 {
     public const string ReferencePrefix = "STUB-";
+
+    /// <summary>Configuration key of the stub-bank mode: <c>Auto</c> (default) or <c>Manual</c> (SL4-BIL-DISBOPS, D-SL4-13).</summary>
+    public const string ModeKey = "Billing:StubBank:Mode";
+
+    /// <summary>
+    /// True when the stub holds every released payment at Released until the dev bank endpoints
+    /// (<c>/dev/bank/disbursements/{id}/issue|clear|return|reject</c>) move it on, so tests can stop, void or return it.
+    /// </summary>
+    public bool Manual => string.Equals(configuration?[ModeKey], "Manual", StringComparison.OrdinalIgnoreCase);
 
     public Task<BankOutcome> SubmitAsync(BankInstruction instruction, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(instruction);
-        return Task.FromResult(new BankOutcome(true, true, instruction.ValueDate, ReferencePrefix + instruction.EndToEndId));
+        return Task.FromResult(Manual
+            ? new BankOutcome(false, false, instruction.ValueDate, string.Empty)
+            : new BankOutcome(true, true, instruction.ValueDate, ReferencePrefix + instruction.EndToEndId));
     }
 }
 

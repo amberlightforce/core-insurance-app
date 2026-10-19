@@ -2,7 +2,7 @@ using Mono.Cecil;
 
 namespace CoreIns.ArchitectureTests;
 
-/// <summary>SL6-DSAR-SPI: IDsarParticipant implementations live only in module implementation projects (D-SL6-07).</summary>
+/// <summary>SL6-DSAR-SPI: IDsarParticipant implementations live only in module implementation projects (D-SL6-07), plus the one restrict-only PLT participant in Platform.</summary>
 public sealed class DsarParticipantRuleTests
 {
     [Fact]
@@ -21,7 +21,7 @@ public sealed class DsarParticipantRuleTests
 
             using var asm = ModuleDefinition.ReadModule(path);
             offenders.AddRange(asm.Types
-                .Where(t => t.Interfaces.Any(i => i.InterfaceType.FullName == "CoreIns.SharedKernel.Dsar.IDsarParticipant"))
+                .Where(t => t.FullName != "CoreIns.Platform.Dsar.PlatformDsarParticipant" && t.Interfaces.Any(i => i.InterfaceType.FullName == "CoreIns.SharedKernel.Dsar.IDsarParticipant"))
                 .Select(t => $"{project}: {t.FullName}"));
         }
 

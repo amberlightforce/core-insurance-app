@@ -29,6 +29,7 @@ internal sealed class RecordDisbursementOutcomeHandler(
     IClock clock,
     IEventPublisher events,
     ClaimProtection protection,
+    CoreIns.Modules.Claims.Commands.Payments.SettlementReceipt receipt,
     IOptions<ClaimsOptions> options) : ICommandHandler<RecordDisbursementOutcome, string>
 {
     public async Task<Result<string>> HandleAsync(RecordDisbursementOutcome command, CancellationToken cancellationToken)
@@ -82,6 +83,8 @@ internal sealed class RecordDisbursementOutcomeHandler(
         var lines = await db.ReserveLines.AsNoTracking().Where(l => lineIds.Contains(l.ReserveLineId)).ToDictionaryAsync(l => l.ReserveLineId, cancellationToken)
             .ConfigureAwait(false);
         var claimKey = claim.ClaimId.Value.ToString();
+        // REQ-CLM-138: the settlement receipt is requested once, when the payment is issued (never blocks; CMP decides if one is required).
+        await receipt.RequestAsync(payment, [.. transactions.Select(t => (lines[t.ReserveLineId].CostType, t.Amount))], cancellationToken).ConfigureAwait(false);
         events.Publish(new OutgoingEvent(
             EventDescriptor.From(PaymentIssuedV1.Descriptor),
             ClaimEvents.AggregateType,

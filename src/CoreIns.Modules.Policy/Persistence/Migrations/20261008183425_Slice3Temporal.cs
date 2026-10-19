@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Policy.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Slice3Temporal : Migration
+    public partial class Slice3Temporal : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

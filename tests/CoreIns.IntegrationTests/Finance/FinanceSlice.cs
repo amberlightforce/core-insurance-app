@@ -70,7 +70,11 @@ internal sealed class FinanceSlice(Microsoft.AspNetCore.Mvc.Testing.WebApplicati
     }
 
     /// <summary>BIL BillingEntryPosted with the given sub-ledger lines.</summary>
-    public Task<EventEnvelope> EntryAsync(Guid billingAccount, string entryType, string date, params JsonObject[] lines)
+    public Task<EventEnvelope> EntryAsync(Guid billingAccount, string entryType, string date, params JsonObject[] lines) =>
+        EntryInSetAsync(billingAccount, entryType, date, null, lines);
+
+    /// <summary>BIL BillingEntryPosted that is one member of a delta set (D4).</summary>
+    public Task<EventEnvelope> EntryInSetAsync(Guid billingAccount, string entryType, string date, EventSet? set, params JsonObject[] lines)
     {
         var entryId = Guid.CreateVersion7();
         var payload = Sample("bil", "BillingEntryPosted");
@@ -80,7 +84,7 @@ internal sealed class FinanceSlice(Microsoft.AspNetCore.Mvc.Testing.WebApplicati
         payload["businessDate"] = date;
         payload["lines"] = new JsonArray([.. lines]);
         return PublishAsync(BillingEntryPostedV1.Descriptor, "BillingAccount", billingAccount.ToString(), payload,
-            BusinessKeys.Empty.With("entryId", entryId.ToString()).With("billingAccountId", billingAccount.ToString()));
+            BusinessKeys.Empty.With("entryId", entryId.ToString()).With("billingAccountId", billingAccount.ToString()), set);
     }
 
     /// <summary>

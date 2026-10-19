@@ -4,31 +4,22 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Dsar.create result. PRD outputs: "request, tasks, package"</summary>
+/// <summary>cmp.Dsar.create result: the case, its tasks and the package once compiled</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DsarCreateResponse
 {
-    /// <summary>PRD: "request"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'request'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("request")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Request { get; init; }
+    public global::CoreIns.Modules.Compliance.Contracts.Api.DsarRequestView? Request { get; init; }
 
-    /// <summary>PRD: "tasks"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'tasks'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("tasks")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Tasks { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Compliance.Contracts.Api.DsarTaskView>? Tasks { get; init; }
 
-    /// <summary>PRD: "package"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'package'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("package")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Package { get; init; }
+    public global::CoreIns.Modules.Compliance.Contracts.Api.DsarPackageView? Package { get; init; }
 }

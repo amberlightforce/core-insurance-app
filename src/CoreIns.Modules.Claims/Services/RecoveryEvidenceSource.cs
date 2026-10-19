@@ -27,7 +27,7 @@ internal sealed class RecoveryCashBuffer
 /// Resolves <c>BIL_ALLOCATION</c> evidence into RECOVERY lines (REQ-CLM-151, BR-CLM-039): default pro rata to the amount paid
 /// per reserve line, or the allocation specified at demand (scaled to the cash received). Any other evidence kind is not ours.
 /// </summary>
-internal sealed class RecoveryEvidenceSource(ClaimsDbContext db, RecoveryCashBuffer buffer, FinancialsReader financials, Microsoft.Extensions.Options.IOptions<ClaimsOptions> options) : IClaimFinancialEvidenceSource
+internal sealed class RecoveryEvidenceSource(ClaimsDbContext db, RecoveryCashBuffer buffer, FinancialsReader financials, Microsoft.Extensions.Options.IOptions<ClaimsOptions> options) : IClaimFinancialEvidenceProvider
 {
     public async Task<ResolvedClaimFinancialEvidence?> ResolveAsync(ClaimId claimId, ClaimFinancialEvidence evidence, CancellationToken cancellationToken)
     {

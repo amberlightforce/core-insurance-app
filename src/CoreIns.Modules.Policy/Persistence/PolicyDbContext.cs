@@ -35,7 +35,13 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
 
     public DbSet<WithdrawalRow> Withdrawals => Set<WithdrawalRow>();
 
+    public DbSet<NonPaymentCancellationRow> NonPaymentCancellations => Set<NonPaymentCancellationRow>();
+
+    public DbSet<PsrExceptionRow> PsrExceptions => Set<PsrExceptionRow>();
+
     public DbSet<OosCorrectionRow> OosCorrections => Set<OosCorrectionRow>();
+
+    public DbSet<MigrationImportRow> MigrationImports => Set<MigrationImportRow>();
 
     protected override string Schema => PolicyModule.Schema;
 
@@ -316,9 +322,26 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.TreatmentRuleId).HasColumnName("treatment_rule_id");
             entity.Property(e => e.TreatmentRuleVersion).HasColumnName("treatment_rule_version");
             entity.HasIndex(e => new { e.TransactionId, e.SetIndex }).IsUnique().HasDatabaseName("ux_charge_line_set");
+            entity.Property(e => e.Opening).HasColumnName("opening").HasDefaultValue(false);
             entity.HasIndex(e => e.TermId).HasDatabaseName("ix_charge_line_term");
             entity.HasOne<PolicyTransactionRow>().WithMany().HasForeignKey(e => e.TransactionId)
                 .HasConstraintName("fk_charge_line_transaction").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<MigrationImportRow>(entity =>
+        {
+            entity.ToTable("migration_import", table => table.HasCheckConstraint("ck_migration_import_mode", "mode IN ('OPENING', 'RENEWAL_BASED')"));
+            entity.HasKey(e => e.PolicyId).HasName("pk_migration_import");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.BatchId).HasColumnName("batch_id");
+            entity.Property(e => e.LegacyNumber).HasColumnName("legacy_number");
+            entity.Property(e => e.Mode).HasColumnName("mode");
+            entity.Property(e => e.BaselineHash).HasColumnName("baseline_hash");
+            entity.Property(e => e.ImportedAt).HasColumnName("imported_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.BatchId).HasDatabaseName("ix_migration_import_batch");
+            entity.HasIndex(e => new { e.LegalEntityId, e.LegacyNumber }).IsUnique().HasDatabaseName("ux_migration_import_legacy");
         });
 
         modelBuilder.Entity<OosCorrectionRow>(entity =>
@@ -347,6 +370,59 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_oos_correction_policy");
             entity.HasOne<PolicyTransactionRow>().WithMany().HasForeignKey(e => e.TransactionId)
                 .HasConstraintName("fk_oos_correction_transaction").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<NonPaymentCancellationRow>(entity =>
+        {
+            entity.ToTable("nonpay_cancellation", table =>
+                table.HasCheckConstraint("ck_nonpay_cancellation_status", "status IN ('SCHEDULED', 'EXECUTED', 'EXCEPTION', 'RESCINDED', 'HELD')"));
+            entity.HasKey(e => e.NonPaymentId).HasName("pk_nonpay_cancellation");
+            entity.Property(e => e.NonPaymentId).HasColumnName("nonpay_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.ClockInstanceId).HasColumnName("clock_instance_id");
+            entity.Property(e => e.RequestId).HasColumnName("request_id");
+            entity.Property(e => e.SourceEventId).HasColumnName("source_event_id");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.EffectiveAt).HasColumnName("effective_at").HasColumnType("timestamptz");
+            entity.Property(e => e.OverdueAmount).HasColumnName("overdue_amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.Property(e => e.NoticeDocumentId).HasColumnName("notice_document_id");
+            entity.Property(e => e.ProofRef).HasColumnName("proof_ref");
+            entity.Property(e => e.JobId).HasColumnName("job_id");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.PolicyId, e.TermId, e.ClockInstanceId }).IsUnique().HasDatabaseName("ux_nonpay_cancellation_policy_term_clock");
+            entity.HasIndex(e => e.RequestId).HasDatabaseName("ix_nonpay_cancellation_request");
+            entity.HasIndex(e => new { e.Status, e.EffectiveAt }).HasDatabaseName("ix_nonpay_cancellation_due");
+        });
+
+        modelBuilder.Entity<PsrExceptionRow>(entity =>
+        {
+            entity.ToTable("psr_exception", table =>
+            {
+                table.HasCheckConstraint("ck_psr_exception_status", "status IN ('PENDING', 'PROCEED', 'HOLD', 'RESCINDED')");
+                table.HasCheckConstraint("ck_psr_exception_reason", "reason IN ('VULNERABLE_CUSTOMER', 'HOLD')");
+            });
+            entity.HasKey(e => e.ExceptionId).HasName("pk_psr_exception");
+            entity.Property(e => e.ExceptionId).HasColumnName("exception_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.NonPaymentId).HasColumnName("nonpay_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.Reason).HasColumnName("reason");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.RaisedAt).HasColumnName("raised_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecidedBy).HasColumnName("decided_by");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecisionNote).HasColumnName("decision_note");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => e.NonPaymentId).IsUnique().HasDatabaseName("ux_psr_exception_nonpay");
+            entity.HasIndex(e => new { e.LegalEntityId, e.Status, e.RaisedAt }).HasDatabaseName("ix_psr_exception_queue");
+            entity.HasOne<NonPaymentCancellationRow>().WithMany().HasForeignKey(e => e.NonPaymentId)
+                .HasConstraintName("fk_psr_exception_nonpay").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<PackRollbackExceptionRow>(entity =>

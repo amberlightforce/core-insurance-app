@@ -113,6 +113,29 @@ const moduleRoutes: RouteObject[] = [
     ],
   },
   {
+    // SL6-UI-BIL-DELINQ: delinquency cases (billing roles; guard shared with refunds).
+    path: 'billing/delinquency',
+    lazy: async () => ({
+      Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
+    }),
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/delinquency/DelinquencyListPage'))
+            .DelinquencyListPage,
+        }),
+      },
+      {
+        path: ':delinquencyId',
+        lazy: async () => ({
+          Component: (await import('./modules/billing/delinquency/DelinquencyDetailPage'))
+            .DelinquencyDetailPage,
+        }),
+      },
+    ],
+  },
+  {
     path: 'billing/releases',
     lazy: async () => ({
       Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
