@@ -21,6 +21,7 @@ tags:
 - name: Submission
 - name: Job
 - name: PolicyChange
+- name: Change
 - name: Cancellation
 - name: Withdrawal
 - name: Reinstatement
@@ -1307,6 +1308,88 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PolicyChangeCreateRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyChangeCreateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '429':
+          $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pol/v1/policy-changes/out-of-sequence:
+    post:
+      operationId: pol.Change.createOutOfSequence
+      summary: Start out-of-sequence change
+      description: |-
+        Start a mid-term change whose effective time is earlier than the term's latest bound transaction. The job is edited, quoted and bound
+        like any change; the bind reverses the later segments, applies this change and re-applies the later ones (re-rated under the term's pinned
+        artefacts) in one transaction (REQ-POL-006, D-SL6-10). Mode NET (default, final for P1-P2) emits one net delta set; a finance month that is
+        locked is never booked into: the correction books in the first open period with correctionOf set (G5, REQ-POL-108).
+      tags:
+      - Change
+      x-requirement:
+      - REQ-POL-006
+      - REQ-POL-108
+      x-wave: W6
+      x-work-packages:
+      - SL6-POL-OOS
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'The bind of the job is dry-runnable'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      x-permission: pol.Change.createOutOfSequence
+      x-error-codes:
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 422
+      - code: POL-ERR-EFFDATE-LIMIT
+        status: 422
+      - code: POL-ERR-AFTER-CANCELLATION
+        status: 422
+      - code: POL-ERR-JOB-CONFLICT
+        status: 409
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      - code: POL-ERR-VALIDATION
+        note: mode GROSS is not enabled for P1-P2 (D-SL6-10)
+        status: 422
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-05 §8.1
+      - orchestration/SLICE-PLAN-6.md D-SL6-10
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeCreateOutOfSequenceRequest'
       responses:
         '201':
           description: Success
@@ -5408,6 +5491,28 @@ components:
         description:
           $ref: ../events/common.schema.json#/$defs/Text
           description: Free-text description of the change; no personal data
+      required:
+      - policyId
+      - effectiveAt
+    ChangeCreateOutOfSequenceRequest:
+      type: object
+      description: 'pol.Change.createOutOfSequence request (REQ-POL-006). The effective time may be earlier than the latest bound transaction of the term;
+        the effective-date limits still apply. Mode NET is the default and final for P1-P2 (D-SL6-10); GROSS is refused.'
+      properties:
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Effective time of the change (valid time)
+        description:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Free-text description of the change; no personal data
+        mode:
+          type: string
+          enum:
+          - NET
+          - GROSS
+          description: Delta mode of the correction set; NET when absent
       required:
       - policyId
       - effectiveAt

@@ -81,6 +81,12 @@
         "provisional": true
       }
     },
+    "pol.Change.createOutOfSequence": {
+      "jobId": "0192aa08-58d8-73d8-8fd2-19d71a1fbb5e",
+      "state": "DRAFT",
+      "termId": "0192081e-52c0-7d2a-8747-12f583bf35a8",
+      "baseTransactionId": "01925f57-30ef-730f-846a-489f927f08cc"
+    },
     "pol.Charges.reconcile": {
       "differences": "unspecified"
     },
@@ -1570,6 +1576,12 @@
     "CancellationScheduleResponse": {
       "jobId": "0192ffd1-d0ee-7157-833f-9b4c33f98c28",
       "refundPreview": "unspecified"
+    },
+    "ChangeCreateOutOfSequenceRequest": {
+      "policyId": "0192cfb8-f3c9-7651-8f8b-c803c52bfeb2",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "description": "Sample text",
+      "mode": "NET"
     },
     "ChargeLine": {
       "chargeId": "01925fbf-fe7d-7b2c-88e8-340b4238207d",
