@@ -23,9 +23,9 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [WRK](#wrk) | 58 | 23 | 35 | 40 | 18 | 9 | 3 | 14 |
 | [PLT](#plt) | 100 | 64 | 36 | 63 | 37 | 26 | 0 | 10 |
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
-| [MIG](#mig) | 20 | 20 | 0 | 12 | 8 | 5 | 0 | 13 |
+| [MIG](#mig) | 22 | 22 | 0 | 14 | 8 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 36 | 12 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1142 | 928 | 214 | 742 | 400 | 129 | 69 | 65 |
+| **Total** | 1144 | 930 | 214 | 744 | 400 | 129 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -1312,6 +1312,8 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `mig.Archive.restrict` | POST `/api/mig/v1/archives/restrict` | C |  | internal |  | W9 | full | REQ-MIG-006 |
 | `mig.Archive.search` | GET `/api/mig/v1/archives/search` | Q |  | ui |  | W9 | full | REQ-MIG-196 |
 | `mig.Archive.subjectExport` | POST `/api/mig/v1/archives/subject-export` | C |  | internal |  | W9 | full | REQ-MIG-006 |
+| `mig.Batch.approve` | POST `/api/mig/v1/batches/approve` | C |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
+| `mig.Batch.create` | POST `/api/mig/v1/batches` | C |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
 | `mig.Batch.get` | GET `/api/mig/v1/batches/{id}` | Q |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
 | `mig.Batch.outcomes` | GET `/api/mig/v1/batches/outcomes` | Q |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
 | `mig.Batch.pause` | POST `/api/mig/v1/batches/pause` | C |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |

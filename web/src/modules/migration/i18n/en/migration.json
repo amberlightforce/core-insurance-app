@@ -1,0 +1,144 @@
+{
+  "overline": "Data migration",
+  "status": {
+    "DRAFT": "Draft",
+    "PENDING_APPROVAL": "Pending approval",
+    "REJECTED": "Rejected",
+    "RUNNING": "Running",
+    "COMPLETED": "Completed",
+    "COMPLETED_WITH_ERRORS": "Completed with errors",
+    "PAUSED": "Paused",
+    "REVERSED": "Reversed",
+    "REVERSAL_BLOCKED": "Reversal blocked",
+    "NOT_REVERSIBLE": "Not reversible"
+  },
+  "outcome": {
+    "PENDING": "Pending",
+    "IMPORTED": "Imported",
+    "SKIPPED_EXISTING": "Skipped (exists)",
+    "FAILED": "Failed",
+    "REVERSED": "Reversed",
+    "REVERSAL_BLOCKED": "Reversal blocked",
+    "ALL": "All"
+  },
+  "final": {
+    "REJECTED": "The approval was rejected. The batch will not run.",
+    "RUNNING": "The batch is running.",
+    "REVERSED": "The batch was reversed."
+  },
+  "home": {
+    "title": "Migration batches and routing",
+    "lead": "Create a batch, dry-run it, start it with a second manager's approval, and reverse it when needed. Routing shows which system is master for a policy on a date.",
+    "openTitle": "Open a batch",
+    "batchId": "Batch id",
+    "batchIdInvalid": "Enter the batch id (a UUID).",
+    "open": "Open",
+    "recent": "Recent batches",
+    "noRecent": "Batches you create or open appear here",
+    "createTitle": "Create a batch",
+    "name": "Batch name",
+    "nameRequired": "Enter a name.",
+    "items": "Items (JSON)",
+    "itemsHelp": "A JSON array of objects with module, objectType, legacyId and payload; at most 5,000 items.",
+    "itemsInvalid": "Enter a non-empty JSON array of items with module, objectType, legacyId and payload.",
+    "create": "Create batch"
+  },
+  "batch": {
+    "back": "All batches",
+    "notFound": "The batch does not exist.",
+    "items": "Items",
+    "dryRun": "Dry run",
+    "dryRunYes": "Done, matches the content",
+    "dryRunNo": "Not done",
+    "baseline": "Configuration baseline",
+    "decision": "Decision",
+    "counts": "Outcomes by result"
+  },
+  "outcomes": {
+    "title": "Item outcomes",
+    "filter": "Outcome",
+    "all": "All outcomes",
+    "columns": {
+      "seq": "No.",
+      "module": "Module",
+      "type": "Object type",
+      "legacy": "Legacy id",
+      "outcome": "Outcome",
+      "core": "Core id",
+      "message": "Message"
+    }
+  },
+  "actions": {
+    "dryRun": "Dry run",
+    "start": "Start batch",
+    "confirmStart": "Request approval to start",
+    "pause": "Pause",
+    "resume": "Resume",
+    "approve": "Approve",
+    "reject": "Reject",
+    "confirmApprove": "Approve and run",
+    "confirmReject": "Reject",
+    "reverseDryRun": "Dry-run reversal",
+    "reverse": "Reverse batch",
+    "confirmReverse": "Reverse the batch",
+    "cancel": "Cancel"
+  },
+  "approval": {
+    "comment": "Comment (optional)"
+  },
+  "help": {
+    "dryRunNeeded": "Run a dry run first. A real run needs a dry run of the same content and a second manager's approval.",
+    "dryRunDone": "The dry run matches the content. Starting asks a second manager for approval.",
+    "pendingApproval": "Started by {who}. A different migration manager decides: the approver cannot be the person who started the batch.",
+    "reverse": "A dry-run reversal shows which items can be reversed. Items with later activity are blocked."
+  },
+  "confirm": {
+    "title": "Please confirm",
+    "start": "This sends the batch for approval. After approval it imports the items into the core system.",
+    "reverse": "This reverses the imported items of the batch. Items with later activity stay and are marked as blocked."
+  },
+  "done": {
+    "startDryRun": "Dry run completed",
+    "start": "Sent for approval",
+    "approve": "Approved, the batch has run",
+    "reject": "Batch rejected",
+    "pause": "Batch paused",
+    "resume": "Batch resumed",
+    "reverseDryRun": "Reversal dry run completed",
+    "reverse": "Reversal completed"
+  },
+  "routing": {
+    "title": "Routing",
+    "help": "Which system is master for an object on a date. Each lookup is added to the timeline below.",
+    "objectType": "Object type",
+    "key": "Key (policy number or legacy key)",
+    "keyRequired": "Enter the key.",
+    "date": "Date",
+    "dateHelp": "yyyy-mm-dd; empty means today",
+    "dateInvalid": "Use the format yyyy-mm-dd.",
+    "resolve": "Look up",
+    "overrideOpen": "Change routing",
+    "override": "Save routing",
+    "overridden": "Routing saved",
+    "state": "Master system",
+    "from": "From (yyyy-mm-dd)",
+    "to": "Until, exclusive (optional)",
+    "reason": "Reason",
+    "reasonRequired": "Enter a reason.",
+    "timeline": "Routing timeline",
+    "period": "{from} to {to}",
+    "open": "open-ended",
+    "noRoute": "No route: legacy system is master",
+    "states": {
+      "NONE": "Legacy master",
+      "TRANSITIONING": "Transitioning",
+      "CORE": "Core master"
+    }
+  },
+  "errors": {
+    "title": "The action was not completed",
+    "forbidden": "Your role does not allow this action.",
+    "generic": "Something went wrong. Try again.",
+    "trace": "Trace {id}"
+  }
+}

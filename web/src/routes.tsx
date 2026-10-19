@@ -295,8 +295,30 @@ moduleRoutes.push({
   ],
 });
 
+moduleRoutes.push({
+  path: 'admin/migration',
+  lazy: async () => ({
+    Component: (await import('./modules/migration/RequireMigrationRole')).RequireMigrationRole,
+  }),
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/migration/MigrationHomePage')).MigrationHomePage,
+      }),
+    },
+    {
+      path: 'batches/:batchId',
+      lazy: async () => ({
+        Component: (await import('./modules/migration/BatchPage')).BatchPage,
+      }),
+    },
+  ],
+});
+
 const implemented = new Set([
   '/admin/packs',
+  '/admin/migration',
   '/policies/pack-rollback',
   '/parties',
   '/policies',

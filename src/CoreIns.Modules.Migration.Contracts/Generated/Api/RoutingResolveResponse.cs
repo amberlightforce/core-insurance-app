@@ -33,6 +33,21 @@ public sealed record RoutingResolveResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? LegacyKey { get; init; }
 
+    /// <summary>Contract member 'validFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validFrom")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidFrom { get; init; }
+
+    /// <summary>Contract member 'validTo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validTo")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidTo { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Reason { get; init; }
+
     /// <summary>Contract member 'deepLink'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("deepLink")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]

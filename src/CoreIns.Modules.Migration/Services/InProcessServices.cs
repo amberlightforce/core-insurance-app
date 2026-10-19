@@ -48,19 +48,41 @@ internal sealed class MigrationRoutingService(MigrationReader reader, IClock clo
     public async Task<RoutingResolveResponse> ResolveAsync(RoutingResolveRequest request, ValidAt? validAt = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var date = validAt?.Date ?? new BusinessDate(DateOnly.FromDateTime(clock.Now.ToDateTimeOffset().UtcDateTime));
+        BusinessDate date;
+        if (validAt?.Date is { } at)
+        {
+            date = at;
+        }
+        else if (request.Date is { } requested)
+        {
+            date = requested;
+        }
+        else
+        {
+            date = new BusinessDate(DateOnly.FromDateTime(clock.Now.ToDateTimeOffset().UtcDateTime));
+        }
+
         var result = await reader.ResolveRouteAsync(request.ObjectType, request.Key, date, cancellationToken).ConfigureAwait(false);
         var view = result.IsSuccess ? result.Value : throw new DomainException(result.Error!);
-        return new RoutingResolveResponse
-        {
-            MasterState = view.MasterState switch
-            {
-                RouteState.Core => RoutingResolveResponse.MasterStateValue.CoreMaster,
-                RouteState.Transitioning => RoutingResolveResponse.MasterStateValue.Transitioning,
-                _ => RoutingResolveResponse.MasterStateValue.LegacyMaster,
-            },
-            RouteId = view.RouteId,
-            LegacyKey = request.Key,
-        };
+        return ToResponse(view, request.Key);
     }
+
+    /// <summary>Maps the stored route state to the contract response (NONE reads as LegacyMaster, CORE as CoreMaster).</summary>
+    internal static RoutingResolveResponse ToResponse(RoutingView view, string key) => new()
+    {
+        MasterState = view.MasterState switch
+        {
+            RouteState.Core => RoutingResolveResponse.MasterStateValue.CoreMaster,
+            RouteState.Transitioning => RoutingResolveResponse.MasterStateValue.Transitioning,
+            _ => RoutingResolveResponse.MasterStateValue.LegacyMaster,
+        },
+        RouteId = view.RouteId,
+        LegacyKey = key,
+        ValidFrom = ParseDate(view.ValidFrom),
+        ValidTo = ParseDate(view.ValidTo),
+        Reason = view.Reason,
+    };
+
+    private static BusinessDate? ParseDate(string? text) =>
+        DateOnly.TryParse(text, System.Globalization.CultureInfo.InvariantCulture, out var d) ? new BusinessDate(d) : null;
 }
