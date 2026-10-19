@@ -159,7 +159,7 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
              WHERE l.policy_number = '{policy.Number}' OR l.receipt_id = '{receipt}'
             """)).ShouldBe(7);
         (await ScalarAsync<long>(_db, $"""
-            SELECT count(*) FROM fin.journal_entry WHERE book <> 'IFRS17' OR rule_set_version <> 3 OR source_event_type <> 'BillingEntryPosted'
+            SELECT count(*) FROM fin.journal_entry WHERE book <> 'IFRS17' OR rule_set_version <> 4 OR source_event_type <> 'BillingEntryPosted'
             """)).ShouldBe(0);
 
         // Written premium per coverage on the LRC account derived from the PFC GL key (REQ-FIN-050, D-SLC-10b).
@@ -380,7 +380,7 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
         premium.Text("chargeCategory").ShouldBe("PREMIUM");
         premium.Text("deriveFrom").ShouldBe("GL_KEY");
         premium.Text("specificity").ShouldBe("1");
-        premium.Text("ruleSetVersion").ShouldBe("3");
+        premium.Text("ruleSetVersion").ShouldBe("4");
         premium.Text("contentHash").ShouldMatch("^[0-9a-f]{64}$");
         premium.Text("accountOrigin").ShouldBe("null");
         var cash = items.Single(i => i.Text("ruleCode") == "RC-CASH")!;

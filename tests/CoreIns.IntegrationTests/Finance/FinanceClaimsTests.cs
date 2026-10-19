@@ -167,7 +167,7 @@ public sealed class FinanceClaimsTests(PostgresFixture database) : IClassFixture
             """)).ShouldBe(0);
         (await ScalarAsync<long>(_db, $"""
             SELECT count(*) FROM fin.journal_entry WHERE journal_id IN (SELECT journal_id FROM fin.journal_line WHERE {claimLines})
-               AND (book <> 'IFRS17' OR rule_set_version <> 3 OR accounting_date <> DATE '{Day}')
+               AND (book <> 'IFRS17' OR rule_set_version <> 4 OR accounting_date <> DATE '{Day}')
             """)).ShouldBe(0);
 
         // Balances after the path (PRD-09 §4.11 / GF-05 subset): incurred 6,200.00; case reserve, clearing and in-transit
@@ -406,7 +406,7 @@ public sealed class FinanceClaimsTests(PostgresFixture database) : IClassFixture
             edit: p => p["delta"]!["functional"] = new JsonObject { ["amount"] = "99.99", ["currency"] = "EUR" });
         await _slice.DrainAsync();
 
-        (await StatusAsync(fs)).ShouldBe("SUSPENDED/NO_RULE", "Friendly Settlement settles per clearing statement, never through GL-2510 (REQ-FIN-299)");
+        (await StatusAsync(fs)).ShouldBe("SUSPENDED/INVALID_ENVELOPE", "a CLEARING payment without fsStatementId fails closed; with one it posts to GL-2515 (SL4-FIN-V4)");
         (await StatusAsync(noLines)).ShouldBe("SUSPENDED/INVALID_ENVELOPE");
         (await StatusAsync(unknownEroding)).ShouldBe("SUSPENDED/INVALID_ENVELOPE");
         (await StatusAsync(fxPayment)).ShouldBe("SUSPENDED/RATE_MISSING");
@@ -422,8 +422,8 @@ public sealed class FinanceClaimsTests(PostgresFixture database) : IClassFixture
         var mismatch = await PaymentAsync(claim, Guid.CreateVersion7(), Guid.CreateVersion7(), "100.00", lineAmount: "90.00");
         await _slice.DrainAsync();
 
-        // Recoveries are out of the slice (D-SL2-01): no rule for the recovery-reserve legs, so no journal and no default account.
-        (await StatusAsync(recovery)).ShouldBe("SUSPENDED/NO_RULE");
+        // A recovery reserve must name its recovery (SL4-FIN-V4): without a recoveryId there is no journal and no default account.
+        (await StatusAsync(recovery)).ShouldBe("SUSPENDED/INVALID_ENVELOPE");
         (await StatusAsync(mismatch)).ShouldBe("SUSPENDED/UNBALANCED");
         (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.journal_line WHERE claim_id = '{claim.ClaimId}'")).ShouldBe(0);
     }
