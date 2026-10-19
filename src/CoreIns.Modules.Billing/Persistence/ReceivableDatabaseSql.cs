@@ -61,8 +61,8 @@ internal static class ReceivableDatabaseSql
         INSERT INTO bil.ledger_rule (rule_id, version, event_type, charge_category, bill_mode, jurisdiction, qualifier, debit_account, credit_account, amount_expression, valid_from, valid_to, source)
         VALUES ('BLR-RECV-CLM',1,'RECEIVABLE_REGISTERED','*','DIRECT_BILL','*','CLM_CLAIM_PAYMENT','LA-28','LA-17','AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-286; SL4-BIL-RECV'),
                ('BLR-RECV-FS',1,'RECEIVABLE_REGISTERED','*','DIRECT_BILL','*','FS_CLEARING','LA-28','LA-24','AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-286; SL4-BIL-RECV'),
-               ('BLR-COLLECT-CLM',1,'RECEIVABLE_COLLECTED','*','DIRECT_BILL','*','CLM_CLAIM_PAYMENT','LA-11','LA-28','AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-286; SL4-BIL-RECV'),
-               ('BLR-COLLECT-FS',1,'RECEIVABLE_COLLECTED','*','DIRECT_BILL','*','FS_CLEARING','LA-11','LA-28','AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-286; SL4-BIL-RECV');
+               ('BLR-COLLECT-CLM',1,'RECEIVABLE_COLLECTED','*','DIRECT_BILL','*','CLM_CLAIM_PAYMENT','LA-10','LA-28','AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-286; SL4-BIL-RECV'),
+               ('BLR-COLLECT-FS',1,'RECEIVABLE_COLLECTED','*','DIRECT_BILL','*','FS_CLEARING','LA-10','LA-28','AMOUNT', DATE '2000-01-01', NULL, 'REQ-BIL-286; SL4-BIL-RECV');
         """;
 }
 
