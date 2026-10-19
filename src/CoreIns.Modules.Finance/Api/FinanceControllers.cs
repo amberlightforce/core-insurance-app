@@ -1,6 +1,7 @@
 using System.Globalization;
 using CoreIns.Modules.Finance.Contracts.Api;
 using CoreIns.Modules.Finance.Queries;
+using CoreIns.Modules.Finance.Posting;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Time;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace CoreIns.Modules.Finance.Api;
 
@@ -20,6 +22,7 @@ internal static class FinancePermissions
     public const string JournalGet = "fin.Journal.get";
     public const string JournalQuery = "fin.Journal.query";
     public const string PostingRulesList = "fin.PostingRules.list";
+    public const string PeriodDevLock = "fin.Period.devLock";
 }
 
 /// <summary>Shared request helpers of the FIN controllers.</summary>
@@ -191,5 +194,36 @@ internal sealed class PostingRulesController : ControllerBase
         {
             return this.Problem(FinanceHttp.Invalid("cursor is malformed."));
         }
+    }
+}
+
+/// <summary>Development-only: locks or reopens a calendar month so E2E can exercise the closed-period guard (G5, REQ-POL-108); 404 elsewhere.</summary>
+[ApiController]
+[Route("api/fin/v1/dev/periods")]
+internal sealed class DevPeriodsController : ControllerBase
+{
+    [HttpPost("{period}/{state}")]
+    [Authorize(Policy = FinancePermissions.PeriodDevLock)]
+    public async Task<IResult> SetAsync(
+        string period, string state, [FromServices] FinancePeriods periods, [FromServices] Microsoft.Extensions.Hosting.IHostEnvironment environment, CancellationToken cancellationToken)
+    {
+        if (!environment.IsDevelopment() && !environment.IsEnvironment("Testing"))
+        {
+            return Results.NotFound();
+        }
+
+        var target = state.ToUpperInvariant() switch { "LOCK" => FinancePeriods.Locked, "OPEN" => FinancePeriods.Open, _ => null };
+        if (target is null || !System.Text.RegularExpressions.Regex.IsMatch(period, "^[0-9]{4}-(0[1-9]|1[0-2])$", System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(1)))
+        {
+            return this.Problem(FinanceHttp.Invalid("period must be yyyy-MM and the state lock or open."));
+        }
+
+        if (FinanceHttp.LegalEntity(HttpContext) is not (var legalEntity, _))
+        {
+            return this.Problem(FinanceHttp.Invalid("The legal entity is not served by this stamp."));
+        }
+
+        await periods.SetStateAsync(legalEntity.Value, period, target, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(new { period, state = target });
     }
 }

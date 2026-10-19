@@ -95,6 +95,7 @@ public static class ClaimsModule
         services.AddScoped<IClaimFinancialEngine, ClaimFinancialEngine>();
         services.TryAddScoped<IClaimFinancialEvidenceSource, ChainedClaimFinancialEvidenceSource>();
         services.AddScoped<IClaimFinancialEvidenceProvider, FsEvidenceProvider>();
+        services.AddScoped<IClaimFinancialEvidenceProvider, FsStatementEvidenceProvider>();
         services.AddScoped<RecoveryCashBuffer>();
         services.AddScoped<IClaimFinancialEvidenceProvider, RecoveryEvidenceSource>();
         services.TryAddScoped<IClaimFinancialGuard, DerivedClaimFinancials>();
@@ -195,6 +196,22 @@ public static class ClaimsModule
         services.AddCommandAuditor<ReceiveFsNotification, FsNotificationReceived, ReceiveFsNotificationAuditor>();
         services.AddCommand<ReceiveFsNotification, FsNotificationReceived, ReceiveFsNotificationHandler>(
             CommandDescriptor.For("clm.FriendlySettlement.receiveNotification") with { RequiresIdempotencyKey = false, Idempotent = false });
+        // Clearing statement (SL4-CLM-FS-STATEMENT, REQ-CLM-160/-264): import + match, net per counterparty, approval, hand-over to BIL, outcome.
+        services.AddScoped<FsStatementReader>();
+        services.AddScoped<FsStatementMatcher>();
+        services.AddScoped<FsNetHandOver>();
+        services.AddScoped<FsNetSettler>();
+        services.AddScoped<IValidator<ImportFsStatement>, ImportFsStatementValidator>();
+        services.AddCommandAuditor<ImportFsStatement, FsImportStatementResponse, ImportFsStatementAuditor>();
+        services.AddCommand<ImportFsStatement, FsImportStatementResponse, ImportFsStatementHandler>(CommandDescriptor.For("clm.FriendlySettlement.importStatement"));
+        services.AddScoped<IValidator<ApproveFsNet>, ApproveFsNetValidator>();
+        services.AddCommandAuditor<ApproveFsNet, FsApproveNetResponse, ApproveFsNetAuditor>();
+        services.AddCommand<ApproveFsNet, FsApproveNetResponse, ApproveFsNetHandler>(CommandDescriptor.For("clm.FriendlySettlement.approveNet") with { SupportsDryRun = true });
+        services.AddEventHandler<ApprovalDecidedV1, FsNetApprovalDecidedHandler>(EventDescriptor.From(ApprovalDecidedV1.Descriptor), FsNetApprovalDecidedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementClearedV1, FsDisbursementClearedHandler>(EventDescriptor.From(DisbursementClearedV1.Descriptor), FsDisbursementClearedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementRejectedV1, FsDisbursementRejectedHandler>(EventDescriptor.From(DisbursementRejectedV1.Descriptor), FsDisbursementRejectedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementStoppedV1, FsDisbursementStoppedHandler>(EventDescriptor.From(DisbursementStoppedV1.Descriptor), FsDisbursementStoppedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<CashAllocatedV1, FsReceivableCollectedHandler>(EventDescriptor.From(CashAllocatedV1.Descriptor), FsReceivableCollectedHandler.Name, ModuleCode.CLM);
         // Recoveries (SL4-CLM-RECOVERY-OPS): cases, milestones, BIL demand, write-off; cash only from BIL evidence.
         services.AddScoped<RecoveryReader>();
         services.AddScoped<IValidator<CreateRecovery>, CreateRecoveryValidator>();
