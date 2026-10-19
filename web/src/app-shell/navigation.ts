@@ -18,6 +18,9 @@ const claimsRoles = ['Staff.ClaimsHandler', 'Staff.ClaimsManager'] as const;
 /** Roles that work underwriting referrals (permission uw.Referral.list; dev users `uwsenior`, `superuser`). */
 const underwritingRoles = ['Staff.UnderwritingManager', 'Platform.Admin'] as const;
 
+/** Roles that work distance-withdrawal requests (permission chn.Withdrawal.list). */
+const withdrawalRoles = ['Staff.Underwriter', 'Staff.Billing', 'Platform.Admin'] as const;
+
 /** Roles that manage pack activation (illustrative; permission mkt.Pack.list). */
 const packRoles = [
   'Platform.ReleaseManager',
@@ -41,6 +44,7 @@ export const defaultNavItems: NavItem[] = [
     label: 'packRollback',
     roles: underwritingRoles,
   },
+  { id: 'policies', to: '/channels/withdrawals', label: 'withdrawals', roles: withdrawalRoles },
   { id: 'claims', to: '/claims', roles: claimsRoles },
   { id: 'billing', to: '/billing' },
   {

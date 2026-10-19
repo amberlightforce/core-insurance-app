@@ -1,10 +1,19 @@
 using CoreIns.Modules.Policy.Contracts.Api;
 using CoreIns.Modules.Policy.Domain.Servicing;
+using CoreIns.SharedKernel;
+using CoreIns.SharedKernel.Identifiers;
 
 namespace CoreIns.Modules.Policy.Commands.Cancellation;
 
 /// <summary>The command wrapper (<c>pol.Cancellation.create</c>); the request and response are the generated contract types (SL3-CONTRACTS).</summary>
-internal sealed record CancelPolicy(CancellationCreateRequest Request) : CoreIns.Platform.Commands.ICommand<CancellationCreateResponse>;
+internal sealed record CancelPolicy(CancellationCreateRequest Request, WithdrawalCase? Withdrawal = null) : CoreIns.Platform.Commands.ICommand<CancellationCreateResponse>;
+
+/// <summary>
+/// Set by <c>pol.Withdrawal.submit</c> (SL6-POL-WITHDRAW) when the cancellation machinery is used to void a term ab initio: the
+/// effective time is the term's cover start, the refund is full including IPT and levies, the transaction is a Void. Never
+/// reachable from <c>pol.Cancellation.create</c>.
+/// </summary>
+internal sealed record WithdrawalCase(PolicyTermId TermId, string Right, string ChannelRef, Instant ReceivedAt);
 
 /// <summary>Parsing of the request's text fields.</summary>
 internal static class CancellationText
@@ -33,5 +42,11 @@ internal interface ICancellationRefundMethods
 /// <summary>Illustrative refund methods: only Policyholder → ProRata.</summary>
 internal sealed class IllustrativeRefundMethods : ICancellationRefundMethods
 {
-    public RefundMethod? Resolve(string source) => source == Domain.CancellationSources.Policyholder ? RefundMethod.ProRata : null;
+    public RefundMethod? Resolve(string source) => source switch
+    {
+        Domain.CancellationSources.Policyholder => RefundMethod.ProRata,
+        // Law 5317/2026 Art. 72; the pinned MOTOR-GR 1.1 artefact declares the same (SL6-POL-WITHDRAW).
+        Domain.CancellationSources.DistanceWithdrawal => RefundMethod.FullRefund,
+        _ => null,
+    };
 }

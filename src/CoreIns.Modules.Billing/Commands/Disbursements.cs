@@ -54,6 +54,21 @@ internal sealed class RequestDisbursementValidator : AbstractValidator<RequestDi
             RuleFor(c => c.Request.CardToken).Null().WithErrorCode("CARD_NOT_SUPPORTED");
             RuleFor(c => c.Request.OffsetInstruction).Null().WithErrorCode("OFFSET_NOT_SUPPORTED");
         });
+        When(c => c.Request.SourceType == DisbursementCodes.FsClearing, () =>
+        {
+            RuleFor(c => c.Request.PayeePartyId).NotNull().WithErrorCode("PAYEE_REQUIRED");
+            RuleFor(c => c.Request.PayeeAccountId).NotNull().WithErrorCode("PAYEE_ACCOUNT_REQUIRED");
+            RuleFor(c => c.Request.ApprovalEvidenceRef).NotEmpty().WithErrorCode("APPROVAL_EVIDENCE_REQUIRED");
+            RuleFor(c => c.Request.ApprovalContentHash).NotNull().WithErrorCode("APPROVAL_HASH_REQUIRED");
+            RuleFor(c => c.Request.StatementReference).NotEmpty().MaximumLength(140).WithErrorCode("STATEMENT_REQUIRED");
+            RuleFor(c => c.Request.Lines).NotNull().Must(l => l is { Count: > 0 and <= 500 }).WithErrorCode("LINES_REQUIRED");
+            RuleForEach(c => c.Request.Lines).Must(l => l.Amount.IsPositive && l.Amount.IsRoundedToMinorUnits).WithErrorCode("LINE_AMOUNT");
+            RuleFor(c => c.Request.ClaimId).Null().WithErrorCode("CLAIM_NOT_ALLOWED");
+            RuleFor(c => c.Request.AdHocPayee).Null().WithErrorCode("AD_HOC_PAYEE_NOT_SUPPORTED");
+            RuleFor(c => c.Request.CoPayees).Must(p => p is null || p.Count == 0).WithErrorCode("CO_PAYEES_NOT_SUPPORTED");
+            RuleFor(c => c.Request.CardToken).Null().WithErrorCode("CARD_NOT_SUPPORTED");
+            RuleFor(c => c.Request.OffsetInstruction).Null().WithErrorCode("OFFSET_NOT_SUPPORTED");
+        });
         When(c => c.Request.SourceType == DisbursementCodes.RefundPayment, () =>
         {
             RuleFor(c => c.Request.SourceId).Must(id => Guid.TryParseExact(id, "D", out var parsed) && parsed != Guid.Empty).WithErrorCode("REFUND_ID");
@@ -98,8 +113,8 @@ internal sealed partial class RequestDisbursementHandler(
     RequestContext context,
     IClock clock,
     INumberingService numbering,
-    IEventPublisher events,
     LedgerWriter ledger,
+    DisbursementReleaser releaser,
     IServiceProvider services,
     ILogger<RequestDisbursementHandler> logger) : ICommandHandler<RequestDisbursement, DisbursementRequestResponse>
 {
@@ -115,14 +130,21 @@ internal sealed partial class RequestDisbursementHandler(
 
         // 1. Source register (REQ-BIL-197, REQ-BIL-354) and method (REQ-BIL-209).
         var isRefund = request.SourceType == DisbursementCodes.RefundPayment;
-        if (!isRefund && request.SourceType != DisbursementCodes.ClaimPayment)
+        var isFs = request.SourceType == DisbursementCodes.FsClearing;
+        if (!isRefund && !isFs && request.SourceType != DisbursementCodes.ClaimPayment)
         {
-            return DomainError.Of(ModuleCode.BIL, "SOURCE", $"Source type {request.SourceType} is not in the source register of this release (CLM_CLAIM_PAYMENT, BIL_REFUND).");
+            return DomainError.Of(ModuleCode.BIL, "SOURCE", $"Source type {request.SourceType} is not in the source register of this release (CLM_CLAIM_PAYMENT, BIL_REFUND, FS_CLEARING).");
         }
 
-        if (request.Method != DisbursementCodes.SepaCreditTransfer)
+        // CLEARING is the method of FS_CLEARING and of nothing else (REQ-BIL-354, -355).
+        if (request.Method == DisbursementCodes.Clearing && !isFs)
         {
-            return DomainError.Of(ModuleCode.BIL, "METHOD-NOT-ALLOWED", $"Method {request.Method} is not allowed for {request.SourceType} (SEPA_CT only).");
+            return DomainError.Of(ModuleCode.BIL, "SOURCE", $"Method CLEARING is reserved for source {DisbursementCodes.FsClearing}, not {request.SourceType}.");
+        }
+
+        if (request.Method != (isFs ? DisbursementCodes.Clearing : DisbursementCodes.SepaCreditTransfer))
+        {
+            return DomainError.Of(ModuleCode.BIL, "METHOD-NOT-ALLOWED", $"Method {request.Method} is not allowed for {request.SourceType} ({(isFs ? DisbursementCodes.Clearing : DisbursementCodes.SepaCreditTransfer)} only).");
         }
 
         if (request.Amount.Currency != Currency.EUR)
@@ -132,6 +154,18 @@ internal sealed partial class RequestDisbursementHandler(
 
         var payeePartyId = request.PayeePartyId!.Value;
         var payeeAccountId = request.PayeeAccountId!.Value;
+
+        // 1a. FS_CLEARING: the statement lines must add up to the net (REQ-BIL-355, BIL-ERR-LINES-MISMATCH).
+        if (isFs)
+        {
+            var lines = request.Lines!;
+            var total = lines.Aggregate(0m, (sum, l) => sum + l.Amount.Amount);
+            if (lines.Any(l => l.Amount.Currency != Currency.EUR) || total != request.Amount.Amount
+                || lines.Select(l => (l.ClaimId, l.FsCaseId)).Distinct().Count() != lines.Count)
+            {
+                return DomainError.Of(ModuleCode.BIL, "LINES-MISMATCH", "The statement lines must be unique EUR lines that sum to the net amount.");
+            }
+        }
 
         // 2. Approval evidence (REQ-BIL-198): the approved content must be the content BIL is asked to pay.
         var expected = DisbursementContent.Hash(request.SourceType, request.SourceId, payeePartyId, payeeAccountId, request.Amount);
@@ -162,8 +196,8 @@ internal sealed partial class RequestDisbursementHandler(
         if (DisbursementApproval.TryParseApprovalRequest(request.ApprovalEvidenceRef, out var approvalRequestId))
         {
             var verified = await VerifyApprovalAsync(
-                approvalRequestId, request.SourceId, expected, isRefund ? DisbursementApproval.RefundType : DisbursementApproval.ClaimPaymentType,
-                isRefund ? DisbursementApproval.RefundSubject(request.SourceId) : DisbursementApproval.ClaimPaymentSubject(request.SourceId), cancellationToken)
+                approvalRequestId, request.SourceId, expected, isRefund ? DisbursementApproval.RefundType : isFs ? DisbursementApproval.FsNetType : DisbursementApproval.ClaimPaymentType,
+                isRefund ? DisbursementApproval.RefundSubject(request.SourceId) : isFs ? DisbursementApproval.FsNetSubject(request.SourceId) : DisbursementApproval.ClaimPaymentSubject(request.SourceId), cancellationToken)
                 .ConfigureAwait(false);
             if (verified is not null)
             {
@@ -179,7 +213,7 @@ internal sealed partial class RequestDisbursementHandler(
             return BillingErrors.NotFound("payee account");
         }
 
-        var purpose = isRefund ? DisbursementCodes.RefundPurpose : DisbursementCodes.ClaimPaymentPurpose;
+        var purpose = isRefund ? DisbursementCodes.RefundPurpose : isFs ? DisbursementCodes.ClearingPurpose : DisbursementCodes.ClaimPaymentPurpose;
         if (account.PartyId != payeePartyId || account.Purpose != purpose
             || account.Status != Codes.Of(PayeeAccountStatus.Active) || account.ValidTo is not null)
         {
@@ -197,7 +231,8 @@ internal sealed partial class RequestDisbursementHandler(
         }
 
         // 4. Duplicates (REQ-BIL-202): a live disbursement for the same source object or duplicate key.
-        var existing = await ExistingAsync(legalEntity, request, payeeAccountId, refund?.CreditSetKey, cancellationToken).ConfigureAwait(false);
+        var businessRef = isFs ? request.StatementReference : refund?.CreditSetKey;
+        var existing = await ExistingAsync(legalEntity, request, payeeAccountId, businessRef, cancellationToken).ConfigureAwait(false);
         if (existing is not null)
         {
             return Duplicate(existing.Value);
@@ -214,7 +249,9 @@ internal sealed partial class RequestDisbursementHandler(
         // 6. The disbursement: Requested → PendingApproval → Approved (the source's evidence is the approval).
         var number = await numbering.NextAsync(new NumberRequest(NumberingSchemes.Disbursement, today), cancellationToken).ConfigureAwait(false);
         var machine = DisbursementStateModel.Machine;
-        var state = machine.FireOrThrow(machine.FireOrThrow(machine.Start(DisbursementState.Requested).Value, DisbursementTrigger.EnterApproval), DisbursementTrigger.Approve);
+        // The source's evidence is the approval, except for FS_CLEARING: it waits in PendingApproval for the release approval (D-SL4-12).
+        var state = machine.FireOrThrow(machine.Start(DisbursementState.Requested).Value, DisbursementTrigger.EnterApproval);
+        state = isFs ? state : machine.FireOrThrow(state, DisbursementTrigger.Approve);
         var row = new DisbursementRow
         {
             DisbursementId = disbursementId,
@@ -225,7 +262,9 @@ internal sealed partial class RequestDisbursementHandler(
             SourceType = request.SourceType,
             SourceId = request.SourceId,
             ClaimId = isRefund ? null : request.ClaimId,
-            BusinessRef = refund?.CreditSetKey,
+            BusinessRef = businessRef,
+            StatementRef = isFs ? request.StatementReference : null,
+            Lines = isFs ? FsLines.Serialize(request.Lines!) : null,
             PayeePartyId = payeePartyId,
             PayeeAccountId = payeeAccountId,
             Amount = request.Amount.Amount,
@@ -241,7 +280,7 @@ internal sealed partial class RequestDisbursementHandler(
             ScreenedAt = now,
             VopResult = account.VopResult ?? Codes.Of(VopOutcome.NotAvailable),
             RequestedAt = now,
-            ApprovedAt = now,
+            ApprovedAt = isFs ? null : now,
             CreatedBy = context.Actor.ToString(),
             RecordVersion = 1,
         };
@@ -254,105 +293,19 @@ internal sealed partial class RequestDisbursementHandler(
         {
             // A concurrent request for the same source won the race (it waited on the index until that one committed).
             db.Entry(row).State = EntityState.Detached;
-            var winner = await ExistingAsync(legalEntity, request, payeeAccountId, refund?.CreditSetKey, cancellationToken).ConfigureAwait(false);
+            var winner = await ExistingAsync(legalEntity, request, payeeAccountId, businessRef, cancellationToken).ConfigureAwait(false);
             return Duplicate(winner ?? default);
         }
 
         // 7. Release to the bound bank channel; the stub acknowledges and debits at once (D-SL2-05).
-        if (services.GetService<IBankChannel>() is { } channel)
+        if (!isFs && services.GetService<IBankChannel>() is { } channel)
         {
-            await ReleaseAsync(row, channel, request.Amount, today, now, refund, cancellationToken).ConfigureAwait(false);
+            await releaser.ReleaseAsync(row, channel, request.Amount, today, now, refund, cancellationToken).ConfigureAwait(false);
         }
 
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         LogRequested(logger, row.DisbursementId.Value, row.SourceType, row.SourceId, row.State);
         return DisbursementReader.View(row, account.IbanLast4);
-    }
-
-    private async Task ReleaseAsync(
-        DisbursementRow row, IBankChannel channel, Money amount, BusinessDate today, Instant now, RefundRow? refund, CancellationToken cancellationToken)
-    {
-        var machine = DisbursementStateModel.Machine;
-        var sourceModule = Enum.Parse<ModuleCode>(row.SourceModule);
-        var lineage = BusinessKeys.Empty.With("disbursementId", row.DisbursementId.Value.ToString()).With("sourceId", row.SourceId);
-        lineage = row.ClaimId is { } claim ? lineage.With("claimId", claim.Value.ToString()) : lineage;
-        lineage = refund is null ? lineage : lineage.With("refundId", refund.RefundId.Value.ToString()).With("billingAccountId", refund.BillingAccountId.Value.ToString());
-
-        // A refund's lines carry its account and the REFUND transaction kind (servicing entry, FIN rule set v3).
-        var dimensions = new LineDimensions
-        {
-            DisbursementId = row.DisbursementId,
-            SourceType = row.SourceType,
-            SourceId = row.SourceId,
-            ClaimId = row.ClaimId,
-            BillingAccountId = refund?.BillingAccountId,
-            TransactionKind = refund is null ? null : TransactionKinds.Refund,
-        };
-        var valueDate = row.RequestedValueDate is { } requested && requested > today ? requested : today;
-
-        // Released: the source's clearing account to disbursements in transit (REQ-BIL-211).
-        var released = await ledger.RuleAsync(ledger.Key(EntryTypes.DisbursementReleased, RuleQualifiers.Any, row.SourceType), cancellationToken).ConfigureAwait(false);
-        var rule = released.IsSuccess ? released.Value : throw new DomainException(released.Error!);
-        row.State = Codes.Of(machine.FireOrThrow(Codes.Parse<DisbursementState>(row.State), DisbursementTrigger.Release));
-        row.ReleasedAt = now;
-        row.ValueDate = valueDate;
-        row.ReleaseEntryId = ledger.Post(new EntrySpec(
-            EntryTypes.DisbursementReleased, null, [new PostingLeg(rule, amount, dimensions)], lineage, "bil.Disbursement.release", row.DisbursementId));
-
-        var outcome = await channel.SubmitAsync(
-            new BankInstruction(row.DisbursementId, row.DisbursementNumber, amount, valueDate, row.Method, row.PayeeAccountId), cancellationToken).ConfigureAwait(false);
-        if (!outcome.Accepted)
-        {
-            return; // Awaiting the bank's acknowledgement (asynchronous channels are a later package).
-        }
-
-        // Issued on the bank's acknowledgement (REQ-BIL-207): DisbursementIssued.
-        row.State = Codes.Of(machine.FireOrThrow(DisbursementState.Released, DisbursementTrigger.Issue));
-        row.IssuedAt = now;
-        row.BankReference = outcome.BankReference;
-        row.ValueDate = outcome.ValueDate;
-        var keys = BusinessKeys.Empty.With("disbursementId", row.DisbursementId.Value.ToString());
-        keys = row.ClaimId is { } claimId ? keys.With("claimId", claimId.Value.ToString()) : keys;
-        keys = refund is null ? keys : keys.With("refundId", refund.RefundId.Value.ToString()).With("billingAccountId", refund.BillingAccountId.Value.ToString());
-        events.Publish(new OutgoingEvent(
-            EventDescriptor.From(DisbursementIssuedV1.Descriptor), "Disbursement", row.DisbursementId.Value.ToString(),
-            new DisbursementIssuedV1
-            {
-                DisbursementId = row.DisbursementId,
-                SourceModule = sourceModule,
-                SourceType = row.SourceType,
-                SourceId = row.SourceId,
-                Amount = amount,
-                ValueDate = outcome.ValueDate,
-                Method = row.Method,
-            },
-            keys) { OccurredAt = now });
-
-        if (!outcome.Debited)
-        {
-            return;
-        }
-
-        // Cleared on the statement debit (REQ-BIL-207): disbursements in transit to cash at bank, DisbursementCleared.
-        var cleared = await ledger.RuleAsync(ledger.Key(EntryTypes.DisbursementCleared, RuleQualifiers.Any, row.SourceType), cancellationToken).ConfigureAwait(false);
-        var clearRule = cleared.IsSuccess ? cleared.Value : throw new DomainException(cleared.Error!);
-        row.State = Codes.Of(machine.FireOrThrow(DisbursementState.Issued, DisbursementTrigger.Clear));
-        row.ClearedAt = now;
-        row.ClearEntryId = ledger.Post(new EntrySpec(
-            EntryTypes.DisbursementCleared, null, [new PostingLeg(clearRule, amount, dimensions)], lineage, "bil.Disbursement.clear", row.DisbursementId));
-        events.Publish(new OutgoingEvent(
-            EventDescriptor.From(DisbursementClearedV1.Descriptor), "Disbursement", row.DisbursementId.Value.ToString(),
-            new DisbursementClearedV1
-            {
-                DisbursementId = row.DisbursementId,
-                SourceModule = sourceModule,
-                SourceType = row.SourceType,
-                SourceId = row.SourceId,
-                Amount = amount,
-                ValueDate = outcome.ValueDate,
-                Method = row.Method,
-            },
-            keys) { OccurredAt = now });
     }
 
     /// <summary>
