@@ -45,6 +45,12 @@ internal static class EntryTypes
 
     /// <summary>A disbursement's statement debit: disbursements in transit LA-13 → cash at bank LA-10 (REQ-BIL-211).</summary>
     public const string DisbursementCleared = "DISBURSEMENT_CLEARED";
+
+    /// <summary>An FS_CLEARING net released to the bank: Friendly Settlement clearing LA-24 → disbursements in transit LA-13 (REQ-BIL-357).</summary>
+    public const string FsClearingReleased = "FS_CLEARING_RELEASED";
+
+    /// <summary>The statement debit of an FS_CLEARING net: disbursements in transit LA-13 → cash at bank LA-10.</summary>
+    public const string FsClearingCleared = "FS_CLEARING_CLEARED";
 }
 
 /// <summary>Sub-ledger accounts used by the slice (PRD-06 §7.1.4; the whole chart LA-01…LA-27 is seeded as data, REQ-BIL-282).</summary>
@@ -152,6 +158,12 @@ internal sealed record LineDimensions
 
     public ClaimId? ClaimId { get; init; }
 
+    public Guid? RecoveryId { get; init; }
+
+    public string? StatementRef { get; init; }
+
+    public PartyId? CounterpartyPartyId { get; init; }
+
     /// <summary>Transaction kind code of the POL transaction (MKT TaxTransactionKind); set on servicing entries, null otherwise (contract LedgerDimensions).</summary>
     public string? TransactionKind { get; init; }
 
@@ -252,3 +264,4 @@ internal static class Posting
 
     private static DomainError NoRule(string detail) => DomainError.Of(ModuleCode.BIL, "NO-RULE", detail);
 }
+

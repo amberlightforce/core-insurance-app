@@ -10,6 +10,7 @@ using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 
 namespace CoreIns.Modules.Billing.Services;
@@ -22,7 +23,7 @@ namespace CoreIns.Modules.Billing.Services;
 /// refused (BIL-ERR-AMOUNT-MISMATCH): partial payments are not allocated in the slice, they stay unapplied. The
 /// database refuses any allocation above the receipt or the item (trigger, REQ-BIL-130).
 /// </summary>
-internal sealed class Allocator(BillingDbContext db, RequestContext context, LedgerWriter ledger, IEventPublisher events, IClock clock)
+internal sealed class Allocator(BillingDbContext db, RequestContext context, LedgerWriter ledger, IEventPublisher events, IClock clock, IServiceProvider services)
 {
     /// <summary>SQLSTATE the allocation guard raises when Σ allocations would exceed the receipt or the item.</summary>
     public const string OverAllocationState = "BL001";
@@ -202,6 +203,13 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
                 DownPayment = false,
             },
             lineage.With("billingAccountId", receipt.BillingAccountId.Value.ToString())) { OccurredAt = now });
+
+        // SL6-BIL-DELINQ: a receipt that clears the arrears of a non-payment case cures it (clock stopped as Met, DelinquencyResolved).
+        if (services.GetService<NonpayService>() is { } nonpay)
+        {
+            await nonpay.CureAsync(receipt.BillingAccountId, cancellationToken).ConfigureAwait(false);
+        }
+
         return rows;
     }
 

@@ -8,19 +8,56 @@ namespace CoreIns.Modules.Channels.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record WithdrawalGetResponse
 {
-    /// <summary>PRD: "status"</summary>
+    /// <summary>Contract member 'withdrawalRequestId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'withdrawalRequestId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Status { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("withdrawalRequestId")]
+    public required global::System.Guid WithdrawalRequestId { get; init; }
 
-    /// <summary>PRD: "refund status"</summary>
+    /// <summary>Contract member 'requestNumber'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Business number issued by PLT numbering (format is configuration).</para>
     /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("requestNumber")]
+    public required string RequestNumber { get; init; }
+
+    /// <summary>Contract member 'policyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.PolicyId? PolicyId { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required global::CoreIns.Modules.Channels.Contracts.Api.WithdrawalStatusCode Status { get; init; }
+
+    /// <summary>PRD: "refund status" - NONE until POL closes the request; then PROCESSED (refund handed to BIL by POL) or REJECTED</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("refundStatus")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RefundStatus { get; init; }
+    public string? RefundStatus { get; init; }
+
+    /// <summary>Contract member 'declaredAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("declaredAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? DeclaredAt { get; init; }
+
+    /// <summary>Contract member 'confirmedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("confirmedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? ConfirmedAt { get; init; }
+
+    /// <summary>Contract member 'deadlineAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("deadlineAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? DeadlineAt { get; init; }
+
+    /// <summary>Contract member 'declineCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("declineCode")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? DeclineCode { get; init; }
+
+    /// <summary>Contract member 'channel'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Channel { get; init; }
 }

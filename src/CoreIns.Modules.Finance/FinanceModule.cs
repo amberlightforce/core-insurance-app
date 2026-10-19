@@ -49,6 +49,7 @@ public static class FinanceModule
         ArgumentNullException.ThrowIfNull(configuration);
 
         services.AddModuleDbContext<FinanceDbContext>(Schema);
+        services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Finance.Services.Dsar.FinanceDsarParticipant>();
         services.AddScoped<ReferenceData>();
         services.AddScoped<JournalWriter>();
         services.AddScoped<JournalReversal>();

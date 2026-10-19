@@ -52,11 +52,21 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
     public DbSet<RefundNettingRow> RefundNettings => Set<RefundNettingRow>();
 
+    public DbSet<DelinquencyCaseRow> DelinquencyCases => Set<DelinquencyCaseRow>();
+
+    public DbSet<DelinquencyContactRow> DelinquencyContacts => Set<DelinquencyContactRow>();
+
+    public DbSet<ReceivableRow> Receivables => Set<ReceivableRow>();
+
+    public DbSet<ReceivableAllocationRow> ReceivableAllocations => Set<ReceivableAllocationRow>();
+
     protected override string Schema => BillingModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        DsarRestrictionModel.Configure(modelBuilder);
+        ReceivableModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BillingAccountRow>(entity =>
         {
@@ -72,6 +82,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.Jurisdiction).HasColumnName("jurisdiction").HasColumnType("char(2)");
             entity.Property(e => e.AccountNumber).HasColumnName("account_number");
+            entity.Property(e => e.AccountType).HasColumnName("account_type").HasDefaultValue("PREMIUM");
             entity.Property(e => e.PayerPartyId).HasColumnName("payer_party_id");
             entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
             entity.Property(e => e.Status).HasColumnName("status");
@@ -81,7 +92,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.HasIndex(e => new { e.LegalEntityId, e.AccountNumber }).IsUnique().HasDatabaseName("ux_billing_account_number");
 
             // REQ-BIL-033: one Active account per payer, legal entity and currency (the slice creates no standalone accounts).
-            entity.HasIndex(e => new { e.LegalEntityId, e.PayerPartyId, e.Currency }).IsUnique()
+            entity.HasIndex(e => new { e.LegalEntityId, e.PayerPartyId, e.Currency, e.AccountType }).IsUnique()
                 .HasFilter("status = 'ACTIVE'").HasDatabaseName("ux_billing_account_active_payer");
         });
 
@@ -450,6 +461,9 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.SourceType).HasColumnName("source_type");
             entity.Property(e => e.SourceId).HasColumnName("source_id");
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.RecoveryId).HasColumnName("recovery_id");
+            entity.Property(e => e.StatementRef).HasColumnName("statement_ref");
+            entity.Property(e => e.CounterpartyPartyId).HasColumnName("counterparty_party_id");
             entity.Property(e => e.TransactionKind).HasColumnName("transaction_kind");
             entity.Property(e => e.CancellationSource).HasColumnName("cancellation_source");
             entity.Property(e => e.TreatmentRuleId).HasColumnName("treatment_rule_id");
@@ -515,6 +529,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
         ConfigurePayeeAccounts(modelBuilder);
         ConfigureDisbursements(modelBuilder);
         ConfigureRefunds(modelBuilder);
+        ConfigureDelinquency(modelBuilder);
     }
 
     /// <summary>Payee accounts (REQ-BIL-343): IBAN as ciphertext, blind index and last four characters only.</summary>
@@ -585,6 +600,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.SourceType).HasColumnName("source_type");
             entity.Property(e => e.SourceId).HasColumnName("source_id");
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+
             entity.Property(e => e.PayeePartyId).HasColumnName("payee_party_id");
             entity.Property(e => e.PayeeAccountId).HasColumnName("payee_account_id");
             entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
@@ -596,6 +612,10 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.ApprovalContentHash).HasColumnName("approval_content_hash").HasColumnType("char(64)");
             entity.Property(e => e.PurposeText).HasColumnName("purpose_text");
             entity.Property(e => e.BusinessRef).HasColumnName("business_ref");
+            entity.Property(e => e.StatementRef).HasColumnName("statement_ref");
+            entity.Property(e => e.Lines).HasColumnName("lines").HasColumnType("jsonb");
+            entity.Property(e => e.ReleaseApprovalRequestId).HasColumnName("release_approval_request_id");
+            entity.Property(e => e.ReleaseApprovedBy).HasColumnName("release_approved_by");
             entity.Property(e => e.State).HasColumnName("state");
             entity.Property(e => e.ScreeningResult).HasColumnName("screening_result");
             entity.Property(e => e.ScreeningListVersions).HasColumnName("screening_list_versions");
@@ -631,6 +651,75 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.HasOne<PayeeAccountRow>().WithMany().HasForeignKey(e => e.PayeeAccountId)
                 .HasConstraintName("fk_disbursement_payee_account").OnDelete(DeleteBehavior.Restrict);
         });
+
+    /// <summary>
+    /// Delinquency cases (SL6-BIL-DELINQ): one open case per term, and the contacts recorded on them. The notice document and
+    /// the compliance clock instance are looked up by their ids, so each is indexed.
+    /// </summary>
+    private static void ConfigureDelinquency(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DelinquencyCaseRow>(entity =>
+        {
+            entity.ToTable("delinquency_case", table =>
+            {
+                table.HasCheckConstraint("ck_delinquency_case_state", Codes.CheckSql<DelinquencyState>("state"));
+                table.HasCheckConstraint("ck_delinquency_case_trigger", Codes.CheckSql<DelinquencyTrigger>("trigger"));
+                table.HasCheckConstraint("ck_delinquency_case_amount", "overdue_amount >= 0");
+                table.HasCheckConstraint("ck_delinquency_case_currency", "currency ~ '^[A-Z]{3}$'");
+                table.HasCheckConstraint("ck_delinquency_case_record_version", "record_version >= 1");
+            });
+            entity.HasKey(e => e.CaseId).HasName("pk_delinquency_case");
+            entity.Property(e => e.CaseId).HasColumnName("case_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.BillingAccountId).HasColumnName("billing_account_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.ProductCode).HasColumnName("product_code");
+            entity.Property(e => e.PlanCode).HasColumnName("plan_code");
+            entity.Property(e => e.State).HasColumnName("state");
+            entity.Property(e => e.Trigger).HasColumnName("trigger");
+            entity.Property(e => e.OverdueAmount).HasColumnName("overdue_amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.Property(e => e.NoticeDocumentId).HasColumnName("notice_document_id");
+            entity.Property(e => e.NotificationDate).HasColumnName("notification_date").HasColumnType("date");
+            entity.Property(e => e.ClockInstanceId).HasColumnName("clock_instance_id");
+            entity.Property(e => e.Deadline).HasColumnName("deadline").HasColumnType("timestamptz");
+            entity.Property(e => e.PromiseDate).HasColumnName("promise_date").HasColumnType("date");
+            entity.Property(e => e.HoldReason).HasColumnName("hold_reason");
+            entity.Property(e => e.Outcome).HasColumnName("outcome");
+            entity.Property(e => e.CancellationRequestId).HasColumnName("cancellation_request_id");
+            entity.Property(e => e.OpenedAt).HasColumnName("opened_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ResolvedAt).HasColumnName("resolved_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.LegalEntityId, e.BillingAccountId }).HasDatabaseName("ix_delinquency_case_account");
+            entity.HasIndex(e => e.NoticeDocumentId).HasDatabaseName("ix_delinquency_case_document");
+            entity.HasIndex(e => e.ClockInstanceId).HasDatabaseName("ix_delinquency_case_clock");
+
+            // One open case per term: a resolved case or one that asked for cancellation no longer blocks a new one.
+            entity.HasIndex(e => e.TermId).IsUnique()
+                .HasFilter("state IN ('NOTICE_REQUESTED', 'CLOCK_RUNNING', 'NOTICE_RETURNED', 'ON_HOLD', 'ARRANGED')").HasDatabaseName("ux_delinquency_case_open_per_term");
+            entity.HasOne<BillingAccountRow>().WithMany().HasForeignKey(e => e.BillingAccountId)
+                .HasConstraintName("fk_delinquency_case_account").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<DelinquencyContactRow>(entity =>
+        {
+            entity.ToTable("delinquency_contact");
+            entity.HasKey(e => e.ContactId).HasName("pk_delinquency_contact");
+            entity.Property(e => e.ContactId).HasColumnName("contact_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.CaseId).HasColumnName("case_id");
+            entity.Property(e => e.Channel).HasColumnName("channel");
+            entity.Property(e => e.Outcome).HasColumnName("outcome");
+            entity.Property(e => e.Note).HasColumnName("note");
+            entity.Property(e => e.RecordedBy).HasColumnName("recorded_by");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.CaseId).HasDatabaseName("ix_delinquency_contact_case");
+            entity.HasOne<DelinquencyCaseRow>().WithMany().HasForeignKey(e => e.CaseId)
+                .HasConstraintName("fk_delinquency_contact_case").OnDelete(DeleteBehavior.Restrict);
+        });
+    }
 
     /// <summary>
     /// Refunds (REQ-BIL-007, -181…-191): one open refund per billing account (REQ-BIL-188 aggregate authority: splitting a
@@ -757,3 +846,8 @@ internal sealed class BillingDbContextDesignTimeFactory : IDesignTimeDbContextFa
     public BillingDbContext CreateDbContext(string[] args) =>
         new(ModuleDbContextRegistration.MigrationOptions<BillingDbContext>("Host=localhost;Database=coreins_design;Username=design", BillingModule.Schema));
 }
+
+
+
+
+

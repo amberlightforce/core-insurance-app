@@ -24,11 +24,27 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
 
     public DbSet<ParticipationRow> Participations => Set<ParticipationRow>();
 
+    public DbSet<ClaimViewRow> ClaimViews => Set<ClaimViewRow>();
+
+    public DbSet<ClaimEventRow> ClaimEvents => Set<ClaimEventRow>();
+
+    public DbSet<ClaimExposureRow> ClaimExposures => Set<ClaimExposureRow>();
+
+    public DbSet<ClaimAmountRow> ClaimAmounts => Set<ClaimAmountRow>();
+
+    public DbSet<RecoveryBatchRow> RecoveryBatches => Set<RecoveryBatchRow>();
+
+    public DbSet<RecoveryRow> Recoveries => Set<RecoveryRow>();
+
+    public DbSet<IntakeExceptionRow> IntakeExceptions => Set<IntakeExceptionRow>();
+
     protected override string Schema => ReinsuranceModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        DsarRestrictionModel.Configure(modelBuilder);
+        ConfigureRecovery(modelBuilder);
 
         modelBuilder.Entity<ContractRow>(entity =>
         {
@@ -189,6 +205,121 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.HasIndex(e => new { e.VersionId, e.Rev }).IsUnique().HasFilter("lead").HasDatabaseName("ux_participation_one_lead");
             entity.HasIndex(e => e.ReinsurerPartyId).HasDatabaseName("ix_participation_reinsurer");
             entity.HasOne<ContractVersionRow>().WithMany().HasForeignKey(e => e.VersionId).HasConstraintName("fk_participation_version").OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureRecovery(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ClaimViewRow>(entity =>
+        {
+            entity.ToTable("claim_view");
+            entity.HasKey(e => e.ClaimId).HasName("pk_claim_view");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.ProductCode).HasColumnName("product_code");
+            entity.Property(e => e.LossDate).HasColumnName("loss_date").HasColumnType("date");
+            entity.Property(e => e.Closed).HasColumnName("closed");
+            entity.Property(e => e.ClosedSequence).HasColumnName("closed_sequence");
+            entity.Property(e => e.LastSequence).HasColumnName("last_sequence");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+        });
+
+        modelBuilder.Entity<ClaimEventRow>(entity =>
+        {
+            entity.ToTable("claim_event");
+            entity.HasKey(e => e.EventId).HasName("pk_claim_event");
+            entity.Property(e => e.EventId).HasColumnName("event_id");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.AggregateSequence).HasColumnName("aggregate_sequence");
+            entity.Property(e => e.AppliedAt).HasColumnName("applied_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.ClaimId).HasDatabaseName("ix_claim_event_claim");
+        });
+
+        modelBuilder.Entity<ClaimExposureRow>(entity =>
+        {
+            entity.ToTable("claim_exposure");
+            entity.HasKey(e => new { e.ClaimId, e.ExposureId }).HasName("pk_claim_exposure");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.ExposureId).HasColumnName("exposure_id");
+            entity.Property(e => e.Kind).HasColumnName("kind");
+            entity.Property(e => e.CoverageCode).HasColumnName("coverage_code");
+            entity.Property(e => e.SiiLob).HasColumnName("sii_lob");
+            entity.Property(e => e.ContractId).HasColumnName("contract_id");
+            entity.HasIndex(e => e.ContractId).HasDatabaseName("ix_claim_exposure_contract");
+        });
+
+        modelBuilder.Entity<ClaimAmountRow>(entity =>
+        {
+            entity.ToTable("claim_amount");
+            entity.HasKey(e => new { e.ClaimId, e.ExposureId, e.CostType }).HasName("pk_claim_amount");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.ExposureId).HasColumnName("exposure_id");
+            entity.Property(e => e.CostType).HasColumnName("cost_type");
+            entity.Property(e => e.Paid).HasColumnName("paid").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.OpenReserve).HasColumnName("open_reserve").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.RecoveryOpen).HasColumnName("recovery_open").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Realised).HasColumnName("realised").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.ReserveSequence).HasColumnName("reserve_sequence");
+            entity.Property(e => e.RecoverySequence).HasColumnName("recovery_sequence");
+        });
+
+        modelBuilder.Entity<RecoveryBatchRow>(entity =>
+        {
+            entity.ToTable("recovery_batch");
+            entity.HasKey(e => e.BatchId).HasName("pk_recovery_batch");
+            entity.Property(e => e.BatchId).HasColumnName("batch_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.ContractId).HasColumnName("contract_id");
+            entity.Property(e => e.ContractYear).HasColumnName("contract_year");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.SourceEventId).HasColumnName("source_event_id");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CalcHash).HasColumnName("calc_hash");
+            entity.Property(e => e.EngineVersion).HasColumnName("engine_version");
+            entity.Property(e => e.ContractVersion).HasColumnName("contract_version");
+            entity.Property(e => e.Trace).HasColumnName("trace").HasColumnType("jsonb");
+            entity.HasIndex(e => new { e.ContractId, e.RecordedAt }).HasDatabaseName("ix_recovery_batch_contract");
+        });
+
+        modelBuilder.Entity<RecoveryRow>(entity =>
+        {
+            entity.ToTable("recovery", table => table.HasCheckConstraint("ck_recovery_state", "state IN ('CALCULATED', 'POSTED', 'REVERSED')"));
+            entity.HasKey(e => e.RecoveryId).HasName("pk_recovery");
+            entity.Property(e => e.RecoveryId).HasColumnName("recovery_id");
+            entity.Property(e => e.BatchId).HasColumnName("batch_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.ContractId).HasColumnName("contract_id");
+            entity.Property(e => e.ContractYear).HasColumnName("contract_year");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.LayerId).HasColumnName("layer_id");
+            entity.Property(e => e.LayerNo).HasColumnName("layer_no");
+            entity.Property(e => e.ParticipantPartyId).HasColumnName("participant_party_id");
+            entity.Property(e => e.IncurredDelta).HasColumnName("incurred_delta").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.PaidDelta).HasColumnName("paid_delta").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.OutstandingDelta).HasColumnName("outstanding_delta").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.State).HasColumnName("state");
+            entity.Property(e => e.SiiLob).HasColumnName("sii_lob");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.ContractId, e.ClaimId }).HasDatabaseName("ix_recovery_contract_claim");
+            entity.HasIndex(e => e.ClaimId).HasDatabaseName("ix_recovery_claim");
+            entity.HasIndex(e => e.BatchId).HasDatabaseName("ix_recovery_batch");
+            entity.HasOne<RecoveryBatchRow>().WithMany().HasForeignKey(e => e.BatchId).HasConstraintName("fk_recovery_batch").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<IntakeExceptionRow>(entity =>
+        {
+            entity.ToTable("intake_exception");
+            entity.HasKey(e => e.ExceptionId).HasName("pk_intake_exception");
+            entity.Property(e => e.ExceptionId).HasColumnName("exception_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.ContractId).HasColumnName("contract_id");
+            entity.Property(e => e.Code).HasColumnName("code");
+            entity.Property(e => e.Detail).HasColumnName("detail");
+            entity.Property(e => e.SourceEventId).HasColumnName("source_event_id");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.ClaimId).HasDatabaseName("ix_intake_exception_claim");
         });
     }
 }

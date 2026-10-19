@@ -196,7 +196,7 @@ public sealed class FinanceV4Tests(PostgresFixture database) : IClassFixture<Pos
         _slice.EntryAsync(Guid.CreateVersion7(), entryType, Day, Leg(debit, "DEBIT", amount, dimensions), Leg(credit, "CREDIT", amount, dimensions));
 
     private Task<EventEnvelope> ReceivableCollectedAsync(Guid claim, Guid recovery, string amount, Guid? counterparty = null, bool withRecovery = true) =>
-        BilAsync("RECEIVABLE_COLLECTED", "LA-10", "LA-28", amount, d =>
+        BilAsync("RECEIVABLE_COLLECTED", "LA-11", "LA-28", amount, d =>
         {
             d["sourceType"] = "CLM_CLAIM_PAYMENT";
             d["sourceId"] = recovery.ToString();
@@ -283,7 +283,7 @@ public sealed class FinanceV4Tests(PostgresFixture database) : IClassFixture<Pos
         (await NetAsync("GL-4310", filter)).ShouldBe(-200000.00m, "subrogation income, credit");
         (await NetAsync("GL-1330", $"claim_id = '{claim}'")).ShouldBe(0m, "recovery reserve built and released by CLM's own ReserveChanged events");
         (await NetAsync("GL-5110", $"claim_id = '{claim}'")).ShouldBe(0m);
-        (await NetAsync("GL-1110", filter)).ShouldBe(200000.00m);
+        (await NetAsync("GL-2540", filter)).ShouldBe(200000.00m);
         (await ScalarAsync<string>(_db, $"SELECT string_agg(DISTINCT counterparty_party_id::text, ',') FROM fin.journal_line WHERE {filter} AND account_code IN ('GL-1340', 'GL-4310')"))
             .ShouldBe(insurer.ToString());
         await AssertJournalsBalancedAsync($"claim_id = '{claim}' OR {filter}");
@@ -310,7 +310,7 @@ public sealed class FinanceV4Tests(PostgresFixture database) : IClassFixture<Pos
         (await NetAsync("GL-4320", filter)).ShouldBe(-1700.00m);
         (await NetAsync("GL-4310", filter)).ShouldBe(0m);
         (await NetAsync("GL-1340", filter)).ShouldBe(0m);
-        (await NetAsync("GL-1110", filter)).ShouldBe(1700.00m);
+        (await NetAsync("GL-2540", filter)).ShouldBe(1700.00m);
         (await NetAsync("GL-1330", $"claim_id = '{claim}'")).ShouldBe(0m);
         await AssertJournalsBalancedAsync($"claim_id = '{claim}' OR {filter}");
     }
@@ -363,12 +363,12 @@ public sealed class FinanceV4Tests(PostgresFixture database) : IClassFixture<Pos
         (await NetAsync("GL-2515", key)).ShouldBe(1500.00m, "net receivable 1,500: a debit balance");
 
         var registered = await FsEntryAsync("RECEIVABLE_REGISTERED", "LA-28", "LA-24", "1500.00", statement, insurerY);
-        var collected = await FsEntryAsync("RECEIVABLE_COLLECTED", "LA-10", "LA-28", "1500.00", statement, insurerY);
+        var collected = await FsEntryAsync("RECEIVABLE_COLLECTED", "LA-11", "LA-28", "1500.00", statement, insurerY);
         await _slice.DrainAsync();
         (await StatusAsync(registered)).ShouldBe("NO_POSTING");
         (await StatusAsync(collected)).ShouldBe("POSTED");
         (await NetAsync("GL-2515", key)).ShouldBe(0m);
-        (await NetAsync("GL-1110", key)).ShouldBe(1500.00m);
+        (await NetAsync("GL-2540", key)).ShouldBe(1500.00m);
         await AssertJournalsBalancedAsync($"claim_id = '{claim}' OR {key}");
     }
 
@@ -460,7 +460,7 @@ public sealed class FinanceV4Tests(PostgresFixture database) : IClassFixture<Pos
         var riFx = await RiAsync(Guid.CreateVersion7(), party, "100.00", "0.00", "100.00", edit: p => p["outstandingDelta"]!["functional"] = new JsonObject { ["amount"] = "99.00", ["currency"] = "EUR" });
         var collectedNoRecovery = await ReceivableCollectedAsync(claim, recovery, "100.00", withRecovery: false);
         var fsNoStatement = await FsEntryAsync("FS_CLEARING_RELEASED", "LA-24", "LA-13", "100.00", statement, party, withStatement: false);
-        var collectedUnknownSource = await BilAsync("RECEIVABLE_COLLECTED", "LA-10", "LA-28", "100.00", d => d["sourceType"] = "OTHER");
+        var collectedUnknownSource = await BilAsync("RECEIVABLE_COLLECTED", "LA-11", "LA-28", "100.00", d => d["sourceType"] = "OTHER");
         await _slice.DrainAsync();
 
         (await StatusAsync(unknownType)).ShouldBe("SUSPENDED/NO_RULE");

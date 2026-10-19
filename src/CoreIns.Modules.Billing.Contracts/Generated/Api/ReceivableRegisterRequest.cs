@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Receivable.register request (REQ-BIL-346, -356). Typed by SL4-CONTRACTS. Missing source-specific members are BIL-ERR-VALIDATION; the counterparty account is created on first use. Idempotent on the Idempotency-Key and on (sourceType, sourceId).</summary>
+/// <summary>bil.Receivable.register request (REQ-BIL-346, -356). Typed by SL4-CONTRACTS. Missing source-specific members are BIL-ERR-VALIDATION; the counterparty account is created on first use. Idempotent on the Idempotency-Key. The duplicate business key is (sourceType, sourceId, purpose, counterpartyPartyId, amount); a new key for an existing business key is BIL-ERR-DUPLICATE (SL4-BIL-RECV).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReceivableRegisterRequest
 {
@@ -12,7 +12,7 @@ public sealed record ReceivableRegisterRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("sourceType")]
     public required global::CoreIns.Modules.Billing.Contracts.Api.ReceivableSourceType SourceType { get; init; }
 
-    /// <summary>Id of the source object; with sourceType it is the duplicate key (BIL-ERR-DUPLICATE)</summary>
+    /// <summary>Id of the source object; participates in the extended receivable duplicate business key (BIL-ERR-DUPLICATE)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("sourceId")]
     public required string SourceId { get; init; }
 

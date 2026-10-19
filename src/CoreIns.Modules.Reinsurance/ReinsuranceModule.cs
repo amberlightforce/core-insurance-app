@@ -1,4 +1,7 @@
+using CoreIns.Modules.Claims.Contracts.Events;
 using CoreIns.Modules.Reinsurance.Authority;
+using CoreIns.Modules.Reinsurance.Intake;
+using CoreIns.Modules.Reinsurance.Recovery;
 using CoreIns.Modules.Reinsurance.Contracts;
 using CoreIns.Modules.Reinsurance.Contracts.Api;
 using CoreIns.Modules.Reinsurance.Persistence;
@@ -6,6 +9,7 @@ using CoreIns.Modules.Reinsurance.Registry;
 using CoreIns.Platform;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Errors;
+using CoreIns.Platform.Events;
 using CoreIns.Platform.Persistence;
 using CoreIns.SharedKernel.Identifiers;
 using FluentValidation;
@@ -51,7 +55,11 @@ public static class ReinsuranceModule
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.contract, {Schema}.contract_version TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.dsar_restriction TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.section, {Schema}.layer, {Schema}.clause, {Schema}.participation TO {appRole}",
+                // SL4-RI-RECOVERY: the claim view moves; the recovery rows, their batch and the exception log are sealed (SELECT, INSERT only).
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.claim_view, {Schema}.claim_exposure, {Schema}.claim_amount TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.claim_event, {Schema}.recovery_batch, {Schema}.recovery, {Schema}.intake_exception TO {appRole}",
             ]),
     ];
 
@@ -64,6 +72,7 @@ public static class ReinsuranceModule
 
         services.AddOptions<ReinsuranceOptions>().Bind(configuration.GetSection(ReinsuranceOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
         services.AddModuleDbContext<ReinsuranceDbContext>(Schema);
+        services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Reinsurance.Services.Dsar.ReinsuranceDsarParticipant>();
 
         services.AddScoped<PartyDirectory>();
         services.AddScoped<ContractLifecycleService>();
@@ -97,8 +106,22 @@ public static class ReinsuranceModule
             services.AddHostedService<LifecycleJobRegistrar>();
         }
 
-        // In-process contract other modules call (D-ARC-16).
+        // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IReinsuranceContractService, ReinsuranceContractService>();
+        services.AddScoped<IReinsuranceRecoveryService, ReinsuranceRecoveryService>();
+
+        // SL4-RI-RECOVERY: claim view (CLM event consumers), recovery booking and the recovery queries.
+        services.AddScoped<RecoveryBooker>();
+        services.AddScoped<RecoveryReader>();
+        services.AddScoped<ClaimIntake>();
+        services.AddEventHandler<ClaimReportedV1, ClaimReportedHandler>(EventDescriptor.From(ClaimReportedV1.Descriptor), ClaimReportedHandler.Name, ModuleCode.RI);
+        services.AddEventHandler<ExposureCreatedV1, ExposureCreatedHandler>(EventDescriptor.From(ExposureCreatedV1.Descriptor), ExposureCreatedHandler.Name, ModuleCode.RI);
+        services.AddEventHandler<ReserveChangedV1, ReserveChangedHandler>(EventDescriptor.From(ReserveChangedV1.Descriptor), ReserveChangedHandler.Name, ModuleCode.RI);
+        services.AddEventHandler<PaymentIssuedV1, PaymentIssuedHandler>(EventDescriptor.From(PaymentIssuedV1.Descriptor), PaymentIssuedHandler.Name, ModuleCode.RI);
+        services.AddEventHandler<PaymentVoidedV1, PaymentVoidedHandler>(EventDescriptor.From(PaymentVoidedV1.Descriptor), PaymentVoidedHandler.Name, ModuleCode.RI);
+        services.AddEventHandler<RecoveryRecordedV1, RecoveryRecordedHandler>(EventDescriptor.From(RecoveryRecordedV1.Descriptor), RecoveryRecordedHandler.Name, ModuleCode.RI);
+        services.AddEventHandler<ClaimClosedV1, ClaimClosedHandler>(EventDescriptor.From(ClaimClosedV1.Descriptor), ClaimClosedHandler.Name, ModuleCode.RI);
+        services.AddEventHandler<ClaimReopenedV1, ClaimReopenedHandler>(EventDescriptor.From(ClaimReopenedV1.Descriptor), ClaimReopenedHandler.Name, ModuleCode.RI);
 
         services.AddErrorDefinitions(Errors);
         return services;

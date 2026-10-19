@@ -26,6 +26,15 @@ public static class DisbursementCodes
 
     /// <summary>Payee account purpose used for policy refunds (REQ-BIL-186, REQ-BIL-343).</summary>
     public const string RefundPurpose = "REFUND";
+
+    /// <summary>Source type of a CLM Friendly Settlement net payable to the clearing office (D-SL4-02, REQ-BIL-354).</summary>
+    public const string FsClearing = "FS_CLEARING";
+
+    /// <summary>Inter-company clearing method (REQ-BIL-209), allowed only for <see cref="FsClearing"/>.</summary>
+    public const string Clearing = "CLEARING";
+
+    /// <summary>Payee account purpose of the clearing office (REQ-BIL-343).</summary>
+    public const string ClearingPurpose = "CLEARING";
 }
 
 /// <summary>
@@ -82,6 +91,15 @@ public static class DisbursementApproval
 
     /// <summary>Evidence of a refund approved by rule (within the auto-approval limit, unchanged payee): <c>BIL/RefundAuto/{refundId}</c>.</summary>
     public const string RefundAutoEvidencePrefix = "BIL/RefundAuto/";
+
+    /// <summary>The approval type CLM requests for a Friendly Settlement net above the net-approver's own authority (D-SL4-12).</summary>
+    public const string FsNetType = "CLM.FS_NET_SETTLEMENT";
+
+    /// <summary>The subject type of that approval (CLM/FsNet/{net id}).</summary>
+    public const string FsNetSubjectType = "FsNet";
+
+    /// <summary>The approval subject of an FS net (its source id is the CLM net id).</summary>
+    public static ObjectRef FsNetSubject(string sourceId) => new(ModuleCode.CLM, FsNetSubjectType, sourceId);
 
     private const string EvidencePrefix = "PLT/ApprovalRequest/";
 

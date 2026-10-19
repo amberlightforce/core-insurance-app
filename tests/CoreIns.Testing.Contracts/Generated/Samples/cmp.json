@@ -1,12 +1,22 @@
 {
   "responses": {
     "cmp.AiSystem.get": {
-      "entry": "unspecified",
-      "status": "unspecified"
+      "featureId": "AI-CLM-01",
+      "name": "sample",
+      "aiActClass": "sample",
+      "status": "DRAFT",
+      "submittedBy": "sample",
+      "approvedBy": "sample",
+      "recordVersion": 1
     },
     "cmp.AiSystem.register": {
-      "entry": "unspecified",
-      "status": "unspecified"
+      "featureId": "AI-CLM-01",
+      "name": "sample",
+      "aiActClass": "sample",
+      "status": "DRAFT",
+      "submittedBy": "sample",
+      "approvedBy": "sample",
+      "recordVersion": 1
     },
     "cmp.Bureau.handover": {
       "key": "value"
@@ -287,62 +297,103 @@
   },
   "schemas": {
     "AiSystemApproveRequest": {
-      "featureId": "0192b199-6987-72d4-8634-cd6c37bc3261",
-      "entry": "unspecified"
+      "featureId": "AI-CLM-01",
+      "reason": "sample"
     },
     "AiSystemApproveResponse": {
-      "entry": "unspecified",
-      "status": "unspecified"
+      "featureId": "AI-CLM-01",
+      "name": "sample",
+      "aiActClass": "sample",
+      "status": "DRAFT",
+      "submittedBy": "sample",
+      "approvedBy": "sample",
+      "recordVersion": 1
     },
     "AiSystemGetResponse": {
-      "entry": "unspecified",
-      "status": "unspecified"
+      "featureId": "AI-CLM-01",
+      "name": "sample",
+      "aiActClass": "sample",
+      "status": "DRAFT",
+      "submittedBy": "sample",
+      "approvedBy": "sample",
+      "recordVersion": 1
     },
     "AiSystemListItem": {
-      "entry": "unspecified",
-      "status": "unspecified"
+      "featureId": "AI-CLM-01",
+      "name": "sample",
+      "aiActClass": "sample",
+      "status": "DRAFT",
+      "submittedBy": "sample",
+      "approvedBy": "sample",
+      "recordVersion": 1
     },
     "AiSystemListPage": {
       "items": [
         {
-          "entry": "unspecified",
-          "status": "unspecified"
+          "featureId": "AI-CLM-01",
+          "name": "sample",
+          "aiActClass": "sample",
+          "status": "DRAFT",
+          "submittedBy": "sample",
+          "approvedBy": "sample",
+          "recordVersion": 1
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "AiSystemRegisterRequest": {
-      "featureId": "01924754-8e62-7aba-8b4d-7e102664362e",
-      "entry": "unspecified"
+      "featureId": "AI-CLM-01",
+      "name": "sample",
+      "aiActClass": "sample"
     },
     "AiSystemRegisterResponse": {
-      "entry": "unspecified",
-      "status": "unspecified"
+      "featureId": "AI-CLM-01",
+      "name": "sample",
+      "aiActClass": "sample",
+      "status": "DRAFT",
+      "submittedBy": "sample",
+      "approvedBy": "sample",
+      "recordVersion": 1
     },
     "AiSystemRetireRequest": {
-      "featureId": "0192264b-cc96-76e3-807a-a57e12e5fbc7",
-      "entry": "unspecified"
+      "featureId": "AI-CLM-01",
+      "reason": "sample"
     },
     "AiSystemRetireResponse": {
-      "entry": "unspecified",
-      "status": "unspecified"
+      "featureId": "AI-CLM-01",
+      "name": "sample",
+      "aiActClass": "sample",
+      "status": "DRAFT",
+      "submittedBy": "sample",
+      "approvedBy": "sample",
+      "recordVersion": 1
     },
     "AiSystemSubmitForReviewRequest": {
-      "featureId": "01925a35-4d6f-749a-85f3-1f6f3f9bde60",
-      "entry": "unspecified"
+      "featureId": "AI-CLM-01",
+      "reason": "sample"
     },
     "AiSystemSubmitForReviewResponse": {
-      "entry": "unspecified",
-      "status": "unspecified"
+      "featureId": "AI-CLM-01",
+      "name": "sample",
+      "aiActClass": "sample",
+      "status": "DRAFT",
+      "submittedBy": "sample",
+      "approvedBy": "sample",
+      "recordVersion": 1
     },
     "AiSystemSuspendRequest": {
-      "featureId": "01921e16-0445-7971-81c6-c0edd77df9b0",
-      "entry": "unspecified"
+      "featureId": "AI-CLM-01",
+      "reason": "sample"
     },
     "AiSystemSuspendResponse": {
-      "entry": "unspecified",
-      "status": "unspecified"
+      "featureId": "AI-CLM-01",
+      "name": "sample",
+      "aiActClass": "sample",
+      "status": "DRAFT",
+      "submittedBy": "sample",
+      "approvedBy": "sample",
+      "recordVersion": 1
     },
     "AnnualReturnAmendRequest": {
       "type": "unspecified",
