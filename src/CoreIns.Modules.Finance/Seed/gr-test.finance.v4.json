@@ -655,6 +655,16 @@
         "en": "Credit written: premium per coverage (account from the charge type GL key)"
       },
       {
+        "code": "CW-TAX-PAYABLE",
+        "sourceEvent": "bil.BillingEntryPosted",
+        "entryType": "CREDIT_WRITTEN",
+        "sourceAccount": "LA-06",
+        "chargeCategory": "TAX",
+        "deriveFrom": "GL_KEY",
+        "el": "Πίστωση εγγραφής: μείωση φόρου πληρωτέου (ακύρωση/μείωση ασφαλίστρου)",
+        "en": "Credit written: tax payable reduced (void or pro-rata reduction; account from the charge type GL key)"
+      },
+      {
         "code": "CW-SURCHARGE",
         "sourceEvent": "bil.BillingEntryPosted",
         "entryType": "CREDIT_WRITTEN",

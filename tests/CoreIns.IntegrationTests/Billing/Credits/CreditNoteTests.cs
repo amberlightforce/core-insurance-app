@@ -209,7 +209,6 @@ public sealed class CreditNoteTests(PostgresFixture database) : IClassFixture<Po
     [InlineData("rule", "TREATMENT-RULE-MISMATCH")]
     [InlineData("provisional", "PROVISIONAL-FLAG-MISMATCH")]
     [InlineData("missing", "TREATMENT-RULE-MISSING")]
-    [InlineData("reduce", "TAX-CREDIT-NOT-SUPPORTED")]
     [InlineData("insurer", "TREATMENT-MISMATCH")]
     public async Task REQ_BIL_079_every_other_disagreement_fails_closed(string mutation, string reason)
     {
@@ -246,6 +245,46 @@ public sealed class CreditNoteTests(PostgresFixture database) : IClassFixture<Po
         (await _slice.ScalarAsync<string>($"SELECT quarantine_reason FROM bil.charge WHERE transaction_id = '{transaction}' AND charge_category = 'TAX'")).ShouldBe(reason);
         (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE transaction_id = '{transaction}'")).ShouldBe(0);
         (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.ledger_entry e JOIN bil.ledger_line l ON l.entry_id = e.entry_id WHERE l.transaction_id = '{transaction}' AND e.entry_type LIKE 'CREDIT%'")).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task GAP_SL3_BIL_VOID_a_void_after_payment_credits_the_whole_amount_paid_including_IPT()
+    {
+        var s = await CreditScenario.BilledAsync(_slice);
+        _treatment.Override = r => r.TransactionKind == TaxTransactionKind.DistanceWithdrawalVoid ? TreatmentAction.ReverseAsVoid : null;
+        await s.PayAsync(s.Policy.Total);
+        var tax = s.Deltas.Where(d => CreditScenario.CategoryOf(d) == CreditScenario.TaxCategory).Sum(CreditScenario.AmountOf);
+        tax.ShouldBeGreaterThan(0m);
+
+        // pol.Withdrawal.submit: every line reversed in full (factor -1), tax lines REVERSE_AS_VOID carrying minus the IPT billed.
+        var (set, premium, transaction) = s.ServicingSet("DISTANCE_WITHDRAWAL_VOID", null, factor: -1m, taxAmount: -tax, taxRuleId: "GR-TRT-IPT-OTHER");
+        for (var i = 0; i < set.Count; i++) // each tax line reverses its own bind amount (the helper gives every tax line one amount)
+        {
+            if (CreditScenario.CategoryOf(s.Deltas[i]) == CreditScenario.TaxCategory)
+            {
+                ((JsonObject)set[i].Payload)["netAmount"]!["amount"] = (-CreditScenario.AmountOf(s.Deltas[i])).ToString("0.00", CultureInfo.InvariantCulture);
+            }
+        }
+
+        await s.DeliverAsync(set);
+
+        var blocked = await _slice.ScalarAsync<string?>($"SELECT string_agg(charge_category || ':' || coalesce(quarantine_reason, '-') || ':' || status, ', ') FROM bil.charge WHERE transaction_id = '{transaction}'") + await _slice.ScalarAsync<string?>("SELECT string_agg(detail, ' | ') FROM bil.intake_exception");
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE kind = 'CREDIT_NOTE' AND transaction_id = '{transaction}'")).ShouldBe(1, blocked);
+        var note = (await s.DocumentsAsync()).Single(d => d.Text("invoice.kind") == "CREDIT_NOTE");
+        note.Text("invoice.originalInvoiceId").ShouldBe(s.InvoiceId);
+        Money(note["invoice"]!["total"]).ShouldBe(s.Policy.Total, "the credit note is the whole amount paid, IPT included");
+        (-premium + tax).ShouldBe(s.Policy.Total);
+        note["invoiceItems"]!.AsArray().Where(i => i!["chargeCategory"]!.GetValue<string>() == "TAX").Sum(i => Money(i!["amount"])).ShouldBe(tax);
+        Money((await s.BalancesAsync())["credit"]).ShouldBe(s.Policy.Total); // all of it is refundable account credit
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.charge WHERE transaction_id = '{transaction}' AND quarantine_reason IS NOT NULL")).ShouldBe(0);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM cmp.fiscal_document WHERE source_type = 'CREDIT' AND source_id = '{note.Text("invoice.invoiceId")}'")).ShouldBe(1);
+        (await _slice.ScalarAsync<decimal>(Net("CREDIT_WRITTEN", "LA-06", s.AccountId))).ShouldBe(tax);
+        await _slice.AllEntriesBalanceAsync();
+
+        // FIN takes every entry of the void (the tax debit follows the REVERSE_AS_VOID treatment) and its journals balance.
+        await _slice.DrainAsync();
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM fin.business_event WHERE event_type = 'BillingEntryPosted' AND billing_account_id = '{s.AccountId}' AND status <> 'POSTED'")).ShouldBe(0, await _slice.ScalarAsync<string?>($"SELECT string_agg(payload->>'eventType' || ':' || status || ':' || coalesce(exception_reason, '') || ':' || coalesce(exception_detail, ''), ' | ') FROM fin.business_event WHERE event_type = 'BillingEntryPosted' AND billing_account_id = '{s.AccountId}' AND status <> 'POSTED'"));
+        (await _slice.ScalarAsync<decimal>($"SELECT coalesce(sum(CASE side WHEN 'DEBIT' THEN amount ELSE -amount END), 0) FROM fin.journal_line WHERE billing_account_id = '{s.AccountId}'")).ShouldBe(0m);
     }
 
     [Fact]
