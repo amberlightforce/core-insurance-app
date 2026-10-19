@@ -78,7 +78,7 @@ internal sealed class ChangeHarness : IAsyncDisposable
         _database = database;
         // A CSR holds the change permissions too (the role does not exist in the dev users; it only shows the date limits).
         var settings = new Dictionary<string, string?>();
-        foreach (var permission in new[] { "pol.PolicyChange.create", "pol.change", "pol.Job.updateDraft", "pol.Job.quote", "pol.Job.bind", "pol.Job.get", "pol.Job.withdraw" })
+        foreach (var permission in new[] { "pol.PolicyChange.create", "pol.Change.createOutOfSequence", "pol.change", "pol.Job.updateDraft", "pol.Job.quote", "pol.Job.bind", "pol.Job.get", "pol.Job.withdraw" })
         {
             settings[$"Platform:Permissions:Grants:{permission}:0"] = "Staff.Underwriter";
             settings[$"Platform:Permissions:Grants:{permission}:1"] = Csr;
