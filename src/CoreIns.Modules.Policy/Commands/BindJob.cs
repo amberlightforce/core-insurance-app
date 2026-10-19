@@ -116,6 +116,11 @@ internal sealed class BindJobHandler(
             return DomainError.Of(ModuleCode.POL, "QUOTE-STALE", "The quote's validity has ended; requote it.");
         }
 
+        if (version.StaleReason is { } staleReason)
+        {
+            return DomainError.Of(ModuleCode.POL, "QUOTE-STALE", $"The quote was priced under a rolled-back configuration ({staleReason}); requote it before binding (D-SL5-10).");
+        }
+
         // The quote is bound at its quoted price only under the configuration it was priced with (REQ-POL-088, -158).
         var current = (await marketConfiguration.Value.CurrentHashAsync(cancellationToken).ConfigureAwait(false)).Hash;
         if (current is { } currentHash && !string.Equals(version.ConfigurationHash, currentHash.Value, StringComparison.Ordinal))
