@@ -1,9 +1,0 @@
-Running tests from C:\Users\Karl\Projects\coreinsurance\core-insurance-app\.claude\worktrees\b-clmpayops\tests\CoreIns.IntegrationTests\bin\Release\net10.0\CoreIns.IntegrationTests.dll (net10.0|x64)
-C:\Users\Karl\Projects\coreinsurance\core-insurance-app\.claude\worktrees\b-clmpayops\tests\CoreIns.IntegrationTests\bin\Release\net10.0\CoreIns.IntegrationTests.dll (net10.0|x64) passed (2m 51s 793ms)
-
-Test run summary: Passed!
-  total: 9
-  failed: 0
-  succeeded: 9
-  skipped: 0
-  duration: 2m 52s 140ms

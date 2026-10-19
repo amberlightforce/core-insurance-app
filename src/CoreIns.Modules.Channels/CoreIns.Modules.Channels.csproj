@@ -14,6 +14,8 @@
     <ProjectReference Include="..\CoreIns.Modules.Channels.Contracts\CoreIns.Modules.Channels.Contracts.csproj" />
     <!-- pol.Policy.get and pol.Withdrawal.submit: contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
+    <!-- doc.Document.request (the acknowledgement): contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Documents.Contracts\CoreIns.Modules.Documents.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
   </ItemGroup>

@@ -18,6 +18,8 @@
     <ProjectReference Include="..\CoreIns.Modules.Party.Contracts\CoreIns.Modules.Party.Contracts.csproj" />
     <!-- clm events for the claim view (REQ-RI-113). Contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Claims.Contracts\CoreIns.Modules.Claims.Contracts.csproj" />
+    <!-- pol.ChargeDeltaEmitted for the premium cession (SL6-RI-CESSION-DELTA). Contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
   </ItemGroup>

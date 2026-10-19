@@ -19,13 +19,13 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [FIN](#fin) | 88 | 80 | 8 | 55 | 33 | 10 | 0 | 3 |
 | [DOC](#doc) | 44 | 42 | 2 | 27 | 17 | 4 | 12 | 0 |
 | [CMP](#cmp) | 90 | 53 | 37 | 69 | 21 | 21 | 0 | 3 |
-| [CHN](#chn) | 84 | 60 | 24 | 56 | 28 | 3 | 25 | 2 |
+| [CHN](#chn) | 86 | 62 | 24 | 58 | 28 | 3 | 25 | 2 |
 | [WRK](#wrk) | 58 | 23 | 35 | 40 | 18 | 9 | 3 | 14 |
 | [PLT](#plt) | 100 | 64 | 36 | 63 | 37 | 26 | 0 | 10 |
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
-| [MIG](#mig) | 20 | 20 | 0 | 12 | 8 | 5 | 0 | 13 |
+| [MIG](#mig) | 22 | 22 | 0 | 14 | 8 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 36 | 12 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1143 | 929 | 214 | 743 | 400 | 129 | 69 | 65 |
+| **Total** | 1147 | 933 | 214 | 747 | 400 | 129 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -1031,6 +1031,8 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `chn.Webhook.replay` | POST `/api/chn/v1/webhooks/replay` | C |  | ui |  | W4 | full | REQ-CHN-232..REQ-CHN-236 |
 | `chn.Webhook.subscribe` | POST `/api/chn/v1/webhooks/subscribe` | C |  | ui |  | W4 | full | REQ-CHN-232..REQ-CHN-236 |
 | `chn.Webhook.verify` | POST `/api/chn/v1/webhooks/verify` | C |  | ui |  | W4 | full | REQ-CHN-232..REQ-CHN-236 |
+| `chn.Withdrawal.close` | POST `/api/chn/v1/withdrawals/{id}/close` | C |  | ui |  | W6 | full | REQ-CHN-007, REQ-CHN-164..REQ-CHN-166 |
+| `chn.Withdrawal.confirm` | POST `/api/chn/v1/withdrawals/confirm` | C |  | ui |  | W6 | full | REQ-CHN-007, REQ-CHN-164..REQ-CHN-166 |
 | `chn.Withdrawal.declare` | POST `/api/chn/v1/withdrawals/declare` | C |  | ui |  | W6 | full | REQ-CHN-007, REQ-CHN-164..REQ-CHN-166 |
 | `chn.Withdrawal.get` | GET `/api/chn/v1/withdrawals/{id}` | Q |  | ui |  | W6 | full | REQ-CHN-168 |
 | `chn.Withdrawal.list` | GET `/api/chn/v1/withdrawals` | Q |  | ui |  | W6 | full | REQ-CHN-168 |
@@ -1313,6 +1315,8 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `mig.Archive.restrict` | POST `/api/mig/v1/archives/restrict` | C |  | internal |  | W9 | full | REQ-MIG-006 |
 | `mig.Archive.search` | GET `/api/mig/v1/archives/search` | Q |  | ui |  | W9 | full | REQ-MIG-196 |
 | `mig.Archive.subjectExport` | POST `/api/mig/v1/archives/subject-export` | C |  | internal |  | W9 | full | REQ-MIG-006 |
+| `mig.Batch.approve` | POST `/api/mig/v1/batches/approve` | C |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
+| `mig.Batch.create` | POST `/api/mig/v1/batches` | C |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
 | `mig.Batch.get` | GET `/api/mig/v1/batches/{id}` | Q |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
 | `mig.Batch.outcomes` | GET `/api/mig/v1/batches/outcomes` | Q |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
 | `mig.Batch.pause` | POST `/api/mig/v1/batches/pause` | C |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
@@ -1536,7 +1540,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-CHN-004 | `chn.Change.confirm`, `chn.Change.preview`, `chn.Change.refer`, `chn.Journey.abandon` (+6) | mapped by builder |
 | REQ-CHN-005 | `chn.Change.confirm`, `chn.Change.preview`, `chn.Change.refer`, `chn.Journey.abandon` (+6) | mapped by builder |
 | REQ-CHN-006 | — | bancassurance is out of P1 (D-PRG-10); no §9.1 operation |
-| REQ-CHN-007 | `chn.Withdrawal.declare` |  |
+| REQ-CHN-007 | `chn.Withdrawal.close`, `chn.Withdrawal.confirm`, `chn.Withdrawal.declare` |  |
 | REQ-CHN-008 | `chn.Language.get`, `chn.Language.set`, `plt.ExternalUser.invite`, `plt.ExternalUser.link` (+2) | mapped by builder |
 | REQ-CHN-009 | `chn.Notification.list`, `chn.Notification.markRead`, `chn.NotificationSubscription.set` |  |
 | REQ-WRK-001 | `wrk.Activity.create`, `wrk.Activity.get`, `wrk.Activity.list` |  |

@@ -109,6 +109,11 @@ public sealed record ChargeDeltaEmittedV1 : global::CoreIns.Platform.Contracts.E
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public bool? Provisional { get; init; }
 
+    /// <summary>True when the delta carries a migrated opening balance (SL6-MIG-POL-IMPORT): BIL and FIN treat it as an opening balance of an in-force policy, not as new business</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("opening")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Opening { get; init; }
+
     /// <summary>Transaction kind of the bound transaction (the MKT TaxTransactionKind values, PRD-17 §7.5). Always set by POL from slice 3; BIL and FIN use it for the tax-treatment check (REQ-BIL-079, REQ-FIN-182). A renewal term is NEW_BUSINESS.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("transactionKind")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]

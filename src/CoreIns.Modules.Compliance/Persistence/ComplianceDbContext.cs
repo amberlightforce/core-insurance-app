@@ -1,5 +1,6 @@
 using CoreIns.Modules.Compliance.AiRegister;
 using CoreIns.Modules.Compliance.Domain;
+using CoreIns.Modules.Compliance.Dsar;
 using CoreIns.Platform.Persistence;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
@@ -29,6 +30,7 @@ internal sealed class ComplianceDbContext(DbContextOptions<ComplianceDbContext> 
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.MapDsarRestrictions();
+        modelBuilder.MapDsar();
 
         modelBuilder.Entity<FiscalDocumentRow>(entity =>
         {

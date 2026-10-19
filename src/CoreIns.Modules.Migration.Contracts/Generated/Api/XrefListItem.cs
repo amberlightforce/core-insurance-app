@@ -4,15 +4,49 @@
 
 namespace CoreIns.Modules.Migration.Contracts.Api;
 
-/// <summary>mig.Xref.list result. PRD outputs: "page"</summary>
+/// <summary>mig.Xref.list result item.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record XrefListItem
 {
-    /// <summary>PRD: "page"</summary>
+    /// <summary>Contract member 'xrefId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'xrefId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("page")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("xrefId")]
+    public required global::System.Guid XrefId { get; init; }
+
+    /// <summary>Contract member 'source'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("source")]
+    public required string Source { get; init; }
+
+    /// <summary>Contract member 'objectType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("objectType")]
+    public required string ObjectType { get; init; }
+
+    /// <summary>Contract member 'legacyKey'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legacyKey")]
+    public required string LegacyKey { get; init; }
+
+    /// <summary>Contract member 'coreId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'coreId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("coreId")]
+    public required global::System.Guid CoreId { get; init; }
+
+    /// <summary>Contract member 'batchId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'batchId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("batchId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Page { get; init; }
+    public global::System.Guid? BatchId { get; init; }
+
+    /// <summary>Contract member 'origin'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("origin")]
+    public required string Origin { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required string Status { get; init; }
 }

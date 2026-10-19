@@ -396,6 +396,9 @@ internal sealed class ChargeLineRow
 
     /// <summary>The version of the treatment rule.</summary>
     public string? TreatmentRuleVersion { get; set; }
+
+    /// <summary>True for a migrated opening balance (SL6-MIG-POL-IMPORT): BIL and FIN treat it as an opening balance, not new business.</summary>
+    public bool Opening { get; set; }
 }
 
 /// <summary>
@@ -536,4 +539,29 @@ internal sealed class WithdrawalRow
 
     /// <summary>The first <c>WithdrawalSubmitResponse</c> as JSON.</summary>
     public string Result { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// <c>pol.migration_import</c>: a policy created by the migration importer (SL6-MIG-POL-IMPORT). The reverser finds its objects by
+/// batch here; the legacy number and the import mode (OPENING mid-term, RENEWAL_BASED expiring term) are kept for lineage.
+/// </summary>
+internal sealed class MigrationImportRow
+{
+    public PolicyId PolicyId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public Guid BatchId { get; set; }
+
+    public string LegacyNumber { get; set; } = string.Empty;
+
+    /// <summary>OPENING or RENEWAL_BASED.</summary>
+    public string Mode { get; set; } = string.Empty;
+
+    /// <summary>The configuration baseline hash H0 of the batch (null when the batch carries none).</summary>
+    public string? BaselineHash { get; set; }
+
+    public Instant ImportedAt { get; set; }
 }
