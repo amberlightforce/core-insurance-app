@@ -214,9 +214,8 @@ internal sealed class CancelPolicyHandler(
         }
 
         // ---- tax and levy lines: the MKT treatment decides (REQ-POL-215) -----------------------------------------------
-        // NonPayment looks up the Policyholder cancellation row: IPT is kept (KEEP_NOT_REDUCED) as for any cancellation; the GR pack carries no
-        // NonPayment row yet. TODO(hardening): D2 opinion and a TAX.CANCELLATION.NonPayment pack row, then look it up under its own source.
-        var taxSource = request.Source == CancellationSources.NonPayment ? CancellationSources.Policyholder : request.Source;
+        // NonPayment has its own pack row (D-SL6-15, mirrors Policyholder).
+        var taxSource = request.Source;
         var taxLines = await TreatTaxLinesAsync(policy, lines, taxSource, effective, zone, withdrawal is not null, cancellationToken).ConfigureAwait(false);
         if (taxLines.IsFailure)
         {

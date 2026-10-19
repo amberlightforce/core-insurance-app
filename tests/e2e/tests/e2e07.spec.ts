@@ -158,15 +158,11 @@ test('E2E-07 non-payment: delivered notice starts the clock, elapse cancels; cur
     return JSON.stringify(list.body).includes('DT-CANCELLATION-NOTICE') ? true : undefined;
   });
 
-  // BIL credits the cancelled term (credit note against the invoice). GAP-SL6-NONPAY-IPT: the GR pack has no IPT treatment rule for a CANCELLATION
-  // with source NonPayment (the PRDs give none, D-SL3-06), so BIL quarantines the credit (BIL-DELTA-EXCEPTION TREATMENT-RULE-MISSING) and bills
-  // no credit note. Set E2E07_MONEY=1 to assert the credit note once the rule exists.
-  if (process.env['E2E07_MONEY'] === '1') {
-    await eventually('the credit note of the cancellation', async () => {
-      const list = await call(request, billing, 'GET', `/api/bil/v1/invoices?policyId=${main.policyId}`);
-      return (list.body['items'] as Json[]).some((i) => i['invoice']['kind'] === 'CREDIT_NOTE') ? true : undefined;
-    });
-  }
+  // BIL credits the cancelled term (credit note against the invoice); the GR pack's CANCELLATION/NonPayment treatment row (D-SL6-15) makes it billable.
+  await eventually('the credit note of the cancellation', async () => {
+    const list = await call(request, billing, 'GET', `/api/bil/v1/invoices?policyId=${main.policyId}`);
+    return (list.body['items'] as Json[]).some((i) => i['invoice']['kind'] === 'CREDIT_NOTE') ? true : undefined;
+  });
 
   // ---- 5. The variants cancelled nothing.
   await new Promise((done) => setTimeout(done, 15_000)); // a few sweeper rounds

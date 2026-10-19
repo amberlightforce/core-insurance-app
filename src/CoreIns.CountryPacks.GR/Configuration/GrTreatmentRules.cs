@@ -6,7 +6,7 @@ namespace CoreIns.CountryPacks.GR.Configuration;
 /// Greece <c>TaxCalculator.treatment</c> rule rows (D2, PRD-17 REQ-MKT-330/331, section 9.4.4). All rows are legal status
 /// PendingOpinion: they are provisional outside Production and refused in Production (D-REG-02, D-SLC-09) until the D2 tax
 /// and legal opinion settles them. Rows exist for the IPT charge category only. Levy and stamp categories have no row, and
-/// so do cancellation sources other than Policyholder: the PRDs give no refundability or reduction for them, so
+/// so do cancellation sources other than Policyholder and NonPayment (D-SL6-15): the PRDs give no refundability or reduction for them, so
 /// <c>treatment</c> returns RULE_MISSING and a credit carrying such a line fails closed (D-SL3-06). Key scheme:
 /// <c>tax.treatment.rule.&lt;CATEGORY&gt;.&lt;KIND&gt;.&lt;SOURCE|ANY&gt;</c>.
 /// </summary>
@@ -27,6 +27,7 @@ internal static class GrTreatmentRules
     public static IReadOnlyList<PackConfigValue> Values { get; } =
     [
         Row("CANCELLATION", "Policyholder", "KEEP_NOT_REDUCED", "GR-TRT-IPT-CANCEL-POLICYHOLDER", Keep),
+        Row("CANCELLATION", "NonPayment", "KEEP_NOT_REDUCED", "GR-TRT-IPT-CANCEL-NONPAYMENT", Keep),
         Row("ENDORSEMENT_CREDIT", "ANY", "KEEP_NOT_REDUCED", "GR-TRT-IPT-ENDORSEMENT-CREDIT", Keep),
         Row("RETURN_PREMIUM", "ANY", "KEEP_NOT_REDUCED", "GR-TRT-IPT-RETURN-PREMIUM", Keep),
         Row("REFUND", "ANY", "KEEP_NOT_REDUCED", "GR-TRT-IPT-REFUND", Keep),
@@ -43,5 +44,6 @@ internal static class GrTreatmentRules
             LegalStatus.PendingOpinion, sourceRef, MotorPath: true,
             Note: kind == "DISTANCE_WITHDRAWAL_VOID"
                 ? "Alternative INSURER_BEARS selectable via tax.treatment.withdrawal_void_routing (registered, not used by the slice). " + WithdrawalNote
+                : kind == "CANCELLATION" && source == "NonPayment" ? "mirrors Policyholder; TAX_OPINION_PENDING (D-SL6-15)"
                 : kind == "VOID" && source == "DistanceWithdrawal" ? WithdrawalNote : null);
 }

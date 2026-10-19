@@ -134,8 +134,8 @@ public sealed class ConfigStateManifestTests
 
         // 0.2.0 = 0.1.0 + the treatment rows, nothing else added, removed or changed.
         v2.Where(v => !v.Key.StartsWith("tax.treatment.", StringComparison.Ordinal)).ToList().ShouldBe([.. v1]);
-        v2.Count(v => v.Key.StartsWith("tax.treatment.", StringComparison.Ordinal)).ShouldBe(9);
-        v2.Count.ShouldBe(v1.Count + 9);
+        v2.Count(v => v.Key.StartsWith("tax.treatment.", StringComparison.Ordinal)).ShouldBe(10);
+        v2.Count.ShouldBe(v1.Count + 10);
         gr.Values.ShouldBe([.. v2]);
     }
 
