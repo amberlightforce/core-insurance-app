@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CoreIns.Modules.Claims.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Reverification : Migration
+    public partial class Reverification : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

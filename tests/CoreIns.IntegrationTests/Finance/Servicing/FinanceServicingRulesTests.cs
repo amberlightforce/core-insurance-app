@@ -163,7 +163,7 @@ public sealed class FinanceServicingRulesTests
     }
 
     [Fact]
-    public async Task REQ_FIN_182_a_credit_kept_on_the_payable_where_the_treatment_reduces_it_is_refused()
+    public async Task REQ_FIN_182_a_credit_kept_on_the_payable_where_the_treatment_reduces_it_is_refused_and_the_matching_reduction_passes()
     {
         // DISTANCE_WITHDRAWAL_VOID is REVERSE_AS_VOID (customerCredit FULL, the authority liability is reduced).
         var kept = await CheckAsync(Checker(), Entry("CREDIT_WRITTEN",
@@ -175,7 +175,7 @@ public sealed class FinanceServicingRulesTests
         var reduced = await CheckAsync(Checker(), Entry("CREDIT_WRITTEN",
             Line("LA-06", "DEBIT", 43.29m, "DISTANCE_WITHDRAWAL_VOID", "DistanceWithdrawal", rule: "GR-TRT-IPT-WITHDRAWAL-VOID"),
             Line("LA-01", "CREDIT", 43.29m, "DISTANCE_WITHDRAWAL_VOID", null, null, null)));
-        reduced.Passed.ShouldBeFalse("a REDUCE treatment consistent with the debit still cannot post: no IPT payable debit exists on any entry type (no remittance rule)");
+        reduced.Passed.ShouldBeTrue(reduced.Detail); // GAP-SL3-BIL-VOID: a CREDIT_WRITTEN debit that the treatment reduces posts
     }
 
     [Fact]

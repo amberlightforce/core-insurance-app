@@ -19,10 +19,73 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("clm")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("CoreIns.Modules.Claims.MigrationImport.ClaimMigrationImportRow", b =>
+                {
+                    b.Property<Guid>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<Guid?>("ClockId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("clock_id");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("currency");
+
+                    b.Property<DateTime>("ImportedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("imported_at");
+
+                    b.Property<string>("LegacyNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legacy_number");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<decimal>("OpeningReserve")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("opening_reserve");
+
+                    b.Property<string>("Origin")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("origin");
+
+                    b.Property<DateOnly>("OriginalNotifiedOn")
+                        .HasColumnType("date")
+                        .HasColumnName("original_notified_on");
+
+                    b.HasKey("ClaimId")
+                        .HasName("pk_migration_import");
+
+                    b.HasIndex("BatchId")
+                        .HasDatabaseName("ix_migration_import_batch");
+
+                    b.HasIndex("LegalEntityId", "LegacyNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ux_migration_import_legacy");
+
+                    b.ToTable("migration_import", "clm", t =>
+                        {
+                            t.HasCheckConstraint("ck_migration_import_origin", "origin = 'MIGRATION'");
+
+                            t.HasCheckConstraint("ck_migration_import_reserve", "opening_reserve >= 0");
+                        });
+                });
 
             modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.ClaimPaymentRow", b =>
                 {
@@ -2067,6 +2130,16 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_transaction_set_status", "status IN ('DRAFT', 'SUBMITTED', 'PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'POSTED')");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Claims.MigrationImport.ClaimMigrationImportRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Claims.Persistence.ClaimRow", null)
+                        .WithOne()
+                        .HasForeignKey("CoreIns.Modules.Claims.MigrationImport.ClaimMigrationImportRow", "ClaimId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_migration_import_claim");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.ClaimPaymentRow", b =>

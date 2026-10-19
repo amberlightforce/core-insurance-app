@@ -79,6 +79,7 @@ internal static class ClockDefinitions
     public const string BilNonpayNotice = "BIL_NONPAY_NOTICE";
     public const string DsarResponse = "CMP_DSAR_RESPONSE";
     public const string ClmFsCounterpartyReply = "CLM_FS_COUNTERPARTY_REPLY";
+    public const string ClmOpenClaimResponse = "CLM_OPEN_CLAIM_RESPONSE";
 
     public static IReadOnlyList<ClockDefinition> All { get; } =
     [
@@ -93,6 +94,10 @@ internal static class ClockDefinitions
         // Placeholder: the 30 days are not from a source.
         new(ClmFsCounterpartyReply, "FS counterparty reply", StatutoryClockKind.Deadline, "P30D", "GR",
             ClockLegalStatus.Illustrative, "PRD-08 placeholder, not verified", WarnBefore: "P5D"),
+
+        // Placeholder for the claim handling deadline an imported open claim keeps (CLM-010, CMP-009): the number is not sourced.
+        new(ClmOpenClaimResponse, "Open claim handling deadline", StatutoryClockKind.Deadline, "P30D", "GR",
+            ClockLegalStatus.Illustrative, "PRD-07 placeholder, not verified", WarnBefore: "P5D"),
     ];
 
     public static ClockDefinition? Find(string code) => All.FirstOrDefault(d => string.Equals(d.Code, code, StringComparison.Ordinal));

@@ -7,16 +7,13 @@ import { addDays, advanceToAthens, athensDate, athensTime, concludedDate, confir
 // the window (23:59:50 Europe/Athens on the dev clock), POL voids the term once, BIL credits and refunds the whole amount paid
 // including IPT (deduction 0.00), DOC renders the acknowledgement once. A declaration confirmed after midnight is declined and
 // voids nothing; the window is counted in local calendar days across a DST change; a double confirm is one void. F-401 default:
-// full refund (the money leg, see below); the tax_position TAX_OPINION_PENDING note lives in the GR pack row and is not exposed by an API. Runs through tests/e2e/run-e2e08.sh.
+// full refund (the money leg, BIL credits the IPT of the void since GAP-SL3-BIL-VOID); the tax_position TAX_OPINION_PENDING note lives in the GR pack row and is not exposed by an API. Runs through tests/e2e/run-e2e08.sh.
 
 const IBAN = 'GR1601101250000000012300695';
 const WINDOW_DAYS = 14; // ILLUSTRATIVE (D-SL6-06), the CHN and POL default
 const LAST_SECONDS = '23:59:50'; // a few seconds of headroom for the calls between the advance and the confirm
 
-// The money legs need BIL to credit IPT and levies (GAP-SL3-BIL-VOID, STATUS.md): until BIL and FIN map a tax credit the tax delta of the
-// void is quarantined (TAX-CREDIT-NOT-SUPPORTED) and no credit note is billed. Set E2E08_MONEY=1 to run this leg once the gap is closed.
 test('E2E-08 withdrawal refund: one credit note for the whole amount paid incl. IPT, stub fiscal credit, refund paid (deduction 0.00)', async ({ request }) => {
-  test.skip(process.env['E2E08_MONEY'] !== '1', 'GAP-SL3-BIL-VOID: BIL quarantines the IPT credit of a distance withdrawal void');
   test.setTimeout(600_000);
   const underwriter = await signIn(request, 'underwriter');
   const billing = await signIn(request, 'billing');
