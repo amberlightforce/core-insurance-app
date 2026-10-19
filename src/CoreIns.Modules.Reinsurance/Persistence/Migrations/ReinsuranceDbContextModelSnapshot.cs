@@ -23,6 +23,158 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ClaimAmountRow", b =>
+                {
+                    b.Property<Guid>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.Property<Guid>("ExposureId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("exposure_id");
+
+                    b.Property<string>("CostType")
+                        .HasColumnType("text")
+                        .HasColumnName("cost_type");
+
+                    b.Property<decimal>("OpenReserve")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("open_reserve");
+
+                    b.Property<decimal>("Paid")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("paid");
+
+                    b.Property<decimal>("Realised")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("realised");
+
+                    b.Property<decimal>("RecoveryOpen")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("recovery_open");
+
+                    b.Property<long>("RecoverySequence")
+                        .HasColumnType("bigint")
+                        .HasColumnName("recovery_sequence");
+
+                    b.Property<long>("ReserveSequence")
+                        .HasColumnType("bigint")
+                        .HasColumnName("reserve_sequence");
+
+                    b.HasKey("ClaimId", "ExposureId", "CostType")
+                        .HasName("pk_claim_amount");
+
+                    b.ToTable("claim_amount", "ri");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ClaimEventRow", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_id");
+
+                    b.Property<long>("AggregateSequence")
+                        .HasColumnType("bigint")
+                        .HasColumnName("aggregate_sequence");
+
+                    b.Property<DateTime>("AppliedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("applied_at");
+
+                    b.Property<Guid>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.HasKey("EventId")
+                        .HasName("pk_claim_event");
+
+                    b.HasIndex("ClaimId")
+                        .HasDatabaseName("ix_claim_event_claim");
+
+                    b.ToTable("claim_event", "ri");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ClaimExposureRow", b =>
+                {
+                    b.Property<Guid>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.Property<Guid>("ExposureId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("exposure_id");
+
+                    b.Property<Guid?>("ContractId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("contract_id");
+
+                    b.Property<string>("CoverageCode")
+                        .HasColumnType("text")
+                        .HasColumnName("coverage_code");
+
+                    b.Property<string>("Kind")
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("SiiLob")
+                        .HasColumnType("text")
+                        .HasColumnName("sii_lob");
+
+                    b.HasKey("ClaimId", "ExposureId")
+                        .HasName("pk_claim_exposure");
+
+                    b.HasIndex("ContractId")
+                        .HasDatabaseName("ix_claim_exposure_contract");
+
+                    b.ToTable("claim_exposure", "ri");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ClaimViewRow", b =>
+                {
+                    b.Property<Guid>("ClaimId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.Property<bool>("Closed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("closed");
+
+                    b.Property<long>("ClosedSequence")
+                        .HasColumnType("bigint")
+                        .HasColumnName("closed_sequence");
+
+                    b.Property<long>("LastSequence")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_sequence");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateOnly?>("LossDate")
+                        .HasColumnType("date")
+                        .HasColumnName("loss_date");
+
+                    b.Property<Guid?>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<string>("ProductCode")
+                        .HasColumnType("text")
+                        .HasColumnName("product_code");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ClaimId")
+                        .HasName("pk_claim_view");
+
+                    b.ToTable("claim_view", "ri");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ClauseRow", b =>
                 {
                     b.Property<Guid>("ClauseId")
@@ -295,6 +447,52 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.IntakeExceptionRow", b =>
+                {
+                    b.Property<Guid>("ExceptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("exception_id");
+
+                    b.Property<Guid>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<Guid?>("ContractId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("contract_id");
+
+                    b.Property<string>("Detail")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("detail");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<Guid?>("SourceEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_event_id");
+
+                    b.HasKey("ExceptionId")
+                        .HasName("pk_intake_exception");
+
+                    b.HasIndex("ClaimId")
+                        .HasDatabaseName("ix_intake_exception_claim");
+
+                    b.ToTable("intake_exception", "ri");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.LayerRow", b =>
                 {
                     b.Property<Guid>("LayerId")
@@ -413,6 +611,149 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.RecoveryBatchRow", b =>
+                {
+                    b.Property<Guid>("BatchId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<string>("CalcHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("calc_hash");
+
+                    b.Property<Guid>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.Property<Guid>("ContractId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("contract_id");
+
+                    b.Property<string>("ContractVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("contract_version");
+
+                    b.Property<int>("ContractYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("contract_year");
+
+                    b.Property<string>("EngineVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("engine_version");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<Guid>("SourceEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_event_id");
+
+                    b.Property<string>("Trace")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("trace");
+
+                    b.HasKey("BatchId")
+                        .HasName("pk_recovery_batch");
+
+                    b.HasIndex("ContractId", "RecordedAt")
+                        .HasDatabaseName("ix_recovery_batch_contract");
+
+                    b.ToTable("recovery_batch", "ri");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.RecoveryRow", b =>
+                {
+                    b.Property<Guid>("RecoveryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("recovery_id");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<Guid>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.Property<Guid>("ContractId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("contract_id");
+
+                    b.Property<int>("ContractYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("contract_year");
+
+                    b.Property<decimal>("IncurredDelta")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("incurred_delta");
+
+                    b.Property<Guid>("LayerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("layer_id");
+
+                    b.Property<int>("LayerNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("layer_no");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<decimal>("OutstandingDelta")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("outstanding_delta");
+
+                    b.Property<decimal>("PaidDelta")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("paid_delta");
+
+                    b.Property<Guid>("ParticipantPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("participant_party_id");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<string>("SiiLob")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("sii_lob");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.HasKey("RecoveryId")
+                        .HasName("pk_recovery");
+
+                    b.HasIndex("BatchId")
+                        .HasDatabaseName("ix_recovery_batch");
+
+                    b.HasIndex("ClaimId")
+                        .HasDatabaseName("ix_recovery_claim");
+
+                    b.HasIndex("ContractId", "ClaimId")
+                        .HasDatabaseName("ix_recovery_contract_claim");
+
+                    b.ToTable("recovery", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_recovery_state", "state IN ('CALCULATED', 'POSTED', 'REVERSED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.SectionRow", b =>
                 {
                     b.Property<Guid>("SectionId")
@@ -502,6 +843,16 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_participation_version");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.RecoveryRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.RecoveryBatchRow", null)
+                        .WithMany()
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_recovery_batch");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.SectionRow", b =>
