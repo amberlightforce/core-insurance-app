@@ -106,6 +106,14 @@ internal sealed class DisbursementRow
     /// <summary>Business reference of the paid object for sources without a claim (the credit set of a refund): part of the duplicate key (REQ-BIL-202).</summary>
     public string? BusinessRef { get; set; }
 
+    public string? StatementRef { get; set; }
+
+    public string? Lines { get; set; }
+
+    public Guid? ReleaseApprovalRequestId { get; set; }
+
+    public string? ReleaseApprovedBy { get; set; }
+
     public string State { get; set; } = string.Empty;
 
     public string ScreeningResult { get; set; } = string.Empty;
@@ -136,3 +144,4 @@ internal sealed class DisbursementRow
 
     public int RecordVersion { get; set; }
 }
+

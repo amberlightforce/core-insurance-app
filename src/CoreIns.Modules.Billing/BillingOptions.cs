@@ -57,9 +57,23 @@ internal sealed class BillingOptions
     [Required]
     public string TreatmentBusinessBasis { get; set; } = "ESTABLISHMENT";
 
+    /// <summary>Core money-source register rows (REQ-BIL-354); an absent row fails closed.</summary>
+    public Dictionary<string, BillingSourceRow> Sources { get; set; } = new(StringComparer.Ordinal);
+
     /// <summary>The configured zone.</summary>
     public TimeZoneInfo Zone => TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
 
     /// <summary>The configured default currency.</summary>
     public Currency Currency => Currency.FromCode(DefaultCurrency);
 }
+
+internal sealed class BillingSourceRow
+{
+    public string CallingModule { get; set; } = string.Empty;
+    public string Direction { get; set; } = string.Empty;
+    public string[] AllowedMethods { get; set; } = [];
+    public string ApprovalEvidenceType { get; set; } = string.Empty;
+    public string[] LedgerRuleRows { get; set; } = [];
+    public string FinancePostingRuleReference { get; set; } = string.Empty;
+}
+

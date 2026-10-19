@@ -4,28 +4,37 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>chn.Withdrawal.declare result. PRD outputs: "request number, confirmedAt, receipt"</summary>
+/// <summary>chn.Withdrawal.declare result. PRD outputs: "request number, confirmedAt, receipt". A late declaration is recorded and returned as DECLINED with declineCode CHN-ERR-RIGHT-EXPIRED (not an HTTP error, so the record persists).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record WithdrawalDeclareResponse
 {
     /// <summary>PRD: "request number"</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Business number issued by PLT numbering (format is configuration).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("requestNumber")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RequestNumber { get; init; }
+    public required string RequestNumber { get; init; }
 
-    /// <summary>PRD: "confirmedAt"</summary>
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required global::CoreIns.Modules.Channels.Contracts.Api.WithdrawalStatusCode Status { get; init; }
+
+    /// <summary>PRD: "confirmedAt"; absent until the confirmation step</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("confirmedAt")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Instant? ConfirmedAt { get; init; }
 
-    /// <summary>PRD: "receipt"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("receipt")]
+    /// <summary>Confirmation token (demo/ops builds return it; production sends it only by e-mail)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("confirmToken")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Receipt { get; init; }
+    public string? ConfirmToken { get; init; }
+
+    /// <summary>CHN-ERR-RIGHT-EXPIRED when the window had passed</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("declineCode")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? DeclineCode { get; init; }
+
+    /// <summary>Contract member 'receipt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receipt")]
+    public required global::CoreIns.Modules.Channels.Contracts.Api.WithdrawalReceipt Receipt { get; init; }
 }

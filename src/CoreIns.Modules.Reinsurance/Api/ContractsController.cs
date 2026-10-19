@@ -24,6 +24,9 @@ internal static class ReinsurancePermissions
     public const string ContractGet = "ri.Contract.get";
     public const string ContractList = "ri.Contract.list";
     public const string ContractApplicable = "ri.Contract.applicable";
+    public const string RecoveryListByClaim = "ri.Recovery.listByClaim";
+    public const string RecoveryListByContract = "ri.Recovery.listByContract";
+    public const string RecoveryTrace = "ri.Recovery.trace";
 }
 
 /// <summary>
