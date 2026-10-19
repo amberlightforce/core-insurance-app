@@ -7,6 +7,7 @@ using CoreIns.Modules.Billing.Persistence;
 using CoreIns.Modules.Billing.Queries;
 using CoreIns.Modules.Billing.Services;
 using CoreIns.Modules.Compliance.Contracts.Events;
+using CoreIns.Modules.Documents.Contracts.Events;
 using CoreIns.Modules.Policy.Contracts.Events;
 using CoreIns.Platform;
 using CoreIns.Platform.Approvals;
@@ -53,6 +54,8 @@ public static class BillingModule
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.billing_account, {Schema}.plan_instance, {Schema}.charge, {Schema}.invoice, {Schema}.invoice_item, {Schema}.receipt, {Schema}.intake_exception TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.dsar_restriction TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.payee_account, {Schema}.disbursement, {Schema}.refund TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.delinquency_case TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.delinquency_contact TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.refund_credit, {Schema}.refund_netting TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.receivable, {Schema}.receivable_allocation, {Schema}.allocation, {Schema}.credit_application, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
@@ -116,6 +119,11 @@ public static class BillingModule
         services.AddCommandAuditor<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountAuditor>();
         services.AddCommand<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountHandler>(
             CommandDescriptor.For("bil.PayeeAccount.create") with { SupportsDryRun = true });
+        services.AddScoped<DisbursementReleaser>();
+        services.AddScoped<IValidator<ApproveDisbursementRelease>, ApproveDisbursementReleaseValidator>();
+        services.AddCommandAuditor<ApproveDisbursementRelease, DisbursementApproveReleaseResponse, ApproveDisbursementReleaseAuditor>();
+        services.AddCommand<ApproveDisbursementRelease, DisbursementApproveReleaseResponse, ApproveDisbursementReleaseHandler>(
+            CommandDescriptor.For("bil.Disbursement.approveRelease") with { SupportsDryRun = true });
         services.AddScoped<IValidator<RequestDisbursement>, RequestDisbursementValidator>();
         services.AddCommandAuditor<RequestDisbursement, DisbursementRequestResponse, RequestDisbursementAuditor>();
         services.AddCommand<RequestDisbursement, DisbursementRequestResponse, RequestDisbursementHandler>(
@@ -138,6 +146,22 @@ public static class BillingModule
         services.AddCommandAuditor<ResubmitRefund, RefundResubmitResponse, ResubmitRefundAuditor>();
         services.AddCommand<ResubmitRefund, RefundResubmitResponse, ResubmitRefundHandler>(CommandDescriptor.For("bil.Refund.resubmit") with { SupportsDryRun = true });
 
+        // SL6-BIL-DELINQ: non-payment cases (notice, waiting clock, cure, cancellation request). DOC and CMP are reached through their
+        // contract interfaces, resolved when used.
+        services.AddScoped<NonpayService>();
+        services.AddScoped<DelinquencyReader>();
+        AddInternalDelinquencyCommand<SweepDelinquency, SweepDelinquencyHandler>(services, "bil.Delinquency.sweep");
+        AddInternalDelinquencyCommand<OpenDelinquency, OpenDelinquencyHandler>(services, "bil.Delinquency.open");
+        AddInternalDelinquencyCommand<NoticeDelivered, NoticeDeliveredHandler>(services, "bil.Delinquency.noticeDelivered");
+        AddInternalDelinquencyCommand<NoticeFailed, NoticeFailedHandler>(services, "bil.Delinquency.noticeFailed");
+        AddInternalDelinquencyCommand<NonpayClockElapsed, NonpayClockElapsedHandler>(services, "bil.Delinquency.clockElapsed");
+        services.AddCommandAuditor<RecordDelinquencyContact, DelinquencyRecordContactResponse, DelinquencyAuditor<RecordDelinquencyContact, DelinquencyRecordContactResponse>>();
+        services.AddCommand<RecordDelinquencyContact, DelinquencyRecordContactResponse, RecordDelinquencyContactHandler>(CommandDescriptor.For("bil.Delinquency.recordContact"));
+        services.AddCommandAuditor<ArrangeDelinquency, DelinquencyArrangeResponse, DelinquencyAuditor<ArrangeDelinquency, DelinquencyArrangeResponse>>();
+        services.AddCommand<ArrangeDelinquency, DelinquencyArrangeResponse, ArrangeDelinquencyHandler>(CommandDescriptor.For("bil.Delinquency.arrange"));
+        services.AddCommandAuditor<ReleaseDelinquencyHold, DelinquencyReleaseHoldResponse, DelinquencyAuditor<ReleaseDelinquencyHold, DelinquencyReleaseHoldResponse>>();
+        services.AddCommand<ReleaseDelinquencyHold, DelinquencyReleaseHoldResponse, ReleaseDelinquencyHoldHandler>(CommandDescriptor.For("bil.Delinquency.releaseHold"));
+
         // Consumers (worker): POL charges and bind, CMP fiscal outcomes.
         services.AddEventHandler<ChargeDeltaEmittedV1, ChargeDeltaEmittedHandler>(
             EventDescriptor.From(ChargeDeltaEmittedV1.Descriptor), ChargeDeltaEmittedHandler.Name, ModuleCode.BIL);
@@ -151,6 +175,13 @@ public static class BillingModule
         services.AddEventHandler<FiscalDocRejectedV1, FiscalDocRejectedHandler>(
             EventDescriptor.From(FiscalDocRejectedV1.Descriptor), FiscalDocRejectedHandler.Name, ModuleCode.BIL);
 
+        services.AddEventHandler<DocumentDeliveredV1, DocumentDeliveredNonpayHandler>(
+            EventDescriptor.From(DocumentDeliveredV1.Descriptor), DocumentDeliveredNonpayHandler.Name, ModuleCode.BIL);
+        services.AddEventHandler<DeliveryFailedV1, DeliveryFailedNonpayHandler>(
+            EventDescriptor.From(DeliveryFailedV1.Descriptor), DeliveryFailedNonpayHandler.Name, ModuleCode.BIL);
+        services.AddEventHandler<ClockElapsedV1, ClockElapsedNonpayHandler>(
+            EventDescriptor.From(ClockElapsedV1.Descriptor), ClockElapsedNonpayHandler.Name, ModuleCode.BIL);
+
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IBillingBillingAccountService, BillingAccountService>();
         services.AddScoped<IBillingInvoiceService, InvoiceService>();
@@ -159,10 +190,16 @@ public static class BillingModule
         services.AddScoped<IBillingPayeeAccountService, PayeeAccountService>();
         services.AddScoped<IBillingDisbursementService, DisbursementService>();
         services.AddScoped<IBillingRefundService, RefundService>();
+        services.AddScoped<IBillingDelinquencyService, DelinquencyService>();
 
         services.AddErrorDefinitions(Errors);
         return services;
     }
+
+    private static void AddInternalDelinquencyCommand<TCommand, THandler>(IServiceCollection services, string operation)
+        where TCommand : Commands.IDelinquencyCommand, ICommand<int>
+        where THandler : class, ICommandHandler<TCommand, int> =>
+        services.AddCommand<TCommand, int, THandler>(CommandDescriptor.For(operation) with { RequiresIdempotencyKey = false, Idempotent = false });
 
     /// <summary>Status, bilingual title and description of every BIL-ERR code the module raises (RFC 9457, D-API-15).</summary>
     internal static ErrorDefinition[] Errors { get; } =
@@ -215,7 +252,13 @@ public static class BillingModule
             .Describe("Η επιστροφή πληρώνεται μόνο σε επαληθευμένο λογαριασμό του πληρωτή.", "A refund is paid only to the payer's verified bank account."),
         ErrorDefinition.For(ModuleCode.BIL, "NOT-PERMITTED", 403, "Δεν έχετε εξουσιοδότηση για αυτό το ποσό", "No authority for this amount")
             .Describe("Δεν υπάρχει εξουσιοδότηση επιστροφής για αυτό το ποσό.", "No refund authority covers this amount."),
+        ErrorDefinition.For(ModuleCode.BIL, "DELINQUENCY-STATE", 409, "Η εκκρεμότητα δεν είναι στην κατάλληλη κατάσταση", "The delinquency case is not in the right state")
+            .Describe("Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση της εκκρεμότητας οφειλής.", "The action is not allowed in the delinquency case's current state."),
         ErrorDefinition.For(ModuleCode.BIL, "FISCAL-TREATMENT-OPEN", 422, "Ανοικτή φορολογική μεταχείριση", "Fiscal treatment is open"),
+        ErrorDefinition.For(ModuleCode.BIL, "LINES-MISMATCH", 422, "Οι γραμμές δεν αντιστοιχούν στο καθαρό ποσό", "The lines do not match the net")
+            .Describe("Οι γραμμές της κατάστασης φιλικού διακανονισμού πρέπει να είναι μοναδικές και να αθροίζουν στο καθαρό ποσό.", "The Friendly Settlement statement lines must be unique and add up to the net amount."),
+        ErrorDefinition.For(ModuleCode.BIL, "APPROVAL-REQUIRED", 422, "Δεν εκκρεμεί έγκριση αποδέσμευσης", "No release approval is pending")
+            .Describe("Η πληρωμή δεν περιμένει έγκριση αποδέσμευσης.", "The disbursement is not awaiting a release approval."),
         ErrorDefinition.For(ModuleCode.BIL, "DUPLICATE", 409, "Πιθανή διπλή πληρωμή", "Possible duplicate payment")
             .Describe("Υπάρχει ήδη πληρωμή για την ίδια πηγή ή με τον ίδιο λογαριασμό, ποσό και αναφορά.", "A payment already exists for the same source or with the same account, amount and reference."),
     ];
