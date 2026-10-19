@@ -1,4 +1,6 @@
 using CoreIns.CountryPacks.CY;
+using CoreIns.CountryPacks.CY.Claims;
+using CoreIns.CountryPacks.GR.Claims;
 using CoreIns.CountryPacks.GR.Addresses;
 using CoreIns.CountryPacks.GR.Configuration;
 using CoreIns.CountryPacks.GR.Fiscal;
@@ -35,6 +37,13 @@ internal static class CountryPackBinding
                 if (!environment.IsProduction())
                 {
                     services.AddSingleton<IFiscalDocumentChannel, MyDataStubFiscalChannel>();
+
+                    // FriendlySettlementClearing: the GR STUB (SL4-MKT-FS), outside Production only. In Production the SPI is unbound and CLM
+                    // fails closed (CLM-ERR-FS-DISABLED, D-SL4-03).
+                    var fsOptions = new FriendlySettlementStubOptions();
+                    configuration.GetSection(FriendlySettlementStubOptions.Section).Bind(fsOptions);
+                    services.AddSingleton(fsOptions);
+                    services.AddSingleton<IFriendlySettlementClearing, FriendlySettlementClearingStub>();
                 }
 
                 break;
@@ -42,6 +51,7 @@ internal static class CountryPackBinding
                 services.AddSingleton<IIdValidator>(sp => new CyIdValidator(sp.GetRequiredService<TimeProvider>()));
                 services.AddSingleton<INameTransliterator, CyNameTransliterator>();
                 services.AddSingleton<IPackConfigurationSource, CyTreatmentRules>();
+                services.AddSingleton<IFriendlySettlementClearing, CyFriendlySettlementClearing>();
                 break;
             default:
                 throw new InvalidOperationException($"No country pack is deployed for Stamp:Country '{country}'.");
