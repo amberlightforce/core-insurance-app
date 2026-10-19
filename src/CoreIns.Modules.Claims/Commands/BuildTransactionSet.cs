@@ -181,9 +181,9 @@ internal sealed class BuildTransactionSetHandler(
         if (!clearing && drafts.SingleOrDefault(d => d.Kind == TransactionKind.Payment) is { } paymentDraft)
         {
             var account = paymentDraft.Source!.PayeeAccountId!.Value;
-            var rejected = Codes.Of(PaymentStatus.Rejected);
+            string[] rejected = [Codes.Of(PaymentStatus.Rejected), Codes.Of(PaymentStatus.Voided), Codes.Of(PaymentStatus.Stopped), Codes.Of(PaymentStatus.Returned)];
             var duplicate = await db.ClaimPayments.AsNoTracking()
-                .Where(p => p.ClaimId == claim.ClaimId && p.PayeeAccountId == account && p.Amount == paymentDraft.Amount && p.Status != rejected)
+                .Where(p => p.ClaimId == claim.ClaimId && p.PayeeAccountId == account && p.Amount == paymentDraft.Amount && !rejected.Contains(p.Status))
                 .Join(db.TransactionSets.AsNoTracking().Where(s => s.Status != Codes.Of(SetStatus.Draft)), p => p.SetId, s => s.SetId, (p, s) => p.ClaimPaymentId)
                 .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
             if (duplicate != default)

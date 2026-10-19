@@ -1,6 +1,8 @@
 using CoreIns.Modules.Claims.Authority;
 using CoreIns.Modules.Claims.Commands;
+using CoreIns.Modules.Claims.Commands.Payments;
 using CoreIns.Modules.Claims.Commands.Recoveries;
+using CoreIns.Modules.Compliance.Contracts.Events;
 using CoreIns.Modules.Claims.Contracts;
 using CoreIns.Modules.Claims.Contracts.Api;
 using CoreIns.Modules.Billing.Contracts.Events;
@@ -120,6 +122,35 @@ public static class ClaimsModule
         services.AddEventHandler<DisbursementClearedV1, DisbursementClearedHandler>(
             EventDescriptor.From(DisbursementClearedV1.Descriptor), DisbursementClearedHandler.Name, ModuleCode.CLM);
 
+        // Payment corrections (SL4-CLM-PAYOPS): void, stop, reissue, BIL's correction facts, the settlement receipt and its MARK.
+        services.AddScoped<PaymentCorrections>();
+        services.AddScoped<SettlementReceipt>();
+        services.AddScoped<IValidator<VoidPayment>, VoidPaymentValidator>();
+        services.AddCommandAuditor<VoidPayment, PaymentVoidResponse, VoidPaymentAuditor>();
+        services.AddCommand<VoidPayment, PaymentVoidResponse, VoidPaymentHandler>(CommandDescriptor.For("clm.Payment.void") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<StopPayment>, StopPaymentValidator>();
+        services.AddCommandAuditor<StopPayment, PaymentStopResponse, StopPaymentAuditor>();
+        services.AddCommand<StopPayment, PaymentStopResponse, StopPaymentHandler>(CommandDescriptor.For("clm.Payment.stop") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ReissuePayment>, ReissuePaymentValidator>();
+        services.AddCommandAuditor<ReissuePayment, PaymentReissueResponse, ReissuePaymentAuditor>();
+        services.AddCommand<ReissuePayment, PaymentReissueResponse, ReissuePaymentHandler>(CommandDescriptor.For("clm.Payment.reissue") with { SupportsDryRun = true });
+        services.AddCommandAuditor<RecordDisbursementCorrection, string, RecordDisbursementCorrectionAuditor>();
+        services.AddCommand<RecordDisbursementCorrection, string, RecordDisbursementCorrectionHandler>(
+            CommandDescriptor.For("clm.Payment.recordCorrection") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddCommandAuditor<RecordPaymentFiscalMark, string, RecordPaymentFiscalMarkAuditor>();
+        services.AddCommand<RecordPaymentFiscalMark, string, RecordPaymentFiscalMarkHandler>(
+            CommandDescriptor.For("clm.Payment.recordFiscalMark") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddEventHandler<DisbursementStoppedV1, DisbursementStoppedHandler>(
+            EventDescriptor.From(DisbursementStoppedV1.Descriptor), DisbursementStoppedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementVoidedV1, DisbursementVoidedHandler>(
+            EventDescriptor.From(DisbursementVoidedV1.Descriptor), DisbursementVoidedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementReturnedV1, DisbursementReturnedHandler>(
+            EventDescriptor.From(DisbursementReturnedV1.Descriptor), DisbursementReturnedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<DisbursementRejectedV1, DisbursementRejectedHandler>(
+            EventDescriptor.From(DisbursementRejectedV1.Descriptor), DisbursementRejectedHandler.Name, ModuleCode.CLM);
+        services.AddEventHandler<FiscalDocRegisteredV1, FiscalDocRegisteredHandler>(
+            EventDescriptor.From(FiscalDocRegisteredV1.Descriptor), FiscalDocRegisteredHandler.Name, ModuleCode.CLM);
+
         // Re-verification (SL3-CLM-REVERIFY, REQ-CLM-057/058): POL changes raise a demand, a human keeps or adopts (REQ-CLM-002).
         services.AddCommandAuditor<RaiseReverification, int, RaiseReverificationAuditor>();
         services.AddCommand<RaiseReverification, int, RaiseReverificationHandler>(
@@ -225,6 +256,8 @@ public static class ClaimsModule
             .Describe("Η κατανομή πρέπει να αθροίζει στο ποσό και να αναφέρεται σε εκθέσεις της ζημίας.", "The allocation must sum to the amount and name exposures of the claim."),
         ErrorDefinition.For(ModuleCode.CLM, "MTPL-CLOCKS-REQUIRED", 422, "Οι νόμιμες προθεσμίες ΑΠΟ δεν παρακολουθούνται", "MTPL statutory clocks are not tracked")
             .Describe("Στην παραγωγή δεν δημιουργούνται εκθέσεις αστικής ευθύνης τρίτων μέχρι να υλοποιηθούν οι προθεσμίες.", "Production does not create third-party MTPL exposures until the statutory clocks exist."),
+        ErrorDefinition.For(ModuleCode.CLM, "NOT-STOPPABLE", 422, "Η πληρωμή δεν μπορεί πλέον να σταματήσει", "The payment can no longer be stopped")
+            .Describe("Η εντολή έχει ήδη εκτελεστεί ή εκκαθαριστεί στην τράπεζα· δεν ακυρώνεται. Αναμείνατε επιστροφή ή ξεκινήστε ανάκτηση.", "The disbursement has been executed or cleared; it cannot be stopped. Wait for a return or start a recovery."),
         ErrorDefinition.For(ModuleCode.CLM, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];
