@@ -23,6 +23,67 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Compliance.AiRegister.AiSystemRow", b =>
+                {
+                    b.Property<string>("FeatureId")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("feature_id");
+
+                    b.Property<string>("AiActClass")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("ai_act_class");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("approved_by");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("FeatureId")
+                        .HasName("pk_ai_system");
+
+                    b.ToTable("ai_system", "cmp", t =>
+                        {
+                            t.HasCheckConstraint("ck_ai_system_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_ai_system_status", "status IN ('DRAFT','IN_REVIEW','APPROVED','SUSPENDED','RETIRED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Compliance.Persistence.FiscalDocumentRow", b =>
                 {
                     b.Property<Guid>("FiscalDocumentId")

@@ -1,3 +1,4 @@
+using CoreIns.Modules.Compliance.AiRegister;
 using CoreIns.Modules.Compliance.Commands;
 using CoreIns.Modules.Compliance.Contracts;
 using CoreIns.Modules.Compliance.Contracts.Api;
@@ -48,6 +49,8 @@ public static class ComplianceModule
 
         services.AddScoped<IComplianceFiscalDocumentService, ComplianceFiscalDocumentService>();
 
+        services.AddAiRegister();
+
         services.AddErrorDefinitions(Errors);
         return services;
     }
@@ -69,6 +72,8 @@ public static class ComplianceModule
             .Describe("Το πιστωτικό πρέπει να αναφέρεται σε καταχωρημένο παραστατικό έκδοσης του ίδιου αντισυμβαλλομένου (όχι σε άλλο πιστωτικό).", "A credit must refer to a Registered ISSUE document of the same counterparty (not to another credit)."),
         ErrorDefinition.For(ModuleCode.CMP, "IDEMPOTENCY-MISMATCH", 409, "Το κλειδί παραστατικού χρησιμοποιήθηκε με διαφορετικό περιεχόμενο", "The fiscal key was already used with different content")
             .Describe("Η ίδια πηγή, ρόλος και αναθεώρηση υπάρχουν ήδη με άλλο αντισυμβαλλόμενο ή ποσά.", "The same source, role and revision already exist with another counterparty or amounts."),
+        ErrorDefinition.For(ModuleCode.CMP, "APPROVAL-SAME-USER", 403, "Ο εγκρίνων πρέπει να διαφέρει από τον υποβάλλοντα", "The approver must differ from the submitter")
+            .Describe("Η έγκριση απαιτεί δεύτερο χρήστη (αρχή των τεσσάρων ματιών).", "Approval needs a second user (four-eyes principle)."),
         ErrorDefinition.For(ModuleCode.CMP, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

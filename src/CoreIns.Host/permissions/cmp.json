@@ -3,7 +3,14 @@
     "Permissions": {
       "Grants": {
         "cmp.FiscalDocument.request": [ "Platform.Admin" ],
-        "cmp.FiscalDocument.get": [ "Staff.Billing", "Platform.Admin" ]
+        "cmp.FiscalDocument.get": [ "Staff.Billing", "Platform.Admin" ],
+        "cmp.AiSystem.register": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.AiSystem.submitForReview": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.AiSystem.approve": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.AiSystem.suspend": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.AiSystem.retire": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.AiSystem.get": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.AiSystem.list": [ "Staff.ComplianceOfficer", "Platform.Admin" ]
       }
     }
   }
