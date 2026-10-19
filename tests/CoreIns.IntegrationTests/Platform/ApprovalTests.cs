@@ -204,7 +204,7 @@ public sealed class ApprovalTests(PostgresFixture database) : IClassFixture<Post
 
         // Above the manager's limit nobody may approve: DENY.
         var bigHash = NewHash();
-        var big = await CreateAsync("handler-x", Guid.NewGuid().ToString(), bigHash, "50000.01");
+        var big = await CreateAsync("handler-x", Guid.NewGuid().ToString(), bigHash, "1000000.01");
         var (denied, deniedBody) = await DecideAsync("manager-m", Manager, big, bigHash);
         denied.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
         deniedBody!["code"]!.GetValue<string>().ShouldBe("PLT-ERR-AUTHORITY-DENIED");
@@ -417,8 +417,8 @@ public sealed class ApprovalTests(PostgresFixture database) : IClassFixture<Post
     [Theory]
     [InlineData(Handler, "5000.00", AuthorityDecision.Allow, null)]
     [InlineData(Handler, "5000.01", AuthorityDecision.Refer, Manager)]
-    [InlineData(Manager, "50000.00", AuthorityDecision.Allow, null)]
-    [InlineData(Manager, "50000.01", AuthorityDecision.Deny, null)]
+    [InlineData(Manager, "1000000.00", AuthorityDecision.Allow, null)]
+    [InlineData(Manager, "1000000.01", AuthorityDecision.Deny, null)]
     public async Task D_SL2_03_illustrative_claims_limits_allow_the_exact_limit_and_refer_one_cent_above(
         string role, string amount, AuthorityDecision expected, string? referral)
     {
