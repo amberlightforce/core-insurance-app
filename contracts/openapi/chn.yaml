@@ -1497,6 +1497,8 @@ paths:
         PRD inputs: name, contract id, e-mail, reason
         PRD outputs: request number, confirmedAt, receipt
         PRD error notes: — (never rejects after validation of presence)
+
+        Step 1 of 2: records the declaration and issues a confirmation token; chn.Withdrawal.confirm sets confirmedAt.
       tags:
       - Withdrawal
       x-requirement:
@@ -1517,6 +1519,12 @@ paths:
       - ui
       x-permission: chn.Withdrawal.declare
       x-error-codes:
+      - code: CHN-ERR-RIGHT-EXPIRED
+        note: not raised as an HTTP error - the late declaration is recorded and returned as status DECLINED (D-SL6-06)
+        status: 422
+      - code: CHN-ERR-NOT-FOUND
+        note: the contract id is not a policy
+        status: 404
       - code: CHN-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1545,6 +1553,147 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/withdrawals/confirm:
+    post:
+      operationId: chn.Withdrawal.confirm
+      summary: Confirm declaration (step 2)
+      description: |-
+        Confirm declaration (step 2)
+
+        Added by SL6-CHN-WITHDRAW (D-SL6-06); naturally idempotent on the request number.
+      tags:
+      - Withdrawal
+      x-requirement:
+      - REQ-CHN-007
+      - REQ-CHN-164..REQ-CHN-166
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: none
+      x-exposure:
+      - ui
+      x-permission: chn.Withdrawal.confirm
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      - code: CHN-ERR-TOKEN-INVALID
+        status: 422
+      - code: CHN-ERR-RIGHT-EXPIRED
+        note: not raised as an HTTP error - recorded as status DECLINED
+        status: 422
+      - code: CHN-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-12 §9.1 l.1832
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawalConfirmRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WithdrawalConfirmResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/withdrawals/{id}/close:
+    post:
+      operationId: chn.Withdrawal.close
+      summary: Close with the POL outcome
+      description: |-
+        Close with the POL outcome
+
+        Added by SL6-CHN-WITHDRAW (D-SL6-06); naturally idempotent on the request number.
+      tags:
+      - Withdrawal
+      x-requirement:
+      - REQ-CHN-007
+      - REQ-CHN-164..REQ-CHN-166
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: none
+      x-exposure:
+      - ui
+      x-permission: chn.Withdrawal.close
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      - code: CHN-ERR-WRONG-STATE
+        status: 409
+      - code: CHN-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-12 §9.1 l.1832
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Request number or withdrawal request id
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawalCloseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WithdrawalCloseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -6458,53 +6607,178 @@ components:
           description: 'PRD: "request number when referred"'
     WithdrawalDeclareRequest:
       type: object
-      description: 'chn.Withdrawal.declare request. PRD inputs: "name, contract id, e-mail, reason"'
+      description: 'chn.Withdrawal.declare request (typed by SL6-CHN-WITHDRAW, D-SL6-06). PRD inputs: "name, contract id, e-mail, reason"'
+      required:
+      - name
+      - contractId
+      - eMail
       properties:
         name:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "name"'
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: 'PRD: "name" (declarant)'
         contractId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "contract id"'
+          description: 'PRD: "contract id" = the policy id'
         eMail:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "e-mail"'
+          type: string
+          minLength: 3
+          maxLength: 320
+          description: 'PRD: "e-mail" (the confirmation token is sent here)'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-    WithdrawalDeclareResponse:
+          type: string
+          maxLength: 1000
+          description: 'PRD: "reason" (optional)'
+    WithdrawalStatusCode:
+      type: string
+      enum:
+      - DECLARED
+      - CONFIRMED
+      - SUBMITTED
+      - PROCESSED
+      - REJECTED
+      - DECLINED
+      description: DECLARED = awaiting confirmation; CONFIRMED = confirmed, handoff to POL pending; SUBMITTED = POL has it; PROCESSED/REJECTED = POL outcome; DECLINED = window expired (recorded)
+    WithdrawalReceipt:
       type: object
-      description: 'chn.Withdrawal.declare result. PRD outputs: "request number, confirmedAt, receipt"'
+      description: Receipt of a declaration
+      required:
+      - requestNumber
+      - declaredAt
       properties:
         requestNumber:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        declaredAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        confirmBy:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: Last instant at which the right can still be exercised (23:59:59 Europe/Athens of the last day)
+    WithdrawalDeclareResponse:
+      type: object
+      description: 'chn.Withdrawal.declare result. PRD outputs: "request number, confirmedAt, receipt". A late declaration is recorded and returned as DECLINED with declineCode CHN-ERR-RIGHT-EXPIRED (not an HTTP error, so the record persists).'
+      required:
+      - requestNumber
+      - status
+      - receipt
+      properties:
+        requestNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
           description: 'PRD: "request number"'
+        status:
+          $ref: '#/components/schemas/WithdrawalStatusCode'
         confirmedAt:
           $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "confirmedAt"'
+          description: 'PRD: "confirmedAt"; absent until the confirmation step'
+        confirmToken:
+          type: string
+          description: Confirmation token (demo/ops builds return it; production sends it only by e-mail)
+        declineCode:
+          type: string
+          description: CHN-ERR-RIGHT-EXPIRED when the window had passed
         receipt:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt"'
+          $ref: '#/components/schemas/WithdrawalReceipt'
+    WithdrawalConfirmRequest:
+      type: object
+      description: chn.Withdrawal.confirm request
+      required:
+      - requestNumber
+      - token
+      properties:
+        requestNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        token:
+          type: string
+          minLength: 1
+          maxLength: 200
+    WithdrawalConfirmResponse:
+      type: object
+      description: chn.Withdrawal.confirm result; confirmedAt is platform time at confirmation
+      required:
+      - requestNumber
+      - status
+      properties:
+        requestNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        status:
+          $ref: '#/components/schemas/WithdrawalStatusCode'
+        confirmedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        declineCode:
+          type: string
+    WithdrawalCloseRequest:
+      type: object
+      description: chn.Withdrawal.close request (POL outcome of the withdrawal)
+      required:
+      - outcome
+      properties:
+        outcome:
+          type: string
+          enum:
+          - PROCESSED
+          - REJECTED
+    WithdrawalCloseResponse:
+      type: object
+      description: chn.Withdrawal.close result
+      required:
+      - requestNumber
+      - status
+      properties:
+        requestNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        status:
+          $ref: '#/components/schemas/WithdrawalStatusCode'
     WithdrawalGetResponse:
       type: object
       description: 'chn.Withdrawal.get result. PRD outputs: "status, refund status"'
+      required:
+      - withdrawalRequestId
+      - requestNumber
+      - status
       properties:
+        withdrawalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        requestNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          $ref: '#/components/schemas/WithdrawalStatusCode'
         refundStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "refund status"'
+          type: string
+          description: 'PRD: "refund status" - NONE until POL closes the request; then PROCESSED (refund handed to BIL by POL) or REJECTED'
+        declaredAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        confirmedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        deadlineAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        declineCode:
+          type: string
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
     WithdrawalListItem:
       type: object
       description: 'chn.Withdrawal.list result. PRD outputs: "status, refund status"'
+      required:
+      - withdrawalRequestId
+      - requestNumber
+      - status
       properties:
+        withdrawalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        requestNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          $ref: '#/components/schemas/WithdrawalStatusCode'
         refundStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "refund status"'
+          type: string
+        declaredAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        confirmedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
     WithdrawalListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope

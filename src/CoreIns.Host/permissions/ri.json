@@ -10,7 +10,11 @@
         // Reads: the reinsurance roles and, for get / applicable, the claims roles (SL4-RI-RECOVERY looks up the treaty for a loss).
         "ri.Contract.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "ri.Contract.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Platform.Admin" ],
-        "ri.Contract.applicable": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
+        "ri.Contract.applicable": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        // Recoveries (SL4-RI-RECOVERY): claims roles and RI roles read.
+        "ri.Recovery.listByClaim": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "ri.Recovery.listByContract": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "ri.Recovery.trace": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
       }
     },
     "Authority": {
