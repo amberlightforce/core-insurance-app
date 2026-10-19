@@ -4,20 +4,50 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Clock.stop result. PRD outputs: "instance state, met/late flag"</summary>
+/// <summary>cmp.Clock.stop result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClockStopResponse
 {
-    /// <summary>PRD: "instance state"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Instance state after the call</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("instanceState")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? InstanceState { get; init; }
+    public required InstanceStateValue InstanceState { get; init; }
 
-    /// <summary>PRD: "met/late flag"</summary>
+    /// <summary>True when stopped after the deadline</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("metLateFlag")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public bool? MetLateFlag { get; init; }
+
+    /// <summary>Instance state after the call</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<InstanceStateValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum InstanceStateValue
+    {
+        /// <summary><c>RUNNING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RUNNING")]
+        Running,
+
+        /// <summary><c>WARNED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("WARNED")]
+        Warned,
+
+        /// <summary><c>PAUSED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PAUSED")]
+        Paused,
+
+        /// <summary><c>MET</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MET")]
+        Met,
+
+        /// <summary><c>BREACHED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("BREACHED")]
+        Breached,
+
+        /// <summary><c>ELAPSED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ELAPSED")]
+        Elapsed,
+
+        /// <summary><c>CANCELLED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CANCELLED")]
+        Cancelled,
+    }
 }

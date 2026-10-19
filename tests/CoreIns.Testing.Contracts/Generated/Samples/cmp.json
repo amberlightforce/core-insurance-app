@@ -18,24 +18,64 @@
     },
     "cmp.Clock.cancel": {
       "instanceId": "019293b9-9f22-7058-889f-b2f8f72e8bae",
-      "deadline": "unspecified",
-      "valueVersion": "unspecified"
+      "status": "RUNNING",
+      "deadline": "2026-10-07T09:00:00Z",
+      "valueVersion": 1
     },
     "cmp.Clock.get": {
-      "instances": "unspecified"
+      "instances": [
+        {
+          "instanceId": "01924a57-1719-7133-81de-b6434ea41999",
+          "clockCode": "POL_REFUND_DUE",
+          "subjectRef": {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192b9cd-81ef-73f2-884a-bb684258b04a"
+          },
+          "key": "sample",
+          "kind": "WAITING_PERIOD",
+          "status": "RUNNING",
+          "startedAt": "2026-10-07T09:00:00Z",
+          "deadline": "2026-10-07T09:00:00Z",
+          "pausedAt": "2026-10-07T09:00:00Z",
+          "closedAt": "2026-10-07T09:00:00Z",
+          "outcome": "sample",
+          "metLate": true,
+          "variant": "sample",
+          "valueVersion": 1
+        }
+      ]
     },
     "cmp.Clock.import": {
       "key": "value"
     },
     "cmp.Clock.pause": {
       "instanceId": "019274a5-2b0d-72d8-8b6b-94523d5d9a4a",
-      "deadline": "unspecified",
-      "valueVersion": "unspecified"
+      "status": "RUNNING",
+      "deadline": "2026-10-07T09:00:00Z",
+      "valueVersion": 1
     },
     "cmp.Clock.query": {
       "items": [
         {
-          "instances": "unspecified"
+          "instanceId": "01920031-7839-7309-8d7f-55dd6c142d71",
+          "clockCode": "POL_REFUND_DUE",
+          "subjectRef": {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192848c-7faf-79c7-87dd-8e454d4e78cf"
+          },
+          "key": "sample",
+          "kind": "WAITING_PERIOD",
+          "status": "RUNNING",
+          "startedAt": "2026-10-07T09:00:00Z",
+          "deadline": "2026-10-07T09:00:00Z",
+          "pausedAt": "2026-10-07T09:00:00Z",
+          "closedAt": "2026-10-07T09:00:00Z",
+          "outcome": "sample",
+          "metLate": true,
+          "variant": "sample",
+          "valueVersion": 1
         }
       ],
       "nextCursor": "sample",
@@ -43,22 +83,32 @@
     },
     "cmp.Clock.resume": {
       "instanceId": "01927ae0-517f-7a08-8e8c-e222734cc05c",
-      "deadline": "unspecified",
-      "valueVersion": "unspecified"
+      "status": "RUNNING",
+      "deadline": "2026-10-07T09:00:00Z",
+      "valueVersion": 1
     },
     "cmp.Clock.start": {
       "instanceId": "0192c6b9-dcb8-79a6-87bd-d1510aabba21",
-      "deadline": "unspecified",
-      "valueVersion": "unspecified"
+      "status": "RUNNING",
+      "deadline": "2026-10-07T09:00:00Z",
+      "valueVersion": 1
     },
     "cmp.Clock.stop": {
-      "instanceState": "unspecified",
+      "instanceState": "RUNNING",
       "metLateFlag": true
     },
     "cmp.ClockDef.list": {
       "items": [
         {
-          "key": "value"
+          "code": "POL_REFUND_DUE",
+          "name": "sample",
+          "kind": "WAITING_PERIOD",
+          "duration": "sample",
+          "jurisdiction": "sample",
+          "legalStatus": "sample",
+          "source": "sample",
+          "extendable": true,
+          "warnBefore": "sample"
         }
       ],
       "nextCursor": "sample",
@@ -402,23 +452,51 @@
       "lag": "unspecified"
     },
     "ClockCancelRequest": {
-      "clockCode": "unspecified",
-      "subjectRef": "unspecified",
-      "jurisdiction": "unspecified",
-      "startTime": "unspecified",
-      "variant": "unspecified",
+      "instanceId": "01924765-074c-72ca-80a0-8e0ae3919e42",
+      "key": "sample",
       "causationId": "0192ba4f-84d8-7c9f-8c67-deec97d077aa",
-      "reason": "unspecified"
+      "reason": "sample"
     },
     "ClockCancelResponse": {
       "instanceId": "01929cc3-7956-7dc2-80a7-87078528c54f",
-      "deadline": "unspecified",
-      "valueVersion": "unspecified"
+      "status": "RUNNING",
+      "deadline": "2026-10-07T09:00:00Z",
+      "valueVersion": 1
+    },
+    "ClockDefGetResponse": {
+      "code": "POL_REFUND_DUE",
+      "name": "sample",
+      "kind": "WAITING_PERIOD",
+      "duration": "sample",
+      "jurisdiction": "sample",
+      "legalStatus": "sample",
+      "source": "sample",
+      "extendable": true,
+      "warnBefore": "sample"
+    },
+    "ClockDefListItem": {
+      "code": "POL_REFUND_DUE",
+      "name": "sample",
+      "kind": "WAITING_PERIOD",
+      "duration": "sample",
+      "jurisdiction": "sample",
+      "legalStatus": "sample",
+      "source": "sample",
+      "extendable": true,
+      "warnBefore": "sample"
     },
     "ClockDefListPage": {
       "items": [
         {
-          "key": "value"
+          "code": "POL_REFUND_DUE",
+          "name": "sample",
+          "kind": "WAITING_PERIOD",
+          "duration": "sample",
+          "jurisdiction": "sample",
+          "legalStatus": "sample",
+          "source": "sample",
+          "extendable": true,
+          "warnBefore": "sample"
         }
       ],
       "nextCursor": "sample",
@@ -429,87 +507,162 @@
       "code": "unspecified"
     },
     "ClockExtendRequest": {
-      "clockCode": "unspecified",
-      "subjectRef": "unspecified",
-      "jurisdiction": "unspecified",
-      "startTime": "unspecified",
-      "variant": "unspecified",
-      "causationId": "0192acc1-b337-7416-8b8c-56b8a3ead938",
-      "reason": "unspecified"
+      "instanceId": "01921852-1982-75b1-8adc-5638f8a98905",
+      "key": "sample",
+      "extension": "sample",
+      "reason": "sample"
     },
     "ClockExtendResponse": {
       "instanceId": "01921fa1-9a76-7039-8df9-38cbbccd8fd5",
-      "deadline": "unspecified",
-      "valueVersion": "unspecified"
+      "status": "RUNNING",
+      "deadline": "2026-10-07T09:00:00Z",
+      "valueVersion": 1
     },
     "ClockGetResponse": {
-      "instances": "unspecified"
+      "instances": [
+        {
+          "instanceId": "01928b74-6a00-7247-8f1d-4d466efc8a42",
+          "clockCode": "POL_REFUND_DUE",
+          "subjectRef": {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192314a-5ac0-74fc-81a7-9c9786406b81"
+          },
+          "key": "sample",
+          "kind": "WAITING_PERIOD",
+          "status": "RUNNING",
+          "startedAt": "2026-10-07T09:00:00Z",
+          "deadline": "2026-10-07T09:00:00Z",
+          "pausedAt": "2026-10-07T09:00:00Z",
+          "closedAt": "2026-10-07T09:00:00Z",
+          "outcome": "sample",
+          "metLate": true,
+          "variant": "sample",
+          "valueVersion": 1
+        }
+      ]
     },
     "ClockImportRequest": {
       "legacyRecords": "unspecified",
       "handOverDates": "unspecified"
     },
+    "ClockInstanceView": {
+      "instanceId": "0192ba6b-8909-7278-8db6-27ec2379c051",
+      "clockCode": "POL_REFUND_DUE",
+      "subjectRef": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "01929222-8bb9-7d6d-8f2f-5cc3b3053087"
+      },
+      "key": "sample",
+      "kind": "WAITING_PERIOD",
+      "status": "RUNNING",
+      "startedAt": "2026-10-07T09:00:00Z",
+      "deadline": "2026-10-07T09:00:00Z",
+      "pausedAt": "2026-10-07T09:00:00Z",
+      "closedAt": "2026-10-07T09:00:00Z",
+      "outcome": "sample",
+      "metLate": true,
+      "variant": "sample",
+      "valueVersion": 1
+    },
     "ClockPauseRequest": {
-      "clockCode": "unspecified",
-      "subjectRef": "unspecified",
-      "jurisdiction": "unspecified",
-      "startTime": "unspecified",
-      "variant": "unspecified",
+      "instanceId": "01924c42-a3e9-7e62-8705-189d941e37c2",
+      "key": "sample",
       "causationId": "01923cab-efce-73b6-87fa-071ba36534a0",
-      "reason": "unspecified"
+      "reason": "sample"
     },
     "ClockPauseResponse": {
       "instanceId": "0192eaad-d277-7acd-8fb9-a456874f3ad0",
-      "deadline": "unspecified",
-      "valueVersion": "unspecified"
+      "status": "RUNNING",
+      "deadline": "2026-10-07T09:00:00Z",
+      "valueVersion": 1
     },
     "ClockQueryItem": {
-      "instances": "unspecified"
+      "instanceId": "0192acbb-e2ba-7eb7-8be7-92c34c3e11d2",
+      "clockCode": "POL_REFUND_DUE",
+      "subjectRef": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "0192f8e5-1ff3-7c0d-8605-4c0cd1b9bfca"
+      },
+      "key": "sample",
+      "kind": "WAITING_PERIOD",
+      "status": "RUNNING",
+      "startedAt": "2026-10-07T09:00:00Z",
+      "deadline": "2026-10-07T09:00:00Z",
+      "pausedAt": "2026-10-07T09:00:00Z",
+      "closedAt": "2026-10-07T09:00:00Z",
+      "outcome": "sample",
+      "metLate": true,
+      "variant": "sample",
+      "valueVersion": 1
     },
     "ClockQueryPage": {
       "items": [
         {
-          "instances": "unspecified"
+          "instanceId": "0192f348-0780-79d1-8913-dd51ebb118e9",
+          "clockCode": "POL_REFUND_DUE",
+          "subjectRef": {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192d6db-b8f6-7276-8caf-60bc0ac0c62e"
+          },
+          "key": "sample",
+          "kind": "WAITING_PERIOD",
+          "status": "RUNNING",
+          "startedAt": "2026-10-07T09:00:00Z",
+          "deadline": "2026-10-07T09:00:00Z",
+          "pausedAt": "2026-10-07T09:00:00Z",
+          "closedAt": "2026-10-07T09:00:00Z",
+          "outcome": "sample",
+          "metLate": true,
+          "variant": "sample",
+          "valueVersion": 1
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "ClockResumeRequest": {
-      "clockCode": "unspecified",
-      "subjectRef": "unspecified",
-      "jurisdiction": "unspecified",
-      "startTime": "unspecified",
-      "variant": "unspecified",
+      "instanceId": "01926a7e-0434-78cd-8b31-a097552acae4",
+      "key": "sample",
       "causationId": "019296c8-9c3a-70fa-8c3b-1a88ad60ae9b",
-      "reason": "unspecified"
+      "reason": "sample"
     },
     "ClockResumeResponse": {
       "instanceId": "0192393f-2d57-7b8c-8931-267adf55f39b",
-      "deadline": "unspecified",
-      "valueVersion": "unspecified"
+      "status": "RUNNING",
+      "deadline": "2026-10-07T09:00:00Z",
+      "valueVersion": 1
     },
     "ClockStartRequest": {
-      "clockCode": "unspecified",
-      "subjectRef": "unspecified",
-      "jurisdiction": "unspecified",
-      "startTime": "unspecified",
-      "variant": "unspecified",
+      "clockCode": "POL_REFUND_DUE",
+      "subjectRef": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "01928c71-057c-7703-8681-cca39f0120fb"
+      },
+      "key": "sample",
+      "startTime": "2026-10-07T09:00:00Z",
+      "variant": "sample",
       "causationId": "01921c68-dab1-7558-8d8c-38ecab13c0dd",
-      "reason": "unspecified"
+      "reason": "sample"
     },
     "ClockStartResponse": {
       "instanceId": "01926eec-e476-7ac8-8e67-6277623918d0",
-      "deadline": "unspecified",
-      "valueVersion": "unspecified"
+      "status": "RUNNING",
+      "deadline": "2026-10-07T09:00:00Z",
+      "valueVersion": 1
     },
     "ClockStopRequest": {
       "instanceId": "0192f76b-6628-7c2d-8f41-e76c58a47e8e",
+      "key": "sample",
       "outcome": "Met",
       "stopTime": "2026-10-07T09:00:00Z"
     },
     "ClockStopResponse": {
-      "instanceState": "unspecified",
+      "instanceState": "RUNNING",
       "metLateFlag": true
     },
     "ComplaintAcknowledgeResponse": {

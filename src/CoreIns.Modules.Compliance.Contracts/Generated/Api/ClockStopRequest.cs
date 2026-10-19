@@ -29,6 +29,11 @@ public sealed record ClockStopRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.ClockCode? ClockCode { get; init; }
 
+    /// <summary>Instance key (default empty)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("key")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Key { get; init; }
+
     /// <summary>Stop outcome (PRD-11 §9.1 row)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
     public required OutcomeValue Outcome { get; init; }
