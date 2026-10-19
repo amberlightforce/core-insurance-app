@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { call, cents, eventually, type Json } from './support/api.js';
 import {
-  applySet, bindMotorPolicy, capturePayee, countOf, expectAllBalanced, financials, linesOf, listPayments, net, paymentLine, reserveLine, stubBank,
+  applySet, bindMotorPolicy, capturePayee, expectAllBalanced, financials, linesOf, listPayments, net, paymentLine, reserveLine, stubBank,
   submitFnol, tokenFor, waitForDisbursement, waitForJournals, waitForPayment,
 } from './support/claims4/index.js';
 
@@ -98,8 +98,12 @@ test('payment corrections: stop, void, bank reject and reissue restore the reser
   expect(await open()).toBe(RESERVE - PAYMENT);
 
   // ---- 5. FIN reverses what was reversed: all journals balance and the clearing accounts net to zero; cash left once, for the reissue.
-  const journals = await waitForJournals(request, finance, { claimId }, 'payment, reversal and BIL journals', (all) =>
-    countOf(all, 'CLM:PaymentIssued') >= 4 && countOf(all, 'BIL:BillingEntryPosted') >= 5);
+  // The set is complete when the cash of the reissued payment is in and the clearing accounts have netted (stable on a second read).
+  const journals = await waitForJournals(request, finance, { claimId }, 'payment, reversal and BIL journals', (all) => {
+    const l = linesOf(all);
+    return net(l, 'GL-1110') === -PAYMENT && net(l, 'GL-2510') === 0n && net(l, 'GL-2530') === 0n && all.length > 0;
+  });
+  test.info().annotations.push({ type: 'journals', description: journals.map((j) => `${j['sourceModule']}:${j['sourceEventType']}`).sort().join(', ') });
   expectAllBalanced(journals);
   const lines = linesOf(journals);
   expect(net(lines, 'GL-2510'), 'claim payment clearing nets to zero').toBe(0n);
