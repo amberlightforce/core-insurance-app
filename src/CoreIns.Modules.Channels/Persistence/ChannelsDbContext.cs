@@ -17,6 +17,7 @@ internal sealed class ChannelsDbContext(DbContextOptions<ChannelsDbContext> opti
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.MapDsarRestrictions();
 
         modelBuilder.Entity<WithdrawalRequestRow>(entity =>
         {

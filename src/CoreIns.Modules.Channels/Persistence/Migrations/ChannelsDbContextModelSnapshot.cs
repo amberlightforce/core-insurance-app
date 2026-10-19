@@ -150,6 +150,51 @@ namespace CoreIns.Modules.Channels.Persistence.Migrations
                             t.HasCheckConstraint("ck_withdrawal_request_status", "status IN ('DECLARED', 'CONFIRMED', 'SUBMITTED', 'PROCESSED', 'REJECTED', 'DECLINED')");
                         });
                 });
+
+            modelBuilder.Entity("CoreIns.Platform.Persistence.DsarRestrictionRow", b =>
+                {
+                    b.Property<Guid>("RestrictionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("restriction_id");
+
+                    b.Property<string>("LegalBasis")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_basis");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("RecordClass")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("record_class");
+
+                    b.Property<DateTime>("RestrictedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("restricted_at");
+
+                    b.Property<string>("RetentionEnd")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("retention_end");
+
+                    b.HasKey("RestrictionId")
+                        .HasName("pk_dsar_restriction");
+
+                    b.HasIndex("PartyId", "RecordClass")
+                        .IsUnique()
+                        .HasDatabaseName("ux_dsar_restriction_subject_class");
+
+                    b.ToTable("dsar_restriction", "chn");
+                });
 #pragma warning restore 612, 618
         }
     }

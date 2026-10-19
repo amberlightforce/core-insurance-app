@@ -1,3 +1,5 @@
+using CoreIns.Modules.Compliance.Services.Dsar;
+using CoreIns.SharedKernel.Dsar;
 using CoreIns.Modules.Compliance.Commands;
 using CoreIns.Modules.Compliance.Contracts;
 using CoreIns.Modules.Compliance.Contracts.Api;
@@ -39,6 +41,7 @@ public static class ComplianceModule
         ArgumentNullException.ThrowIfNull(configuration);
 
         services.AddModuleDbContext<ComplianceDbContext>(Schema);
+        services.AddSingleton<IDsarParticipant, ComplianceDsarParticipant>();
         services.AddScoped<FiscalDocumentReader>();
 
         services.AddScoped<IValidator<RequestFiscalDocument>, RequestFiscalDocumentValidator>();

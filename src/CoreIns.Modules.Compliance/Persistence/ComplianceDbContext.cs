@@ -22,6 +22,7 @@ internal sealed class ComplianceDbContext(DbContextOptions<ComplianceDbContext> 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.MapDsarRestrictions();
 
         modelBuilder.Entity<FiscalDocumentRow>(entity =>
         {
