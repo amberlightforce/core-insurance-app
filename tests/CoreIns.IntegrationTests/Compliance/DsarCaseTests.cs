@@ -37,12 +37,25 @@ public sealed class DsarCaseTests(PostgresFixture database) : IClassFixture<Post
         }
     }
 
-    private Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program> Host(IDsarParticipant? participant)
+    /// <param name="dropRealWork">Removes the real WRK participant (NX-HD-03) so WRK reads as not built.</param>
+    private Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program> Host(IDsarParticipant? participant, bool dropRealWork = false)
     {
         var factory = new ApiHostFactory(database.AppConnectionString);
-        return participant is null
+        return participant is null && !dropRealWork
             ? factory
-            : factory.WithWebHostBuilder(b => b.ConfigureTestServices(s => s.AddSingleton(participant)));
+            : factory.WithWebHostBuilder(b => b.ConfigureTestServices(s =>
+            {
+                // A stand-in replaces the real WRK participant; the engine refuses duplicate modules.
+                foreach (var real in s.Where(d => d.ServiceType == typeof(IDsarParticipant) && d.ImplementationType?.Name == "WorkDsarParticipant").ToList())
+                {
+                    s.Remove(real);
+                }
+
+                if (participant is not null)
+                {
+                    s.AddSingleton(participant);
+                }
+            }));
     }
 
     private static async Task<(HttpResponseMessage Response, JsonNode? Body)> Call(HttpClient client, HttpMethod method, string path, string user, object? body = null)
@@ -144,7 +157,7 @@ public sealed class DsarCaseTests(PostgresFixture database) : IClassFixture<Post
     [Fact]
     public async Task A_participant_that_is_not_built_blocks_completion_and_clears_on_retry()
     {
-        await using var factory = Host(null);
+        await using var factory = Host(null, dropRealWork: true);
         using var client = factory.CreateClient();
         var id = await OpenVerifiedCase(client, "ACCESS");
 
