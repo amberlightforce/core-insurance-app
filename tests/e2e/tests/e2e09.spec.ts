@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 import { call, signIn, type Json } from './support/api.js';
+import { advanceServerPast } from './support/time.js';
 import { importProducts, issuePolicy, serverNow } from './support/servicing.js';
 
 // E2E-09 DSAR access and erasure across modules (SLICE-PLAN-6, D-SL6-07). One data subject holds a policy, an invoice, a claim, a
@@ -28,7 +29,7 @@ test('E2E-09 DSAR: fan-out map, export found == seeded, redaction, disclosure lo
   const policy = await issuePolicy(request, 'e2e09', { pay: true, plate: 'IKX-0909' });
   const subject = policy.partyId;
   const lossAt = new Date(policy.startAt.getTime() + 1000).toISOString().replace('.000Z', 'Z');
-  while ((await serverNow(request)).getTime() < policy.startAt.getTime() + 4000) await new Promise((done) => setTimeout(done, 500));
+  await advanceServerPast(request, new Date(policy.startAt.getTime() + 4000));
   const fnol = await call(request, claims, 'POST', '/api/clm/v1/fnol/submit', {
     lineOfBusiness: 'MOTOR', policyId: policy.policyId, policyNumber: policy.policyNumber, lossAt, lossCause: 'COLLISION',
     lossLocation: 'Λεωφ. Κηφισίας 124, Αθήνα', description: 'E2E-09 DSAR subject claim (synthetic)', channel: 'STAFF', receiptMedium: 'TELEPHONE',

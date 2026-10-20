@@ -9,11 +9,10 @@ test('e2e03 stack is healthy and the dev clock advances by one day', async ({ re
   const health = await request.get('/health/ready');
   expect(health.status()).toBe(200);
 
-  // Until SL3-PLT-SUPPORT (dev clock endpoint) is merged the endpoint answers 404: skip the clock step with that reason.
-  // Remove this probe after merging main with SL3-PLT-SUPPORT.
+  // The dev clock is mandatory here: a missing endpoint (404) is a failure, never a skip (NX-TST-02).
   const admin = await signIn(request, 'admin');
   const probe = await call(request, admin, 'GET', '/api/plt/v1/dev/clock');
-  test.skip(probe.status === 404, 'GET /dev/clock is not available yet (SL3-PLT-SUPPORT not merged)');
+  expect(probe.status, 'GET /api/plt/v1/dev/clock must exist on the shiftable E2E stack (Platform__Time__Mode=Shiftable)').toBe(200);
 
   const before = await readClock(request);
   const after = await advanceClock(request, { days: 1 });
