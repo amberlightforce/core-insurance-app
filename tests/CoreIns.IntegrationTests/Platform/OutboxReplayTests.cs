@@ -240,7 +240,11 @@ public sealed class OutboxReplayTests(PostgresFixture database) : IClassFixture<
     public async Task A_slow_handler_that_fails_after_losing_its_lease_leaves_the_reclaiming_dispatchers_effect_intact()
     {
         var ct = TestContext.Current.CancellationToken;
-        await using var harness = await NewHarnessAsync(o => o.LeaseDuration = TimeSpan.FromSeconds(60));
+        await using var harness = await NewHarnessAsync(o =>
+        {
+            o.LeaseDuration = TimeSpan.FromSeconds(60);
+            o.MaxAttempts = 1; // the stale dispatcher's failure is its last attempt: it must not park
+        });
         var behaviour = harness.Services.GetRequiredService<LedgerBehaviour>();
         var aggregate = Guid.CreateVersion7();
         await harness.SendAsync(new CreateWidget("slowfail", 1m, aggregate));
@@ -264,7 +268,8 @@ public sealed class OutboxReplayTests(PostgresFixture database) : IClassFixture<
         (await StateAsync(harness, aggregate)).ShouldBe((1L, 1, "slowfail"));
         (await harness.CountAsync("SELECT count(*) FROM plt.outbox_message WHERE status = 'Pending'")).ShouldBe(0);
         (await harness.CountAsync("SELECT count(*) FROM plt.event_archive")).ShouldBe(1);
-        // TODO(hardening): ParkSql does not check lease ownership; a stale dispatcher failing its last attempt would park a dead letter for an event another dispatcher completed.
+        (await harness.CountAsync("SELECT count(*) FROM plt.outbox_dead_letter")).ShouldBe(0, "a dispatcher that lost its lease must not park");
+        (await harness.CountAsync("SELECT count(*) FROM plt.outbox_message WHERE event_type = 'DeadLetterParked'")).ShouldBe(0);
     }
 
     private async Task<PlatformHarness> NewHarnessAsync(Action<OutboxOptions>? outbox = null)

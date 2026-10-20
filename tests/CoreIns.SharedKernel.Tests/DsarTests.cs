@@ -49,6 +49,13 @@ public sealed class DsarTests
     }
 
     [Fact]
+    public void Not_erased_detail_names_the_retention_hold_and_basis()
+    {
+        Assert.StartsWith("NOT_ERASED", DsarRetentionPolicy.NotErasedDetail(null));
+        Assert.Contains("GDPR Art 17(3)(b)", DsarRetentionPolicy.NotErasedDetail("GDPR Art 17(3)(b)"));
+    }
+
+    [Fact]
     public async Task NotBuilt_blocks_and_subject_tostring_has_no_identifiers()
     {
         var s = new SubjectRef(PartyId.New(), new Dictionary<string, IReadOnlyList<string>> { ["policyNumber"] = ["P-SECRET"] });
