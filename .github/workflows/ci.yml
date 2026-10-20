@@ -162,6 +162,70 @@ jobs:
           exit-code: "1"
           format: table
 
+  security:
+    name: Security gates (secrets, vulnerable dependencies, IaC scan, dev-config guard)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # gitleaks scans the whole history; the repository is public
+
+      # Pinned image; allow-list for reviewed false positives lives in .gitleaks.toml (TODO(hardening): rotate and drop any entry).
+      - name: Secret scan (gitleaks, full history)
+        run: >
+          docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.0
+          git /repo --config /repo/.gitleaks.toml --redact --no-banner --verbose
+
+      - name: No deployable config enables DevAuthentication or ASPNETCORE_ENVIRONMENT=Development
+        run: python3 scripts/check-no-dev-config.py
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Vulnerable NuGet packages (direct and transitive)
+        run: |
+          set -euo pipefail
+          dotnet restore CoreIns.sln
+          dotnet list CoreIns.sln package --vulnerable --include-transitive 2>&1 | tee vulnerable.txt
+          # `dotnet list` exits 0 even when it finds something, so fail on its report line.
+          if grep -q "has the following vulnerable packages" vulnerable.txt; then
+            echo "::error::Vulnerable NuGet packages found (see above)."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Vulnerable npm packages (production dependencies)
+        run: |
+          set -euo pipefail
+          (cd web && npm audit --omit=dev)
+          (cd tests/e2e && npm audit --omit=dev)
+
+      # Trivy has no Bicep parser, so scan the compiled ARM JSON next to the Dockerfile.
+      # TODO(hardening): Trivy skips ARM language-version-2 templates silently; add a Bicep-aware linter rule set (az bicep lint) per finding class.
+      - name: Compile Bicep for the IaC scan
+        run: |
+          set -euo pipefail
+          az bicep install --version v0.48.1
+          mkdir -p artifacts/iac-scan
+          az bicep build --file infra/azure/main.bicep --outfile artifacts/iac-scan/main.json
+          cp Dockerfile artifacts/iac-scan/Dockerfile
+
+      - name: IaC and Dockerfile misconfiguration scan (Trivy; fails on HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v0.75.0
+          scan-type: config
+          scan-ref: artifacts/iac-scan
+          severity: HIGH,CRITICAL
+          trivyignores: .trivyignore
+          exit-code: "1"
+          format: table
+
   e2e01:
     name: E2E-01 happy path on the Compose stack
     # After the build, test and image jobs: the stack image is built again by compose (own tag coreins-host:e2e).
