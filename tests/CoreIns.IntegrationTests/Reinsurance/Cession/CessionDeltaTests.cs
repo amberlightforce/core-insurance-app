@@ -46,6 +46,7 @@ public sealed class CessionDeltaTests(PostgresFixture database) : IClassFixture<
         set ??= new EventSet(Guid.CreateVersion7(), 1, 1); // every bound transaction is a set (D4), size 1 when ordinary
         var payload = FinanceSlice.Sample("pol", "ChargeDeltaEmitted");
         payload["termId"] = term.ToString();
+        payload["opening"] = false; // the sample is an opening delta; these are ordinary deltas (opening ones are not ceded)
         payload["coverageCode"] = coverage;
         payload["chargeCategory"] = category;
         payload["chargeId"] = Guid.CreateVersion7().ToString();
