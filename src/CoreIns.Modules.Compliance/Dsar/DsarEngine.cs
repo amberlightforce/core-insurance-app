@@ -572,6 +572,15 @@ internal sealed class DsarEngine(
                 continue;
             }
 
+            // Participants share the scope's transaction (DAT, PTY, POL): a savepoint per task lets a faulting one be undone
+            // without poisoning the transaction for the tasks that follow.
+            var tx = db.Database.CurrentTransaction;
+            var savepoint = tx is not null && tx.SupportsSavepoints ? "dsar_task" : null;
+            if (savepoint is not null)
+            {
+                await tx!.CreateSavepointAsync(savepoint, ct).ConfigureAwait(false);
+            }
+
             try
             {
                 var result = phase switch
@@ -593,6 +602,10 @@ internal sealed class DsarEngine(
                     : null;
                 t.Status = violation is not null ? DsarTaskStatuses.Failed : result.HasNotBuilt ? DsarTaskStatuses.NotBuilt : DsarTaskStatuses.Done;
                 t.Error = violation is null ? null : "RETENTION-VIOLATION:" + violation.RecordClass;
+                if (savepoint is not null)
+                {
+                    await tx!.ReleaseSavepointAsync(savepoint, ct).ConfigureAwait(false);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -600,8 +613,20 @@ internal sealed class DsarEngine(
             }
             catch (Exception ex)
             {
-                // TODO(hardening): a poisoned shared transaction (DAT runs in this scope) is not recoverable here.
                 logger.LogWarning(ex, "DSAR participant {Module} failed in phase {Phase}", t.Module, phase);
+                if (savepoint is not null)
+                {
+                    try
+                    {
+                        await tx!.RollbackToSavepointAsync(savepoint, CancellationToken.None).ConfigureAwait(false);
+                    }
+                    catch (Exception rollbackEx) when (rollbackEx is not OperationCanceledException)
+                    {
+                        // TODO(hardening): the connection itself is broken; the case needs a retry in a fresh scope.
+                        logger.LogError(rollbackEx, "DSAR savepoint rollback failed after {Module} fault", t.Module);
+                    }
+                }
+
                 t.Status = DsarTaskStatuses.Failed;
                 t.Error = ex.GetType().Name;
             }

@@ -76,12 +76,16 @@ if (role == AppRole.Api)
     builder.Services.AddControllers().AddModuleControllers(ModuleCatalog.ApiAssemblies);
     builder.Services.AddOpenApi();
     builder.Services.AddCoreInsSecurity(builder.Configuration, devSignIn);
+    builder.Services.AddCoreInsHttpHardening(builder.Configuration, builder.Environment);
 }
 
 var app = builder.Build();
 
 if (role == AppRole.Api)
 {
+    var hardening = new HttpHardeningOptions();
+    app.Configuration.GetSection(HttpHardeningOptions.Section).Bind(hardening);
+    app.UseCoreInsSecurityHeaders(app.Environment, hardening);
     app.UseExceptionHandler();
     app.UseSerilogRequestLogging();
 
@@ -89,7 +93,9 @@ if (role == AppRole.Api)
     app.UseDefaultFiles();
     app.UseStaticFiles();
 
+    app.UseCors(HttpHardeningExtensions.CorsPolicy);
     app.UseAuthentication();
+    app.UseRateLimiter();
     app.UseAuthorization();
 
     // Request context (actor, language, trace, stamp, configuration hash) and HTTP idempotency (D-API-01).

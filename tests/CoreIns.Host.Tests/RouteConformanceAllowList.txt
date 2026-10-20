@@ -17,8 +17,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/payment-instruments
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-plans
 CONTRACT_NOT_SERVED GET /api/bil/v1/receipts
 CONTRACT_NOT_SERVED GET /api/bil/v1/suspense
-CONTRACT_NOT_SERVED GET /api/bil/v1/tax-levy/detail
-CONTRACT_NOT_SERVED GET /api/bil/v1/tax-levy/periods
 CONTRACT_NOT_SERVED GET /api/chn/v1/account-current
 CONTRACT_NOT_SERVED GET /api/chn/v1/agent-logs/query
 CONTRACT_NOT_SERVED GET /api/chn/v1/api-products
@@ -101,9 +99,6 @@ CONTRACT_NOT_SERVED GET /api/fin/v1/reconciliation/detail
 CONTRACT_NOT_SERVED GET /api/fin/v1/tax-returns
 CONTRACT_NOT_SERVED GET /api/fin/v1/tax-returns/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/written-premium/query
-CONTRACT_NOT_SERVED GET /api/mig/v1/archives/search
-CONTRACT_NOT_SERVED GET /api/mig/v1/archives/{}
-CONTRACT_NOT_SERVED GET /api/mig/v1/enquiries/get
 CONTRACT_NOT_SERVED GET /api/mkt/v1/capabilities/get
 CONTRACT_NOT_SERVED GET /api/mkt/v1/changeover/configuration
 CONTRACT_NOT_SERVED GET /api/mkt/v1/configuration/compare
@@ -528,12 +523,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/recalculate
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/record-filing
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/request-payment
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/transition
-CONTRACT_NOT_SERVED POST /api/mig/v1/archives/erase
-CONTRACT_NOT_SERVED POST /api/mig/v1/archives/rectification-note
-CONTRACT_NOT_SERVED POST /api/mig/v1/archives/restrict
-CONTRACT_NOT_SERVED POST /api/mig/v1/archives/subject-export
-CONTRACT_NOT_SERVED POST /api/mig/v1/batches/redrive
-CONTRACT_NOT_SERVED POST /api/mig/v1/import-contracts/conformance
 CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests
 CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/approve
 CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/import
@@ -918,6 +907,8 @@ CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/submit
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/to-complaint
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/withdraw
 CONTRACT_NOT_SERVED POST /api/wrk/v1/search/global
+SERVED_NOT_IN_CONTRACT GET /api/bil/v1/migrated-records/mandates
+SERVED_NOT_IN_CONTRACT GET /api/bil/v1/migrated-records/receivables
 SERVED_NOT_IN_CONTRACT GET /api/mkt/v1/pack-activations
 SERVED_NOT_IN_CONTRACT GET /api/mkt/v1/pack-activations/{}
 SERVED_NOT_IN_CONTRACT GET /api/pol/v1/policy-changes/{}/preview
