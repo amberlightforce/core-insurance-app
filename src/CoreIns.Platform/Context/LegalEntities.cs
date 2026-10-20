@@ -16,6 +16,12 @@ public interface ILegalEntityDirectory
 
     /// <summary>Every legal entity served by this deployment (key-ring warm-up).</summary>
     IReadOnlyList<LegalEntityId> All { get; }
+
+    /// <summary>
+    /// The IANA time zone in which <paramref name="code"/>'s business dates are computed (REQ-MKT-187). Throws when the legal
+    /// entity is unknown or the host lacks the zone's tz data: it never falls back to UTC.
+    /// </summary>
+    TimeZoneInfo TimeZoneOf(LegalEntityCode code);
 }
 
 /// <summary>The stamp's legal entity from <c>Stamp:LegalEntity</c> and <c>Stamp:LegalEntityId</c>.</summary>
@@ -32,6 +38,12 @@ internal sealed class StampLegalEntityDirectory(IOptions<StampOptions> stamp) : 
     }
 
     public IReadOnlyList<LegalEntityId> All => [StampId()];
+
+    public TimeZoneInfo TimeZoneOf(LegalEntityCode code)
+    {
+        Resolve(code);
+        return CoreIns.Platform.Time.BusinessTimeZone.Athens;
+    }
 
     private LegalEntityId StampId() =>
         Guid.TryParse(stamp.Value.LegalEntityId, out var id) && id != Guid.Empty
