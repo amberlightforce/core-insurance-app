@@ -24,10 +24,18 @@ public sealed class ChannelsOptions
     public int WithdrawalTokenHours { get; set; } = 48;
 
     /// <summary>
-    /// Returns the confirmation token in the declare response (demo/ops/test stamps without a mail channel). Production sends it only
-    /// by e-mail: TODO(hardening) wire the notification channel and set this to false there.
+    /// Returns the confirmation token in the declare response (demo/ops/test stamps without a mail channel). The token also goes to the
+    /// notification seam (<c>IWithdrawalNotifier</c>); production sets this to false once a real e-mail channel replaces the logging default.
     /// </summary>
     public bool ReturnWithdrawalToken { get; set; } = true;
+
+    /// <summary>Seconds between sweeps that re-submit CONFIRMED withdrawals to POL (worker role).</summary>
+    [Range(1, 86400)]
+    public int SweepIntervalSeconds { get; set; } = 300;
+
+    /// <summary>Seconds a request stays CONFIRMED before the sweeper takes it (the confirm call itself may still be finishing).</summary>
+    [Range(0, 86400)]
+    public int SweepGraceSeconds { get; set; } = 60;
 
     /// <summary>The configured zone.</summary>
     public TimeZoneInfo Zone => TimeZoneInfo.FindSystemTimeZoneById(TimeZone);

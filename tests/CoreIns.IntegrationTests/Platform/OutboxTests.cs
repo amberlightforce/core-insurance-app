@@ -199,6 +199,28 @@ public sealed class OutboxTests(PostgresFixture database) : IClassFixture<Postgr
     }
 
     [Fact]
+    public async Task A_permanent_handler_failure_is_dead_lettered_at_once_without_retries()
+    {
+        await using var harness = await PlatformHarness.CreateAsync(database, outbox: o =>
+        {
+            o.MaxAttempts = 8;
+            o.HandlerBatchSize = 1;
+        });
+        var aggregate = Guid.CreateVersion7();
+        await harness.SendAsync(new CreateWidget("perm-fail", 1m, aggregate));
+        await harness.SendAsync(new CreateWidget("after", 2m, aggregate));
+        harness.Behaviour.Permanent = true;
+        harness.Behaviour.FailWhile = e => e.AggregateSequence == 1 && e.AggregateId == aggregate.ToString();
+
+        var round = await harness.Processor.DrainAsync(TestContext.Current.CancellationToken);
+
+        round.Retried.ShouldBe(0);
+        (await harness.CountAsync("SELECT count(*) FROM plt.outbox_dead_letter WHERE status = 'Parked'")).ShouldBe(1);
+        (await harness.CountAsync("SELECT attempts FROM plt.outbox_dead_letter")).ShouldBe(1);
+        harness.Log.Deliveries.Where(d => d.AggregateId == aggregate.ToString()).Select(d => d.Sequence).ShouldBe([2L], "the aggregate continues after parking");
+    }
+
+    [Fact]
     public async Task A_handler_that_keeps_failing_is_dead_lettered_and_can_be_replayed()
     {
         await using var harness = await PlatformHarness.CreateAsync(database, outbox: o =>
