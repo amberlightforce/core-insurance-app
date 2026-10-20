@@ -118,7 +118,9 @@ internal sealed class RecordingHandler(ExecutionLog log, HandlerBehaviour behavi
 
         if (behaviour.FailWhile(envelope))
         {
-            throw new InvalidOperationException($"handler failure for {payload.Name}");
+            throw behaviour.Permanent
+                ? new PermanentEventFailureException($"permanent handler failure for {payload.Name}")
+                : new InvalidOperationException($"handler failure for {payload.Name}");
         }
 
         log.Deliveries.Enqueue(("recording", envelope.AggregateId, envelope.AggregateSequence, envelope.Origin));
@@ -128,6 +130,9 @@ internal sealed class RecordingHandler(ExecutionLog log, HandlerBehaviour behavi
 internal sealed class HandlerBehaviour
 {
     public Func<EventEnvelope, bool> FailWhile { get; set; } = _ => false;
+
+    /// <summary>When true a failure is a <see cref="PermanentEventFailureException"/> (dead-lettered at once).</summary>
+    public bool Permanent { get; set; }
 }
 
 /// <summary>

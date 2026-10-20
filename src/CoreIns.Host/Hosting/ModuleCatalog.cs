@@ -87,6 +87,7 @@ internal static class ModuleCatalog
         typeof(ClaimsModule).Assembly,
         typeof(ReinsuranceModule).Assembly,
         typeof(MigrationModule).Assembly,
+        typeof(WorkModule).Assembly,
     ];
 
     /// <summary>Calls every module's registration hook. The platform registers first.</summary>

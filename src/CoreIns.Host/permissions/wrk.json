@@ -1,0 +1,85 @@
+{
+  "Platform": {
+    "Permissions": {
+      "Grants": {
+        "wrk.Activity.list": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Activity.get": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Activity.assign": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Activity.complete": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Activity.skip": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Activity.cancel": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Activity.blockingStatus": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Activity.create": [
+          "Staff.UnderwritingManager",
+          "Staff.BillingManager",
+          "Platform.Admin"
+        ],
+        "wrk.Queue.getNext": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ]
+      }
+    }
+  }
+}

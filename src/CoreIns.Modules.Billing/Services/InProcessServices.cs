@@ -195,3 +195,13 @@ internal sealed class DelinquencyService(RequestContext context, ILegalEntityDir
                 : null) ?? throw new DomainException(BillingErrors.NotFound("delinquency case")),
         };
 }
+
+/// <summary><see cref="IBillingTaxLevyService"/>: the IPT / levy payable accrual totals (REQ-BIL-269..278); all periods of the caller's legal entity.</summary>
+internal sealed class TaxLevyService(RequestContext context, ILegalEntityDirectory legalEntities, TaxLevyReader reader) : IBillingTaxLevyService
+{
+    public Task<TaxLevyDetailResponse> DetailAsync(CancellationToken cancellationToken = default) =>
+        reader.DetailAsync(InProcess.LegalEntity(context, legalEntities), null, cancellationToken);
+
+    public Task<TaxLevyPeriodsResponse> PeriodsAsync(CancellationToken cancellationToken = default) =>
+        reader.PeriodsAsync(InProcess.LegalEntity(context, legalEntities), null, cancellationToken);
+}

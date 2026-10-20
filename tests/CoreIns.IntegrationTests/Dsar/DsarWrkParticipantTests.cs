@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CoreIns.IntegrationTests.Dsar;
 
-/// <summary>NX-HD-03: WRK takes part in DSARs ("nothing held" until the Work core lands) and no DSAR map module is left without a participant.</summary>
+/// <summary>NX-HD-03: WRK takes part in DSARs (a party without tasks holds nothing; NX-HD-05 tests real task data) and no DSAR map module is left without a participant.</summary>
 public sealed class DsarWrkParticipantTests(PostgresFixture database) : IClassFixture<PostgresFixture>, IAsyncDisposable
 {
     // The DSAR map (DsarEngine DsarOptions): PTY POL BIL CLM UW RI DOC CHN WRK PLT FIN RAT DAT MIG CMP. DAT is served by the Compliance adapter.

@@ -14,7 +14,16 @@
         "mig.Batch.resume": [ "Staff.MigrationManager", "Platform.Admin" ],
         "mig.Batch.reverse": [ "Staff.MigrationManager", "Platform.Admin" ],
         "mig.Batch.get": [ "Staff.MigrationManager", "Platform.Admin" ],
-        "mig.Batch.outcomes": [ "Staff.MigrationManager", "Platform.Admin" ]
+        "mig.Batch.outcomes": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Batch.redrive": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Enquiry.get": [ "Staff.MigrationManager", "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Platform.Admin" ],
+        "mig.Archive.search": [ "Staff.MigrationManager", "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "mig.Archive.get": [ "Staff.MigrationManager", "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "mig.Archive.subjectExport": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "mig.Archive.rectificationNote": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "mig.Archive.restrict": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "mig.Archive.erase": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "mig.ImportContract.conformance": [ "Staff.MigrationManager", "Platform.Admin" ]
       }
     },
     "Authority": {

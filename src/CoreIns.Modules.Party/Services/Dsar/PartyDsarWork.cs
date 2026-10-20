@@ -23,14 +23,20 @@ internal sealed class PartyDsarWork(DbSession session, DsarRetentionPolicy polic
     /// <summary>Value written over an erased contact point.</summary>
     public const string ErasedMarker = "[erased]";
 
-    // TODO(hardening): the party master is restrict-only here because policies reference it; add PARTY_RECORD to the
-    // configured restrict-only table once F-404 names retention classes for party data.
+    // The party master, addresses, primary contact points and intermediary records are restrict-only in this module whatever the
+    // configured table says (policies and fiscal documents reference them): see IsRetained. Erase reports them NOT_ERASED.
     private const string Basis = "Insurance contract and regulatory record keeping; retention period undefined (F-404), data retained and restricted";
 
     private const string CountParty =
         "SELECT (SELECT count(*) FROM pty.party WHERE party_id = @p) + (SELECT count(*) FROM pty.party_name WHERE party_id = @p) + (SELECT count(*) FROM pty.party_identifier WHERE party_id = @p)";
 
     public string Module => "PTY";
+
+    /// <summary>Classes that are never erased here: the party master is referenced by policies, invoices and claims.</summary>
+    private static readonly string[] AlwaysRetained = [PartyRecord, Address, ContactPointPrimary, Intermediary];
+
+    private bool IsRetained(string recordClass) =>
+        AlwaysRetained.Contains(recordClass, StringComparer.Ordinal) || policy.IsRestrictOnly(recordClass);
 
     public async Task<DsarModuleResult> ExportAsync(SubjectRef subject, DsarContext context, CancellationToken ct = default)
     {
@@ -92,7 +98,7 @@ internal sealed class PartyDsarWork(DbSession session, DsarRetentionPolicy polic
             {
                 outcomes.Add(DsarRecordOutcome.NotHeld(recordClass));
             }
-            else if (recordClass == ContactPointOther && policy.RestrictInsteadOfErase(recordClass, Basis, count) is null)
+            else if (recordClass == ContactPointOther && !IsRetained(recordClass))
             {
                 // Contact preferences outside the mandatory retention classes: overwrite the value; the row stays (the app role has no DELETE).
                 await DsarSql.ExecuteAsync(session,
@@ -102,7 +108,7 @@ internal sealed class PartyDsarWork(DbSession session, DsarRetentionPolicy polic
             else
             {
                 await DsarSql.RestrictAsync(session, id, recordClass, Basis, DsarRetention.UnsetF404, "erase request: retained", context.RequestedBy, ct).ConfigureAwait(false);
-                outcomes.Add(DsarRecordOutcome.Restricted(recordClass, Basis, count));
+                outcomes.Add(DsarRecordOutcome.Restricted(recordClass, Basis, count) with { Detail = DsarRetentionPolicy.NotErasedDetail(Basis) });
             }
         }
 
