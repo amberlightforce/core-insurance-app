@@ -45,6 +45,8 @@ param postgresBackupRetentionDays int = 7
 @allowed(['Disabled', 'ZoneRedundant', 'SameZone'])
 param postgresHighAvailability string = 'Disabled'
 param postgresGeoRedundantBackup bool = false
+@description('CanNotDelete locks on the database server and storage account (prod).')
+param lockCriticalResources bool = false
 param postgresAdminLogin string = 'pgadmin'
 @secure()
 param postgresAdminPassword string
@@ -58,6 +60,10 @@ param migratorDbPassword string
 // Storage
 @description('Retention (days) of the immutability policies on documents and audit-archive.')
 param immutabilityRetentionDays int
+@allowed(['Standard_LRS', 'Standard_ZRS', 'Standard_GRS', 'Standard_GZRS', 'Standard_RAGRS', 'Standard_RAGZRS'])
+param storageSkuName string = 'Standard_LRS'
+param storageVersioning bool = false
+param storageSoftDeleteDays int = 7
 
 // Apps
 param apiMinReplicas int = 0
@@ -136,6 +142,7 @@ module postgres 'modules/postgres.bicep' = {
     backupRetentionDays: postgresBackupRetentionDays
     highAvailability: postgresHighAvailability
     geoRedundantBackup: postgresGeoRedundantBackup
+    lockServer: lockCriticalResources
     administratorLogin: postgresAdminLogin
     administratorPassword: postgresAdminPassword
   }
@@ -188,6 +195,10 @@ module storage 'modules/storage.bicep' = {
       identities.outputs.worker.principalId
     ]
     immutabilityRetentionDays: immutabilityRetentionDays
+    skuName: storageSkuName
+    enableVersioning: storageVersioning
+    softDeleteDays: storageSoftDeleteDays
+    lockAccount: lockCriticalResources
   }
 }
 
