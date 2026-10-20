@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { expect, type APIRequestContext } from '@playwright/test';
+import { advanceServerPast, serverClockNow } from '../time.js';
 import { call, signIn, type Json } from '../api.js';
 
 const SEED = process.env['E2E_PRODUCT_SEED'] ?? resolve(import.meta.dirname, '../../../../../src/CoreIns.Modules.Product/Seed/motor-gr.product.json');
@@ -44,7 +45,7 @@ export async function bindMotorPolicy(request: APIRequestContext, plate: string)
   expect([200, 201, 409], imported.text).toContain(imported.status);
 
   const party = await createPerson(request, underwriter, 'Νίκος', 'Αλεξίου');
-  const start = new Date(Date.now() + 20_000);
+  const start = new Date((await serverClockNow(request)).getTime() + 20_000);
   start.setUTCMilliseconds(0);
   const effectiveAt = start.toISOString().replace('.000Z', 'Z');
   const created = await call(request, underwriter, 'POST', '/api/pol/v1/submissions', { policyholderPartyId: party, product: 'MOTOR-GR', channel: 'STAFF', effectiveAt, quoteType: 'FULL' });
@@ -77,7 +78,7 @@ export async function bindMotorPolicy(request: APIRequestContext, plate: string)
   expect(bind.status, bind.text).toBe(200);
 
   // The loss is dated one second into the term; wait until that instant is in the past on the server too.
-  while (Date.now() < start.getTime() + 4000) await new Promise((done) => setTimeout(done, 500));
+  await advanceServerPast(request, new Date(start.getTime() + 4000));
   return {
     policyId: bind.body['policyId'] as string,
     policyNumber: bind.body['policyNumber'] as string,
