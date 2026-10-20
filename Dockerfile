@@ -27,6 +27,8 @@ WORKDIR /app
 ENV ASPNETCORE_HTTP_PORTS=8080 \
     DOTNET_RUNNING_IN_CONTAINER=true \
     TZ=UTC
+# NX-EC-03: the business time zone (Europe/Athens) must exist; the app also refuses to start without it, never falling back to UTC.
+RUN test -f /usr/share/zoneinfo/Europe/Athens     || (apt-get update && apt-get install -y --no-install-recommends tzdata && rm -rf /var/lib/apt/lists/*)     && test -f /usr/share/zoneinfo/Europe/Athens
 COPY --from=build /app ./
 COPY --from=web /web/dist ./wwwroot
 # The base image's built-in unprivileged user (UID 1654).

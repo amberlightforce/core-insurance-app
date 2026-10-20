@@ -181,6 +181,8 @@ public sealed class ServicingTaxRealMarketTests
         public LegalEntityId Resolve(LegalEntityCode code) => new(EntityId);
 
         public IReadOnlyList<LegalEntityId> All => [];
+
+        public TimeZoneInfo TimeZoneOf(LegalEntityCode code) => CoreIns.Platform.Time.BusinessTimeZone.Athens;
     }
 
     private sealed class Env(string name) : IHostEnvironment
