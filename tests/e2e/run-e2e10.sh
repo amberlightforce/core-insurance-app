@@ -34,11 +34,12 @@ trap cleanup EXIT
 
 echo "--- starting a fresh stack (project $PROJECT)"
 "${COMPOSE[@]}" down -v --remove-orphans >/dev/null 2>&1 || true
-if [ "${SKIP_BUILD:-0}" = "1" ]; then
-  "${COMPOSE[@]}" up -d
-else
-  "${COMPOSE[@]}" up -d --build
-fi
+BUILD_ARGS=()
+[ "${SKIP_BUILD:-0}" = "1" ] || BUILD_ARGS=(--build)
+# --wait blocks until the services are running/healthy. The api has no compose healthcheck and the one-shot bootstrap/migrate
+# containers exit, which some compose versions treat as a --wait failure, so a failure here is not fatal: the /health/ready
+# poll below is the authoritative readiness gate.
+"${COMPOSE[@]}" up -d "${BUILD_ARGS[@]}" --wait --wait-timeout 300 || echo "compose --wait did not settle; falling back to the readiness poll" >&2
 
 echo "--- waiting for $API/health/ready"
 for i in $(seq 1 120); do
