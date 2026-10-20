@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { adminNavItem, defaultNavItems } from './app-shell/navigation';
 import { RequireRole } from './auth/RequireRole';
-import { underwritingRoles } from './auth/roles';
+import { complianceRoles, underwritingRoles } from './auth/roles';
 import { routes } from './routes';
 
 interface Flat {
@@ -60,10 +60,10 @@ describe('route guards vs navigation', () => {
     expect(sorted(rolesOf('/policies/referrals'))).toEqual(sorted(underwritingRoles));
   });
 
-  it('keeps the /work page unguarded and /compliance redirecting to the DSAR console', () => {
+  it('keeps the /work page unguarded and guards the /compliance landing and the DSAR console', () => {
     expect(flat.some((r) => r.path === '/work')).toBe(true);
     expect(rolesOf('/work')).toBeUndefined();
-    expect(flat.some((r) => r.path === '/compliance')).toBe(true);
+    expect(sorted(rolesOf('/compliance'))).toEqual(sorted(complianceRoles));
     expect(rolesOf('/compliance/dsar')).toBeDefined();
   });
 });

@@ -82,6 +82,7 @@ public static class ReinsuranceModule
         services.AddScoped<PartyDirectory>();
         services.AddScoped<ContractLifecycleService>();
         services.AddScoped<ContractReader>();
+        services.AddScoped<CoreIns.Modules.Reinsurance.Cession.RiReadModels>();
 
         services.AddScoped<IValidator<CreateContract>, CreateContractValidator>();
         services.AddCommandAuditor<CreateContract, ContractCreateResponse, CreateContractAuditor>();

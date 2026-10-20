@@ -119,6 +119,8 @@ public static class BillingModule
         // idempotent on the caller's key; their results carry the masked IBAN only, never the IBAN (REQ-BIL-338).
         services.AddScoped<PayeeProtection>();
         services.AddScoped<DisbursementReader>();
+        services.AddScoped<TaxLevyReader>();
+        services.AddScoped<MigratedRecordsReader>();
         services.AddScoped<IValidator<CreatePayeeAccount>, CreatePayeeAccountValidator>();
         services.AddCommandAuditor<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountAuditor>();
         services.AddCommand<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountHandler>(
@@ -213,6 +215,7 @@ public static class BillingModule
         services.AddScoped<IBillingDisbursementService, DisbursementService>();
         services.AddScoped<IBillingRefundService, RefundService>();
         services.AddScoped<IBillingDelinquencyService, DelinquencyService>();
+        services.AddScoped<IBillingTaxLevyService, TaxLevyService>();
 
         services.AddErrorDefinitions(Errors);
         return services;

@@ -71,6 +71,10 @@ public sealed class DsarRetentionPolicy
     public DsarRetentionPolicy(IEnumerable<string> restrictOnlyClasses) =>
         _restrictOnly = new HashSet<string>(restrictOnlyClasses, StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Outcome detail for a record class an erase request could not erase because a retention hold applies.</summary>
+    public static string NotErasedDetail(string? legalBasis) =>
+        "NOT_ERASED: retained under retention hold" + (string.IsNullOrWhiteSpace(legalBasis) ? string.Empty : " (" + legalBasis + ")");
+
     /// <summary>True when the class must be restricted and never erased.</summary>
     public bool IsRestrictOnly(string recordClass) => _restrictOnly.Contains(recordClass);
 

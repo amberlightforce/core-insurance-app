@@ -27,6 +27,12 @@ internal static class ReinsurancePermissions
     public const string RecoveryListByClaim = "ri.Recovery.listByClaim";
     public const string RecoveryListByContract = "ri.Recovery.listByContract";
     public const string RecoveryTrace = "ri.Recovery.trace";
+    public const string CessionListByPolicy = "ri.Cession.listByPolicy";
+    public const string CessionGet = "ri.Cession.get";
+    public const string CessionExceptionList = "ri.CessionException.list";
+    public const string ProgrammeList = "ri.Programme.list";
+    public const string ProgrammeGet = "ri.Programme.get";
+    public const string ParticipationList = "ri.Participation.list";
 }
 
 /// <summary>

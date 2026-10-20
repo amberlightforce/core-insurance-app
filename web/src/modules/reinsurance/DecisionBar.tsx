@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useIdempotencyKey } from '../../api/idempotency';
 import { Banner, Button, TextField, announce, toast } from '../../design-system';
 import { problemOf } from '../staff/problem';
+import { ProblemBanner } from '../staff/ProblemBanner';
 import styles from './Reinsurance.module.css';
 import {
   approveContract,
@@ -115,40 +116,42 @@ export function DecisionBar({ contract }: { contract: ContractView }) {
   const code = problem?.code;
   const known =
     code && i18n.exists(`reinsurance:errors.codes.${code}`) ? t(`errors.codes.${code}`) : null;
-  const explained =
-    known ??
-    (problem?.status === 403 ? t('errors.forbidden') : (problem?.detail ?? t('errors.generic')));
+  const explained = known ?? problem?.detail ?? t('errors.generic');
   const stale = code === 'RI-ERR-STALE';
 
   const error = problem ? (
-    <Banner
-      variant="danger"
-      live="alert"
-      title={code === 'RI-ERR-SOD' ? t('errors.sodTitle') : t('errors.title')}
-      actions={
-        stale ? (
-          <Button
-            variant="secondary"
-            size="sm"
-            onPress={() => {
-              cancel();
-              void refresh();
-            }}
-          >
-            {t('errors.reload')}
-          </Button>
-        ) : undefined
-      }
-    >
-      <p>{explained}</p>
-      {code || problem.traceId ? (
-        <p className="ds-caption">
-          {code ? <span className="ds-mono">{code}</span> : null}
-          {code && problem.traceId ? ' · ' : null}
-          {problem.traceId ? t('errors.trace', { id: problem.traceId }) : null}
-        </p>
-      ) : null}
-    </Banner>
+    problem.status === 403 && !known ? (
+      <ProblemBanner error={mutation.error} title={t('errors.title')} />
+    ) : (
+      <Banner
+        variant="danger"
+        live="alert"
+        title={code === 'RI-ERR-SOD' ? t('errors.sodTitle') : t('errors.title')}
+        actions={
+          stale ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              onPress={() => {
+                cancel();
+                void refresh();
+              }}
+            >
+              {t('errors.reload')}
+            </Button>
+          ) : undefined
+        }
+      >
+        <p>{explained}</p>
+        {code || problem.traceId ? (
+          <p className="ds-caption">
+            {code ? <span className="ds-mono">{code}</span> : null}
+            {code && problem.traceId ? ' · ' : null}
+            {problem.traceId ? t('errors.trace', { id: problem.traceId }) : null}
+          </p>
+        ) : null}
+      </Banner>
+    )
   ) : null;
 
   if (contract.status === 'DRAFT') {

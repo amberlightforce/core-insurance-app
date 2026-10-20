@@ -6,6 +6,7 @@ import i18n from '../../i18n';
 import { expectNoA11yViolations } from '../../test/axe';
 import { renderWithDs } from '../../test/render';
 import { ProblemBanner } from './ProblemBanner';
+import { QueryView } from './QueryView';
 import { readRecent, rememberRecent } from './recent';
 
 describe('ProblemBanner', () => {
@@ -68,9 +69,32 @@ describe('ProblemBanner 403', () => {
     renderWithDs(
       <ProblemBanner error={new ApiError({ status: 403 })} title="Customer creation failed" />,
     );
+    expect(screen.getByText('No permission')).toBeInTheDocument();
     expect(screen.getByText('Customer creation failed')).toBeInTheDocument();
     expect(screen.getByText(/Staff\.Billing.*does not allow this action/)).toBeInTheDocument();
     sessionStorage.clear();
+  });
+
+  it('never offers a retry on a 403', async () => {
+    await i18n.changeLanguage('en');
+    renderWithDs(<ProblemBanner error={new ApiError({ status: 403 })} onRetry={() => undefined} />);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('QueryView shows the forbidden banner for a 403 and the error state with retry otherwise', async () => {
+    await i18n.changeLanguage('en');
+    const base = { data: undefined, isPending: false, isError: true, refetch: () => undefined };
+    const { unmount } = renderWithDs(
+      <QueryView query={{ ...base, error: new ApiError({ status: 403 }) }}>{() => null}</QueryView>,
+    );
+    expect(screen.getByText('No permission')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /retry/i })).not.toBeInTheDocument();
+    unmount();
+    renderWithDs(
+      <QueryView query={{ ...base, error: new ApiError({ status: 500 }) }}>{() => null}</QueryView>,
+    );
+    expect(screen.queryByText('No permission')).not.toBeInTheDocument();
+    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 });
 

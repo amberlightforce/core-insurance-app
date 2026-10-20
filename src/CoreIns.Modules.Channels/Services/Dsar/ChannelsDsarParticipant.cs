@@ -52,7 +52,9 @@ internal sealed class ChannelsDsarParticipant(IServiceScopeFactory scopes) : IDs
 
     private static async Task<List<object>> CollectAsync(IServiceProvider services, ChannelsDbContext db, SubjectRef subject, CancellationToken ct)
     {
-        // TODO(hardening): withdrawal rows hold no party id; match by the party's other identifiers once CHN stores the party.
+        // Withdrawal rows hold no party id: they are found through the policies the party holds and the party's e-mail addresses.
+        var session = services.GetRequiredService<DbSession>();
+        var connection = await session.OpenConnectionAsync(ct).ConfigureAwait(false);
         var policyIds = new List<PolicyId>();
         foreach (var text in Identifiers(subject, "policyId"))
         {
@@ -62,11 +64,9 @@ internal sealed class ChannelsDsarParticipant(IServiceScopeFactory scopes) : IDs
             }
         }
 
-        // The fan-out knows the party only: the withdrawals are found through the policies the party holds (read-only lookup in POL).
+        // The fan-out knows the party only: the policies it holds (read-only lookup in POL).
         if (policyIds.Count == 0)
         {
-            var session = services.GetRequiredService<DbSession>();
-            var connection = await session.OpenConnectionAsync(ct).ConfigureAwait(false);
             await using var command = new Npgsql.NpgsqlCommand("SELECT policy_id FROM pol.policy WHERE policyholder_party_id = @p", connection, session.Transaction);
             command.Parameters.AddWithValue("p", NpgsqlTypes.NpgsqlDbType.Uuid, subject.PartyId.Value);
             await using var reader = await command.ExecuteReaderAsync(ct).ConfigureAwait(false);
@@ -76,17 +76,32 @@ internal sealed class ChannelsDsarParticipant(IServiceScopeFactory scopes) : IDs
             }
         }
 
-        // TODO(hardening): e-mail match is exact (case-sensitive); normalise at write time.
-        var emails = Identifiers(subject, "email").ToList();
+        // E-mail match is case-insensitive: the supplied identifiers plus the party's e-mail contact points (read-only lookup in PTY).
+        var emails = new HashSet<string>(Identifiers(subject, "email").Select(NormaliseEmail).Where(e => e.Length > 0), StringComparer.Ordinal);
+        await using (var command = new Npgsql.NpgsqlCommand(
+            "SELECT lower(btrim(value)) FROM pty.party_contact_point WHERE party_id = @p AND upper(type) = 'EMAIL' AND value <> '[erased]'", connection, session.Transaction))
+        {
+            command.Parameters.AddWithValue("p", NpgsqlTypes.NpgsqlDbType.Uuid, subject.PartyId.Value);
+            await using var reader = await command.ExecuteReaderAsync(ct).ConfigureAwait(false);
+            while (await reader.ReadAsync(ct).ConfigureAwait(false))
+            {
+                emails.Add(reader.GetString(0));
+            }
+        }
+
         if (policyIds.Count == 0 && emails.Count == 0)
         {
             return [];
         }
 
+        // TODO(hardening): normalise the e-mail at write time so the comparison can use an index instead of lower().
+        var emailList = emails.ToList();
+#pragma warning disable CA1304, CA1311 // Translated to SQL lower(); no culture involved.
         var rows = await db.WithdrawalRequests.AsNoTracking()
-            .Where(w => policyIds.Contains(w.PolicyId) || emails.Contains(w.DeclarantEmail))
+            .Where(w => policyIds.Contains(w.PolicyId) || emailList.Contains(w.DeclarantEmail.Trim().ToLower()))
             .OrderBy(w => w.DeclaredAt)
             .ToListAsync(ct).ConfigureAwait(false);
+#pragma warning restore CA1304, CA1311
         return rows.Select(w => (object)new
         {
             id = w.WithdrawalRequestId,
@@ -102,6 +117,8 @@ internal sealed class ChannelsDsarParticipant(IServiceScopeFactory scopes) : IDs
             declineCode = w.DeclineCode,
         }).ToList();
     }
+
+    private static string NormaliseEmail(string value) => value.Trim().ToLowerInvariant();
 
     private static IReadOnlyList<string> Identifiers(SubjectRef subject, string kind) =>
         subject.KnownIdentifiers.TryGetValue(kind, out var values) ? values : [];

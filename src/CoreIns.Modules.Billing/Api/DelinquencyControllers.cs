@@ -4,7 +4,9 @@ using CoreIns.Modules.Billing.Queries;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
+using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -36,13 +38,21 @@ internal sealed class DelinquencyController : ControllerBase
         return found is null ? HttpResults.Problem(BillingErrors.NotFound("delinquency case"), HttpContext) : Results.Ok(new DelinquencyGetResponse { Process = found });
     }
 
-    /// <summary>bil.Delinquency.list by account or state.</summary>
+    /// <summary>bil.Delinquency.list by account, policy, state or trigger (codes are upper-snake).</summary>
     [HttpGet]
     [Authorize(Policy = DelinquencyPermissions.List)]
     public async Task<IResult> ListAsync(
-        [FromQuery] string? cursor, [FromQuery] int? limit, [FromQuery] Guid? billingAccountId, [FromQuery] string? state,
-        [FromServices] DelinquencyReader reader, CancellationToken cancellationToken) =>
-        Results.Ok(await reader.ListAsync(LegalEntity(), billingAccountId is { } a ? new BillingAccountId(a) : null, state, cursor, limit, cancellationToken).ConfigureAwait(false));
+        [FromQuery] string? cursor, [FromQuery] int? limit, [FromQuery] Guid? billingAccountId, [FromQuery] string? state, [FromQuery] Guid? policyId,
+        [FromQuery] string? trigger, [FromServices] DelinquencyReader reader, CancellationToken cancellationToken)
+    {
+        if (!FilterCode.IsValid(state) || !FilterCode.IsValid(trigger))
+        {
+            return HttpResults.Problem(new DomainError(ErrorCode.For(ModuleCode.BIL, PlatformErrors.Validation), "state and trigger must be upper-snake codes."), HttpContext);
+        }
+
+        return Results.Ok(await reader.ListAsync(
+            LegalEntity(), billingAccountId is { } a ? new BillingAccountId(a) : null, state, cursor, limit, cancellationToken, policyId, trigger).ConfigureAwait(false));
+    }
 
     /// <summary>bil.Delinquency.recordContact.</summary>
     [HttpPost("record-contact")]
