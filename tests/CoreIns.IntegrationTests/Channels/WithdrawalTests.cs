@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json.Nodes;
 using CoreIns.Modules.Channels.Domain;
 using CoreIns.Platform.Time;
@@ -182,5 +183,41 @@ public sealed class WithdrawalTests(PostgresFixture database) : IClassFixture<Po
 
         var (_, got) = await SendAsync(Client(), HttpMethod.Get, $"/api/chn/v1/withdrawals/{declared.Text("requestNumber")}", roles: Admin);
         got.Text("refundStatus").ShouldBe("PROCESSED");
+    }
+
+    private async Task<(HttpResponseMessage Response, JsonNode? Body)> GetAsUserAsync(string path, string roles, string user)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(path, UriKind.Relative));
+        request.Headers.Add(TestAuthHandler.RolesHeader, roles);
+        request.Headers.Add(TestAuthHandler.UserHeader, user);
+        var response = await Client().SendAsync(request, TestContext.Current.CancellationToken);
+        var text = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        return (response, text.Length == 0 ? null : JsonNode.Parse(text));
+    }
+
+    [Fact]
+    public async Task A_portal_customer_cannot_read_another_customers_withdrawal_request()
+    {
+        const string portal = "Customer.Portal";
+        using var declare = new HttpRequestMessage(HttpMethod.Post, new Uri("/api/chn/v1/withdrawals/declare", UriKind.Relative))
+        {
+            Content = JsonContent.Create(new { name = "Μαρία Παπαδοπούλου", contractId = Guid.CreateVersion7(), eMail = "maria@example.org" }),
+        };
+        declare.Headers.Add(TestAuthHandler.RolesHeader, portal);
+        declare.Headers.Add(TestAuthHandler.UserHeader, "customer-a");
+        declare.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+        var declareResponse = await Client().SendAsync(declare, TestContext.Current.CancellationToken);
+        declareResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var declared = JsonNode.Parse(await declareResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        var path = $"/api/chn/v1/withdrawals/{declared.Text("requestNumber")}";
+
+        (await GetAsUserAsync(path, portal, "customer-a")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var (other, body) = await GetAsUserAsync(path, portal, "customer-b");
+        other.StatusCode.ShouldBe(HttpStatusCode.NotFound, body?.ToJsonString());
+        body.Text("code").ShouldBe("CHN-ERR-NOT-FOUND");
+
+        // Staff read by permission, whoever declared it.
+        (await GetAsUserAsync(path, "Staff.Underwriter", "staff-1")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 }
