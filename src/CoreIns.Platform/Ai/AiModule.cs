@@ -5,6 +5,7 @@ using CoreIns.Platform.Contracts.Api;
 using CoreIns.Platform.Contracts.Events;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
+using CoreIns.Platform.Http;
 using CoreIns.SharedKernel.Ai;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
@@ -97,6 +98,7 @@ internal sealed class AiController : ControllerBase
     public async Task<IResult> SetAsync([FromBody] AiToggleSetRequest body, [FromServices] ICommandHandler<SetAiToggle, AiToggleSetResponse> handler, CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new SetAiToggle(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
+    [SkipIdempotency]
     [HttpPost("ai-toggle/resolve")]
     [Authorize(Policy = AiPermissions.ToggleResolve)]
     public async Task<IResult> ResolveAsync([FromBody] AiToggleResolveRequest body, [FromServices] AiQueries queries, CancellationToken cancellationToken) =>
@@ -117,6 +119,7 @@ internal sealed class AiController : ControllerBase
     public async Task<IResult> RecordOutcomeAsync([FromBody] AiRecordOutcomeRequest body, [FromServices] ICommandHandler<RecordAiOutcome, AiRecordOutcomeResponse> handler, CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new RecordAiOutcome(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
+    [SkipIdempotency]
     [HttpPost("feature-flags/evaluate")]
     [Authorize(Policy = AiPermissions.FlagEvaluate)]
     public async Task<IResult> EvaluateFlagAsync([FromBody] FeatureFlagEvaluateRequest body, [FromServices] AiQueries queries, CancellationToken cancellationToken) =>
