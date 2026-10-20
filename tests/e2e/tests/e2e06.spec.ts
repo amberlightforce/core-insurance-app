@@ -157,15 +157,13 @@ async function importStatement(request: APIRequestContext, token: string, insure
   const period = currentMonth();
   // The legs' cases reach their matchable state through the worker, so a first import can race it: re-import (idempotent,
   // it re-matches the unmatched lines) until every line of the counterparty is matched, or the wait runs out.
-  let statement: Json = {};
-  for (let attempt = 0; attempt < 15; attempt++) {
+  return eventually('every statement line of the counterparty to be MATCHED', async () => {
     const imported = await call(request, token, 'POST', '/api/clm/v1/friendly-settlements/import-statement', { period: { from: period.from, to: period.to }, counterpartyCode: insurer });
     expect(imported.status, imported.text).toBe(200);
-    statement = imported.body['statement'] as Json;
-    if (ofCounterparty(statement, insurer).lines.every((l) => l['matchStatus'] === 'MATCHED')) break;
-    await new Promise((done) => setTimeout(done, 2000));
-  }
-  return statement;
+    const statement = imported.body['statement'] as Json;
+    const lines = ofCounterparty(statement, insurer).lines;
+    return lines.length > 0 && lines.every((l) => l['matchStatus'] === 'MATCHED') ? statement : undefined;
+  }, { intervalMs: 2000, timeoutMs: 120_000 });
 }
 
 test('E2E-06 Friendly Settlement: own and at-fault legs, statement, net payable through BIL FS_CLEARING, GL-2515 nets to zero', async ({ request }) => {
