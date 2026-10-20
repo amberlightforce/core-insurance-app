@@ -11,7 +11,7 @@ COPY web/ ./
 RUN npm run build && find dist -name '*.map' -delete
 
 # --- 2. Back end: restore and publish the Host ----------------------------------------------------
-FROM mcr.microsoft.com/dotnet/sdk:10.0.401 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.402 AS build
 WORKDIR /src
 COPY global.json Directory.Build.props Directory.Packages.props .editorconfig ./
 COPY tools/ tools/
