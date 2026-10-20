@@ -17,8 +17,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/payment-instruments
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-plans
 CONTRACT_NOT_SERVED GET /api/bil/v1/receipts
 CONTRACT_NOT_SERVED GET /api/bil/v1/suspense
-CONTRACT_NOT_SERVED GET /api/bil/v1/tax-levy/detail
-CONTRACT_NOT_SERVED GET /api/bil/v1/tax-levy/periods
 CONTRACT_NOT_SERVED GET /api/chn/v1/account-current
 CONTRACT_NOT_SERVED GET /api/chn/v1/agent-logs/query
 CONTRACT_NOT_SERVED GET /api/chn/v1/api-products
@@ -918,6 +916,8 @@ CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/submit
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/to-complaint
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/withdraw
 CONTRACT_NOT_SERVED POST /api/wrk/v1/search/global
+SERVED_NOT_IN_CONTRACT GET /api/bil/v1/migrated-records/mandates
+SERVED_NOT_IN_CONTRACT GET /api/bil/v1/migrated-records/receivables
 SERVED_NOT_IN_CONTRACT GET /api/mkt/v1/pack-activations
 SERVED_NOT_IN_CONTRACT GET /api/mkt/v1/pack-activations/{}
 SERVED_NOT_IN_CONTRACT GET /api/pol/v1/policy-changes/{}/preview

@@ -76,6 +76,47 @@ internal static class WithdrawalSupport
         return await db.WithdrawalRequests.SingleOrDefaultAsync(r => r.LegalEntityId == legalEntity && r.RequestNumber == idOrNumber, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// The acknowledgement letter (DT-WITHDRAWAL-ACK) of the received declaration. DOC de-duplicates on (template, request number),
+    /// so the letter is rendered once however often it is requested. No DOC binding means no letter. A failing DOC call never fails
+    /// the (already committed) confirmation: the sweeper requests the letter again while the request is still CONFIRMED.
+    /// TODO(hardening): a SUBMITTED request whose letter failed is not retried; needs an ack marker column on the request.
+    /// </summary>
+    public static async Task AcknowledgeAsync(
+        IServiceProvider services, IWithdrawalPolicyPort policies, ChannelsOptions settings, WithdrawalRequestRow row, Instant now, CancellationToken cancellationToken)
+    {
+        var documents = services.GetService<IDocumentRequestService>();
+        var facts = documents is null ? null : await policies.FindAsync(row.PolicyId, cancellationToken).ConfigureAwait(false);
+        if (documents is null || facts is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await documents.RequestAsync(
+                new DocumentRequestSpec(
+                    "DT-WITHDRAWAL-ACK",
+                    row.RequestNumber,
+                    new ObjectRef(ModuleCode.CHN, "WithdrawalRequest", row.WithdrawalRequestId.ToString("D")),
+                    facts.PolicyholderPartyId,
+                    "el",
+                    new Dictionary<string, string>(StringComparer.Ordinal)
+                    {
+                        ["customerName"] = row.DeclarantName,
+                        ["policyNo"] = facts.PolicyNumber,
+                        ["withdrawalDate"] = now.ToBusinessDate(settings.Zone).ToString(),
+                    }),
+                cancellationToken).ConfigureAwait(false);
+        }
+#pragma warning disable CA1031 // The confirmation is committed; the letter is retried by the sweeper.
+        catch (Exception ex) when (ex is not OperationCanceledException)
+#pragma warning restore CA1031
+        {
+            _ = ex; // TODO(hardening): log through a module logger once the support class has one.
+        }
+    }
+
     public static DomainError NotFound() =>
         DomainError.Of(ModuleCode.CHN, "NOT-FOUND", "The withdrawal request does not exist in your legal entity.");
 }
@@ -106,6 +147,7 @@ internal sealed class DeclareWithdrawalHandler(
     IClock clock,
     INumberingService numbering,
     IWithdrawalPolicyPort policies,
+    IWithdrawalNotifier notifier,
     IOptions<ChannelsOptions> options) : ICommandHandler<DeclareWithdrawal, WithdrawalDeclareResponse>
 {
     public async Task<Result<WithdrawalDeclareResponse>> HandleAsync(DeclareWithdrawal command, CancellationToken cancellationToken)
@@ -129,6 +171,7 @@ internal sealed class DeclareWithdrawalHandler(
                 active.TokenExpiresAt = now.Plus(TimeSpan.FromHours(settings.WithdrawalTokenHours));
                 active.RecordVersion++;
                 await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await notifier.SendConfirmationTokenAsync(active.RequestNumber, active.DeclarantEmail, token, active.TokenExpiresAt!.Value, cancellationToken).ConfigureAwait(false);
             }
 
             return Response(active, token, settings);
@@ -169,6 +212,11 @@ internal sealed class DeclareWithdrawalHandler(
         };
         db.WithdrawalRequests.Add(row);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        if (token2 is not null)
+        {
+            await notifier.SendConfirmationTokenAsync(row.RequestNumber, row.DeclarantEmail, token2, row.TokenExpiresAt!.Value, cancellationToken).ConfigureAwait(false);
+        }
+
         return Response(row, token2, settings);
     }
 
@@ -284,42 +332,13 @@ internal sealed class ConfirmWithdrawalHandler(
                 WithdrawalSupport.PublishClosed(events, row, WithdrawalRequestClosedV1.OutcomeValue.Rejected, now);
                 break;
             default:
-                // TODO(hardening): no POL binding yet - the Received event is the only path; a sweeper should re-submit CONFIRMED rows.
+                // No POL binding (or POL unreachable): the row stays CONFIRMED and WithdrawalSweeper re-submits it (idempotent on the channel reference).
                 break;
         }
 
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        await AcknowledgeAsync(row, now, cancellationToken).ConfigureAwait(false);
+        await WithdrawalSupport.AcknowledgeAsync(services, policies, settings, row, now, cancellationToken).ConfigureAwait(false);
         return Response(row);
-    }
-
-    /// <summary>
-    /// The acknowledgement letter (DT-WITHDRAWAL-ACK) of the received declaration. DOC de-duplicates on (template, request number),
-    /// so the letter is rendered once however often the request is confirmed. No DOC binding means no letter (TODO(hardening): outbox retry).
-    /// </summary>
-    private async Task AcknowledgeAsync(WithdrawalRequestRow row, Instant now, CancellationToken cancellationToken)
-    {
-        var documents = services.GetService<IDocumentRequestService>();
-        var facts = documents is null ? null : await policies.FindAsync(row.PolicyId, cancellationToken).ConfigureAwait(false);
-        if (documents is null || facts is null)
-        {
-            return;
-        }
-
-        await documents.RequestAsync(
-            new DocumentRequestSpec(
-                "DT-WITHDRAWAL-ACK",
-                row.RequestNumber,
-                new ObjectRef(ModuleCode.CHN, "WithdrawalRequest", row.WithdrawalRequestId.ToString("D")),
-                facts.PolicyholderPartyId,
-                "el",
-                new Dictionary<string, string>(StringComparer.Ordinal)
-                {
-                    ["customerName"] = row.DeclarantName,
-                    ["policyNo"] = facts.PolicyNumber,
-                    ["withdrawalDate"] = now.ToBusinessDate(options.Value.Zone).ToString(),
-                }),
-            cancellationToken).ConfigureAwait(false);
     }
 
     private static WithdrawalConfirmResponse Response(WithdrawalRequestRow row) => new()
