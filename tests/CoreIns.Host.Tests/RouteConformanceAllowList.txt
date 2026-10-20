@@ -179,9 +179,6 @@ CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/footprint
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/query
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/zone
 CONTRACT_NOT_SERVED GET /api/ri/v1/aggregate-tracker/get
-CONTRACT_NOT_SERVED GET /api/ri/v1/cession-exceptions
-CONTRACT_NOT_SERVED GET /api/ri/v1/cessions/list-by-policy
-CONTRACT_NOT_SERVED GET /api/ri/v1/cessions/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/close/status
 CONTRACT_NOT_SERVED GET /api/ri/v1/collaterals
 CONTRACT_NOT_SERVED GET /api/ri/v1/commission/history
@@ -193,9 +190,6 @@ CONTRACT_NOT_SERVED GET /api/ri/v1/facs/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/ifrs17-links/query
 CONTRACT_NOT_SERVED GET /api/ri/v1/items
 CONTRACT_NOT_SERVED GET /api/ri/v1/line-tables/{}
-CONTRACT_NOT_SERVED GET /api/ri/v1/participations
-CONTRACT_NOT_SERVED GET /api/ri/v1/programmes
-CONTRACT_NOT_SERVED GET /api/ri/v1/programmes/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/security-rules/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/approval/history
 CONTRACT_NOT_SERVED GET /api/uw/v1/contingencies
