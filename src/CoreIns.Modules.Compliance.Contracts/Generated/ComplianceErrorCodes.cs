@@ -56,6 +56,12 @@ public static class ComplianceErrorCodes
     /// </remarks>
     public const string ClockUnknown = "CMP-ERR-CLOCK-UNKNOWN";
 
+    /// <summary>CMP-ERR-COMPLAINT-STATE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 11 operation(s): cmp.Complaint.acknowledge, cmp.Complaint.addAction, cmp.Complaint.approveReply, cmp.Complaint.classify, cmp.Complaint.close, cmp.Complaint.create, cmp.Complaint.escalate, cmp.Complaint.get, cmp.Complaint.link, cmp.Complaint.query, cmp.Complaint.submitReply.</para>
+    /// </remarks>
+    public const string ComplaintState = "CMP-ERR-COMPLAINT-STATE";
+
     /// <summary>CMP-ERR-CORRELATED-NOT-FOUND (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 1 operation(s): cmp.FiscalDocument.request.</para>
@@ -106,7 +112,7 @@ public static class ComplianceErrorCodes
 
     /// <summary>CMP-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): cmp.Bureau.status, cmp.FiscalDocument.get, cmp.FiscalDocument.listBySource, cmp.FiscalDocument.qrPayload, cmp.Submission.recordFiling.</para>
+    /// <para>Declared by 16 operation(s): cmp.Bureau.status, cmp.Complaint.acknowledge, cmp.Complaint.addAction, cmp.Complaint.approveReply, cmp.Complaint.classify, cmp.Complaint.close, cmp.Complaint.create, cmp.Complaint.escalate, cmp.Complaint.get, cmp.Complaint.link, cmp.Complaint.query, cmp.Complaint.submitReply, ….</para>
     /// </remarks>
     public const string NotFound = "CMP-ERR-NOT-FOUND";
 
@@ -121,6 +127,12 @@ public static class ComplianceErrorCodes
     /// <para>Declared by 2 operation(s): cmp.Evidence.submit, cmp.Traceability.export.</para>
     /// </remarks>
     public const string ReqUnknown = "CMP-ERR-REQ-UNKNOWN";
+
+    /// <summary>CMP-ERR-ROOT-CAUSE-REQUIRED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 11 operation(s): cmp.Complaint.acknowledge, cmp.Complaint.addAction, cmp.Complaint.approveReply, cmp.Complaint.classify, cmp.Complaint.close, cmp.Complaint.create, cmp.Complaint.escalate, cmp.Complaint.get, cmp.Complaint.link, cmp.Complaint.query, cmp.Complaint.submitReply.</para>
+    /// </remarks>
+    public const string RootCauseRequired = "CMP-ERR-ROOT-CAUSE-REQUIRED";
 
     /// <summary>CMP-ERR-RULES-MISSING (HTTP 422).</summary>
     /// <remarks>
@@ -168,7 +180,7 @@ public static class ComplianceErrorCodes
     public const string Prefix = "CMP-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AiChecklistIncomplete, AiProhibited, ApprovalRequired, ApprovalSameUser, ClockCancelReason, ClockNoValue, ClockState, ClockUnknown, CorrelatedNotFound, DatapointUnmapped, ExtensionNotAllowed, FiscalTotal, Held, IdempotencyMismatch, IdentityNotVerified, NotAComplaint, NotFound, NotRejected, ReqUnknown, RulesMissing, Sod, SourceUnknown, TaxonomyUnknown, TransportUnavailable, Validation, ValidationBlocking];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AiChecklistIncomplete, AiProhibited, ApprovalRequired, ApprovalSameUser, ClockCancelReason, ClockNoValue, ClockState, ClockUnknown, ComplaintState, CorrelatedNotFound, DatapointUnmapped, ExtensionNotAllowed, FiscalTotal, Held, IdempotencyMismatch, IdentityNotVerified, NotAComplaint, NotFound, NotRejected, ReqUnknown, RootCauseRequired, RulesMissing, Sod, SourceUnknown, TaxonomyUnknown, TransportUnavailable, Validation, ValidationBlocking];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -181,6 +193,7 @@ public static class ComplianceErrorCodes
         [ClockNoValue] = 422,
         [ClockState] = 422,
         [ClockUnknown] = 422,
+        [ComplaintState] = 422,
         [CorrelatedNotFound] = 422,
         [DatapointUnmapped] = 422,
         [ExtensionNotAllowed] = 422,
@@ -192,6 +205,7 @@ public static class ComplianceErrorCodes
         [NotFound] = 404,
         [NotRejected] = 422,
         [ReqUnknown] = 422,
+        [RootCauseRequired] = 422,
         [RulesMissing] = 422,
         [Sod] = 403,
         [SourceUnknown] = 422,

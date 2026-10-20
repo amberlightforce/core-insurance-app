@@ -18,9 +18,9 @@ public interface IComplianceComplaintService
     /// <para>Status: minimal. Wave W8.</para>
     /// <para>Exposure: ui; consumers: CHN, CLM.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: CMP-ERR-NOT-A-COMPLAINT (422), CMP-ERR-RULES-MISSING (422), CMP-ERR-SOD (403), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: CMP-ERR-COMPLAINT-STATE (422), CMP-ERR-ROOT-CAUSE-REQUIRED (422), CMP-ERR-NOT-FOUND (404), CMP-ERR-NOT-A-COMPLAINT (422), CMP-ERR-RULES-MISSING (422), CMP-ERR-SOD (403), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintCreateResponse> CreateAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintCreateResponse> CreateAsync(global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintCreateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Migration (same validation as live, R-77)</summary>
     /// <remarks>
@@ -40,7 +40,7 @@ public interface IComplianceComplaintService
     /// <para>Status: minimal. Wave W8.</para>
     /// <para>Exposure: ui; consumers: CLM.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
-    /// <para>Errors: CMP-ERR-NOT-A-COMPLAINT (422), CMP-ERR-RULES-MISSING (422), CMP-ERR-SOD (403), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: CMP-ERR-COMPLAINT-STATE (422), CMP-ERR-ROOT-CAUSE-REQUIRED (422), CMP-ERR-NOT-FOUND (404), CMP-ERR-NOT-A-COMPLAINT (422), CMP-ERR-RULES-MISSING (422), CMP-ERR-SOD (403), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintLinkResponse> LinkAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintLinkResponse> LinkAsync(global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintLinkRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

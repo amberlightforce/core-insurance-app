@@ -125,17 +125,119 @@
       "limit": 1
     },
     "cmp.Complaint.create": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "0192e4d4-176e-7c87-8d69-b3f280c8e5a5",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "019239ec-2f70-73df-80a0-516601ed6d3e",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192ab31-e70a-7469-8b36-4a73149a9f8b"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "019249f0-8a7e-7fbd-80a2-4150f374b278",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "cmp.Complaint.import": {
       "key": "value"
     },
     "cmp.Complaint.link": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "0192fdae-d7c9-7a1d-8b6d-4256afebea9b",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "01924c13-70bd-71bd-885f-1fa6ef269dce",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "01929209-547f-7b7c-8b67-0b3d561a573f"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "01922d68-0384-7d9b-853b-acb9d76546f0",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "cmp.Dsar.approve": {
       "request": {
@@ -1427,79 +1529,814 @@
       "instanceState": "RUNNING",
       "metLateFlag": true
     },
+    "ComplaintAcknowledgeRequest": {
+      "id": "01929b47-e0d2-7ce5-82ec-403863ab60be",
+      "note": "sample"
+    },
     "ComplaintAcknowledgeResponse": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "0192b67e-8046-70d4-893c-f27b88624b92",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "01926eb3-2e5b-77c5-8d48-927a8e00606f",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "01928450-5bab-7d75-8f6f-b8da8f57e911"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "0192831f-0ead-71f1-811d-0ec79cc66d99",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
+    },
+    "ComplaintActionView": {
+      "kind": "sample",
+      "note": "sample",
+      "by": "sample",
+      "at": "2026-10-07T09:00:00Z"
+    },
+    "ComplaintAddActionRequest": {
+      "id": "01927806-8b24-76ae-8e22-8ad004d3e486",
+      "kind": "sample",
+      "note": "sample"
     },
     "ComplaintAddActionResponse": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "019246bd-ecfc-7dca-8ee7-c017bd998310",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "01929288-3024-7aeb-885b-10b76bca4082",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192e547-f92c-7f42-84d7-6b4f5ad3a0d7"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "0192470c-5a49-720a-8b13-17893adf7cc7",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
+    },
+    "ComplaintApproveReplyRequest": {
+      "id": "019256c5-08b1-7d19-8b3d-3a53583e660d",
+      "approved": true,
+      "comment": "sample"
     },
     "ComplaintApproveReplyResponse": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "01925603-9415-73c9-8413-f78db0c2cfd4",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "0192114d-3b52-74bc-8709-03ee265e5cda",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "01920765-cef8-727a-8b77-6129371d158a"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "0192f41b-0802-7434-8929-e248ac9c2604",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
+    },
+    "ComplaintClassifyRequest": {
+      "id": "01923250-5859-7f5e-82b1-9d2960f9a47e",
+      "category": "sample",
+      "cause": "sample",
+      "productLine": "sample",
+      "vulnerable": true
     },
     "ComplaintClassifyResponse": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "01921dee-4d55-73e5-8351-3a39c2f7fd42",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "0192b3eb-b499-7e51-8760-bc3b9ba4e001",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "019231b1-d43b-7496-8c7b-8c914b88260e"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "01927a55-62da-7675-8ff5-d485d8985c6b",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
+    },
+    "ComplaintCloseRequest": {
+      "id": "0192b555-5a89-794e-8498-5e9170597172",
+      "reason": "sample",
+      "rootCause": "sample"
     },
     "ComplaintCloseResponse": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "019239e6-f794-7b66-8be9-01ea19159bd5",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "0192f478-8f9f-7bd3-8d0e-ec4b0991c9bb",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192481e-e4a7-75be-8940-b211b17a7ef1"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "01924c0c-143a-77aa-8a65-3fc8b5722eb2",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
+    },
+    "ComplaintCreateRequest": {
+      "complainantPartyId": "01926cf6-e6e3-7722-8f01-57bde31f3c7a",
+      "complainantType": "INDIVIDUAL",
+      "channel": "sample",
+      "receivedAt": "2026-10-07T09:00:00Z",
+      "description": "sample",
+      "language": "el",
+      "productLine": "sample",
+      "vulnerable": true,
+      "links": [
+        {
+          "module": "POL",
+          "type": "Policy",
+          "id": "0192c587-f92f-71c6-8a97-b3ee21576c16"
+        }
+      ]
     },
     "ComplaintCreateResponse": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "0192e29a-5777-754a-8fe9-e9a274f8305b",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "019266ad-8a8f-725d-8b53-7ea84a943f5f",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192098c-f848-7655-89c8-8c3068c2c2ac"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "019285ab-cc21-7938-825f-fa58541b65d2",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
+    },
+    "ComplaintDeadlineView": {
+      "clockCode": "sample",
+      "instanceId": "01920cbf-3bb7-75e6-856c-77ca7cf5429d",
+      "status": "sample",
+      "deadline": "2026-10-07T09:00:00Z"
+    },
+    "ComplaintEscalateRequest": {
+      "id": "019272fa-ca90-7aa6-8e39-575b6028d7ab",
+      "adrBody": "sample",
+      "reference": "sample"
     },
     "ComplaintEscalateResponse": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "0192302a-e10f-7df5-8ee2-38d55a6f1439",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "019228ab-a57b-79fc-8955-82863bbdc8f3",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192321e-4a97-75ee-8edb-85152dfa9a23"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "01923827-d6df-7c56-8f08-92525aa5b13e",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "ComplaintGetResponse": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "019219db-8f1c-744f-8055-0776afa95c2f",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "01924a1d-d5e4-7c0f-817b-e07ffd9f371d",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192d6bb-0f4a-7277-8a66-e2ffc0e76ac6"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "01928e1d-4a7d-7b18-858c-e2cb38fd064c",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "ComplaintImportRequest": {
       "legacyRecords": "unspecified",
       "handOverDates": "unspecified"
     },
+    "ComplaintLinkRequest": {
+      "id": "0192cb09-691e-7139-815a-d3b4414738c5",
+      "links": [
+        {
+          "module": "POL",
+          "type": "Policy",
+          "id": "0192cead-c36f-7f24-8df0-c4d717785f18"
+        }
+      ]
+    },
     "ComplaintLinkResponse": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "01928036-0e8d-75bd-8aaa-c0e9bc8b349e",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "019242f3-9c7b-7912-83cc-83381a55991e",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192ceed-7141-7f34-87a5-0c447516860b"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "019262fb-82b9-7c84-86b5-36165cc45db4",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "ComplaintProcedureTextResponse": {
-      "text": "unspecified",
-      "version": "unspecified"
+      "text": "sample",
+      "version": "sample",
+      "language": "sample"
     },
     "ComplaintQueryItem": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "0192e9ac-4d82-7c3d-8ef1-6db31ca638cd",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "0192bfb5-def6-7281-87f2-70f87168ec36",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "01923d96-d002-704c-8ec7-f0676968c68d"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "0192d07e-8e47-7ed6-8c2e-d00be0a8023d",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "ComplaintQueryPage": {
       "items": [
         {
-          "complaint": "unspecified",
-          "number": "unspecified",
-          "deadlines": "unspecified"
+          "complaint": {
+            "complaintId": "019259f6-a78d-7079-8eb3-d28fd6639706",
+            "number": "sample",
+            "status": "RECEIVED",
+            "receivedAt": "2026-10-07T09:00:00Z",
+            "channel": "sample",
+            "complainantPartyId": "0192f644-a508-731d-8785-a99496778e56",
+            "complainantType": "sample",
+            "description": "sample",
+            "language": "sample",
+            "category": "sample",
+            "cause": "sample",
+            "productLine": "sample",
+            "vulnerable": true,
+            "links": [
+              {
+                "module": "POL",
+                "type": "Policy",
+                "id": "01921ffc-8cd7-7d9e-813a-91fb18d66aaa"
+              }
+            ],
+            "actions": [
+              {
+                "kind": "sample",
+                "note": "sample",
+                "by": "sample",
+                "at": "2026-10-07T09:00:00Z"
+              }
+            ],
+            "acknowledgedAt": "2026-10-07T09:00:00Z",
+            "replyStatus": "sample",
+            "outcome": "sample",
+            "replyText": "sample",
+            "replyAuthor": "sample",
+            "replyApprovedBy": "sample",
+            "redressAmount": "sample",
+            "rootCause": "sample",
+            "adrBody": "sample",
+            "adrReference": "sample",
+            "answeredAt": "2026-10-07T09:00:00Z",
+            "closedAt": "2026-10-07T09:00:00Z",
+            "closedReason": "sample",
+            "createdBy": "sample",
+            "rulesMissing": true
+          },
+          "number": "sample",
+          "deadlines": [
+            {
+              "clockCode": "sample",
+              "instanceId": "01922e0e-d025-7a2c-81ed-235e2771d4c1",
+              "status": "sample",
+              "deadline": "2026-10-07T09:00:00Z"
+            }
+          ]
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
+    "ComplaintSubmitReplyRequest": {
+      "id": "0192fd40-49b4-7144-80fb-f409a6e025e1",
+      "outcome": "UPHELD",
+      "replyText": "sample",
+      "redressAmount": "sample",
+      "rootCause": "sample"
+    },
     "ComplaintSubmitReplyResponse": {
-      "complaint": "unspecified",
-      "number": "unspecified",
-      "deadlines": "unspecified"
+      "complaint": {
+        "complaintId": "0192eaa1-b746-772b-8ed1-83e98c62d883",
+        "number": "sample",
+        "status": "RECEIVED",
+        "receivedAt": "2026-10-07T09:00:00Z",
+        "channel": "sample",
+        "complainantPartyId": "01928630-f58d-7b63-8166-18b8b0ba65f7",
+        "complainantType": "sample",
+        "description": "sample",
+        "language": "sample",
+        "category": "sample",
+        "cause": "sample",
+        "productLine": "sample",
+        "vulnerable": true,
+        "links": [
+          {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192781c-e31b-7067-8f37-68f5498770af"
+          }
+        ],
+        "actions": [
+          {
+            "kind": "sample",
+            "note": "sample",
+            "by": "sample",
+            "at": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "acknowledgedAt": "2026-10-07T09:00:00Z",
+        "replyStatus": "sample",
+        "outcome": "sample",
+        "replyText": "sample",
+        "replyAuthor": "sample",
+        "replyApprovedBy": "sample",
+        "redressAmount": "sample",
+        "rootCause": "sample",
+        "adrBody": "sample",
+        "adrReference": "sample",
+        "answeredAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z",
+        "closedReason": "sample",
+        "createdBy": "sample",
+        "rulesMissing": true
+      },
+      "number": "sample",
+      "deadlines": [
+        {
+          "clockCode": "sample",
+          "instanceId": "01920ec7-a52f-7ce0-8b35-bf303f372073",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
+    },
+    "ComplaintView": {
+      "complaintId": "01921996-9898-7025-8f2a-a68fb16cb1ca",
+      "number": "sample",
+      "status": "RECEIVED",
+      "receivedAt": "2026-10-07T09:00:00Z",
+      "channel": "sample",
+      "complainantPartyId": "0192a6e1-3987-79b7-8fd9-79a6a35106ee",
+      "complainantType": "sample",
+      "description": "sample",
+      "language": "sample",
+      "category": "sample",
+      "cause": "sample",
+      "productLine": "sample",
+      "vulnerable": true,
+      "links": [
+        {
+          "module": "POL",
+          "type": "Policy",
+          "id": "0192aafb-69ba-7bf9-88a3-d02681a45d36"
+        }
+      ],
+      "actions": [
+        {
+          "kind": "sample",
+          "note": "sample",
+          "by": "sample",
+          "at": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "acknowledgedAt": "2026-10-07T09:00:00Z",
+      "replyStatus": "sample",
+      "outcome": "sample",
+      "replyText": "sample",
+      "replyAuthor": "sample",
+      "replyApprovedBy": "sample",
+      "redressAmount": "sample",
+      "rootCause": "sample",
+      "adrBody": "sample",
+      "adrReference": "sample",
+      "answeredAt": "2026-10-07T09:00:00Z",
+      "closedAt": "2026-10-07T09:00:00Z",
+      "closedReason": "sample",
+      "createdBy": "sample",
+      "rulesMissing": true
     },
     "DisclosureLogQueryItem": {
       "entries": [

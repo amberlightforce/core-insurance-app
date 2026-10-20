@@ -4,6 +4,7 @@ using CoreIns.Modules.Compliance.AiRegister;
 using CoreIns.Modules.Compliance.Clocks;
 using CoreIns.Modules.Migration.Contracts.Spi;
 using CoreIns.Modules.Compliance.Commands;
+using CoreIns.Modules.Compliance.Complaints;
 using CoreIns.Modules.Compliance.Contracts;
 using CoreIns.Modules.Compliance.Contracts.Api;
 using CoreIns.Modules.Compliance.Dsar;
@@ -100,6 +101,25 @@ public static class ComplianceModule
         services.AddCommand<EraseDsar, DsarEraseResponse, EraseDsarHandler>(CommandDescriptor.For("cmp.Dsar.erase"));
         services.AddCommand<RecordDisclosure, DisclosureLogRecordResponse, RecordDisclosureHandler>(CommandDescriptor.For("cmp.DisclosureLog.record"));
 
+
+        // Complaint handling (W8-CMP-01): register to close, reply with second-user approval, 50-day reply clock.
+        services.AddScoped<ComplaintEngine>();
+        services.AddScoped<ComplaintReader>();
+        services.AddScoped<IValidator<CreateComplaint>, CreateComplaintValidator>();
+        services.AddScoped<IValidator<ClassifyComplaint>, ClassifyComplaintValidator>();
+        services.AddScoped<IValidator<LinkComplaint>, LinkComplaintValidator>();
+        services.AddScoped<IValidator<AddComplaintAction>, AddComplaintActionValidator>();
+        services.AddScoped<IValidator<SubmitComplaintReply>, SubmitComplaintReplyValidator>();
+        services.AddCommand<CreateComplaint, ComplaintCreateResponse, CreateComplaintHandler>(CommandDescriptor.For("cmp.Complaint.create"));
+        services.AddCommand<ClassifyComplaint, ComplaintClassifyResponse, ClassifyComplaintHandler>(CommandDescriptor.For("cmp.Complaint.classify"));
+        services.AddCommand<LinkComplaint, ComplaintLinkResponse, LinkComplaintHandler>(CommandDescriptor.For("cmp.Complaint.link"));
+        services.AddCommand<AcknowledgeComplaint, ComplaintAcknowledgeResponse, AcknowledgeComplaintHandler>(CommandDescriptor.For("cmp.Complaint.acknowledge"));
+        services.AddCommand<AddComplaintAction, ComplaintAddActionResponse, AddComplaintActionHandler>(CommandDescriptor.For("cmp.Complaint.addAction"));
+        services.AddCommand<SubmitComplaintReply, ComplaintSubmitReplyResponse, SubmitComplaintReplyHandler>(CommandDescriptor.For("cmp.Complaint.submitReply"));
+        services.AddCommand<ApproveComplaintReply, ComplaintApproveReplyResponse, ApproveComplaintReplyHandler>(CommandDescriptor.For("cmp.Complaint.approveReply"));
+        services.AddCommand<EscalateComplaint, ComplaintEscalateResponse, EscalateComplaintHandler>(CommandDescriptor.For("cmp.Complaint.escalate"));
+        services.AddCommand<CloseComplaint, ComplaintCloseResponse, CloseComplaintHandler>(CommandDescriptor.For("cmp.Complaint.close"));
+
         services.AddErrorDefinitions(Errors);
         return services;
     }
@@ -141,6 +161,14 @@ public static class ComplianceModule
             .Describe("Η διαγραφή ή ο περιορισμός χρειάζεται έγκριση από DPO που δεν δημιούργησε το αίτημα.", "Erase or restrict needs the approval of a DPO who did not create the request."),
         ErrorDefinition.For(ModuleCode.CMP, "LEGAL-HOLD", 422, "Η διαγραφή μπλοκάρεται από νομική δέσμευση", "A legal hold blocks the purge")
             .Describe("Το αίτημα φέρει νομική δέσμευση· τα δεδομένα μπορούν μόνο να περιοριστούν.", "The request carries a legal hold; the data can only be restricted."),
+        ErrorDefinition.For(ModuleCode.CMP, "SOD", 403, "Ο εγκρίνων πρέπει να διαφέρει από τον συντάκτη", "The approver must differ from the author")
+            .Describe("Η απάντηση σε παράπονο εγκρίνεται από δεύτερο χρήστη (διαχωρισμός καθηκόντων).", "A complaint reply is approved by a second user (segregation of duties)."),
+        ErrorDefinition.For(ModuleCode.CMP, "COMPLAINT-STATE", 422, "Η ενέργεια δεν επιτρέπεται στην κατάσταση του παραπόνου", "The action is not allowed in the complaint's state")
+            .Describe("Η τρέχουσα κατάσταση του παραπόνου δεν επιτρέπει αυτή την ενέργεια.", "The complaint's current state does not allow this action."),
+        ErrorDefinition.For(ModuleCode.CMP, "ROOT-CAUSE-REQUIRED", 422, "Απαιτείται βασική αιτία", "A root cause is required")
+            .Describe("Ένα παράπονο που έγινε δεκτό κλείνει μόνο με καταγεγραμμένη βασική αιτία.", "An upheld complaint closes only with a recorded root cause."),
+        ErrorDefinition.For(ModuleCode.CMP, "NOT-A-COMPLAINT", 422, "Δεν πρόκειται για παράπονο", "Not a complaint")
+            .Describe("Η γνωστοποίηση ζημιάς δεν είναι παράπονο· καταχωρήστε την ως αίτημα αποζημίωσης.", "A claim notification is not a complaint; register it as a claim."),
         ErrorDefinition.For(ModuleCode.CMP, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

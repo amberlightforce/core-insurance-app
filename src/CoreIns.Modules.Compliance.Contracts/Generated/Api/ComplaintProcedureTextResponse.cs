@@ -4,23 +4,22 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Complaint.procedureText result. PRD outputs: "text, version"</summary>
+/// <summary>cmp.Complaint.procedureText result: the published complaint-handling procedure</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ComplaintProcedureTextResponse
 {
-    /// <summary>PRD: "text"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Procedure text in the requested language</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("text")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Text { get; init; }
+    public string? Text { get; init; }
 
-    /// <summary>PRD: "version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Published version</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("version")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Version { get; init; }
+    public string? Version { get; init; }
+
+    /// <summary>Contract member 'language'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("language")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Language { get; init; }
 }

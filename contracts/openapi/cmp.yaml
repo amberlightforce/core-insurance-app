@@ -1915,6 +1915,12 @@ paths:
       - CLM
       x-permission: cmp.Complaint.create
       x-error-codes:
+      - code: CMP-ERR-COMPLAINT-STATE
+        status: 422
+      - code: CMP-ERR-ROOT-CAUSE-REQUIRED
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-NOT-A-COMPLAINT
         status: 422
       - code: CMP-ERR-RULES-MISSING
@@ -1989,6 +1995,12 @@ paths:
       - ui
       x-permission: cmp.Complaint.classify
       x-error-codes:
+      - code: CMP-ERR-COMPLAINT-STATE
+        status: 422
+      - code: CMP-ERR-ROOT-CAUSE-REQUIRED
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-NOT-A-COMPLAINT
         status: 422
       - code: CMP-ERR-RULES-MISSING
@@ -2064,6 +2076,12 @@ paths:
       - CLM
       x-permission: cmp.Complaint.link
       x-error-codes:
+      - code: CMP-ERR-COMPLAINT-STATE
+        status: 422
+      - code: CMP-ERR-ROOT-CAUSE-REQUIRED
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-NOT-A-COMPLAINT
         status: 422
       - code: CMP-ERR-RULES-MISSING
@@ -2137,6 +2155,12 @@ paths:
       - ui
       x-permission: cmp.Complaint.acknowledge
       x-error-codes:
+      - code: CMP-ERR-COMPLAINT-STATE
+        status: 422
+      - code: CMP-ERR-ROOT-CAUSE-REQUIRED
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-NOT-A-COMPLAINT
         status: 422
       - code: CMP-ERR-RULES-MISSING
@@ -2210,6 +2234,12 @@ paths:
       - ui
       x-permission: cmp.Complaint.addAction
       x-error-codes:
+      - code: CMP-ERR-COMPLAINT-STATE
+        status: 422
+      - code: CMP-ERR-ROOT-CAUSE-REQUIRED
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-NOT-A-COMPLAINT
         status: 422
       - code: CMP-ERR-RULES-MISSING
@@ -2283,6 +2313,12 @@ paths:
       - ui
       x-permission: cmp.Complaint.submitReply
       x-error-codes:
+      - code: CMP-ERR-COMPLAINT-STATE
+        status: 422
+      - code: CMP-ERR-ROOT-CAUSE-REQUIRED
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-NOT-A-COMPLAINT
         status: 422
       - code: CMP-ERR-RULES-MISSING
@@ -2356,6 +2392,12 @@ paths:
       - ui
       x-permission: cmp.Complaint.approveReply
       x-error-codes:
+      - code: CMP-ERR-COMPLAINT-STATE
+        status: 422
+      - code: CMP-ERR-ROOT-CAUSE-REQUIRED
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-NOT-A-COMPLAINT
         status: 422
       - code: CMP-ERR-RULES-MISSING
@@ -2429,6 +2471,12 @@ paths:
       - ui
       x-permission: cmp.Complaint.escalate
       x-error-codes:
+      - code: CMP-ERR-COMPLAINT-STATE
+        status: 422
+      - code: CMP-ERR-ROOT-CAUSE-REQUIRED
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-NOT-A-COMPLAINT
         status: 422
       - code: CMP-ERR-RULES-MISSING
@@ -2502,6 +2550,12 @@ paths:
       - ui
       x-permission: cmp.Complaint.close
       x-error-codes:
+      - code: CMP-ERR-COMPLAINT-STATE
+        status: 422
+      - code: CMP-ERR-ROOT-CAUSE-REQUIRED
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-NOT-A-COMPLAINT
         status: 422
       - code: CMP-ERR-RULES-MISSING
@@ -2575,6 +2629,12 @@ paths:
       - ui
       x-permission: cmp.Complaint.get
       x-error-codes:
+      - code: CMP-ERR-COMPLAINT-STATE
+        status: 422
+      - code: CMP-ERR-ROOT-CAUSE-REQUIRED
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-NOT-A-COMPLAINT
         status: 422
       - code: CMP-ERR-RULES-MISSING
@@ -2644,6 +2704,12 @@ paths:
       - ui
       x-permission: cmp.Complaint.query
       x-error-codes:
+      - code: CMP-ERR-COMPLAINT-STATE
+        status: 422
+      - code: CMP-ERR-ROOT-CAUSE-REQUIRED
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-NOT-A-COMPLAINT
         status: 422
       - code: CMP-ERR-RULES-MISSING
@@ -2658,6 +2724,12 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: status
+        in: query
+        required: false
+        description: 'Filter by complaint status'
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -7298,183 +7370,444 @@ components:
       x-status: minimal
     ComplaintCreateRequest:
       type: object
-      description: 'cmp.Complaint.create request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Complaint.create request: a complaint received from a complainant'
+      properties:
+        complainantPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Party that complains (optional until identified)'
+        complainantType:
+          type: string
+          enum:
+          - INDIVIDUAL
+          - BUSINESS
+          description: 'Kind of complainant'
+        channel:
+          type: string
+          maxLength: 32
+          description: 'Channel it arrived through (EMAIL, LETTER, PHONE, WEB, ...)'
+        receivedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'When it was received (default now); starts the reply clock'
+        description:
+          type: string
+          maxLength: 4000
+          description: 'What the complainant says'
+        language:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+          description: 'Language of the complaint'
+        productLine:
+          type: string
+          maxLength: 64
+          description: 'Product line concerned'
+        vulnerable:
+          type: boolean
+          description: 'Complainant flagged as vulnerable (no reason stored)'
+        links:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: 'Policies, claims or other objects it concerns'
+      required:
+      - description
     ComplaintCreateResponse:
       type: object
-      description: 'cmp.Complaint.create result. PRD outputs: "complaint, number, deadlines"'
+      description: 'cmp.Complaint.create result'
       properties:
         complaint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "complaint"'
+          $ref: '#/components/schemas/ComplaintView'
         number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
+          type: string
+          description: 'Complaint number'
         deadlines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadlines"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintDeadlineView'
     ComplaintClassifyRequest:
       type: object
-      description: 'cmp.Complaint.classify request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Complaint.classify request: category, cause and product line'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Complaint id'
+        category:
+          type: string
+          description: 'Category from the pack list (CLAIM_NOTIFICATION is refused: not a complaint)'
+          maxLength: 64
+        cause:
+          type: string
+          description: 'Cause'
+          maxLength: 64
+        productLine:
+          type: string
+          description: 'Product line'
+          maxLength: 64
+        vulnerable:
+          type: boolean
+          description: 'Vulnerable flag'
+      required:
+      - id
+      - category
     ComplaintClassifyResponse:
       type: object
-      description: 'cmp.Complaint.classify result. PRD outputs: "complaint, number, deadlines"'
+      description: 'cmp.Complaint.classify result'
       properties:
         complaint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "complaint"'
+          $ref: '#/components/schemas/ComplaintView'
         number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
+          type: string
+          description: 'Complaint number'
         deadlines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadlines"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintDeadlineView'
     ComplaintLinkRequest:
       type: object
-      description: 'cmp.Complaint.link request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Complaint.link request: objects the complaint concerns'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Complaint id'
+        links:
+          type: array
+          minItems: 1
+          items:
+            $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: 'Objects to link'
+      required:
+      - id
+      - links
     ComplaintLinkResponse:
       type: object
-      description: 'cmp.Complaint.link result. PRD outputs: "complaint, number, deadlines"'
+      description: 'cmp.Complaint.link result'
       properties:
         complaint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "complaint"'
+          $ref: '#/components/schemas/ComplaintView'
         number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
+          type: string
+          description: 'Complaint number'
         deadlines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadlines"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintDeadlineView'
     ComplaintAcknowledgeRequest:
       type: object
-      description: 'cmp.Complaint.acknowledge request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Complaint.acknowledge request'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Complaint id'
+        note:
+          type: string
+          description: 'Note on the acknowledgement, no personal data'
+          maxLength: 512
+      required:
+      - id
     ComplaintAcknowledgeResponse:
       type: object
-      description: 'cmp.Complaint.acknowledge result. PRD outputs: "complaint, number, deadlines"'
+      description: 'cmp.Complaint.acknowledge result'
       properties:
         complaint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "complaint"'
+          $ref: '#/components/schemas/ComplaintView'
         number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
+          type: string
+          description: 'Complaint number'
         deadlines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadlines"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintDeadlineView'
     ComplaintAddActionRequest:
       type: object
-      description: 'cmp.Complaint.addAction request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Complaint.addAction request: an investigation step'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Complaint id'
+        kind:
+          type: string
+          description: 'Kind of step (CONTACT, REQUEST_INFO, REVIEW, ...)'
+          maxLength: 64
+        note:
+          type: string
+          description: 'What was done'
+          maxLength: 1000
+      required:
+      - id
+      - kind
     ComplaintAddActionResponse:
       type: object
-      description: 'cmp.Complaint.addAction result. PRD outputs: "complaint, number, deadlines"'
+      description: 'cmp.Complaint.addAction result'
       properties:
         complaint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "complaint"'
+          $ref: '#/components/schemas/ComplaintView'
         number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
+          type: string
+          description: 'Complaint number'
         deadlines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadlines"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintDeadlineView'
     ComplaintSubmitReplyRequest:
       type: object
-      description: 'cmp.Complaint.submitReply request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Complaint.submitReply request: the draft reply, held for a second user approval'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Complaint id'
+        outcome:
+          type: string
+          enum:
+          - UPHELD
+          - PARTIALLY_UPHELD
+          - REJECTED
+          description: 'Outcome'
+        replyText:
+          type: string
+          description: 'Reply text'
+          maxLength: 8000
+        redressAmount:
+          type: string
+          description: 'Redress awarded, decimal in the entity currency'
+          maxLength: 32
+        rootCause:
+          type: string
+          description: 'Root cause (required to close an upheld complaint)'
+          maxLength: 128
+      required:
+      - id
+      - outcome
+      - replyText
     ComplaintSubmitReplyResponse:
       type: object
-      description: 'cmp.Complaint.submitReply result. PRD outputs: "complaint, number, deadlines"'
+      description: 'cmp.Complaint.submitReply result'
       properties:
         complaint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "complaint"'
+          $ref: '#/components/schemas/ComplaintView'
         number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
+          type: string
+          description: 'Complaint number'
         deadlines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadlines"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintDeadlineView'
     ComplaintApproveReplyRequest:
       type: object
-      description: 'cmp.Complaint.approveReply request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Complaint.approveReply request: second-user approval or return of the reply (approver differs from author)'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Complaint id'
+        approved:
+          type: boolean
+          description: 'False returns the reply to its author (default true)'
+        comment:
+          type: string
+          description: 'Comment'
+          maxLength: 512
+      required:
+      - id
     ComplaintApproveReplyResponse:
       type: object
-      description: 'cmp.Complaint.approveReply result. PRD outputs: "complaint, number, deadlines"'
+      description: 'cmp.Complaint.approveReply result'
       properties:
         complaint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "complaint"'
+          $ref: '#/components/schemas/ComplaintView'
         number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
+          type: string
+          description: 'Complaint number'
         deadlines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadlines"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintDeadlineView'
     ComplaintEscalateRequest:
       type: object
-      description: 'cmp.Complaint.escalate request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Complaint.escalate request: refer to an ADR body'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Complaint id'
+        adrBody:
+          type: string
+          description: 'ADR body'
+          maxLength: 128
+        reference:
+          type: string
+          description: 'Reference at the ADR body'
+          maxLength: 128
+      required:
+      - id
     ComplaintEscalateResponse:
       type: object
-      description: 'cmp.Complaint.escalate result. PRD outputs: "complaint, number, deadlines"'
+      description: 'cmp.Complaint.escalate result'
       properties:
         complaint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "complaint"'
+          $ref: '#/components/schemas/ComplaintView'
         number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
+          type: string
+          description: 'Complaint number'
         deadlines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadlines"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintDeadlineView'
     ComplaintCloseRequest:
       type: object
-      description: 'cmp.Complaint.close request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Complaint.close request'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Complaint id'
+        reason:
+          type: string
+          description: 'Closing reason'
+          maxLength: 512
+        rootCause:
+          type: string
+          description: 'Root cause'
+          maxLength: 128
+      required:
+      - id
     ComplaintCloseResponse:
       type: object
-      description: 'cmp.Complaint.close result. PRD outputs: "complaint, number, deadlines"'
+      description: 'cmp.Complaint.close result'
       properties:
         complaint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "complaint"'
+          $ref: '#/components/schemas/ComplaintView'
         number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
+          type: string
+          description: 'Complaint number'
         deadlines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadlines"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintDeadlineView'
     ComplaintGetResponse:
       type: object
-      description: 'cmp.Complaint.get result. PRD outputs: "complaint, number, deadlines"'
+      description: 'cmp.Complaint.get result'
       properties:
         complaint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "complaint"'
+          $ref: '#/components/schemas/ComplaintView'
         number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
+          type: string
+          description: 'Complaint number'
         deadlines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadlines"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintDeadlineView'
+    ComplaintDeadlineView:
+      type: object
+      description: 'A statutory clock of a complaint'
+      properties:
+        clockCode:
+          type: string
+          description: 'Clock code (CMP_COMPLAINT_REPLY)'
+        instanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Clock instance id'
+        status:
+          type: string
+          description: 'Clock status (RUNNING, WARNED, PAUSED, MET, BREACHED, ...)'
+        deadline:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'Due instant'
+    ComplaintActionView:
+      type: object
+      description: 'One investigation step'
+      properties:
+        kind:
+          type: string
+        note:
+          type: string
+        by:
+          type: string
+        at:
+          $ref: ../events/common.schema.json#/$defs/Instant
+    ComplaintView:
+      type: object
+      description: 'A complaint with its state'
+      properties:
+        complaintId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        number:
+          type: string
+        status:
+          type: string
+          enum:
+          - RECEIVED
+          - ACKNOWLEDGED
+          - UNDER_INVESTIGATION
+          - ANSWERED
+          - ESCALATED
+          - CLOSED
+        receivedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        channel:
+          type: string
+        complainantPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        complainantType:
+          type: string
+        description:
+          type: string
+        language:
+          type: string
+        category:
+          type: string
+        cause:
+          type: string
+        productLine:
+          type: string
+        vulnerable:
+          type: boolean
+        links:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/ObjectRef
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintActionView'
+        acknowledgedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        replyStatus:
+          type: string
+          description: 'NONE, PENDING_APPROVAL, RETURNED or APPROVED'
+        outcome:
+          type: string
+        replyText:
+          type: string
+        replyAuthor:
+          type: string
+        replyApprovedBy:
+          type: string
+        redressAmount:
+          type: string
+        rootCause:
+          type: string
+        adrBody:
+          type: string
+        adrReference:
+          type: string
+        answeredAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        closedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        closedReason:
+          type: string
+        createdBy:
+          type: string
+        rulesMissing:
+          type: boolean
+          description: 'No reply clock could be started for the jurisdiction (fail closed: a task must set the deadline by hand)'
     ComplaintQueryItem:
       type: object
-      description: 'cmp.Complaint.query result. PRD outputs: "complaint, number, deadlines"'
+      description: 'cmp.Complaint.query result item'
       properties:
         complaint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "complaint"'
+          $ref: '#/components/schemas/ComplaintView'
         number:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "number"'
+          type: string
         deadlines:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "deadlines"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplaintDeadlineView'
     ComplaintQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7487,14 +7820,16 @@ components:
       description: Page of cmp.Complaint.query results (cursor pagination, contract §3.5.5)
     ComplaintProcedureTextResponse:
       type: object
-      description: 'cmp.Complaint.procedureText result. PRD outputs: "text, version"'
+      description: 'cmp.Complaint.procedureText result: the published complaint-handling procedure'
       properties:
         text:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "text"'
+          type: string
+          description: 'Procedure text in the requested language'
         version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
+          type: string
+          description: 'Published version'
+        language:
+          type: string
     DsarCreateRequest:
       type: object
       description: 'cmp.Dsar.create request: the data subject and the kind of request'
