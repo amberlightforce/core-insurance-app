@@ -90,16 +90,33 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     public async ValueTask DisposeAsync()
     {
+        // NX-TST-05: events this class emitted must match their schemas; the database is dropped right after.
+        Exception? drift = null;
+        try
+        {
+            await EventSchemaDriftCheck.AssertCleanAsync(SuperuserConnectionString).ConfigureAwait(false);
+        }
+        catch (EventSchemaDriftException ex)
+        {
+            drift = ex;
+        }
+
         if (_container is not null)
         {
             await _container.DisposeAsync().ConfigureAwait(false);
-            return;
+        }
+        else
+        {
+            NpgsqlConnection.ClearAllPools();
+            await using var admin = NpgsqlDataSource.Create(AdminConnectionString);
+            await using var drop = admin.CreateCommand($"DROP DATABASE IF EXISTS {DatabaseName} WITH (FORCE)");
+            await drop.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
 
-        NpgsqlConnection.ClearAllPools();
-        await using var admin = NpgsqlDataSource.Create(AdminConnectionString);
-        await using var drop = admin.CreateCommand($"DROP DATABASE IF EXISTS {DatabaseName} WITH (FORCE)");
-        await drop.ExecuteNonQueryAsync().ConfigureAwait(false);
+        if (drift is not null)
+        {
+            throw drift;
+        }
     }
 
     /// <summary>Runs SQL as the superuser in the application database.</summary>
