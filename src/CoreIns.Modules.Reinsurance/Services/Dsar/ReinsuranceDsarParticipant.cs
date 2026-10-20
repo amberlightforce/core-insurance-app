@@ -51,14 +51,21 @@ internal sealed class ReinsuranceDsarParticipant(IServiceScopeFactory scopes, IC
     }
 
     /// <inheritdoc />
-    public Task<DsarModuleResult> EraseAsync(SubjectRef subject, DsarContext context, CancellationToken ct = default)
+    public async Task<DsarModuleResult> EraseAsync(SubjectRef subject, DsarContext context, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(subject);
         ArgumentNullException.ThrowIfNull(context);
 
-        // Every class here is restrict-only (ledger, invoice, claim file, policy/fiscal document); nothing is erasable.
-        // TODO(hardening): erase non-regulated classes (none exist in this module today) through DsarRetentionPolicy.
-        return ApplyAsync(subject, "ERASURE_REQUEST", null, null, context.ApprovedBy ?? context.RequestedBy, ct);
+        // Every class here is regulated and held under retention (ledger, invoice, claim file, policy/fiscal document): nothing is
+        // erased. Each held class is restricted and reported NOT_ERASED with the reason, so the DPO sees a refusal, not a silent keep.
+        // TODO(hardening): erase non-regulated classes (none exist in this module today) once F-404 names retention classes.
+        var result = await ApplyAsync(subject, "ERASURE_REQUEST", null, null, context.ApprovedBy ?? context.RequestedBy, ct).ConfigureAwait(false);
+        return result with
+        {
+            Outcomes = [.. result.Outcomes.Select(o => o.Kind == DsarOutcomeKind.Restricted
+                ? o with { Detail = DsarRetentionPolicy.NotErasedDetail(o.LegalBasis) }
+                : o)],
+        };
     }
 
     private async Task<DsarModuleResult> ApplyAsync(

@@ -4,6 +4,7 @@ using CoreIns.Modules.Channels.Commands;
 using CoreIns.Modules.Channels.Contracts.Api;
 using CoreIns.Modules.Channels.Domain;
 using CoreIns.Modules.Channels.Persistence;
+using CoreIns.Modules.Channels.Services;
 using CoreIns.Modules.Channels.Queries;
 using CoreIns.Platform;
 using CoreIns.Platform.Commands;
@@ -46,6 +47,13 @@ public static class ChannelsModule
         services.AddScoped<WithdrawalReader>();
         services.AddScoped<CoreIns.Modules.Channels.Ai.TicketService>();
         services.TryAddScoped<IWithdrawalPolicyPort, PolicyContractWithdrawalPort>();
+        services.TryAddScoped<IWithdrawalNotifier, LoggingWithdrawalNotifier>();
+        services.AddCommand<ResubmitWithdrawal, string, ResubmitWithdrawalHandler>(CommandDescriptor.For("chn.Withdrawal.resubmit") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddSingleton<WithdrawalSweepRunner>();
+        if (string.Equals(configuration["APP_ROLE"], "worker", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddHostedService<WithdrawalSweeper>();
+        }
 
         services.AddScoped<IValidator<DeclareWithdrawal>, DeclareWithdrawalValidator>();
         services.AddCommandAuditor<DeclareWithdrawal, WithdrawalDeclareResponse, DeclareWithdrawalAuditor>();

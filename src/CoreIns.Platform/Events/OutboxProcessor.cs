@@ -330,7 +330,7 @@ public sealed partial class OutboxProcessor
                 }
 
                 var attempt = message.Attempts + 1;
-                if (attempt >= _options.MaxAttempts)
+                if (attempt >= _options.MaxAttempts || failed.All(f => f.Error is PermanentEventFailureException))
                 {
                     foreach (var (handler, error) in failed)
                     {

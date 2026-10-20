@@ -93,17 +93,56 @@ internal sealed class DisbursementController : ControllerBase
             : Results.Ok(new DisbursementGetResponse { Disbursement = found });
     }
 
-    /// <summary>bil.Disbursement.list: newest first, cursor-paged (the release inbox narrows to FS_CLEARING client-side).</summary>
+    /// <summary>
+    /// bil.Disbursement.list: newest first, cursor-paged. Optional server-side filters: <c>state</c>, <c>sourceType</c>, <c>payeeAccountId</c>,
+    /// and a requested-date range <c>requestedFrom</c> (inclusive) .. <c>requestedTo</c> (inclusive), both ISO dates in the billing zone.
+    /// </summary>
     [HttpGet("disbursements")]
     [Authorize(Policy = DisbursementPermissions.DisbursementList)]
-    public async Task<IResult> ListDisbursementsAsync([FromQuery] string? cursor, [FromQuery] int? limit, [FromServices] DisbursementReader reader, CancellationToken cancellationToken)
+    public async Task<IResult> ListDisbursementsAsync(
+        [FromQuery] string? cursor, [FromQuery] int? limit, [FromQuery] string? state, [FromQuery] string? sourceType, [FromQuery] Guid? payeeAccountId,
+        [FromQuery] string? requestedFrom, [FromQuery] string? requestedTo, [FromServices] DisbursementReader reader, [FromServices] IOptions<BillingOptions> options,
+        CancellationToken cancellationToken)
     {
         if (cursor is not null && !int.TryParse(cursor, out _))
         {
             return HttpResults.Problem(new DomainError(ErrorCode.For(ModuleCode.BIL, PlatformErrors.Validation), "Invalid cursor."), HttpContext);
         }
 
-        return Results.Ok(await reader.ListAsync(LegalEntity(), cursor, limit, cancellationToken).ConfigureAwait(false));
+        if (!FilterCode.IsValid(state) || !FilterCode.IsValid(sourceType))
+        {
+            return HttpResults.Problem(new DomainError(ErrorCode.For(ModuleCode.BIL, PlatformErrors.Validation), "state and sourceType must be upper-snake codes."), HttpContext);
+        }
+
+        Instant? from = null;
+        Instant? before = null;
+        if (requestedFrom is not null)
+        {
+            if (!BusinessDate.TryParse(requestedFrom, out var fromDate))
+            {
+                return HttpResults.Problem(new DomainError(ErrorCode.For(ModuleCode.BIL, PlatformErrors.Validation), "requestedFrom must be an ISO date."), HttpContext);
+            }
+
+            from = fromDate.StartOfDayIn(options.Value.Zone);
+        }
+
+        if (requestedTo is not null)
+        {
+            if (!BusinessDate.TryParse(requestedTo, out var toDate))
+            {
+                return HttpResults.Problem(new DomainError(ErrorCode.For(ModuleCode.BIL, PlatformErrors.Validation), "requestedTo must be an ISO date."), HttpContext);
+            }
+
+            before = toDate.AddDays(1).StartOfDayIn(options.Value.Zone);
+        }
+
+        if (from is { } f && before is { } b && b <= f)
+        {
+            return HttpResults.Problem(new DomainError(ErrorCode.For(ModuleCode.BIL, PlatformErrors.Validation), "requestedTo is before requestedFrom."), HttpContext);
+        }
+
+        var filter = new DisbursementFilter(state, sourceType, payeeAccountId, from, before);
+        return Results.Ok(await reader.ListAsync(LegalEntity(), cursor, limit, filter, cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>bil.Disbursement.approveRelease: the maker/checker release of an FS_CLEARING net (Staff.BillingManager, never the requester).</summary>
@@ -136,4 +175,10 @@ internal sealed class DisbursementController : ControllerBase
         var context = services.GetRequiredService<RequestContext>();
         return services.GetRequiredService<ILegalEntityDirectory>().Resolve(context.LegalEntity ?? throw new InvalidOperationException("No legal entity."));
     }
+}
+
+/// <summary>Guards the code-valued list filters (upper-snake only): anything else is a 400, never a query.</summary>
+internal static class FilterCode
+{
+    public static bool IsValid(string? value) => value is null || (value.Length is > 0 and <= 64 && value.All(c => c is (>= 'A' and <= 'Z') or '_' or (>= '0' and <= '9')));
 }
