@@ -1,3 +1,4 @@
+using CoreIns.Rules;
 using System.Globalization;
 using System.Text.Json;
 using CoreIns.Modules.Market.Contracts;
@@ -118,15 +119,16 @@ internal sealed class ChangeEngineFactory(
         }
 
         var scale = probe.Scale.Value;
-        return probe.Mode.Value switch
+        var mode = probe.Mode.Value switch
         {
-            RoundingApplyResponse.ModeValue.HalfUp => new PremiumRounding(a => decimal.Round(a, scale, MidpointRounding.AwayFromZero)),
-            RoundingApplyResponse.ModeValue.HalfEven => new PremiumRounding(a => decimal.Round(a, scale, MidpointRounding.ToEven)),
-            RoundingApplyResponse.ModeValue.Down => new PremiumRounding(a => decimal.Round(a, scale, MidpointRounding.ToZero)),
-            RoundingApplyResponse.ModeValue.Up => new PremiumRounding(a => decimal.Round(a, scale, a >= 0 ? MidpointRounding.ToPositiveInfinity : MidpointRounding.ToNegativeInfinity)),
-            RoundingApplyResponse.ModeValue.Ceiling => new PremiumRounding(a => decimal.Round(a, scale, MidpointRounding.ToPositiveInfinity)),
-            _ => new PremiumRounding(a => decimal.Round(a, scale, MidpointRounding.ToNegativeInfinity)),
+            RoundingApplyResponse.ModeValue.HalfUp => RoundingMode.HalfUp,
+            RoundingApplyResponse.ModeValue.HalfEven => RoundingMode.HalfEven,
+            RoundingApplyResponse.ModeValue.Down => RoundingMode.Down,
+            RoundingApplyResponse.ModeValue.Up => RoundingMode.Up,
+            RoundingApplyResponse.ModeValue.Ceiling => RoundingMode.Ceiling,
+            _ => RoundingMode.Floor,
         };
+        return new PremiumRounding(a => DecimalRounding.RoundTo(a, scale, mode));
     }
 }
 

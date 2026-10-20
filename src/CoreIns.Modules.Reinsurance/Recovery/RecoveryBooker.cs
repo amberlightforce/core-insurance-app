@@ -9,6 +9,7 @@ using CoreIns.Modules.Reinsurance.Registry;
 using CoreIns.Platform.Contracts.Common;
 using CoreIns.Platform.Events;
 using CoreIns.Platform.Time;
+using CoreIns.Rules;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -78,8 +79,8 @@ internal sealed class RecoveryBooker(ReinsuranceDbContext db, IClock clock, IEve
             new UnlClause(content.AlaeIncluded, content.StatutoryInterestIncluded),
             Participations(content),
             content.PlacedPct / 100m, // stored as a percentage (100 = 100%); the engine wants a fraction
-            // TODO(hardening): take the rounding rule from mkt.Rounding.apply (PITFALLS 11); until then cents, half away from zero.
-            amount => Math.Round(amount, 2, MidpointRounding.AwayFromZero),
+            // TODO(hardening): resolve the legal entity's rule via mkt.Rounding.apply (PITFALLS 11); until then the platform money mode at cents.
+            amount => DecimalRounding.RoundTo(amount, 2, DecimalRounding.DefaultMoneyMode),
             $"{version.VersionNo}:{version.ContentHash}");
 
         var booked = (await db.Recoveries.AsNoTracking().Where(r => r.ContractId == contractId)

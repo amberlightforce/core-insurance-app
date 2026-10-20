@@ -114,22 +114,15 @@ internal static class RatingEngine
     /// <summary>The tax or levy of one coverage line: base x configured rate, rounded as the plan declares (REQ-RAT-109, -110).</summary>
     public static Money TaxAmount(Money premium, decimal rate, TaxPlanDto plan)
     {
-        MidpointRounding mode;
-        switch (plan.Mode)
+        // A tax plan may declare only the two commercial modes; anything else fails closed.
+        if (plan.Mode is not ("HalfUp" or "HalfEven") || !DecimalRounding.TryParseMode(plan.Mode, out var roundingMode))
         {
-            case "HalfUp":
-                mode = MidpointRounding.AwayFromZero;
-                break;
-            case "HalfEven":
-                mode = MidpointRounding.ToEven;
-                break;
-            default:
-                throw new DomainException(DomainError.Of(ModuleCode.RAT, "TAX", $"Unknown rounding mode {plan.Mode}."));
+            throw new DomainException(DomainError.Of(ModuleCode.RAT, "TAX", $"Unknown rounding mode {plan.Mode}."));
         }
 
         try
         {
-            return premium.Multiply(rate).Round(plan.Places, mode);
+            return premium.Multiply(rate).Round(plan.Places, DecimalRounding.ToMidpoint(roundingMode, 0m));
         }
         catch (Exception ex) when (ex is OverflowException or InvalidOperationException or ArgumentException or PrecisionLossException)
         {
