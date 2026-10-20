@@ -143,6 +143,7 @@ internal sealed class ImportProductVersionHandler(
     private async Task<Result<ProductVersionImportResponse>> LockAsync(
         ProductVersionRow version, ProductRow product, ProductArtefact definition, Instant now, CancellationToken cancellationToken)
     {
+        var zone = legalEntities.TimeZoneOf(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
         var state = Codes.Parse<ProductVersionState>(version.Status);
         foreach (var trigger in new[] { ProductVersionTrigger.Submit, ProductVersionTrigger.Approve, ProductVersionTrigger.Publish })
         {
@@ -203,8 +204,8 @@ internal sealed class ImportProductVersionHandler(
                 ProductCode = definition.Product.Code,
                 Version = definition.Version,
                 ArtefactHash = Sha256Hash.Parse(version.ArtefactHash),
-                NewBusinessWindow = ToInstants(definition.Windows.NewBusiness),
-                RenewalWindow = ToInstants(definition.Windows.Renewal),
+                NewBusinessWindow = ToInstants(definition.Windows.NewBusiness, zone),
+                RenewalWindow = ToInstants(definition.Windows.Renewal, zone),
                 Jurisdiction = definition.Jurisdiction,
                 LegalEntity = definition.LegalEntity,
                 Channels = definition.Channels,
@@ -253,22 +254,9 @@ internal sealed class ImportProductVersionHandler(
         Created = created,
     };
 
-    private static InstantRange ToInstants(DateRange window)
+    private static InstantRange ToInstants(DateRange window, TimeZoneInfo zone)
     {
-        var zone = AthensOrUtc();
         return new InstantRange(window.Start.StartOfDayIn(zone), window.End?.StartOfDayIn(zone));
-    }
-
-    private static TimeZoneInfo AthensOrUtc()
-    {
-        try
-        {
-            return TimeZoneInfo.FindSystemTimeZoneById("Europe/Athens");
-        }
-        catch (TimeZoneNotFoundException)
-        {
-            return TimeZoneInfo.Utc;
-        }
     }
 
     private static DomainError Invalid(string field, string code, string message) =>

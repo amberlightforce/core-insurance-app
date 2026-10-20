@@ -89,6 +89,12 @@ public enum RoundingMode
 /// <summary>Decimal rounding with explicit mode; the result has exactly <c>places</c> fractional digits.</summary>
 public static class DecimalRounding
 {
+    /// <summary>
+    /// The platform's money rounding when no MKT rule can be resolved by the caller (commercial, half away from zero). It is the
+    /// seeded MKT default; modules that can resolve <c>mkt.Rounding.apply</c> use that rule instead.
+    /// </summary>
+    public const RoundingMode DefaultMoneyMode = RoundingMode.HalfUp;
+
     /// <summary>Maximum decimal places (System.Decimal scale limit).</summary>
     public const int MaxPlaces = 28;
 
@@ -100,18 +106,36 @@ public static class DecimalRounding
     {
         ArgumentOutOfRangeException.ThrowIfNegative(places);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(places, MaxPlaces);
-        decimal rounded = mode switch
-        {
-            RoundingMode.HalfEven => decimal.Round(value, places, MidpointRounding.ToEven),
-            RoundingMode.HalfUp => decimal.Round(value, places, MidpointRounding.AwayFromZero),
-            RoundingMode.Down => decimal.Round(value, places, MidpointRounding.ToZero),
-            RoundingMode.Ceiling => decimal.Round(value, places, MidpointRounding.ToPositiveInfinity),
-            RoundingMode.Floor => decimal.Round(value, places, MidpointRounding.ToNegativeInfinity),
-            RoundingMode.Up => decimal.Round(value, places, value >= 0 ? MidpointRounding.ToPositiveInfinity : MidpointRounding.ToNegativeInfinity),
-            RoundingMode.HalfDown => HalfDown(value, places),
-            _ => throw new ArgumentOutOfRangeException(nameof(mode)),
-        };
+        decimal rounded = mode == RoundingMode.HalfDown
+            ? HalfDown(value, places)
+            : decimal.Round(value, places, ToMidpoint(mode, value));
         return WithScale(rounded, places);
+    }
+
+    /// <summary>
+    /// THE single mapping from a <see cref="RoundingMode"/> to the framework's <see cref="MidpointRounding"/> (NX-EC-01). Every
+    /// money module goes through here; nobody spells a literal mode. <see cref="RoundingMode.HalfDown"/> has no framework
+    /// equivalent and is refused (use <see cref="Round"/>); an undefined value fails closed.
+    /// </summary>
+    /// <remarks><see cref="RoundingMode.Up"/> is "away from zero", so the direction depends on the sign of <paramref name="value"/>.</remarks>
+    public static MidpointRounding ToMidpoint(RoundingMode mode, decimal value) => mode switch
+    {
+        RoundingMode.HalfEven => MidpointRounding.ToEven,
+        RoundingMode.HalfUp => MidpointRounding.AwayFromZero,
+        RoundingMode.Down => MidpointRounding.ToZero,
+        RoundingMode.Ceiling => MidpointRounding.ToPositiveInfinity,
+        RoundingMode.Floor => MidpointRounding.ToNegativeInfinity,
+        RoundingMode.Up => value >= 0 ? MidpointRounding.ToPositiveInfinity : MidpointRounding.ToNegativeInfinity,
+        RoundingMode.HalfDown => throw new ArgumentOutOfRangeException(nameof(mode), mode, "HalfDown has no MidpointRounding equivalent; use DecimalRounding.Round."),
+        _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown rounding mode."),
+    };
+
+    /// <summary>Rounds to <paramref name="places"/> with <paramref name="mode"/>, keeping the framework's natural scale (no zero padding, unlike <see cref="Round"/>).</summary>
+    public static decimal RoundTo(decimal value, int places, RoundingMode mode)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(places);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(places, MaxPlaces);
+        return mode == RoundingMode.HalfDown ? HalfDown(value, places) : decimal.Round(value, places, ToMidpoint(mode, value));
     }
 
     /// <summary>Parses a rounding mode name (exact, case-sensitive).</summary>

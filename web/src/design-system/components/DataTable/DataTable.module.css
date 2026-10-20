@@ -165,9 +165,27 @@
 }
 
 .scroller {
+  /* NX-UI-03: wide tables scroll inside their card, never clip. */
+  max-inline-size: 100%;
   max-block-size: var(--_height, 70vh);
   overflow: auto;
   overscroll-behavior: contain;
+}
+
+.viewport::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: var(--space-6);
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(to left, var(--color-surface-sheet), transparent);
+  transition: opacity var(--motion-duration-feedback-md) var(--motion-ease-standard);
+}
+
+.root[data-scrolled-end] .viewport::after {
+  opacity: 1;
 }
 
 .grid {
@@ -555,11 +573,18 @@
   min-block-size: 160px;
 }
 
+/* NX-UI-03: the empty block centres in the visible area, not in the (wider) scrolling row. */
+.spanRow[data-kind='empty'] .spanCell {
+  inline-size: 100cqi;
+  justify-content: center;
+}
+
 .emptyBlock {
   display: grid;
   gap: var(--space-3);
-  justify-items: start;
+  justify-items: center;
   padding-block: var(--space-6);
+  text-align: center;
 }
 
 .emptyTitle {

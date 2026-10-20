@@ -70,10 +70,36 @@ def walk_role_assignments(template, path):
             yield from walk_role_assignments(resource["properties"]["template"], path + [resource["name"]])
 
 
+SECRETISH = re.compile(r"password|secret|connectionstring|apikey|accesskey|sharedkey", re.I)
+# Outputs that may carry secret-looking names: Key Vault secret URIs (no value) and the App Insights ingestion string.
+OUTPUT_ALLOW = {"coreSecretUri", "migratorSecretUri", "adminSecretUri", "appRoleSecretUri", "migratorRoleSecretUri",
+                "entraSecretUri", "appInsightsConnectionString"}
+
+
+def check_secret_hygiene(template, path, errors):
+    """Every secret-looking parameter is a securestring; no secret-looking or credential-bearing outputs."""
+    where = "/".join(path) or "main"
+    for name, spec in template.get("parameters", {}).items():
+        # `secrets` / `*SecretUri` hold Key Vault references only, never values.
+        if SECRETISH.search(name) and name != "secrets" and not name.endswith("SecretUri") and spec.get("type") != "securestring":
+            errors.append(f"{where}: parameter {name} looks like a secret but is not @secure()")
+    for name, spec in template.get("outputs", {}).items():
+        if spec.get("type") in ("securestring", "secureObject"):
+            errors.append(f"{where}: output {name} is secure (would be exposed through deployment outputs)")
+        elif SECRETISH.search(name) and name not in OUTPUT_ALLOW:
+            errors.append(f"{where}: output {name} has a secret-like name")
+        elif "listKeys" in json.dumps(spec.get("value", "")) or "Password=" in json.dumps(spec.get("value", "")):
+            errors.append(f"{where}: output {name} exposes credentials")
+    for resource in resources(template):
+        if resource.get("type") == "Microsoft.Resources/deployments":
+            check_secret_hygiene(resource["properties"]["template"], path + [resource["name"]], errors)
+
+
 def main(compiled_path):
     template = json.load(open(compiled_path, encoding="utf-8"))
     errors = []
     modules = deployments(template)
+    check_secret_hygiene(template, [], errors)
 
     # 1. Every role assignment: Key Vault roles only in the keyvault module, and only on single secrets.
     secret_params = {}

@@ -39,3 +39,21 @@ export async function waitForJournals(request: APIRequestContext, token: string,
     return JSON.stringify(actual) === JSON.stringify(expected) ? all : undefined;
   });
 }
+
+/** The dev clock's current time (the server's "now"; never the runner's wall clock). */
+export async function serverClockNow(request: APIRequestContext): Promise<Date> {
+  return new Date(String((await readClock(request))['now']));
+}
+
+/**
+ * Moves the dev clock forward (never waits on the runner's wall clock) until the server's now is at least `instant`.
+ * Returns the server's now afterwards. A no-op when the instant is already in the past.
+ */
+export async function advanceServerPast(request: APIRequestContext, instant: Date): Promise<Date> {
+  const now = await serverClockNow(request);
+  const missingMs = instant.getTime() - now.getTime();
+  if (missingMs > 0) await advanceClock(request, { seconds: Math.ceil(missingMs / 1000) });
+  const after = await serverClockNow(request);
+  expect(after.getTime(), 'the dev clock is past the requested instant').toBeGreaterThanOrEqual(instant.getTime());
+  return after;
+}

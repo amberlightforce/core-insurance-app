@@ -169,11 +169,13 @@ test('E2E-12 pack rollback after bound business', async ({ request }) => {
   expect(String(freshTerm['productVersion'])).toMatch(/^1\.2/);
 
   // ---- 10. An H2 term cannot be cancelled without the treatment rules (fail closed); after re-activating 0.2.0 it can.
-  await new Promise((done) => setTimeout(done, 25_000)); // the terms start 20 s after their creation
+  // The terms start 20 s after their creation: poll the dry run until it is refused for the missing rule (not for a term that has not started).
   const cancel = { policyId: policies[0]!.policyId, source: 'Policyholder', reasonCode: 'CUSTOMER_REQUEST', effectiveAt: new Date().toISOString().replace(/\.\d+Z$/, 'Z'), kind: 'STANDARD' };
-  const refused = await call(request, underwriter, 'POST', '/api/pol/v1/cancellations?dryRun=true', cancel);
+  const refused = await eventually('the dry-run cancellation to be refused with RULE_MISSING', async () => {
+    const attempt = await call(request, underwriter, 'POST', '/api/pol/v1/cancellations?dryRun=true', { ...cancel, effectiveAt: new Date().toISOString().replace(/\.\d+Z$/, 'Z') });
+    return attempt.status >= 400 && attempt.text.includes('RULE_MISSING') ? attempt : undefined;
+  }, { timeoutMs: 120_000, intervalMs: 2000 });
   expect(refused.status, refused.text).toBeGreaterThanOrEqual(400);
-  expect(refused.text).toContain('RULE_MISSING');
   const reactivated = await rollOrActivate(request, 'schedule-activation', PACK, '0.2.0', 'Reactivate the treatment pack after the acceptance of the fix');
   const H4 = reactivated['resultingHash'] as string;
   await expectHash(H4);

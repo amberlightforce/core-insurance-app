@@ -24,6 +24,7 @@
     <ProjectReference Include="..\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+    <ProjectReference Include="..\CoreIns.Rules\CoreIns.Rules.csproj" />
   </ItemGroup>
 
   <ItemGroup>

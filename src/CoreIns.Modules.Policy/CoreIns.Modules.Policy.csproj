@@ -30,6 +30,7 @@
     <ProjectReference Include="..\CoreIns.Modules.Migration.Contracts\CoreIns.Modules.Migration.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
+    <ProjectReference Include="..\CoreIns.Rules\CoreIns.Rules.csproj" />
   </ItemGroup>
 
   <ItemGroup>

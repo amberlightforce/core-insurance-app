@@ -12,7 +12,7 @@ namespace CoreIns.Modules.Rating.Events;
 
 /// <summary>Activates the exact source tariff for a server-published fallback; the outbox owns event-id idempotency.</summary>
 internal sealed partial class ProductVersionFallbackHandler(
-    RatingStore store, IAuditWriter audit, RequestContext context, IClock clock, ILogger<ProductVersionFallbackHandler> logger)
+    RatingStore store, ILegalEntityDirectory legalEntities, IAuditWriter audit, RequestContext context, IClock clock, ILogger<ProductVersionFallbackHandler> logger)
     : IEventHandler<ProductVersionPublishedV1>
 {
     public async Task HandleAsync(EventEnvelope envelope, ProductVersionPublishedV1 payload, CancellationToken cancellationToken)
@@ -23,7 +23,7 @@ internal sealed partial class ProductVersionFallbackHandler(
         }
 
         await store.EnsureSeededAsync(cancellationToken).ConfigureAwait(false);
-        var at = payload.NewBusinessWindow.Start.ToBusinessDate(TimeZoneInfo.FindSystemTimeZoneById("Europe/Athens"));
+        var at = payload.NewBusinessWindow.Start.ToBusinessDate(legalEntities.TimeZoneOf(envelope.LegalEntity));
         var result = await store.ActivateFallbackAsync(
             payload.ProductCode, source.ToString(), payload.Version.ToString(), at.Value, envelope.EventId.Value, cancellationToken).ConfigureAwait(false);
         if (result.Refusal is { } refusal)
