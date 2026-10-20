@@ -1,3 +1,4 @@
+using CoreIns.Rules;
 using System.Globalization;
 using CoreIns.Modules.Market.Contracts;
 using CoreIns.Modules.Market.Contracts.Api;
@@ -580,7 +581,7 @@ internal sealed class CancelPolicyHandler(
         static Money M(decimal amount, Currency c)
         {
             var trimmed = JobSupport.Exact(amount);
-            return new Money(trimmed.Scale < 2 ? decimal.Round(trimmed, 2) + 0.00m : trimmed, c);
+            return new Money(trimmed.Scale < 2 ? trimmed + 0.00m : trimmed, c);
         }
         var prorated = new List<ServicingProratedLine>();
         foreach (var delta in premiumDeltas)
@@ -610,7 +611,7 @@ internal sealed class CancelPolicyHandler(
         var annualBefore = before.Segments.GroupBy(s => s.Key).Sum(g => g.OrderBy(s => s.From).Last().Rate.AnnualRate);
         return new ServicingPreview
         {
-            AnnualBefore = M(annualBefore, currency).RoundToMinorUnits(MidpointRounding.AwayFromZero),
+            AnnualBefore = M(annualBefore, currency).RoundToMinorUnits(DecimalRounding.ToMidpoint(DecimalRounding.DefaultMoneyMode, 0m)),
             AnnualAfter = M(0m, currency),
             ProratedLines = prorated,
             TaxLines = taxLines,
