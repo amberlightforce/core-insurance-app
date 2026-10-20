@@ -121,7 +121,7 @@ public sealed partial class OutboxProcessor
         WITH done AS (
             UPDATE plt.outbox_message
             SET status = 'Dispatched', dispatched_at = @now, lease_until = NULL, lease_owner = NULL, last_error = NULL
-            WHERE event_id = ANY(@ids) AND status = 'Pending'
+            WHERE event_id = ANY(@ids) AND status = 'Pending' AND (lease_owner = @owner OR lease_owner IS NULL)
             RETURNING *)
         INSERT INTO plt.event_archive (
             event_id, event_type, schema_version, producer, aggregate_type, aggregate_id, aggregate_sequence, occurred_at,
@@ -156,7 +156,9 @@ public sealed partial class OutboxProcessor
             u.attempts, @now, 'Parked'
         FROM unnest(@id, @handler, @event_id, @event_type, @aggregate_type, @aggregate_id, @error_class, @error_message, @attempts)
             AS u(id, handler, event_id, event_type, aggregate_type, aggregate_id, error_class, error_message, attempts)
+        JOIN plt.outbox_message m ON m.event_id = u.event_id AND m.status = 'Pending' AND m.lease_owner = @owner
         ON CONFLICT DO NOTHING
+        RETURNING event_id, handler
         """;
 
     private readonly NpgsqlDataSource _dataSource;
@@ -402,6 +404,7 @@ public sealed partial class OutboxProcessor
         {
             await using var complete = new NpgsqlCommand(CompleteSql, connection, transaction);
             complete.Parameters.Add(new NpgsqlParameter<Guid[]>("ids", [.. outcome.Completed]));
+            complete.Parameters.Add(new NpgsqlParameter<string>("owner", _owner));
             complete.Parameters.Add(new NpgsqlParameter("now", NpgsqlDbType.TimestampTz) { Value = now.ToUtcDateTime() });
             await complete.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -434,6 +437,7 @@ public sealed partial class OutboxProcessor
     private async Task ParkAsync(
         NpgsqlConnection connection, NpgsqlTransaction transaction, ParkedFailure[] parked, Instant now, CancellationToken cancellationToken)
     {
+        var inserted = new HashSet<(Guid EventId, string Handler)>();
         await using (var park = new NpgsqlCommand(ParkSql, connection, transaction))
         {
             park.Parameters.Add(new NpgsqlParameter<Guid[]>("id", [.. parked.Select(_ => Guid.CreateVersion7())]));
@@ -446,9 +450,17 @@ public sealed partial class OutboxProcessor
             park.Parameters.Add(new NpgsqlParameter<string[]>("error_message", [.. parked.Select(p => ErrorText.Of(p.Error))]));
             park.Parameters.Add(new NpgsqlParameter<int[]>("attempts", [.. parked.Select(p => p.Attempts)]));
             park.Parameters.Add(new NpgsqlParameter("now", NpgsqlDbType.TimestampTz) { Value = now.ToUtcDateTime() });
-            await park.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+            park.Parameters.Add(new NpgsqlParameter<string>("owner", _owner));
+
+            // Only messages this dispatcher still leases are parked: after a lost lease another dispatcher owns the outcome.
+            await using var reader = await park.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            {
+                inserted.Add((reader.GetGuid(0), reader.GetString(1)));
+            }
         }
 
+        parked = [.. parked.Where(p => inserted.Contains((p.Envelope.EventId.Value, p.Handler)))];
         var notices = parked.Select(p => PlatformEvents.DeadLetterParkedEnvelope(p.Envelope, p.Handler, ErrorText.ClassOf(p.Error), now)).ToList();
         await OutboxWriter.WriteAsync(connection, transaction, notices, now, cancellationToken).ConfigureAwait(false);
         foreach (var p in parked)
