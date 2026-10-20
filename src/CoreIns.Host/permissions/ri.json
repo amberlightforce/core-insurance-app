@@ -14,7 +14,14 @@
         // Recoveries (SL4-RI-RECOVERY): claims roles and RI roles read.
         "ri.Recovery.listByClaim": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "ri.Recovery.listByContract": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
-        "ri.Recovery.trace": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
+        "ri.Recovery.trace": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        // Cession, programme and participation reads (NX-HD-08a).
+        "ri.Cession.listByPolicy": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.Cession.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.CessionException.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.Programme.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.Programme.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.Participation.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ]
       }
     },
     "Authority": {
