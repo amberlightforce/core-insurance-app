@@ -163,7 +163,6 @@ CONTRACT_NOT_SERVED GET /api/pty/v1/party-roles/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/producer-of-records/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/relationships/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/screening/case-get
-CONTRACT_NOT_SERVED GET /api/pty/v1/vulnerabilities/query
 CONTRACT_NOT_SERVED GET /api/rat/v1/breakdowns/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/change-explanations/get
 CONTRACT_NOT_SERVED GET /api/rat/v1/impact-analysises/{}
@@ -724,8 +723,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/relationships/add
 CONTRACT_NOT_SERVED POST /api/pty/v1/relationships/end
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/bulk
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/case-decide
-CONTRACT_NOT_SERVED POST /api/pty/v1/vulnerabilities/record
-CONTRACT_NOT_SERVED POST /api/pty/v1/vulnerabilities/remove
 CONTRACT_NOT_SERVED POST /api/rat/v1/bonus-malus/transition
 CONTRACT_NOT_SERVED POST /api/rat/v1/comparisons/compare-versions
 CONTRACT_NOT_SERVED POST /api/rat/v1/day-count/year-fraction
