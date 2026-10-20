@@ -1,0 +1,13 @@
+{
+  "analyzers": {
+    "core": {
+      "rules": {
+        "outputs-should-not-contain-secrets": { "level": "error" },
+        "secure-secrets-in-params": { "level": "error" },
+        "use-secure-value-for-secure-inputs": { "level": "error" },
+        "secure-params-in-nested-deployments": { "level": "error" },
+        "protect-commandtoexecute-secrets": { "level": "error" }
+      }
+    }
+  }
+}
