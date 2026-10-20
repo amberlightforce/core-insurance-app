@@ -165,6 +165,13 @@ public static class BillingModule
         // contract interfaces, resolved when used.
         services.AddScoped<NonpayService>();
         services.AddScoped<DelinquencyReader>();
+        services.AddSingleton<DelinquencySweepRunner>();
+        if (string.Equals(configuration["APP_ROLE"], "worker", StringComparison.OrdinalIgnoreCase)
+            && configuration.GetValue("Billing:DelinquencySweepEnabled", true))
+        {
+            services.AddHostedService<DelinquencySweeper>();
+        }
+
         AddInternalDelinquencyCommand<SweepDelinquency, SweepDelinquencyHandler>(services, "bil.Delinquency.sweep");
         AddInternalDelinquencyCommand<OpenDelinquency, OpenDelinquencyHandler>(services, "bil.Delinquency.open");
         AddInternalDelinquencyCommand<NoticeDelivered, NoticeDeliveredHandler>(services, "bil.Delinquency.noticeDelivered");
