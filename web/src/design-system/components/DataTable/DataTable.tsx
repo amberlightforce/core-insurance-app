@@ -617,6 +617,20 @@ export function DataTable<Row>(props: DataTableProps<Row>) {
     root.toggleAttribute('data-scrolled-end', el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
   };
 
+  // Also flag horizontal overflow before any scroll, so a clipped last column shows its edge fade (NX-UI-03).
+  useLayoutEffect(() => {
+    onScroll();
+    const el = scrollRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => {
+      onScroll();
+    });
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+    };
+  }, [layout.width, narrow]);
+
   // Labels and counts.
   const pageOffset = paged ? paging.pageIndex * paging.pageSize : 0;
   const totalRows = paged
