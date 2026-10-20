@@ -56,12 +56,8 @@ internal sealed class CessionIntake(
 
         var cfg = options.Value;
         var now = clock.Now;
-        if (!CessionEngine.InBase(cfg.Mode, payload.ChargeCategory))
-        {
-            return; // NET: tax, levy and stamp lines are not cession base.
-        }
-
-        if (!string.Equals(payload.NetAmount.Currency.Code, Eur, StringComparison.Ordinal))
+        var inBase = CessionEngine.InBase(cfg.Mode, payload.ChargeCategory);
+        if (inBase && !string.Equals(payload.NetAmount.Currency.Code, Eur, StringComparison.Ordinal))
         {
             // TODO(hardening): multi-currency cession.
             await RaiseAsync(termId, eventId, "CESSION_CURRENCY", $"Currency {payload.NetAmount.Currency.Code} is not EUR; not ceded.", now, cancellationToken).ConfigureAwait(false);
@@ -70,20 +66,20 @@ internal sealed class CessionIntake(
 
         var from = payload.ValidPeriod.Start;
         var treaties = cfg.Treaties.Where(t => t.CoverageCodes.Contains(payload.CoverageCode, StringComparer.Ordinal)).ToList();
-        if (treaties.Count == 0)
+        if (treaties.Count == 0 && inBase)
         {
             await RaiseAsync(termId, eventId, "CESSION_NO_TREATY", $"No treaty is registered for coverage {payload.CoverageCode}.", now, cancellationToken).ConfigureAwait(false);
             return;
         }
 
         var matching = treaties.Where(t => Covers(t, from)).ToList();
-        if (matching.Count == 0)
+        if (matching.Count == 0 && inBase)
         {
             await RaiseAsync(termId, eventId, "CESSION_OUT_OF_PERIOD", $"No treaty for coverage {payload.CoverageCode} covers {from.Value}.", now, cancellationToken).ConfigureAwait(false);
             return;
         }
 
-        if (matching.Count(t => t.Kind == TreatyKinds.QuotaShare) > 1)
+        if (inBase && matching.Count(t => t.Kind == TreatyKinds.QuotaShare) > 1)
         {
             await RaiseAsync(termId, eventId, "CESSION_AMBIGUOUS", $"More than one quota share covers {payload.CoverageCode} on {from.Value}.", now, cancellationToken).ConfigureAwait(false);
             return;
@@ -133,7 +129,8 @@ internal sealed class CessionIntake(
 
         var coverage = treaty.CoverageCodes;
         var lines = await db.PremiumDeltas.Where(p => p.TermId == termId && coverage.Contains(p.CoverageCode)).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var written = lines.Where(p => Covers(treaty, p.ValidFrom)).Sum(p => p.Amount);
+        // Lines outside the cession base (NET: tax, levies) are stored only so that a set counts as complete.
+        var written = lines.Where(p => CessionEngine.InBase(mode, p.ChargeCategory) && Covers(treaty, p.ValidFrom)).Sum(p => p.Amount);
         var booked = await db.Cessions.Where(c => c.TermId == termId && c.TreatyId == treaty.TreatyId).SumAsync(c => (decimal?)c.Delta, cancellationToken).ConfigureAwait(false) ?? 0m;
         var target = CessionEngine.Target(treaty.SharePct, written);
         var difference = CessionEngine.Difference(target, booked);

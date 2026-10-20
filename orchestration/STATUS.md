@@ -1,5 +1,7 @@
 # STATUS — Greek P&C core insurance build
 
+> **Checkpoint 2026-10-20 (light process, D-USR-20):** Slices 3, 4, 5 and 6 are fully built and on main. All 12 journeys E2E-01..12 have specs + CI jobs (E2E-01/02/02x/03/04/05/06/07/08/09/10/11/12); each new one passed locally on its own stack. Builders were Sonnet, pushed straight to main after build + focused tests (no reviewer agents, see briefs/LIGHT-WORKFLOW.md). Known gaps are listed as `TODO(hardening)` in code; notable open items: levy credits still quarantined; WRK module not built (DSAR cases never auto-complete); vulnerable-customer check stubbed; overdue sweep has no scheduler; several migrated/RI/BIL records lack read APIs; RI quota-share treaties only via config; UI screens built against mocks then smoke-walked on the coreins stack (orchestration/ux/smoke-2026-10-20/). CI being stabilised by the CI-fix agent. Decision added: D-SL6-15 (non-payment IPT mirrors policyholder). Older text below is historical.
+
 > **Verified takeover checkpoint — 2026-10-09:** Eight recovered/follow-up PRs (#28/#34/#37/#39/#43/#44/#45/#46) are merged after all required checks. Combined candidate servicing and RI registry acceptance passes all 10 tests. Open RI #47/#48, product fallback #49 and platform #50 remain separate review/dependency gates. The RI recovery API and pack activation/rollback backends are unfinished. See [CODEX-TAKEOVER.md](CODEX-TAKEOVER.md) for current evidence and next steps. Older paragraphs below are historical.
 
 

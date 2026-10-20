@@ -181,12 +181,13 @@ internal sealed partial class Intake(
                     return;
                 }
 
-                var lines = entry.Lines.ToList();
+                var ownType = entry.EntryType;
+                var lines = entry.Lines.Select(l => l with { OwnEntryType = l.OwnEntryType ?? ownType }).ToList();
                 foreach (var sibling in siblings.Where(b => b.Status == BusinessEventStatus.Waiting && b.WaitingOn == setKey).OrderBy(b => b.AggregateSequence))
                 {
                     var other = FsBilEntries.Adjust(Normalise(JsonSerializer.Deserialize<BillingEntryPostedV1>(sibling.Payload, SharedKernelJson.Options)
                         ?? throw new JsonException("BillingEntryPosted payload is empty.")));
-                    lines.AddRange(other.Lines);
+                    lines.AddRange(other.Lines.Select(l => l with { OwnEntryType = l.OwnEntryType ?? other.EntryType }));
                     members.Add(sibling);
                 }
 
