@@ -2104,45 +2104,48 @@ export interface components {
             /** @description PRD: "proof" */
             proof?: components["schemas"]["Unspecified"];
         };
-        /** @description pty.Vulnerability.query result. PRD outputs: "flag, rule codes, trusted contacts" */
+        /** @description pty.Vulnerability.query result for one party. */
         VulnerabilityQueryItem: {
-            /** @description PRD: "flag" */
-            flag?: boolean;
-            /** @description PRD: "rule codes" */
-            ruleCodes?: components["schemas"]["Unspecified"];
-            /** @description PRD: "trusted contacts" */
+            partyId: components["schemas"]["Uuid"];
+            /** @description True when the party is flagged vulnerable */
+            flag: boolean;
+            /** @description Handling rule codes only; reasons and categories are never carried (P3) */
+            ruleCodes: components["schemas"]["Code"][];
+            /** @description PRD: "trusted contacts" (TODO(hardening): not modelled yet, always absent) */
             trustedContacts?: components["schemas"]["Unspecified"];
         };
         /** @description Page of pty.Vulnerability.query results (cursor pagination, contract §3.5.5) */
         VulnerabilityQueryPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["VulnerabilityQueryItem"][];
         };
-        /** @description pty.Vulnerability.record request. PRD inputs: "party" */
+        /** @description pty.Vulnerability.record request: flags the party vulnerable (idempotent). */
         VulnerabilityRecordRequest: {
-            /** @description PRD: "party" */
-            party?: components["schemas"]["Unspecified"];
+            partyId: components["schemas"]["Uuid"];
+            /** @description Handling rule codes to apply */
+            ruleCodes?: components["schemas"]["Code"][];
         };
-        /** @description pty.Vulnerability.record result. PRD outputs: "flag, rule codes, trusted contacts" */
+        /** @description pty.Vulnerability.record result. */
         VulnerabilityRecordResponse: {
-            /** @description PRD: "flag" */
-            flag?: boolean;
-            /** @description PRD: "rule codes" */
-            ruleCodes?: components["schemas"]["Unspecified"];
-            /** @description PRD: "trusted contacts" */
+            partyId: components["schemas"]["Uuid"];
+            /** @description True when the party is flagged vulnerable */
+            flag: boolean;
+            /** @description Handling rule codes only; reasons and categories are never carried (P3) */
+            ruleCodes: components["schemas"]["Code"][];
+            /** @description PRD: "trusted contacts" (TODO(hardening): not modelled yet, always absent) */
             trustedContacts?: components["schemas"]["Unspecified"];
         };
-        /** @description pty.Vulnerability.remove request. PRD inputs: "party" */
+        /** @description pty.Vulnerability.remove request: clears the flag (the row is kept, no DELETE). */
         VulnerabilityRemoveRequest: {
-            /** @description PRD: "party" */
-            party?: components["schemas"]["Unspecified"];
+            partyId: components["schemas"]["Uuid"];
         };
-        /** @description pty.Vulnerability.remove result. PRD outputs: "flag, rule codes, trusted contacts" */
+        /** @description pty.Vulnerability.remove result. */
         VulnerabilityRemoveResponse: {
-            /** @description PRD: "flag" */
-            flag?: boolean;
-            /** @description PRD: "rule codes" */
-            ruleCodes?: components["schemas"]["Unspecified"];
-            /** @description PRD: "trusted contacts" */
+            partyId: components["schemas"]["Uuid"];
+            /** @description True when the party is flagged vulnerable */
+            flag: boolean;
+            /** @description Handling rule codes only; reasons and categories are never carried (P3) */
+            ruleCodes: components["schemas"]["Code"][];
+            /** @description PRD: "trusted contacts" (TODO(hardening): not modelled yet, always absent) */
             trustedContacts?: components["schemas"]["Unspecified"];
         };
         /** @description Typed from REQ-PTY-006, REQ-PTY-174. PRD inputs: "party_id or ad-hoc payee, caller ref" */
@@ -4336,11 +4339,13 @@ export interface operations {
     };
     "pty.Vulnerability.query": {
         parameters: {
-            query?: {
+            query: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description The party to look up (NX-HD-02). A party that does not exist in the caller's legal entity yields an empty page, which callers must treat as unknown, never as not vulnerable (fail closed). */
+                partyId: components["schemas"]["Uuid"];
             };
             header?: {
                 /**

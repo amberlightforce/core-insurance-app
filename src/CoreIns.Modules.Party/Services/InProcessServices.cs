@@ -114,3 +114,16 @@ internal sealed class PartyProducerCodeService(IntermediaryQueries queries, IClo
         return queries.ValidateAsync(request, date, cancellationToken);
     }
 }
+
+/// <summary>
+/// The in-process contract <see cref="IPartyVulnerabilityService"/>: <c>pty.Vulnerability.query</c> for the non-payment cancellation gate of POL
+/// (NX-HD-02). A page with no item means the party is unknown to the caller's legal entity; callers must treat that as vulnerable.
+/// </summary>
+internal sealed class PartyVulnerabilityService(VulnerabilityQueries queries, PartyProtection protection, RequestContext context) : IPartyVulnerabilityService
+{
+    public async Task<VulnerabilityQueryPage> QueryAsync(PartyId partyId, string? cursor = null, int? limit = null, CancellationToken cancellationToken = default)
+    {
+        var item = await queries.GetAsync(protection.Current(context), partyId, cancellationToken).ConfigureAwait(false);
+        return new VulnerabilityQueryPage { Items = item is null ? [] : [item], NextCursor = null, Limit = limit };
+    }
+}

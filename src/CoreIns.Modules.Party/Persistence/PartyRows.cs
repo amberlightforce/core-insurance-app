@@ -301,3 +301,24 @@ internal sealed class DsarRestrictionRow
 
     public string CreatedBy { get; set; } = string.Empty;
 }
+
+/// <summary>
+/// <c>pty.vulnerability</c>: the vulnerable-customer flag of a party (REQ-PTY-011, NX-HD-02); one row per party. Removing the flag sets
+/// <see cref="Flag"/> false (the app role has no DELETE, and the history of who flagged and cleared stays in the audit trail). The vulnerability
+/// category is never stored here, only rule codes (P3 stays out).
+/// </summary>
+internal sealed class VulnerabilityRow
+{
+    public PartyId PartyId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public bool Flag { get; set; }
+
+    /// <summary>Handling rule codes, comma separated (codes never contain a comma).</summary>
+    public string RuleCodes { get; set; } = string.Empty;
+
+    public Instant UpdatedAt { get; set; }
+
+    public string UpdatedBy { get; set; } = string.Empty;
+}

@@ -32,11 +32,25 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
 
     public DbSet<DsarRestrictionRow> DsarRestrictions => Set<DsarRestrictionRow>();
 
+    public DbSet<VulnerabilityRow> Vulnerabilities => Set<VulnerabilityRow>();
+
     protected override string Schema => PartyModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<VulnerabilityRow>(entity =>
+        {
+            entity.ToTable("vulnerability");
+            entity.HasKey(e => e.PartyId).HasName("pk_vulnerability");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Flag).HasColumnName("flag");
+            entity.Property(e => e.RuleCodes).HasColumnName("rule_codes");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+        });
 
         modelBuilder.Entity<DsarRestrictionRow>(entity =>
         {

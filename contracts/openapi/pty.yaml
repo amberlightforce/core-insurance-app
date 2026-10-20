@@ -2557,6 +2557,13 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: partyId
+        in: query
+        required: true
+        description: The party to look up (NX-HD-02). A party that does not exist in the caller's legal entity yields an empty page, which callers
+          must treat as unknown, never as not vulnerable (fail closed).
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -2601,6 +2608,8 @@ paths:
       - ui
       x-permission: pty.Vulnerability.record
       x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -2664,6 +2673,8 @@ paths:
       - ui
       x-permission: pty.Vulnerability.remove
       x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -5833,17 +5844,25 @@ components:
           description: 'PRD: "proof"'
     VulnerabilityQueryItem:
       type: object
-      description: 'pty.Vulnerability.query result. PRD outputs: "flag, rule codes, trusted contacts"'
+      description: 'pty.Vulnerability.query result for one party.'
       properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         flag:
           type: boolean
-          description: 'PRD: "flag"'
+          description: True when the party is flagged vulnerable
         ruleCodes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule codes"'
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Handling rule codes only; reasons and categories are never carried (P3)
         trustedContacts:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "trusted contacts"'
+          description: 'PRD: "trusted contacts" (TODO(hardening): not modelled yet, always absent)'
+      required:
+      - partyId
+      - flag
+      - ruleCodes
     VulnerabilityQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -5856,44 +5875,67 @@ components:
       description: Page of pty.Vulnerability.query results (cursor pagination, contract §3.5.5)
     VulnerabilityRecordRequest:
       type: object
-      description: 'pty.Vulnerability.record request. PRD inputs: "party"'
+      description: 'pty.Vulnerability.record request: flags the party vulnerable (idempotent).'
       properties:
-        party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        ruleCodes:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Handling rule codes to apply
+      required:
+      - partyId
     VulnerabilityRecordResponse:
       type: object
-      description: 'pty.Vulnerability.record result. PRD outputs: "flag, rule codes, trusted contacts"'
+      description: 'pty.Vulnerability.record result.'
       properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         flag:
           type: boolean
-          description: 'PRD: "flag"'
+          description: True when the party is flagged vulnerable
         ruleCodes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule codes"'
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Handling rule codes only; reasons and categories are never carried (P3)
         trustedContacts:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "trusted contacts"'
+          description: 'PRD: "trusted contacts" (TODO(hardening): not modelled yet, always absent)'
+      required:
+      - partyId
+      - flag
+      - ruleCodes
     VulnerabilityRemoveRequest:
       type: object
-      description: 'pty.Vulnerability.remove request. PRD inputs: "party"'
+      description: 'pty.Vulnerability.remove request: clears the flag (the row is kept, no DELETE).'
       properties:
-        party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - partyId
     VulnerabilityRemoveResponse:
       type: object
-      description: 'pty.Vulnerability.remove result. PRD outputs: "flag, rule codes, trusted contacts"'
+      description: 'pty.Vulnerability.remove result.'
       properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         flag:
           type: boolean
-          description: 'PRD: "flag"'
+          description: True when the party is flagged vulnerable
         ruleCodes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule codes"'
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Handling rule codes only; reasons and categories are never carried (P3)
         trustedContacts:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "trusted contacts"'
+          description: 'PRD: "trusted contacts" (TODO(hardening): not modelled yet, always absent)'
+      required:
+      - partyId
+      - flag
+      - ruleCodes
     ScreeningScreenRequest:
       type: object
       properties:

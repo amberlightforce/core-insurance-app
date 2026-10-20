@@ -66,10 +66,20 @@ public static class PartyModule
         services.AddCommandAuditor<UpdateIntermediary, IntermediaryUpdateResponse, IntermediaryAuditor>();
         services.AddCommand<UpdateIntermediary, IntermediaryUpdateResponse, UpdateIntermediaryHandler>(CommandDescriptor.For("pty.Intermediary.update"));
 
+        services.AddScoped<VulnerabilityQueries>();
+        services.AddScoped<VulnerabilityWriter>();
+        services.AddScoped<IValidator<RecordVulnerability>, RecordVulnerabilityValidator>();
+        services.AddCommandAuditor<RecordVulnerability, VulnerabilityRecordResponse, VulnerabilityAuditor>();
+        services.AddCommand<RecordVulnerability, VulnerabilityRecordResponse, RecordVulnerabilityHandler>(CommandDescriptor.For("pty.Vulnerability.record"));
+        services.AddScoped<IValidator<RemoveVulnerability>, RemoveVulnerabilityValidator>();
+        services.AddCommandAuditor<RemoveVulnerability, VulnerabilityRemoveResponse, VulnerabilityAuditor>();
+        services.AddCommand<RemoveVulnerability, VulnerabilityRemoveResponse, RemoveVulnerabilityHandler>(CommandDescriptor.For("pty.Vulnerability.remove"));
+
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IPartyPartyService, PartyPartyService>();
         services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Party.Services.Dsar.PartyDsarParticipant>();
         services.AddScoped<IPartyProducerCodeService, PartyProducerCodeService>();
+        services.AddScoped<IPartyVulnerabilityService, PartyVulnerabilityService>();
 
         services.AddErrorDefinitions(Errors);
         return services;

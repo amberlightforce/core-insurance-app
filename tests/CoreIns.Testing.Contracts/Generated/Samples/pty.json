@@ -422,8 +422,11 @@
     "pty.Vulnerability.query": {
       "items": [
         {
+          "partyId": "0192b1ec-fa2b-71f2-8d46-c33a2adf940a",
           "flag": true,
-          "ruleCodes": "unspecified",
+          "ruleCodes": [
+            "SAMPLE_CODE"
+          ],
           "trustedContacts": "unspecified"
         }
       ],
@@ -1494,15 +1497,21 @@
       "paymentBlock": true
     },
     "VulnerabilityQueryItem": {
+      "partyId": "0192ea29-c1b1-79e8-8332-7bf9d237afc1",
       "flag": true,
-      "ruleCodes": "unspecified",
+      "ruleCodes": [
+        "SAMPLE_CODE"
+      ],
       "trustedContacts": "unspecified"
     },
     "VulnerabilityQueryPage": {
       "items": [
         {
+          "partyId": "01920481-53cc-7fa8-8681-b5d195b15e0f",
           "flag": true,
-          "ruleCodes": "unspecified",
+          "ruleCodes": [
+            "SAMPLE_CODE"
+          ],
           "trustedContacts": "unspecified"
         }
       ],
@@ -1510,19 +1519,28 @@
       "limit": 1
     },
     "VulnerabilityRecordRequest": {
-      "party": "unspecified"
+      "partyId": "01927443-bbfc-7d33-8fec-7765a88378ee",
+      "ruleCodes": [
+        "SAMPLE_CODE"
+      ]
     },
     "VulnerabilityRecordResponse": {
+      "partyId": "0192f57a-9827-7fa3-8c96-72ae8bb5550f",
       "flag": true,
-      "ruleCodes": "unspecified",
+      "ruleCodes": [
+        "SAMPLE_CODE"
+      ],
       "trustedContacts": "unspecified"
     },
     "VulnerabilityRemoveRequest": {
-      "party": "unspecified"
+      "partyId": "0192723d-f1f5-7c84-87fd-5d0852605439"
     },
     "VulnerabilityRemoveResponse": {
+      "partyId": "01921463-bff0-7747-8837-3f2731061a3f",
       "flag": true,
-      "ruleCodes": "unspecified",
+      "ruleCodes": [
+        "SAMPLE_CODE"
+      ],
       "trustedContacts": "unspecified"
     }
   }

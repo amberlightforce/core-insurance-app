@@ -27,6 +27,9 @@ internal static class PartyPermissions
     public const string IntermediaryUpdate = "pty.Intermediary.update";
     public const string ProducerCodeValidate = "pty.ProducerCode.validate";
     public const string ProducerCodeSearch = "pty.ProducerCode.search";
+    public const string VulnerabilityQuery = "pty.Vulnerability.query";
+    public const string VulnerabilityRecord = "pty.Vulnerability.record";
+    public const string VulnerabilityRemove = "pty.Vulnerability.remove";
 }
 
 /// <summary>

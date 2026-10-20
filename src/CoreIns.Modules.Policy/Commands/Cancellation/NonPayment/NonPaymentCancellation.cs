@@ -43,8 +43,9 @@ internal static class NonPaymentStatus
 }
 
 /// <summary>
-/// Is the policyholder a vulnerable customer? Read through the party service (PTY, REQ-PTY vulnerability flag); a flag that is absent, or a
-/// party service that is not wired, means not vulnerable (D-SL6-04).
+/// Must a non-payment cancellation of this policyholder go to a person instead of running? True when the party is flagged vulnerable (PTY,
+/// REQ-PTY-011) <b>or when that cannot be established</b>: the party service is not wired, it throws, or the party is unknown to it. Fail
+/// closed (NX-HD-02): "unknown" is never "not vulnerable"; the PSR queue decides.
 /// </summary>
 internal interface IVulnerabilityCheck
 {
@@ -52,16 +53,49 @@ internal interface IVulnerabilityCheck
 }
 
 /// <summary>
-/// Default <see cref="IVulnerabilityCheck"/>. PTY's <c>pty.Vulnerability.query</c> is not implemented in this release and its page carries no party
-/// key, so the answer is "not vulnerable" until it is. TODO(hardening): call <see cref="IPartyVulnerabilityService"/> by party once PTY serves it.
+/// Default <see cref="IVulnerabilityCheck"/>: asks <see cref="IPartyVulnerabilityService"/> (<c>pty.Vulnerability.query</c>) by party. Any answer
+/// other than "the party exists and is not flagged" counts as needing review. TODO(hardening): trusted contacts and per-rule handling (a rule code
+/// could allow cancellation with a trusted contact copied); today any flag blocks.
 /// </summary>
-internal sealed class PartyVulnerabilityCheck(Dependency<IPartyVulnerabilityService> party) : IVulnerabilityCheck
+internal sealed partial class PartyVulnerabilityCheck(Dependency<IPartyVulnerabilityService> party, ILogger<PartyVulnerabilityCheck> logger) : IVulnerabilityCheck
 {
-    public Task<bool> IsVulnerableAsync(PartyId partyId, CancellationToken cancellationToken)
+    public async Task<bool> IsVulnerableAsync(PartyId partyId, CancellationToken cancellationToken)
     {
-        _ = party.TryValue;
-        return Task.FromResult(false);
+        var service = party.TryValue;
+        if (service is null)
+        {
+            LogUnavailable(logger, partyId.Value);
+            return true;
+        }
+
+        try
+        {
+            var page = await service.QueryAsync(partyId, cancellationToken: cancellationToken).ConfigureAwait(false);
+            if (page.Items.Count != 1)
+            {
+                LogUnknown(logger, partyId.Value, page.Items.Count);
+                return true;
+            }
+
+            return page.Items[0].Flag;
+        }
+#pragma warning disable CA1031 // Fail closed: whatever went wrong, a person decides.
+        catch (Exception exception) when (exception is not OperationCanceledException)
+#pragma warning restore CA1031
+        {
+            LogFailed(logger, exception, partyId.Value);
+            return true;
+        }
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Party service is not available; treating party {PartyId} as vulnerable (fail closed).")]
+    private static partial void LogUnavailable(ILogger logger, Guid partyId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Vulnerability of party {PartyId} is unknown ({Count} results); treating as vulnerable (fail closed).")]
+    private static partial void LogUnknown(ILogger logger, Guid partyId, int count);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Vulnerability query for party {PartyId} failed; treating as vulnerable (fail closed).")]
+    private static partial void LogFailed(ILogger logger, Exception exception, Guid partyId);
 }
 
 /// <summary>

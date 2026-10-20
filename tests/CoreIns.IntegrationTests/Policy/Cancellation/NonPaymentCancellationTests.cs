@@ -22,6 +22,7 @@ public sealed class NonPaymentCancellationTests(PostgresFixture database) : ICla
 {
     private const string Manager = "Staff.UnderwritingManager";
     private static readonly TimeZoneInfo Athens = TimeZoneInfo.FindSystemTimeZoneById("Europe/Athens");
+    private static readonly string[] HandlingRules = ["NO_NONPAY_CANCEL"];
     private readonly FakeVulnerability _vulnerability = new();
     private CancellationSlice _slice = null!;
     private Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program> _factory = null!;
@@ -102,6 +103,34 @@ public sealed class NonPaymentCancellationTests(PostgresFixture database) : ICla
     }
 
     [Fact]
+    public async Task NX_HD_02_the_real_check_cancels_an_unflagged_party_and_never_a_party_flagged_in_pty()
+    {
+        // No IVulnerabilityCheck override: the real PartyVulnerabilityCheck asks PTY (pty.Vulnerability.query) for the policyholder.
+        var realCheck = _slice.Factory;
+        var clear = await _slice.BindAsync();
+        var flagged = await _slice.BindAsync();
+        await _slice.AdvanceAsync(TimeSpan.FromDays(40));
+
+        await using var data = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        var flaggedParty = await ScalarAsync<Guid>(data, $"SELECT policyholder_party_id FROM pol.policy WHERE policy_id = '{flagged.PolicyId}'");
+        var (recorded, recordedBody) = await SendAsync(
+            _slice.Client, HttpMethod.Post, "/api/pty/v1/vulnerabilities/record", new { partyId = flaggedParty, ruleCodes = HandlingRules });
+        recorded.StatusCode.ShouldBe(HttpStatusCode.OK, recordedBody?.ToJsonString());
+
+        await DeliverAsync(RequestFor(clear, Today()), realCheck);
+        await DeliverAsync(RequestFor(flagged, Today()), realCheck);
+
+        (await ScalarAsync<long>(data, $"SELECT count(*) FROM pol.job WHERE policy_id = '{clear.PolicyId}' AND job_type = 'CANCELLATION'")).ShouldBe(1);
+        (await ScalarAsync<long>(data, $"SELECT count(*) FROM pol.job WHERE policy_id = '{flagged.PolicyId}' AND job_type = 'CANCELLATION'")).ShouldBe(0);
+        (await ScalarAsync<string>(data, $"SELECT reason FROM pol.psr_exception WHERE term_id = '{flagged.TermId}'")).ShouldBe("VULNERABLE_CUSTOMER");
+
+        // Clearing the flag works.
+        var (removed, removedBody) = await SendAsync(_slice.Client, HttpMethod.Post, "/api/pty/v1/vulnerabilities/remove", new { partyId = flaggedParty });
+        removed.StatusCode.ShouldBe(HttpStatusCode.OK, removedBody?.ToJsonString());
+        removedBody.Text("flag").ShouldBe("false");
+    }
+
+    [Fact]
     public async Task REQ_POL_211_a_cure_before_the_effective_date_rescinds_the_scheduled_cancellation()
     {
         var policy = await _slice.BindAsync();
@@ -159,12 +188,13 @@ public sealed class NonPaymentCancellationTests(PostgresFixture database) : ICla
             Motor = true,
         };
 
-    private Task DeliverAsync(CancellationForNonPaymentRequestedV1 payload) => DeliverAsync(payload, CancellationForNonPaymentRequestedHandler.Name);
+    private Task DeliverAsync(CancellationForNonPaymentRequestedV1 payload, Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program>? factory = null) =>
+        DeliverAsync(payload, CancellationForNonPaymentRequestedHandler.Name, factory);
 
-    private async Task DeliverAsync<T>(T payload, string handlerName)
+    private async Task DeliverAsync<T>(T payload, string handlerName, Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program>? factory = null)
         where T : class, CoreIns.Platform.Contracts.Events.IEventPayload<T>
     {
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = (factory ?? _factory).Services.CreateAsyncScope();
         var services = scope.ServiceProvider;
         var context = services.GetRequiredService<RequestContext>();
         context.LegalEntity = LegalEntityCode.Parse("GR-TEST");

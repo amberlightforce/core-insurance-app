@@ -18,7 +18,7 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("pty")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -853,6 +853,40 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_producer_code_validity", "valid_to IS NULL OR valid_to > valid_from");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.VulnerabilityRow", b =>
+                {
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<bool>("Flag")
+                        .HasColumnType("boolean")
+                        .HasColumnName("flag");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("RuleCodes")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("rule_codes");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("PartyId")
+                        .HasName("pk_vulnerability");
+
+                    b.ToTable("vulnerability", "pty");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryRow", b =>

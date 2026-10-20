@@ -94,7 +94,7 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): pty.Dsar.restrict, pty.Party.get.</para>
+    /// <para>Declared by 4 operation(s): pty.Dsar.restrict, pty.Party.get, pty.Vulnerability.record, pty.Vulnerability.remove.</para>
     /// </remarks>
     public const string NotFound = "PTY-ERR-NOT-FOUND";
 
