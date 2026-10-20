@@ -86,7 +86,7 @@ test('E2E-11 out-of-sequence change: claim re-verified once, BIL respread, FIN c
     const n = (page.body['items'] as Json[]).length;
     stable = n === last ? stable + 1 : 0;
     last = n;
-    return stable >= 5 && n >= 6 ? true : undefined;
+    return stable >= 15 && n >= 6 ? true : undefined; // 15 quiet seconds: a loaded CI runner lags behind the outbox
   });
   const lock = await call(request, finance, 'POST', `/api/fin/v1/dev/periods/${lockedMonth}/lock`);
   expect(lock.status, lock.text).toBe(200);

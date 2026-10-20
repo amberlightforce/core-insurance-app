@@ -155,9 +155,17 @@ function ofCounterparty(statement: Json, code: string): { lines: Json[]; net: Js
 
 async function importStatement(request: APIRequestContext, token: string, insurer: string): Promise<Json> {
   const period = currentMonth();
-  const imported = await call(request, token, 'POST', '/api/clm/v1/friendly-settlements/import-statement', { period: { from: period.from, to: period.to }, counterpartyCode: insurer });
-  expect(imported.status, imported.text).toBe(200);
-  return imported.body['statement'] as Json;
+  // The legs' cases reach their matchable state through the worker, so a first import can race it: re-import (idempotent,
+  // it re-matches the unmatched lines) until every line of the counterparty is matched, or the wait runs out.
+  let statement: Json = {};
+  for (let attempt = 0; attempt < 15; attempt++) {
+    const imported = await call(request, token, 'POST', '/api/clm/v1/friendly-settlements/import-statement', { period: { from: period.from, to: period.to }, counterpartyCode: insurer });
+    expect(imported.status, imported.text).toBe(200);
+    statement = imported.body['statement'] as Json;
+    if (ofCounterparty(statement, insurer).lines.every((l) => l['matchStatus'] === 'MATCHED')) break;
+    await new Promise((done) => setTimeout(done, 2000));
+  }
+  return statement;
 }
 
 test('E2E-06 Friendly Settlement: own and at-fault legs, statement, net payable through BIL FS_CLEARING, GL-2515 nets to zero', async ({ request }) => {
@@ -272,7 +280,7 @@ test('E2E-06 variant 7: net receivable registered at BIL, cash matched by the st
 
   const statement = await importStatement(request, manager, insurerZ);
   const mine = ofCounterparty(statement, insurerZ);
-  expect(mine.lines.every((l) => l['matchStatus'] === 'MATCHED')).toBe(true);
+  expect(mine.lines.every((l) => l['matchStatus'] === 'MATCHED'), JSON.stringify(mine.lines.map((l) => [l['matchStatus'], l['exceptionReason']]))).toBe(true);
   expect(mine.net['direction']).toBe('RECEIVABLE');
   expect(cents(mine.net['amount'])).toBe(1_800n * K);
   const statementId = statement['fsStatementId'] as string;
