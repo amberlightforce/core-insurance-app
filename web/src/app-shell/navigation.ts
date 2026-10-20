@@ -13,13 +13,13 @@ export interface NavItem {
 }
 
 /** Roles that work claims (dev users `claims` and `claimsmgr`). */
-const claimsRoles = ['Staff.ClaimsHandler', 'Staff.ClaimsManager'] as const;
+export const claimsRoles = ['Staff.ClaimsHandler', 'Staff.ClaimsManager'] as const;
 
 /** Roles that work underwriting referrals (permission uw.Referral.list; dev users `uwsenior`, `superuser`). */
-const underwritingRoles = ['Staff.UnderwritingManager', 'Platform.Admin'] as const;
+export const underwritingRoles = ['Staff.UnderwritingManager', 'Platform.Admin'] as const;
 
 /** Roles that work distance-withdrawal requests (permission chn.Withdrawal.list). */
-const withdrawalRoles = ['Staff.Underwriter', 'Staff.Billing', 'Platform.Admin'] as const;
+export const withdrawalRoles = ['Staff.Underwriter', 'Staff.Billing', 'Platform.Admin'] as const;
 
 /** Roles that manage pack activation (illustrative; permission mkt.Pack.list). */
 const packRoles = [

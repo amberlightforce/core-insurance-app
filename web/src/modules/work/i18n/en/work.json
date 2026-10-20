@@ -1,0 +1,36 @@
+{
+  "overline": "Work",
+  "title": "My work",
+  "lead": "The work queues that concern you, in one place. Open an item or see the whole queue.",
+  "noQueues": {
+    "title": "No work queue for your roles",
+    "body": "You hold no role with a work queue. Searches and records are in the other sections."
+  },
+  "seeAll": "See all",
+  "empty": "Nothing is waiting.",
+  "loading": "Loading…",
+  "more": "{count, plural, one {and # more item} other {and # more items}}",
+  "sections": {
+    "referrals": "Underwriting referrals",
+    "approvals": "Claim approvals",
+    "refunds": "Refunds awaiting approval",
+    "withdrawals": "Withdrawal requests",
+    "dsar": "Data-subject requests",
+    "packRollback": "Pack rollback exceptions"
+  },
+  "item": {
+    "raised": "since {date}",
+    "requested": "requested {date}",
+    "declared": "declared {date}",
+    "deadline": "due {date}",
+    "dsarType": {
+      "ACCESS": "Access",
+      "PORTABILITY": "Portability",
+      "ERASURE": "Erasure",
+      "RESTRICTION": "Restriction",
+      "OBJECTION": "Objection"
+    },
+    "refund": "Refund {amount}",
+    "withdrawal": "Withdrawal {number}"
+  }
+}

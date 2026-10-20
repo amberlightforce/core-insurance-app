@@ -8,6 +8,11 @@ import { HomePage } from './modules/home/HomePage';
 /** Module routes load on demand (D-FE-23): the staff screens of the thin slice. */
 const moduleRoutes: RouteObject[] = [
   {
+    // «My work»: aggregates the existing work queues (TODO(hardening): replaced by the WRK task module).
+    path: 'work',
+    lazy: async () => ({ Component: (await import('./modules/work/WorkPage')).WorkPage }),
+  },
+  {
     path: 'parties',
     lazy: async () => ({
       Component: (await import('./modules/party/PartySearchPage')).PartySearchPage,
@@ -417,6 +422,7 @@ moduleRoutes.push(
 );
 
 const implemented = new Set([
+  '/work',
   '/admin/packs',
   '/admin/migration',
   '/compliance',
