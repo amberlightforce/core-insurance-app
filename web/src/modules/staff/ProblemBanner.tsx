@@ -22,38 +22,41 @@ export interface ProblemBannerProps {
  * Shows an RFC 9457 Problem Details response readably: a localised headline for known codes (else the server's
  * title), the server's detail, per-field errors, and the code with the trace id for support. The trace id is
  * not personal data (D-SLC-05) and is what an operator quotes when reporting a failure.
+ * A 403 is the `forbidden` variant: a warning «No permission» (never a retry), with the context line kept below it.
  */
 export function ProblemBanner({ error, title, onRetry, retryLabel }: ProblemBannerProps) {
   const { t, i18n } = useTranslation('staff');
   const problem = problemOf(error);
   const key = codeKey(problem.code);
   const known = key && i18n.exists(`staff:${key}`) ? t(key) : null;
+  // A 403 carries no body: say plainly that the signed-in role may not do this, instead of a bare «failed».
+  const forbidden = problem.status === 403;
   const headline =
+    (forbidden ? t('noPermission.title') : null) ??
     title ??
     known ??
     problem.title ??
     (problem.status === 0 ? t('problem.network') : t('problem.generic'));
-  // A 403 carries no body: say plainly that the signed-in role may not do this, instead of a bare «failed».
-  const forbidden = problem.status === 403 && !problem.detail;
   const roles = readSession()?.user.roles.join(', ') ?? '';
   const fieldErrors = (problem.errors ?? []).filter((e) => e.field !== '$');
   const detail = problem.detail;
 
   return (
     <Banner
-      variant="danger"
+      variant={forbidden ? 'warning' : 'danger'}
       live="alert"
       title={headline}
       actions={
-        onRetry ? (
+        onRetry && !forbidden ? (
           <Button variant="secondary" size="sm" onPress={onRetry}>
             {retryLabel ?? t('retry')}
           </Button>
         ) : undefined
       }
     >
-      {known && title ? <p>{known}</p> : null}
-      {forbidden ? (
+      {forbidden && title ? <p>{title}</p> : null}
+      {known && title && !forbidden ? <p>{known}</p> : null}
+      {forbidden && !problem.detail ? (
         <p>{roles ? t('noPermission.action', { roles }) : t('noPermission.actionUnknown')}</p>
       ) : null}
       {detail && detail !== headline ? <p>{detail}</p> : null}

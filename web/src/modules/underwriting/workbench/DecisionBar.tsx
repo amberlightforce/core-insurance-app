@@ -16,6 +16,7 @@ import {
 import { formatDateTime } from '../../../format';
 import { displayName } from '../../../app-shell/user';
 import { problemOf } from '../../staff/problem';
+import { ProblemBanner } from '../../staff/ProblemBanner';
 import {
   decideIssues,
   useRefreshReferrals,
@@ -121,9 +122,7 @@ export function DecisionBar({ referral }: DecisionBarProps) {
     problem?.code && i18n.exists(`underwriting:errors.codes.${problem.code}`)
       ? t(`errors.codes.${problem.code}`)
       : null;
-  const explained =
-    known ??
-    (problem?.status === 403 ? t('errors.forbidden') : (problem?.detail ?? t('errors.generic')));
+  const explained = known ?? problem?.detail ?? t('errors.generic');
   const stale = problem?.code === 'UW-ERR-STALE';
 
   const decidedBy = summary.lastDecidedBy ?? displayName(readSession()?.user.name ?? '');
@@ -255,7 +254,11 @@ export function DecisionBar({ referral }: DecisionBarProps) {
         </form>
       ) : null}
 
-      {problem ? (
+      {problem?.status === 403 && !known ? (
+        <div className={styles.blocked}>
+          <ProblemBanner error={mutation.error} title={t('errors.title')} />
+        </div>
+      ) : problem ? (
         <div className={styles.blocked}>
           <Banner
             variant="danger"

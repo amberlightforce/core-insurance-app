@@ -17,6 +17,7 @@ import { formatDateTime, formatMoney } from '../../../format';
 import { useIssueText } from '../../quote/uwIssues';
 import { PageHeader } from '../../staff/PageHeader';
 import { problemOf } from '../../staff/problem';
+import { ProblemBanner } from '../../staff/ProblemBanner';
 import { useFormat } from '../../staff/useFormat';
 import { useReferral, type ReferralIssue, type ReferralReason, type ReferralView } from '../api';
 import { DecisionBar } from './DecisionBar';
@@ -248,19 +249,23 @@ export function DetailPane({ jobRef }: DetailPaneProps) {
       <div className={styles.sheet}>
         <h1 className="ds-visually-hidden">{t('title')}</h1>
         <div className={styles.centre}>
-          <ErrorState
-            message={
-              problem.status === 404 ? t('detail.notFound') : (problem.title ?? t('list.error'))
-            }
-            {...(problem.traceId ? { correlationId: problem.traceId } : {})}
-            {...(problem.status === 404
-              ? {}
-              : {
-                  onRetry: () => {
-                    void query.refetch();
-                  },
-                })}
-          />
+          {problem.status === 403 ? (
+            <ProblemBanner error={query.error} />
+          ) : (
+            <ErrorState
+              message={
+                problem.status === 404 ? t('detail.notFound') : (problem.title ?? t('list.error'))
+              }
+              {...(problem.traceId ? { correlationId: problem.traceId } : {})}
+              {...(problem.status === 404
+                ? {}
+                : {
+                    onRetry: () => {
+                      void query.refetch();
+                    },
+                  })}
+            />
+          )}
         </div>
       </div>
     );
