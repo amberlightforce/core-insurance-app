@@ -161,7 +161,7 @@ internal sealed class RatingServicingTaxAdapter(
             }
 
             var calculable = line.TreatmentAction is ServicingTreatmentAction.Apply or ServicingTreatmentAction.ReduceProRata or ServicingTreatmentAction.ReverseAsVoid;
-            if (decimal.Round(line.Amount.Amount, line.Amount.Currency.MinorUnits) != line.Amount.Amount
+            if (!line.Amount.IsRoundedToMinorUnits
                 || Math.Abs(line.Amount.Amount) > Math.Abs(expected.Delta.Amount)
                 || (line.Amount.Amount != 0m && Math.Sign(line.Amount.Amount) != Math.Sign(expected.Delta.Amount))
                 || (!calculable && line.Amount.Amount != 0m))

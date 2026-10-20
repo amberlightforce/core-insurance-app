@@ -7,22 +7,13 @@ namespace CoreIns.ArchitectureTests;
 /// MKT rule). Under <c>src/CoreIns.Modules.*</c> nobody may (a) spell a literal commercial mode (<c>AwayFromZero</c>, <c>ToEven</c>,
 /// <c>ToPositiveInfinity</c>, <c>ToNegativeInfinity</c>) or (b) call <c>decimal.Round</c>/<c>Math.Round</c> without any mode (silent
 /// banker's rounding). <c>ToZero</c> is allowed: it is truncation (exact division, "is it already rounded" checks), not a policy.
-/// Existing offenders are allow-listed per file with their count; NX-EC-02 migrates them and empties <see cref="AllowedForEc02"/>.
+/// Existing offenders are allow-listed per file with their count; NX-EC-02 migrated them and emptied <see cref="AllowedForEc02"/>.
 /// </summary>
 public sealed partial class MoneyRoundingGuardTests
 {
-    /// <summary>file (relative to the repository root, forward slashes) to the number of offending calls. TODO(NX-EC-02): empty this.</summary>
+    /// <summary>file (relative to the repository root, forward slashes) to the number of offending calls. Empty since NX-EC-02; keep it empty.</summary>
     private static readonly Dictionary<string, int> AllowedForEc02 = new(StringComparer.Ordinal)
     {
-        ["src/CoreIns.Modules.Claims/Commands/LiabilityFacts.cs"] = 1,
-        ["src/CoreIns.Modules.Claims/Domain/Financials.cs"] = 3,
-        ["src/CoreIns.Modules.Claims/Services/RecoveryEvidenceSource.cs"] = 1,
-        ["src/CoreIns.Modules.Finance/Queries/JournalReader.cs"] = 1,
-        ["src/CoreIns.Modules.Policy/Commands/Cancellation/CancelPolicy.cs"] = 2,
-        ["src/CoreIns.Modules.Policy/Commands/Change/ChangeServicing.cs"] = 1,
-        ["src/CoreIns.Modules.Policy/Commands/Change/RatingServicingTaxAdapter.cs"] = 1,
-        ["src/CoreIns.Modules.Rating/Domain/RatingFacts.cs"] = 1,
-        ["src/CoreIns.Modules.Underwriting/Domain/RuleSets.cs"] = 2,
     };
 
     [GeneratedRegex(@"\b(?:decimal|Math)\.Round\(")]
