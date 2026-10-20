@@ -1,3 +1,4 @@
+using CoreIns.Rules;
 using System.Text.Json;
 using CoreIns.Modules.Claims.Contracts.Api;
 using CoreIns.Modules.Claims.Domain;
@@ -112,7 +113,7 @@ internal sealed class RecoveryEvidenceSource(ClaimsDbContext db, RecoveryCashBuf
         var allocated = 0m;
         for (var i = 0; i < weights.Count; i++)
         {
-            var amount = i == weights.Count - 1 ? cash - allocated : decimal.Round(cash * weights[i].Weight / sum, 2, MidpointRounding.ToEven);
+            var amount = i == weights.Count - 1 ? cash - allocated : DecimalRounding.RoundTo(cash * weights[i].Weight / sum, 2, DecimalRounding.DefaultMoneyMode);
             allocated += amount;
             if (amount > 0m)
             {

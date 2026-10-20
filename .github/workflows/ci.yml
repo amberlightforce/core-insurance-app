@@ -19,12 +19,16 @@ on:
     branches: [main]
     paths-ignore:
       - "orchestration/**"
+  # Nightly full run on main (03:17 UTC). Besides every push, this is the slot where the slow E2E-07/08 journeys get a run with no
+  # other pushes queued ahead of them, so a flake shows up in the morning rather than on someone's merge.
+  schedule:
+    - cron: "17 3 * * *"
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -251,6 +255,18 @@ jobs:
       - name: Run E2E-01 (API and UI)
         run: tests/e2e/run-e2e01.sh
 
+      # Playwright HTML report and traces (first-retry traces, so flaky tests that passed on retry are included), kept 7 days.
+      - name: Upload the Playwright report and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-e2e01
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
   e2e02:
     name: E2E-02a claims happy path on the Compose stack
     # Same shape as e2e01 but its own stack (project coreins-e2e02, image tag coreins-host:e2e02, ports 26500+), so the two jobs
@@ -275,6 +291,18 @@ jobs:
 
       - name: Run E2E-02a (API and UI)
         run: tests/e2e/run-e2e02.sh
+
+      # Playwright HTML report and traces (first-retry traces, so flaky tests that passed on retry are included), kept 7 days.
+      - name: Upload the Playwright report and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-e2e02
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
 
   e2e03:
     name: E2E-03 time-shifted journeys on the Compose stack
@@ -301,6 +329,18 @@ jobs:
       - name: Run E2E-03 (API and UI)
         run: tests/e2e/run-e2e03.sh
 
+      # Playwright HTML report and traces (first-retry traces, so flaky tests that passed on retry are included), kept 7 days.
+      - name: Upload the Playwright report and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-e2e03
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
   e2e12:
     name: E2E-12 pack rollback on the Compose stack
     # Same shape as e2e03 but its own stack (project coreins-e2e12, image tag coreins-host:e2e12, ports 28000+, shiftable dev
@@ -326,6 +366,18 @@ jobs:
       - name: Run E2E-12 (API and UI)
         run: tests/e2e/run-e2e12.sh
 
+      # Playwright HTML report and traces (first-retry traces, so flaky tests that passed on retry are included), kept 7 days.
+      - name: Upload the Playwright report and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-e2e12
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
   e2e10:
     name: E2E-10 AI kill switch on the Compose stack
     # Own stack (project coreins-e2e10, image tag coreins-host:e2e10, ports 30000+). Runs the e2e10 journey, then re-runs the E2E-01 and
@@ -348,6 +400,18 @@ jobs:
 
       - name: Run E2E-10
         run: tests/e2e/run-e2e10.sh
+
+      # Playwright HTML report and traces (first-retry traces, so flaky tests that passed on retry are included), kept 7 days.
+      - name: Upload the Playwright report and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-e2e10
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
 
   e2e11:
     name: E2E-11 out-of-sequence change on the Compose stack
@@ -372,6 +436,18 @@ jobs:
       - name: Run E2E-11
         run: tests/e2e/run-e2e11.sh
 
+      # Playwright HTML report and traces (first-retry traces, so flaky tests that passed on retry are included), kept 7 days.
+      - name: Upload the Playwright report and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-e2e11
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
   e2e08:
     name: E2E-08 distance withdrawal on the Compose stack
     # Own stack (project coreins-e2e08, image tag coreins-host:e2e08, ports 29000+, shiftable dev clock for api and worker).
@@ -393,6 +469,18 @@ jobs:
 
       - name: Run E2E-08
         run: tests/e2e/run-e2e08.sh
+
+      # Playwright HTML report and traces (first-retry traces, so flaky tests that passed on retry are included), kept 7 days.
+      - name: Upload the Playwright report and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-e2e08
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
 
   e2e09:
     name: E2E-09 DSAR access and erasure on the Compose stack
@@ -416,6 +504,18 @@ jobs:
       - name: Run E2E-09
         run: tests/e2e/run-e2e09.sh
 
+      # Playwright HTML report and traces (first-retry traces, so flaky tests that passed on retry are included), kept 7 days.
+      - name: Upload the Playwright report and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-e2e09
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
   e2e07:
     name: E2E-07 non-payment cancellation on the Compose stack
     # Own stack (project coreins-e2e07, image tag coreins-host:e2e07, ports 32000+, shiftable dev clock, worker role sweepers).
@@ -437,6 +537,18 @@ jobs:
 
       - name: Run E2E-07
         run: tests/e2e/run-e2e07.sh
+
+      # Playwright HTML report and traces (first-retry traces, so flaky tests that passed on retry are included), kept 7 days.
+      - name: Upload the Playwright report and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-e2e07
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
 
   e2e06:
     name: E2E-02 recoveries, E2E-06 Friendly Settlement and payment corrections on the Compose stack
@@ -461,6 +573,18 @@ jobs:
       - name: Run E2E-02 recoveries, E2E-06 and the payment corrections
         run: tests/e2e/run-e2e06.sh
 
+      # Playwright HTML report and traces (first-retry traces, so flaky tests that passed on retry are included), kept 7 days.
+      - name: Upload the Playwright report and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-e2e06
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
   e2e05:
     name: E2E-05 migration of an in-force motor policy on the Compose stack
     # Own stack (project coreins-e2e05, image tag coreins-host:e2e05, ports 34000+).
@@ -482,3 +606,15 @@ jobs:
 
       - name: Run E2E-05
         run: tests/e2e/run-e2e05.sh
+
+      # Playwright HTML report and traces (first-retry traces, so flaky tests that passed on retry are included), kept 7 days.
+      - name: Upload the Playwright report and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-e2e05
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7

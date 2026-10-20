@@ -159,7 +159,8 @@ internal sealed record MotorRisk(
             throw Input(path, "A positive amount with at most two decimals is expected.");
         }
 
-        return decimal.Round(value, 2) + 0.00m;
+        // IsPlainAmount admits only zeros beyond the second decimal, so truncating to two places is exact (NX-EC-02: no rounding of input).
+        return decimal.Round(value, 2, MidpointRounding.ToZero) + 0.00m;
     }
 
     /// <summary>

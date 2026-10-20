@@ -195,7 +195,14 @@ internal sealed class JournalReader(DbSession session)
     private static Money Minor(decimal amount, string currencyCode)
     {
         var currency = Currency.FromCode(currencyCode.Trim());
-        return new Money(decimal.Round(amount, currency.MinorUnits), currency);
+        var exact = decimal.Round(amount, currency.MinorUnits, MidpointRounding.ToZero);
+        if (exact != amount)
+        {
+            // Fail closed: a stored amount finer than the currency's minor unit is corrupt, never silently rounded (NX-EC-02).
+            throw new InvalidOperationException($"Stored amount {amount} is not rounded to the {currency.Code} minor units.");
+        }
+
+        return new Money(exact, currency);
     }
 
     /// <summary>The chart's code origin (PRD-09 illustrative code or technical placeholder).</summary>
