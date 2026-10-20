@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test, type APIRequestContext } from '@playwright/test';
-import { call, eventually, signIn, type Json } from './support/api.js';
+import { call, eventually, signIn, staysTrue, type Json } from './support/api.js';
 import { importProducts, issuePolicy, serverNow, type Issued } from './support/servicing.js';
 import { advanceClock } from './support/time.js';
 import { addDays, athensDate } from './support/withdrawal.js';
@@ -165,9 +165,9 @@ test('E2E-07 non-payment: delivered notice starts the clock, elapse cancels; cur
   });
 
   // ---- 5. The variants cancelled nothing.
-  await new Promise((done) => setTimeout(done, 15_000)); // a few sweeper rounds
+  // The sweeper has just cancelled the main policy, so it is running; the variants must stay in force over a few more rounds (fails on the first violation).
   for (const policy of [cure, returned, unproven, hold]) {
-    expect(await termState(request, underwriter, policy), `${policy.policyNumber} stays in force`).toBe('IN_FORCE');
+    await staysTrue(`${policy.policyNumber} stays in force`, async () => (await termState(request, underwriter, policy)) === 'IN_FORCE', 3, 3000);
   }
   expect((await caseOf(request, billing, hold))!['state'], 'the hold keeps the case open and the clock paused').toBe('ON_HOLD');
   expect((await caseOf(request, billing, unproven))!['clockInstanceId'] ?? null).toBeNull();
