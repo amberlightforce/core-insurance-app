@@ -44,13 +44,43 @@ export async function call(
   return { status: response.status(), body: text ? (JSON.parse(text) as Json) : {}, text };
 }
 
-/** Polls until the async outbox (the worker) has produced the expected state. */
-export async function eventually<T>(what: string, read: () => Promise<T | undefined>): Promise<T> {
-  const deadline = Date.now() + WORKER_TIMEOUT_MS;
+export const pause = (ms: number): Promise<void> => new Promise((done) => setTimeout(done, ms));
+
+/** Polls until the async outbox (the worker) has produced the expected state; `read` returns undefined while it has not. Fails loudly on timeout. */
+export async function eventually<T>(
+  what: string,
+  read: () => Promise<T | undefined>,
+  options: { timeoutMs?: number; intervalMs?: number } = {},
+): Promise<T> {
+  const timeoutMs = options.timeoutMs ?? WORKER_TIMEOUT_MS;
+  const deadline = Date.now() + timeoutMs;
   for (;;) {
     const value = await read();
     if (value !== undefined) return value;
-    if (Date.now() > deadline) throw new Error(`timed out after ${WORKER_TIMEOUT_MS / 1000}s waiting for the worker: ${what}`);
-    await new Promise((done) => setTimeout(done, 1000));
+    if (Date.now() > deadline) throw new Error(`timed out after ${timeoutMs / 1000}s waiting for the worker: ${what}`);
+    await pause(options.intervalMs ?? 1000);
+  }
+}
+
+/** Polls until two consecutive reads are equal (the async work has settled); fails loudly if it never does. */
+export async function settled<T>(what: string, read: () => Promise<T>, options: { timeoutMs?: number; intervalMs?: number } = {}): Promise<T> {
+  let last = await read();
+  return eventually(
+    what,
+    async () => {
+      const now = await read();
+      if (now === last) return now;
+      last = now;
+      return undefined;
+    },
+    { timeoutMs: options.timeoutMs ?? 120_000, intervalMs: options.intervalMs ?? 1000 },
+  );
+}
+
+/** A negative check (something must NOT happen): `check` must hold for `rounds` consecutive polls; it fails on the first violation. */
+export async function staysTrue(what: string, check: () => Promise<boolean>, rounds = 3, intervalMs = 2000): Promise<void> {
+  for (let round = 0; round < rounds; round++) {
+    if (!(await check())) throw new Error(`violated while it had to hold: ${what}`);
+    await pause(intervalMs);
   }
 }
