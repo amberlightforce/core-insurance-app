@@ -3,6 +3,15 @@
   <!-- Unit tests of the Host's own logic (role selection, configuration rules). No database, no Docker. -->
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="RouteConformanceAllowList.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\CoreIns.Host\CoreIns.Host.csproj" />
   </ItemGroup>
 

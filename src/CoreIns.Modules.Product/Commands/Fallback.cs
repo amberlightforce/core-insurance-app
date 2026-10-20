@@ -78,8 +78,8 @@ internal static class FallbackSupport
         ];
     }
 
-    public static InstantRange ToInstants(DateRange window) =>
-        new(window.Start.StartOfDayIn(FallbackPlanner.Athens), window.End?.StartOfDayIn(FallbackPlanner.Athens));
+    public static InstantRange ToInstants(DateRange window, TimeZoneInfo zone) =>
+        new(window.Start.StartOfDayIn(zone), window.End?.StartOfDayIn(zone));
 
     public static FallbackView View(FallbackRequestRow row, string productCode) => new()
     {
@@ -159,7 +159,8 @@ internal sealed class RequestFallbackHandler(
         }
 
         var now = clock.Now;
-        var fallbackDate = FallbackPlanner.AthensDate(now);
+        var zone = legalEntities.TimeZoneOf(caller);
+        var fallbackDate = FallbackPlanner.DateIn(now, zone);
         var facts = await FallbackSupport.LoadFactsAsync(db, product.ProductId, cancellationToken).ConfigureAwait(false);
         var planned = FallbackPlanner.Plan(facts, request.DefectiveVersion, fallbackDate);
         if (planned.IsFailure)
@@ -179,8 +180,8 @@ internal sealed class RequestFallbackHandler(
         {
             NewVersion = plan.NewVersion,
             Source = new FallbackSource { Version = plan.Source.Number, ArtefactHash = Sha256Hash.Parse(plan.Source.ArtefactHash) },
-            NewBusinessWindow = FallbackSupport.ToInstants(plan.NewBusinessWindow),
-            ClosedWindow = FallbackSupport.ToInstants(plan.ClosedWindow),
+            NewBusinessWindow = FallbackSupport.ToInstants(plan.NewBusinessWindow, zone),
+            ClosedWindow = FallbackSupport.ToInstants(plan.ClosedWindow, zone),
         };
         if (context.DryRun)
         {
@@ -500,9 +501,12 @@ internal sealed partial class DecideFallbackHandler(
         return await ApplyAsync(row, product, defective, source, replanned.Value, decidedBy, decidedAt, decisionReason, now, cancellationToken).ConfigureAwait(false);
     }
 
+    private TimeZoneInfo Zone =>
+        legalEntities.TimeZoneOf(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
+
     private async Task<Result<FallbackPlan>> ReplanAsync(FallbackRequestRow row, ProductId productId, Instant now, CancellationToken cancellationToken)
     {
-        var today = FallbackPlanner.AthensDate(now);
+        var today = FallbackPlanner.DateIn(now, Zone);
         var facts = await FallbackSupport.LoadFactsAsync(db, productId, cancellationToken).ConfigureAwait(false);
         var defectiveFacts = facts.FirstOrDefault(f => f.Id == row.DefectiveVersionId);
         if (defectiveFacts is null)
@@ -618,8 +622,8 @@ internal sealed partial class DecideFallbackHandler(
                 ProductCode = product.Code,
                 Version = plan.NewVersion,
                 ArtefactHash = artefact.Hash,
-                NewBusinessWindow = FallbackSupport.ToInstants(plan.NewBusinessWindow),
-                RenewalWindow = FallbackSupport.ToInstants(plan.NewRenewalWindow),
+                NewBusinessWindow = FallbackSupport.ToInstants(plan.NewBusinessWindow, Zone),
+                RenewalWindow = FallbackSupport.ToInstants(plan.NewRenewalWindow, Zone),
                 Jurisdiction = definition.Jurisdiction,
                 LegalEntity = definition.LegalEntity,
                 Channels = definition.Channels,
