@@ -196,6 +196,8 @@ public sealed class ServicingTaxTests
         public LegalEntityId Resolve(LegalEntityCode code) => new(Guid.Parse("0192f0c4-0000-7000-8000-000000000001"));
 
         public IReadOnlyList<LegalEntityId> All => [];
+
+        public TimeZoneInfo TimeZoneOf(LegalEntityCode code) => CoreIns.Platform.Time.BusinessTimeZone.Athens;
     }
 
     private sealed class Env(string name) : IHostEnvironment
