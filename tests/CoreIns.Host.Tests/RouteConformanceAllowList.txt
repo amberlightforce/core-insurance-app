@@ -45,9 +45,6 @@ CONTRACT_NOT_SERVED GET /api/clm/v1/claim-trackings/{}
 CONTRACT_NOT_SERVED GET /api/clm/v1/conversations
 CONTRACT_NOT_SERVED GET /api/clm/v1/financials/daily-totals
 CONTRACT_NOT_SERVED GET /api/cmp/v1/bureaus/status
-CONTRACT_NOT_SERVED GET /api/cmp/v1/complaints/procedure-text
-CONTRACT_NOT_SERVED GET /api/cmp/v1/complaints/query
-CONTRACT_NOT_SERVED GET /api/cmp/v1/complaints/{}
 CONTRACT_NOT_SERVED GET /api/cmp/v1/fiscal-documents/list-by-source
 CONTRACT_NOT_SERVED GET /api/cmp/v1/fiscal-documents/qr-payload
 CONTRACT_NOT_SERVED GET /api/cmp/v1/fiscal-reconciliation/breaks
@@ -376,16 +373,7 @@ CONTRACT_NOT_SERVED POST /api/cmp/v1/bureaus/reconcile
 CONTRACT_NOT_SERVED POST /api/cmp/v1/bureaus/retransmit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/clock-defs/propose
 CONTRACT_NOT_SERVED POST /api/cmp/v1/clocks/import
-CONTRACT_NOT_SERVED POST /api/cmp/v1/complaints
-CONTRACT_NOT_SERVED POST /api/cmp/v1/complaints/acknowledge
-CONTRACT_NOT_SERVED POST /api/cmp/v1/complaints/add-action
-CONTRACT_NOT_SERVED POST /api/cmp/v1/complaints/approve-reply
-CONTRACT_NOT_SERVED POST /api/cmp/v1/complaints/classify
-CONTRACT_NOT_SERVED POST /api/cmp/v1/complaints/close
-CONTRACT_NOT_SERVED POST /api/cmp/v1/complaints/escalate
 CONTRACT_NOT_SERVED POST /api/cmp/v1/complaints/import
-CONTRACT_NOT_SERVED POST /api/cmp/v1/complaints/link
-CONTRACT_NOT_SERVED POST /api/cmp/v1/complaints/submit-reply
 CONTRACT_NOT_SERVED POST /api/cmp/v1/dsar/import
 CONTRACT_NOT_SERVED POST /api/cmp/v1/enfia-confirmations/decide
 CONTRACT_NOT_SERVED POST /api/cmp/v1/enfia-confirmations/import

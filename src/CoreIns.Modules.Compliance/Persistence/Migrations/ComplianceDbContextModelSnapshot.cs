@@ -84,6 +84,174 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Complaints.ComplaintRow", b =>
+                {
+                    b.Property<Guid>("ComplaintId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("complaint_id");
+
+                    b.Property<DateTime?>("AcknowledgedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("acknowledged_at");
+
+                    b.Property<string>("AcknowledgementNote")
+                        .HasColumnType("text")
+                        .HasColumnName("acknowledgement_note");
+
+                    b.Property<string>("Actions")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("actions");
+
+                    b.Property<string>("AdrBody")
+                        .HasColumnType("text")
+                        .HasColumnName("adr_body");
+
+                    b.Property<string>("AdrReference")
+                        .HasColumnType("text")
+                        .HasColumnName("adr_reference");
+
+                    b.Property<DateTime?>("AnsweredAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("answered_at");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text")
+                        .HasColumnName("category");
+
+                    b.Property<string>("Cause")
+                        .HasColumnType("text")
+                        .HasColumnName("cause");
+
+                    b.Property<string>("Channel")
+                        .HasColumnType("text")
+                        .HasColumnName("channel");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("closed_at");
+
+                    b.Property<string>("ClosedReason")
+                        .HasColumnType("text")
+                        .HasColumnName("closed_reason");
+
+                    b.Property<Guid?>("ComplainantPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("complainant_party_id");
+
+                    b.Property<string>("ComplainantType")
+                        .HasColumnType("text")
+                        .HasColumnName("complainant_type");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Language")
+                        .HasColumnType("text")
+                        .HasColumnName("language");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Links")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("links");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("number");
+
+                    b.Property<string>("Outcome")
+                        .HasColumnType("text")
+                        .HasColumnName("outcome");
+
+                    b.Property<string>("ProductLine")
+                        .HasColumnType("text")
+                        .HasColumnName("product_line");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("received_at");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("RedressAmount")
+                        .HasColumnType("text")
+                        .HasColumnName("redress_amount");
+
+                    b.Property<string>("ReplyApprovedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("reply_approved_by");
+
+                    b.Property<string>("ReplyAuthor")
+                        .HasColumnType("text")
+                        .HasColumnName("reply_author");
+
+                    b.Property<Guid?>("ReplyClockId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reply_clock_id");
+
+                    b.Property<string>("ReplyStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reply_status");
+
+                    b.Property<string>("ReplyText")
+                        .HasColumnType("text")
+                        .HasColumnName("reply_text");
+
+                    b.Property<string>("RootCause")
+                        .HasColumnType("text")
+                        .HasColumnName("root_cause");
+
+                    b.Property<bool>("RulesMissing")
+                        .HasColumnType("boolean")
+                        .HasColumnName("rules_missing");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<bool>("Vulnerable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("vulnerable");
+
+                    b.HasKey("ComplaintId")
+                        .HasName("pk_complaint");
+
+                    b.HasIndex("LegalEntityId", "Number")
+                        .IsUnique()
+                        .HasDatabaseName("ux_complaint_number");
+
+                    b.HasIndex("LegalEntityId", "Status")
+                        .HasDatabaseName("ix_complaint_status");
+
+                    b.ToTable("complaint", "cmp", t =>
+                        {
+                            t.HasCheckConstraint("ck_complaint_outcome", "outcome IS NULL OR outcome IN ('UPHELD','PARTIALLY_UPHELD','REJECTED')");
+
+                            t.HasCheckConstraint("ck_complaint_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_complaint_reply_status", "reply_status IN ('NONE','PENDING_APPROVAL','RETURNED','APPROVED')");
+
+                            t.HasCheckConstraint("ck_complaint_status", "status IN ('RECEIVED','ACKNOWLEDGED','UNDER_INVESTIGATION','ANSWERED','ESCALATED','CLOSED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Compliance.Dsar.DisclosureLogRow", b =>
                 {
                     b.Property<Guid>("EntryId")

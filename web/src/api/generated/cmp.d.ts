@@ -2603,133 +2603,250 @@ export interface components {
         };
         /** @description cmp.ClockDef.propose result. PRD outputs: "definitions" */
         ClockDefProposeResponse: Record<string, never>;
-        /** @description cmp.Complaint.create request. PRD inputs: "per op" */
-        ComplaintCreateRequest: Record<string, never>;
-        /** @description cmp.Complaint.create result. PRD outputs: "complaint, number, deadlines" */
+        /** @description cmp.Complaint.create request: a complaint received from a complainant */
+        ComplaintCreateRequest: {
+            /** @description Party that complains (optional until identified) */
+            complainantPartyId?: components["schemas"]["Uuid"];
+            /**
+             * @description Kind of complainant
+             * @enum {string}
+             */
+            complainantType?: "INDIVIDUAL" | "BUSINESS";
+            /** @description Channel it arrived through (EMAIL, LETTER, PHONE, WEB, ...) */
+            channel?: string;
+            /** @description When it was received (default now); starts the reply clock */
+            receivedAt?: components["schemas"]["Instant"];
+            /** @description What the complainant says */
+            description: string;
+            /** @description Language of the complaint */
+            language?: components["schemas"]["LanguageCode"];
+            /** @description Product line concerned */
+            productLine?: string;
+            /** @description Complainant flagged as vulnerable (no reason stored) */
+            vulnerable?: boolean;
+            /** @description Policies, claims or other objects it concerns */
+            links?: components["schemas"]["ObjectRef"][];
+        };
+        /** @description cmp.Complaint.create result */
         ComplaintCreateResponse: {
-            /** @description PRD: "complaint" */
-            complaint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "number" */
-            number?: components["schemas"]["Unspecified"];
-            /** @description PRD: "deadlines" */
-            deadlines?: components["schemas"]["Unspecified"];
+            complaint?: components["schemas"]["ComplaintView"];
+            /** @description Complaint number */
+            number?: string;
+            deadlines?: components["schemas"]["ComplaintDeadlineView"][];
         };
-        /** @description cmp.Complaint.classify request. PRD inputs: "per op" */
-        ComplaintClassifyRequest: Record<string, never>;
-        /** @description cmp.Complaint.classify result. PRD outputs: "complaint, number, deadlines" */
+        /** @description cmp.Complaint.classify request: category, cause and product line */
+        ComplaintClassifyRequest: {
+            /** @description Complaint id */
+            id: components["schemas"]["Uuid"];
+            /** @description Category from the pack list (CLAIM_NOTIFICATION is refused: not a complaint) */
+            category: string;
+            /** @description Cause */
+            cause?: string;
+            /** @description Product line */
+            productLine?: string;
+            /** @description Vulnerable flag */
+            vulnerable?: boolean;
+        };
+        /** @description cmp.Complaint.classify result */
         ComplaintClassifyResponse: {
-            /** @description PRD: "complaint" */
-            complaint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "number" */
-            number?: components["schemas"]["Unspecified"];
-            /** @description PRD: "deadlines" */
-            deadlines?: components["schemas"]["Unspecified"];
+            complaint?: components["schemas"]["ComplaintView"];
+            /** @description Complaint number */
+            number?: string;
+            deadlines?: components["schemas"]["ComplaintDeadlineView"][];
         };
-        /** @description cmp.Complaint.link request. PRD inputs: "per op" */
-        ComplaintLinkRequest: Record<string, never>;
-        /** @description cmp.Complaint.link result. PRD outputs: "complaint, number, deadlines" */
+        /** @description cmp.Complaint.link request: objects the complaint concerns */
+        ComplaintLinkRequest: {
+            /** @description Complaint id */
+            id: components["schemas"]["Uuid"];
+            /** @description Objects to link */
+            links: components["schemas"]["ObjectRef"][];
+        };
+        /** @description cmp.Complaint.link result */
         ComplaintLinkResponse: {
-            /** @description PRD: "complaint" */
-            complaint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "number" */
-            number?: components["schemas"]["Unspecified"];
-            /** @description PRD: "deadlines" */
-            deadlines?: components["schemas"]["Unspecified"];
+            complaint?: components["schemas"]["ComplaintView"];
+            /** @description Complaint number */
+            number?: string;
+            deadlines?: components["schemas"]["ComplaintDeadlineView"][];
         };
-        /** @description cmp.Complaint.acknowledge request. PRD inputs: "per op" */
-        ComplaintAcknowledgeRequest: Record<string, never>;
-        /** @description cmp.Complaint.acknowledge result. PRD outputs: "complaint, number, deadlines" */
+        /** @description cmp.Complaint.acknowledge request */
+        ComplaintAcknowledgeRequest: {
+            /** @description Complaint id */
+            id: components["schemas"]["Uuid"];
+            /** @description Note on the acknowledgement, no personal data */
+            note?: string;
+        };
+        /** @description cmp.Complaint.acknowledge result */
         ComplaintAcknowledgeResponse: {
-            /** @description PRD: "complaint" */
-            complaint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "number" */
-            number?: components["schemas"]["Unspecified"];
-            /** @description PRD: "deadlines" */
-            deadlines?: components["schemas"]["Unspecified"];
+            complaint?: components["schemas"]["ComplaintView"];
+            /** @description Complaint number */
+            number?: string;
+            deadlines?: components["schemas"]["ComplaintDeadlineView"][];
         };
-        /** @description cmp.Complaint.addAction request. PRD inputs: "per op" */
-        ComplaintAddActionRequest: Record<string, never>;
-        /** @description cmp.Complaint.addAction result. PRD outputs: "complaint, number, deadlines" */
+        /** @description cmp.Complaint.addAction request: an investigation step */
+        ComplaintAddActionRequest: {
+            /** @description Complaint id */
+            id: components["schemas"]["Uuid"];
+            /** @description Kind of step (CONTACT, REQUEST_INFO, REVIEW, ...) */
+            kind: string;
+            /** @description What was done */
+            note?: string;
+        };
+        /** @description cmp.Complaint.addAction result */
         ComplaintAddActionResponse: {
-            /** @description PRD: "complaint" */
-            complaint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "number" */
-            number?: components["schemas"]["Unspecified"];
-            /** @description PRD: "deadlines" */
-            deadlines?: components["schemas"]["Unspecified"];
+            complaint?: components["schemas"]["ComplaintView"];
+            /** @description Complaint number */
+            number?: string;
+            deadlines?: components["schemas"]["ComplaintDeadlineView"][];
         };
-        /** @description cmp.Complaint.submitReply request. PRD inputs: "per op" */
-        ComplaintSubmitReplyRequest: Record<string, never>;
-        /** @description cmp.Complaint.submitReply result. PRD outputs: "complaint, number, deadlines" */
+        /** @description cmp.Complaint.submitReply request: the draft reply, held for a second user approval */
+        ComplaintSubmitReplyRequest: {
+            /** @description Complaint id */
+            id: components["schemas"]["Uuid"];
+            /**
+             * @description Outcome
+             * @enum {string}
+             */
+            outcome: "UPHELD" | "PARTIALLY_UPHELD" | "REJECTED";
+            /** @description Reply text */
+            replyText: string;
+            /** @description Redress awarded, decimal in the entity currency */
+            redressAmount?: string;
+            /** @description Root cause (required to close an upheld complaint) */
+            rootCause?: string;
+        };
+        /** @description cmp.Complaint.submitReply result */
         ComplaintSubmitReplyResponse: {
-            /** @description PRD: "complaint" */
-            complaint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "number" */
-            number?: components["schemas"]["Unspecified"];
-            /** @description PRD: "deadlines" */
-            deadlines?: components["schemas"]["Unspecified"];
+            complaint?: components["schemas"]["ComplaintView"];
+            /** @description Complaint number */
+            number?: string;
+            deadlines?: components["schemas"]["ComplaintDeadlineView"][];
         };
-        /** @description cmp.Complaint.approveReply request. PRD inputs: "per op" */
-        ComplaintApproveReplyRequest: Record<string, never>;
-        /** @description cmp.Complaint.approveReply result. PRD outputs: "complaint, number, deadlines" */
+        /** @description cmp.Complaint.approveReply request: second-user approval or return of the reply (approver differs from author) */
+        ComplaintApproveReplyRequest: {
+            /** @description Complaint id */
+            id: components["schemas"]["Uuid"];
+            /** @description False returns the reply to its author (default true) */
+            approved?: boolean;
+            /** @description Comment */
+            comment?: string;
+        };
+        /** @description cmp.Complaint.approveReply result */
         ComplaintApproveReplyResponse: {
-            /** @description PRD: "complaint" */
-            complaint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "number" */
-            number?: components["schemas"]["Unspecified"];
-            /** @description PRD: "deadlines" */
-            deadlines?: components["schemas"]["Unspecified"];
+            complaint?: components["schemas"]["ComplaintView"];
+            /** @description Complaint number */
+            number?: string;
+            deadlines?: components["schemas"]["ComplaintDeadlineView"][];
         };
-        /** @description cmp.Complaint.escalate request. PRD inputs: "per op" */
-        ComplaintEscalateRequest: Record<string, never>;
-        /** @description cmp.Complaint.escalate result. PRD outputs: "complaint, number, deadlines" */
+        /** @description cmp.Complaint.escalate request: refer to an ADR body */
+        ComplaintEscalateRequest: {
+            /** @description Complaint id */
+            id: components["schemas"]["Uuid"];
+            /** @description ADR body */
+            adrBody?: string;
+            /** @description Reference at the ADR body */
+            reference?: string;
+        };
+        /** @description cmp.Complaint.escalate result */
         ComplaintEscalateResponse: {
-            /** @description PRD: "complaint" */
-            complaint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "number" */
-            number?: components["schemas"]["Unspecified"];
-            /** @description PRD: "deadlines" */
-            deadlines?: components["schemas"]["Unspecified"];
+            complaint?: components["schemas"]["ComplaintView"];
+            /** @description Complaint number */
+            number?: string;
+            deadlines?: components["schemas"]["ComplaintDeadlineView"][];
         };
-        /** @description cmp.Complaint.close request. PRD inputs: "per op" */
-        ComplaintCloseRequest: Record<string, never>;
-        /** @description cmp.Complaint.close result. PRD outputs: "complaint, number, deadlines" */
+        /** @description cmp.Complaint.close request */
+        ComplaintCloseRequest: {
+            /** @description Complaint id */
+            id: components["schemas"]["Uuid"];
+            /** @description Closing reason */
+            reason?: string;
+            /** @description Root cause */
+            rootCause?: string;
+        };
+        /** @description cmp.Complaint.close result */
         ComplaintCloseResponse: {
-            /** @description PRD: "complaint" */
-            complaint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "number" */
-            number?: components["schemas"]["Unspecified"];
-            /** @description PRD: "deadlines" */
-            deadlines?: components["schemas"]["Unspecified"];
+            complaint?: components["schemas"]["ComplaintView"];
+            /** @description Complaint number */
+            number?: string;
+            deadlines?: components["schemas"]["ComplaintDeadlineView"][];
         };
-        /** @description cmp.Complaint.get result. PRD outputs: "complaint, number, deadlines" */
+        /** @description cmp.Complaint.get result */
         ComplaintGetResponse: {
-            /** @description PRD: "complaint" */
-            complaint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "number" */
-            number?: components["schemas"]["Unspecified"];
-            /** @description PRD: "deadlines" */
-            deadlines?: components["schemas"]["Unspecified"];
+            complaint?: components["schemas"]["ComplaintView"];
+            /** @description Complaint number */
+            number?: string;
+            deadlines?: components["schemas"]["ComplaintDeadlineView"][];
         };
-        /** @description cmp.Complaint.query result. PRD outputs: "complaint, number, deadlines" */
+        /** @description A statutory clock of a complaint */
+        ComplaintDeadlineView: {
+            /** @description Clock code (CMP_COMPLAINT_REPLY) */
+            clockCode?: string;
+            /** @description Clock instance id */
+            instanceId?: components["schemas"]["Uuid"];
+            /** @description Clock status (RUNNING, WARNED, PAUSED, MET, BREACHED, ...) */
+            status?: string;
+            /** @description Due instant */
+            deadline?: components["schemas"]["Instant"];
+        };
+        /** @description One investigation step */
+        ComplaintActionView: {
+            kind?: string;
+            note?: string;
+            by?: string;
+            at?: components["schemas"]["Instant"];
+        };
+        /** @description A complaint with its state */
+        ComplaintView: {
+            complaintId?: components["schemas"]["Uuid"];
+            number?: string;
+            /** @enum {string} */
+            status?: "RECEIVED" | "ACKNOWLEDGED" | "UNDER_INVESTIGATION" | "ANSWERED" | "ESCALATED" | "CLOSED";
+            receivedAt?: components["schemas"]["Instant"];
+            channel?: string;
+            complainantPartyId?: components["schemas"]["Uuid"];
+            complainantType?: string;
+            description?: string;
+            language?: string;
+            category?: string;
+            cause?: string;
+            productLine?: string;
+            vulnerable?: boolean;
+            links?: components["schemas"]["ObjectRef"][];
+            actions?: components["schemas"]["ComplaintActionView"][];
+            acknowledgedAt?: components["schemas"]["Instant"];
+            /** @description NONE, PENDING_APPROVAL, RETURNED or APPROVED */
+            replyStatus?: string;
+            outcome?: string;
+            replyText?: string;
+            replyAuthor?: string;
+            replyApprovedBy?: string;
+            redressAmount?: string;
+            rootCause?: string;
+            adrBody?: string;
+            adrReference?: string;
+            answeredAt?: components["schemas"]["Instant"];
+            closedAt?: components["schemas"]["Instant"];
+            closedReason?: string;
+            createdBy?: string;
+            /** @description No reply clock could be started for the jurisdiction (fail closed: a task must set the deadline by hand) */
+            rulesMissing?: boolean;
+        };
+        /** @description cmp.Complaint.query result item */
         ComplaintQueryItem: {
-            /** @description PRD: "complaint" */
-            complaint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "number" */
-            number?: components["schemas"]["Unspecified"];
-            /** @description PRD: "deadlines" */
-            deadlines?: components["schemas"]["Unspecified"];
+            complaint?: components["schemas"]["ComplaintView"];
+            number?: string;
+            deadlines?: components["schemas"]["ComplaintDeadlineView"][];
         };
         /** @description Page of cmp.Complaint.query results (cursor pagination, contract §3.5.5) */
         ComplaintQueryPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["ComplaintQueryItem"][];
         };
-        /** @description cmp.Complaint.procedureText result. PRD outputs: "text, version" */
+        /** @description cmp.Complaint.procedureText result: the published complaint-handling procedure */
         ComplaintProcedureTextResponse: {
-            /** @description PRD: "text" */
-            text?: components["schemas"]["Unspecified"];
-            /** @description PRD: "version" */
-            version?: components["schemas"]["Unspecified"];
+            /** @description Procedure text in the requested language */
+            text?: string;
+            /** @description Published version */
+            version?: string;
+            language?: string;
         };
         /** @description cmp.Dsar.create request: the data subject and the kind of request */
         DsarCreateRequest: {
@@ -5257,6 +5374,8 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description Filter by complaint status */
+                status?: string;
             };
             header?: {
                 /**

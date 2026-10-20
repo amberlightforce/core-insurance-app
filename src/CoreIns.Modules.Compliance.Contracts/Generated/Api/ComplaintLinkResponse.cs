@@ -4,31 +4,22 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Complaint.link result. PRD outputs: "complaint, number, deadlines"</summary>
+/// <summary>cmp.Complaint.link result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ComplaintLinkResponse
 {
-    /// <summary>PRD: "complaint"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'complaint'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("complaint")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Complaint { get; init; }
+    public global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintView? Complaint { get; init; }
 
-    /// <summary>PRD: "number"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Complaint number</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("number")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Number { get; init; }
+    public string? Number { get; init; }
 
-    /// <summary>PRD: "deadlines"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'deadlines'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("deadlines")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Deadlines { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintDeadlineView>? Deadlines { get; init; }
 }

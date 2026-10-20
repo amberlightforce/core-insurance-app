@@ -80,6 +80,7 @@ internal static class ClockDefinitions
     public const string DsarResponse = "CMP_DSAR_RESPONSE";
     public const string ClmFsCounterpartyReply = "CLM_FS_COUNTERPARTY_REPLY";
     public const string ClmOpenClaimResponse = "CLM_OPEN_CLAIM_RESPONSE";
+    public const string ComplaintReply = "CMP_COMPLAINT_REPLY";
 
     public static IReadOnlyList<ClockDefinition> All { get; } =
     [
@@ -98,6 +99,11 @@ internal static class ClockDefinitions
         // Placeholder for the claim handling deadline an imported open claim keeps (CLM-010, CMP-009): the number is not sourced.
         new(ClmOpenClaimResponse, "Open claim handling deadline", StatutoryClockKind.Deadline, "P30D", "GR",
             ClockLegalStatus.Illustrative, "PRD-07 placeholder, not verified", WarnBefore: "P5D"),
+
+        // Reasoned written reply within 50 calendar days; a holding response does not pause it (PRD-11 clock 21).
+        // TODO(hardening): CMP_COMPLAINT_ACK (5 business days, UNVERIFIED, OI-CMP-06) is not defined: fail closed, no invented value.
+        new(ComplaintReply, "Complaint reply deadline", StatutoryClockKind.Deadline, "P50D", "GR",
+            ClockLegalStatus.SecondarySource, "BoG Executive Committee Act 88/5.4.2016 (PRD-11 OBL-COMP, OI-CMP-06)", WarnBefore: "P7D"),
     ];
 
     public static ClockDefinition? Find(string code) => All.FirstOrDefault(d => string.Equals(d.Code, code, StringComparison.Ordinal));

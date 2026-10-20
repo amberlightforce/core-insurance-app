@@ -14,11 +14,11 @@ public sealed class FakeComplianceComplaintService : global::CoreIns.Testing.Con
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintCreateResponse> CreateAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintCreateResponse>("cmp.Complaint.create", [request, options], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintCreateResponse> CreateAsync(global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintCreateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintCreateResponse>("cmp.Complaint.create", [request, options], cancellationToken);
 
     /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> ImportAsync(global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintImportRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::System.Text.Json.JsonElement>("cmp.Complaint.import", [request, options], cancellationToken);
 
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintLinkResponse> LinkAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintLinkResponse>("cmp.Complaint.link", [request, options], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintLinkResponse> LinkAsync(global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintLinkRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Compliance.Contracts.Api.ComplaintLinkResponse>("cmp.Complaint.link", [request, options], cancellationToken);
 }
