@@ -15,7 +15,13 @@ const plt = '/api/plt/v1';
  * catalogue (PRD AI register) and the user may add a feature id; every row is then resolved against the server.
  * TODO(hardening): replace by a plt.Ai.list read once the backend exposes one.
  */
-export const knownFeatures: readonly string[] = ['AI-CLM-01', 'AI-CLM-04', 'AI-BIL-SUSPENSE'];
+export const knownFeatures: readonly string[] = [
+  'AI-BIL-01',
+  'AI-CHN-02',
+  'AI-CLM-01',
+  'AI-PTY-01',
+  'AI-UW-01',
+];
 export const featureIdPattern = /^AI-[A-Z]{2,3}-\d{2,}$/;
 /** GLOBAL is the kill-switch scope that stops every AI feature. */
 export const globalScope = 'GLOBAL';
