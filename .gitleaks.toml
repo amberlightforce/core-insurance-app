@@ -1,0 +1,23 @@
+# gitleaks config (NX-OT-02). Extends the default ruleset; only add reviewed false positives below.
+title = "core-insurance-app gitleaks"
+
+[extend]
+useDefault = true
+
+# Local-development-only values: the well-known public Azurite storage key and a throwaway DataProtection master key
+# that exists only for the local Compose stack / launch profiles and is never accepted outside Development.
+# TODO(hardening): every allow-list entry must name the finding it covers; move the dev master key to a generated per-machine value.
+[[allowlists]]
+description = "Local dev stack: Azurite well-known key and dev-only DataProtection master key"
+paths = [
+  '''infra/local/\.env\.example''',
+  '''src/CoreIns\.Host/Properties/launchSettings\.json''',
+  '''tests/e2e/stack/.*\.env''',
+]
+
+[[allowlists]]
+description = "Generated contract samples (field names such as flagKey/zoneKey/issueKeyHash with fake values) and the integration-test master key"
+paths = [
+  '''tests/CoreIns\.Contracts\.Tests/Generated/Samples/.*\.json''',
+  '''tests/CoreIns\.IntegrationTests/ApiHostFactory\.cs''',
+]

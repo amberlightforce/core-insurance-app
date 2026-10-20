@@ -1,7 +1,8 @@
+import { billingRoles } from '../../../auth/roles';
 import { readSession } from '../../../dev-auth/devAuth';
 
 /** Roles that see the refund screens (clerks propose, the billing manager decides). */
-export const refundViewRoles: readonly string[] = ['Staff.Billing', 'Staff.BillingManager'];
+export const refundViewRoles: readonly string[] = billingRoles;
 export const refundDecideRole = 'Staff.BillingManager';
 
 export function currentRoles(): string[] {

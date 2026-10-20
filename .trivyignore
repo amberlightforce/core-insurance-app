@@ -1,0 +1,2 @@
+# Trivy misconfiguration allow-list (NX-OT-02). One AVD-/DS- ID per line with a comment saying why.
+# TODO(hardening): resolve each entry rather than ignoring it.

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using CoreIns.Rules;
 using CoreIns.SharedKernel;
 
 namespace CoreIns.Modules.Reinsurance.Cession;
@@ -57,9 +58,10 @@ internal sealed class CessionOptions
 /// <summary>The pure arithmetic of the cession (no I/O): target, difference to booked.</summary>
 internal static class CessionEngine
 {
-    /// <summary>Target cession = share x written premium, rounded to cents (away from zero).</summary>
+    /// <summary>Target cession = share x written premium, rounded to cents in the platform money mode.</summary>
+    // TODO(hardening): resolve the legal entity's rule via mkt.Rounding.apply instead of the platform default.
     public static decimal Target(decimal sharePct, decimal writtenPremium) =>
-        decimal.Round(sharePct / 100m * writtenPremium, 2, MidpointRounding.AwayFromZero);
+        DecimalRounding.RoundTo(sharePct / 100m * writtenPremium, 2, DecimalRounding.DefaultMoneyMode);
 
     /// <summary>The difference to book: target minus what is already booked for the term and treaty.</summary>
     public static decimal Difference(decimal target, decimal booked) => target - booked;

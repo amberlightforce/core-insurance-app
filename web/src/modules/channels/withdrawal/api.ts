@@ -8,6 +8,7 @@ import {
 
 import { apiRequest } from '../../../api/client';
 import type { components } from '../../../api/generated/chn';
+import { withdrawalRoles } from '../../../auth/roles';
 import { useDevSession } from '../../../dev-auth/devAuth';
 
 type S = components['schemas'];
@@ -23,11 +24,9 @@ export type WithdrawalStatus = S['WithdrawalStatusCode'];
 const chn = '/api/chn/v1/withdrawals';
 
 /** Staff roles that may list and close withdrawal requests (permissions chn.Withdrawal.list / .close). */
-const staffRoles = ['Staff.Underwriter', 'Staff.Billing', 'Platform.Admin'];
-
 export function useCanWorkWithdrawals(): boolean {
   const roles = useDevSession()?.user.roles ?? [];
-  return roles.some((r) => staffRoles.includes(r));
+  return roles.some((r) => withdrawalRoles.some((w) => w === r));
 }
 
 export function declareWithdrawal(body: WithdrawalDeclareRequest, idempotencyKey: string) {

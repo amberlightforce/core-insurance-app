@@ -65,6 +65,7 @@ internal static class ModuleCatalog
         .. ClaimsModule.Databases,
         .. ReinsuranceModule.Databases,
         .. MigrationModule.Databases,
+        .. WorkModule.Databases,
     ];
 
     /// <summary>Module assemblies whose (internal) <c>[ApiController]</c>s the api serves.</summary>

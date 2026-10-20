@@ -7,7 +7,8 @@ import { ActivationPage } from './ActivationPage';
 import { ActivationDialog } from './ActivationDialog';
 import { PackDetailPage } from './PackDetailPage';
 import { PackRegistryPage } from './PackRegistryPage';
-import { RequirePackRole } from './RequirePackRole';
+import { RequireRole } from '../../../auth/RequireRole';
+import { packRoles } from '../../../auth/roles';
 import * as fx from './fixtures';
 
 const session = vi.hoisted(() => ({
@@ -60,7 +61,7 @@ describe('pack lifecycle and decisions', () => {
   it('guards the pack route for an unrelated role without an API request', () => {
     session.user.roles = ['Staff.ClaimsHandler'];
     const api = mockApi([]);
-    renderScreen(<RequirePackRole />, { path: '/admin/packs', url: '/admin/packs' });
+    renderScreen(<RequireRole roles={packRoles} />, { path: '/admin/packs', url: '/admin/packs' });
     expect(screen.getByText('No permission')).toBeInTheDocument();
     expect(api.calls).toHaveLength(0);
   });

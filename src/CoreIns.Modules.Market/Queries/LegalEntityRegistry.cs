@@ -17,7 +17,7 @@ namespace CoreIns.Modules.Market.Queries;
 internal sealed record LegalEntityInfo(
     LegalEntityId Id, LegalEntityCode Code, string HomeJurisdiction, string PackId, string FunctionalCurrency, string TimeZone, string Status, bool IsTestEntity)
 {
-    public TimeZoneInfo Zone => TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
+    public TimeZoneInfo Zone => CoreIns.Platform.Time.BusinessTimeZone.Resolve(TimeZone);
 }
 
 /// <summary>
@@ -112,4 +112,7 @@ internal sealed class MarketLegalEntityDirectory(LegalEntityRegistry registry) :
         registry.Find(code)?.Id ?? throw new InvalidOperationException($"Legal entity {code} is not in the MKT registry.");
 
     public IReadOnlyList<LegalEntityId> All => [.. registry.All().Select(e => e.Id)];
+
+    public TimeZoneInfo TimeZoneOf(LegalEntityCode code) =>
+        (registry.Find(code) ?? throw new InvalidOperationException($"Legal entity {code} is not in the MKT registry.")).Zone;
 }

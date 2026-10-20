@@ -4,6 +4,7 @@ using CoreIns.IntegrationTests.Reinsurance.Registry;
 using CoreIns.Modules.Billing;
 using CoreIns.Modules.Billing.Commands;
 using CoreIns.Modules.Billing.Domain;
+using CoreIns.Modules.Billing.Services;
 using CoreIns.Modules.Compliance.Contracts;
 using CoreIns.Modules.Compliance.Contracts.Api;
 using CoreIns.Modules.Documents.Contracts;
@@ -319,5 +320,18 @@ public sealed class DelinquencyTests(PostgresFixture database) : IClassFixture<P
         (await StateAsync(b)).ShouldBe("NOTICE_REQUESTED");
         (await _slice.ScalarAsync<string>($"SELECT \"trigger\" FROM bil.delinquency_case WHERE term_id = '{b.Policy.TermId}'")).ShouldBe("OVERDUE");
         _documents.Requests.Count.ShouldBeGreaterThanOrEqualTo(1);
+    }
+
+    [Fact]
+    public async Task The_scheduled_runner_opens_the_overdue_case_as_a_service_actor_in_the_stamp_entity()
+    {
+        var b = await BilledAsync();
+        var runner = _slice.Policy.Factory.Services.GetRequiredService<DelinquencySweepRunner>();
+
+        (await runner.RunAsync(Ct)).ShouldBe(0); // not overdue yet
+        _time.Now += TimeSpan.FromDays(7);
+        (await runner.RunAsync(Ct)).ShouldBeGreaterThanOrEqualTo(1);
+        (await StateAsync(b)).ShouldBe("NOTICE_REQUESTED");
+        (await runner.RunAsync(Ct)).ShouldBe(0); // idempotent
     }
 }

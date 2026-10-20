@@ -1,19 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using CoreIns.Rules;
 
 namespace CoreIns.Modules.Market.Domain;
-
-/// <summary>Rounding modes of <c>cur.rounding.*</c> (REQ-MKT-192).</summary>
-internal enum RoundingMode
-{
-    HalfUp,
-    HalfEven,
-    Down,
-    Up,
-    Ceiling,
-    Floor,
-}
 
 /// <summary>A rounding rule: mode, scale (null = the currency's ISO 4217 minor units) and level (REQ-MKT-192).</summary>
 internal sealed record RoundingRule(RoundingMode Mode, int? Scale, string Level)
@@ -48,15 +38,7 @@ internal sealed record RoundingRule(RoundingMode Mode, int? Scale, string Level)
     public decimal Apply(decimal amount, int scale)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(scale);
-        return Mode switch
-        {
-            RoundingMode.HalfUp => decimal.Round(amount, scale, MidpointRounding.AwayFromZero),
-            RoundingMode.HalfEven => decimal.Round(amount, scale, MidpointRounding.ToEven),
-            RoundingMode.Down => decimal.Round(amount, scale, MidpointRounding.ToZero),
-            RoundingMode.Up => decimal.Round(amount, scale, amount >= 0 ? MidpointRounding.ToPositiveInfinity : MidpointRounding.ToNegativeInfinity),
-            RoundingMode.Ceiling => decimal.Round(amount, scale, MidpointRounding.ToPositiveInfinity),
-            _ => decimal.Round(amount, scale, MidpointRounding.ToNegativeInfinity),
-        };
+        return DecimalRounding.RoundTo(amount, scale, Mode);
     }
 
     /// <summary>Deterministic rule id from the rule key and its parameters (REQ-MKT-195).</summary>

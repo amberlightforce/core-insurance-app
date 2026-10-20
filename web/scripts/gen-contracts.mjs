@@ -20,6 +20,10 @@ const modules = [
   'chn',
   'mig',
   'cmp',
+  'doc',
+  'dat',
+  'rat',
+  'wrk',
 ];
 mkdirSync(join(root, 'src', 'api', 'generated'), { recursive: true });
 for (const module of modules) {

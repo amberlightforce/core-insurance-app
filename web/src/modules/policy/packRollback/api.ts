@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query';
 
 import { apiRequest } from '../../../api/client';
+import { packRollbackReviewerRoles } from '../../../auth/roles';
 import { useDevSession } from '../../../dev-auth/devAuth';
 import type {
   PackRollbackExceptionListPage,
@@ -66,9 +67,7 @@ export function useReviewException() {
 }
 
 /** Roles that review pack-rollback exceptions (illustrative; the API enforces pol.PackRollbackException.*). */
-const reviewerRoles = ['Staff.UnderwritingManager', 'Platform.Admin'];
-
 export function useCanReview(): boolean {
   const roles = useDevSession()?.user.roles ?? [];
-  return roles.some((r) => reviewerRoles.includes(r));
+  return roles.some((r) => packRollbackReviewerRoles.some((p) => p === r));
 }

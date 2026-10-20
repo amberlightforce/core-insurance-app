@@ -5,7 +5,8 @@ import { mockApi, renderScreen } from '../../../test/mockApi';
 import { expectNoA11yViolations } from '../../../test/axe';
 import { ExceptionDetailPage } from './ExceptionDetailPage';
 import { ExceptionQueuePage } from './ExceptionQueuePage';
-import { RequireReviewerRole } from './RequireReviewerRole';
+import { RequireRole } from '../../../auth/RequireRole';
+import { packRollbackReviewerRoles } from '../../../auth/roles';
 import * as fx from './fixtures';
 
 const session = vi.hoisted(() => ({
@@ -88,7 +89,7 @@ it('filters open/reviewed exceptions using only status in the query', async () =
 it('guards the exception route for an unrelated role', async () => {
   session.user.roles = ['Staff.ClaimsHandler'];
   const api = mockApi([]);
-  renderScreen(<RequireReviewerRole />, {
+  renderScreen(<RequireRole roles={packRollbackReviewerRoles} />, {
     path: '/policies/pack-rollback',
     url: '/policies/pack-rollback',
   });

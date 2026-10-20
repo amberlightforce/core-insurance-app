@@ -1,3 +1,13 @@
+import {
+  aiAdminRoles,
+  claimsRoles,
+  dsarRoles,
+  migrationRoles,
+  packRoles,
+  reinsuranceRoles,
+  underwritingRoles,
+  withdrawalRoles,
+} from '../auth/roles';
 import type { ModuleIconName } from '../design-system/icons';
 
 /** A rail destination. The label comes from `shell:nav.<id>`; the icon from the fixed module icons. */
@@ -12,24 +22,16 @@ export interface NavItem {
   roles?: readonly string[];
 }
 
-/** Roles that work claims (dev users `claims` and `claimsmgr`). */
-export const claimsRoles = ['Staff.ClaimsHandler', 'Staff.ClaimsManager'] as const;
-
-/** Roles that work underwriting referrals (permission uw.Referral.list; dev users `uwsenior`, `superuser`). */
-export const underwritingRoles = ['Staff.UnderwritingManager', 'Platform.Admin'] as const;
-
-/** Roles that work distance-withdrawal requests (permission chn.Withdrawal.list). */
-export const withdrawalRoles = ['Staff.Underwriter', 'Staff.Billing', 'Platform.Admin'] as const;
-
-/** Roles that manage pack activation (illustrative; permission mkt.Pack.list). */
-const packRoles = [
-  'Platform.ReleaseManager',
-  'Platform.DesignAuthority',
-  'Platform.Admin',
-] as const;
-
-/** Roles that work data migration (permissions mig.Batch.*, mig.Routing.*; dev role Staff.MigrationManager). */
-const migrationRoles = ['Staff.MigrationManager', 'Platform.Admin'] as const;
+export {
+  aiAdminRoles,
+  claimsRoles,
+  dsarRoles,
+  migrationRoles,
+  packRoles,
+  reinsuranceRoles,
+  underwritingRoles,
+  withdrawalRoles,
+} from '../auth/roles';
 
 /** Default staff navigation (role-configured order arrives with PLT; Part 1 §3.4). */
 export const defaultNavItems: NavItem[] = [
@@ -51,12 +53,7 @@ export const defaultNavItems: NavItem[] = [
   {
     id: 'reinsurance',
     to: '/reinsurance',
-    roles: [
-      'Staff.ReinsuranceAccountant',
-      'Staff.ReinsuranceManager',
-      'Staff.RecoverySpecialist',
-      'Platform.Admin',
-    ],
+    roles: reinsuranceRoles,
   },
   { id: 'finance', to: '/finance' },
   { id: 'documents', to: '/documents' },
@@ -64,7 +61,7 @@ export const defaultNavItems: NavItem[] = [
     id: 'compliance',
     to: '/compliance/dsar',
     label: 'dsar',
-    roles: ['Staff.ComplianceOfficer', 'Platform.Admin'],
+    roles: dsarRoles,
   },
   { id: 'reports', to: '/reports' },
   { id: 'products', to: '/products' },
@@ -74,7 +71,7 @@ export const defaultNavItems: NavItem[] = [
     id: 'admin',
     to: '/admin/ai',
     label: 'aiControl',
-    roles: ['Platform.Admin', 'Platform.AiGovernor'],
+    roles: aiAdminRoles,
   },
 ];
 
