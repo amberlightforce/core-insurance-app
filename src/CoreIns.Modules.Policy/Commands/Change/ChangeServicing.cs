@@ -389,7 +389,7 @@ internal sealed class ChangePricer(IServicingTax tax, RequestContext context)
             var wrongAction = (!debit && !credit) || (debit
                 ? delta.Amount < 0m || line.Action != TreatmentActionCode.Apply || (delta.Amount == 0m && line.Amount != 0m)
                 : delta.Amount > 0m || line.Action != TreatmentActionCode.KeepNotReduced || line.Amount != 0m);
-            if (wrongAction || decimal.Round(line.Amount, 2) != line.Amount)
+            if (wrongAction || decimal.Round(line.Amount, 2, MidpointRounding.ToZero) != line.Amount)
             {
                 return DomainError.Of(
                     ModuleCode.POL, "RATING",
