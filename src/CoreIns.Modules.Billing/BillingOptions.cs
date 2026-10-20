@@ -71,6 +71,13 @@ internal sealed class BillingOptions
     [Range(typeof(decimal), "0", "100000")]
     public decimal DelinquencyTolerance { get; set; } = 5.00m;
 
+    /// <summary>Whether the worker role runs the scheduled overdue sweep (NX-HD-01). Switch off to pause case opening.</summary>
+    public bool DelinquencySweepEnabled { get; set; } = true;
+
+    /// <summary>Seconds between overdue sweeps (default hourly; the grace period is counted in days).</summary>
+    [Range(1, 86400)]
+    public int DelinquencySweepIntervalSeconds { get; set; } = 3600;
+
     /// <summary>Core money-source register rows (REQ-BIL-354); an absent row fails closed.</summary>
     public Dictionary<string, BillingSourceRow> Sources { get; set; } = new(StringComparer.Ordinal);
 
