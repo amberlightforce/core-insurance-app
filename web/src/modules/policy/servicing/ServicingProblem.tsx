@@ -49,11 +49,7 @@ export function ServicingProblem({ error, title, onGoToVehicle, onRetry }: Servi
   const code = problem.code ?? '';
 
   if (problem.status === 403) {
-    return (
-      <Banner variant="warning" live="alert" title={staff('noPermission.title')}>
-        {t('servicing.problems.forbidden')}
-      </Banner>
-    );
+    return <ProblemBanner error={error} />;
   }
 
   const technical = (

@@ -13,7 +13,7 @@ import {
   textColumn,
   type DataColumn,
 } from '../../../design-system';
-import { problemOf } from '../../staff/problem';
+import { ProblemBanner } from '../../staff/ProblemBanner';
 import { type ReferralListItem, type ReferralQueue, type useReferralList } from '../api';
 import { useIssueTypeLabel, waitingSince } from './helpers';
 import styles from './Workbench.module.css';
@@ -131,29 +131,16 @@ export function QueuePane({ queue, onOpen, list }: QueuePaneProps) {
       </div>
     );
   } else if (query.isError && items.length === 0) {
-    const problem = problemOf(query.error);
     body = (
       <div className={styles.notice}>
-        <Banner
-          variant={problem.status === 403 ? 'warning' : 'danger'}
-          title={problem.status === 403 ? t('noPermission.title') : t('list.error')}
-          live="none"
-          actions={
-            problem.status === 403 ? undefined : (
-              <Button
-                variant="secondary"
-                size="sm"
-                onPress={() => {
-                  void query.refetch();
-                }}
-              >
-                {t('errors.retry')}
-              </Button>
-            )
-          }
-        >
-          {problem.status === 403 ? t('noPermission.body') : (problem.detail ?? problem.title)}
-        </Banner>
+        <ProblemBanner
+          error={query.error}
+          title={t('list.error')}
+          retryLabel={t('errors.retry')}
+          onRetry={() => {
+            void query.refetch();
+          }}
+        />
       </div>
     );
   } else {
