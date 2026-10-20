@@ -1,3 +1,4 @@
+using CoreIns.Rules;
 using System.Globalization;
 using System.Text.Json.Nodes;
 using CoreIns.SharedKernel;
@@ -221,7 +222,7 @@ internal static class SetHashing
     }
 
     /// <summary>Two-decimal fixed text (EUR minor units, D-SL2-06).</summary>
-    public static string Fixed(decimal amount) => decimal.Round(amount, 2, MidpointRounding.ToEven).ToString("F2", CultureInfo.InvariantCulture);
+    public static string Fixed(decimal amount) => DecimalRounding.RoundTo(amount, 2, DecimalRounding.DefaultMoneyMode).ToString("F2", CultureInfo.InvariantCulture);
 
     private static void Add(JsonObject node, string name, string? value)
     {
@@ -235,7 +236,7 @@ internal static class SetHashing
 /// <summary>Money helpers of the slice (EUR only, D-SL2-06: functional and group amounts equal the transaction amount).</summary>
 internal static class ClaimMoney
 {
-    public static Money Eur(decimal amount) => new(decimal.Round(amount, 2, MidpointRounding.ToEven), Currency.EUR);
+    public static Money Eur(decimal amount) => new(DecimalRounding.RoundTo(amount, 2, DecimalRounding.DefaultMoneyMode), Currency.EUR);
 
-    public static Money Of(decimal amount, string currency) => new(decimal.Round(amount, 2, MidpointRounding.ToEven), Currency.FromCode(currency));
+    public static Money Of(decimal amount, string currency) => new(DecimalRounding.RoundTo(amount, 2, DecimalRounding.DefaultMoneyMode), Currency.FromCode(currency));
 }
