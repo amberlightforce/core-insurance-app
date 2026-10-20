@@ -23,6 +23,196 @@ namespace CoreIns.Modules.Work.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Work.Persistence.ActivityRow", b =>
+                {
+                    b.Property<Guid>("ActivityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("activity_id");
+
+                    b.Property<string>("AssigneeId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("assignee_id");
+
+                    b.Property<string>("AssigneeType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("assignee_type");
+
+                    b.Property<DateTime?>("BreachedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("breached_at");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("category");
+
+                    b.Property<string>("CauseRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("cause_ref");
+
+                    b.Property<string>("CloseReason")
+                        .HasColumnType("text")
+                        .HasColumnName("close_reason");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("closed_at");
+
+                    b.Property<string>("ClosedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("closed_by");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("EscalationAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("escalation_at");
+
+                    b.Property<bool>("GateBlocking")
+                        .HasColumnType("boolean")
+                        .HasColumnName("gate_blocking");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("number");
+
+                    b.Property<string>("Outcome")
+                        .HasColumnType("text")
+                        .HasColumnName("outcome");
+
+                    b.Property<string>("PatternCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("pattern_code");
+
+                    b.Property<string>("PatternVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("pattern_version");
+
+                    b.Property<string>("PrimaryId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("primary_id");
+
+                    b.Property<string>("PrimaryModule")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("primary_module");
+
+                    b.Property<string>("PrimaryType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("primary_type");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("priority");
+
+                    b.Property<string>("QueueCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("queue_code");
+
+                    b.Property<string>("RaisingModule")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("raising_module");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("SecondaryRefs")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("secondary_refs");
+
+                    b.Property<string>("SlaPolicy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("sla_policy");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.Property<Guid?>("SubjectPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("subject_party_id");
+
+                    b.Property<DateTime?>("TargetAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("target_at");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ActivityId")
+                        .HasName("pk_activity");
+
+                    b.HasIndex("Number")
+                        .IsUnique()
+                        .HasDatabaseName("ux_activity_number");
+
+                    b.HasIndex("SubjectPartyId")
+                        .HasDatabaseName("ix_activity_subject_party");
+
+                    b.HasIndex("TargetAt")
+                        .HasDatabaseName("ix_activity_sla_sweep")
+                        .HasFilter("state = 'OPEN' AND breached_at IS NULL");
+
+                    b.HasIndex("LegalEntityId", "PrimaryModule", "PrimaryType", "PrimaryId")
+                        .HasDatabaseName("ix_activity_primary_object");
+
+                    b.HasIndex("LegalEntityId", "State", "AssigneeType", "AssigneeId", "TargetAt")
+                        .HasDatabaseName("ix_activity_inbox");
+
+                    b.HasIndex("LegalEntityId", "PatternCode", "PrimaryModule", "PrimaryType", "PrimaryId", "CauseRef")
+                        .IsUnique()
+                        .HasDatabaseName("ux_activity_open_duplicate")
+                        .HasFilter("state = 'OPEN'");
+
+                    b.ToTable("activity", "wrk", t =>
+                        {
+                            t.HasCheckConstraint("ck_activity_assignee_type", "assignee_type IN ('USER', 'GROUP', 'QUEUE')");
+
+                            t.HasCheckConstraint("ck_activity_closed", "(state = 'OPEN') = (closed_at IS NULL)");
+
+                            t.HasCheckConstraint("ck_activity_state", "state IN ('OPEN', 'COMPLETED', 'SKIPPED', 'CANCELLED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Platform.Persistence.DsarRestrictionRow", b =>
                 {
                     b.Property<Guid>("RestrictionId")

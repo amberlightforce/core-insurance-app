@@ -47,6 +47,7 @@ public static class MigrationModule
         services.AddOwnerDecidedApprovalType(BatchApproval.Type);
         services.AddScoped<BatchRunner>();
         services.AddScoped<MigrationReader>();
+        services.AddScoped<MigrationArchiveReader>();
 
         services.AddScoped<IValidator<CreateBatch>, CreateBatchValidator>();
         services.AddCommand<CreateBatch, BatchResponse, CreateBatchHandler>(CommandDescriptor.For("mig.Batch.create"));
@@ -59,6 +60,13 @@ public static class MigrationModule
         services.AddCommand<RegisterXref, XrefView, RegisterXrefHandler>(CommandDescriptor.For("mig.Xref.register"));
         services.AddScoped<IValidator<OverrideRouting>, OverrideRoutingValidator>();
         services.AddCommand<OverrideRouting, RoutingView, OverrideRoutingHandler>(CommandDescriptor.For("mig.Routing.override"));
+
+        services.AddCommand<RedriveBatch, BatchResponse, RedriveBatchHandler>(CommandDescriptor.For("mig.Batch.redrive"));
+        services.AddCommand<CheckConformance, ConformanceResponse, CheckConformanceHandler>(CommandDescriptor.For("mig.ImportContract.conformance"));
+        services.AddCommand<ArchiveSubjectExportCommand, ArchiveDsarResponse, ArchiveDsarHandler>(CommandDescriptor.For("mig.Archive.subjectExport") with { Idempotent = false });
+        services.AddCommand<ArchiveRectificationNoteCommand, ArchiveDsarResponse, ArchiveDsarHandler>(CommandDescriptor.For("mig.Archive.rectificationNote"));
+        services.AddCommand<ArchiveRestrictCommand, ArchiveDsarResponse, ArchiveDsarHandler>(CommandDescriptor.For("mig.Archive.restrict"));
+        services.AddCommand<ArchiveEraseCommand, ArchiveDsarResponse, ArchiveDsarHandler>(CommandDescriptor.For("mig.Archive.erase") with { SupportsDryRun = true });
 
         services.AddScoped<IMigrationXrefService, MigrationXrefService>();
         services.AddScoped<IMigrationRoutingService, MigrationRoutingService>();

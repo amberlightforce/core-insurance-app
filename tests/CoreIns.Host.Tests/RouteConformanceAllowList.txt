@@ -99,9 +99,6 @@ CONTRACT_NOT_SERVED GET /api/fin/v1/reconciliation/detail
 CONTRACT_NOT_SERVED GET /api/fin/v1/tax-returns
 CONTRACT_NOT_SERVED GET /api/fin/v1/tax-returns/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/written-premium/query
-CONTRACT_NOT_SERVED GET /api/mig/v1/archives/search
-CONTRACT_NOT_SERVED GET /api/mig/v1/archives/{}
-CONTRACT_NOT_SERVED GET /api/mig/v1/enquiries/get
 CONTRACT_NOT_SERVED GET /api/mkt/v1/capabilities/get
 CONTRACT_NOT_SERVED GET /api/mkt/v1/changeover/configuration
 CONTRACT_NOT_SERVED GET /api/mkt/v1/configuration/compare
@@ -207,9 +204,6 @@ CONTRACT_NOT_SERVED GET /api/uw/v1/issues/list-for-channel
 CONTRACT_NOT_SERVED GET /api/uw/v1/issues/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/refusal-registers/query
 CONTRACT_NOT_SERVED GET /api/uw/v1/renewal-directions/{}
-CONTRACT_NOT_SERVED GET /api/wrk/v1/activities
-CONTRACT_NOT_SERVED GET /api/wrk/v1/activities/blocking-status
-CONTRACT_NOT_SERVED GET /api/wrk/v1/activities/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/desktop/get
 CONTRACT_NOT_SERVED GET /api/wrk/v1/inbound-documents
 CONTRACT_NOT_SERVED GET /api/wrk/v1/inbound-documents/{}
@@ -529,12 +523,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/recalculate
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/record-filing
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/request-payment
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/transition
-CONTRACT_NOT_SERVED POST /api/mig/v1/archives/erase
-CONTRACT_NOT_SERVED POST /api/mig/v1/archives/rectification-note
-CONTRACT_NOT_SERVED POST /api/mig/v1/archives/restrict
-CONTRACT_NOT_SERVED POST /api/mig/v1/archives/subject-export
-CONTRACT_NOT_SERVED POST /api/mig/v1/batches/redrive
-CONTRACT_NOT_SERVED POST /api/mig/v1/import-contracts/conformance
 CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests
 CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/approve
 CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/import
@@ -885,12 +873,7 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/test
 CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/validate
 CONTRACT_NOT_SERVED POST /api/uw/v1/rules/evaluate-batch
 CONTRACT_NOT_SERVED POST /api/uw/v1/valuation/compute
-CONTRACT_NOT_SERVED POST /api/wrk/v1/activities
-CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/assign
 CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/bulk-reassign
-CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/cancel
-CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/complete
-CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/skip
 CONTRACT_NOT_SERVED POST /api/wrk/v1/assignments/simulate
 CONTRACT_NOT_SERVED POST /api/wrk/v1/command-registries/register
 CONTRACT_NOT_SERVED POST /api/wrk/v1/data-subject/erase
@@ -917,7 +900,6 @@ CONTRACT_NOT_SERVED POST /api/wrk/v1/notes/edit
 CONTRACT_NOT_SERVED POST /api/wrk/v1/notes/export
 CONTRACT_NOT_SERVED POST /api/wrk/v1/participants/assign-by-rules
 CONTRACT_NOT_SERVED POST /api/wrk/v1/participants/change
-CONTRACT_NOT_SERVED POST /api/wrk/v1/queues/get-next
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/close
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/reply
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/request-info
