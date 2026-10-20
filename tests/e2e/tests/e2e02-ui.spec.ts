@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type Browser, type Page } from '@playwright/test';
+import { advanceServerPast, serverClockNow } from './support/time.js';
 import { call, signIn, type Json } from './support/api.js';
 
 // E2E-02a through the claims screens in a real browser (Greek UI, role-based locators; SLICE-PLAN-2, D-SL2-01..13):
@@ -110,7 +111,7 @@ test('E2E-02a through the claims screens', async ({ page, browser, request }) =>
   expect(created.status, created.text).toBe(201);
   const party = created.body['party']['partyId'] as string;
 
-  const start = new Date(Math.ceil((Date.now() + 25_000) / 60_000) * 60_000);
+  const start = new Date(Math.ceil(((await serverClockNow(request)).getTime() + 25_000) / 60_000) * 60_000);
   const effectiveAt = start.toISOString().replace('.000Z', 'Z');
   const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Athens', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(start);
   const lossTime = parts; // HH:mm in Athens
@@ -144,7 +145,7 @@ test('E2E-02a through the claims screens', async ({ page, browser, request }) =>
   const policyNumber = bind.body['policyNumber'] as string;
   expect(policyNumber).toMatch(/^POL\d+$/);
   // The loss minute is the start minute: wait until it is in the past on the server too.
-  while (Date.now() < start.getTime() + 4000) await new Promise((done) => setTimeout(done, 500));
+  await advanceServerPast(request, new Date(start.getTime() + 4000));
 
   // ---- 2. FNOL as the claims handler.
   await signInAs(page, HANDLER);

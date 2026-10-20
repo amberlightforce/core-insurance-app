@@ -44,7 +44,8 @@ internal static class FallbackPlanner
 {
     public const string Locked = "LOCKED";
 
-    public static TimeZoneInfo Athens { get; } = TimeZoneInfo.FindSystemTimeZoneById("Europe/Athens");
+    // TODO(hardening): static callers without a legal-entity context (controller TryTime, Dates.ValidDate) still use Athens; thread the entity zone through.
+    public static TimeZoneInfo Athens => CoreIns.Platform.Time.BusinessTimeZone.Athens;
 
     public static Result<FallbackPlan> Plan(IReadOnlyList<VersionFacts> versions, ProductVersionNumber defectiveNumber, BusinessDate fallbackDate)
     {
@@ -94,4 +95,7 @@ internal static class FallbackPlanner
 
     /// <summary>The Athens business date of an instant (PITFALLS 14). The zone lookup throws when unknown: it never falls back to UTC.</summary>
     public static BusinessDate AthensDate(Instant instant) => instant.ToBusinessDate(Athens);
+
+    /// <summary>The business date of an instant in the legal entity's zone.</summary>
+    public static BusinessDate DateIn(Instant instant, TimeZoneInfo zone) => instant.ToBusinessDate(zone);
 }

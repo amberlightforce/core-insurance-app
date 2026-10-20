@@ -61,8 +61,8 @@ internal sealed class WithdrawalsController : ControllerBase
     [Authorize(Policy = ChannelsPermissions.WithdrawalGet)]
     public async Task<IResult> GetAsync(string id, [FromServices] WithdrawalReader reader, CancellationToken cancellationToken)
     {
-        // TODO(hardening): a portal customer may read only requests of their own policies.
-        var found = await reader.GetAsync(LegalEntity(), id, cancellationToken).ConfigureAwait(false);
+        // TODO(hardening): also admit a portal customer who owns the policy but did not declare the request (needs a party link).
+        var found = await reader.GetAsync(LegalEntity(), id, OwnerFilter(), cancellationToken).ConfigureAwait(false);
         return found is null
             ? Problem(DomainError.Of(ModuleCode.CHN, "NOT-FOUND", "The withdrawal request does not exist in your legal entity."))
             : Results.Ok(found);
@@ -74,7 +74,18 @@ internal sealed class WithdrawalsController : ControllerBase
     public async Task<IResult> ListAsync(
         [FromQuery] string? requestNumber, [FromQuery] string? cursor, [FromQuery] int? limit,
         [FromServices] WithdrawalReader reader, CancellationToken cancellationToken) =>
-        Results.Ok(await reader.ListAsync(LegalEntity(), requestNumber, cursor, limit, cancellationToken).ConfigureAwait(false));
+        Results.Ok(await reader.ListAsync(LegalEntity(), requestNumber, cursor, limit, OwnerFilter(), cancellationToken).ConfigureAwait(false));
+
+    /// <summary>
+    /// A caller holding only the portal role sees just the requests they declared (null = no restriction: staff by permission).
+    /// Fails closed: anyone without a staff or platform role is restricted.
+    /// </summary>
+    private string? OwnerFilter()
+    {
+        var context = HttpContext.RequestServices.GetRequiredService<RequestContext>();
+        var staff = context.Roles.Any(r => r.StartsWith("Staff.", StringComparison.Ordinal) || r.StartsWith("Platform.", StringComparison.Ordinal));
+        return staff ? null : context.Actor.ToString();
+    }
 
     private LegalEntityId LegalEntity()
     {

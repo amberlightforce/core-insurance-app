@@ -59,8 +59,9 @@ internal sealed class EvaluateRulesHandler(
 
             var risk = UwRisk.Parse(snapshot);
             // The business date of a Greek legal entity is the Europe/Athens date, not the UTC date.
-            var effective = request.EffectiveDate?.Value ?? clock.Now.ToBusinessDate(AthensOrUtc()).Value;
-            var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity.")).Value;
+            var caller = context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity.");
+            var effective = request.EffectiveDate?.Value ?? clock.Now.ToBusinessDate(legalEntities.TimeZoneOf(caller)).Value;
+            var legalEntity = legalEntities.Resolve(caller).Value;
             await store.EnsureSeededAsync(cancellationToken).ConfigureAwait(false);
             var ruleSet = await store.ResolveAsync(request.ProductCode!, request.Checkpoint == RulesEvaluateRequest.CheckpointValue.PreQuote ? "PRE_QUOTE" : "PRE_BIND", effective, cancellationToken).ConfigureAwait(false)
                 ?? throw new DomainException(DomainError.Of(ModuleCode.UW, "RULESET-UNRESOLVED", $"No rule set is active for {request.ProductCode} on {effective:yyyy-MM-dd}."));
@@ -256,18 +257,6 @@ internal sealed class EvaluateRulesHandler(
         catch (DomainException ex)
         {
             return ex.Error;
-        }
-    }
-
-    private static TimeZoneInfo AthensOrUtc()
-    {
-        try
-        {
-            return TimeZoneInfo.FindSystemTimeZoneById("Europe/Athens");
-        }
-        catch (TimeZoneNotFoundException)
-        {
-            return TimeZoneInfo.Utc;
         }
     }
 
