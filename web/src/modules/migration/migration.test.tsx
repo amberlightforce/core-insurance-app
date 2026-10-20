@@ -8,7 +8,8 @@ import type { BatchResponse, BatchView } from './api';
 import { BatchPage } from './BatchPage';
 import { MigrationHomePage } from './MigrationHomePage';
 import { parseItems } from './parseItems';
-import { RequireMigrationRole } from './RequireMigrationRole';
+import { RequireRole } from '../../auth/RequireRole';
+import { migrationRoles } from '../../auth/roles';
 
 vi.setConfig({ testTimeout: 60_000 });
 
@@ -184,7 +185,10 @@ describe('migration batch screens', () => {
 
   it('shows the no-permission state to other roles', () => {
     signIn(['Staff.Billing']);
-    renderScreen(<RequireMigrationRole />, { path: '/admin/migration', url: '/admin/migration' });
+    renderScreen(<RequireRole roles={migrationRoles} />, {
+      path: '/admin/migration',
+      url: '/admin/migration',
+    });
     expect(screen.getByText('Δεν έχετε δικαίωμα')).toBeInTheDocument();
   });
 });

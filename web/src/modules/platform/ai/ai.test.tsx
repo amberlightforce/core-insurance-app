@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from '../../../i18n';
 import { mockApi, renderScreen } from '../../../test/mockApi';
 import { AiControlPage } from './AiControlPage';
-import { RequireAiRole } from './RequireAiRole';
+import { RequireRole } from '../../../auth/RequireRole';
+import { aiAdminRoles } from '../../../auth/roles';
 
 const session = vi.hoisted(() => ({ roles: ['Platform.Admin'] as string[] }));
 vi.mock('../../../dev-auth/devAuth', async (importOriginal) => ({
@@ -104,7 +105,7 @@ describe('AI control page', () => {
   it('guards the route for non-administrators', () => {
     session.roles = ['Staff.ClaimsHandler'];
     mockApi([]);
-    renderScreen(<RequireAiRole />, { path: '/admin/ai', url: '/admin/ai' });
+    renderScreen(<RequireRole roles={aiAdminRoles} />, { path: '/admin/ai', url: '/admin/ai' });
     expect(screen.queryByRole('switch')).not.toBeInTheDocument();
   });
 });

@@ -6,7 +6,8 @@ import { mockApi, problem, renderScreen, type MockRoute } from '../../test/mockA
 import { expectNoA11yViolations } from '../../test/axe';
 import { DecisionBar } from './DecisionBar';
 import { EditContractPage, NewContractPage } from './ContractEditorPage';
-import { RequireReinsuranceRole } from './RequireReinsuranceRole';
+import { RequireRole } from '../../auth/RequireRole';
+import { reinsuranceRoles } from '../../auth/roles';
 import { ReinsuranceHomePage } from './ReinsuranceHomePage';
 import { treaty } from './fixtures';
 import { ClaimRecoveriesPage } from './ClaimRecoveriesPage';
@@ -173,7 +174,10 @@ describe('reinsurance registry and treaty editor', () => {
   it('shows the no-permission state to unrelated roles', async () => {
     signIn('claims', ['Staff.ClaimsHandler']);
     mockApi([]);
-    renderScreen(<RequireReinsuranceRole />, { path: '/reinsurance', url: '/reinsurance' });
+    renderScreen(<RequireRole roles={reinsuranceRoles} />, {
+      path: '/reinsurance',
+      url: '/reinsurance',
+    });
     expect(await screen.findByText(/πρόσβαση|δικαίωμα/i)).toBeInTheDocument();
   });
 });

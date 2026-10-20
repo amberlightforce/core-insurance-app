@@ -1,7 +1,5 @@
+import { packRoles } from '../../../auth/roles';
 import { useDevSession } from '../../../dev-auth/devAuth';
-
-/** Roles that see the registry (illustrative until the PLT role grants land; the API enforces mkt.Pack.list). */
-const viewerRoles = ['Platform.ReleaseManager', 'Platform.DesignAuthority', 'Platform.Admin'];
 
 export interface Caller {
   id: string;
@@ -24,6 +22,6 @@ export function useCaller(): Caller {
     name: user?.name ?? '',
     canRequest: roles.includes('Platform.ReleaseManager'),
     canDecide: roles.includes('Platform.DesignAuthority'),
-    canView: roles.some((r) => viewerRoles.includes(r)),
+    canView: roles.some((r) => packRoles.some((p) => p === r)),
   };
 }

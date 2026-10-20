@@ -1,7 +1,7 @@
+import { dsarRoles } from '../../../auth/roles';
 import { useDevSession } from '../../../dev-auth/devAuth';
 
-/** Roles that work the DSAR console (permissions cmp.Dsar.*, cmp.DisclosureLog.*); the API enforces each call. */
-export const dsarRoles = ['Staff.ComplianceOfficer', 'Platform.Admin'] as const;
+export { dsarRoles };
 
 export function useDsarCaller() {
   const session = useDevSession();

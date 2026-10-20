@@ -2,8 +2,25 @@ import { Navigate, type RouteObject } from 'react-router';
 
 import { AppLayout, ModulePlaceholder } from './App';
 import { adminNavItem, defaultNavItems } from './app-shell/navigation';
+import { RequireRole } from './auth/RequireRole';
+import {
+  aiAdminRoles,
+  billingRoles,
+  claimsRoles,
+  dsarRoles,
+  migrationRoles,
+  packRoles,
+  packRollbackReviewerRoles,
+  reinsuranceRoles,
+  underwritingRoles,
+  withdrawalRoles,
+} from './auth/roles';
 import { DevSignIn } from './dev-auth/DevSignIn';
 import { HomePage } from './modules/home/HomePage';
+
+const loadWorkbench = async () => ({
+  Component: (await import('./modules/underwriting/workbench/WorkbenchPage')).WorkbenchPage,
+});
 
 /** Module routes load on demand (D-FE-23): the staff screens of the thin slice. */
 const moduleRoutes: RouteObject[] = [
@@ -44,16 +61,14 @@ const moduleRoutes: RouteObject[] = [
   },
   {
     path: 'policies/referrals',
-    lazy: async () => ({
-      Component: (await import('./modules/underwriting/workbench/WorkbenchPage')).WorkbenchPage,
-    }),
+    element: <RequireRole roles={underwritingRoles} />,
+    children: [{ index: true, lazy: loadWorkbench }],
   },
   {
     // The «Ανάληψη κινδύνου» rail entry opens the same referral workbench (SL5-UI-UW-WB).
     path: 'underwriting',
-    lazy: async () => ({
-      Component: (await import('./modules/underwriting/workbench/WorkbenchPage')).WorkbenchPage,
-    }),
+    element: <RequireRole roles={underwritingRoles} />,
+    children: [{ index: true, lazy: loadWorkbench }],
   },
   {
     path: 'policies/:policyId',
@@ -97,9 +112,7 @@ const moduleRoutes: RouteObject[] = [
   {
     // SL4-UI-BIL: receivables and FS_CLEARING release approvals (billing roles; the guard is shared with refunds).
     path: 'billing/receivables',
-    lazy: async () => ({
-      Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
-    }),
+    element: <RequireRole roles={billingRoles} />,
     children: [
       {
         index: true,
@@ -120,9 +133,7 @@ const moduleRoutes: RouteObject[] = [
   {
     // SL6-UI-BIL-DELINQ: delinquency cases (billing roles; guard shared with refunds).
     path: 'billing/delinquency',
-    lazy: async () => ({
-      Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
-    }),
+    element: <RequireRole roles={billingRoles} />,
     children: [
       {
         index: true,
@@ -142,9 +153,7 @@ const moduleRoutes: RouteObject[] = [
   },
   {
     path: 'billing/releases',
-    lazy: async () => ({
-      Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
-    }),
+    element: <RequireRole roles={billingRoles} />,
     children: [
       {
         index: true,
@@ -163,11 +172,9 @@ const moduleRoutes: RouteObject[] = [
     ],
   },
   {
-    // Refund screens: billing roles see them, everyone else the no-permission state (RequireRefundRole).
+    // Refund screens: billing roles see them, everyone else the no-permission state.
     path: 'billing/refunds',
-    lazy: async () => ({
-      Component: (await import('./modules/billing/refunds/RequireRefundRole')).RequireRefundRole,
-    }),
+    element: <RequireRole roles={billingRoles} />,
     children: [
       {
         index: true,
@@ -184,11 +191,9 @@ const moduleRoutes: RouteObject[] = [
     ],
   },
   {
-    // Claims screens: a claims role sees them, everyone else the no-permission state (RequireClaimsRole).
+    // Claims screens: a claims role sees them, everyone else the no-permission state.
     path: 'claims',
-    lazy: async () => ({
-      Component: (await import('./modules/claims/RequireClaimsRole')).RequireClaimsRole,
-    }),
+    element: <RequireRole roles={claimsRoles} />,
     children: [
       {
         index: true,
@@ -242,9 +247,7 @@ const moduleRoutes: RouteObject[] = [
 moduleRoutes.push(
   {
     path: 'admin/packs',
-    lazy: async () => ({
-      Component: (await import('./modules/market/packs/RequirePackRole')).RequirePackRole,
-    }),
+    element: <RequireRole roles={packRoles} />,
     children: [
       {
         index: true,
@@ -267,11 +270,9 @@ moduleRoutes.push(
     ],
   },
   {
-    // AI control plane (SL6-UI-PLT-AI): AI administrators only (RequireAiRole).
+    // AI control plane (SL6-UI-PLT-AI): AI administrators only.
     path: 'admin/ai',
-    lazy: async () => ({
-      Component: (await import('./modules/platform/ai/RequireAiRole')).RequireAiRole,
-    }),
+    element: <RequireRole roles={aiAdminRoles} />,
     children: [
       {
         index: true,
@@ -283,10 +284,7 @@ moduleRoutes.push(
   },
   {
     path: 'policies/pack-rollback',
-    lazy: async () => ({
-      Component: (await import('./modules/policy/packRollback/RequireReviewerRole'))
-        .RequireReviewerRole,
-    }),
+    element: <RequireRole roles={packRollbackReviewerRoles} />,
     children: [
       {
         index: true,
@@ -307,10 +305,7 @@ moduleRoutes.push(
 );
 moduleRoutes.push({
   path: 'reinsurance',
-  lazy: async () => ({
-    Component: (await import('./modules/reinsurance/RequireReinsuranceRole'))
-      .RequireReinsuranceRole,
-  }),
+  element: <RequireRole roles={reinsuranceRoles} />,
   children: [
     {
       index: true,
@@ -347,9 +342,7 @@ moduleRoutes.push({
 
 moduleRoutes.push({
   path: 'admin/migration',
-  lazy: async () => ({
-    Component: (await import('./modules/migration/RequireMigrationRole')).RequireMigrationRole,
-  }),
+  element: <RequireRole roles={migrationRoles} />,
   children: [
     {
       index: true,
@@ -368,9 +361,7 @@ moduleRoutes.push({
 
 moduleRoutes.push({
   path: 'compliance/dsar',
-  lazy: async () => ({
-    Component: (await import('./modules/compliance/dsar/RequireDsarRole')).RequireDsarRole,
-  }),
+  element: <RequireRole roles={dsarRoles} />,
   children: [
     {
       index: true,
@@ -398,10 +389,7 @@ moduleRoutes.push(
   },
   {
     path: 'channels/withdrawals',
-    lazy: async () => ({
-      Component: (await import('./modules/channels/withdrawal/RequireWithdrawalRole'))
-        .RequireWithdrawalRole,
-    }),
+    element: <RequireRole roles={withdrawalRoles} />,
     children: [
       {
         index: true,

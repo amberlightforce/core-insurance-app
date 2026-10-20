@@ -6,7 +6,8 @@ import { mockApi, problem, renderScreen } from '../../../test/mockApi';
 import type { DsarCase } from './api';
 import { DsarCasePage } from './DsarCasePage';
 import { DsarListPage } from './DsarListPage';
-import { RequireDsarRole } from './RequireDsarRole';
+import { RequireRole } from '../../../auth/RequireRole';
+import { dsarRoles } from '../../../auth/roles';
 
 vi.setConfig({ testTimeout: 60_000 });
 
@@ -204,7 +205,10 @@ describe('DSAR console', () => {
 
   it('shows the no-permission state to other roles', () => {
     signIn(['Staff.Billing']);
-    renderScreen(<RequireDsarRole />, { path: '/compliance/dsar', url: '/compliance/dsar' });
+    renderScreen(<RequireRole roles={dsarRoles} />, {
+      path: '/compliance/dsar',
+      url: '/compliance/dsar',
+    });
     expect(screen.getByText('Δεν έχετε δικαίωμα')).toBeInTheDocument();
   });
 });

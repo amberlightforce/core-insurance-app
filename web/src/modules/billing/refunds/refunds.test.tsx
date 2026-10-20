@@ -10,7 +10,8 @@ import { InvoicePage } from '../InvoicePage';
 import type { RefundView } from './api';
 import { RefundDetailPage } from './RefundDetailPage';
 import { RefundsInboxPage } from './RefundsInboxPage';
-import { RequireRefundRole } from './RequireRefundRole';
+import { RequireRole } from '../../../auth/RequireRole';
+import { billingRoles } from '../../../auth/roles';
 
 vi.setConfig({ testTimeout: 60_000 });
 
@@ -161,7 +162,10 @@ describe('RefundsInboxPage', () => {
   it('shows the no-permission state to a role without billing', async () => {
     signIn('claims', ['Staff.ClaimsHandler']);
     mockApi([]);
-    renderScreen(<RequireRefundRole />, { path: '/billing/refunds', url: '/billing/refunds' });
+    renderScreen(<RequireRole roles={billingRoles} />, {
+      path: '/billing/refunds',
+      url: '/billing/refunds',
+    });
     expect(await screen.findByText(/δικαίωμα|πρόσβαση/i)).toBeInTheDocument();
   });
 });
