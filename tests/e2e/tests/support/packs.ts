@@ -1,5 +1,5 @@
 import { expect, type APIRequestContext } from '@playwright/test';
-import { call, signIn, type Json } from './api.js';
+import { call, settled, signIn, type Json } from './api.js';
 import { createParty, iso, PRODUCT, serverNow, VEHICLE_VALUE } from './servicing.js';
 
 // Helpers of the slice-5 pack-rollback journey (E2E-12).
@@ -68,14 +68,7 @@ export async function currentHash(request: APIRequestContext): Promise<string> {
 
 /** Counts every FIN journal (paged), once the async posting has settled (two equal reads 4 s apart). */
 export async function settledJournalCount(request: APIRequestContext): Promise<number> {
-  let last = await journalCount(request);
-  for (let i = 0; i < 30; i++) {
-    await new Promise((done) => setTimeout(done, 4000));
-    const now = await journalCount(request);
-    if (now === last) return now;
-    last = now;
-  }
-  throw new Error('FIN journals never settled');
+  return settled('FIN journals to settle', () => journalCount(request), { intervalMs: 2000 });
 }
 
 async function journalCount(request: APIRequestContext): Promise<number> {

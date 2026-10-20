@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test, type APIRequestContext } from '@playwright/test';
+import { advanceServerPast, serverClockNow } from './support/time.js';
 import { call as rawCall, cents, eur, eventually, money, signIn, sum, type Json } from './support/api.js';
 
 // E2E-02a claims happy path at API level (SLICE-PLAN-2; D-SL2-01): policy in force -> FNOL -> coverage verified on the POL
@@ -60,7 +61,7 @@ test('E2E-02a claims happy path: FNOL, reserves, four-eyes approval, final payme
     return created.body['party']['partyId'] as string;
   });
 
-  const start = new Date(Date.now() + 20_000);
+  const start = new Date((await serverClockNow(request)).getTime() + 20_000);
   start.setUTCMilliseconds(0);
   const effectiveAt = start.toISOString().replace('.000Z', 'Z');
   const bound = await test.step('quote and bind a motor policy with own damage that is in force today', async () => {
@@ -104,7 +105,7 @@ test('E2E-02a claims happy path: FNOL, reserves, four-eyes approval, final payme
 
   // The loss is dated one second into the term; wait until that instant is in the past on the server too.
   const lossAt = new Date(start.getTime() + 1000).toISOString().replace('.000Z', 'Z');
-  while (Date.now() < start.getTime() + 4000) await new Promise((done) => setTimeout(done, 500));
+  await advanceServerPast(request, new Date(start.getTime() + 4000));
 
   // ---- 2. FNOL as the claims handler: coverage verified on the POL snapshot, own-damage exposure for the insured.
   const fnol = await test.step('FNOL (staff channel) with an own-damage exposure', async () => {
