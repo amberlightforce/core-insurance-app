@@ -32,6 +32,9 @@ export const migrationRoles = ['Staff.MigrationManager', 'Platform.Admin'] as co
 /** Roles that work the DSAR console (permissions cmp.Dsar.*, cmp.DisclosureLog.*). */
 export const dsarRoles = ['Staff.ComplianceOfficer', 'Platform.Admin'] as const;
 
+/** Roles that work the compliance landing: complaints and statutory clocks (cmp.Complaint.*, cmp.Clock.*). */
+export const complianceRoles = ['Staff.ComplianceOfficer', 'Platform.Admin'] as const;
+
 /** Roles that administer the AI control plane (illustrative; plt.AiToggle.set / plt.Ai.killSwitch). */
 export const aiAdminRoles = ['Platform.Admin', 'Platform.AiGovernor'] as const;
 

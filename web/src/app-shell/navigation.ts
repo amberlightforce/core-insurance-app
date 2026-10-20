@@ -1,6 +1,7 @@
 import {
   aiAdminRoles,
   claimsRoles,
+  complianceRoles,
   dsarRoles,
   migrationRoles,
   packRoles,
@@ -25,6 +26,7 @@ export interface NavItem {
 export {
   aiAdminRoles,
   claimsRoles,
+  complianceRoles,
   dsarRoles,
   migrationRoles,
   packRoles,
@@ -57,6 +59,7 @@ export const defaultNavItems: NavItem[] = [
   },
   { id: 'finance', to: '/finance' },
   { id: 'documents', to: '/documents' },
+  { id: 'compliance', to: '/compliance', roles: complianceRoles },
   {
     id: 'compliance',
     to: '/compliance/dsar',

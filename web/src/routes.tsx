@@ -1,4 +1,4 @@
-import { Navigate, type RouteObject } from 'react-router';
+import { type RouteObject } from 'react-router';
 
 import { AppLayout, ModulePlaceholder } from './App';
 import { adminNavItem, defaultNavItems } from './app-shell/navigation';
@@ -7,6 +7,7 @@ import {
   aiAdminRoles,
   billingRoles,
   claimsRoles,
+  complianceRoles,
   dsarRoles,
   migrationRoles,
   packRoles,
@@ -360,6 +361,21 @@ moduleRoutes.push({
 });
 
 moduleRoutes.push({
+  // NX-UI-09: complaints and statutory clocks landing; DSARs hang off it.
+  path: 'compliance',
+  element: <RequireRole roles={complianceRoles} />,
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/compliance/home/ComplianceHomePage'))
+          .ComplianceHomePage,
+      }),
+    },
+  ],
+});
+
+moduleRoutes.push({
   path: 'compliance/dsar',
   element: <RequireRole roles={dsarRoles} />,
   children: [
@@ -440,8 +456,6 @@ export const routes: RouteObject[] = [
           path: `${item.to.slice(1)}/*`,
           element: <ModulePlaceholder />,
         })),
-      // Compliance has one screen so far (DSAR); its bare path opens it.
-      { path: 'compliance', element: <Navigate to="/compliance/dsar" replace /> },
       ...moduleRoutes,
       // Development-only local sign-in (D-SLC-03); shows an empty state when the API does not offer it.
       { path: 'dev/sign-in', element: <DevSignIn /> },

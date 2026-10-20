@@ -1,0 +1,32 @@
+{
+  "home": {
+    "overline": "Compliance",
+    "title": "Compliance",
+    "lead": "Customer complaints and the statutory clocks that govern them, plus data-subject requests.",
+    "clocks": {
+      "title": "Statutory clocks",
+      "open": "open",
+      "empty": "No statutory clocks are running.",
+      "columns": { "code": "Clock", "subject": "Subject", "status": "Status", "deadline": "Due" },
+      "status": {
+        "RUNNING": "Running",
+        "WARNED": "Due soon",
+        "PAUSED": "Paused",
+        "MET": "Met",
+        "BREACHED": "Breached",
+        "ELAPSED": "Elapsed",
+        "CANCELLED": "Cancelled"
+      }
+    },
+    "complaints": {
+      "title": "Complaints",
+      "empty": "No complaints on file.",
+      "columns": { "number": "Number", "status": "Status", "deadline": "Next deadline" }
+    },
+    "dsar": {
+      "title": "Data-subject requests",
+      "body": "Open, verify and fulfil GDPR access, portability, erasure, restriction and objection requests.",
+      "open": "Open the DSAR console"
+    }
+  }
+}
