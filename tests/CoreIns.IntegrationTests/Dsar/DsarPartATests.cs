@@ -71,11 +71,11 @@ public sealed class DsarPartATests(PostgresFixture database) : IClassFixture<Pos
         again.Outcomes.Select(o => (o.RecordClass, o.Kind)).ToArray().ShouldBe(erase.Outcomes.Select(o => (o.RecordClass, o.Kind)).ToArray());
 
         (await ScalarAsync($"SELECT risk_tree::text FROM pol.quote_version WHERE job_id = '{draftJob}'")).ShouldBe("{}");
-        (await ScalarAsync($"SELECT count(*) FROM pol.quote_version q JOIN pol.job j USING (job_id) WHERE j.policyholder_party_id = '{party}' AND q.risk_tree <> '{{}}'::jsonb")).ShouldBe("1");
+        (await ScalarAsync($"SELECT count(*) FROM pol.quote_version q JOIN pol.job j USING (job_id) WHERE j.policyholder_party_id = '{party}' AND q.risk_tree <> jsonb_build_object()")).ShouldBe("1");
     }
 
     [Fact]
-    public async Task UW_and_RAT_report_every_class_and_never_skip_silently()
+    public async Task UW_and_RAT_report_every_class_for_a_stranger_as_not_held()
     {
         await using var host = new ApiHostFactory(database.AppConnectionString);
         var subject = SubjectRef.ForParty(new PartyId(Guid.CreateVersion7()));
@@ -86,8 +86,55 @@ public sealed class DsarPartATests(PostgresFixture database) : IClassFixture<Pos
             (await participant.ExportAsync(subject, context, Ct)).Outcomes.ShouldNotBeEmpty();
             var erase = await participant.EraseAsync(subject, context, Ct);
             erase.Outcomes.ShouldNotBeEmpty();
-            erase.Outcomes.ShouldAllBe(o => o.Kind == DsarOutcomeKind.NotHeld && o.Detail != null);
+            erase.Outcomes.ShouldAllBe(o => o.Kind == DsarOutcomeKind.NotHeld);
         }
+    }
+
+    [Fact]
+    public async Task UW_and_RAT_find_the_subjects_rows_through_the_POL_job_and_retain_them_on_erase()
+    {
+        var party = Guid.CreateVersion7();
+        var job = await SeedJobAsync(party, bound: false);
+        var quote = await ScalarAsync($"SELECT quote_id FROM pol.quote_version WHERE job_id = '{job}'");
+        var other = Guid.CreateVersion7();
+        var otherJob = await SeedJobAsync(other, bound: false);
+        var hash = new string('a', 64);
+        var worksheet = new string('b', 64);
+        var otherWorksheet = new string('c', 64);
+        await ExecuteAsync($"""
+            INSERT INTO uw.rule_set_version (rule_set_code, version_no, product_code, checkpoint, content_hash, status, effective_from, data_status, definition, created_at, created_by)
+            VALUES ('RS', '1', 'P', 'PRE_QUOTE', '{hash}', 'Active', current_date, 'ILLUSTRATIVE_TEST_DATA', jsonb_build_object(), now(), 'test');
+            INSERT INTO uw.evaluation (evaluation_id, legal_entity_id, job_id, checkpoint, rule_set_code, rule_set_version, rule_set_hash, snapshot_ref, snapshot_hash, outcome, lane, trace, facts, created_at, created_by)
+            VALUES ('{Guid.CreateVersion7()}', '{ApiHostFactory.LegalEntityId}', '{job}', 'PRE_QUOTE', 'RS', '1', '{hash}', 's', '{hash}', 'ACCEPT', 'AUTO', '[]'::jsonb, jsonb_build_object(), now(), 'test'),
+                   ('{Guid.CreateVersion7()}', '{ApiHostFactory.LegalEntityId}', '{otherJob}', 'PRE_QUOTE', 'RS', '1', '{hash}', 's', '{hash}', 'ACCEPT', 'AUTO', '[]'::jsonb, jsonb_build_object(), now(), 'test');
+            INSERT INTO rat.rating_artifact (artefact_hash, artefact_code, label, product_code, product_version, engine_version, data_status, definition, created_at, created_by)
+            VALUES ('{hash}', 'A', 'a', 'P', '1.0', '1', 'ILLUSTRATIVE_TEST_DATA', jsonb_build_object(), now(), 'test');
+            INSERT INTO rat.worksheet (worksheet_id, legal_entity_id, jurisdiction, artefact_hash, configuration_hash, input_hash, engine_version, data_status, body, created_at, created_by)
+            VALUES ('{worksheet}', '{ApiHostFactory.LegalEntityId}', 'GR', '{hash}', '{hash}', '{hash}', '1', 'ILLUSTRATIVE_TEST_DATA', jsonb_build_object(), now(), 'test'),
+                   ('{otherWorksheet}', '{ApiHostFactory.LegalEntityId}', 'GR', '{hash}', '{hash}', '{hash}', '1', 'ILLUSTRATIVE_TEST_DATA', jsonb_build_object(), now(), 'test');
+            INSERT INTO rat.worksheet_index (worksheet_id, legal_entity_id, quote_id, job_id, mode, retention_state, created_at)
+            VALUES ('{worksheet}', '{ApiHostFactory.LegalEntityId}', '{quote}', '{job}', 'QUOTE', 'QUOTE', now()),
+                   ('{otherWorksheet}', '{ApiHostFactory.LegalEntityId}', NULL, '{otherJob}', 'QUOTE', 'QUOTE', now());
+            """);
+        await using var host = new ApiHostFactory(database.AppConnectionString);
+        var subject = SubjectRef.ForParty(new PartyId(party));
+        var context = new DsarContext(Guid.NewGuid(), "tester", "dpo");
+
+        var uw = Participant(host, "UW");
+        (await uw.ExportAsync(subject, context, Ct)).Outcomes.Single(o => o.RecordClass == "UW_EVALUATION").RecordCount.ShouldBe(1);
+        var uwErase = await uw.EraseAsync(subject, context, Ct);
+        var evaluation = uwErase.Outcomes.Single(o => o.RecordClass == "UW_EVALUATION");
+        evaluation.Kind.ShouldBe(DsarOutcomeKind.Restricted);
+        evaluation.Detail.ShouldNotBeNull().ShouldStartWith("NOT_ERASED");
+        (await ScalarAsync($"SELECT count(*) FROM uw.evaluation WHERE job_id = '{job}'")).ShouldBe("1");
+
+        var rat = Participant(host, "RAT");
+        var export = await rat.ExportAsync(subject, context, Ct);
+        export.Outcomes.Single().RecordCount.ShouldBe(1);
+        export.ExportPayload.ShouldNotBeNull().ShouldContain(worksheet);
+        export.ExportPayload.ShouldNotContain(otherWorksheet);
+        (await rat.EraseAsync(subject, context, Ct)).Outcomes.Single().Detail.ShouldNotBeNull().ShouldStartWith("NOT_ERASED");
+        (await ScalarAsync($"SELECT count(*) FROM rat.worksheet WHERE worksheet_id = '{worksheet}'")).ShouldBe("1");
     }
 
     private static IDsarParticipant Participant(ApiHostFactory host, string module) =>

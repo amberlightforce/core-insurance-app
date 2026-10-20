@@ -17,7 +17,7 @@ internal sealed class MigrationDsarParticipant(IServiceScopeFactory scopes) : ID
 {
     internal const string Xref = "MIGRATION_XREF";
     internal const string Archive = "MIGRATION_ARCHIVE";
-    private const string Basis = "Migration audit archive of legacy data (GDPR Art. 17(3)(b); retention period unset, F-404)";
+    internal const string Basis = "Migration audit archive of legacy data (GDPR Art. 17(3)(b); retention period unset, F-404)";
 
     public string Module => "MIG";
 
@@ -31,6 +31,18 @@ internal sealed class MigrationDsarParticipant(IServiceScopeFactory scopes) : ID
             ? DsarRecordOutcome.NotHeld(d.Class)
             : DsarRecordOutcome.Restricted(d.Class, Basis, d.Count) with { Detail = "exported" }).ToList();
         return new DsarModuleResult(Module, outcomes, JsonSerializer.Serialize(data.ToDictionary(d => d.Class, d => d.Rows)));
+    }
+
+    /// <summary>Dry run of restrict/erase: the outcomes that would be recorded, writing nothing.</summary>
+    internal async Task<DsarModuleResult> PreviewAsync(SubjectRef subject, string? retentionEnd, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(subject);
+        await using var scope = scopes.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<MigrationDbContext>();
+        var outcomes = (await CollectAsync(db, subject, ct).ConfigureAwait(false))
+            .Select(d => d.Count == 0 ? DsarRecordOutcome.NotHeld(d.Class) : DsarRecordOutcome.Restricted(d.Class, Basis, d.Count, retentionEnd))
+            .ToList();
+        return new DsarModuleResult(Module, outcomes);
     }
 
     public Task<DsarModuleResult> RestrictAsync(SubjectRef subject, string reason, string legalBasis, DateOnly? retentionEnd, CancellationToken ct = default) =>

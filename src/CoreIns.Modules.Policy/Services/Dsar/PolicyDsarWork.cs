@@ -93,13 +93,17 @@ internal sealed class PolicyDsarWork(DbSession session, DsarRetentionPolicy poli
             else if (policy.RestrictInsteadOfErase(recordClass, Basis, count) is { } restricted)
             {
                 await DsarSql.RestrictAsync(session, id, recordClass, Basis, restricted.RetentionEnd ?? DsarRetention.UnsetF404, "erase request: retained", context.RequestedBy, ct).ConfigureAwait(false);
-                outcomes.Add(restricted);
+                outcomes.Add(restricted with { Detail = DsarRetentionPolicy.NotErasedDetail(Basis) });
             }
             else if (recordClass == QuoteDraft)
             {
-                // TODO(hardening): outbox/audit copies and the job resolution manifest are not scrubbed.
+                // Outbox and audit copies are append-only platform records: PLT reports them restricted, they are not rewritten here.
                 await DsarSql.ExecuteAsync(session,
                     "UPDATE pol.quote_version q SET risk_tree = '{}'::jsonb, issues = NULL FROM pol.job j WHERE j.job_id = q.job_id AND j.policyholder_party_id = @p AND j.bound_transaction_id IS NULL",
+                    id, ct).ConfigureAwait(false);
+                // The job's resolution manifest (what was resolved for the draft) goes with it; bound jobs keep theirs (policy record).
+                await DsarSql.ExecuteAsync(session,
+                    "UPDATE pol.job SET resolution_manifest = '{}'::jsonb WHERE policyholder_party_id = @p AND bound_transaction_id IS NULL",
                     id, ct).ConfigureAwait(false);
                 outcomes.Add(new DsarRecordOutcome(recordClass, DsarOutcomeKind.Anonymised, count));
             }
@@ -107,7 +111,7 @@ internal sealed class PolicyDsarWork(DbSession session, DsarRetentionPolicy poli
             {
                 // Unknown class that is not configured restrict-only: fail closed.
                 await DsarSql.RestrictAsync(session, id, recordClass, Basis, DsarRetention.UnsetF404, "erase request: retained", context.RequestedBy, ct).ConfigureAwait(false);
-                outcomes.Add(DsarRecordOutcome.Restricted(recordClass, Basis, count));
+                outcomes.Add(DsarRecordOutcome.Restricted(recordClass, Basis, count) with { Detail = DsarRetentionPolicy.NotErasedDetail(Basis) });
             }
         }
 

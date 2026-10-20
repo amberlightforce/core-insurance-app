@@ -31,6 +31,15 @@ internal static class MigrationPermissions
     public const string BatchReverse = "mig.Batch.reverse";
     public const string BatchGet = "mig.Batch.get";
     public const string BatchOutcomes = "mig.Batch.outcomes";
+    public const string BatchRedrive = "mig.Batch.redrive";
+    public const string EnquiryGet = "mig.Enquiry.get";
+    public const string ArchiveSearch = "mig.Archive.search";
+    public const string ArchiveGet = "mig.Archive.get";
+    public const string ArchiveSubjectExport = "mig.Archive.subjectExport";
+    public const string ArchiveRectificationNote = "mig.Archive.rectificationNote";
+    public const string ArchiveRestrict = "mig.Archive.restrict";
+    public const string ArchiveErase = "mig.Archive.erase";
+    public const string ImportContractConformance = "mig.ImportContract.conformance";
 }
 
 /// <summary>REST facade of the migration framework (contracts/openapi/mig.yaml paths; create and approve are SL6-MIG-FRAME additions).</summary>
@@ -126,4 +135,53 @@ internal sealed class MigrationController : ControllerBase
     [Authorize(Policy = MigrationPermissions.BatchGet)]
     public async Task<IResult> GetBatchAsync(Guid id, [FromServices] MigrationReader reader, CancellationToken cancellationToken) =>
         (await reader.GetBatchAsync(id, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    [HttpPost("batches/redrive")]
+    [Authorize(Policy = MigrationPermissions.BatchRedrive)]
+    public async Task<IResult> RedriveBatchAsync([FromBody] RedriveBatchRequest body, [FromServices] ICommandHandler<RedriveBatch, BatchResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new RedriveBatch(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    [HttpGet("enquiries/get")]
+    [Authorize(Policy = MigrationPermissions.EnquiryGet)]
+    public async Task<IResult> GetEnquiryAsync(
+        [FromQuery] string? party, [FromQuery] string? policyKey, [FromQuery] string? claimKey,
+        [FromServices] MigrationArchiveReader reader, CancellationToken cancellationToken) =>
+        (await reader.EnquireAsync(party, policyKey, claimKey, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    [HttpGet("archives/search")]
+    [Authorize(Policy = MigrationPermissions.ArchiveSearch)]
+    public async Task<IResult> SearchArchiveAsync(
+        [FromQuery] string? keys, [FromQuery] string? cursor, [FromQuery] int? limit,
+        [FromServices] MigrationArchiveReader reader, CancellationToken cancellationToken) =>
+        (await reader.SearchAsync(keys, cursor, limit, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    [HttpGet("archives/{id:guid}")]
+    [Authorize(Policy = MigrationPermissions.ArchiveGet)]
+    public async Task<IResult> GetArchiveAsync(Guid id, [FromServices] MigrationArchiveReader reader, CancellationToken cancellationToken) =>
+        (await reader.GetAsync(id, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    [HttpPost("archives/subject-export")]
+    [Authorize(Policy = MigrationPermissions.ArchiveSubjectExport)]
+    public async Task<IResult> SubjectExportAsync([FromBody] ArchiveDsarBody body, [FromServices] ICommandHandler<ArchiveSubjectExportCommand, ArchiveDsarResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ArchiveSubjectExportCommand(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    [HttpPost("archives/rectification-note")]
+    [Authorize(Policy = MigrationPermissions.ArchiveRectificationNote)]
+    public async Task<IResult> RectificationNoteAsync([FromBody] ArchiveDsarBody body, [FromServices] ICommandHandler<ArchiveRectificationNoteCommand, ArchiveDsarResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ArchiveRectificationNoteCommand(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    [HttpPost("archives/restrict")]
+    [Authorize(Policy = MigrationPermissions.ArchiveRestrict)]
+    public async Task<IResult> RestrictArchiveAsync([FromBody] ArchiveDsarBody body, [FromServices] ICommandHandler<ArchiveRestrictCommand, ArchiveDsarResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ArchiveRestrictCommand(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    [HttpPost("archives/erase")]
+    [Authorize(Policy = MigrationPermissions.ArchiveErase)]
+    public async Task<IResult> EraseArchiveAsync([FromBody] ArchiveDsarBody body, [FromServices] ICommandHandler<ArchiveEraseCommand, ArchiveDsarResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ArchiveEraseCommand(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    [HttpPost("import-contracts/conformance")]
+    [Authorize(Policy = MigrationPermissions.ImportContractConformance)]
+    public async Task<IResult> ConformanceAsync([FromBody] ConformanceBody body, [FromServices] ICommandHandler<CheckConformance, ConformanceResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new CheckConformance(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 }
