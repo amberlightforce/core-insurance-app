@@ -20,7 +20,7 @@ namespace CoreIns.Modules.Claims.Commands;
 internal static class LiabilityMapping
 {
     public static bool Valid(Contracts.Api.LiabilityFacts facts) =>
-        (facts.InsuredFaultPct is null || (facts.InsuredFaultPct is >= 0m and <= 100m && decimal.Round(facts.InsuredFaultPct.Value, 2) == facts.InsuredFaultPct))
+        (facts.InsuredFaultPct is null || (facts.InsuredFaultPct is >= 0m and <= 100m && decimal.Round(facts.InsuredFaultPct.Value, 2, MidpointRounding.ToZero) == facts.InsuredFaultPct))
         && (facts.VehicleCount is null or >= 1)
         && (facts.FaultSource is null || System.Text.RegularExpressions.Regex.IsMatch(facts.FaultSource, "^[A-Z][A-Z0-9_]{0,63}$"));
 
