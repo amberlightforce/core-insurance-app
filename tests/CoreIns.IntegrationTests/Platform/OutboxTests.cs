@@ -207,7 +207,7 @@ public sealed class OutboxTests(PostgresFixture database) : IClassFixture<Postgr
             o.HandlerBatchSize = 1;
         });
         var aggregate = Guid.CreateVersion7();
-        await harness.SendAsync(new CreateWidget("refused", 1m, aggregate));
+        await harness.SendAsync(new CreateWidget("perm-fail", 1m, aggregate));
         await harness.SendAsync(new CreateWidget("after", 2m, aggregate));
         harness.Behaviour.Permanent = true;
         harness.Behaviour.FailWhile = e => e.AggregateSequence == 1 && e.AggregateId == aggregate.ToString();
