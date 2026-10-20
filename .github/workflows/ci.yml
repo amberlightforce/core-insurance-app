@@ -177,7 +177,7 @@ jobs:
           docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.0
           git /repo --config /repo/.gitleaks.toml --redact --no-banner --verbose
 
-      - name: No deployable config enables DevAuthentication or ASPNETCORE_ENVIRONMENT=Development
+      - name: Guard - deployable config stays out of dev mode
         run: python3 scripts/check-no-dev-config.py
 
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
