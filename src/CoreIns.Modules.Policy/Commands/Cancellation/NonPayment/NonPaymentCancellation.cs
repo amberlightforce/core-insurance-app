@@ -233,12 +233,19 @@ internal sealed partial class CancellationForNonPaymentRequestedHandler(
         if (executed.IsFailure)
         {
             // The cancellation handler may have saved part of its work; throwing makes the event transaction roll all of it back.
-            // TODO(hardening): a permanent refusal (term already cancelled, out of sequence) retries until dead-lettered; park it in the PSR queue instead.
-            throw new InvalidOperationException($"The non-payment cancellation of request {payload.RequestId} was refused: {executed.Error}");
+            // A DomainError is a business refusal (term already cancelled, out of sequence, gate failed): a retry cannot cure it, so it
+            // is dead-lettered at once. Only an unavailable dependency is worth the normal retry with backoff.
+            // TODO(hardening): park permanent refusals in the PSR queue as well, so staff see them without reading the dead-letter table.
+            var message = $"The non-payment cancellation of request {payload.RequestId} was refused: {executed.Error}";
+            throw IsTransient(executed.Error!) ? new InvalidOperationException(message) : new PermanentEventFailureException(message);
         }
 
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
+
+    /// <summary>True for a refusal that may pass on its own (a dependency was unavailable); everything else is permanent.</summary>
+    internal static bool IsTransient(DomainError error) =>
+        error.Code.ToString().EndsWith("DEPENDENCY-UNAVAILABLE", StringComparison.Ordinal);
 
     private async Task<string?> ExceptionReasonAsync(PolicyRow policy, CancellationForNonPaymentRequestedV1 payload, CancellationToken cancellationToken)
     {

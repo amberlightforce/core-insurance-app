@@ -6,6 +6,7 @@ using CoreIns.Platform.Events;
 using CoreIns.Platform.Persistence;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Results;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -236,5 +237,17 @@ public sealed class NonPaymentCancellationTests(PostgresFixture database) : ICla
         public bool Vulnerable { get; set; }
 
         public Task<bool> IsVulnerableAsync(PartyId party, CancellationToken cancellationToken) => Task.FromResult(Vulnerable);
+    }
+}
+
+/// <summary>NX-HD-10: which cancellation refusals are retried and which are dead-lettered at once.</summary>
+public sealed class NonPaymentRefusalClassificationTests
+{
+    [Fact]
+    public void A_business_refusal_is_permanent_and_an_unavailable_dependency_is_transient()
+    {
+        CancellationForNonPaymentRequestedHandler.IsTransient(DomainError.Of(ModuleCode.POL, "DEPENDENCY-UNAVAILABLE")).ShouldBeTrue();
+        CancellationForNonPaymentRequestedHandler.IsTransient(DomainError.Of(ModuleCode.POL, "ILLEGAL-TRANSITION")).ShouldBeFalse();
+        CancellationForNonPaymentRequestedHandler.IsTransient(DomainError.Of(ModuleCode.POL, "GATE-FAILED")).ShouldBeFalse();
     }
 }

@@ -65,10 +65,39 @@ internal sealed class DisbursementReader(BillingDbContext db)
     }
 
     /// <summary>A page of the entity's disbursements, newest first (cursor = the offset of the next page).</summary>
-    public async Task<DisbursementListPage> ListAsync(LegalEntityId legalEntity, string? cursor, int? limit, CancellationToken cancellationToken)
+    public async Task<DisbursementListPage> ListAsync(LegalEntityId legalEntity, string? cursor, int? limit, CancellationToken cancellationToken) =>
+        await ListAsync(legalEntity, cursor, limit, DisbursementFilter.None, cancellationToken).ConfigureAwait(false);
+
+    /// <summary>A filtered page (server-side), newest first.</summary>
+    public async Task<DisbursementListPage> ListAsync(LegalEntityId legalEntity, string? cursor, int? limit, DisbursementFilter filter, CancellationToken cancellationToken)
     {
         var size = Math.Clamp(limit ?? 50, 1, 200);
         var query = db.Disbursements.AsNoTracking().Where(d => d.LegalEntityId == legalEntity);
+        if (filter.State is { } state)
+        {
+            query = query.Where(d => d.State == state);
+        }
+
+        if (filter.SourceType is { } sourceType)
+        {
+            query = query.Where(d => d.SourceType == sourceType);
+        }
+
+        if (filter.PayeeAccountId is { } payee)
+        {
+            query = query.Where(d => d.PayeeAccountId == payee);
+        }
+
+        if (filter.RequestedFrom is { } from)
+        {
+            query = query.Where(d => d.RequestedAt >= from);
+        }
+
+        if (filter.RequestedBefore is { } before)
+        {
+            query = query.Where(d => d.RequestedAt < before);
+        }
+
         var offset = int.TryParse(cursor, out var skip) && skip > 0 ? skip : 0;
         var rows = await query.OrderByDescending(d => d.RequestedAt).ThenByDescending(d => d.DisbursementId).Skip(offset).Take(size + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
         var page = rows.Take(size).ToList();
@@ -120,4 +149,10 @@ internal sealed class DisbursementReader(BillingDbContext db)
                 : null,
         };
     }
+}
+
+/// <summary>Server-side filters of the disbursement list; codes are the stored upper-snake codes, the time range is [from, before).</summary>
+internal sealed record DisbursementFilter(string? State, string? SourceType, Guid? PayeeAccountId, Instant? RequestedFrom, Instant? RequestedBefore)
+{
+    public static DisbursementFilter None { get; } = new(null, null, null, null, null);
 }

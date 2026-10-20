@@ -35,7 +35,11 @@
         "bil.Delinquency.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
         "bil.Delinquency.recordContact": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.Delinquency.arrange": [ "Staff.Billing", "Staff.BillingManager" ],
-        "bil.Delinquency.releaseHold": [ "Staff.Billing", "Staff.BillingManager" ]
+        "bil.Delinquency.releaseHold": [ "Staff.Billing", "Staff.BillingManager" ],
+        // NX-HD-08c: levy/IPT accrual reads (finance + billing manager) and the migrated-records inspection lists (billing staff).
+        "bil.TaxLevy.periods": [ "Staff.Finance", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.TaxLevy.detail": [ "Staff.Finance", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.MigratedRecord.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ]
       }
     },
     "Authority": {

@@ -21,13 +21,24 @@ internal sealed class DelinquencyReader(BillingDbContext db)
     }
 
     public async Task<DelinquencyListPage> ListAsync(
-        LegalEntityId legalEntity, BillingAccountId? account, string? state, string? cursor, int? limit, CancellationToken cancellationToken)
+        LegalEntityId legalEntity, BillingAccountId? account, string? state, string? cursor, int? limit, CancellationToken cancellationToken,
+        Guid? policyId = null, string? trigger = null)
     {
         var size = Math.Clamp(limit ?? 50, 1, 200);
         var query = db.DelinquencyCases.AsNoTracking().Where(c => c.LegalEntityId == legalEntity);
         if (account is { } a)
         {
             query = query.Where(c => c.BillingAccountId == a);
+        }
+
+        if (policyId is { } p)
+        {
+            query = query.Where(c => c.PolicyId == new PolicyId(p));
+        }
+
+        if (!string.IsNullOrEmpty(trigger))
+        {
+            query = query.Where(c => c.Trigger == trigger);
         }
 
         if (!string.IsNullOrEmpty(state))
