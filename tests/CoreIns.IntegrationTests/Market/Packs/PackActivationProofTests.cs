@@ -9,6 +9,7 @@ public sealed class PackActivationProofTests
     private static readonly string[] TreatmentKeys =
     [
         "tax.treatment.rule.TAX.CANCELLATION.Policyholder",
+        "tax.treatment.rule.TAX.CANCELLATION.NonPayment",
         "tax.treatment.rule.TAX.ENDORSEMENT_CREDIT.ANY",
         "tax.treatment.rule.TAX.RETURN_PREMIUM.ANY",
         "tax.treatment.rule.TAX.REFUND.ANY",

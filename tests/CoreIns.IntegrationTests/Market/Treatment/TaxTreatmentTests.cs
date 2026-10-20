@@ -136,7 +136,6 @@ public sealed class TaxTreatmentTests
 
     [Theory]
     [InlineData("Insurer")]
-    [InlineData("NonPayment")]
     [InlineData("DistanceWithdrawal")]
     [InlineData("LongTermWithdrawal")]
     [InlineData("Objection")]
@@ -317,7 +316,7 @@ public sealed class TaxTreatmentTests
     {
         var rows = Build("Development").Engine.Catalogue.Entries.Where(e => e.Key.StartsWith(TaxTreatmentRules.KeyPrefix, StringComparison.Ordinal)).ToList();
 
-        rows.Count.ShouldBe(9);
+        rows.Count.ShouldBe(10);
         rows.ShouldAllBe(e => e.LegalStatus == LegalStatus.PendingOpinion && e.Key.StartsWith("tax.treatment.rule.TAX.", StringComparison.Ordinal) && e.SourceRef.Contains("REQ-MKT-331"));
     }
 

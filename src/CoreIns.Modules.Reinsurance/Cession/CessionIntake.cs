@@ -16,8 +16,14 @@ internal sealed class ChargeDeltaCessionHandler(CessionIntake intake) : IEventHa
 {
     public const string Name = "RI.ChargeDeltaEmitted.Cession";
 
-    public Task HandleAsync(EventEnvelope envelope, ChargeDeltaEmittedV1 payload, CancellationToken cancellationToken) =>
-        intake.OnChargeDeltaAsync(envelope, payload, cancellationToken);
+    public Task HandleAsync(EventEnvelope envelope, ChargeDeltaEmittedV1 payload, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(payload);
+
+        // Opening deltas of a migrated in-force policy are history, not new business: they are not ceded again (E2E-05 step 3).
+        // TODO(hardening): the unexpired part of the legacy cession for the remaining term.
+        return payload.Opening == true ? Task.CompletedTask : intake.OnChargeDeltaAsync(envelope, payload, cancellationToken);
+    }
 }
 
 /// <summary>

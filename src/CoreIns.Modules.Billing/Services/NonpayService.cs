@@ -103,6 +103,9 @@ internal sealed class NonpayService(
             BusinessKeys.Empty.With("policyTermId", termId.Value.ToString()).With("processId", row.CaseId.ToString()));
 
         // D-SL6-03: registered post only; rendering is not proof, so the clock waits for DocumentDelivered.
+        // D-SL6-15 (idempotency): a sweep opens several cases inside one request that may carry an Idempotency-Key; each notice uses a
+        // key derived from its case and template, never the ambient request key (else DOC-ERR-IDEMPOTENCY-MISMATCH on the second case).
+        using var noticeKey = context.Use(NoticeKey(row.CaseId), dryRun: false);
         var outcome = await services.GetRequiredService<IDocumentRequestService>().RequestAsync(
             new DocumentRequestSpec(
                 Nonpay.NoticeTemplate,
@@ -125,6 +128,16 @@ internal sealed class NonpayService(
         Touch(row);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return row;
+    }
+
+    /// <summary>Deterministic per-case idempotency key of the notice document request (case id + template).</summary>
+    internal static IdempotencyKey NoticeKey(Guid caseId)
+    {
+        var hash = System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes($"BIL:nonpay-notice:{caseId:D}:{Nonpay.NoticeTemplate}"));
+        var bytes = hash.AsSpan(0, 16).ToArray();
+        bytes[7] = (byte)((bytes[7] & 0x0F) | 0x40);
+        bytes[8] = (byte)((bytes[8] & 0x3F) | 0x80);
+        return IdempotencyKey.From(new Guid(bytes));
     }
 
     /// <summary>Opens a case for every term with an invoice overdue past the grace period; resumes arrangements whose promise date passed unpaid.</summary>

@@ -22,7 +22,7 @@ public sealed class PackVersionsTests
         pack.Values.ShouldBe([.. pack.Versions[1].Values]);
         pack.Versions[0].Values.Any(IsTreatment).ShouldBeFalse();
         pack.Versions[1].Values.Where(v => !IsTreatment(v)).ToList().ShouldBe([.. pack.Versions[0].Values]);
-        pack.Versions[1].Values.Count(IsTreatment).ShouldBe(9);
+        pack.Versions[1].Values.Count(IsTreatment).ShouldBe(10);
     }
 
     [Fact]
