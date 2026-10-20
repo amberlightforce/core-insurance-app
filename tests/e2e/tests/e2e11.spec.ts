@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { call, cents, eventually, signIn, sum, type Json } from './support/api.js';
+import { call, cents, eventually, settled, signIn, sum, type Json } from './support/api.js';
 import { scalar, sql } from './support/pg.js';
 import { importProducts, issuePolicy, iso, serverNow } from './support/servicing.js';
 import { advanceToAthens, athensDate } from './support/withdrawal.js';
@@ -188,7 +188,9 @@ test('E2E-11 out-of-sequence change: claim re-verified once, BIL respread, FIN c
   expect(scalar(`SELECT count(*) FROM ri.cession_exception WHERE term_id = '${policy.termId}'`)).toBe('0');
 
   // ---- 10. Once: one PolicyChanged for the whole correction and one ReverificationRequired for the claim, however long we wait.
-  await new Promise((done) => setTimeout(done, 8_000));
+  // Wait for the outbox to drain (every message dispatched, and the count stable), then assert the counts.
+  await eventually('the outbox to drain', async () => (scalar(`SELECT count(*) FROM plt.outbox_message WHERE dispatched_at IS NULL`) === '0' ? true : undefined), { timeoutMs: 120_000 });
+  await settled('the outbox message count to settle', async () => scalar(`SELECT count(*) FROM plt.outbox_message`), { timeoutMs: 60_000 });
   expect(scalar(`SELECT count(*) FROM plt.outbox_message WHERE event_type = 'PolicyChanged' AND business_keys->>'transactionId' = '${oosTransaction}'`)).toBe('1');
   expect(scalar(`SELECT count(*) FROM plt.outbox_message WHERE event_type = 'ReverificationRequired' AND business_keys->>'claimId' = '${claimId}'`)).toBe('1');
   expect(scalar(`SELECT count(*) FROM ri.cession WHERE term_id = '${policy.termId}' AND set_key = '${oosTransaction}'`), 'one cession row per set').toBe('1');
