@@ -1,4 +1,4 @@
-// Storage account (StorageV2, LRS) with containers documents and audit-archive (immutability policies), inbound and
+// Storage account (StorageV2; replication SKU per stamp) with containers documents and audit-archive (immutability policies), inbound and
 // exports. Public access off, soft delete on, firewall allows snet-apps only (INFRASTRUCTURE §6.2).
 
 param location string
@@ -21,6 +21,19 @@ param immutabilityRetentionDays int
 @description('Soft-delete retention (days) for blobs and containers.')
 param softDeleteDays int = 7
 
+@description('Replication SKU. Prod uses a geo-zone-redundant SKU so a regional loss keeps documents and the audit archive.')
+@allowed(['Standard_LRS', 'Standard_ZRS', 'Standard_GRS', 'Standard_GZRS', 'Standard_RAGRS', 'Standard_RAGZRS'])
+param skuName string = 'Standard_LRS'
+
+@description('Blob versioning plus change feed: an overwritten or deleted blob can be recovered from a prior version (docs/runbooks/backup-restore.md).')
+param enableVersioning bool = false
+
+@description('Retention (days) of the change feed. 0 keeps it indefinitely.')
+param changeFeedRetentionDays int = 0
+
+@description('Add a CanNotDelete management lock on the account.')
+param lockAccount bool = false
+
 var blobContributorRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
 var immutableContainers = ['documents', 'audit-archive']
 var mutableContainers = ['inbound', 'exports']
@@ -29,7 +42,7 @@ resource account 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: name
   location: location
   tags: tags
-  sku: { name: 'Standard_LRS' }
+  sku: { name: skuName }
   kind: 'StorageV2'
   properties: {
     accessTier: 'Hot'
@@ -55,6 +68,8 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01'
   properties: {
     deleteRetentionPolicy: { enabled: true, days: softDeleteDays }
     containerDeleteRetentionPolicy: { enabled: true, days: softDeleteDays }
+    isVersioningEnabled: enableVersioning
+    changeFeed: enableVersioning ? { enabled: true, retentionInDays: changeFeedRetentionDays == 0 ? null : changeFeedRetentionDays } : { enabled: false }
   }
 }
 
@@ -84,6 +99,12 @@ resource mutable 'Microsoft.Storage/storageAccounts/blobServices/containers@2023
     properties: { publicAccess: 'None' }
   }
 ]
+
+resource accountLock 'Microsoft.Authorization/locks@2020-05-01' = if (lockAccount) {
+  scope: account
+  name: 'lock-no-delete'
+  properties: { level: 'CanNotDelete', notes: 'Documents and the audit archive live here; remove the lock deliberately.' }
+}
 
 resource contributors 'Microsoft.Authorization/roleAssignments@2022-04-01' = [
   for principalId in blobContributorPrincipalIds: {
