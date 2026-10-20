@@ -56,6 +56,7 @@ public static class PlatformModule
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
+        services.AddHostedService<BusinessTimeZoneStartupCheck>();
         services.AddOptions<StampOptions>().Bind(configuration.GetSection(StampOptions.Section));
         services.AddOptions<OutboxOptions>().Bind(configuration.GetSection(OutboxOptions.Section));
         services.AddOptions<AuthorityOptions>().Bind(configuration.GetSection(AuthorityOptions.Section));
