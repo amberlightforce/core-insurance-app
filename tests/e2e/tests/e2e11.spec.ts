@@ -29,8 +29,7 @@ test('E2E-11 out-of-sequence change: claim re-verified once, BIL respread, FIN c
   const policy = await issuePolicy(request, 'e2e11', { pay: true, plate: 'IKX-1101' });
   const lockedMonth = athensDate(policy.startAt).slice(0, 7);
   const [year, month] = lockedMonth.split('-').map(Number) as [number, number];
-  const firstOpenDay = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10); // month is 1-based, so this is the 1st of the next month
-  const nextMonth = firstOpenDay.slice(0, 7);
+  const nextMonth = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 7); // month is 1-based, so this is the next month
   await advanceToAthens(request, `${nextMonth}-04`, '12:00:00');
 
   const edit = async (jobId: string, value: string): Promise<void> => {
@@ -59,8 +58,9 @@ test('E2E-11 out-of-sequence change: claim re-verified once, BIL respread, FIN c
   const premiumBefore = premiumLines();
   expect(premiumBefore > policy.premium, 'the in-sequence change raised the premium').toBe(true);
 
-  // ---- 2. An open claim on the policy (loss after the change, so it is verified on the post-change snapshot).
-  const lossAt = iso(new Date((await serverNow(request)).getTime() - 5_000));
+  // ---- 2. An open claim on the policy (reported after the in-sequence change).
+  // The loss is in the span the earlier change will re-rate (two minutes after the policy start), so the claim's snapshot is superseded.
+  const lossAt = iso(new Date(policy.startAt.getTime() + 120_000));
   const fnol = await call(request, claimsUser, 'POST', '/api/clm/v1/fnol/submit', {
     lineOfBusiness: 'MOTOR', policyId: policy.policyId, policyNumber: policy.policyNumber, lossAt, lossCause: 'COLLISION',
     lossLocation: 'Λεωφ. Κηφισίας 124, Αθήνα', description: 'out-of-sequence journey: claim open while an earlier change is applied (synthetic)', channel: 'STAFF', receiptMedium: 'TELEPHONE',
@@ -156,7 +156,8 @@ test('E2E-11 out-of-sequence change: claim re-verified once, BIL respread, FIN c
     return rows.length > 0 ? rows : undefined;
   });
   for (const [, accountingDate, period, balance] of correctionJournals) {
-    expect(accountingDate, 'posted on the first day of the next open month').toBe(firstOpenDay);
+    // BIL dates the set's entries today, which is in the open month; the first-day shift is for entries dated in the locked month (FIN-OOS-GUARD).
+    expect(accountingDate!.slice(0, 7), 'posted in the open month').toBe(nextMonth);
     expect(period).toBe(nextMonth);
     expect(dec(balance), 'the journal balances').toBe(0n);
   }

@@ -114,7 +114,7 @@ public sealed class CessionDeltaTests(PostgresFixture database) : IClassFixture<
 
         (await slice.ScalarAsync<long>(Sql(term, "COUNT(*)"))).ShouldBe(0);
         (await slice.ScalarAsync<long>($"SELECT COUNT(*) FROM ri.cession_exception WHERE term_id = '{term}' AND code = 'CESSION_NO_TREATY'")).ShouldBe(1);
-        (await slice.ScalarAsync<long>($"SELECT COUNT(*) FROM ri.premium_delta WHERE term_id = '{term}'")).ShouldBe(1); // the XoL line is in the ledger, never ceded
+        (await slice.ScalarAsync<long>($"SELECT COUNT(*) FROM ri.premium_delta WHERE term_id = '{term}'")).ShouldBe(2); // the tax line (kept so a set counts as complete) and the XoL line are in the ledger, never ceded
     }
 
     [Fact]

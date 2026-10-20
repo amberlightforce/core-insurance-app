@@ -2,17 +2,17 @@
 # Automated E2E-11 out-of-sequence change with an open claim and a cession (API level) on a fresh Docker Compose stack.
 #
 #   tests/e2e/run-e2e11.sh                  # build the image, start project "coreins-e2e11", run the test, tear down (down -v)
-#   KEEP_STACK=1 tests/e2e/run-e2e11.sh     # leave the stack running afterwards (http://127.0.0.1:33000)
+#   KEEP_STACK=1 tests/e2e/run-e2e11.sh     # leave the stack running afterwards (http://127.0.0.1:35000)
 #   SKIP_BUILD=1 tests/e2e/run-e2e11.sh     # reuse an already built coreins-host:e2e11 image
 #
-# The stack uses its own compose project name, host ports in the 33000 range (tests/e2e/stack/e2e11.env) and its own image
+# The stack uses its own compose project name, host ports in the 35000 range (tests/e2e/stack/e2e11.env) and its own image
 # tag, so it runs beside a developer's own "coreins" stack without touching it. Needs docker (compose v2.24+), node >= 24, curl.
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT=$(cd "$HERE/../.." && pwd)
 PROJECT=coreins-e2e11
-API=${E2E_BASE_URL:-http://127.0.0.1:33000}
+API=${E2E_BASE_URL:-http://127.0.0.1:35000}
 COMPOSE=(docker compose -p "$PROJECT" --project-directory "$ROOT/infra/local"
   -f "$ROOT/infra/local/compose.yaml" -f "$ROOT/tests/e2e/stack/compose.e2e11.yaml" --env-file "$ROOT/tests/e2e/stack/e2e11.env")
 

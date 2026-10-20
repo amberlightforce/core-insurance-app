@@ -8,6 +8,9 @@ internal sealed record SourceLine(string Account, string Side, Money Amount, IRe
     public string? Dimension(string key) => Dimensions.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value) ? value : null;
 
     public Guid? Id(string key) => Guid.TryParse(Dimension(key), out var id) ? id : null;
+
+    /// <summary>The entry type of the entry this line came from, set when several entries of a delta set are posted as one journal (rules resolve per line); null means the journal's entry type.</summary>
+    public string? OwnEntryType { get; init; }
 }
 
 /// <summary>
@@ -76,14 +79,15 @@ internal static class EntryPosting
         {
             // A zero line moves nothing and posts nothing, so it needs no rule: a credit that carries an explicit 0.00 IPT
             // line (KEEP_NOT_REDUCED, D-SL3-05) leaves the tax payable untouched instead of becoming an intake exception.
-            if (line.Amount.IsZero && ServicingEntryTypes.All.Contains(entry.EntryType, StringComparer.Ordinal))
+            var lineEntryType = line.OwnEntryType ?? entry.EntryType;
+            if (line.Amount.IsZero && ServicingEntryTypes.All.Contains(lineEntryType, StringComparer.Ordinal))
             {
                 continue;
             }
 
             var category = line.Dimension(LineDimensionKeys.ChargeCategory);
             var chargeType = line.Dimension(LineDimensionKeys.ChargeType);
-            var match = PostingRules.Resolve(book.RuleSet.Rules, sourceEvent, entry.EntryType, line.Account, category, chargeType);
+            var match = PostingRules.Resolve(book.RuleSet.Rules, sourceEvent, lineEntryType, line.Account, category, chargeType);
             if (match.Rule is not { } rule)
             {
                 return PostingOutcome.Fail(match.Reason!, match.Detail!);
