@@ -21,8 +21,11 @@ public sealed class GrPackConfiguration : IVersionedPackConfigurationSource
     /// </summary>
     public const string FirstVersion = "0.1.0";
 
-    /// <summary>Newest version of this pack data (semantic, REQ-MKT-129): 0.1.0 plus the treatment rows (MINOR).</summary>
-    public const string Version = "0.2.0";
+    /// <summary>0.1.0 plus the treatment rows (MINOR). Shipped: its content never changes (REQ-MKT-129, D-SL5-07).</summary>
+    public const string SecondVersion = "0.2.0";
+
+    /// <summary>Newest version of this pack data (semantic, REQ-MKT-129): 0.2.0 plus the two levy treatment rows of a distance-withdrawal void (NX-HD-06, MINOR).</summary>
+    public const string Version = "0.3.0";
 
     /// <inheritdoc />
     public string PackId => GrPack.PackId;
@@ -34,13 +37,14 @@ public sealed class GrPackConfiguration : IVersionedPackConfigurationSource
     public string Country => GrPack.Country;
 
     /// <inheritdoc />
-    public IReadOnlyList<PackConfigValue> Values { get; } = [.. Core, .. GrTreatmentRules.Values];
+    public IReadOnlyList<PackConfigValue> Values { get; } = [.. Core, .. GrTreatmentRules.Values, .. GrLevyTreatmentRules.Values];
 
     /// <inheritdoc />
     public IReadOnlyList<PackVersionData> Versions { get; } =
     [
         new(FirstVersion, Core),
-        new(Version, [.. Core, .. GrTreatmentRules.Values]),
+        new(SecondVersion, [.. Core, .. GrTreatmentRules.Values]),
+        new(Version, [.. Core, .. GrTreatmentRules.Values, .. GrLevyTreatmentRules.Values]),
     ];
 
     private static IReadOnlyList<PackConfigValue> Core { get; } =

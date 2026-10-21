@@ -211,10 +211,11 @@ public sealed class RegulatoryGoLiveChecklistTests
         levy.Single(v => v.Key.EndsWith("split_basis", StringComparison.Ordinal)).Type.ShouldBe(ConfigValueType.Text);
         levy.Single(v => v.Key.EndsWith(".base", StringComparison.Ordinal)).Type.ShouldBe(ConfigValueType.Text);
 
-        // No levy appears in the treatment rows either (they cover the IPT category only).
+        // The treatment rows cover the IPT category only, plus (0.3.0, NX-HD-06) the levy lines of a distance-withdrawal void.
         new GrPackConfiguration().Values
-            .Where(v => v.Key.StartsWith("tax.treatment.rule.", StringComparison.Ordinal))
-            .ShouldAllBe(v => v.Key.StartsWith("tax.treatment.rule.TAX.", StringComparison.Ordinal));
+            .Where(v => v.Key.StartsWith("tax.treatment.rule.", StringComparison.Ordinal) && !v.Key.StartsWith("tax.treatment.rule.TAX.", StringComparison.Ordinal))
+            .Select(v => v.Key)
+            .ShouldBe(["tax.treatment.rule.LEVY.VOID.DistanceWithdrawal", "tax.treatment.rule.LEVY.DISTANCE_WITHDRAWAL_VOID.ANY"], ignoreOrder: true);
     }
 
     private sealed class Env(string name) : IHostEnvironment

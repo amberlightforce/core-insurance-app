@@ -39,7 +39,7 @@ public sealed class ConfigurationGenesisRaceTests(PostgresFixture database) : IC
 
         results.Distinct().Count().ShouldBe(1);
         (await CountAsync("SELECT count(*) FROM mkt.config_state")).ShouldBe(1);
-        (await CountAsync("SELECT count(*) FROM mkt.pack_version")).ShouldBe(3);
+        (await CountAsync("SELECT count(*) FROM mkt.pack_version")).ShouldBe(4);
         (await CountAsync("SELECT count(*) FROM mkt.pack_activation")).ShouldBe(await CountAsync("SELECT count(*) FROM mkt.legal_entity WHERE pack_id = 'gr'"));
     }
 }
@@ -71,6 +71,6 @@ public sealed class ConfigurationGenesisHostsTests(PostgresFixture database) : I
 
         hashes[0].ShouldBe(hashes[1]);
         (await CountAsync("SELECT count(*) FROM mkt.config_state WHERE cause = 'GENESIS'")).ShouldBe(1);
-        (await CountAsync("SELECT count(*) FROM mkt.pack_version")).ShouldBe(3);
+        (await CountAsync("SELECT count(*) FROM mkt.pack_version")).ShouldBe(4);
     }
 }

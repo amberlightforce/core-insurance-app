@@ -199,8 +199,9 @@ public sealed class FinanceServicingRulesTests
         endorsement.Passed.ShouldBeFalse();
         endorsement.Detail!.ShouldContain("RULE_MISSING");
 
-        // The finance rule exists, so the passed check can post: CREDIT_WRITTEN of LA-07 maps by the levy GL key (rule set v4).
-        FinanceSeed.Rules(FinanceSeed.GrTestV4).ShouldContain(r => r.EntryType == "CREDIT_WRITTEN" && r.SourceAccount == "LA-07" && r.ChargeCategory == "LEVY");
+        // The finance rule exists, so the passed check can post: CREDIT_WRITTEN of LA-07 maps by the levy GL key (rule set v5, NX-HD-06).
+        FinanceSeed.Rules(FinanceSeed.GrTestV5).ShouldContain(r => r.EntryType == "CREDIT_WRITTEN" && r.SourceAccount == "LA-07" && r.ChargeCategory == "LEVY");
+        FinanceSeed.Rules(FinanceSeed.GrTestV4).ShouldNotContain(r => r.EntryType == "CREDIT_WRITTEN" && r.SourceAccount == "LA-07" && r.ChargeCategory == "LEVY");
     }
 
     [Fact]

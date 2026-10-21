@@ -39,11 +39,11 @@ public sealed class PackRegistryApiTests(PostgresFixture database) : IClassFixtu
         pack["pack"]!.GetValue<string>().ShouldBe("gr");
         pack["scope"]!.GetValue<string>().ShouldBe("COUNTRY");
         pack["packId"]!.GetValue<string>().Length.ShouldBe(36);
-        pack["versions"]!.AsArray().Select(v => v!["version"]!.GetValue<string>()).ShouldBe(["0.1.0", "0.2.0"]);
+        pack["versions"]!.AsArray().Select(v => v!["version"]!.GetValue<string>()).ShouldBe(["0.1.0", "0.2.0", "0.3.0"]);
         pack["versions"]!.AsArray().ShouldAllBe(v => v!["contentDigest"]!.GetValue<string>().Length == 64 && v["status"]!.GetValue<string>() == "PUBLISHED");
         var active = pack["activeVersions"]!.AsArray().Single()!;
         active["legalEntity"]!.GetValue<string>().ShouldBe("GR-TEST");
-        active["version"]!.GetValue<string>().ShouldBe("0.2.0");
+        active["version"]!.GetValue<string>().ShouldBe("0.3.0");
         active["configurationHash"]!.GetValue<string>().Length.ShouldBe(64);
         body["nextCursor"].ShouldBeNull();
         body.ToJsonString().ShouldNotContain("\"pack\":\"core\"", Case.Sensitive, "the core defaults are not a pack");
@@ -61,7 +61,7 @@ public sealed class PackRegistryApiTests(PostgresFixture database) : IClassFixtu
         var history = body["activationHistory"]!.AsArray().Single()!;
         history["kind"]!.GetValue<string>().ShouldBe("ACTIVATE");
         history["status"]!.GetValue<string>().ShouldBe("ACTIVE");
-        history["to"]!.GetValue<string>().ShouldBe("0.2.0");
+        history["to"]!.GetValue<string>().ShouldBe("0.3.0");
         history["requestedBy"]!.GetValue<string>().ShouldBe("system:genesis");
         var (byId, byIdBody) = await SendAsync(_client, HttpMethod.Get, "/api/mkt/v1/packs/" + body["packId"]!.GetValue<string>(), roles: "Platform.DesignAuthority");
         byId.StatusCode.ShouldBe(HttpStatusCode.OK);

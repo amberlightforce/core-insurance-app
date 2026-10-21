@@ -74,6 +74,7 @@ public sealed class ConfigurationStateRegressionTests(PostgresFixture database) 
     }
 
     [Theory]
+    [InlineData("0.3.0")]
     [InlineData("0.2.0")]
     [InlineData("0.1.0")]
     public async Task Genesis_exception_cannot_be_reused_to_fabricate_active_rows_later(string version)
