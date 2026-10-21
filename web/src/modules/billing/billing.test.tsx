@@ -54,7 +54,7 @@ const invoiceView = () =>
   });
 
 describe('InvoicePage', () => {
-  it('shows number, status, lines, totals and the fiscal document marked as a stub', async () => {
+  it('shows number, status, lines, totals and the fiscal document without a stub marker', async () => {
     mockApi(invoiceRoutes());
     const { container } = invoiceView();
     expect(
@@ -63,9 +63,8 @@ describe('InvoicePage', () => {
     expect(screen.getAllByText('Εκδόθηκε').length).toBeGreaterThan(0);
 
     const fiscal = screen.getByRole('region', { name: 'Φορολογικό παραστατικό' });
-    expect(within(fiscal).getByText('Δοκιμαστικό φορολογικό παραστατικό')).toBeInTheDocument();
+    expect(within(fiscal).queryByText(/Δοκιμαστικ|(stub)/i)).not.toBeInTheDocument();
     expect(within(fiscal).getByText(/Καταχωρίστηκε \(ΜΑΡΚ\)/)).toBeInTheDocument();
-    expect(within(fiscal).getByText(/Δοκιμαστικό \(stub\)/)).toBeInTheDocument();
     expect(within(fiscal).getByText('400000000042')).toBeInTheDocument();
 
     const lines = screen.getByRole('grid', { name: 'Γραμμές τιμολογίου' });

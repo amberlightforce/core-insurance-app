@@ -12,15 +12,15 @@ const states: Record<string, FiscalState> = {
 };
 
 /**
- * Fiscal-document status of an invoice. In the slice the document comes from the CMP stub, not from the tax
- * authority, so the pill always carries the «stub» marker (D-SLC-10b).
+ * Fiscal-document status of an invoice, as reported by the billing contract. The contract carries no stub
+ * indicator, so none is shown; the channel is never bound as a stub in production.
  */
 export function FiscalStatusPill({
   status,
   compact = false,
 }: {
   status: string | null | undefined;
-  /** Short text and stub marker, for narrow cards (e.g. the policy file's invoice list). */
+  /** Short text, for narrow cards (e.g. the policy file's invoice list). */
   compact?: boolean;
 }) {
   const { t } = useTranslation('billing');
@@ -33,7 +33,6 @@ export function FiscalStatusPill({
       entity="fiscalDocument"
       state={mapped}
       {...(compact ? { text: t(`fiscal.status.${status}`, { defaultValue: status }) } : {})}
-      subLabel={compact ? t('fiscal.stubShort') : t('fiscal.stub')}
       announceChanges={false}
     />
   );
