@@ -134,7 +134,7 @@ public sealed class CessionDeltaTests(PostgresFixture database) : IClassFixture<
             context.ConfigurationHash = ConfigurationHash.Parse(new string('c', 64));
             var session = scope.ServiceProvider.GetRequiredService<DbSession>();
             await using var transaction = await session.BeginTransactionAsync(Ct);
-            var row = await scope.ServiceProvider.GetRequiredService<TrackerService>().OpeningAggregateAsync(treaty, 2026, 250000m, Ct);
+            var row = await scope.ServiceProvider.GetRequiredService<TrackerService>().OpeningAggregateAsync(treaty, 2026, 250000m, null, Ct);
             await transaction.CommitAsync(Ct);
             row.OpeningAggregate.ShouldBe(250000m);
         }

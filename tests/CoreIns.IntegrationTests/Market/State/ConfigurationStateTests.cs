@@ -21,7 +21,7 @@ namespace CoreIns.IntegrationTests.Market.State;
 /// <summary>
 /// SL5-MKT-STATE on a real PostgreSQL 17: persisted, append-only configuration states built from the registered pack versions; genesis;
 /// resolution by any recorded hash (REQ-MKT-048, P-07); the 1 s bound on the current state (REQ-MKT-050); unit-of-work pinning (REQ-MKT-051);
-/// and the treatment of the GR pack versions (D-SL5-07). Facts that write a state put the pack back on 0.2.0 before they end.
+/// and the treatment of the GR pack versions (D-SL5-07). Facts that write a state put the pack back on 0.3.0 before they end.
 /// </summary>
 public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFixture<PostgresFixture>, IAsyncLifetime
 {
@@ -94,7 +94,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
 
     private static string VersionOf(ConfigurationCatalogue state) => state.Manifest.Packs.Single(p => p.PackId == "gr").Version;
 
-    private static string Other(ConfigurationCatalogue state) => VersionOf(state) == "0.2.0" ? "0.1.0" : "0.2.0";
+    private static string Other(ConfigurationCatalogue state) => VersionOf(state) == "0.3.0" ? "0.1.0" : "0.3.0";
 
     [Fact]
     public async Task D_SL5_06_genesis_registers_every_shipped_version_by_digest_and_writes_one_genesis_state_with_an_activation_per_entity()
@@ -112,7 +112,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
             }
         }
 
-        versions.Select(v => $"{v.Pack}@{v.Version}").ShouldBe(["core@1.0.0", "gr@0.1.0", "gr@0.2.0"]);
+        versions.Select(v => $"{v.Pack}@{v.Version}").ShouldBe(["core@1.0.0", "gr@0.1.0", "gr@0.2.0", "gr@0.3.0"]);
         versions.ShouldAllBe(v => v.Status == "Published");
         foreach (var v in versions)
         {
@@ -121,12 +121,12 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
 
         (await ScalarAsync<long>("SELECT count(*) FROM mkt.config_state WHERE cause = 'GENESIS'")).ShouldBe(1);
         var genesis = ConfigStateManifest.FromJson(JsonNode.Parse(await ScalarAsync<string>("SELECT manifest::text FROM mkt.config_state WHERE cause = 'GENESIS'")));
-        genesis.Packs.Select(p => $"{p.PackId}@{p.Version}").ShouldBe(["gr@0.2.0"]);
+        genesis.Packs.Select(p => $"{p.PackId}@{p.Version}").ShouldBe(["gr@0.3.0"]);
         genesis.ParentHash.ShouldBeNull();
         genesis.CoreDigest.ShouldBe(CoreDefaults.Content.Digest);
         (await GenesisHashAsync()).ShouldBe(new ConfigurationCatalogue([new GrPackConfiguration()], Instant.FromUtc(2026, 10, 9)).Hash);
 
-        (await ScalarAsync<long>("SELECT count(*) FROM mkt.pack_activation WHERE kind = 'ACTIVATE' AND status = 'ACTIVE' AND pack_id = 'gr' AND version = '0.2.0'"))
+        (await ScalarAsync<long>("SELECT count(*) FROM mkt.pack_activation WHERE kind = 'ACTIVATE' AND status = 'ACTIVE' AND pack_id = 'gr' AND version = '0.3.0'"))
             .ShouldBe(await ScalarAsync<long>("SELECT count(*) FROM mkt.legal_entity WHERE pack_id = 'gr'"));
         (await ScalarAsync<string>("SELECT string_agg(DISTINCT resulting_hash, ',') FROM mkt.pack_activation WHERE requested_by = 'system:genesis'")).Trim().ShouldBe((await GenesisHashAsync()).ToString());
     }
@@ -185,7 +185,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
         }
         finally
         {
-            await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.2.0", StateCauses.PackActivation);
+            await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.3.0", StateCauses.PackActivation);
         }
     }
 
@@ -216,7 +216,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
         var h2 = await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.1.0");
         var second = (await states.ByHashAsync(h2, Ct))!;
         await Task.Delay(20, Ct);
-        var h3 = await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.2.0", StateCauses.PackActivation);
+        var h3 = await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.3.0", StateCauses.PackActivation);
         var third = (await states.ByHashAsync(h3, Ct))!;
         clock.Set(third.ActivatedAt);
 
@@ -231,7 +231,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
         (await engine.ResolveAsync(Request(genesis.Hash), null, second.ActivatedAt, null, Ct)).ConfigurationHash.ShouldBe(genesis.Hash);
         third.Manifest.ParentHash.ShouldBe(h2);
         second.Manifest.ParentHash.ShouldNotBeNull();
-        third.Hash.ShouldNotBe(genesis.Hash, "re-activating 0.2.0 is a new state, not the genesis again");
+        third.Hash.ShouldNotBe(genesis.Hash, "re-activating 0.3.0 is a new state, not the genesis again");
     }
 
     [Fact]
@@ -253,7 +253,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
         }
         finally
         {
-            await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.2.0", StateCauses.PackActivation);
+            await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.3.0", StateCauses.PackActivation);
         }
     }
 
@@ -275,7 +275,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
         }
         finally
         {
-            await StateHarness.SwitchAsync(database.AppConnectionString, api, "gr", "0.2.0", StateCauses.PackActivation);
+            await StateHarness.SwitchAsync(database.AppConnectionString, api, "gr", "0.3.0", StateCauses.PackActivation);
         }
     }
 
@@ -309,7 +309,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
         }
         finally
         {
-            await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.2.0", StateCauses.PackActivation);
+            await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.3.0", StateCauses.PackActivation);
         }
     }
 
@@ -340,7 +340,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
         }
         finally
         {
-            await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.2.0", StateCauses.PackActivation);
+            await StateHarness.SwitchAsync(database.AppConnectionString, states, "gr", "0.3.0", StateCauses.PackActivation);
         }
     }
 
@@ -387,7 +387,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
 
         error.Message.ShouldContain("gr@0.2.0");
         error.Message.ShouldContain("never changes");
-        (await ScalarAsync<long>("SELECT count(*) FROM mkt.pack_version WHERE pack_id = 'gr'")).ShouldBe(2, "nothing was registered or changed by the refused start");
+        (await ScalarAsync<long>("SELECT count(*) FROM mkt.pack_version WHERE pack_id = 'gr'")).ShouldBe(3, "nothing was registered or changed by the refused start");
     }
 
     [Fact]
@@ -608,6 +608,7 @@ public sealed class ConfigurationStateTests(PostgresFixture database) : IClassFi
         [
             _inner.Versions[0],
             new(_inner.Versions[1].Version, [.. _inner.Versions[1].Values.Select(v => v.Key == "tax.ipt.rate.general" ? v with { Value = "0.16" } : v)]),
+            _inner.Versions[2],
         ];
     }
 }

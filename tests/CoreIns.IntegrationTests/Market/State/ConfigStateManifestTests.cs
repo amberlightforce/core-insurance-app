@@ -118,14 +118,15 @@ public sealed class ConfigStateManifestTests
     }
 
     [Fact]
-    public void D_SL5_07_GR_0_1_0_is_the_historical_content_and_0_2_0_adds_exactly_the_treatment_rows()
+    public void D_SL5_07_GR_0_1_0_is_the_historical_content_0_2_0_adds_exactly_the_treatment_rows_and_0_3_0_the_levy_rows()
     {
         var gr = new GrPackConfiguration();
 
-        gr.Versions.Select(v => v.Version).ShouldBe(["0.1.0", "0.2.0"]);
-        gr.PackVersion.ShouldBe("0.2.0");
+        gr.Versions.Select(v => v.Version).ShouldBe(["0.1.0", "0.2.0", "0.3.0"]);
+        gr.PackVersion.ShouldBe("0.3.0");
         var v1 = gr.Versions[0].Values;
         var v2 = gr.Versions[1].Values;
+        var v3 = gr.Versions[2].Values;
 
         // 0.1.0 is the value list as shipped by SL-MKT (commit 98ff52b, no treatment rows); the digest freezes it.
         v1.Count.ShouldBe(9);
@@ -134,9 +135,14 @@ public sealed class ConfigStateManifestTests
 
         // 0.2.0 = 0.1.0 + the treatment rows, nothing else added, removed or changed.
         v2.Where(v => !v.Key.StartsWith("tax.treatment.", StringComparison.Ordinal)).ToList().ShouldBe([.. v1]);
-        v2.Count(v => v.Key.StartsWith("tax.treatment.", StringComparison.Ordinal)).ShouldBe(12);
-        v2.Count.ShouldBe(v1.Count + 12);
-        gr.Values.ShouldBe([.. v2]);
+        v2.Count(v => v.Key.StartsWith("tax.treatment.", StringComparison.Ordinal)).ShouldBe(10);
+        v2.Count.ShouldBe(v1.Count + 10);
+        PackVersionContent.DigestOf(v2).ToString().ShouldBe("3f7c2f62f4a8c06a068eedc7d056927dac8817f0a6fcd363bf47668b270477a8", "0.2.0 is shipped: its content never changes (REQ-MKT-129)");
+
+        // 0.3.0 = 0.2.0 + the two levy treatment rows of a distance-withdrawal void (NX-HD-06), nothing else.
+        v3.Take(v2.Count).ToList().ShouldBe([.. v2]);
+        v3.Skip(v2.Count).Select(v => v.Key).ShouldBe(["tax.treatment.rule.LEVY.VOID.DistanceWithdrawal", "tax.treatment.rule.LEVY.DISTANCE_WITHDRAWAL_VOID.ANY"]);
+        gr.Values.ShouldBe([.. v3]);
     }
 
     [Fact]
@@ -165,7 +171,7 @@ public sealed class ConfigStateManifestTests
             new CatalogueState(ConfigStateManifest.Genesis(content, CoreDefaults.Content.Digest), CoreDefaults.Content, content), Instant.FromUtc(2026, 10, 10));
 
         direct.Hash.ShouldBe(rebuilt.Hash);
-        direct.Manifest.Packs.Single().Version.ShouldBe("0.2.0");
+        direct.Manifest.Packs.Single().Version.ShouldBe("0.3.0");
         rebuilt.Entries.Count.ShouldBe(direct.Entries.Count);
         rebuilt.Entries.Select(e => (e.Key, e.Node, e.Value, e.LegalStatus)).Order().ShouldBe([.. direct.Entries.Select(e => (e.Key, e.Node, e.Value, e.LegalStatus)).Order()]);
     }

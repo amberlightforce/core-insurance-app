@@ -115,6 +115,17 @@ internal static class CessionEngine
     public static decimal Target(decimal sharePct, decimal writtenPremium) =>
         DecimalRounding.RoundTo(sharePct / 100m * writtenPremium, 2, DecimalRounding.DefaultMoneyMode);
 
+    /// <summary>
+    /// Targets of several quota shares of one term: the cents are allocated jointly (largest remainder) so they sum to the total
+    /// share rounded once, and each target is within one cent of its exact value (NX-EC-06).
+    /// </summary>
+    public static decimal[] JointTargets(IReadOnlyList<(decimal SharePct, decimal WrittenPremium)> treaties)
+    {
+        ArgumentNullException.ThrowIfNull(treaties);
+        var exacts = treaties.Select(t => t.SharePct / 100m * t.WrittenPremium).ToList();
+        return CentAllocation.Distribute(DecimalRounding.RoundTo(exacts.Sum(), 2, DecimalRounding.DefaultMoneyMode), exacts);
+    }
+
     /// <summary>The difference to book: target minus what is already booked for the term and treaty.</summary>
     public static decimal Difference(decimal target, decimal booked) => target - booked;
 
@@ -214,4 +225,7 @@ internal sealed class TrackerRow
     public decimal OpeningAggregate { get; set; }
 
     public Instant RecordedAt { get; set; }
+
+    /// <summary>The migration batch that opened the tracker; null for a tracker not created by a migration (those are never reversed).</summary>
+    public Guid? BatchId { get; set; }
 }

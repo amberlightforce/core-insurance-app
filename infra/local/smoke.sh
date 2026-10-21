@@ -50,3 +50,53 @@ json "$WORK/get.json" "(d['party']['partyNumber'], d['party']['birthDate'], d['p
 echo "--- get (P2 revealed for purpose RATING; audited)"
 curl -s "$API/api/pty/v1/parties/$ID?revealPurpose=RATING" -H "$AUTH" -o "$WORK/reveal.json"
 json "$WORK/reveal.json" "(d['party']['birthDate'], d['party']['identifiers'][0]['value'])"
+
+# ---- seed smoke (NX-OT-10): the demo seed runs twice; the second run must change nothing (idempotent) and the data of every
+# module must be there. Skip with SMOKE_SEED=0 (the first run takes a few minutes: it binds policies and waits for the worker).
+if [ "${SMOKE_SEED:-1}" = "1" ]; then
+  HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+  counts() {
+    "$PY" - "$API" <<'PYEOF'
+import json, sys, urllib.request
+api = sys.argv[1]
+def get(user, path):
+    def req(url, data=None, headers=None):
+        r = urllib.request.Request(api + url, data=data, headers=headers or {})
+        return json.load(urllib.request.urlopen(r))
+    tok = req("/api/plt/v1/dev/sign-in", json.dumps({"userId": user}).encode(), {"Content-Type": "application/json"})["accessToken"]
+    return req(path, headers={"Authorization": "Bearer " + tok})
+def items(user, path):
+    out, cursor = [], None
+    while True:
+        page = get(user, path + ("&" if "?" in path else "?") + "limit=100" + (f"&cursor={cursor}" if cursor else ""))
+        out += page["items"]
+        cursor = page.get("nextCursor")
+        if not cursor:
+            return out
+refunds = [i for i in items("billing", "/api/bil/v1/invoices") if i["invoice"]["kind"] == "CREDIT_NOTE"]
+c = {
+    "invoices": len(items("billing", "/api/bil/v1/invoices")),
+    "credit notes": len(refunds),
+    "journals": len(items("finance", "/api/fin/v1/journals/query")),
+    "complaints": len(items("dpo", "/api/cmp/v1/complaints/query")),
+    "dsar cases": len(items("dpo", "/api/cmp/v1/dsar/query")),
+    "ri contracts": len(items("riacct", "/api/ri/v1/contracts")),
+    "pending refunds": len([i for i in items("billingmgr", "/api/bil/v1/refunds?state=PENDING_APPROVAL")]),
+}
+print(json.dumps(c, sort_keys=True))
+PYEOF
+  }
+  echo "--- seed run 1"
+  "$PY" "$HERE/seed-demo.py" "$API" | tail -4
+  first=$(counts); echo "after run 1: $first"
+  echo "--- seed run 2 (idempotent: nothing new)"
+  "$PY" "$HERE/seed-demo.py" "$API" | tail -4
+  second=$(counts); echo "after run 2: $second"
+  if [ "$first" != "$second" ]; then echo "SEED SMOKE FAILED: the second run changed the data" >&2; exit 1; fi
+  "$PY" -c "
+import json, sys
+c = json.loads(sys.argv[1])
+missing = [k for k in ('invoices', 'journals', 'complaints', 'dsar cases', 'ri contracts', 'pending refunds') if not c[k]]
+sys.exit('SEED SMOKE FAILED, no data for: ' + ', '.join(missing) if missing else 0)" "$second"
+  echo "seed smoke ok"
+fi

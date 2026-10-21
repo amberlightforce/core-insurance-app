@@ -16,6 +16,7 @@ using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace CoreIns.Modules.Billing.Commands;
 
@@ -95,6 +96,13 @@ internal sealed class TakePaymentHandler(
             }
         }
 
+        var bankReference = string.IsNullOrWhiteSpace(request.BankReference) ? null : request.BankReference.Trim();
+        if (request.Method != PaymentTakeRequest.MethodValue.Cashier && bankReference is { } reference
+            && await db.Receipts.AsNoTracking().AnyAsync(r => r.LegalEntityId == legalEntity && r.BankReference == reference && r.Method == ReceiptCodes.BankTransfer, cancellationToken).ConfigureAwait(false))
+        {
+            return DuplicateBankReference();
+        }
+
         var now = clock.Now;
         var today = ledger.Today;
         var number = await numbering.NextAsync(new NumberRequest(NumberingSchemes.Receipt, today), cancellationToken).ConfigureAwait(false);
@@ -113,14 +121,23 @@ internal sealed class TakePaymentHandler(
             ValueDate = request.ValueDate ?? today,
             AccountingDate = today,
             InvoiceRef = request.InvoiceId,
-            BankReference = request.BankReference,
+            BankReference = bankReference,
             State = Codes.Of(PaymentStateModel.Machine.Start(PaymentState.Received).Value),
             RecordedAt = now,
             CreatedBy = context.Actor.ToString(),
             RecordVersion = 1,
         };
         db.Receipts.Add(receipt);
-        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "ux_receipt_bank_reference" })
+        {
+            // A retry after the idempotency record expired, or a concurrent request with the same bank statement line.
+            db.Entry(receipt).State = EntityState.Detached;
+            return DuplicateBankReference();
+        }
 
         var rule = await ledger.RuleAsync(ledger.Key(EntryTypes.Received, RuleQualifiers.Any, RuleQualifiers.Any), cancellationToken).ConfigureAwait(false);
         if (rule.IsFailure)
@@ -240,6 +257,9 @@ internal sealed class TakePaymentHandler(
             _ => (null, ReceiptCodes.RuleUniqueOpenAmount, ReceiptCodes.AmbiguousMatch),
         };
     }
+
+    private static DomainError DuplicateBankReference() =>
+        DomainError.Of(ModuleCode.BIL, "DUPLICATE", "A receipt with this bank reference is already recorded (one receipt per bank statement line).");
 
     private static PaymentTakeResponse Respond(ReceiptRow receipt, IReadOnlyList<AllocationRow> allocations, PaymentTakeResponse.AllocationOutcomeValue outcome) =>
         new()

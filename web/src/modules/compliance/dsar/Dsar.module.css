@@ -37,20 +37,26 @@
 .grid {
   inline-size: 100%;
   border-collapse: collapse;
+  color: var(--color-text-primary);
   font: var(--type-body-compact);
 }
 
 .grid th,
 .grid td {
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-inset-cell-y) var(--space-inset-cell-x);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
   text-align: start;
   vertical-align: top;
-  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
 }
 
 .grid th {
+  border-block-end-color: var(--color-border-default);
   color: var(--color-text-secondary);
-  font-weight: 600;
+  font: var(--type-label);
+}
+
+.grid tbody tr:hover td {
+  background-color: var(--color-state-row-hover);
 }
 
 .scroll {
