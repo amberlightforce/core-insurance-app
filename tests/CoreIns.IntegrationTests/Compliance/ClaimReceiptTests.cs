@@ -82,6 +82,37 @@ public sealed class ClaimReceiptTests(PostgresFixture database) : IClassFixture<
     }
 
     [Fact]
+    public async Task The_same_key_and_total_with_different_line_detail_is_a_409_mismatch()
+    {
+        using var client = _factory.CreateClient();
+        var party = Guid.CreateVersion7();
+        var payment = Guid.CreateVersion7().ToString();
+        (await PostAsync(client, Body(payment, party))).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var split = new
+        {
+            sourceType = "CLM_CLAIM_PAYMENT",
+            sourceId = payment,
+            role = "ISSUE",
+            revision = 0,
+            documentCategory = "CLAIM_SETTLEMENT_RECEIPT",
+            lines = new[]
+            {
+                new { fiscalCategoryKey = "CLAIM-SETTLEMENT", amount = new { amount = "500.00", currency = "EUR" } },
+                new { fiscalCategoryKey = "CLAIM-SETTLEMENT", amount = new { amount = "300.00", currency = "EUR" } },
+            },
+            counterpartyPartyId = party,
+            issueDate = "2026-10-19",
+        };
+        var (response, body) = await PostAsync(client, split);
+        response.StatusCode.ShouldBe(HttpStatusCode.Conflict, body?.ToJsonString());
+        body.Text("code").ShouldBe("CMP-ERR-IDEMPOTENCY-MISMATCH");
+
+        // The identical payload still replays.
+        (await PostAsync(client, Body(payment, party))).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
     public async Task Clearing_lines_credits_and_cancellations_are_refused()
     {
         using var client = _factory.CreateClient();
