@@ -65,6 +65,7 @@ public static class ReinsuranceModule
                 $"GRANT SELECT, INSERT ON {Schema}.claim_event, {Schema}.recovery_batch, {Schema}.recovery, {Schema}.intake_exception TO {appRole}",
                 // SL6-RI-CESSION-DELTA: the premium ledger, cession rows, exception log and tracker are sealed (SELECT, INSERT only).
                 $"GRANT SELECT, INSERT ON {Schema}.premium_delta, {Schema}.cession, {Schema}.cession_exception, {Schema}.tracker TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.cession_treaty TO {appRole}",
             ]),
     ];
 
@@ -131,6 +132,7 @@ public static class ReinsuranceModule
 
         // SL6-RI-CESSION-DELTA: premium cession (target minus booked) from POL premium delta sets; the opening-aggregate tracker.
         services.AddOptions<CessionOptions>().Bind(configuration.GetSection(CessionOptions.Section));
+        services.AddScoped<Registry.CessionTreatyRegistry>();
         services.AddScoped<CessionIntake>();
         services.AddScoped<TrackerService>();
         services.AddScoped<IMigrationImporter, MigrationImport.ReinsuranceMigrationImporter>();

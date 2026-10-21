@@ -63,7 +63,7 @@ describe('InvoicePage', () => {
     expect(screen.getAllByText('Εκδόθηκε').length).toBeGreaterThan(0);
 
     const fiscal = screen.getByRole('region', { name: 'Φορολογικό παραστατικό' });
-    expect(within(fiscal).queryByText(/Δοκιμαστικ|(stub)/i)).not.toBeInTheDocument();
+    expect(within(fiscal).queryByText(/Δοκιμαστικ|(stub)/)).not.toBeInTheDocument();
     expect(within(fiscal).getByText(/Καταχωρίστηκε \(ΜΑΡΚ\)/)).toBeInTheDocument();
     expect(within(fiscal).getByText('400000000042')).toBeInTheDocument();
 

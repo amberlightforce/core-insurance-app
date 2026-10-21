@@ -153,4 +153,76 @@ public sealed class CessionDeltaTests(PostgresFixture database) : IClassFixture<
         CessionEngine.Difference(360m, 300m).ShouldBe(60m);
         CessionEngine.Difference(0m, 300m).ShouldBe(-300m);
     }
+
+    private static async Task<Guid> InsertTreatyAsync(
+        RecoverySlice slice, IServiceProvider svc, string treatyId, string coverage, string status = "APPROVED", string cessionBase = "NET", string currency = "EUR", bool superseded = false, decimal share = 25m)
+    {
+        var legalEntity = svc.GetRequiredService<ILegalEntityDirectory>().Resolve(LegalEntityCode.Parse("GR-TEST")).Value;
+        return await slice.ScalarAsync<Guid>(
+            "INSERT INTO ri.cession_treaty (treaty_version_id, legal_entity_id, treaty_id, kind, contract_year, share_pct, cession_base, currency, coverage_codes, valid_from, valid_to, status, source, known_from, known_to) " +
+            $"VALUES (gen_random_uuid(), '{legalEntity}', '{treatyId}', 'QUOTA_SHARE', 2026, {share}, '{cessionBase}', '{currency}', ARRAY['{coverage}'], '2026-01-01', '2027-01-01', '{status}', 'REGISTRY', now() - interval '1 day', {(superseded ? "now() - interval '1 hour'" : "NULL")}) RETURNING treaty_version_id");
+    }
+
+    [Fact]
+    public async Task Only_approved_treaties_in_force_in_the_registry_are_ceded_to_and_config_is_not_needed()
+    {
+        var slice = new RecoverySlice(database);
+        await using var _ = slice;
+        var pub = new FinanceSlice(slice.Registry.Factory);
+        var svc = slice.Registry.Factory.Services;
+        var policy = Guid.CreateVersion7();
+        var term = Guid.CreateVersion7();
+        await InsertTreatyAsync(slice, svc, "QS-REG-OK", "REG_OK", share: 25m);
+        await InsertTreatyAsync(slice, svc, "QS-REG-DRAFT", "REG_DRAFT", status: "DRAFT");
+        await InsertTreatyAsync(slice, svc, "QS-REG-WITHDRAWN", "REG_WD", status: "WITHDRAWN");
+        await InsertTreatyAsync(slice, svc, "QS-REG-OLD", "REG_OLD", superseded: true);
+
+        foreach (var coverage in new[] { "REG_OK", "REG_DRAFT", "REG_WD", "REG_OLD" })
+        {
+            await Deliver(svc, ChargeDeltaCessionHandler.Name, await DeltaAsync(pub, policy, term, coverage, "1000.00"));
+        }
+
+        (await slice.ScalarAsync<decimal>(Sql(term, "COALESCE(SUM(delta) FILTER (WHERE treaty_id = 'QS-REG-OK'), 0)"))).ShouldBe(250m);
+        (await slice.ScalarAsync<long>(Sql(term, "COUNT(*)"))).ShouldBe(1);
+        (await slice.ScalarAsync<long>($"SELECT COUNT(*) FROM ri.cession_exception WHERE term_id = '{term}' AND code = 'CESSION_NO_TREATY'")).ShouldBe(3); // draft, withdrawn and superseded are never in force
+    }
+
+    [Fact]
+    public async Task A_gross_treaty_cedes_the_tax_line_and_records_mode_gross_while_a_net_treaty_does_not()
+    {
+        var slice = new RecoverySlice(database);
+        await using var _ = slice;
+        var pub = new FinanceSlice(slice.Registry.Factory);
+        var svc = slice.Registry.Factory.Services;
+        var policy = Guid.CreateVersion7();
+        var term = Guid.CreateVersion7();
+        await InsertTreatyAsync(slice, svc, "QS-GROSS", "GROSS_COV", cessionBase: "GROSS", share: 50m);
+        await InsertTreatyAsync(slice, svc, "QS-NET", "NET_COV", share: 50m);
+
+        await Deliver(svc, ChargeDeltaCessionHandler.Name, await DeltaAsync(pub, policy, term, "GROSS_COV", "1000.00"));
+        await Deliver(svc, ChargeDeltaCessionHandler.Name, await DeltaAsync(pub, policy, term, "GROSS_COV", "120.00", category: "TAX"));
+        await Deliver(svc, ChargeDeltaCessionHandler.Name, await DeltaAsync(pub, policy, term, "NET_COV", "1000.00"));
+        await Deliver(svc, ChargeDeltaCessionHandler.Name, await DeltaAsync(pub, policy, term, "NET_COV", "120.00", category: "TAX"));
+
+        (await slice.ScalarAsync<decimal>(Sql(term, "SUM(delta) FILTER (WHERE treaty_id = 'QS-GROSS')"))).ShouldBe(560m); // 50% of 1,120
+        (await slice.ScalarAsync<string>(Sql(term, "MIN(mode) FILTER (WHERE treaty_id = 'QS-GROSS')"))).ShouldBe("GROSS");
+        (await slice.ScalarAsync<decimal>(Sql(term, "SUM(delta) FILTER (WHERE treaty_id = 'QS-NET')"))).ShouldBe(500m);
+        (await slice.ScalarAsync<string>(Sql(term, "MIN(mode) FILTER (WHERE treaty_id = 'QS-NET')"))).ShouldBe("NET");
+    }
+
+    [Fact]
+    public async Task A_treaty_in_another_currency_gets_an_exception_row_not_a_guessed_conversion()
+    {
+        var slice = new RecoverySlice(database);
+        await using var _ = slice;
+        var pub = new FinanceSlice(slice.Registry.Factory);
+        var svc = slice.Registry.Factory.Services;
+        var term = Guid.CreateVersion7();
+        await InsertTreatyAsync(slice, svc, "QS-USD", "USD_COV", currency: "USD");
+
+        await Deliver(svc, ChargeDeltaCessionHandler.Name, await DeltaAsync(pub, Guid.CreateVersion7(), term, "USD_COV", "1000.00"));
+
+        (await slice.ScalarAsync<long>(Sql(term, "COUNT(*)"))).ShouldBe(0);
+        (await slice.ScalarAsync<long>($"SELECT COUNT(*) FROM ri.cession_exception WHERE term_id = '{term}' AND code = 'CESSION_CURRENCY'")).ShouldBe(1);
+    }
 }

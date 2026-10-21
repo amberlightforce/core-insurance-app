@@ -9,8 +9,8 @@ namespace CoreIns.Modules.Reinsurance.Cession;
 
 /// <summary>
 /// <c>ri.Tracker.openingAggregate</c>: records the opening aggregate of a treaty year once, idempotent on (treaty, year), for
-/// MIG-CLM-RI-IMPORT. A repeat returns the stored row and changes nothing. TODO(hardening): a repeat with a different amount
-/// is a data conflict the import should report; here the first value wins.
+/// MIG-CLM-RI-IMPORT. A repeat returns the stored row and changes nothing (first value wins); a repeat with a different amount
+/// is a data conflict that the caller reports by comparing the stored amount (ReinsuranceMigrationImporter: MIG-ERR-CONFLICT).
 /// </summary>
 internal sealed class TrackerService(ReinsuranceDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock)
 {
