@@ -216,12 +216,12 @@ function ReleaseDetails({ disbursement }: { disbursement: DisbursementView }) {
               {
                 id: 'screening',
                 label: t('releases.detail.screening'),
-                value: t('releases.detail.stub'),
+                value: t('releases.detail.notAvailable'),
               },
               {
                 id: 'vop',
                 label: t('releases.detail.vop'),
-                value: t('releases.detail.stub'),
+                value: t('releases.detail.notAvailable'),
               },
             ]}
           />

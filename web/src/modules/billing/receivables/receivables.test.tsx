@@ -254,9 +254,12 @@ describe('release approvals', () => {
     });
 
   it('lists only FS_CLEARING releases awaiting approval', async () => {
-    mockApi(disbRoutes(disbursement()));
+    const api = mockApi(disbRoutes(disbursement()));
     renderScreen(<ReleasesInboxPage />, { path: '/billing/releases', url: '/billing/releases' });
     const pending = await screen.findByRole('grid', { name: 'Αναμένουν έγκριση' });
+    expect(
+      api.callsTo('GET', '/api/bil/v1/disbursements')[0]?.url.searchParams.get('sourceType'),
+    ).toBe('FS_CLEARING');
     expect(within(pending).getByText(/FS-STMT-2026-10/)).toBeInTheDocument();
     expect(within(pending).getAllByRole('row')).toHaveLength(2);
   });

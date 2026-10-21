@@ -168,9 +168,6 @@ function InvoiceDetails({ data }: { data: InvoiceGetResponse }) {
           />
         </Section>
         <Section title={t('fiscal.title')}>
-          <Banner variant="info" title={t('fiscal.stubTitle')}>
-            {t('fiscal.stubBody')}
-          </Banner>
           <KeyValueList
             aria-label={t('fiscal.title')}
             items={[

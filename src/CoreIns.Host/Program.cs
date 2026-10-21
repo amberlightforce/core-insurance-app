@@ -85,6 +85,7 @@ if (role == AppRole.Api)
 {
     var hardening = new HttpHardeningOptions();
     app.Configuration.GetSection(HttpHardeningOptions.Section).Bind(hardening);
+    app.UseCoreInsCorrelation();
     app.UseCoreInsSecurityHeaders(app.Environment, hardening);
     app.UseExceptionHandler();
     app.UseSerilogRequestLogging();
