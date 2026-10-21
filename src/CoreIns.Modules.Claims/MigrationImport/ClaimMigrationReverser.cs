@@ -1,10 +1,14 @@
 using CoreIns.Modules.Claims.Domain;
 using CoreIns.Modules.Claims.Persistence;
+using CoreIns.Modules.Compliance.Contracts;
+using CoreIns.Modules.Compliance.Contracts.Api;
 using CoreIns.Modules.Migration.Contracts.Spi;
 using CoreIns.Platform.Context;
+using CoreIns.Platform.Contracts;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CoreIns.Modules.Claims.MigrationImport;
 
@@ -12,9 +16,10 @@ namespace CoreIns.Modules.Claims.MigrationImport;
 /// <c>IMigrationReverser</c> for module CLM (D-SL6-05). Removes an imported claim only while nothing has happened to it since the
 /// import: no ledger transaction (so no payment and no reserve change), no recovery, no friendly-settlement case, no re-verification
 /// and an unchanged record. The delete runs in <c>clm.reverse_migrated_claim</c> (SECURITY DEFINER, repeats the check under the claim
-/// row lock): claim rows are otherwise never deleted. The imported clock is left to CMP (CMP has no reverser; TODO(hardening)).
+/// row lock): claim rows are otherwise never deleted. The imported claim clock is cancelled in CMP through
+/// <c>cmp.Clock.cancel</c> once the claim is gone (CMP keeps the cancelled instance as its audit trail; cancel is idempotent).
 /// </summary>
-internal sealed class ClaimMigrationReverser(ClaimsDbContext db, ClaimProtection protection, RequestContext context) : IMigrationReverser
+internal sealed class ClaimMigrationReverser(ClaimsDbContext db, ClaimProtection protection, RequestContext context, IServiceProvider services) : IMigrationReverser
 {
     public string ModuleName => "CLM";
 
@@ -44,10 +49,24 @@ internal sealed class ClaimMigrationReverser(ClaimsDbContext db, ClaimProtection
             var removed = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
                 "SELECT clm.reverse_migrated_claim(@id)", new { id = import.ClaimId.Value },
                 db.Database.CurrentTransaction?.GetDbTransaction(), cancellationToken: cancellationToken)).ConfigureAwait(false);
+            if (removed && import.ClockId is { } clockId)
+            {
+                await CancelClockAsync(clockId, batchId, cancellationToken).ConfigureAwait(false);
+            }
+
             outcomes.Add(removed ? new ReversalOutcome(ClaimMigrationImporter.ObjectType, import.ClaimId.Value, true) : Blocked(import, "Activity appeared on the claim after the migration."));
         }
 
         return outcomes;
+    }
+
+    private async Task CancelClockAsync(Guid clockId, Guid batchId, CancellationToken cancellationToken)
+    {
+        var clocks = services.GetService<IComplianceClockService>()
+            ?? throw new InvalidOperationException("CMP is not registered in this deployment; the imported claim clock cannot be cancelled.");
+        await clocks.CancelAsync(
+            new ClockCancelRequest { InstanceId = clockId, Reason = $"Migration batch {batchId} reversed: the imported claim was removed." },
+            CommandOptions.New(), cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<string?> ActivityAsync(ClaimMigrationImportRow import, CancellationToken cancellationToken)

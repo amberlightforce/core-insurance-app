@@ -225,4 +225,7 @@ internal sealed class TrackerRow
     public decimal OpeningAggregate { get; set; }
 
     public Instant RecordedAt { get; set; }
+
+    /// <summary>The migration batch that opened the tracker; null for a tracker not created by a migration (those are never reversed).</summary>
+    public Guid? BatchId { get; set; }
 }

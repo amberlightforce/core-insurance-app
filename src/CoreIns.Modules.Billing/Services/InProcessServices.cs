@@ -1,3 +1,4 @@
+using CoreIns.Platform.Telemetry;
 using CoreIns.Modules.Billing.Commands;
 using CoreIns.Modules.Billing.Contracts;
 using CoreIns.Modules.Billing.Contracts.Api;
@@ -71,8 +72,18 @@ internal sealed class InvoiceService(RequestContext context, ILegalEntityDirecto
 /// <summary><see cref="IBillingPaymentService"/>: <c>take</c> (REQ-BIL-004).</summary>
 internal sealed class PaymentService(RequestContext context, ICommandHandler<TakePayment, PaymentTakeResponse> take) : IBillingPaymentService
 {
-    public Task<PaymentTakeResponse> TakeAsync(PaymentTakeRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        InProcess.RunAsync(context, take, new TakePayment(request), options, cancellationToken);
+    public async Task<PaymentTakeResponse> TakeAsync(PaymentTakeRequest request, CommandOptions options, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await InProcess.RunAsync(context, take, new TakePayment(request), options, cancellationToken).ConfigureAwait(false);
+        }
+        catch (DomainException ex)
+        {
+            CoreInsMetrics.PaymentFailed("take", ex.Error.Code.ToString());
+            throw;
+        }
+    }
 }
 
 /// <summary>

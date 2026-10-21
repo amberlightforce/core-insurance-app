@@ -7,6 +7,7 @@ using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
+using CoreIns.Platform.Telemetry;
 using CoreIns.Platform.Http;
 using CoreIns.Platform.Persistence;
 using CoreIns.Platform.Time;
@@ -320,10 +321,12 @@ internal sealed partial class NonPaymentSweeper(NonPaymentSweepRunner runner, IO
                 try
                 {
                     await runner.RunAsync(stoppingToken).ConfigureAwait(false);
+                    CoreInsMetrics.SweeperSucceeded("non-payment");
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     LogRunFailed(logger, ex);
+                    CoreInsMetrics.SweeperFailed("non-payment");
                 }
             }
             while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false));

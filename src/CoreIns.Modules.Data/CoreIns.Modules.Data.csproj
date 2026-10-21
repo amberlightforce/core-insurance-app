@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CoreIns.Modules.Data.Contracts\CoreIns.Modules.Data.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
+    <ProjectReference Include="..\CoreIns.Platform.DataProtection\CoreIns.Platform.DataProtection.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
   </ItemGroup>
 
