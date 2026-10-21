@@ -7,6 +7,7 @@ using CoreIns.Platform.Context;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Paging;
 using CoreIns.SharedKernel.Results;
 using Microsoft.EntityFrameworkCore;
 
@@ -115,8 +116,9 @@ internal sealed class RecoveryReader(ReinsuranceDbContext db, RequestContext con
             return RiErrors.Validation("limit", "LIMIT_RANGE", $"The limit is between 1 and {MaxLimit}.");
         }
 
-        var offset = 0;
-        if (cursor is not null && !int.TryParse(cursor, NumberStyles.None, CultureInfo.InvariantCulture, out offset))
+        string[]? after = null;
+        if (!KeysetPaging.TryDecode(cursor, 4, out after)
+            || (after is not null && !(Guid.TryParse(after[0], out _) && Guid.TryParse(after[1], out _) && int.TryParse(after[2], NumberStyles.None, CultureInfo.InvariantCulture, out _) && Guid.TryParse(after[3], out _))))
         {
             return RiErrors.Validation("cursor", "CURSOR", "The cursor is not valid.");
         }
@@ -140,9 +142,25 @@ internal sealed class RecoveryReader(ReinsuranceDbContext db, RequestContext con
                     g.Sum(r => r.IncurredDelta), g.Sum(r => r.PaidDelta), last.RecoveryId, last.BatchId, last.State);
             })
             .OrderBy(p => p.ContractId).ThenBy(p => p.ClaimId).ThenBy(p => p.LayerNo).ThenBy(p => p.ParticipantPartyId)
-            .Skip(offset).Take(size + 1).ToList();
-        var next = positions.Count > size ? (offset + size).ToString(CultureInfo.InvariantCulture) : null;
-        return (positions.Take(size).ToList(), next, size);
+            .AsEnumerable();
+        if (after is not null)
+        {
+            var key = (Contract: Guid.Parse(after[0]), Claim: Guid.Parse(after[1]), Layer: int.Parse(after[2], CultureInfo.InvariantCulture), Participant: Guid.Parse(after[3]));
+            positions = positions.Where(p => CompareKey(p, key) > 0);
+        }
+
+        // TODO(hardening): the positions are aggregated in memory (above), so the keyset applies after the grouping; push both into SQL with the sum.
+        var (page, next) = KeysetPaging.Slice(positions.Take(size + 1).ToList(), size, p => KeysetPaging.Encode(
+            KeysetPaging.Part(p.ContractId), KeysetPaging.Part(p.ClaimId), p.LayerNo.ToString(CultureInfo.InvariantCulture), KeysetPaging.Part(p.ParticipantPartyId)));
+        return (page, next, size);
+    }
+
+    private static int CompareKey(RecoverablePosition p, (Guid Contract, Guid Claim, int Layer, Guid Participant) key)
+    {
+        var c = p.ContractId.CompareTo(key.Contract);
+        c = c != 0 ? c : p.ClaimId.CompareTo(key.Claim);
+        c = c != 0 ? c : p.LayerNo.CompareTo(key.Layer);
+        return c != 0 ? c : p.ParticipantPartyId.CompareTo(key.Participant);
     }
 
     private static Money Eur(decimal amount) => new(ContractSupport.Amount(amount), EurCurrency);

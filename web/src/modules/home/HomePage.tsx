@@ -27,6 +27,8 @@ import { readRecent } from '../staff/recent';
 import { useRecentLabels, type RecentLabel } from '../staff/useRecentLabels';
 import staff from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
+import { useCanSeeInbox, useTaskDigest } from '../work/api';
+import { useTaskTitle } from '../work/parts';
 import { usePendingApprovals, useAllInvoices } from './api';
 import styles from './HomePage.module.css';
 import { greetingKey, summariseInvoices } from './summary';
@@ -88,7 +90,7 @@ function Hero({
  * invented, so cards without a real source are left out.
  */
 export function HomePage() {
-  const { t } = useTranslation(['home', 'shell', 'claims']);
+  const { t } = useTranslation(['home', 'shell', 'claims', 'work']);
   const navigate = useNavigate();
   const fmt = useFormat();
   const session = useDevSession();
@@ -97,6 +99,9 @@ export function HomePage() {
   const seesApprovals = has(roles, 'Staff.ClaimsHandler', 'Staff.ClaimsManager');
   const invoices = useAllInvoices(seesInvoices);
   const approvals = usePendingApprovals(seesApprovals);
+  const seesTasks = useCanSeeInbox();
+  const tasks = useTaskDigest('mine', seesTasks);
+  const taskTitle = useTaskTitle();
   const today = athensToday();
   const now = useMemo(() => new Date(), []);
 
@@ -268,6 +273,26 @@ export function HomePage() {
     retry?: () => void;
   }[] = [];
 
+  if (seesTasks) {
+    const own = tasks.data?.tasks ?? [];
+    cards.push({
+      id: 'tasks',
+      title: t('work:home.card'),
+      family: own.some((task) => task.slaBreached) ? 'danger' : 'brand',
+      count: own.length,
+      items: own.slice(0, 3).map((task) => ({
+        id: task.id,
+        label: taskTitle(task),
+        meta: task.targetAt ? (
+          <span className={styles.itemMeta}>{fmt.date(task.targetAt)}</span>
+        ) : undefined,
+      })),
+      to: '/work',
+      loading: tasks.isPending,
+      error: tasks.isError,
+      retry: () => void tasks.refetch(),
+    });
+  }
   if (seesApprovals) {
     cards.push({
       id: 'approvals',

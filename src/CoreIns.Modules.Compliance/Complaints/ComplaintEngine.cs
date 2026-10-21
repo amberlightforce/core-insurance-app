@@ -329,7 +329,9 @@ internal sealed class ComplaintEngine(
         }
 
         // Segregation of duties: the approver is not the reply's author.
-        if (string.Equals(Actor, row.ReplyAuthor, StringComparison.Ordinal))
+        // Also across delegation: an approver acting for the author (or an author acting through an agent) is the author.
+        if (string.Equals(Actor, row.ReplyAuthor, StringComparison.Ordinal)
+            || (context.OnBehalfOf is { } principal && string.Equals(principal.Id, row.ReplyAuthor, StringComparison.Ordinal)))
         {
             return Err("SOD", "The approver must differ from the author of the reply.");
         }

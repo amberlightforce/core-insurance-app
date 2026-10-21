@@ -72,16 +72,15 @@ export function useDisbursement(disbursementId: string) {
 }
 
 /**
- * bil.Disbursement.list. The list has no server-side filter yet, so the release inbox narrows to FS_CLEARING
- * disbursements here.
- * TODO(hardening): filter server-side once bil.Disbursement.list takes status/source filters.
+ * bil.Disbursement.list filtered server-side by sourceType=FS_CLEARING (HD-08c); the client check below only guards
+ * against a server that ignores the filter.
  */
 export function useReleaseCandidates() {
   return useQuery({
     queryKey: ['bil', 'disbursements', 'releases'],
     queryFn: async ({ signal }) => {
       const page = await apiRequest<{ items?: unknown[] }>(`${base}/disbursements`, {
-        query: { limit: 200 },
+        query: { sourceType: 'FS_CLEARING', limit: 200 },
         signal,
       });
       return (page.items ?? [])

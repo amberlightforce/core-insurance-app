@@ -18,6 +18,7 @@ import { Toaster } from './design-system/components/Toast';
 import { moduleIcons } from './design-system/icons';
 import { sampleEntityName } from './app-shell/user';
 import { useDevSession } from './dev-auth/devAuth';
+import { useWorkNotifications } from './modules/work/notifications';
 
 /**
  * Staff portal root: the Aegean shell around the routed module. Modules are placeholders until their work
@@ -43,6 +44,7 @@ export function AppLayout() {
     () => visibleNavItems(defaultNavItems, session?.user.roles ?? []),
     [session],
   );
+  const work = useWorkNotifications();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -94,7 +96,8 @@ export function AppLayout() {
         onOpenHelp={openHelp}
         notifications={
           <NotificationBell
-            count={0}
+            count={work.count}
+            attention={work.attention}
             isExpanded={notificationsOpen}
             onPress={() => {
               setNotificationsOpen((open) => !open);
@@ -110,7 +113,7 @@ export function AppLayout() {
       <NotificationCenter
         isOpen={notificationsOpen}
         onOpenChange={setNotificationsOpen}
-        notifications={[]}
+        notifications={work.items}
       />
       <Toaster />
     </>

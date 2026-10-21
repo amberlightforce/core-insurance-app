@@ -2,7 +2,10 @@ using System.Text.Json;
 using CoreIns.Modules.Billing.Contracts.Api;
 using CoreIns.Modules.Billing.Persistence;
 using CoreIns.SharedKernel;
+using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Paging;
+using CoreIns.SharedKernel.Results;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoreIns.Modules.Billing.Queries;
@@ -24,7 +27,12 @@ internal sealed class DelinquencyReader(BillingDbContext db)
         LegalEntityId legalEntity, BillingAccountId? account, string? state, string? cursor, int? limit, CancellationToken cancellationToken,
         Guid? policyId = null, string? trigger = null)
     {
-        var size = Math.Clamp(limit ?? 50, 1, 200);
+        var size = KeysetPaging.Clamp(limit);
+        if (!KeysetPaging.TryDecode(cursor, 1, out var cursorParts) || (cursorParts is not null && !Guid.TryParse(cursorParts[0], out _)))
+        {
+            throw new DomainException(DomainError.Of(ModuleCode.BIL, "VALIDATION", "The cursor is malformed."));
+        }
+
         var query = db.DelinquencyCases.AsNoTracking().Where(c => c.LegalEntityId == legalEntity);
         if (account is { } a)
         {
@@ -46,22 +54,22 @@ internal sealed class DelinquencyReader(BillingDbContext db)
             query = query.Where(c => c.State == state);
         }
 
-        // Case ids are UUIDv7: ordering by id is creation order and a stable cursor.
-        var all = (await query.ToListAsync(cancellationToken).ConfigureAwait(false)).OrderBy(c => c.CaseId).ToList();
-        if (cursor is not null && Guid.TryParse(cursor, out var after))
+        // Case ids are UUIDv7: ordering by id is creation order and a stable keyset cursor.
+        if (cursorParts is not null)
         {
-            all = [.. all.Where(c => c.CaseId.CompareTo(after) > 0)];
+            var after = Guid.Parse(cursorParts[0]);
+            query = query.Where(c => c.CaseId.CompareTo(after) > 0);
         }
 
-        var page = all.Take(size + 1).ToList();
-        var shown = page.Take(size).ToList();
+        var rows = await query.OrderBy(c => c.CaseId).Take(size + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var (shown, next) = KeysetPaging.Slice(rows, size, c => KeysetPaging.Encode(KeysetPaging.Part(c.CaseId)));
         var items = new List<DelinquencyListItem>();
         foreach (var row in shown)
         {
             items.Add(new DelinquencyListItem { Process = await ViewAsync(row, cancellationToken, withContacts: false).ConfigureAwait(false) });
         }
 
-        return new DelinquencyListPage { Items = items, NextCursor = page.Count > size ? shown[^1].CaseId.ToString("D") : null, Limit = size };
+        return new DelinquencyListPage { Items = items, NextCursor = next, Limit = size };
     }
 
     public async Task<JsonElement> ViewAsync(DelinquencyCaseRow row, CancellationToken cancellationToken, bool withContacts = true)

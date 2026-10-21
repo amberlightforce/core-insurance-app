@@ -5,6 +5,7 @@ using CoreIns.Modules.Compliance.Persistence;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Paging;
 using CoreIns.SharedKernel.Results;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -168,13 +169,12 @@ internal sealed class CloseComplaintHandler(ComplaintEngine engine) : ICommandHa
 /// <summary>Read side: <c>cmp.Complaint.get</c> and <c>cmp.Complaint.query</c>.</summary>
 internal sealed class ComplaintReader(ComplianceDbContext db, ComplaintEngine engine, RequestContext context, ILegalEntityDirectory legalEntities)
 {
-    private const int MaxPage = 200;
-
     public Task<ComplaintCase?> GetAsync(Guid id, CancellationToken ct) => engine.FindAsync(id, ct);
 
     public async Task<(List<ComplaintCase> Items, string? Next, int Limit)> QueryAsync(string? cursor, int? limit, string? status, CancellationToken ct)
     {
-        var take = Math.Clamp(limit ?? 50, 1, MaxPage);
+        var take = KeysetPaging.Clamp(limit);
+        var after = Dsar.DsarReader.Cursor(cursor);
         var legalEntity = ClockLookup.LegalEntity(context, legalEntities);
         var query = db.Set<ComplaintRow>().AsNoTracking().Where(r => r.LegalEntityId == legalEntity);
         if (!string.IsNullOrWhiteSpace(status))
@@ -183,13 +183,13 @@ internal sealed class ComplaintReader(ComplianceDbContext db, ComplaintEngine en
             query = query.Where(r => r.Status == wanted);
         }
 
-        // TODO(hardening): keyset paging in SQL; the strongly typed id is compared in memory here (as in DSAR).
-        var all = await query.OrderBy(r => r.ComplaintId).ToListAsync(ct).ConfigureAwait(false);
-        var rows = (Guid.TryParse(cursor, out var after) ? all.Where(r => r.ComplaintId.Value.CompareTo(after) > 0) : all).Take(take + 1).ToList();
-        var page = rows.Take(take).ToList();
+        var allIds = (await query.Select(r => r.ComplaintId).ToListAsync(ct).ConfigureAwait(false)).Select(i => i.Value);
+        var pageIds = KeysetPaging.IdsAfter(allIds, after, take + 1).Select(g => new ComplaintId(g)).ToList();
+        var rows = (await query.Where(r => pageIds.Contains(r.ComplaintId)).ToListAsync(ct).ConfigureAwait(false)).OrderBy(r => r.ComplaintId.Value).ToList();
+        var (page, next) = KeysetPaging.Slice(rows, take, r => KeysetPaging.Encode(KeysetPaging.Part(r.ComplaintId.Value)));
         var clockRows = await engine.ClocksOfAsync(page, ct).ConfigureAwait(false);
         var items = page.Select(r => new ComplaintCase(r, [.. clockRows.Where(c => r.ReplyClockId == c.ClockId.Value)])).ToList();
-        return (items, rows.Count > take ? page[^1].ComplaintId.Value.ToString("D", CultureInfo.InvariantCulture) : null, take);
+        return (items, next, take);
     }
 
     /// <summary>

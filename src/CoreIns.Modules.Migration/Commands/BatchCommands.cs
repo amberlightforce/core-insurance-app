@@ -42,6 +42,17 @@ internal static class Batches
     }
 }
 
+/// <summary>The content hash of a batch: its ordered items and the baseline hash, recomputable from the stored rows (NX-EC-09).</summary>
+internal static class BatchContent
+{
+    public static string Canonical(IEnumerable<(string Module, string ObjectType, string LegacyId, string Payload)> items, string? baseline) =>
+        string.Join('\n', items.Select(i => $"{i.Module}|{i.ObjectType}|{i.LegacyId}|{i.Payload}")) + "\n" + baseline;
+
+    /// <summary>The hash of the items as they are stored now. Differs from the stored <c>ContentHash</c> when a row changed after creation.</summary>
+    public static string CurrentHash(BatchRow batch, IEnumerable<BatchItemRow> items) =>
+        Sha256Hash.ComputeUtf8(Canonical(items.OrderBy(i => i.Seq).Select(i => (i.ModuleName, i.ObjectType, i.LegacyId, i.Payload)), batch.BaselineHash)).Value;
+}
+
 /// <summary>mig.Batch.create: stores the ordered items of a batch and records the baseline configuration hash H0.</summary>
 internal sealed record CreateBatch(CreateBatchRequest Request) : ICommand<BatchResponse>;
 
@@ -231,6 +242,8 @@ internal sealed class StartBatchHandler(
 
             // Item rows were only used to carry the dry-run results: nothing of them is stored.
             db.ChangeTracker.Entries<BatchItemRow>().ToList().ForEach(e => e.State = EntityState.Detached);
+            // The dry run vouches for the content as it is stored now, not for the hash written at creation.
+            batch.ContentHash = BatchContent.CurrentHash(batch, items);
             batch.DryRunHash = batch.ContentHash;
             batch.DryRunAt = now;
             batch.UpdatedAt = now;
@@ -242,6 +255,12 @@ internal sealed class StartBatchHandler(
         if (batch.DryRunHash != batch.ContentHash)
         {
             return DomainError.Of(ModuleCode.MIG, "DRYRUN-REQUIRED", "Run the batch dry before the real run.");
+        }
+
+        // A content change after the dry run invalidates it (NX-EC-09): the approval must cover what was dry-run.
+        if (BatchContent.CurrentHash(batch, items) != batch.ContentHash)
+        {
+            return DomainError.Of(ModuleCode.MIG, "DRYRUN-REQUIRED", "The batch content changed after the dry run; run the batch dry again.");
         }
 
         var approvals = services.GetService<IPlatformApprovalService>();
@@ -310,6 +329,13 @@ internal sealed class ApproveBatchHandler(
         if (!reject && !string.Equals(request.Decision, "APPROVE", StringComparison.OrdinalIgnoreCase))
         {
             return DomainError.Of(ModuleCode.MIG, MigrationErrors.Validation, "Decision must be APPROVE or REJECT.");
+        }
+
+        // The content must still be what was dry-run and approved (NX-EC-09), checked before deciding or running anything.
+        var storedItems = await db.Items.AsNoTracking().Where(i => i.BatchId == batch.BatchId).OrderBy(i => i.Seq).ToListAsync(cancellationToken).ConfigureAwait(false);
+        if (BatchContent.CurrentHash(batch, storedItems) != batch.ContentHash)
+        {
+            return DomainError.Of(ModuleCode.MIG, "APPROVAL-STALE", "The batch content changed after the dry run and the approval request; run it dry and request approval again.");
         }
 
         var approvals = services.GetRequiredService<IPlatformApprovalService>();

@@ -7,7 +7,7 @@ const base = '/api/bil/v1/delinquencies';
 /**
  * Shapes of the SL6-BIL-DELINQ API. The bil.yaml schemas wrap everything in an untyped `process` / `data`
  * (PRD wording), so these are hand-written from DelinquencyReader.ViewAsync and the command handlers.
- * TODO(hardening): replace with generated types once bil.yaml types the delinquency view.
+ * TODO(hardening): bil.yaml still types `process` as Unspecified, so these stay hand-written until the contract does.
  */
 export type DelinquencyState =
   | 'NOTICE_REQUESTED'

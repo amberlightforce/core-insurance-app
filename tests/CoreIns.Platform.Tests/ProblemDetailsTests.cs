@@ -25,6 +25,20 @@ public sealed class ProblemDetailsTests
     }
 
     [Fact]
+    public void Problems_carry_the_correlation_id_chosen_by_the_correlation_middleware()
+    {
+        var mapper = new ProblemDetailsMapper(new ErrorCatalog());
+        var http = Http("/api/pol/v1/jobs");
+        var id = CorrelationId.Parse("0123456789abcdef0123456789abcdef");
+        http.Items[CoreIns.Platform.Http.PlatformHeaders.CorrelationItemKey] = id;
+
+        var problem = mapper.Create(DomainError.Of(ModuleCode.POL, PlatformErrors.IdempotencyMismatch, "x"), http);
+
+        problem.Extensions["traceId"].ShouldBe(id.Value);
+        problem.Extensions["correlationId"].ShouldBe(id.Value);
+    }
+
+    [Fact]
     public void Problems_carry_code_type_status_localized_title_and_trace()
     {
         var mapper = new ProblemDetailsMapper(new ErrorCatalog());

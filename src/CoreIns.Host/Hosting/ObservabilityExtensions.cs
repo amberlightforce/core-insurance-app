@@ -4,7 +4,11 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using System.Diagnostics;
+using CoreIns.Platform.Http;
+using CoreIns.SharedKernel.Identifiers;
 using Serilog;
+using Serilog.Context;
 
 namespace CoreIns.Host.Hosting;
 
@@ -61,4 +65,35 @@ internal static class ObservabilityExtensions
 
         return builder;
     }
+
+    /// <summary>
+    /// Correlation ids (NX-OT-06). Accepts a valid <c>X-Correlation-Id</c> (a W3C trace id: 32 hex digits, so it fits the audit
+    /// <c>CorrelationId</c>); anything else is ignored and the request's trace id is used. The id is echoed in the response header
+    /// (also on errors), pushed into the Serilog LogContext and the Activity, and read by the request context and Problem Details.
+    /// Place first in the pipeline.
+    /// </summary>
+    public static IApplicationBuilder UseCoreInsCorrelation(this IApplicationBuilder app)
+    {
+        ArgumentNullException.ThrowIfNull(app);
+        return app.Use(async (context, next) =>
+        {
+            var incoming = context.Request.Headers[PlatformHeaders.CorrelationId].ToString();
+            var id = CorrelationId.TryParse(incoming, out var accepted) ? accepted : CorrelationFromActivity();
+            context.Items[PlatformHeaders.CorrelationItemKey] = id;
+            context.Response.OnStarting(() =>
+            {
+                context.Response.Headers[PlatformHeaders.CorrelationId] = id.Value;
+                return Task.CompletedTask;
+            });
+
+            Activity.Current?.SetTag("correlation.id", id.Value);
+            using (LogContext.PushProperty("CorrelationId", id.Value))
+            {
+                await next(context).ConfigureAwait(false);
+            }
+        });
+    }
+
+    private static CorrelationId CorrelationFromActivity() =>
+        Activity.Current is { } activity && CorrelationId.TryParse(activity.TraceId.ToHexString(), out var id) ? id : CorrelationId.New();
 }

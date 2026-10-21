@@ -9,6 +9,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\CoreIns.CountryPacks.GR\CoreIns.CountryPacks.GR.csproj" />
     <ProjectReference Include="..\..\src\CoreIns.CountryPacks.CY\CoreIns.CountryPacks.CY.csproj" />
+    <!-- NX-EC-12: the go-live checklist reads the clock definitions and the Production gate (internals made visible to this project). -->
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Compliance\CoreIns.Modules.Compliance.csproj" />
+    <ProjectReference Include="..\..\src\CoreIns.Modules.Market\CoreIns.Modules.Market.csproj" />
   </ItemGroup>
 
 </Project>
