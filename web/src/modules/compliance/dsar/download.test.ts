@@ -3,15 +3,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { downloadPackage } from './download';
 
 describe('downloadPackage', () => {
-  const original = { create: URL.createObjectURL, revoke: URL.revokeObjectURL };
+  // jsdom has no Blob URLs, so the originals may be absent; restore exactly what was there.
+  const names = ['createObjectURL', 'revokeObjectURL'] as const;
+  const original = new Map<string, PropertyDescriptor | undefined>(
+    names.map((name) => [name, Object.getOwnPropertyDescriptor(URL, name)]),
+  );
 
   beforeEach(() => {
     vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
   });
 
   afterEach(() => {
-    URL.createObjectURL = original.create;
-    URL.revokeObjectURL = original.revoke;
+    for (const name of names) {
+      const descriptor = original.get(name);
+      if (descriptor) Object.defineProperty(URL, name, descriptor);
+      else Reflect.deleteProperty(URL, name);
+    }
     vi.restoreAllMocks();
   });
 
