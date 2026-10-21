@@ -516,3 +516,39 @@
     forced-color-adjust: none;
   }
 }
+
+/* Sub-heading inside a section card (layer blocks, grouped lists): the mockup's `.card h4` weight. */
+.subTitle {
+  margin: var(--space-0);
+  color: var(--color-text-primary);
+  font: var(--type-label);
+}
+
+/* Short bulleted list of reasons / validation lines inside a card or banner. */
+.reasonList {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-0);
+  padding-inline-start: var(--space-5);
+  color: var(--color-text-secondary);
+  font: var(--type-body-compact);
+}
+
+/* Plain ruled list of lines (allocations, history): hairline between rows, like `.linkList` without links. */
+.ruledList {
+  display: grid;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  font: var(--type-body-compact);
+  list-style: none;
+}
+
+.ruledList > li {
+  padding-block: var(--space-2);
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+.ruledList > li:last-child {
+  border-block-end: 0;
+}

@@ -244,7 +244,7 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
         <Section title={t('layers.title')}>
           {draft.layers.map((layer, index) => (
             <div className={staff.stack} key={layer.layerNo}>
-              <h3>{t('layers.layerNo', { no: layer.layerNo })}</h3>
+              <h3 className={staff.subTitle}>{t('layers.layerNo', { no: layer.layerNo })}</h3>
               <div className={staff.grid}>
                 {(['attachment', 'limit', 'aad', 'aal'] as const).map((field) => (
                   <CurrencyField
@@ -373,7 +373,7 @@ function ContractEditor({ contract }: { contract?: ContractView }) {
         </Section>
         {tried && validation.length ? (
           <Banner variant="warning" live="alert" title={t('editor.fixFields')}>
-            <ul>
+            <ul className={staff.reasonList}>
               {validation.map((error) => (
                 <li key={error}>{t(`editor.validation.${error}`)}</li>
               ))}
