@@ -5,13 +5,14 @@ import { advanceServerPast } from './support/time.js';
 import { importProducts, issuePolicy, serverNow } from './support/servicing.js';
 
 // E2E-09 DSAR access and erasure across modules (SLICE-PLAN-6, D-SL6-07). One data subject holds a policy, an invoice, a claim, a
-// delivered document, a withdrawal declaration and a DAT subject fact. An ACCESS case fans out over the 15-row map (WRK is not built and
-// shows NOT_BUILT), exports what is held, redacts a third-party module and logs the disclosure. An ERASURE case needs a verified identity,
-// a second DPO's approval and no legal hold; regulated classes come back RESTRICTED with retentionEnd UNSET_F404 (F-404), the others are
-// erased, and every outcome is erased, anonymised, restricted, not-held or not-built. WRK keeps both cases open (D-SL6-07).
+// delivered document, a withdrawal declaration and a DAT subject fact. An ACCESS case fans out over the 15-row map (all 15 modules answer, WRK
+// included since NX-HD-03/05: NOT_HELD when the party has no tasks, else its tasks), exports what is held, redacts a third-party module and logs
+// the disclosure; with no blocker left the export completes the case (COMPLETED, DSARCompleted published once). An ERASURE case needs a verified
+// identity, a second DPO's approval and no legal hold; regulated classes (and anything under a retention hold) come back RESTRICTED with
+// retentionEnd UNSET_F404 (F-404), the others are erased, WRK retains and restricts its tasks, and the erase completes the case.
 
 const MAP = ['PTY', 'POL', 'BIL', 'CLM', 'UW', 'RI', 'DOC', 'CHN', 'WRK', 'PLT', 'FIN', 'RAT', 'DAT', 'MIG', 'CMP'];
-const KINDS = ['ERASED', 'ANONYMISED', 'RESTRICTED', 'NOT_HELD', 'NOT_BUILT'];
+const KINDS = ['ERASED', 'ANONYMISED', 'RESTRICTED', 'NOT_HELD'];
 const DAT_FACT = { category: 'CONTACT', key: 'preferred-channel', value: 'e-mail' };
 
 const outcomesOf = (tasks: Json[], module: string): Json[] => (tasks.find((t) => t['module'] === module)?.['outcomes'] ?? []) as Json[];
@@ -60,7 +61,7 @@ test('E2E-09 DSAR: fan-out map, export found == seeded, redaction, disclosure lo
     return got.body;
   };
 
-  // ---- 1. ACCESS: the clock runs for one month, the fan-out lists the 15-row map, WRK is NOT_BUILT.
+  // ---- 1. ACCESS: the clock runs for one month, the fan-out lists the 15-row map, every module answers (WRK included).
   const accessId = await open('ACCESS');
   const early = await call(request, dpo, 'POST', '/api/cmp/v1/dsar/start-fan-out', { id: randomUUID() });
   expect(early.status, 'an unknown case is refused').toBeGreaterThanOrEqual(400);
@@ -69,8 +70,10 @@ test('E2E-09 DSAR: fan-out map, export found == seeded, redaction, disclosure lo
   expect(fan.body['request']['status']).toBe('IN_REVIEW');
   const tasks = fan.body['tasks'] as Json[];
   expect(tasks.map((t) => t['module'])).toEqual(MAP);
-  expect(tasks.find((t) => t['module'] === 'WRK')!['status'], 'WRK is not built').toBe('NOT_BUILT');
-  expect(tasks.filter((t) => t['module'] !== 'WRK' && t['status'] !== 'DONE'), 'every built module answered').toEqual([]);
+  expect(tasks.find((t) => t['module'] === 'WRK')!['status'], 'WRK has a DSAR participant').toBe('DONE');
+  expect(tasks.filter((t) => t['status'] !== 'DONE'), 'every module answered').toEqual([]);
+  expect(tasks.some((t) => (t['outcomes'] as Json[]).some((o) => o['kind'] === 'NOT_BUILT')), 'no NOT_BUILT outcome').toBe(false);
+  expect(fan.body['request']['blockers'], 'only the package is still to compile').toEqual(['PACKAGE_NOT_COMPILED']);
 
   const received = new Date(fan.body['request']['receivedAt']).getTime();
   const deadline = new Date(fan.body['request']['deadline']).getTime();
@@ -95,7 +98,7 @@ test('E2E-09 DSAR: fan-out map, export found == seeded, redaction, disclosure lo
     for (const t of tasks) for (const o of t['outcomes'] as Json[]) expect(KINDS, `${t['module']}/${o['recordClass']}`).toContain(o['kind']);
   });
 
-  // ---- 3. DPO review: redact the third party data of CLM, then export. WRK keeps the case open (D-SL6-07).
+  // ---- 3. DPO review: redact the third party data of CLM, then export. The export completes the case.
   const clm = tasks.find((t) => t['module'] === 'CLM')!;
   const decided = await call(request, dpo, 'POST', '/api/cmp/v1/dsar/decide-item', { id: accessId, taskId: clm['taskId'], redactThirdParty: true, note: 'claim file names a third party' });
   expect(decided.status, decided.text).toBe(200);
@@ -106,8 +109,8 @@ test('E2E-09 DSAR: fan-out map, export found == seeded, redaction, disclosure lo
   expect(entries.find((e) => e['module'] === 'POL')!['redacted']).toBe(false);
   expect(JSON.stringify(entries.find((e) => e['module'] === 'DAT'))).toContain(DAT_FACT.value);
   expect(exported.body['package']['index'].length).toBeGreaterThan(0);
-  expect(exported.body['request']['blockers']).toEqual(['NOT_BUILT:WRK']);
-  expect(exported.body['request']['status'], 'a module that is not built blocks auto-completion').toBe('IN_REVIEW');
+  expect(exported.body['request']['blockers'], 'nothing blocks the case').toEqual([]);
+  expect(exported.body['request']['status'], 'all modules answered and the package is compiled: the case completes').toBe('COMPLETED');
 
   // ---- 4. Disclosure log entry for the export.
   await test.step('the disclosure to the data subject is logged', async () => {
@@ -122,9 +125,11 @@ test('E2E-09 DSAR: fan-out map, export found == seeded, redaction, disclosure lo
     expect(recorded.some((e) => e['dsarId'] === accessId && e['recipient'] === 'Data subject')).toBe(true);
   });
 
-  // The case stays inside its deadline: the clock runs, the deadline is ahead of the server's now.
+  // The case was answered inside its deadline: it is completed and the deadline is ahead of the server's now.
   expect(deadline).toBeGreaterThan((await serverNow(request)).getTime());
-  expect((await readCase(accessId))['request']['completedAt'] ?? null).toBeNull();
+  const doneAccess = await readCase(accessId);
+  expect(doneAccess['request']['status']).toBe('COMPLETED');
+  expect(doneAccess['request']['completedAt'] ?? null).not.toBeNull();
 
   // ---- 5. ERASURE: approval by a second DPO, legal hold, then the purge.
   const eraseId = await open('ERASURE');
@@ -162,14 +167,18 @@ test('E2E-09 DSAR: fan-out map, export found == seeded, redaction, disclosure lo
       expect(i['retentionEnd']).toBe('UNSET_F404');
     }
     expect(items.some((i) => i['module'] === 'DAT' && i['kind'] === 'ERASED'), 'DAT erased the subject fact').toBe(true);
-    expect(items.some((i) => i['module'] === 'WRK' && i['kind'] === 'NOT_BUILT')).toBe(true);
+    const wrk = items.filter((i) => i['module'] === 'WRK');
+    expect(wrk.length, 'WRK answered the erase').toBeGreaterThan(0);
+    for (const i of wrk) expect(['NOT_HELD', 'RESTRICTED'], 'WRK retains and restricts its tasks, never erases them').toContain(i['kind']);
+    for (const i of items.filter((x) => x['kind'] === 'RESTRICTED')) expect(i['legalBasis'], `${i['module']}/${i['recordClass']} restricted with a basis`).toBeTruthy();
     expect(items.filter((i) => i['kind'] === 'ERASED' || i['kind'] === 'ANONYMISED').length, `the erasable classes were erased: ${JSON.stringify(items.map((i) => [i['module'], i['recordClass'], i['kind'], i['recordCount']]))}`).toBeGreaterThanOrEqual(1);
   });
   const after = await readCase(eraseId);
-  expect(after['request']['blockers'], 'only the module that is not built holds the case open').toEqual(['NOT_BUILT:WRK']);
-  expect(after['request']['status']).toBe('IN_REVIEW');
+  expect(after['request']['blockers'], 'every module is erased or restricted').toEqual([]);
+  expect(after['request']['status'], 'the erase completes the case').toBe('COMPLETED');
+  expect(after['request']['completedAt'] ?? null).not.toBeNull();
 
-  // A repeat of the erase changes nothing.
+  // A repeat of the erase on the completed case changes nothing (DSARCompleted is published once).
   const again = await call(request, dpo2, 'POST', '/api/cmp/v1/dsar/erase', { dsarId: eraseId });
   expect(again.status, again.text).toBe(200);
   expect((again.body['perItemOutcome'] as Json[]).length).toBe(items.length);

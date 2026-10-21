@@ -185,7 +185,7 @@ export function CaseActions({ data }: { data: DsarCase }) {
         ) : null}
         {request.status === 'IN_REVIEW' && (erasure || restriction) ? (
           <>
-            {caller.actorKey && caller.actorKey === request.createdBy ? (
+            {caller.actorKey && sameActor(caller.actorKey, request.createdBy) ? (
               <Banner variant="warning" live="none" title={t('dsar.fourEyes.title')}>
                 {t('dsar.fourEyes.body')}
               </Banner>
@@ -260,4 +260,10 @@ export function CaseActions({ data }: { data: DsarCase }) {
       {run.isError ? <ProblemBanner error={run.error} /> : null}
     </div>
   );
+}
+
+/** The api stores the creator as the actor id ("dev:dpo"); the session carries the canonical ActorKey ("USER:dev:dpo"). */
+function sameActor(actorKey: string, createdBy: string): boolean {
+  const bare = (value: string): string => value.replace(/^USER:/, '');
+  return bare(actorKey) === bare(createdBy);
 }

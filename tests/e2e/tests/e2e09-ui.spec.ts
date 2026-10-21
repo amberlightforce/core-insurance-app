@@ -5,9 +5,10 @@ import { importProducts, issuePolicy } from './support/servicing.js';
 import { alive, go, signInAs } from './support/ui.js';
 
 // E2E-09 DSAR through the compliance screens (SLICE-PLAN-6, D-SL6-07): the DPO opens an ACCESS case for a data subject who holds a paid policy
-// and a DAT fact, verifies identity, starts the fan-out (15 modules, WRK NOT_BUILT), exports the package and records the disclosure; then an
-// ERASURE case where the creator is refused their own approval (four eyes), a second DPO approves in another browser context and the erase
-// returns RESTRICTED for the regulated classes and ERASED for the DAT fact. WRK keeps both cases open. Greek UI, labels from compliance dsar.json.
+// and a DAT fact, verifies identity, starts the fan-out (15 modules, all DONE; WRK has a DSAR participant since NX-HD-03/05), exports the package (the
+// case completes) and records the disclosure; then an ERASURE case where the creator is refused their own approval (four eyes), a second DPO
+// approves in another browser context and the erase returns RESTRICTED for the regulated classes and ERASED for the DAT fact; the erase
+// completes the case. Greek UI, labels from compliance dsar.json.
 // Runs against the stack of tests/e2e/run-e2e09.sh (its e2e09 filter picks this file up).
 
 const DPO = 'Dev Compliance Officer / DPO (synthetic)';
@@ -43,7 +44,7 @@ async function openCase(page: Page, subject: string, type: string): Promise<stri
   return page.url().split('/').pop()!;
 }
 
-/** Identity check and fan-out of a fresh case: every built module answers, WRK is NOT_BUILT and holds the case open. */
+/** Identity check and fan-out of a fresh case: all 15 modules answer (WRK included), no module is NOT_BUILT; the case stays in review until exported/erased. */
 async function verifyAndFanOut(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Επαλήθευση ταυτότητας', exact: true }).click();
   await expect(page.getByText('Ταυτότητα επαληθεύτηκε').first()).toBeVisible();
@@ -54,10 +55,12 @@ async function verifyAndFanOut(page: Page): Promise<void> {
   await expect(tasks.getByRole('row')).toHaveCount(MAP.length + 1); // header row
   for (const module of MAP) await expect(tasks.getByRole('row').filter({ has: page.getByRole('cell', { name: module, exact: true }) })).toHaveCount(1);
   const wrk = tasks.getByRole('row').filter({ has: page.getByRole('cell', { name: 'WRK', exact: true }) });
-  await expect(wrk).toContainText('Δεν έχει υλοποιηθεί');
-  await expect(tasks.getByText('Ολοκληρώθηκε')).toHaveCount(MAP.length - 1);
-  await expect(page.getByText('Δεν καλύπτονται όλες οι ενότητες')).toBeVisible();
-  await expect(page.getByRole('list', { name: 'Εμπόδια ολοκλήρωσης' })).toContainText('NOT_BUILT:WRK');
+  await expect(wrk).toContainText('Ολοκληρώθηκε');
+  await expect(wrk).not.toContainText('Δεν έχει υλοποιηθεί');
+  await expect(tasks.getByText('Ολοκληρώθηκε')).toHaveCount(MAP.length);
+  await expect(tasks.getByText('Δεν έχει υλοποιηθεί')).toHaveCount(0);
+  await expect(page.getByText('Δεν καλύπτονται όλες οι ενότητες')).toHaveCount(0);
+  await expect(page.getByRole('list', { name: 'Εμπόδια ολοκλήρωσης' })).not.toContainText('NOT_BUILT');
 }
 
 test('E2E-09 UI: DSAR access with export and disclosure, then erasure with four eyes and retention classes', async ({ page, browser, request }) => {
@@ -86,14 +89,15 @@ test('E2E-09 UI: DSAR access with export and disclosure, then erasure with four 
   const outcomes = page.getByRole('table', { name: 'Αποτελέσματα' });
   await expect(outcomes.getByRole('row').filter({ hasText: 'SUBJECT_FACT' })).toHaveCount(1);
 
-  // ---- 3. Export: the package is downloaded as JSON; the case stays in review because WRK is not built.
+  // ---- 3. Export: the package is downloaded as JSON and, with every module answered, the case completes.
   const [download] = await Promise.all([
     page.waitForEvent('download'),
     page.getByRole('button', { name: 'Σύνταξη και λήψη εξαγωγής' }).click(),
   ]);
   expect(download.suggestedFilename()).toBe(`dsar-${accessId}.json`);
   await expect(page.getByText('Η εξαγωγή συντάχθηκε').first()).toBeVisible();
-  await expect(page.getByText('Σε εξέταση').first()).toBeVisible();
+  await expect(page.getByText('Ολοκληρώθηκε').first()).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Εμπόδια ολοκλήρωσης' })).toHaveCount(0);
 
   // ---- 4. The disclosure to the data subject is logged and listed.
   await page.getByRole('textbox', { name: 'Αποδέκτης', exact: true }).fill('Υποκείμενο δεδομένων');
@@ -140,8 +144,8 @@ test('E2E-09 UI: DSAR access with export and disclosure, then erasure with four 
   await expect(erased.getByRole('row').filter({ hasText: 'Περιορίστηκε' }).first()).toBeVisible();
   await expect(erased.getByRole('row').filter({ hasText: 'Περιορίστηκε' }).first()).toContainText('UNSET_F404');
   await expect(erased.getByRole('row').filter({ hasText: 'DAT' }).filter({ hasText: 'Διαγράφηκε' })).not.toHaveCount(0);
-  await expect(second.getByRole('list', { name: 'Εμπόδια ολοκλήρωσης' })).toContainText('NOT_BUILT:WRK');
-  await expect(second.getByText('Σε εξέταση').first()).toBeVisible();
+  await expect(second.getByRole('list', { name: 'Εμπόδια ολοκλήρωσης' })).toHaveCount(0);
+  await expect(second.getByText('Ολοκληρώθηκε').first()).toBeVisible();
 
   // The first DPO sees the same recorded outcome and the approval.
   await go(page, `/compliance/dsar/${eraseId}`);
