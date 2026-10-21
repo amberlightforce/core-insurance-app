@@ -312,12 +312,14 @@ public sealed class TaxTreatmentTests
     }
 
     [Fact]
-    public void GR_rows_exist_for_the_ipt_category_only_and_every_row_is_pending_opinion_with_a_source()
+    public void GR_rows_exist_for_ipt_and_the_levy_of_a_withdrawal_void_only_and_every_row_is_pending_opinion_with_a_source()
     {
         var rows = Build("Development").Engine.Catalogue.Entries.Where(e => e.Key.StartsWith(TaxTreatmentRules.KeyPrefix, StringComparison.Ordinal)).ToList();
 
-        rows.Count.ShouldBe(10);
-        rows.ShouldAllBe(e => e.LegalStatus == LegalStatus.PendingOpinion && e.Key.StartsWith("tax.treatment.rule.TAX.", StringComparison.Ordinal) && e.SourceRef.Contains("REQ-MKT-331"));
+        rows.Count.ShouldBe(12);
+        rows.ShouldAllBe(e => e.LegalStatus == LegalStatus.PendingOpinion && e.SourceRef.Contains("REQ-MKT-331"));
+        rows.Where(e => !e.Key.StartsWith("tax.treatment.rule.TAX.", StringComparison.Ordinal)).Select(e => e.Key).ShouldBe(
+            ["tax.treatment.rule.LEVY.VOID.DistanceWithdrawal", "tax.treatment.rule.LEVY.DISTANCE_WITHDRAWAL_VOID.ANY"], ignoreOrder: true);
     }
 
     [Fact]

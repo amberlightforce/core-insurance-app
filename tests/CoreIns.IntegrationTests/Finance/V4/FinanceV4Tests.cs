@@ -445,6 +445,34 @@ public sealed class FinanceV4Tests(PostgresFixture database) : IClassFixture<Pos
         (await StatusAsync(partial)).ShouldBe("SUSPENDED/VOID_REFUSED");
     }
 
+    [Fact]
+    public async Task NX_HD_06_partial_voids_post_scaled_compensating_journals_never_exceed_the_payment_and_a_full_reversal_cannot_follow()
+    {
+        var (claim, payment, disbursement) = (Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7());
+        await PaymentAsync(claim, payment, "800.00", "SEPA_CT", disbursement: disbursement);
+        await _slice.DrainAsync();
+
+        var first = await VoidAsync(claim, payment, "300.00");
+        var tooMuch = await VoidAsync(claim, payment, "600.00");
+        await _slice.DrainAsync();
+        (await StatusAsync(first)).ShouldBe("POSTED");
+        (await StatusAsync(tooMuch)).ShouldBe("SUSPENDED/VOID_REFUSED");
+        (await NetAsync("GL-2210", $"claim_id = '{claim}'")).ShouldBe(500.00m, "300.00 of the 800.00 reserve consumption is restored");
+        (await NetAsync("GL-2510", $"claim_payment_id = '{payment}'")).ShouldBe(-500.00m);
+        (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.journal_entry WHERE reverses_journal_id IS NOT NULL AND source_ref = '{payment}'")).ShouldBe(0, "a partial void is not the linked reversal");
+
+        // A void without an amount voids what is left; the payment is then fully voided and nothing more can be.
+        var rest = await VoidAsync(claim, payment);
+        await _slice.DrainAsync();
+        (await StatusAsync(rest)).ShouldBe("POSTED");
+        (await NetAsync("GL-2210", $"claim_id = '{claim}'")).ShouldBe(0m);
+        (await NetAsync("GL-2510", $"claim_payment_id = '{payment}'")).ShouldBe(0m);
+        var again = await VoidAsync(claim, payment, "0.01");
+        await _slice.DrainAsync();
+        (await StatusAsync(again)).ShouldBe("SUSPENDED/VOID_REFUSED");
+        await AssertJournalsBalancedAsync($"claim_id = '{claim}'");
+    }
+
     // ---- fail closed ----------------------------------------------------------------------------------------------------------
 
     [Fact]

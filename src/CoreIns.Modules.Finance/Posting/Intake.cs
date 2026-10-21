@@ -350,7 +350,7 @@ internal sealed partial class Intake(
     private async Task VoidPaymentAsync(BusinessEventRow row, CancellationToken cancellationToken)
     {
         var legalEntity = new LegalEntityId(row.LegalEntityId!.Value);
-        var outcome = await voids.ReverseAsync(row.Payload, legalEntity, row.OccurredAt.ToBusinessDate(options.Value.Zone), cancellationToken).ConfigureAwait(false);
+        var outcome = await voids.ReverseAsync(row.Payload, row.BusinessEventId, legalEntity, row.OccurredAt.ToBusinessDate(options.Value.Zone), cancellationToken).ConfigureAwait(false);
         if (outcome.Reason is not null)
         {
             await SuspendAsync(row, outcome.Reason, outcome.Detail!, null, cancellationToken).ConfigureAwait(false);

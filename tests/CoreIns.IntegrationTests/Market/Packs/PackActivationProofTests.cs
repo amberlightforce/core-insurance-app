@@ -18,6 +18,8 @@ public sealed class PackActivationProofTests
         "tax.treatment.rule.TAX.FEE.ANY",
         "tax.treatment.rule.TAX.VOID.DistanceWithdrawal",
         "tax.treatment.rule.TAX.DISTANCE_WITHDRAWAL_VOID.ANY",
+        "tax.treatment.rule.LEVY.VOID.DistanceWithdrawal",
+        "tax.treatment.rule.LEVY.DISTANCE_WITHDRAWAL_VOID.ANY",
     ];
 
     [Fact]

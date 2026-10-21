@@ -5,7 +5,7 @@ namespace CoreIns.IntegrationTests.Finance.Servicing;
 /// <summary>
 /// A <c>TaxCalculator.treatment</c> double with the Greece rows of REQ-MKT-331 (all PendingOpinion, D-SL3-05): IPT on
 /// cancellation by the policyholder, endorsement credit, return premium and refund is KEEP_NOT_REDUCED; new business,
-/// endorsement debit and fee are APPLY; a distance withdrawal void is REVERSE_AS_VOID. Levy and stamp categories and any
+/// endorsement debit and fee are APPLY; a distance withdrawal void is REVERSE_AS_VOID (levy too, NX-HD-06). Other levy kinds, the stamp category and any
 /// other cancellation source have no row, so they raise RULE_MISSING exactly as MKT does (no core default, D-SL3-06).
 /// The rows are test data of this double, not regulatory values.
 /// </summary>
@@ -47,7 +47,9 @@ internal sealed class FakeTaxCalculator : ITaxCalculator
             (TaxTransactionKind.DistanceWithdrawalVoid, _) => (TreatmentAction.ReverseAsVoid, "GR-TRT-IPT-WITHDRAWAL-VOID"),
             _ => null,
         }
-        : null;
+        : request.Category == TaxCategory.Levy && request.TransactionKind == TaxTransactionKind.DistanceWithdrawalVoid
+            ? (TreatmentAction.ReverseAsVoid, "GR-TRT-LEVY-WITHDRAWAL-VOID") // NX-HD-06: the only levy row of the Greece pack
+            : null;
         if (row is not { } found)
         {
             throw new SpiException(

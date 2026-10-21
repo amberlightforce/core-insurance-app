@@ -162,14 +162,9 @@ internal sealed class TermBilling(
 
         if (amount.IsNegative)
         {
-            if (charge.ChargeCategory == ChargeCategories.Levy)
-            {
-                // The treatment allows it (REDUCE / VOID), but there are no tested mechanics for reducing a levy payable
-                // (D-SL3-06): fail closed. IPT credits are supported (GAP-SL3-BIL-VOID); KEEP_NOT_REDUCED credits are zero (INV-05).
-                await QuarantineAsync(charge, QuarantineReasons.TaxCreditNotSupported, cancellationToken).ConfigureAwait(false);
-                return;
-            }
-
+            // NX-HD-06: tax and levy credits are supported. CheckTreatmentAsync above proved the credit follows TaxCalculator.treatment
+            // (REDUCE / VOID only; KEEP_NOT_REDUCED credits are zero, INV-05); a pending-opinion row is provisional and Production refuses it in MKT.
+            // The ledger rule below (LA-06 / LA-07 against LA-01) fails closed with NO-RULE when it is missing.
             // A credit posts nothing yet: CREDIT_WRITTEN and CREDIT_BILLED are posted together, with the credit note, when
             // its set is complete and the invoice it credits is known (ScheduleAsync). Only its ledger rule is checked here.
             var creditRule = await ledger.RuleAsync(ledger.Key(EntryTypes.CreditWritten, charge.ChargeCategory, RuleQualifiers.Any), cancellationToken).ConfigureAwait(false);

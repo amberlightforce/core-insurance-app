@@ -24,7 +24,7 @@ internal static class EntryTypes
 
     /// <summary>
     /// Written state of a credit (negative delta) reversed: premium or fee clearing → written unbilled (PRD-06 §4.13 step 16,
-    /// REQ-BIL-073). Never posts tax or levy: a tax or levy credit has no rule and is quarantined (D-SL3-05/06).
+    /// REQ-BIL-073). Tax (BLR-CREDIT-WRITTEN-TAX) and levy (BLR-CREDIT-WRITTEN-LEVY, NX-HD-06) credits post only after the treatment check; without a ledger rule they are quarantined (NO-RULE, D-SL3-05/06).
     /// </summary>
     public const string CreditWritten = "CREDIT_WRITTEN";
 

@@ -179,6 +179,31 @@ public sealed class FinanceServicingRulesTests
     }
 
     [Fact]
+    public async Task NX_HD_06_a_levy_reduction_on_a_distance_withdrawal_void_passes_a_kept_levy_and_any_other_levy_credit_fails_closed()
+    {
+        var c = Checker();
+        var reduced = await CheckAsync(c, Entry("CREDIT_WRITTEN",
+            Line("LA-07", "DEBIT", 3.00m, "DISTANCE_WITHDRAWAL_VOID", null, "GR-AUXF", "LEVY", "GR-TRT-LEVY-WITHDRAWAL-VOID"),
+            Line("LA-01", "CREDIT", 3.00m, "DISTANCE_WITHDRAWAL_VOID", null, null, null, null)));
+        reduced.Passed.ShouldBeTrue(reduced.Detail);
+        c.Calculator.Requests.ShouldContain(r => r.Category == TaxCategory.Levy && r.TransactionKind == TaxTransactionKind.DistanceWithdrawalVoid);
+
+        var kept = await CheckAsync(c, Entry("CREDIT_WRITTEN",
+            Line("LA-07", "CREDIT", 3.00m, "DISTANCE_WITHDRAWAL_VOID", null, "GR-AUXF", "LEVY", "GR-TRT-LEVY-WITHDRAWAL-VOID"),
+            Line("LA-01", "DEBIT", 3.00m, "DISTANCE_WITHDRAWAL_VOID", null, null, null, null)));
+        kept.Passed.ShouldBeFalse("the levy payable grows where the treatment reduces it");
+
+        var endorsement = await CheckAsync(c, Entry("CREDIT_WRITTEN",
+            Line("LA-07", "DEBIT", 3.00m, "ENDORSEMENT_CREDIT", null, "GR-AUXF", "LEVY", null),
+            Line("LA-01", "CREDIT", 3.00m, "ENDORSEMENT_CREDIT", null, null, null, null)));
+        endorsement.Passed.ShouldBeFalse();
+        endorsement.Detail!.ShouldContain("RULE_MISSING");
+
+        // The finance rule exists, so the passed check can post: CREDIT_WRITTEN of LA-07 maps by the levy GL key (rule set v4).
+        FinanceSeed.Rules(FinanceSeed.GrTestV4).ShouldContain(r => r.EntryType == "CREDIT_WRITTEN" && r.SourceAccount == "LA-07" && r.ChargeCategory == "LEVY");
+    }
+
+    [Fact]
     public async Task REQ_FIN_182_RULE_MISSING_fails_closed_for_a_levy_line_and_for_a_source_the_pack_has_no_row_for()
     {
         var levy = await CheckAsync(Checker(), Entry("CREDIT_WRITTEN",

@@ -14,5 +14,18 @@ internal static class CreditTaxDatabaseSql
             ('BLR-CREDIT-WRITTEN-TAX', 1, 'CREDIT_WRITTEN', 'TAX', 'DIRECT_BILL', '*', '*', 'LA-06', 'LA-01', 'AMOUNT', DATE '2000-01-01', NULL, 'GAP-SL3-BIL-VOID; REQ-BIL-073; PRD-06 section 4.13 (IPT credit reverses the payable)');
         """;
 
+    /// <summary>
+    /// NX-HD-06: CREDIT_WRITTEN of a levy line: levy payable LA-07 debited against LA-01, the mirror of the WRITTEN levy rule. The levy
+    /// treatment (REDUCE) is checked per line before this rule is used, and a levy that was accrued-not-billed (never invoiced) has no
+    /// invoice item to credit, so its credit is quarantined as CREDIT-EXCEEDS-BILLED.
+    /// </summary>
+    public const string LevyRules = """
+        INSERT INTO bil.ledger_rule (rule_id, version, event_type, charge_category, bill_mode, jurisdiction, qualifier,
+            debit_account, credit_account, amount_expression, valid_from, valid_to, source) VALUES
+            ('BLR-CREDIT-WRITTEN-LEVY', 1, 'CREDIT_WRITTEN', 'LEVY', 'DIRECT_BILL', '*', '*', 'LA-07', 'LA-01', 'AMOUNT', DATE '2000-01-01', NULL, 'NX-HD-06; REQ-BIL-073; PRD-06 section 4.13 (levy credit reverses the payable)');
+        """;
+
+    public const string LevyRulesDown = "DELETE FROM bil.ledger_rule WHERE rule_id = 'BLR-CREDIT-WRITTEN-LEVY';";
+
     public const string RulesDown = "DELETE FROM bil.ledger_rule WHERE rule_id = 'BLR-CREDIT-WRITTEN-TAX';";
 }
