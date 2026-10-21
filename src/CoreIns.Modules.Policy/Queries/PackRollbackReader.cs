@@ -4,6 +4,7 @@ using CoreIns.Modules.Policy.Persistence;
 using CoreIns.Platform.Context;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Paging;
 using CoreIns.SharedKernel.Results;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,9 +15,9 @@ internal sealed class PackRollbackReader(PolicyDbContext db, RequestContext cont
 {
     public async Task<Result<PackRollbackExceptionListPage>> ListAsync(string? status, string? activationId, int? limit, string? cursor, CancellationToken cancellationToken)
     {
-        // TODO(hardening): keyset cursor; an offset cursor can skip or repeat rows while the queue changes.
-        var skip = 0;
-        if (limit is < 1 or > 200 || (cursor is not null && (!int.TryParse(cursor, out skip) || skip < 0)))
+        string[]? after = null;
+        if (!KeysetPaging.TryTake(limit, 25, out var take) || !KeysetPaging.TryDecode(cursor, 2, out after)
+            || (after is not null && !(KeysetPaging.TryLong(after[0], out _) && Guid.TryParse(after[1], out _))))
         {
             return DomainError.Of(ModuleCode.POL, "VALIDATION", "cursor is malformed or limit is outside 1..200.");
         }
@@ -49,13 +50,20 @@ internal sealed class PackRollbackReader(PolicyDbContext db, RequestContext cont
             query = query.Where(e => e.ActivationId == a);
         }
 
-        var take = limit ?? 25;
-        var rows = await query.OrderByDescending(e => e.IdentifiedAt).ThenBy(e => e.ExceptionId).Skip(skip).Take(take + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var page = rows.Take(take).ToList();
+        if (after is not null)
+        {
+            KeysetPaging.TryLong(after[0], out var ticks);
+            var identifiedBefore = Instant.FromDateTimeOffset(new DateTimeOffset(ticks, TimeSpan.Zero));
+            var idAfter = Guid.Parse(after[1]);
+            query = query.Where(e => e.IdentifiedAt < identifiedBefore || (e.IdentifiedAt == identifiedBefore && e.ExceptionId.CompareTo(idAfter) > 0));
+        }
+
+        var rows = await query.OrderByDescending(e => e.IdentifiedAt).ThenBy(e => e.ExceptionId).Take(take + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var (page, next) = KeysetPaging.Slice(rows, take, e => KeysetPaging.Encode(KeysetPaging.Part(e.IdentifiedAt.ToDateTimeOffset().UtcTicks), KeysetPaging.Part(e.ExceptionId)));
         return new PackRollbackExceptionListPage
         {
             Items = await ToViewsAsync(page, cancellationToken).ConfigureAwait(false),
-            NextCursor = rows.Count > take ? (skip + take).ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
+            NextCursor = next,
             Limit = take,
         };
     }

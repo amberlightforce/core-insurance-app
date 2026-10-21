@@ -224,7 +224,8 @@ function StatementBody({ statement }: { statement: FsStatementView }) {
 /**
  * Friendly Settlement statements (SCR-CLM-09 subset, REQ-CLM-160, -264): import a month from the clearing source,
  * lines with match status and exception reasons, net per counterparty, approve net and the BIL hand-over state.
- * TODO(hardening): reasons DIRECTION_MISMATCH / PAYMENT_NOT_APPROVED are not carried by the contract yet.
+ * TODO(hardening): FsStatementLine carries only matchStatus; the server's finer reasons (DIRECTION_MISMATCH, COUNTERPARTY_MISMATCH,
+ * CASE_ALREADY_MATCHED, AMOUNT_DIFFERENCE, PAYMENT_NOT_APPROVED) need a contract field before the page can show them.
  */
 export function FsStatementsPage() {
   const { t } = useTranslation('claims');

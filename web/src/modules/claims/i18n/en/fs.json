@@ -45,6 +45,7 @@
     "inStatement": "In statement",
     "atFaultHint": "Created from the counterparty's notification. The payment is settled by clearing statement.",
     "empty": "No friendly settlement case yet.",
+    "statementsLink": "Friendly settlement statements",
     "evaluate": "Check eligibility",
     "openOwn": "Open own settlement",
     "submit": "Submit to clearing",

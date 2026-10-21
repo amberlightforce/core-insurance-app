@@ -147,14 +147,25 @@ public sealed class AiFeaturesTests(PostgresFixture database) : IClassFixture<Po
         got.StatusCode.ShouldBe(HttpStatusCode.OK, ticket?.ToJsonString());
         ticket.Text("status").ShouldBe("PENDING");
 
-        var (approved, decided) = await PostAsync("/api/chn/v1/tickets/approve", new { ticketId });
+        // NX-EC-09: an approval needs a step-up proof bound to this ticket and to the person deciding.
+        var (noProof, noProofBody) = await PostAsync("/api/chn/v1/tickets/approve", new { ticketId });
+        noProof.StatusCode.ShouldNotBe(HttpStatusCode.OK, noProofBody?.ToJsonString());
+        var (otherTicket, _) = await PostAsync("/api/chn/v1/tickets/approve", new { ticketId, stepUpProof = new { ticketId = Guid.NewGuid(), subject = "USER:test-user", method = "mfa", issuedAt = DateTimeOffset.UtcNow } });
+        otherTicket.StatusCode.ShouldNotBe(HttpStatusCode.OK);
+        var (otherSubject, _) = await PostAsync("/api/chn/v1/tickets/approve", new { ticketId, stepUpProof = new { ticketId, subject = "USER:someone-else", method = "mfa", issuedAt = DateTimeOffset.UtcNow } });
+        otherSubject.StatusCode.ShouldNotBe(HttpStatusCode.OK);
+        var (oldProof, _) = await PostAsync("/api/chn/v1/tickets/approve", new { ticketId, stepUpProof = new { ticketId, subject = "USER:test-user", method = "mfa", issuedAt = DateTimeOffset.UtcNow.AddHours(-1) } });
+        oldProof.StatusCode.ShouldNotBe(HttpStatusCode.OK);
+
+        var proof = new { ticketId, subject = "USER:test-user", method = "mfa", issuedAt = DateTimeOffset.UtcNow };
+        var (approved, decided) = await PostAsync("/api/chn/v1/tickets/approve", new { ticketId, stepUpProof = proof });
         approved.StatusCode.ShouldBe(HttpStatusCode.OK, decided?.ToJsonString());
         decided.Text("status").ShouldBe("APPROVED");
 
         var (stale, staleBody) = await PostAsync("/api/chn/v1/tickets/reject", new { ticketId });
         stale.StatusCode.ShouldBe(HttpStatusCode.Conflict, staleBody?.ToJsonString());
 
-        var (again, _) = await PostAsync("/api/chn/v1/tickets/approve", new { ticketId });
+        var (again, _) = await PostAsync("/api/chn/v1/tickets/approve", new { ticketId, stepUpProof = proof });
         again.StatusCode.ShouldBe(HttpStatusCode.OK); // repeating the same decision is idempotent
     }
 }

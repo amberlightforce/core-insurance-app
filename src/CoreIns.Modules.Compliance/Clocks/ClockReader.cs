@@ -2,6 +2,9 @@ using CoreIns.Modules.Compliance.Contracts.Api;
 using CoreIns.Modules.Compliance.Persistence;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Paging;
+using CoreIns.SharedKernel.Results;
+using CoreIns.Platform.Errors;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoreIns.Modules.Compliance.Clocks;
@@ -10,8 +13,7 @@ namespace CoreIns.Modules.Compliance.Clocks;
 internal sealed class ClockReader(ComplianceDbContext db)
 {
     private const int DefaultLimit = 50;
-    public const int MaxPage = 200;
-    private const int MaxLimit = MaxPage;
+    public const int MaxPage = KeysetPaging.MaxPageSize;
 
     /// <summary>The instance with this id.</summary>
     public async Task<ClockInstanceView?> GetByIdAsync(LegalEntityId legalEntity, Guid id, CancellationToken cancellationToken)
@@ -20,11 +22,16 @@ internal sealed class ClockReader(ComplianceDbContext db)
         return row is null ? null : ToView(row);
     }
 
-    /// <summary>A page of instances, newest id last (UUIDv7 order); the cursor is the offset of the next page (TODO(hardening): keyset cursor).</summary>
+    /// <summary>A page of instances, newest id last (UUIDv7 order); the cursor is an opaque keyset on the clock id (NX-HD-12), a malformed one is refused.</summary>
     public async Task<(IReadOnlyList<ClockInstanceView> Items, string? NextCursor, int Limit)> QueryAsync(
         LegalEntityId legalEntity, string? cursor, int? limit, Guid? id, ObjectRef? subject, string? code, string? status, string? deadlineRange, CancellationToken cancellationToken)
     {
-        var take = Math.Clamp(limit ?? DefaultLimit, 1, MaxLimit);
+        var take = KeysetPaging.Clamp(limit, DefaultLimit);
+        if (!KeysetPaging.TryDecode(cursor, 1, out var after) || (after is not null && !Guid.TryParse(after[0], out _)))
+        {
+            throw new DomainException(DomainError.Of(ModuleCode.CMP, "VALIDATION", "The cursor is malformed."));
+        }
+
         var query = db.Clocks.AsNoTracking().Where(c => c.LegalEntityId == legalEntity);
         if (id is { } wanted)
         {
@@ -62,11 +69,10 @@ internal sealed class ClockReader(ComplianceDbContext db)
             }
         }
 
-        var skip = int.TryParse(cursor, out var offset) && offset > 0 ? offset : 0;
-
-        var rows = await query.OrderBy(c => c.ClockId).Skip(skip).Take(take + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var page = rows.Take(take).ToList();
-        var next = rows.Count > take ? (skip + take).ToString(System.Globalization.CultureInfo.InvariantCulture) : null;
+        var allIds = (await query.Select(c => c.ClockId).ToListAsync(cancellationToken).ConfigureAwait(false)).Select(i => i.Value);
+        var pageIds = KeysetPaging.IdsAfter(allIds, after is null ? null : Guid.Parse(after[0]), take + 1).Select(g => new StatutoryClockId(g)).ToList();
+        var rows = (await query.Where(c => pageIds.Contains(c.ClockId)).ToListAsync(cancellationToken).ConfigureAwait(false)).OrderBy(c => c.ClockId.Value).ToList();
+        var (page, next) = KeysetPaging.Slice(rows, take, c => KeysetPaging.Encode(KeysetPaging.Part(c.ClockId.Value)));
         return ([.. page.Select(ToView)], next, take);
     }
 

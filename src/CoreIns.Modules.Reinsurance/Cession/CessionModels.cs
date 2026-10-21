@@ -21,7 +21,7 @@ internal static class TreatyKinds
     public const string XolNoCession = "XOL_NO_CESSION";
 }
 
-/// <summary>One premium-cession treaty known to RI. ILLUSTRATIVE configuration (D-SL6-10); TODO(hardening): move to the treaty registry.</summary>
+/// <summary>One premium-cession treaty as configured. DEV SEED ONLY (NX-HD-07): the intake reads the approved treaty from <c>ri.cession_treaty</c>, not from here.</summary>
 internal sealed class CessionTreatyOptions
 {
     [Required]
@@ -50,9 +50,61 @@ internal sealed class CessionOptions
 {
     public const string Section = "Reinsurance:Cession";
 
+    /// <summary>Cession base of the seeded treaties (the registry row carries it per treaty).</summary>
     public CessionMode Mode { get; set; } = CessionMode.Net;
 
+    /// <summary>Whether configured treaties are inserted into the registry as approved dev-seed rows when absent. Production configures none.</summary>
+    public bool SeedFromConfig { get; set; } = true;
+
     public List<CessionTreatyOptions> Treaties { get; set; } = [];
+}
+
+/// <summary>
+/// <c>ri.cession_treaty</c>: an approved premium-cession treaty version in the registry (NX-HD-07). Only APPROVED or ACTIVE rows with
+/// <c>known_to</c> null are in force; a superseded version is closed by setting <c>known_to</c>. <c>source</c> says whether the
+/// row came from the registry workflow (REGISTRY) or the configuration dev seed (DEV_SEED).
+/// </summary>
+internal sealed class CessionTreatyRow
+{
+    public Guid TreatyVersionId { get; set; }
+
+    public Guid LegalEntityId { get; set; }
+
+    public string TreatyId { get; set; } = string.Empty;
+
+    public string Kind { get; set; } = TreatyKinds.QuotaShare;
+
+    public int ContractYear { get; set; }
+
+    /// <summary>Ceded share in percent, 0 to 100.</summary>
+    public decimal SharePct { get; set; }
+
+    /// <summary>NET (premium lines only) or GROSS (every charge line).</summary>
+    public string CessionBase { get; set; } = "NET";
+
+    public string Currency { get; set; } = "EUR";
+
+    public string[] CoverageCodes { get; set; } = [];
+
+    /// <summary>Inclusive start of the cover period a written premium line must start in.</summary>
+    public BusinessDate ValidFrom { get; set; }
+
+    /// <summary>Exclusive end of the cover period.</summary>
+    public BusinessDate ValidTo { get; set; }
+
+    public string Status { get; set; } = "APPROVED";
+
+    public string Source { get; set; } = "REGISTRY";
+
+    public string? ApprovedBy { get; set; }
+
+    public Instant? ApprovedAt { get; set; }
+
+    public Instant KnownFrom { get; set; }
+
+    public Instant? KnownTo { get; set; }
+
+    public CessionMode Base => string.Equals(CessionBase, "GROSS", StringComparison.Ordinal) ? CessionMode.Gross : CessionMode.Net;
 }
 
 /// <summary>The pure arithmetic of the cession (no I/O): target, difference to booked.</summary>

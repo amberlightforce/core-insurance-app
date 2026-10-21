@@ -6,6 +6,7 @@ using CoreIns.Modules.Billing.Domain;
 using CoreIns.Modules.Billing.Persistence;
 using CoreIns.Modules.Billing.Services;
 using CoreIns.Platform.Audit;
+using CoreIns.Platform.Authority;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
@@ -35,7 +36,8 @@ internal sealed record DisbursementOpOutcome(DisbursementRow Row, string IbanLas
 /// operations, the in-process <c>IBillingDisbursementService</c> (CLM payment corrections) and the dev bank endpoints.
 /// </summary>
 internal sealed class DisbursementOperator(
-    BillingDbContext db, RequestContext context, IClock clock, LedgerWriter ledger, DisbursementReleaser releaser, IEventPublisher events)
+    BillingDbContext db, RequestContext context, IClock clock, LedgerWriter ledger, DisbursementReleaser releaser, IEventPublisher events,
+    IAuthorityService authority)
 {
     /// <summary>Roles that may stop or void a disbursement of a source (CLM acts for its payments; BIL for its own).</summary>
     private static readonly string[] Allowed =
@@ -43,13 +45,12 @@ internal sealed class DisbursementOperator(
 
     public async Task<Result<DisbursementOpOutcome>> StopAsync(DisbursementId id, string reason, CancellationToken cancellationToken)
     {
-        // TODO(hardening): plt.Authority.check on BIL.DisbursementStop with the amount once the authority type is seeded; roles only for now.
         if (!context.Roles.Any(r => Allowed.Contains(r, StringComparer.Ordinal)))
         {
             return DomainError.Of(ModuleCode.BIL, "SOD", "Stopping a disbursement needs BIL.DisbursementStop authority.");
         }
 
-        return await RunAsync(id, DisbursementTrigger.Stop, reason, cancellationToken).ConfigureAwait(false);
+        return await RunAsync(id, DisbursementTrigger.Stop, reason, cancellationToken, requireAuthority: true).ConfigureAwait(false);
     }
 
     public async Task<Result<DisbursementOpOutcome>> VoidAsync(DisbursementId id, string reason, CancellationToken cancellationToken)
@@ -59,7 +60,7 @@ internal sealed class DisbursementOperator(
             return DomainError.Of(ModuleCode.BIL, "SOD", "Voiding a disbursement needs BIL.DisbursementStop authority.");
         }
 
-        return await RunAsync(id, DisbursementTrigger.Void, reason, cancellationToken).ConfigureAwait(false);
+        return await RunAsync(id, DisbursementTrigger.Void, reason, cancellationToken, requireAuthority: true).ConfigureAwait(false);
     }
 
     /// <summary>The beneficiary bank returned the payment (Issued, or Cleared: late return).</summary>
@@ -112,7 +113,7 @@ internal sealed class DisbursementOperator(
         return new DisbursementOpOutcome(row, last4, amount, null);
     }
 
-    private async Task<Result<DisbursementOpOutcome>> RunAsync(DisbursementId id, DisbursementTrigger trigger, string reason, CancellationToken cancellationToken)
+    private async Task<Result<DisbursementOpOutcome>> RunAsync(DisbursementId id, DisbursementTrigger trigger, string reason, CancellationToken cancellationToken, bool requireAuthority = false)
     {
         var loaded = await LoadAsync(id, cancellationToken).ConfigureAwait(false);
         if (loaded.IsFailure)
@@ -121,6 +122,26 @@ internal sealed class DisbursementOperator(
         }
 
         var (row, last4, refund, amount) = loaded.Value;
+        // Stop and void are limited by amount (NX-EC-09): the actor must hold BIL.DISBURSEMENT_STOP over this payment. A refer is
+        // a refusal too: the correction is immediate, so there is no second person to refer it to.
+        if (requireAuthority)
+        {
+            var check = await authority.CheckAsync(
+                new AuthorityCheckRequest(
+                    context.Actor, context.Roles, SupportAuthorityTypes.DisbursementStop,
+                    new Dictionary<string, DimensionValue>(StringComparer.Ordinal) { [SupportAuthorityTypes.AmountDimension] = DimensionValue.Of(amount) },
+                    new ObjectRef(ModuleCode.BIL, "Disbursement", row.DisbursementId.Value.ToString()), clock.Now),
+                cancellationToken).ConfigureAwait(false);
+            context.AuthorityChecks.Add(check);
+            if (check.Decision != AuthorityDecision.Allow)
+            {
+                return DomainError.Of(ModuleCode.BIL, "SOD", $"No authority to {trigger.ToString().ToLowerInvariant()} a disbursement of {amount} (BIL.DISBURSEMENT_STOP: {check.ReasonCode}).") with
+                {
+                    Metadata = new Dictionary<string, string>(StringComparer.Ordinal) { ["authorityCheckId"] = check.CheckId.ToString(), ["reasonCode"] = check.ReasonCode },
+                };
+            }
+        }
+
         var machine = DisbursementStateModel.Machine;
         var from = Codes.Parse<DisbursementState>(row.State);
         if (!machine.CanFire(from, trigger))

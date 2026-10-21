@@ -32,5 +32,126 @@
     },
     "refund": "Refund {amount}",
     "withdrawal": "Withdrawal {number}"
-  }
+  },
+  "inbox": {
+    "title": "Tasks"
+  },
+  "other": {
+    "title": "Other queues",
+    "lead": "Queues of the other modules that do not yet run through work management."
+  },
+  "tabs": {
+    "mine": "My tasks",
+    "queue": "Queue",
+    "team": "Team",
+    "empty": {
+      "mine": {
+        "title": "You have no tasks",
+        "body": "Take the next task or open the queue."
+      },
+      "queue": {
+        "title": "The queue is empty",
+        "body": "No unassigned task is waiting."
+      },
+      "team": {
+        "title": "No tasks",
+        "body": "There are no open tasks in your queues."
+      }
+    }
+  },
+  "next": {
+    "button": "Next task",
+    "empty": "No task is waiting in your queues.",
+    "failed": "The next task could not be taken."
+  },
+  "task": {
+    "open": "Open",
+    "claim": "Take it",
+    "back": "Back to tasks",
+    "due": "due {date}",
+    "assignedToMe": "You",
+    "unassigned": "Unassigned",
+    "notYours": "Only the task's assignee can close it. Take it first."
+  },
+  "claim": {
+    "done": "The task is now assigned to you.",
+    "taken": "Someone else already took this task.",
+    "failed": "The task could not be taken."
+  },
+  "state": {
+    "OPEN": "Open",
+    "COMPLETED": "Completed",
+    "SKIPPED": "Skipped",
+    "CANCELLED": "Cancelled"
+  },
+  "priority": {
+    "HIGH": "High",
+    "NORMAL": "Normal",
+    "LOW": "Low"
+  },
+  "patterns": {
+    "WRK-MKT-PACK-ROLLBACK-REVIEW": "Review transactions after a pack rollback",
+    "WRK-POL-NONPAY-PSR-EXCEPTION": "Decide a non-payment cancellation",
+    "WRK-BIL-NONPAY-PSR-HOLD": "Vulnerable-customer hold",
+    "WRK-BIL-NONPAY-NOTICE-RETURNED": "Non-payment notice returned"
+  },
+  "queues": {
+    "PSR": "Policy service",
+    "PACK-ROLLBACK-REVIEW": "Pack rollback review"
+  },
+  "outcomes": {
+    "RESOLVED": "Resolved",
+    "NO_ACTION_NEEDED": "No action needed",
+    "REFERRED_ON": "Referred on"
+  },
+  "detail": {
+    "task": "Task",
+    "objects": "Related objects",
+    "closure": "Closure",
+    "number": "Number",
+    "queue": "Queue",
+    "assignee": "Assignee",
+    "priority": "Priority",
+    "created": "Created",
+    "due": "Due",
+    "escalation": "Escalation",
+    "primaryObject": "Primary object",
+    "secondaryObject": "Secondary object",
+    "closedAt": "Closed",
+    "outcome": "Outcome",
+    "note": "Note",
+    "notFound": "The task was not found or you have no access to it.",
+    "packRollbackHint": "The review itself is recorded on the pack-rollback exception list. Complete this task when the review is done."
+  },
+  "close": {
+    "cancel": "Cancel",
+    "outcome": "Outcome",
+    "outcomeRequired": "Choose an outcome.",
+    "note": "Note",
+    "reason": "Reason",
+    "reasonRequired": "A reason is required.",
+    "forbidden": "Only the assignee or a manager can change the task.",
+    "conflict": "The task changed or is already closed. Reload the page.",
+    "failed": "The action did not complete.",
+    "complete": {
+      "open": "Complete",
+      "title": "Complete task",
+      "submit": "Complete",
+      "done": "The task is complete."
+    },
+    "skip": {
+      "open": "Skip",
+      "title": "Skip task",
+      "submit": "Skip",
+      "done": "The task was skipped."
+    }
+  },
+  "notifications": {
+    "queueWaiting": "{count, plural, one {# task is waiting in the queue} other {# tasks are waiting in the queue}}",
+    "openQueue": "Queue"
+  },
+  "home": {
+    "card": "My tasks"
+  },
+  "showMore": "Show more"
 }

@@ -72,6 +72,52 @@ internal static class AgentTools
     ];
 }
 
+/// <summary>
+/// Checks the step-up proof of a ticket approval: <c>{ "ticketId", "subject", "method", "issuedAt" }</c>, bound to the ticket and the deciding
+/// person and no older than <see cref="MaxAge"/>.
+/// </summary>
+internal static class StepUp
+{
+    public static readonly TimeSpan MaxAge = TimeSpan.FromMinutes(5);
+
+    private static readonly string[] Methods = ["mfa", "webauthn", "totp"];
+
+    /// <summary>Null when the proof is valid, otherwise the reason it is not.</summary>
+    public static string? Verify(JsonElement? proof, Guid ticketId, ActorRef actor, Instant now)
+    {
+        if (proof is not { ValueKind: JsonValueKind.Object } p)
+        {
+            return "Approving a ticket needs a step-up proof.";
+        }
+
+        if (!p.TryGetProperty("ticketId", out var t) || t.ValueKind != JsonValueKind.String || !Guid.TryParse(t.GetString(), out var proofTicket) || proofTicket != ticketId)
+        {
+            return "The step-up proof is for another ticket.";
+        }
+
+        if (!p.TryGetProperty("subject", out var s) || s.ValueKind != JsonValueKind.String || !string.Equals(s.GetString(), actor.ToString(), StringComparison.Ordinal))
+        {
+            return "The step-up proof was not given by the person deciding.";
+        }
+
+        if (!p.TryGetProperty("method", out var m) || m.ValueKind != JsonValueKind.String || !Methods.Contains(m.GetString(), StringComparer.Ordinal))
+        {
+            return "The step-up proof names no accepted method.";
+        }
+
+        if (!p.TryGetProperty("issuedAt", out var i) || i.ValueKind != JsonValueKind.String
+            || !System.DateTimeOffset.TryParse(i.GetString(), System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeUniversal, out var issued))
+        {
+            return "The step-up proof has no issue time.";
+        }
+
+        var age = now.ToDateTimeOffset() - issued;
+
+        // TODO(hardening): the proof is a client assertion; verify an IdP-signed step-up (acr/amr claim or a signed challenge) instead.
+        return age < TimeSpan.FromSeconds(-30) || age > MaxAge ? "The step-up proof has expired or is from the future." : null;
+    }
+}
+
 /// <summary>Ticket reads and decisions (chn.Ticket.get, approve, reject). Never gated by the AI switch: a human can always decide a pending ticket.</summary>
 internal sealed class TicketService(ChannelsDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock)
 {
@@ -104,12 +150,30 @@ internal sealed class TicketService(ChannelsDbContext db, RequestContext context
     }
 
     /// <summary>Approves or rejects a pending ticket. Idempotent for a repeat of the same decision; the opposite decision is stale.</summary>
-    public async Task<Result<TicketRow>> DecideAsync(Guid ticketId, bool approve, CancellationToken cancellationToken)
+    public async Task<Result<TicketRow>> DecideAsync(Guid ticketId, bool approve, JsonElement? stepUpProof, CancellationToken cancellationToken)
     {
+        // Only a person decides (REQ-CHN-269).
+        if (context.Actor.Kind != ActorKind.User)
+        {
+            return DomainError.Of(ModuleCode.CHN, "HUMAN-REQUIRED", "Only a person can decide a ticket.");
+        }
+
         var row = await FindAsync(ticketId, cancellationToken).ConfigureAwait(false);
         if (row is null)
         {
             return DomainError.Of(ModuleCode.CHN, "NOT-FOUND", "The ticket does not exist in your legal entity.");
+        }
+
+        // TODO(hardening): refuse a decider equal to the delegating person of the agent that raised the ticket (RequestedBy holds only the agent).
+        // An approval needs a fresh step-up proof bound to this ticket and to the person deciding. A repeat of the decision already
+        // taken is idempotent and needs none. Rejecting is the safe direction and needs no proof.
+        if (approve && row.Status != TicketStatuses.Approved)
+        {
+            var problem = StepUp.Verify(stepUpProof, row.TicketId, context.Actor, clock.Now);
+            if (problem is not null)
+            {
+                return DomainError.Of(ModuleCode.CHN, "STEP-UP-REQUIRED", problem);
+            }
         }
 
         var target = approve ? TicketStatuses.Approved : TicketStatuses.Rejected;
@@ -227,22 +291,21 @@ internal sealed class TicketsController : ControllerBase
     [HttpPost("approve")]
     [Authorize(Policy = "chn.Ticket.approve")]
     public Task<IResult> ApproveAsync([FromBody] TicketApproveRequest request, [FromServices] TicketService tickets, CancellationToken cancellationToken) =>
-        DecideAsync(request.TicketId, true, tickets, cancellationToken);
+        DecideAsync(request.TicketId, true, request.StepUpProof, tickets, cancellationToken);
 
     [HttpPost("reject")]
     [Authorize(Policy = "chn.Ticket.reject")]
     public Task<IResult> RejectAsync([FromBody] TicketRejectRequest request, [FromServices] TicketService tickets, CancellationToken cancellationToken) =>
-        DecideAsync(request.TicketId, false, tickets, cancellationToken);
+        DecideAsync(request.TicketId, false, null, tickets, cancellationToken);
 
-    private async Task<IResult> DecideAsync(Guid? ticketId, bool approve, TicketService tickets, CancellationToken cancellationToken)
+    private async Task<IResult> DecideAsync(Guid? ticketId, bool approve, JsonElement? stepUpProof, TicketService tickets, CancellationToken cancellationToken)
     {
         if (ticketId is null)
         {
             return Results.ValidationProblem(new Dictionary<string, string[]> { ["ticketId"] = ["Required."] });
         }
 
-        // TODO(hardening): verify the step-up proof for approvals and bind the decision to the delegating subject.
-        var result = await tickets.DecideAsync(ticketId.Value, approve, cancellationToken).ConfigureAwait(false);
+        var result = await tickets.DecideAsync(ticketId.Value, approve, stepUpProof, cancellationToken).ConfigureAwait(false);
         return result.IsSuccess ? Results.Ok(TicketService.View(result.Value)) : Problem(result.Error);
     }
 

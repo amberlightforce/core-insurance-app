@@ -84,6 +84,27 @@ public sealed class NonPaymentCancellationTests(PostgresFixture database) : ICla
         heldItem.Text("reason").ShouldBe("VULNERABLE_CUSTOMER");
         var proceedItem = page["items"]!.AsArray().Single(i => i.Text("termId") == proceeded.TermId);
 
+        // Keyset paging: one row per page, following the opaque cursor, serves each exception once; an offset-style cursor is refused.
+        var paged = new List<string>();
+        string? cursor = null;
+        for (var i = 0; i < 20; i++)
+        {
+            var url = "/api/pol/v1/psr-exceptions?status=PENDING&limit=1" + (cursor is null ? string.Empty : $"&cursor={Uri.EscapeDataString(cursor)}");
+            var (r, b) = await SendAsync(_factory.CreateClient(), HttpMethod.Get, url, roles: Manager);
+            r.StatusCode.ShouldBe(HttpStatusCode.OK, b?.ToJsonString());
+            paged.AddRange(b!["items"]!.AsArray().Select(x => x.Text("exceptionId")));
+            cursor = b["nextCursor"]?.GetValue<string>();
+            if (cursor is null)
+            {
+                break;
+            }
+        }
+
+        paged.Distinct().Count().ShouldBe(paged.Count);
+        paged.ShouldContain(heldItem.Text("exceptionId"));
+        paged.ShouldContain(proceedItem.Text("exceptionId"));
+        (await SendAsync(_factory.CreateClient(), HttpMethod.Get, "/api/pol/v1/psr-exceptions?cursor=1", roles: Manager)).Response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+
         var client = _factory.CreateClient();
         var hold = new { exceptionId = heldItem.Text("exceptionId"), decision = "HOLD", note = "Customer is in hospital; call first." };
         (await SendAsync(client, HttpMethod.Post, "/api/pol/v1/psr-exceptions/decide", hold)).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden); // the underwriter may not decide

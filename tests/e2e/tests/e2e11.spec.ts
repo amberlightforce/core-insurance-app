@@ -115,7 +115,10 @@ test('E2E-11 out-of-sequence change: claim re-verified once, BIL respread, FIN c
   expect(setPremium).toBe(premiumAfter - premiumBefore);
   expect(cents(bound.preview['servicingPreview']['premiumChange'])).toBe(setPremium);
   expect(scalar(`SELECT mode || '/' || status FROM pol.oos_correction WHERE transaction_id = '${oosTransaction}'`)).toBe('NET/APPLIED');
-  // TODO(hardening): the GROSS-mode premium delta and the DAT assertion are deferred (D-SL6-10).
+  // The RI cession reads the approved treaty from the registry (NX-HD-07; the stack env is only the dev seed of that row). GROSS-mode
+  // premium deltas are not reachable through the API (422 above); the GROSS base is covered in CessionDeltaTests.
+  expect(scalar(`SELECT count(*) FROM ri.cession_treaty WHERE treaty_id = 'QS-E2E11' AND status = 'APPROVED' AND known_to IS NULL`), 'the treaty is an approved registry row').toBe('1');
+  expect(scalar(`SELECT string_agg(DISTINCT treaty_id || '/' || mode, ',') FROM ri.cession WHERE term_id = '${policy.termId}'`), 'cessions are booked against the registry treaty in NET mode').toBe('QS-E2E11/NET');
 
   // ---- 6. CLM: ReverificationRequired, the claim keeps its snapshot until a human decides.
   const pending = await eventually('the claim to require re-verification', async () => {

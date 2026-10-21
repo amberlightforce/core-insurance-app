@@ -78,6 +78,22 @@ public sealed class DisbursementOpsTests(PostgresFixture database) : IClassFixtu
     }
 
     [Fact]
+    public async Task NX_EC_09_stop_and_void_are_limited_by_the_amount_of_the_actors_authority()
+    {
+        var large = await ReleasedPaymentAsync(150000m);
+
+        // A claims handler holds the role but not authority over EUR 150000: refused, and the payment is untouched.
+        (await Should.ThrowAsync<DomainException>(() => StopAsync(large.DisbursementId, "Staff.ClaimsHandler"))).Error.Code.Value.ShouldBe("BIL-ERR-SOD");
+        (await Should.ThrowAsync<DomainException>(() => VoidAsync(large.DisbursementId, "Staff.ClaimsHandler"))).Error.Code.Value.ShouldBe("BIL-ERR-SOD");
+        (await StateAsync(large.DisbursementId)).ShouldBe("RELEASED");
+
+        // The manager's authority covers it; a handler may stop a small payment.
+        (await StopAsync(large.DisbursementId)).Disbursement.Status.ShouldBe(DisbursementStopResponse.DisbursementDetail.StatusValue.Stopped);
+        var small = await ReleasedPaymentAsync(900m);
+        (await StopAsync(small.DisbursementId, "Staff.ClaimsHandler")).Disbursement.Status.ShouldBe(DisbursementStopResponse.DisbursementDetail.StatusValue.Stopped);
+    }
+
+    [Fact]
     public async Task REQ_BIL_208_stop_a_Released_payment_reverses_the_release_and_publishes_DisbursementStopped_once()
     {
         var released = await ReleasedPaymentAsync();

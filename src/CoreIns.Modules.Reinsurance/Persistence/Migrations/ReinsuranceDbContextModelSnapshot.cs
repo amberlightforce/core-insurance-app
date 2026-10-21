@@ -18,7 +18,7 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("ri")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -128,6 +128,112 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                     b.ToTable("cession", "ri", t =>
                         {
                             t.HasCheckConstraint("ck_cession_mode", "mode IN ('NET', 'GROSS')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Cession.CessionTreatyRow", b =>
+                {
+                    b.Property<Guid>("TreatyVersionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("treaty_version_id");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("approved_at");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("approved_by");
+
+                    b.Property<string>("CessionBase")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("cession_base");
+
+                    b.Property<int>("ContractYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("contract_year");
+
+                    b.PrimitiveCollection<string[]>("CoverageCodes")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("coverage_codes");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<DateTime>("KnownFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("known_from");
+
+                    b.Property<DateTime?>("KnownTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("known_to");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<decimal>("SharePct")
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("share_pct");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TreatyId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("treaty_id");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateOnly>("ValidTo")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_to");
+
+                    b.HasKey("TreatyVersionId")
+                        .HasName("pk_cession_treaty");
+
+                    b.HasIndex("LegalEntityId", "TreatyId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_cession_treaty_current")
+                        .HasFilter("known_to IS NULL");
+
+                    b.ToTable("cession_treaty", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_cession_treaty_base", "cession_base IN ('NET', 'GROSS')");
+
+                            t.HasCheckConstraint("ck_cession_treaty_kind", "kind IN ('QUOTA_SHARE', 'XOL_NO_CESSION')");
+
+                            t.HasCheckConstraint("ck_cession_treaty_known", "known_to IS NULL OR known_to > known_from");
+
+                            t.HasCheckConstraint("ck_cession_treaty_period", "valid_to > valid_from");
+
+                            t.HasCheckConstraint("ck_cession_treaty_scope", "cardinality(coverage_codes) >= 1");
+
+                            t.HasCheckConstraint("ck_cession_treaty_share", "share_pct >= 0 AND share_pct <= 100");
+
+                            t.HasCheckConstraint("ck_cession_treaty_source", "source IN ('REGISTRY', 'DEV_SEED')");
+
+                            t.HasCheckConstraint("ck_cession_treaty_status", "status IN ('DRAFT', 'APPROVED', 'ACTIVE', 'WITHDRAWN')");
                         });
                 });
 

@@ -58,6 +58,28 @@
         {
           "Id": "bil-billingmgr-refund-illustrative", "Role": "Staff.BillingManager", "Type": "BIL.REFUND", "Illustrative": true,
           "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ]
+        },
+        // NX-EC-09: stop/void of a disbursement by amount (ILLUSTRATIVE, ignored in Production: fail closed). A payment above the
+        // actor's limit is refused; there is no referral for an immediate correction.
+        {
+          "Id": "bil-billing-disbstop-illustrative", "Role": "Staff.Billing", "Type": "BIL.DISBURSEMENT_STOP", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "100000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "bil-claimshandler-disbstop-illustrative", "Role": "Staff.ClaimsHandler", "Type": "BIL.DISBURSEMENT_STOP", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "100000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "bil-billingmgr-disbstop-illustrative", "Role": "Staff.BillingManager", "Type": "BIL.DISBURSEMENT_STOP", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "10000000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "bil-claimsmgr-disbstop-illustrative", "Role": "Staff.ClaimsManager", "Type": "BIL.DISBURSEMENT_STOP", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "10000000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "bil-admin-disbstop-illustrative", "Role": "Platform.Admin", "Type": "BIL.DISBURSEMENT_STOP", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "10000000.00", "Currency": "EUR" } ]
         }
       ]
     }
