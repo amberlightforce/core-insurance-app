@@ -74,7 +74,9 @@ internal sealed class CancelPolicyHandler(
     IProration proration,
     Dependency<IProductArtifactService> products,
     ICancellationRefundMethods refundMethods,
-    IOptions<PolicyOptions> options) : ICommandHandler<CancelPolicy, CancellationCreateResponse>
+    IOptions<PolicyOptions> options,
+    Dependency<CoreIns.Modules.Documents.Contracts.IDocumentRequestService> documents,
+    PartyDisplayName partyNames) : ICommandHandler<CancelPolicy, CancellationCreateResponse>
 {
     private const string BusinessBasis = "ESTABLISHMENT";
 
@@ -388,7 +390,26 @@ internal sealed class CancelPolicyHandler(
             {
                 OccurredAt = t,
             });
-            // TODO(hardening): request DT-WITHDRAWAL-ACK via DocumentRequested once DOC can be called in-process (no-op while DOC is absent).
+            // DT-WITHDRAWAL-ACK, keyed on the channel reference: DOC de-duplicates on (template, request number), so the letter CHN already
+            // requested for the declaration is not rendered twice, and a withdrawal that reached POL by another path still gets one.
+            // No DOC binding means no letter.
+            if (documents.TryValue is { } docs)
+            {
+                await docs.RequestAsync(
+                    new CoreIns.Modules.Documents.Contracts.DocumentRequestSpec(
+                        "DT-WITHDRAWAL-ACK",
+                        withdrawal.ChannelRef,
+                        new ObjectRef(ModuleCode.POL, "Policy", policy.PolicyId.Value.ToString("D")),
+                        policy.PolicyholderPartyId,
+                        "el",
+                        new Dictionary<string, string>(StringComparer.Ordinal)
+                        {
+                            ["customerName"] = await partyNames.ResolveAsync(policy.PolicyholderPartyId, cancellationToken).ConfigureAwait(false),
+                            ["policyNo"] = policy.PolicyNumber.ToString(),
+                            ["withdrawalDate"] = withdrawal.ReceivedAt.ToBusinessDate(zone).ToString(),
+                        }),
+                    cancellationToken).ConfigureAwait(false);
+            }
         }
 
         // ---- the job: Draft → Quoted → Bound in one step (the quote is deterministic) --------------------------------------
