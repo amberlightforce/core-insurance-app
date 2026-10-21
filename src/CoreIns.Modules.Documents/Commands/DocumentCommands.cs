@@ -200,7 +200,7 @@ public sealed record ProviderEventBody
 }
 
 /// <summary>Result of a provider callback.</summary>
-/// <param name="Outcome"><c>APPLIED</c>, <c>DUPLICATE</c>, <c>IGNORED_TERMINAL</c> or <c>REJECTED_NO_PROOF</c>.</param>
+/// <param name="Outcome"><c>APPLIED</c>, <c>DUPLICATE</c>, <c>IGNORED_TERMINAL</c>, <c>IGNORED_TERMINAL_CONFLICT</c> or <c>REJECTED_NO_PROOF</c>.</param>
 /// <param name="DeliveryStatus">Delivery status after the callback.</param>
 public sealed record ProviderEventResult(string Outcome, string DeliveryStatus);
 
@@ -269,8 +269,11 @@ internal sealed class ReceiveProviderEventHandler(
         var terminal = delivery.Status is nameof(DeliveryState.Delivered) or nameof(DeliveryState.Failed) or nameof(DeliveryState.Bounced);
         if (terminal)
         {
-            // TODO(hardening): a RETURNED after DELIVERED (or the reverse) needs a human decision; today it is kept as evidence only.
-            outcome = "IGNORED_TERMINAL";
+            // A conflicting event after a terminal state (RETURNED after DELIVERED, or the reverse) never flips the delivery; it is kept
+            // as evidence and flagged for a human decision. TODO(hardening): raise a work item for the flagged conflict.
+            var wasDelivered = delivery.Status == nameof(DeliveryState.Delivered);
+            var conflicting = wasDelivered ? body.EventType is "RETURNED" or "BOUNCED" : body.EventType == "DELIVERED";
+            outcome = conflicting ? "IGNORED_TERMINAL_CONFLICT" : "IGNORED_TERMINAL";
         }
         else if (body.EventType == "DELIVERED")
         {
@@ -354,7 +357,13 @@ internal sealed class ReprintDocumentHandler(DocumentsDbContext db, IClock clock
             return DomainError.Of(ModuleCode.DOC, "NOT-FOUND", "The document does not exist.");
         }
 
-        // TODO(hardening): reprint of a statutory notice needs an approval and a reason code; here it only adds a delivery.
+        // A reprint of a statutory notice (non-payment) carries a reason: fail closed without one (REQ-DOC-205).
+        // TODO(hardening): a four-eyes approval for the statutory reprint; here the reason is required but not approved.
+        if (document.TemplateKey == Templates.NonPayNotice && string.IsNullOrWhiteSpace(command.Reason))
+        {
+            return DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "A reprint of a statutory notice needs a reason.");
+        }
+
         var delivery = RequestDocumentHandler.NewDelivery(document, document.Medium, clock.Now, isReprint: true);
         db.Deliveries.Add(delivery);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
