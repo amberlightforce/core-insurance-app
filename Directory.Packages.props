@@ -39,7 +39,7 @@
     <!-- Hangfire storage in PostgreSQL (schema `hangfire`) (ADR §1 background jobs). -->
     <PackageVersion Include="Hangfire.PostgreSql" Version="1.21.1" />
     <!-- FluentValidation: request validation at the API boundary (ADR §1 validation). -->
-    <PackageVersion Include="FluentValidation" Version="12.1.1" />
+    <PackageVersion Include="FluentValidation" Version="12.2.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <!-- Serilog: structured logging configured from appsettings / environment (ADR §1 logging). -->
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
