@@ -115,6 +115,52 @@ public sealed class BillingFinanceImportTests(PostgresFixture database) : IClass
         dry["outcomes"]![2].Text("errorCode").ShouldBe("MIG-ERR-PNL-ACCOUNT");
     }
 
+    [Fact]
+    public async Task The_opening_receivable_sub_ledger_reconciles_per_currency_to_the_fin_receivable_account_and_reversal_into_a_locked_month_moves_to_the_next_open_date()
+    {
+        var id = Guid.NewGuid().ToString("N");
+        var payer = Guid.NewGuid();
+        var opening = $"TB-{id}-R";
+
+        // 250.35 + 100.00 receivable in BIL; FIN opens GL-1210 with the same 350.35 (accounting date in July, locked before the reversal).
+        var batch = await CreateBatchAsync(
+            Receivable($"INV-{id}-R1", payer, 250.35m, 250.35m),
+            Receivable($"INV-{id}-R2", payer, 100.00m, 100.00m),
+            new
+            {
+                module = "FIN", objectType = "OpeningBalance", legacyId = opening,
+                payload = new
+                {
+                    legacyId = opening, accountingDate = "2026-07-31", currency = "EUR",
+                    lines = new object[] { new { accountCode = "GL-1210", debit = 350.35m, credit = 0m }, new { accountCode = "GL-2110", debit = 0m, credit = 350.35m } },
+                    trialBalance = new { debit = 350.35m, credit = 350.35m },
+                },
+            });
+        await StartAsync(batch, dryRun: true);
+        await StartAsync(batch, dryRun: false);
+        var (_, done) = await SendAsync(HttpMethod.Post, "/api/mig/v1/batches/approve", new { batchId = batch, decision = "APPROVE" }, "bob");
+        Outcomes(done).ShouldBe(["IMPORTED", "IMPORTED", "IMPORTED"]);
+        var journalId = done!["outcomes"]![2].Text("coreId");
+
+        // Per-currency reconciliation: BIL sub-ledger outstanding = FIN opening balance on the receivable account (difference 0.00).
+        var bil = await ScalarAsync<decimal>($"SELECT sum(outstanding_amount) FROM bil.migration_receivable WHERE batch_id = '{batch}' AND currency = 'EUR'");
+        var fin = await ScalarAsync<decimal>(
+            $"SELECT sum(CASE side WHEN 'DEBIT' THEN amount ELSE -amount END) FROM fin.journal_line WHERE journal_id = '{journalId}' AND account_code = 'GL-1210' AND currency = 'EUR'");
+        bil.ShouldBe(350.35m);
+        (bil - fin).ShouldBe(0.00m);
+        (await CountAsync($"SELECT count(*) FROM bil.migration_receivable WHERE batch_id = '{batch}' AND currency <> 'EUR'")).ShouldBe(0);
+
+        // July is locked: the reversal journal takes the first day of the next open month and the opening balance is still reversed once.
+        await ExecuteAsync(
+            $"INSERT INTO fin.financial_period (period_id, legal_entity_id, period_code, status, created_at) SELECT gen_random_uuid(), legal_entity_id, '2026-07', 'LOCKED', now() FROM fin.journal_entry WHERE journal_id = '{journalId}' ON CONFLICT DO NOTHING");
+        await ExecuteAsync($"UPDATE fin.financial_period SET status = 'LOCKED' WHERE period_code = '2026-07' AND legal_entity_id = (SELECT legal_entity_id FROM fin.journal_entry WHERE journal_id = '{journalId}')");
+        var (response, reversed) = await SendAsync(HttpMethod.Post, "/api/mig/v1/batches/reverse", new { batchId = batch, dryRun = false }, "alice");
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, reversed?.ToJsonString());
+        reversed!["outcomes"]!.AsArray().Select(o => o.Text("outcome")).ShouldAllBe(o => o == "REVERSED");
+        (await ScalarAsync<string>($"SELECT accounting_date::text FROM fin.journal_entry WHERE reverses_journal_id = '{journalId}'")).ShouldBe("2026-08-01");
+        (await CountAsync($"SELECT count(*) FROM bil.migration_receivable WHERE batch_id = '{batch}'")).ShouldBe(0);
+    }
+
     private static object Receivable(string invoice, Guid payer, decimal outstanding, params decimal[] items) => new
     {
         module = "BIL", objectType = "Receivable", legacyId = invoice,

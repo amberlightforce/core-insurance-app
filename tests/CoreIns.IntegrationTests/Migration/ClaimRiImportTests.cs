@@ -133,6 +133,45 @@ public sealed class ClaimRiImportTests(PostgresFixture database) : IClassFixture
         (await _money.ScalarAsync<long>($"SELECT count(*) FROM clm.migration_import WHERE legacy_number = '{legacyClaim}'")).ShouldBe(0);
     }
 
+    [Fact]
+    public async Task A_batch_of_a_claim_and_a_treaty_year_reverses_removes_the_tracker_cancels_the_clock_and_can_be_imported_again()
+    {
+        var policy = _slice.Policy("MTPL");
+        var suffix = Guid.NewGuid().ToString("N")[..8];
+        var legacyClaim = $"LEG-CLM-{suffix}";
+        var treaty = $"XOL-REV-{suffix}";
+        object[] items =
+        [
+            new { module = "CLM", objectType = "Claim", legacyId = legacyClaim, payload = ClaimPayload(policy, legacyClaim, DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-3))) },
+            new { module = "RI", objectType = "TreatyYear", legacyId = $"{treaty}/2026", payload = new { treatyId = treaty, contractYear = 2026, openingAggregate = 5000.00m } },
+        ];
+        var batch = await CreateBatchAsync(items);
+        await StartAsync(batch, dryRun: true);
+        await StartAsync(batch, dryRun: false);
+        var claimId = (await ApproveAsync(batch))["outcomes"]![0].Text("coreId");
+        (await _money.ScalarAsync<string>($"SELECT status FROM cmp.clock WHERE subject_id = '{claimId}'")).ShouldBe("RUNNING");
+        (await _money.ScalarAsync<long>($"SELECT count(*) FROM ri.tracker WHERE treaty_id = '{treaty}' AND batch_id = '{batch}'")).ShouldBe(1);
+
+        // Dry run reports both as reversible and removes nothing.
+        var (dryResponse, dry) = await _money.SendAsync(HttpMethod.Post, "/api/mig/v1/batches/reverse", new { batchId = batch, dryRun = true }, MigRoles, "alice");
+        dryResponse.StatusCode.ShouldBe(HttpStatusCode.OK, dry?.ToJsonString());
+        (await _money.ScalarAsync<long>($"SELECT count(*) FROM ri.tracker WHERE treaty_id = '{treaty}'")).ShouldBe(1);
+
+        var (response, reversed) = await _money.SendAsync(HttpMethod.Post, "/api/mig/v1/batches/reverse", new { batchId = batch, dryRun = false }, MigRoles, "alice");
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, reversed?.ToJsonString());
+        Outcomes(reversed).ShouldBe(["REVERSED", "REVERSED"]);
+        (await _money.ScalarAsync<long>($"SELECT count(*) FROM clm.claim WHERE claim_id = '{claimId}'")).ShouldBe(0);
+        (await _money.ScalarAsync<long>($"SELECT count(*) FROM ri.tracker WHERE treaty_id = '{treaty}'")).ShouldBe(0);
+        (await _money.ScalarAsync<string>($"SELECT status FROM cmp.clock WHERE subject_id = '{claimId}'")).ShouldBe("CANCELLED");
+
+        // The same treaty year imports again in a new batch (the tracker is gone, so the open-aggregate rule starts clean).
+        var again = await CreateBatchAsync(items[1]);
+        await StartAsync(again, dryRun: true);
+        await StartAsync(again, dryRun: false);
+        Outcomes(await ApproveAsync(again)).ShouldBe(["IMPORTED"]);
+        (await _money.ScalarAsync<long>($"SELECT count(*) FROM ri.tracker WHERE treaty_id = '{treaty}' AND batch_id = '{again}'")).ShouldBe(1);
+    }
+
     private static object ClaimPayload(ScriptedPolicy policy, string legacy, DateOnly notifiedOn) => new
     {
         legacyNumber = legacy, policyId = policy.PolicyId, lossAt = DateTimeOffset.UtcNow.AddDays(-12).ToString("yyyy-MM-ddTHH:mm:ssZ"), notifiedOn = notifiedOn.ToString("yyyy-MM-dd"),

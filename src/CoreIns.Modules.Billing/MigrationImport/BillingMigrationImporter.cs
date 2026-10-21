@@ -144,7 +144,9 @@ internal sealed class BillingMigrationImporter(
             Currency = currency.Code, DueDate = payload.DueDate, ImportedAt = clock.Now, ImportedBy = context.Actor.ToString(),
         };
 
-        // TODO(hardening): a BIL sub-ledger entry for the opening receivable; the GL side is the FIN opening-balance journal.
+        // The opening receivable is the BIL sub-ledger of the legacy balance: bil.migration_receivable (per account and currency, summed by
+        // the reconciliation against the FIN opening-balance receivable accounts). It posts no ledger entry on purpose: a BillingEntryPosted
+        // would make FIN journal the receivable a second time next to the FIN opening-balance journal (REQ-FIN-072 double count).
         db.MigrationReceivables.Add(row);
         return await SaveAsync(row.ReceivableId, $"Opening receivable {payload.LegacyInvoiceNumber}: {outstanding}.", payload.LegacyInvoiceNumber, cancellationToken).ConfigureAwait(false);
     }
