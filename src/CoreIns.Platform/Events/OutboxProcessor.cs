@@ -1,3 +1,4 @@
+using CoreIns.Platform.Telemetry;
 using System.Collections.Concurrent;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Persistence;
@@ -213,6 +214,8 @@ public sealed partial class OutboxProcessor
         {
             return OutboxBatchResult.Empty;
         }
+
+        CoreInsMetrics.OutboxBatchLag(claimed.Max(c => (now - c.Envelope.OccurredAt).Ticks / TimeSpan.TicksPerSecond));
 
         var heads = await HeadsAsync(claimed, cancellationToken).ConfigureAwait(false);
         var runs = new List<List<ClaimedMessage>>();
@@ -461,6 +464,7 @@ public sealed partial class OutboxProcessor
         }
 
         parked = [.. parked.Where(p => inserted.Contains((p.Envelope.EventId.Value, p.Handler)))];
+        CoreInsMetrics.OutboxParked(parked.Length);
         var notices = parked.Select(p => PlatformEvents.DeadLetterParkedEnvelope(p.Envelope, p.Handler, ErrorText.ClassOf(p.Error), now)).ToList();
         await OutboxWriter.WriteAsync(connection, transaction, notices, now, cancellationToken).ConfigureAwait(false);
         foreach (var p in parked)

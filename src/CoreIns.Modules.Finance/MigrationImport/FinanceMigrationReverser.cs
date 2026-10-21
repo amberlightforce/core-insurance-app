@@ -12,8 +12,11 @@ namespace CoreIns.Modules.Finance.MigrationImport;
 /// <c>IMigrationReverser</c> for module FIN (D-SL6-05). Journals are append-only, so an opening balance is reversed by a reversal
 /// journal (REQ-FIN-072). It is allowed only while nothing was posted against the opening balance: any other journal that touches one
 /// of its accounts after it (other than another migration opening balance) is post-migration activity and blocks the reversal.
+/// The reversal is dated like the opening balance; when that month is locked it moves to the first day of the next open month
+/// (the same rule as a late correction, <see cref="FinancePeriods.FirstOpenAsync"/>), and when no open month follows the object is
+/// reported as blocked (fail closed) and nothing is posted.
 /// </summary>
-internal sealed class FinanceMigrationReverser(FinanceDbContext db, JournalReversal reversal, RequestContext context, ILegalEntityDirectory legalEntities) : IMigrationReverser
+internal sealed class FinanceMigrationReverser(FinanceDbContext db, JournalReversal reversal, FinancePeriods periods, RequestContext context, ILegalEntityDirectory legalEntities) : IMigrationReverser
 {
     public string ModuleName => "FIN";
 
@@ -38,9 +41,15 @@ internal sealed class FinanceMigrationReverser(FinanceDbContext db, JournalRever
                 continue;
             }
 
-            // TODO(hardening): the reversal is dated like the opening balance; a closed period would need the next open date.
+            var date = await periods.FirstOpenAsync(legalEntity.Value, new BusinessDate(import.AccountingDate), cancellationToken).ConfigureAwait(false);
+            if (date is not { } reversalDate)
+            {
+                outcomes.Add(Blocked(import, "The opening balance's period and every following period are locked; the reversal cannot be dated."));
+                continue;
+            }
+
             var result = await reversal.ReverseAsync(
-                legalEntity, import.JournalId, new BusinessDate(import.AccountingDate), $"Migration batch {batchId} reversed.", cancellationToken).ConfigureAwait(false);
+                legalEntity, import.JournalId, reversalDate, $"Migration batch {batchId} reversed.", cancellationToken).ConfigureAwait(false);
             outcomes.Add(result.IsSuccess
                 ? new ReversalOutcome(FinanceImportTypes.OpeningBalance, import.JournalId, true)
                 : Blocked(import, result.Error!.Detail ?? "The opening-balance journal is already reversed."));

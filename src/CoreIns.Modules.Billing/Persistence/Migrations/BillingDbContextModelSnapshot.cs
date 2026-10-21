@@ -2115,6 +2115,11 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.HasIndex("BillingAccountId")
                         .HasDatabaseName("ix_receipt_account");
 
+                    b.HasIndex("LegalEntityId", "BankReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_receipt_bank_reference")
+                        .HasFilter("bank_reference IS NOT NULL AND method = 'BANK_TRANSFER'");
+
                     b.HasIndex("LegalEntityId", "ReceiptNumber")
                         .IsUnique()
                         .HasDatabaseName("ux_receipt_number");
@@ -2556,6 +2561,11 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                     b.HasIndex("ApprovalRequestId")
                         .HasDatabaseName("ix_refund_approval_request");
+
+                    b.HasIndex("DisbursementId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_refund_disbursement")
+                        .HasFilter("disbursement_id IS NOT NULL");
 
                     b.HasIndex("BillingAccountId")
                         .IsUnique()

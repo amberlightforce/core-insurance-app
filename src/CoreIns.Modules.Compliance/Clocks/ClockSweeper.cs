@@ -3,6 +3,7 @@ using CoreIns.Platform.Commands;
 using CoreIns.Platform.Configuration;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Events;
+using CoreIns.Platform.Telemetry;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -109,10 +110,12 @@ internal sealed partial class ClockSweeper(ClockSweepRunner runner, IOptions<Clo
             try
             {
                 await runner.RunAsync(stoppingToken).ConfigureAwait(false);
+                CoreInsMetrics.SweeperSucceeded("clock");
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 LogRunFailed(logger, ex);
+                CoreInsMetrics.SweeperFailed("clock");
             }
         }
         while (await WaitAsync(timer, stoppingToken).ConfigureAwait(false));

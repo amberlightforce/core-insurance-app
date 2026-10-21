@@ -194,15 +194,20 @@ internal sealed class PolicyMigrationImporter(
         ProductVersionResolveResponse resolved;
         try
         {
-            // The pinned artefacts are the product version in force now for the term (a legacy term may pre-date the first version).
-            // TODO(hardening): pin the version in force at termStart when the product history reaches back that far.
-            resolved = await productVersions.Value.ResolveAsync(
-                new ProductVersionResolveRequest
-                {
-                    Jurisdiction = jurisdiction, LegalEntity = context.LegalEntity!.Value.Value, Product = payload.Product, Channel = "STAFF",
-                    TransactionType = ProductVersionResolveRequest.TransactionTypeValue.NewBusiness,
-                },
-                ValidAt.From(Instant.Max(start, now)), cancellationToken: cancellationToken).ConfigureAwait(false);
+            // The pinned artefacts are the product version in force at termStart (the version the legacy policy was written under).
+            // A legacy term can pre-date the first product version: then the version in force now is pinned (the earlier lookup found none).
+            resolved = await ResolveVersionAsync(jurisdiction, payload.Product, start, cancellationToken).ConfigureAwait(false);
+        }
+        catch (DomainException) when (start < now)
+        {
+            try
+            {
+                resolved = await ResolveVersionAsync(jurisdiction, payload.Product, now, cancellationToken).ConfigureAwait(false);
+            }
+            catch (DomainException ex)
+            {
+                return Failed("MIG-ERR-DEPENDENCY", $"No product version is available for {payload.Product}: {ex.Error.Code}.");
+            }
         }
         catch (DomainException ex)
         {
@@ -335,6 +340,15 @@ internal sealed class PolicyMigrationImporter(
 
         return new ImportOutcome(ImportStatus.Imported, policyId.Value, null, $"Policy {policyNumber.Value} ({mode}).");
     }
+
+    private Task<ProductVersionResolveResponse> ResolveVersionAsync(string jurisdiction, string product, Instant at, CancellationToken cancellationToken) =>
+        productVersions.Value.ResolveAsync(
+            new ProductVersionResolveRequest
+            {
+                Jurisdiction = jurisdiction, LegalEntity = context.LegalEntity!.Value.Value, Product = product, Channel = "STAFF",
+                TransactionType = ProductVersionResolveRequest.TransactionTypeValue.NewBusiness,
+            },
+            ValidAt.From(at), cancellationToken: cancellationToken);
 
     private static ImportOutcome Failed(string code, string message) => new(ImportStatus.Failed, null, code, message);
 }

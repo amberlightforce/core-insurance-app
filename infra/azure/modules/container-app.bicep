@@ -44,6 +44,13 @@ var probes = empty(liveProbePath)
   ? []
   : [
       {
+        // The api/worker apply nothing at start, but cold image pulls and JIT can take a while: allow up to 60 s before liveness starts.
+        type: 'Startup'
+        httpGet: { path: liveProbePath, port: targetPort }
+        periodSeconds: 5
+        failureThreshold: 12
+      }
+      {
         type: 'Liveness'
         httpGet: { path: liveProbePath, port: targetPort }
         periodSeconds: 10

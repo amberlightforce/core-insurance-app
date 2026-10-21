@@ -1,3 +1,4 @@
+using CoreIns.Platform.Telemetry;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text;
@@ -160,6 +161,7 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
                 var existing = await IdempotencyStore.FindAsync(connection, null, scope, key, now, http.RequestAborted).ConfigureAwait(false);
                 if (existing is not null && !string.Equals(existing.RequestHash, hash.Value, StringComparison.Ordinal))
                 {
+                    CoreInsMetrics.IdempotencyConflict("http");
                     await problems.WriteAsync(
                         Error(module, PlatformErrors.IdempotencyMismatch, "This Idempotency-Key was used with a different request."), http).ConfigureAwait(false);
                     return;

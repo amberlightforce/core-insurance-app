@@ -321,6 +321,8 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.Property(e => e.ContractYear).HasColumnName("contract_year");
             entity.Property(e => e.OpeningAggregate).HasColumnName("opening_aggregate").HasColumnType("numeric(19,4)");
             entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.Property(e => e.BatchId).HasColumnName("batch_id");
+            entity.HasIndex(e => e.BatchId).HasDatabaseName("ix_tracker_batch");
             entity.HasIndex(e => new { e.LegalEntityId, e.TreatyId, e.ContractYear }).IsUnique().HasDatabaseName("ux_tracker_treaty_year");
         });
     }

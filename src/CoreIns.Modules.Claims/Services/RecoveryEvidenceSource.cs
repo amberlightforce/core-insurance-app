@@ -109,15 +109,14 @@ internal sealed class RecoveryEvidenceSource(ClaimsDbContext db, RecoveryCashBuf
             return [];
         }
 
+        // Largest remainder: the shares sum exactly to the cash received (no tail line absorbing the rounding, none dropped).
+        var parts = CentAllocation.Allocate(cash, [.. weights.Select(w => w.Weight)]);
         var result = new List<Share>();
-        var allocated = 0m;
         for (var i = 0; i < weights.Count; i++)
         {
-            var amount = i == weights.Count - 1 ? cash - allocated : DecimalRounding.RoundTo(cash * weights[i].Weight / sum, 2, DecimalRounding.DefaultMoneyMode);
-            allocated += amount;
-            if (amount > 0m)
+            if (parts[i] > 0m)
             {
-                result.Add(new Share(weights[i].Exposure, weights[i].CostType, weights[i].CostCategory, amount));
+                result.Add(new Share(weights[i].Exposure, weights[i].CostType, weights[i].CostCategory, parts[i]));
             }
         }
 
