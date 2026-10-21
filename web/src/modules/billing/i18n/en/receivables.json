@@ -98,7 +98,7 @@
       "checks": "Checks",
       "screening": "Sanctions screening",
       "vop": "Payee verification (VoP)",
-      "stub": "Test result (stub)",
+      "notAvailable": "Not available",
       "checksNote": "No per-claimant verification is made; the clearing is checked as a whole."
     },
     "lines": {

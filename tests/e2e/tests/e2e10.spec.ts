@@ -151,7 +151,10 @@ test('E2E-10 AI kill switch: approval gate, suggestions, bias breach, register s
     const got = await call(request, admin, 'GET', `/api/chn/v1/tickets/${ticketId}`);
     expect(got.status, got.text).toBe(200);
     expect(got.body['status']).toBe('PENDING');
-    const approved = await call(request, admin, 'POST', '/api/chn/v1/tickets/approve', { ticketId });
+    const approved = await call(request, admin, 'POST', '/api/chn/v1/tickets/approve', {
+      ticketId,
+      stepUpProof: { ticketId, subject: 'USER:dev:admin', method: 'mfa', issuedAt: new Date().toISOString() },
+    });
     expect(approved.status, approved.text).toBe(200);
     expect(approved.body['status']).toBe('APPROVED');
     const stale = await call(request, admin, 'POST', '/api/chn/v1/tickets/reject', { ticketId });

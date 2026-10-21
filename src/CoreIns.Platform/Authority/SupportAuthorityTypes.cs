@@ -18,6 +18,9 @@ public static class SupportAuthorityTypes
     /// <summary>Override of the policy effective-date limits (back-dating beyond the configured limit).</summary>
     public static AuthorityTypeCode EffectiveDateOverride { get; } = AuthorityTypeCode.Parse("POL.EFFECTIVE_DATE_OVERRIDE");
 
+    /// <summary>Stop or void of an issued disbursement, limited by its amount (NX-EC-09).</summary>
+    public static AuthorityTypeCode DisbursementStop { get; } = AuthorityTypeCode.Parse("BIL.DISBURSEMENT_STOP");
+
     /// <summary>The refund amount (money, so it carries its currency).</summary>
     public const string AmountDimension = "amount";
 
@@ -58,6 +61,9 @@ public static class SupportAuthorityTypes
                 new AuthorityDimensionDefinition(ReasonDimension, DimensionKind.Code),
                 new AuthorityDimensionDefinition(ProductDimension, DimensionKind.Code),
             ]),
+        new AuthorityTypeDefinition(
+            DisbursementStop, ModuleCode.BIL, new LocalizedText("Στάση/ακύρωση εκταμίευσης", "Disbursement stop or void"),
+            [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
         new AuthorityTypeDefinition(
             EffectiveDateOverride, ModuleCode.POL, new LocalizedText("Παράκαμψη ημερομηνίας έναρξης", "Effective-date override"),
             [

@@ -39,6 +39,8 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
 
     public DbSet<IntakeExceptionRow> IntakeExceptions => Set<IntakeExceptionRow>();
 
+    public DbSet<CessionTreatyRow> CessionTreaties => Set<CessionTreatyRow>();
+
     public DbSet<PremiumDeltaRow> PremiumDeltas => Set<PremiumDeltaRow>();
 
     public DbSet<CessionRow> Cessions => Set<CessionRow>();
@@ -220,6 +222,41 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
 
     private static void ConfigureCession(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<CessionTreatyRow>(entity =>
+        {
+            entity.ToTable("cession_treaty", table =>
+            {
+                table.HasCheckConstraint("ck_cession_treaty_kind", "kind IN ('QUOTA_SHARE', 'XOL_NO_CESSION')");
+                table.HasCheckConstraint("ck_cession_treaty_share", "share_pct >= 0 AND share_pct <= 100");
+                table.HasCheckConstraint("ck_cession_treaty_base", "cession_base IN ('NET', 'GROSS')");
+                table.HasCheckConstraint("ck_cession_treaty_status", "status IN ('DRAFT', 'APPROVED', 'ACTIVE', 'WITHDRAWN')");
+                table.HasCheckConstraint("ck_cession_treaty_source", "source IN ('REGISTRY', 'DEV_SEED')");
+                table.HasCheckConstraint("ck_cession_treaty_period", "valid_to > valid_from");
+                table.HasCheckConstraint("ck_cession_treaty_known", "known_to IS NULL OR known_to > known_from");
+                table.HasCheckConstraint("ck_cession_treaty_scope", "cardinality(coverage_codes) >= 1");
+            });
+            entity.HasKey(e => e.TreatyVersionId).HasName("pk_cession_treaty");
+            entity.Property(e => e.TreatyVersionId).HasColumnName("treaty_version_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.TreatyId).HasColumnName("treaty_id");
+            entity.Property(e => e.Kind).HasColumnName("kind");
+            entity.Property(e => e.ContractYear).HasColumnName("contract_year");
+            entity.Property(e => e.SharePct).HasColumnName("share_pct").HasColumnType("numeric(9,6)");
+            entity.Property(e => e.CessionBase).HasColumnName("cession_base");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.Property(e => e.CoverageCodes).HasColumnName("coverage_codes");
+            entity.Property(e => e.ValidFrom).HasColumnName("valid_from").HasColumnType("date");
+            entity.Property(e => e.ValidTo).HasColumnName("valid_to").HasColumnType("date");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.Source).HasColumnName("source");
+            entity.Property(e => e.ApprovedBy).HasColumnName("approved_by");
+            entity.Property(e => e.ApprovedAt).HasColumnName("approved_at").HasColumnType("timestamptz");
+            entity.Property(e => e.KnownFrom).HasColumnName("known_from").HasColumnType("timestamptz");
+            entity.Property(e => e.KnownTo).HasColumnName("known_to").HasColumnType("timestamptz");
+            entity.Ignore(e => e.Base);
+            entity.HasIndex(e => new { e.LegalEntityId, e.TreatyId }).IsUnique().HasFilter("known_to IS NULL").HasDatabaseName("ux_cession_treaty_current");
+        });
+
         modelBuilder.Entity<PremiumDeltaRow>(entity =>
         {
             entity.ToTable("premium_delta");

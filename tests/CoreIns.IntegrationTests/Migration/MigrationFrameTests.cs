@@ -142,6 +142,33 @@ public sealed class MigrationFrameTests(PostgresFixture database) : IClassFixtur
     }
 
     [Fact]
+    public async Task A_content_change_after_the_dry_run_invalidates_the_run_and_the_approval()
+    {
+        async Task TamperAsync(string batchId)
+        {
+            await using var dataSource = Npgsql.NpgsqlDataSource.Create(database.SuperuserConnectionString);
+            await using var command = dataSource.CreateCommand($"UPDATE mig.batch_item SET payload = '{{\"name\": \"tampered\"}}'::jsonb WHERE batch_id = '{batchId}'");
+            (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).ShouldBeGreaterThan(0);
+        }
+
+        // Changed between the dry run and the real run request: the dry run no longer covers the content.
+        var early = await CreateBatchAsync(Item("PTY", $"T-{Guid.NewGuid():N}-1"));
+        await StartAsync(early, dryRun: true);
+        await TamperAsync(early);
+        (await StartAsync(early, dryRun: false, HttpStatusCode.UnprocessableEntity)).Text("code").ShouldContain("DRYRUN-REQUIRED");
+
+        // Changed after the approval was requested: the approval does not run the changed content.
+        var late = await CreateBatchAsync(Item("PTY", $"T-{Guid.NewGuid():N}-2"));
+        await StartAsync(late, dryRun: true);
+        (await StartAsync(late, dryRun: false)).Text("batch.status").ShouldBe("PENDING_APPROVAL");
+        await TamperAsync(late);
+        var (approved, body) = await ApproveAsync(late, "bob");
+        approved.IsSuccessStatusCode.ShouldBeFalse(body?.ToJsonString());
+        body.Text("code").ShouldContain("APPROVAL-STALE");
+        _pty.Imported.Count.ShouldBe(0);
+    }
+
+    [Fact]
     public async Task Overlapping_routing_periods_are_rejected_and_resolve_returns_one_master()
     {
         var key = $"POL-{Guid.NewGuid():N}";

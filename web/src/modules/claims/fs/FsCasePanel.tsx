@@ -4,6 +4,7 @@ import { isApiError } from '../../../api/client';
 import { useIdempotencyKey } from '../../../api/idempotency';
 import type { ClaimView } from '../../../api/types';
 import { Banner, Button, KeyValueList, StatusPill, announce } from '../../../design-system';
+import { LinkButton } from '../../staff/LinkButton';
 import { Section } from '../../staff/PageHeader';
 import { ProblemBanner } from '../../staff/ProblemBanner';
 import styles from '../../staff/staff.module.css';
@@ -173,7 +174,8 @@ function CaseCard({ claimId, fsCase }: { claimId: string; fsCase: FsCaseView }) 
  * «Φιλικός διακανονισμός» card of the claim file (REQ-CLM-155..159): eligibility, the own-insurer case (opening,
  * recoverable, submission status) and the at-fault leg (notification, payable). Hidden when the capability is off
  * or the signed-in role may not read FS cases.
- * TODO(hardening): the statements screen (SL4-CLM-FS-STATEMENT) and a notification intake form are not built here.
+ * Links to the statements screen (SL4-CLM-FS-STATEMENT).
+ * TODO(hardening): a notification intake form is not built here; the contract has no FS notification intake write.
  */
 export function FsCasePanel({ claim }: { claim: ClaimView }) {
   const { t } = useTranslation('claims');
@@ -226,6 +228,11 @@ export function FsCasePanel({ claim }: { claim: ClaimView }) {
             </Button>
           </div>
         ) : null}
+        <div>
+          <LinkButton variant="secondary" to="/claims/fs-statements">
+            {t('fs.statementsLink')}
+          </LinkButton>
+        </div>
         {evaluate.isError ? (
           isFsDisabled(evaluate.error) ? (
             <Banner variant="info" live="none" title={t('fs.disabled')} />
