@@ -393,7 +393,7 @@ internal sealed class CancelPolicyHandler(
             // DT-WITHDRAWAL-ACK, keyed on the channel reference: DOC de-duplicates on (template, request number), so the letter CHN already
             // requested for the declaration is not rendered twice, and a withdrawal that reached POL by another path still gets one.
             // No DOC binding means no letter.
-            if (documents.TryValue is { } docs)
+            if (!context.DryRun && documents.TryValue is { } docs)
             {
                 await docs.RequestAsync(
                     new CoreIns.Modules.Documents.Contracts.DocumentRequestSpec(
