@@ -44,11 +44,11 @@
     <!-- Serilog: structured logging configured from appsettings / environment (ADR §1 logging). -->
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
     <!-- OpenTelemetry: vendor-neutral traces, metrics and logs (ADR §1 monitoring). -->
-    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.19.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.20.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.20.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.20.0" />
     <!-- OTLP exporter for the local Aspire Dashboard (INFRASTRUCTURE §5 OTEL_EXPORTER_OTLP_ENDPOINT). -->
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.20.0" />
     <!-- Azure Monitor OpenTelemetry Distro: export to Application Insights in Azure (INFRASTRUCTURE §5). -->
     <PackageVersion Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0" />
     <!-- Microsoft.Identity.Web: Entra ID token validation and app roles (ADR §1 identity). -->
