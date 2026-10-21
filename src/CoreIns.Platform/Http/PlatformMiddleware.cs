@@ -37,6 +37,12 @@ public static class PlatformHeaders
 
     /// <summary>Channel code of the caller (CHN code list).</summary>
     public const string Channel = "X-Channel";
+
+    /// <summary>Correlation id: accepted (32 hex digits) or created per request, echoed in the response, Problem Details and the audit (NX-OT-06).</summary>
+    public const string CorrelationId = "X-Correlation-Id";
+
+    /// <summary><see cref="HttpContext.Items"/> key under which the correlation middleware stores the request's <see cref="SharedKernel.Identifiers.CorrelationId"/>.</summary>
+    public const string CorrelationItemKey = "CoreIns.CorrelationId";
 }
 
 /// <summary>
@@ -67,7 +73,9 @@ public sealed class RequestContextMiddleware(RequestDelegate next)
 
         context.Language = LanguageResolver.Resolve(http);
         CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(context.Language == Language.En ? "en" : "el-GR");
-        context.CorrelationId = RequestContext.CurrentTraceId();
+        context.CorrelationId = http.Items.TryGetValue(PlatformHeaders.CorrelationItemKey, out var correlation) && correlation is CorrelationId accepted
+            ? accepted
+            : RequestContext.CurrentTraceId();
         if (LegalEntityCode.TryParse(stamp.Value.LegalEntity, out var entity))
         {
             context.LegalEntity = entity;

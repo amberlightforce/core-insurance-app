@@ -24,6 +24,13 @@ param migratorDbPassword = readEnvironmentVariable('MIGRATOR_DB_PASSWORD')
 // Set from the PLT retention catalogue before go-live (no default: a regulatory value).
 param immutabilityRetentionDays = int(readEnvironmentVariable('IMMUTABILITY_RETENTION_DAYS'))
 
+// Backups and DR (docs/runbooks/backup-restore.md): geo-zone-redundant blobs, versioning and change feed for
+// documents and the audit archive, 30-day soft delete, CanNotDelete locks on the database and storage account.
+param storageSkuName = 'Standard_GZRS'
+param storageVersioning = true
+param storageSoftDeleteDays = 30
+param lockCriticalResources = true
+
 param apiMinReplicas = 2
 param apiMaxReplicas = 6
 param gotenbergMaxReplicas = 4

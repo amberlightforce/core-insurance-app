@@ -58,7 +58,7 @@ internal static class HttpHardeningExtensions
             var origins = options.AllowedOrigins.Where(o => !string.IsNullOrWhiteSpace(o) && o != "*").ToArray();
             if (origins.Length > 0)
             {
-                policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
+                policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod().WithExposedHeaders(CoreIns.Platform.Http.PlatformHeaders.CorrelationId);
             }
         }));
 
