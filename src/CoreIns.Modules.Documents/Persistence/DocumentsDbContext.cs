@@ -195,7 +195,7 @@ internal sealed class EvidenceRow
 
     public string? ProofReference { get; set; }
 
-    /// <summary>What DOC did with the callback: APPLIED, IGNORED_TERMINAL or REJECTED_NO_PROOF.</summary>
+    /// <summary>What DOC did with the callback: APPLIED, IGNORED_TERMINAL, IGNORED_TERMINAL_CONFLICT or REJECTED_NO_PROOF.</summary>
     public string Outcome { get; set; } = string.Empty;
 
     public Instant ReceivedAt { get; set; }

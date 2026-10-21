@@ -313,6 +313,10 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("tracker_id");
 
+                    b.Property<Guid?>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
                     b.Property<int>("ContractYear")
                         .HasColumnType("integer")
                         .HasColumnName("contract_year");
@@ -336,6 +340,9 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
 
                     b.HasKey("TrackerId")
                         .HasName("pk_tracker");
+
+                    b.HasIndex("BatchId")
+                        .HasDatabaseName("ix_tracker_batch");
 
                     b.HasIndex("LegalEntityId", "TreatyId", "ContractYear")
                         .IsUnique()

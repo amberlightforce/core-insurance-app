@@ -192,6 +192,18 @@ internal static class FinanceSeed
     /// </summary>
     public const string GrTestV4 = "gr-test.finance.v4";
 
+    /// <summary>
+    /// The seed of migration LevyCreditPosting (NX-HD-06): v4 plus the CREDIT_WRITTEN rule CW-LEVY-PAYABLE for levy lines. Shipped as a new rule-set
+    /// version because v4 is immutable once applied; effective from 2026-10-01 like v4 and winning the tie by version number.
+    /// </summary>
+    public const string GrTestV5 = "gr-test.finance.v5";
+
+    /// <summary>Migration Down of LevyCreditPosting: v5 superseded (rule rows are append-only, REQ-FIN-070); v4 governs again.</summary>
+    public const string SupersedeV5 = """
+        UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'
+         WHERE legal_entity_code = 'GR-TEST' AND book = 'IFRS17' AND version_no = 5;
+        """;
+
     /// <summary>Migration Down of RecoveryPostings: v4 superseded (rule rows are append-only, REQ-FIN-070); v3 governs again.</summary>
     public const string SupersedeV4 = """
         UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'

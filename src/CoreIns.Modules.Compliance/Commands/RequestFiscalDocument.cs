@@ -59,6 +59,26 @@ internal sealed class RequestFiscalDocumentHandler(
     IEventPublisher events,
     IServiceProvider services) : ICommandHandler<RequestFiscalDocument, FiscalDocumentRequestResponse>
 {
+    /// <summary>Whether the stored lines (JSON) carry the same category, amount, currency and references as the request, in any order.</summary>
+    private static bool SameLines(string storedJson, IReadOnlyList<FiscalDocumentRequestRequest.LineItem> requested)
+    {
+        List<FiscalDocumentRequestRequest.LineItem>? stored;
+        try
+        {
+            stored = JsonSerializer.Deserialize<List<FiscalDocumentRequestRequest.LineItem>>(storedJson, SharedKernelJson.Options);
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+
+        static string Key(FiscalDocumentRequestRequest.LineItem l) =>
+            $"{l.FiscalCategoryKey}|{l.Amount.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)}|{l.Amount.Currency.Code}|{l.ChargeId?.Value}|{l.PaymentId?.Value}";
+
+        return stored is not null
+            && stored.Select(Key).Order(StringComparer.Ordinal).SequenceEqual(requested.Select(Key).Order(StringComparer.Ordinal), StringComparer.Ordinal);
+    }
+
     public async Task<Result<FiscalDocumentRequestResponse>> HandleAsync(RequestFiscalDocument command, CancellationToken cancellationToken)
     {
         var request = command.Request;
@@ -126,8 +146,9 @@ internal sealed class RequestFiscalDocumentHandler(
             cancellationToken).ConfigureAwait(false);
         if (existing is not null)
         {
-            // TODO(hardening): compare line detail too; the total, currency and counterparty identify the payload for now.
-            if (isClaimReceipt && (existing.Total != total0 || existing.Currency != currency.Code || existing.CounterpartyPartyId != request.CounterpartyPartyId))
+            if (isClaimReceipt
+                && (existing.Total != total0 || existing.Currency != currency.Code || existing.CounterpartyPartyId != request.CounterpartyPartyId
+                    || !SameLines(existing.Lines, request.Lines)))
             {
                 return DomainError.Of(ModuleCode.CMP, "IDEMPOTENCY-MISMATCH", "The same source, role and revision were already used with a different payload.");
             }

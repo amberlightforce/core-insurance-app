@@ -3,6 +3,7 @@ using CoreIns.Platform.Commands;
 using CoreIns.Platform.Configuration;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Events;
+using CoreIns.Platform.Telemetry;
 using CoreIns.SharedKernel.Identifiers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -78,10 +79,12 @@ internal sealed partial class DelinquencySweeper(DelinquencySweepRunner runner, 
             try
             {
                 await runner.RunAsync(stoppingToken).ConfigureAwait(false);
+                CoreInsMetrics.SweeperSucceeded("delinquency");
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 LogRunFailed(logger, ex);
+                CoreInsMetrics.SweeperFailed("delinquency");
             }
         }
         while (await WaitAsync(timer, stoppingToken).ConfigureAwait(false));

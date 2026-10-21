@@ -154,60 +154,64 @@ export function AiControlPage() {
         {features.length === 0 ? (
           <p className={styles.muted}>{t('ai.features.empty')}</p>
         ) : (
-          <table aria-label={t('ai.features.title')} style={{ width: '100%', textAlign: 'start' }}>
-            <thead>
-              <tr>
-                <th scope="col">{t('ai.features.feature')}</th>
-                <th scope="col">{t('ai.features.register')}</th>
-                <th scope="col">{t('ai.features.state')}</th>
-                <th scope="col">{t('ai.features.toggle')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {features.map((featureId, i) => {
-                const query = states[i];
-                const state = query?.data;
-                return (
-                  <tr key={featureId}>
-                    <th scope="row" className="ds-mono">
-                      {featureId}
-                    </th>
-                    <td>{state ? (state.registerStatus ?? t('ai.features.noRegister')) : '…'}</td>
-                    <td>
-                      {query?.isError ? (
-                        <StatusPill
-                          semantic="breached"
-                          text={t('ai.features.loadFailed')}
-                          announceChanges={false}
-                        />
-                      ) : state ? (
-                        <StatusPill
-                          semantic={state.allowed ? 'success' : 'warning'}
-                          text={state.allowed ? t('ai.features.allowed') : t('ai.features.blocked')}
-                          announceChanges={false}
-                        />
-                      ) : (
-                        '…'
-                      )}
-                    </td>
-                    <td>
-                      <Switch
-                        labelText={t('ai.features.toggleLabel', { feature: featureId })}
-                        isSelected={state?.enabled ?? false}
-                        onChangeAsync={(next) => toggle(featureId, next)}
-                        onError={(e) => {
-                          setNotice(e instanceof Error ? e.message : undefined);
-                        }}
-                        {...(state ? {} : { isPending: true })}
-                      >
-                        {t('ai.features.toggleLabel', { feature: featureId })}
-                      </Switch>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className={styles.scroll}>
+            <table aria-label={t('ai.features.title')} className={styles.table}>
+              <thead>
+                <tr>
+                  <th scope="col">{t('ai.features.feature')}</th>
+                  <th scope="col">{t('ai.features.register')}</th>
+                  <th scope="col">{t('ai.features.state')}</th>
+                  <th scope="col">{t('ai.features.toggle')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {features.map((featureId, i) => {
+                  const query = states[i];
+                  const state = query?.data;
+                  return (
+                    <tr key={featureId}>
+                      <th scope="row" className="ds-mono">
+                        {featureId}
+                      </th>
+                      <td>{state ? (state.registerStatus ?? t('ai.features.noRegister')) : '…'}</td>
+                      <td>
+                        {query?.isError ? (
+                          <StatusPill
+                            semantic="breached"
+                            text={t('ai.features.loadFailed')}
+                            announceChanges={false}
+                          />
+                        ) : state ? (
+                          <StatusPill
+                            semantic={state.allowed ? 'success' : 'warning'}
+                            text={
+                              state.allowed ? t('ai.features.allowed') : t('ai.features.blocked')
+                            }
+                            announceChanges={false}
+                          />
+                        ) : (
+                          '…'
+                        )}
+                      </td>
+                      <td>
+                        <Switch
+                          labelText={t('ai.features.toggleLabel', { feature: featureId })}
+                          isSelected={state?.enabled ?? false}
+                          onChangeAsync={(next) => toggle(featureId, next)}
+                          onError={(e) => {
+                            setNotice(e instanceof Error ? e.message : undefined);
+                          }}
+                          {...(state ? {} : { isPending: true })}
+                        >
+                          {t('ai.features.toggleLabel', { feature: featureId })}
+                        </Switch>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
         <div className={styles.actions}>
           <TextField
@@ -227,26 +231,28 @@ export function AiControlPage() {
         {log.length === 0 ? (
           <p className={styles.muted}>{t('ai.log.empty')}</p>
         ) : (
-          <table aria-label={t('ai.log.title')} style={{ width: '100%', textAlign: 'start' }}>
-            <thead>
-              <tr>
-                <th scope="col">{t('ai.log.time')}</th>
-                <th scope="col">{t('ai.log.action')}</th>
-                <th scope="col">{t('ai.log.target')}</th>
-                <th scope="col">{t('ai.log.result')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {log.map((entry) => (
-                <tr key={entry.id}>
-                  <td>{entry.at.toLocaleTimeString()}</td>
-                  <td>{t(`ai.log.${entry.action}`)}</td>
-                  <td className="ds-mono">{entry.target}</td>
-                  <td>{entry.ok ? t('ai.log.ok') : t('ai.log.error')}</td>
+          <div className={styles.scroll}>
+            <table aria-label={t('ai.log.title')} className={styles.table}>
+              <thead>
+                <tr>
+                  <th scope="col">{t('ai.log.time')}</th>
+                  <th scope="col">{t('ai.log.action')}</th>
+                  <th scope="col">{t('ai.log.target')}</th>
+                  <th scope="col">{t('ai.log.result')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {log.map((entry) => (
+                  <tr key={entry.id}>
+                    <td>{entry.at.toLocaleTimeString()}</td>
+                    <td>{t(`ai.log.${entry.action}`)}</td>
+                    <td className="ds-mono">{entry.target}</td>
+                    <td>{entry.ok ? t('ai.log.ok') : t('ai.log.error')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </Section>
 

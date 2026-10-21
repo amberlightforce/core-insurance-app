@@ -14,7 +14,7 @@ namespace CoreIns.Modules.Reinsurance.Cession;
 /// </summary>
 internal sealed class TrackerService(ReinsuranceDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock)
 {
-    public async Task<TrackerRow> OpeningAggregateAsync(string treatyId, int contractYear, decimal amount, CancellationToken cancellationToken)
+    public async Task<TrackerRow> OpeningAggregateAsync(string treatyId, int contractYear, decimal amount, Guid? batchId, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(treatyId);
         if (amount < 0m)
@@ -33,7 +33,7 @@ internal sealed class TrackerService(ReinsuranceDbContext db, RequestContext con
 
         var row = new TrackerRow
         {
-            TrackerId = Guid.CreateVersion7(), LegalEntityId = legalEntity, TreatyId = treatyId, ContractYear = contractYear, OpeningAggregate = amount, RecordedAt = clock.Now,
+            TrackerId = Guid.CreateVersion7(), LegalEntityId = legalEntity, TreatyId = treatyId, ContractYear = contractYear, OpeningAggregate = amount, RecordedAt = clock.Now, BatchId = batchId,
         };
         db.Trackers.Add(row);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
