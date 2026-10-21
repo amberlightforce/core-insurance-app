@@ -53,7 +53,7 @@ if (devClock)
     builder.Services.AddDevClock(api: role == AppRole.Api);
 }
 
-builder.Services.AddCoreInsHealthChecks();
+builder.Services.AddCoreInsHealthChecks(role);
 builder.Services.AddCoreInsJobs(connectionString, role);
 builder.Services.AddCountryPacks(builder.Configuration, builder.Environment);
 

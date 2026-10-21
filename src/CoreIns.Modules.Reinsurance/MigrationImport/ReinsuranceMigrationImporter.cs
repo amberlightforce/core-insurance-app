@@ -11,7 +11,7 @@ internal sealed record TreatyYearPayload(string TreatyId, int ContractYear, deci
 /// <summary>
 /// <c>IMigrationImporter</c> for module RI (SL6-MIG-CLM-RI-IMPORT): object type <c>TreatyYear</c> opens the tracker of a treaty year
 /// through <c>ri.Tracker.openingAggregate</c> (idempotent on treaty and year). A repeat with another amount is reported as a
-/// conflict. TODO(hardening): no RI reverser yet; a batch holding RI objects cannot be reversed (D-SL6-05 default).
+/// conflict. The tracker carries the batch id; <see cref="ReinsuranceMigrationReverser"/> removes it again (D-SL6-05).
 /// </summary>
 internal sealed class ReinsuranceMigrationImporter(TrackerService tracker) : IMigrationImporter
 {
@@ -48,7 +48,7 @@ internal sealed class ReinsuranceMigrationImporter(TrackerService tracker) : IMi
             return new ImportOutcome(ImportStatus.Imported, null, null, $"Would open {payload.TreatyId}/{payload.ContractYear} at {payload.OpeningAggregate}.");
         }
 
-        var row = await tracker.OpeningAggregateAsync(payload.TreatyId.Trim(), payload.ContractYear, payload.OpeningAggregate, cancellationToken).ConfigureAwait(false);
+        var row = await tracker.OpeningAggregateAsync(payload.TreatyId.Trim(), payload.ContractYear, payload.OpeningAggregate, context.BatchId, cancellationToken).ConfigureAwait(false);
         return row.OpeningAggregate != payload.OpeningAggregate
             ? Failed("MIG-ERR-CONFLICT", $"{payload.TreatyId}/{payload.ContractYear} already has an opening aggregate of {row.OpeningAggregate}.")
             : new ImportOutcome(ImportStatus.Imported, row.TrackerId, null, $"Treaty year {payload.TreatyId}/{payload.ContractYear} opens at {row.OpeningAggregate}.");
