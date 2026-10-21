@@ -32,7 +32,8 @@
       "REFUND": "Refund"
     },
     "wrk": {
-      "NOT_CREATED_WRK_NOT_BUILT": "Not created (work management is not built yet)"
+      "none": "No review task that you can see",
+      "open": "Open task {number}"
     },
     "fields": {
       "policyNumber": "Policy number",

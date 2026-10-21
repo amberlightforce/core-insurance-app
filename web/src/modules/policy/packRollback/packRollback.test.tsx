@@ -35,6 +35,30 @@ it('records an explicit outcome and reason without re-rating the policy', async 
       path: '/api/pol/v1/pack-rollback-exceptions/review',
       respond: () => ({ body: fx.exception }),
     },
+    {
+      method: 'GET',
+      path: '/api/wrk/v1/activities',
+      respond: () => ({
+        body: {
+          items: [
+            {
+              activity: {
+                id: 'task-1',
+                number: 'ACT-0001',
+                state: 'OPEN',
+                primaryObject: {
+                  module: 'MKT',
+                  type: 'PackActivation',
+                  id: fx.exception.activationId,
+                },
+              },
+            },
+          ],
+          nextCursor: null,
+          limit: 200,
+        },
+      }),
+    },
   ]);
   const { user, container } = renderScreen(<ExceptionDetailPage />, {
     path: '/policies/pack-rollback/:exceptionId',
@@ -43,7 +67,7 @@ it('records an explicit outcome and reason without re-rating the policy', async 
   await screen.findByText('Correction is not available yet');
   expect(screen.getAllByText('Issuance').length).toBeGreaterThan(0);
   expect(screen.queryByText('ISSUANCE')).not.toBeInTheDocument();
-  expect(screen.getByText('Not created (work management is not built yet)')).toBeInTheDocument();
+  expect(await screen.findByRole('button', { name: 'Open task ACT-0001' })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: /Re-rate/ })).not.toBeInTheDocument();
   await expectNoA11yViolations(container);
   await user.click(screen.getByRole('button', { name: 'Review…' }));
