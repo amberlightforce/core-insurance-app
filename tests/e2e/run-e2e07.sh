@@ -60,4 +60,4 @@ if [ ! -d node_modules ]; then
   npm ci --no-audit
 fi
 export E2E_BASE_URL="$API" E2E_PRODUCT_SEED="$ROOT/src/CoreIns.Modules.Product/Seed/motor-gr.product.json"
-npx playwright test 'e2e07.spec' --workers=1
+npx playwright test 'e2e07(.|-)' --workers=1

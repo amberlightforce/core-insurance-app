@@ -25,6 +25,9 @@ param highAvailability string = 'Disabled'
 
 param geoRedundantBackup bool = false
 
+@description('Add a CanNotDelete management lock on the server.')
+param lockServer bool = false
+
 @description('Server administrator login (bootstrap only; the app uses the `app` and `migrator` roles).')
 param administratorLogin string
 
@@ -87,6 +90,12 @@ resource database 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2024-08-0
   name: 'coreins'
   properties: { charset: 'UTF8', collation: 'en_US.utf8' }
   dependsOn: [configurations]
+}
+
+resource serverLock 'Microsoft.Authorization/locks@2020-05-01' = if (lockServer) {
+  scope: server
+  name: 'lock-no-delete'
+  properties: { level: 'CanNotDelete', notes: 'Production database; remove the lock deliberately (docs/runbooks/backup-restore.md).' }
 }
 
 output fqdn string = server.properties.fullyQualifiedDomainName
