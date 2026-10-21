@@ -6,6 +6,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System.Diagnostics;
 using CoreIns.Platform.Http;
+using CoreIns.Platform.Telemetry;
 using CoreIns.SharedKernel.Identifiers;
 using Serilog;
 using Serilog.Context;
@@ -52,7 +53,7 @@ internal static class ObservabilityExtensions
             .WithMetrics(metrics => metrics
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
-                .AddMeter("System.Runtime", "Npgsql"));
+                .AddMeter("System.Runtime", "Npgsql", CoreInsMetrics.MeterName));
 
         if (!string.IsNullOrWhiteSpace(builder.Configuration[AppInsightsKey]))
         {
