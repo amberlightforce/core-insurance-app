@@ -3,6 +3,8 @@ using CoreIns.Modules.Compliance.Contracts.Api;
 using CoreIns.Modules.Compliance.Persistence;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
+using CoreIns.Platform.Errors;
+using CoreIns.SharedKernel.Paging;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
@@ -202,28 +204,39 @@ internal sealed class RecordDisclosureHandler(ComplianceDbContext db, RequestCon
 /// <summary>Reads cases and the disclosure log for the REST facade.</summary>
 internal sealed class DsarReader(ComplianceDbContext db, DsarEngine engine, RequestContext context, ILegalEntityDirectory legalEntities)
 {
-    private const int MaxPage = 200;
+    /// <summary>The opaque cursor's id; a malformed cursor is refused (fail closed), never read as the first page.</summary>
+    internal static Guid? Cursor(string? cursor)
+    {
+        if (!KeysetPaging.TryDecode(cursor, 1, out var parts) || (parts is not null && !Guid.TryParse(parts[0], out _)))
+        {
+            throw new DomainException(DomainError.Of(ModuleCode.CMP, "VALIDATION", "The cursor is malformed."));
+        }
+
+        return parts is null ? null : Guid.Parse(parts[0]);
+    }
 
     public Task<DsarCase?> GetAsync(Guid id, CancellationToken ct) => engine.FindAsync(id, ct);
 
     public async Task<(List<DsarCase> Items, string? Next, int Limit)> QueryAsync(string? cursor, int? limit, CancellationToken ct)
     {
-        var take = Math.Clamp(limit ?? 50, 1, MaxPage);
+        var take = KeysetPaging.Clamp(limit);
+        var after = Cursor(cursor);
         var legalEntity = Clocks.ClockLookup.LegalEntity(context, legalEntities);
         var query = db.Set<DsarRow>().AsNoTracking().Where(r => r.LegalEntityId == legalEntity);
-        // TODO(hardening): keyset paging in SQL; the strongly typed id is compared in memory here.
-        var all = await query.OrderBy(r => r.DsarId).ToListAsync(ct).ConfigureAwait(false);
-        var rows = (Guid.TryParse(cursor, out var after) ? all.Where(r => r.DsarId.Value.CompareTo(after) > 0) : all).Take(take + 1).ToList();
-        var page = rows.Take(take).ToList();
+        var allIds = (await query.Select(r => r.DsarId).ToListAsync(ct).ConfigureAwait(false)).Select(i => i.Value);
+        var pageIds = KeysetPaging.IdsAfter(allIds, after, take + 1).Select(g => new DsarId(g)).ToList();
+        var rows = (await query.Where(r => pageIds.Contains(r.DsarId)).ToListAsync(ct).ConfigureAwait(false)).OrderBy(r => r.DsarId.Value).ToList();
+        var (page, next) = KeysetPaging.Slice(rows, take, r => KeysetPaging.Encode(KeysetPaging.Part(r.DsarId.Value)));
         var ids = page.Select(r => r.DsarId).ToList();
         var tasks = await db.Set<DsarTaskRow>().AsNoTracking().Where(t => ids.Contains(t.DsarId)).ToListAsync(ct).ConfigureAwait(false);
         var items = page.Select(r => new DsarCase(r, [.. tasks.Where(t => t.DsarId == r.DsarId)])).ToList();
-        return (items, rows.Count > take ? page[^1].DsarId.Value.ToString("D") : null, take);
+        return (items, next, take);
     }
 
     public async Task<(List<DisclosureLogRow> Items, string? Next, int Limit)> QueryDisclosuresAsync(string? cursor, int? limit, Guid? partyId, CancellationToken ct)
     {
-        var take = Math.Clamp(limit ?? 50, 1, MaxPage);
+        var take = KeysetPaging.Clamp(limit);
+        var after = Cursor(cursor);
         var legalEntity = Clocks.ClockLookup.LegalEntity(context, legalEntities);
         var query = db.Set<DisclosureLogRow>().AsNoTracking().Where(r => r.LegalEntityId == legalEntity);
         if (partyId is { } party)
@@ -232,14 +245,14 @@ internal sealed class DsarReader(ComplianceDbContext db, DsarEngine engine, Requ
             query = query.Where(r => r.SubjectPartyId == id);
         }
 
-        if (Guid.TryParse(cursor, out var after))
+        if (after is { } a)
         {
-            query = query.Where(r => r.EntryId.CompareTo(after) > 0);
+            query = query.Where(r => r.EntryId.CompareTo(a) > 0);
         }
 
         var rows = await query.OrderBy(r => r.EntryId).Take(take + 1).ToListAsync(ct).ConfigureAwait(false);
-        var page = rows.Take(take).ToList();
-        return (page, rows.Count > take ? page[^1].EntryId.ToString("D") : null, take);
+        var (page, next) = KeysetPaging.Slice(rows, take, r => KeysetPaging.Encode(KeysetPaging.Part(r.EntryId)));
+        return (page, next, take);
     }
 
     public static JsonElement Entry(DisclosureLogRow r) => JsonSerializer.SerializeToElement(new

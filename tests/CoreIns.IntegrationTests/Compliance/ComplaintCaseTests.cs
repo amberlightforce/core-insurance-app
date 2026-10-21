@@ -111,6 +111,35 @@ public sealed class ComplaintCaseTests(PostgresFixture database) : IClassFixture
     }
 
     [Fact]
+    public async Task The_query_pages_by_an_opaque_keyset_cursor_and_refuses_a_malformed_one()
+    {
+        var registered = new List<string> { await Register(), await Register(), await Register() };
+
+        var seen = new List<string>();
+        string? cursor = null;
+        var pages = 0;
+        do
+        {
+            var (response, body) = await Call(HttpMethod.Get, $"{Root}/query?limit=2" + (cursor is null ? string.Empty : $"&cursor={Uri.EscapeDataString(cursor)}"), "clerk");
+            response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+            var items = body!["items"]!.AsArray();
+            items.Count.ShouldBeLessThanOrEqualTo(2);
+            seen.AddRange(items.Select(i => i.Text("complaint.complaintId")));
+            cursor = body["nextCursor"]?.GetValue<string>();
+            pages++;
+        }
+        while (cursor is not null && pages < 50);
+
+        seen.Distinct().Count().ShouldBe(seen.Count);
+        registered.ShouldBeSubsetOf(seen);
+        pages.ShouldBeGreaterThan(1);
+
+        // An offset-style or garbled cursor is refused, never read as the first page.
+        var (bad, badBody) = await Call(HttpMethod.Get, $"{Root}/query?cursor=2", "clerk");
+        bad.IsSuccessStatusCode.ShouldBeFalse(badBody?.ToJsonString());
+    }
+
+    [Fact]
     public async Task A_returned_reply_is_redrafted_and_an_upheld_complaint_needs_a_root_cause_to_close()
     {
         var id = await Register();
