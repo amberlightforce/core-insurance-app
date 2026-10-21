@@ -13,6 +13,16 @@ export const underwritingRoles = ['Staff.UnderwritingManager', 'Platform.Admin']
 /** Roles that review pack-rollback exceptions (the same reviewers as the referral workbench). */
 export const packRollbackReviewerRoles = underwritingRoles;
 
+/**
+ * Roles that see the WRK task inbox (permissions wrk.Activity.list / get, queue visibility of the PSR and
+ * pack-rollback queues; Work's WorkCatalog). The API still filters every list to the queues the caller may see.
+ */
+export const workInboxRoles = [
+  'Staff.UnderwritingManager',
+  'Staff.Underwriter',
+  'Platform.Admin',
+] as const;
+
 /** Roles that work distance-withdrawal requests (permission chn.Withdrawal.list). */
 export const withdrawalRoles = ['Staff.Underwriter', 'Staff.Billing', 'Platform.Admin'] as const;
 

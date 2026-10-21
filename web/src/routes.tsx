@@ -26,9 +26,15 @@ const loadWorkbench = async () => ({
 /** Module routes load on demand (D-FE-23): the staff screens of the thin slice. */
 const moduleRoutes: RouteObject[] = [
   {
-    // «My work»: aggregates the existing work queues (TODO(hardening): replaced by the WRK task module).
+    // «My work»: the WRK task inbox plus the older per-module queues («Other queues»).
     path: 'work',
     lazy: async () => ({ Component: (await import('./modules/work/WorkPage')).WorkPage }),
+  },
+  {
+    path: 'work/tasks/:activityId',
+    lazy: async () => ({
+      Component: (await import('./modules/work/TaskDetailPage')).TaskDetailPage,
+    }),
   },
   {
     path: 'parties',

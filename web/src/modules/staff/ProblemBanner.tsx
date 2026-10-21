@@ -31,8 +31,9 @@ export function ProblemBanner({ error, title, onRetry, retryLabel }: ProblemBann
   const known = key && i18n.exists(`staff:${key}`) ? t(key) : null;
   // A 403 carries no body: say plainly that the signed-in role may not do this, instead of a bare «failed».
   const forbidden = problem.status === 403;
+  // A 403 with a known code (self-approval, authority…) keeps its own explanation as the headline.
   const headline =
-    (forbidden ? t('noPermission.title') : null) ??
+    (forbidden ? (known ?? t('noPermission.title')) : null) ??
     title ??
     known ??
     problem.title ??
@@ -56,7 +57,7 @@ export function ProblemBanner({ error, title, onRetry, retryLabel }: ProblemBann
     >
       {forbidden && title ? <p>{title}</p> : null}
       {known && title && !forbidden ? <p>{known}</p> : null}
-      {forbidden && !problem.detail ? (
+      {forbidden && !known && !problem.detail ? (
         <p>{roles ? t('noPermission.action', { roles }) : t('noPermission.actionUnknown')}</p>
       ) : null}
       {detail && detail !== headline ? <p>{detail}</p> : null}

@@ -12,6 +12,7 @@ using CoreIns.Platform.Persistence;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Paging;
 using CoreIns.SharedKernel.Results;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -116,9 +117,9 @@ internal sealed class PsrReader(PolicyDbContext db, RequestContext context, ILeg
 {
     public async Task<Result<PsrExceptionListPage>> ListAsync(string? status, int? limit, string? cursor, CancellationToken cancellationToken)
     {
-        // TODO(hardening): keyset cursor; an offset cursor can skip or repeat rows while the queue changes.
-        var skip = 0;
-        if (limit is < 1 or > 200 || (cursor is not null && (!int.TryParse(cursor, out skip) || skip < 0)))
+        string[]? after = null;
+        if (!KeysetPaging.TryTake(limit, 25, out var take) || !KeysetPaging.TryDecode(cursor, 2, out after)
+            || (after is not null && !(KeysetPaging.TryLong(after[0], out _) && Guid.TryParse(after[1], out _))))
         {
             return DomainError.Of(ModuleCode.POL, "VALIDATION", "cursor is malformed or limit is outside 1..200.");
         }
@@ -135,13 +136,20 @@ internal sealed class PsrReader(PolicyDbContext db, RequestContext context, ILeg
             query = query.Where(e => e.Status == status);
         }
 
-        var take = limit ?? 25;
-        var rows = await query.OrderBy(e => e.RaisedAt).ThenBy(e => e.ExceptionId).Skip(skip).Take(take + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var page = rows.Take(take).ToList();
+        if (after is not null)
+        {
+            KeysetPaging.TryLong(after[0], out var ticks);
+            var raisedAfter = Instant.FromDateTimeOffset(new DateTimeOffset(ticks, TimeSpan.Zero));
+            var idAfter = Guid.Parse(after[1]);
+            query = query.Where(e => e.RaisedAt > raisedAfter || (e.RaisedAt == raisedAfter && e.ExceptionId.CompareTo(idAfter) > 0));
+        }
+
+        var rows = await query.OrderBy(e => e.RaisedAt).ThenBy(e => e.ExceptionId).Take(take + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var (page, next) = KeysetPaging.Slice(rows, take, e => KeysetPaging.Encode(KeysetPaging.Part(e.RaisedAt.ToDateTimeOffset().UtcTicks), KeysetPaging.Part(e.ExceptionId)));
         return new PsrExceptionListPage
         {
             Items = await ToViewsAsync(page, cancellationToken).ConfigureAwait(false),
-            NextCursor = rows.Count > take ? (skip + take).ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
+            NextCursor = next,
             Limit = take,
         };
     }

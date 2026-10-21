@@ -19,6 +19,7 @@ import { PageHeader, Section } from '../../staff/PageHeader';
 import { QueryView } from '../../staff/QueryView';
 import styles from '../../staff/staff.module.css';
 import { useFormat } from '../../staff/useFormat';
+import { useCanSeeInbox, usePackRollbackTask } from '../../work/api';
 import { useCanReview, useException, useReviewException } from './api';
 import { useKindLabel } from './kinds';
 import { ExceptionStatusPill, HashText } from './parts';
@@ -125,6 +126,7 @@ function ExceptionDetail({ exception }: { exception: PackRollbackExceptionView }
   const fmt = useFormat();
   const kindLabel = useKindLabel();
   const canReview = useCanReview();
+  const reviewTask = usePackRollbackTask(exception.activationId, useCanSeeInbox());
   const [reviewing, setReviewing] = useState(false);
   const open = exception.status === 'OPEN';
 
@@ -227,7 +229,13 @@ function ExceptionDetail({ exception }: { exception: PackRollbackExceptionView }
               {
                 id: 'wrk',
                 label: t('packRollback.fields.wrkActivity'),
-                value: t('packRollback.wrk.NOT_CREATED_WRK_NOT_BUILT'),
+                value: reviewTask.data ? (
+                  <LinkButton to={`/work/tasks/${reviewTask.data.id}`}>
+                    {t('packRollback.wrk.open', { number: reviewTask.data.number })}
+                  </LinkButton>
+                ) : (
+                  t('packRollback.wrk.none')
+                ),
               },
             ]}
           />

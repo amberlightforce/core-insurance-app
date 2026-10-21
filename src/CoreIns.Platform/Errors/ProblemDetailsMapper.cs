@@ -183,7 +183,9 @@ public sealed class ProblemDetailsMapper(ErrorCatalog catalog)
             Instance = context.Request.Path.Value,
         };
         problem.Extensions["code"] = error.Code.Value;
-        problem.Extensions["traceId"] = TraceIdOf(context);
+        var correlationId = TraceIdOf(context);
+        problem.Extensions["traceId"] = correlationId;
+        problem.Extensions["correlationId"] = correlationId;
         problem.Extensions["retryable"] = definition.Retryable;
         if (error.FieldErrors.Count > 0)
         {
@@ -220,8 +222,13 @@ public sealed class ProblemDetailsMapper(ErrorCatalog catalog)
     public IResult ToResult(DomainError error, HttpContext context) => new ProblemResult(this, error);
 
     private static string TraceIdOf(HttpContext context) =>
-        context.RequestServices?.GetService<RequestContext>()?.CorrelationId.Value
+        CorrelationOf(context)
+        ?? context.RequestServices?.GetService<RequestContext>()?.CorrelationId.Value
         ?? (System.Diagnostics.Activity.Current?.TraceId.ToHexString() ?? context.TraceIdentifier);
+
+    /// <summary>The correlation id the correlation middleware chose for this request, if it ran.</summary>
+    private static string? CorrelationOf(HttpContext context) =>
+        context.Items.TryGetValue(Http.PlatformHeaders.CorrelationItemKey, out var value) && value is CorrelationId id ? id.Value : null;
 
     private sealed class ProblemResult(ProblemDetailsMapper mapper, DomainError error) : IResult
     {

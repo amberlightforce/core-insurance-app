@@ -1,281 +1,225 @@
-import { useMemo, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-aria-components';
+import { useNavigate } from 'react-router';
 
-import type { ApprovalView } from '../../api/types';
-import { EmptyState, type StatusFamily } from '../../design-system';
-import { claimsRoles, underwritingRoles, withdrawalRoles } from '../../app-shell/navigation';
-import { useDevSession } from '../../dev-auth/devAuth';
-import { usePendingApprovals } from '../home/api';
-import { refundViewRoles } from '../billing/refunds/roles';
-import { useRefunds, refundsOf } from '../billing/refunds/api';
-import { approvalTypeKey } from '../claims/approvalFormat';
-import { dsarRoles } from '../compliance/dsar/access';
-import { useDsarList } from '../compliance/dsar/api';
-import { useWithdrawals, type WithdrawalListItem } from '../channels/withdrawal/api';
-import { useExceptions } from '../policy/packRollback/api';
-import { useKindLabel } from '../policy/packRollback/kinds';
-import { useReferralList } from '../underwriting/api';
-import { PageHeader, Section } from '../staff/PageHeader';
+import { useIdempotencyKey } from '../../api/idempotency';
+import {
+  Banner,
+  Button,
+  EmptyState,
+  Tabs,
+  announce,
+  useTabSearchParam,
+  type TabItem,
+} from '../../design-system';
+import { problemOf } from '../staff/problem';
 import { LinkButton } from '../staff/LinkButton';
+import { PageHeader, Section } from '../staff/PageHeader';
 import { QueryView } from '../staff/QueryView';
 import staff from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
+import { OtherQueues } from './OtherQueues';
+import {
+  nextTaskOf,
+  useCanSeeInbox,
+  useClaimTask,
+  useGetNextTask,
+  useTaskDigest,
+  useTasks,
+  type Task,
+  type TaskScope,
+} from './api';
+import { countLabel, objectLink, useQueueName, useTaskTitle } from './parts';
+import { TaskFlags } from './TaskFlags';
 import styles from './Work.module.css';
 
-/** How many items a section lists before «see all». */
-const topCount = 5;
-
-export interface WorkItem {
-  id: string;
-  to: string;
-  label: ReactNode;
-  meta?: string;
-}
-
-interface QueueQuery {
-  isPending: boolean;
-  isError: boolean;
-  error: unknown;
-  refetch: () => unknown;
-}
-
-interface QueueSectionProps {
-  title: string;
-  family: StatusFamily;
-  query: QueueQuery;
-  /** The pending items; read only once the query succeeded. */
-  items: WorkItem[];
-  seeAllTo: string;
-  /** Overrides the number of items when the server knows the full count. */
-  count?: number | undefined;
-}
-
-/**
- * One queue: its own loading, error (with retry) and empty states, so one failing API never breaks the page. The
- * items link to the existing detail pages.
- */
-function QueueSection({ title, family, query, items, seeAllTo, count }: QueueSectionProps) {
+function TaskRow({ task, scope }: { task: Task; scope: TaskScope }) {
   const { t } = useTranslation('work');
-  const ready = !query.isPending && !query.isError;
-  const total = count ?? items.length;
-  const adapter = {
-    data: ready ? items : undefined,
-    isPending: query.isPending,
-    isError: query.isError,
-    error: query.error,
-    refetch: query.refetch,
+  const fmt = useFormat();
+  const title = useTaskTitle();
+  const queueName = useQueueName();
+  const navigate = useNavigate();
+  const claim = useClaimTask();
+  const { keyFor, release } = useIdempotencyKey();
+  const [failed, setFailed] = useState<string | null>(null);
+  const assignedTo = task.assignedToMe
+    ? t('task.assignedToMe')
+    : task.assignee.type === 'QUEUE'
+      ? t('task.unassigned')
+      : task.assignee.id;
+
+  const takeIt = () => {
+    setFailed(null);
+    const body = { id: task.id, rulesOrMe: 'me' as const };
+    return claim
+      .mutateAsync({ body, key: keyFor(body) })
+      .then(() => {
+        release();
+        announce(t('claim.done'));
+        void navigate(`/work/tasks/${task.id}`);
+      })
+      .catch((error: unknown) => {
+        const problem = problemOf(error);
+        setFailed(problem.status === 409 ? t('claim.taken') : (problem.title ?? t('claim.failed')));
+      });
   };
+
   return (
-    <Section title={title} family={family} {...(ready ? { count: total } : {})}>
-      <QueryView query={adapter}>
-        {(rows) =>
-          rows.length === 0 ? (
-            <EmptyState kind="done" headingLevel={3} headline={t('empty')} />
-          ) : (
-            <>
-              <ul className={styles.list}>
-                {rows.slice(0, topCount).map((item) => (
-                  <li key={item.id} className={styles.item}>
-                    <Link href={item.to}>{item.label}</Link>
-                    {item.meta ? <span className={styles.itemMeta}>{item.meta}</span> : null}
-                  </li>
-                ))}
-              </ul>
-              <div className={styles.footer}>
-                <span className={staff.muted}>
-                  {total > topCount ? t('more', { count: total - topCount }) : ''}
-                </span>
-                <LinkButton to={seeAllTo}>{t('seeAll')}</LinkButton>
-              </div>
-            </>
-          )
-        }
-      </QueryView>
+    <li className={styles.taskRow} data-testid="task-row">
+      <div className={styles.taskMain}>
+        <span className={styles.taskTitle}>
+          {title(task)}
+          <TaskFlags task={task} />
+        </span>
+        <span className={styles.taskMeta}>
+          <span className="ds-mono">{task.number}</span>
+          <span>{queueName(task.queueCode)}</span>
+          {scope !== 'mine' ? <span>{assignedTo}</span> : null}
+          {task.targetAt ? (
+            <span>{t('task.due', { date: fmt.dateTime(task.targetAt) })}</span>
+          ) : null}
+          {objectLink(task.primaryObject) ? null : (
+            <span className="ds-mono">
+              {task.primaryObject.module}/{task.primaryObject.type}
+            </span>
+          )}
+        </span>
+        {failed ? <Banner variant="warning" live="status" title={failed} /> : null}
+      </div>
+      <div className={styles.taskActions}>
+        {task.claimableByMe ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            isLoading={claim.isPending}
+            onPress={() => {
+              void takeIt();
+            }}
+          >
+            {t('task.claim')}
+          </Button>
+        ) : null}
+        <LinkButton to={`/work/tasks/${task.id}`}>{t('task.open')}</LinkButton>
+      </div>
+    </li>
+  );
+}
+
+function TaskList({ scope }: { scope: TaskScope }) {
+  const { t } = useTranslation('work');
+  const query = useTasks(scope);
+  return (
+    <QueryView query={query}>
+      {({ tasks }) =>
+        tasks.length === 0 ? (
+          <EmptyState
+            kind="done"
+            headingLevel={3}
+            headline={t(`tabs.empty.${scope}.title`)}
+            description={t(`tabs.empty.${scope}.body`)}
+          />
+        ) : (
+          <>
+            <ul className={styles.taskList} aria-label={t(`tabs.${scope}`)}>
+              {tasks.map((task) => (
+                <TaskRow key={task.id} task={task} scope={scope} />
+              ))}
+            </ul>
+            {query.hasNextPage ? (
+              <Button
+                variant="secondary"
+                isLoading={query.isFetchingNextPage}
+                onPress={() => {
+                  void query.fetchNextPage();
+                }}
+              >
+                {t('showMore')}
+              </Button>
+            ) : null}
+          </>
+        )
+      }
+    </QueryView>
+  );
+}
+
+/** «Επόμενη εργασία»: wrk.Queue.getNext takes the most urgent open task of the caller's queues. */
+function NextTaskButton({ onMessage }: { onMessage: (message: string | null) => void }) {
+  const { t } = useTranslation('work');
+  const navigate = useNavigate();
+  const next = useGetNextTask();
+  const { keyFor, release } = useIdempotencyKey();
+
+  const pull = () => {
+    onMessage(null);
+    return next
+      .mutateAsync({ key: keyFor({}) })
+      .then((response) => {
+        release();
+        void navigate(`/work/tasks/${nextTaskOf(response).id}`);
+      })
+      .catch((error: unknown) => {
+        release();
+        const problem = problemOf(error);
+        onMessage(
+          problem.code?.endsWith('QUEUE-EMPTY') || problem.status === 404
+            ? t('next.empty')
+            : (problem.title ?? t('next.failed')),
+        );
+      });
+  };
+
+  return (
+    <Button
+      variant="primary"
+      isLoading={next.isPending}
+      onPress={() => {
+        void pull();
+      }}
+    >
+      {t('next.button')}
+    </Button>
+  );
+}
+
+function Inbox() {
+  const { t } = useTranslation('work');
+  const [tab, setTab] = useTabSearchParam('tab', 'mine');
+  const [message, setMessage] = useState<string | null>(null);
+  const mine = useTaskDigest('mine');
+  const queue = useTaskDigest('queue');
+  const digests = { mine: mine.data, queue: queue.data, team: undefined };
+  const items: TabItem[] = (['mine', 'queue', 'team'] as const).map((id) => {
+    const data = digests[id];
+    const count = data ? countLabel(data.tasks.length, data.more) : undefined;
+    return { id, label: t(`tabs.${id}`), ...(count !== undefined ? { count } : {}) };
+  });
+
+  return (
+    <Section title={t('inbox.title')} actions={<NextTaskButton onMessage={setMessage} />}>
+      {message ? <Banner variant="info" live="status" title={message} /> : null}
+      <Tabs
+        aria-label={t('inbox.title')}
+        items={items}
+        {...(tab ? { selectedKey: tab } : {})}
+        onSelectionChange={setTab}
+      >
+        {(item) => (
+          <TaskList scope={item.id === 'queue' || item.id === 'team' ? item.id : 'mine'} />
+        )}
+      </Tabs>
     </Section>
   );
 }
 
-function ReferralsSection() {
-  const { t } = useTranslation('work');
-  const fmt = useFormat();
-  const { query, items, counts } = useReferralList('OPEN');
-  const rows = useMemo<WorkItem[]>(
-    () =>
-      items.map((r) => ({
-        id: r.jobRef,
-        to: `/underwriting?queue=OPEN&job=${encodeURIComponent(r.jobRef)}`,
-        label: r.jobNumber ?? r.jobRef,
-        meta: t('item.raised', { date: fmt.date(r.raisedAt) }),
-      })),
-    [items, fmt, t],
-  );
-  return (
-    <QueueSection
-      title={t('sections.referrals')}
-      family="warning"
-      query={query}
-      items={rows}
-      seeAllTo="/underwriting"
-      count={counts?.open}
-    />
-  );
-}
-
-function ApprovalsSection() {
-  const { t } = useTranslation(['work', 'claims']);
-  const fmt = useFormat();
-  const query = usePendingApprovals(true);
-  const rows = useMemo<WorkItem[]>(
-    () =>
-      ((query.data?.items as { request: ApprovalView }[] | undefined) ?? []).map(({ request }) => ({
-        id: request.requestId,
-        to: `/claims/approvals/${request.requestId}`,
-        label: t(approvalTypeKey(request.type), { ns: 'claims', defaultValue: request.type }),
-        meta: t('work:item.requested', { date: fmt.date(request.requestedAt) }),
-      })),
-    [query.data, fmt, t],
-  );
-  return (
-    <QueueSection
-      title={t('work:sections.approvals')}
-      family="plum"
-      query={query}
-      items={rows}
-      seeAllTo="/claims/approvals"
-    />
-  );
-}
-
-function RefundsSection() {
-  const { t } = useTranslation('work');
-  const fmt = useFormat();
-  const query = useRefunds({ state: 'PENDING_APPROVAL' });
-  const rows = useMemo<WorkItem[]>(
-    () =>
-      refundsOf(query.data).map((r) => ({
-        id: r.refundId,
-        to: `/billing/refunds/${r.refundId}`,
-        label: t('item.refund', { amount: fmt.money(r.amount) }),
-        meta: t('item.requested', { date: fmt.date(r.proposedAt) }),
-      })),
-    [query.data, fmt, t],
-  );
-  return (
-    <QueueSection
-      title={t('sections.refunds')}
-      family="plum"
-      query={query}
-      items={rows}
-      seeAllTo="/billing/refunds"
-    />
-  );
-}
-
-function WithdrawalsSection() {
-  const { t } = useTranslation('work');
-  const fmt = useFormat();
-  const query = useWithdrawals('');
-  const rows = useMemo<WorkItem[]>(
-    () =>
-      ((query.data?.items ?? []) as WithdrawalListItem[])
-        // DECLARED still waits for the customer's confirmation; staff work the confirmed ones.
-        .filter((r) => r.status === 'CONFIRMED' || r.status === 'SUBMITTED')
-        .map((r) => ({
-          id: r.withdrawalRequestId,
-          to: `/channels/withdrawals/${r.withdrawalRequestId}`,
-          label: t('item.withdrawal', { number: r.requestNumber }),
-          meta: t('item.declared', { date: fmt.date(r.declaredAt) }),
-        })),
-    [query.data, fmt, t],
-  );
-  return (
-    <QueueSection
-      title={t('sections.withdrawals')}
-      family="warning"
-      query={query}
-      items={rows}
-      seeAllTo="/channels/withdrawals"
-    />
-  );
-}
-
-function DsarSection() {
-  const { t } = useTranslation('work');
-  const fmt = useFormat();
-  const query = useDsarList();
-  const rows = useMemo<WorkItem[]>(
-    () =>
-      (query.data?.items ?? [])
-        .filter(({ request }) => request.status !== 'COMPLETED' && request.status !== 'REFUSED')
-        .sort((a, b) => a.request.deadline.localeCompare(b.request.deadline))
-        .map(({ request }) => ({
-          id: request.dsarId,
-          to: `/compliance/dsar/${request.dsarId}`,
-          label: t(`item.dsarType.${request.requestType}`, { defaultValue: request.requestType }),
-          meta: t('item.deadline', { date: fmt.date(request.deadline) }),
-        })),
-    [query.data, fmt, t],
-  );
-  return (
-    <QueueSection
-      title={t('sections.dsar')}
-      family="danger"
-      query={query}
-      items={rows}
-      seeAllTo="/compliance/dsar"
-    />
-  );
-}
-
-function PackRollbackSection() {
-  const { t } = useTranslation('work');
-  const fmt = useFormat();
-  const kindLabel = useKindLabel();
-  const query = useExceptions('OPEN');
-  const rows = useMemo<WorkItem[]>(
-    () =>
-      (query.data?.items ?? []).map((e) => ({
-        id: e.exceptionId,
-        to: `/policies/pack-rollback/${e.exceptionId}`,
-        label: `${e.policyNumber} · ${kindLabel(e.transactionKind)}`,
-        meta: fmt.date(e.identifiedAt),
-      })),
-    [query.data, fmt, kindLabel],
-  );
-  return (
-    <QueueSection
-      title={t('sections.packRollback')}
-      family="warning"
-      query={query}
-      items={rows}
-      seeAllTo="/policies/pack-rollback"
-    />
-  );
-}
-
-const anyOf = (roles: readonly string[], allowed: readonly string[]) =>
-  roles.some((role) => allowed.includes(role));
-
 /**
- * «Η δουλειά μου» (/work): one section per work queue the signed-in user's roles allow, built from the lists the
- * module screens already read. Roles only decide which sections show; the API still enforces permissions.
- * TODO(hardening): replace this frontend aggregation with the WRK task module (assignment, due dates, unified inbox).
+ * «Η δουλειά μου» (/work): the WRK task inbox (my tasks, the unassigned queue, the team's work, next task) for
+ * the roles that see a work queue, then the older per-module queues as «Άλλες ουρές» so nothing is lost.
+ * TODO(hardening): move the older queues onto WRK patterns; saved filters and bulk reassign (supervisor).
  */
 export function WorkPage() {
   const { t } = useTranslation('work');
-  const roles = useDevSession()?.user.roles ?? [];
-
-  const sections: ReactNode[] = [];
-  if (anyOf(roles, underwritingRoles)) {
-    sections.push(<ReferralsSection key="referrals" />);
-    sections.push(<PackRollbackSection key="packRollback" />);
-  }
-  if (anyOf(roles, claimsRoles)) sections.push(<ApprovalsSection key="approvals" />);
-  if (anyOf(roles, refundViewRoles)) sections.push(<RefundsSection key="refunds" />);
-  if (anyOf(roles, withdrawalRoles)) sections.push(<WithdrawalsSection key="withdrawals" />);
-  if (anyOf(roles, dsarRoles)) sections.push(<DsarSection key="dsar" />);
-
+  const canSeeInbox = useCanSeeInbox();
   return (
     <div className={staff.page}>
       <PageHeader
@@ -284,16 +228,8 @@ export function WorkPage() {
         title={t('title')}
         description={t('lead')}
       />
-      {sections.length === 0 ? (
-        <EmptyState
-          kind="first-use"
-          headingLevel={2}
-          headline={t('noQueues.title')}
-          description={t('noQueues.body')}
-        />
-      ) : (
-        <div className={styles.grid}>{sections}</div>
-      )}
+      {canSeeInbox ? <Inbox /> : null}
+      <OtherQueues hideWhenEmpty={canSeeInbox} />
     </div>
   );
 }

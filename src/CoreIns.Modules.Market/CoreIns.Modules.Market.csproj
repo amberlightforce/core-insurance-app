@@ -21,6 +21,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="CoreIns.IntegrationTests" />
     <InternalsVisibleTo Include="CoreIns.ArchitectureTests" />
+    <InternalsVisibleTo Include="CoreIns.CountryPacks.Tests" />
   </ItemGroup>
 
 </Project>
