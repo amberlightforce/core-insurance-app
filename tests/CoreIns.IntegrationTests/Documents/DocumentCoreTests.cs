@@ -140,8 +140,29 @@ public sealed class DocumentCoreTests(PostgresFixture database) : IClassFixture<
 
         // A late "delivered" cannot revive a failed delivery.
         var late = await CallbackAsync(client, "stub-post", deliveryId, "DELIVERED", DateTime.UtcNow.ToString("yyyy-MM-dd"));
-        late.Body.Text("outcome").ShouldBe("IGNORED_TERMINAL");
+        late.Body.Text("outcome").ShouldBe("IGNORED_TERMINAL_CONFLICT"); // kept as evidence, flagged for a human
         (await EventsAsync(documentId)).Select(e => e.Type).ShouldNotContain("DocumentDelivered");
+    }
+
+    [Fact]
+    public async Task A_statutory_notice_reprint_needs_a_reason_and_other_documents_do_not()
+    {
+        using var client = _factory.CreateClient();
+        var (_, notice) = await RequestAsync(client, RequestBody("DT-NONPAY-NOTICE", Guid.NewGuid().ToString(), Guid.CreateVersion7(), Guid.NewGuid().ToString()));
+        var noticeId = notice.Text("documentId");
+
+        var (refused, refusedBody) = await SendAsync(client, HttpMethod.Post, "/api/doc/v1/documents/reprint", new { documentId = noticeId }, roles: Admin);
+        refused.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, refusedBody?.ToJsonString());
+        refusedBody.Text("code").ShouldBe("DOC-ERR-PAYLOAD-INVALID");
+
+        var (blank, _) = await SendAsync(client, HttpMethod.Post, "/api/doc/v1/documents/reprint", new { documentId = noticeId, reason = "  " }, roles: Admin);
+        blank.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+
+        var (ok, okBody) = await SendAsync(client, HttpMethod.Post, "/api/doc/v1/documents/reprint", new { documentId = noticeId, reason = "LOST_IN_POST" }, roles: Admin);
+        ok.StatusCode.ShouldBe(HttpStatusCode.OK, okBody?.ToJsonString());
+
+        var (_, ack) = await RequestAsync(client, RequestBody("DT-WITHDRAWAL-ACK", Guid.NewGuid().ToString(), Guid.CreateVersion7(), Guid.NewGuid().ToString()));
+        (await SendAsync(client, HttpMethod.Post, "/api/doc/v1/documents/reprint", new { documentId = ack.Text("documentId") }, roles: Admin)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
     [Fact]
