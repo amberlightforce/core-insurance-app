@@ -248,7 +248,7 @@ function ReceivableDetails({ receivable }: { receivable: ReceivableView }) {
         {receipts.length === 0 ? (
           <p>{t('receivables.detail.noAllocations')}</p>
         ) : (
-          <ul aria-label={t('receivables.detail.allocations')}>
+          <ul aria-label={t('receivables.detail.allocations')} className={styles.ruledList}>
             {receipts.map((r) => (
               <li key={r.receiptNumber}>
                 {t('receivables.detail.allocationLine', {
