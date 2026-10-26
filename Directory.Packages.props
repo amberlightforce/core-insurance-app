@@ -75,15 +75,15 @@
   <!-- Test packages -->
   <ItemGroup>
     <!-- xUnit v3: test framework (ADR §1 testing); runs on Microsoft.Testing.Platform (global.json). -->
-    <PackageVersion Include="xunit.v3" Version="4.0.1" />
+    <PackageVersion Include="xunit.v3" Version="4.0.2" />
     <!-- Shouldly: assertions (ADR §1 replaces FluentAssertions). -->
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <!-- FsCheck: property-based tests on financial invariants (ADR §3). -->
-    <PackageVersion Include="FsCheck.Xunit.v3" Version="3.4.0" />
+    <PackageVersion Include="FsCheck.Xunit.v3" Version="3.6.0" />
     <!-- NetArchTest: module-boundary rules in CI (ADR §2 rule 8). -->
     <PackageVersion Include="NetArchTest.Rules" Version="1.3.2" />
     <!-- Testcontainers: integration tests against a real PostgreSQL 17 (ADR §3). -->
-    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.15.0" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.16.0" />
     <!-- In-memory test server to boot the Host in integration tests (part of ASP.NET Core). -->
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.13" />
   </ItemGroup>
