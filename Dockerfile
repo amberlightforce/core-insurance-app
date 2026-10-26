@@ -22,7 +22,7 @@ RUN dotnet publish src/CoreIns.Host/CoreIns.Host.csproj --configuration Release 
     -p:ContinuousIntegrationBuild=true
 
 # --- 3. Runtime: ASP.NET Core, non-root -----------------------------------------------------------
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.13 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.14 AS runtime
 WORKDIR /app
 ENV ASPNETCORE_HTTP_PORTS=8080 \
     DOTNET_RUNNING_IN_CONTAINER=true \
