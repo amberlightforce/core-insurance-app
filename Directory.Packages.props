@@ -30,7 +30,7 @@
     <!-- EF Core provider for PostgreSQL 17 (ADR §1 data access). -->
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <!-- ADO.NET driver for PostgreSQL: data source for health checks, Dapper and the migrate job. -->
-    <PackageVersion Include="Npgsql" Version="10.0.3" />
+    <PackageVersion Include="Npgsql" Version="11.0.0" />
     <!-- Dapper: performance-critical and set-based SQL (ledger, reporting marts) (ADR §1 data access). -->
     <PackageVersion Include="Dapper" Version="2.1.89" />
     <!-- Hangfire: background, delayed and recurring jobs with a dashboard (ADR §1 background jobs). -->
