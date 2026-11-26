@@ -35,7 +35,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import { displayName, roleKeys } from '../app-shell/user';
+import { displayName, humanizeRole, roleKeys } from '../app-shell/user';
 import { Avatar } from '../design-system/components/Avatar';
 import { Banner } from '../design-system/components/Banner';
 import { Kbd } from '../design-system/components/Kbd';
@@ -74,17 +74,6 @@ function rememberUser(id: string): void {
   } catch {
     // Private mode or blocked storage: the preselection is a convenience only.
   }
-}
-
-/** `Staff.UnderwritingManager` → `Underwriting Manager`. */
-function roleLabel(role: string): string {
-  const name = role.split('.').at(-1) ?? role;
-  return name.replace(/([a-z])([A-Z])/gu, '$1 $2');
-}
-
-/** Persona name without the «Dev » prefix and «(synthetic)» marker. */
-function personaName(name: string): string {
-  return displayName(name).replace(/^Dev\s+/u, '');
 }
 
 /** Pointer position inside an element as `--_mx/--_my` (px) and `--_nx/--_ny` (−1…1), batched per frame. */
@@ -276,7 +265,7 @@ export function DevSignIn() {
 
   const roleName = (role: string) => {
     const key = (roleKeys as Record<string, string | undefined>)[role];
-    return key ? t(`shell:${key}`) : roleLabel(role);
+    return key ? t(`shell:${key}`) : humanizeRole(role);
   };
 
   /** Clicking a persona (or Enter on the highlighted one) signs in and goes straight to home. */
@@ -368,7 +357,7 @@ export function DevSignIn() {
                 )}
               >
                 {(user) => {
-                  const name = personaName(user.name);
+                  const name = displayName(user.name);
                   const [firstRole, ...more] = user.roles.map(roleName);
                   const isCurrent = session?.user.id === user.id;
                   const isLast = !session && lastUser === user.id;

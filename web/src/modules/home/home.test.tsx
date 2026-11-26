@@ -103,7 +103,7 @@ describe('HomePage', () => {
     ]);
     const { container } = renderScreen(<HomePage />, { path: '/', url: '/' });
 
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/, Dev$/);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/, Underwriter$/);
     expect(screen.getByRole('button', { name: 'Νέα προσφορά' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Νέα δήλωση ζημίας' })).not.toBeInTheDocument();
 

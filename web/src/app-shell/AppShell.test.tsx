@@ -77,7 +77,7 @@ describe('AppShell', () => {
     const { user } = renderShell({
       user: { name: 'Dev Underwriter (synthetic)', roles: ['Staff.Underwriter'] },
     });
-    await user.click(screen.getByRole('button', { name: 'Λογαριασμός: Dev Underwriter' }));
+    await user.click(screen.getByRole('button', { name: 'Λογαριασμός: Underwriter' }));
     const menu = await screen.findByRole('dialog', { name: 'Λογαριασμός και εμφάνιση' });
     expect(menu).toHaveTextContent('Ανάληψη κινδύνου');
     await user.click(within(menu).getByRole('radio', { name: 'Σκοτεινό' }));

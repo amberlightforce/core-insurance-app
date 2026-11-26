@@ -16,7 +16,13 @@ import {
 } from '../../design-system';
 import type { ApprovalView } from '../../api/types';
 import { useDevSession } from '../../dev-auth/devAuth';
-import { firstName, isKnownRole, roleKeys, sampleEntityName } from '../../app-shell/user';
+import {
+  firstName,
+  humanizeRole,
+  isKnownRole,
+  roleKeys,
+  sampleEntityName,
+} from '../../app-shell/user';
 import { InvoiceStatePill } from '../billing/InvoiceStatePill';
 import { InvoiceTable } from '../billing/InvoiceTable';
 import { approvalTypeKey } from '../claims/approvalFormat';
@@ -150,7 +156,9 @@ export function HomePage() {
     year: 'numeric',
     timeZone: 'Europe/Athens',
   }).format(now);
-  const roleNames = roles.map((role) => (isKnownRole(role) ? t(`shell:${roleKeys[role]}`) : role));
+  const roleNames = roles.map((role) =>
+    isKnownRole(role) ? t(`shell:${roleKeys[role]}`) : humanizeRole(role),
+  );
   const waiting = seesApprovals ? pending.length : summary ? summary.open.length : null;
   const line = [dateLine, waiting !== null ? t('home:waiting', { count: waiting }) : null]
     .filter(Boolean)
