@@ -450,6 +450,9 @@ const implemented = new Set([
 
 /** Placeholder routes for modules whose work packages have not landed, plus the thin-slice staff screens. */
 export const routes: RouteObject[] = [
+  // Development-only local sign-in (D-SLC-03), full-bleed outside the shell; an empty state when the API does
+  // not offer it.
+  { path: '/dev/sign-in', element: <DevSignIn /> },
   {
     path: '/',
     element: <AppLayout />,
@@ -463,8 +466,6 @@ export const routes: RouteObject[] = [
           element: <ModulePlaceholder />,
         })),
       ...moduleRoutes,
-      // Development-only local sign-in (D-SLC-03); shows an empty state when the API does not offer it.
-      { path: 'dev/sign-in', element: <DevSignIn /> },
       { path: '*', element: <ModulePlaceholder /> },
     ],
   },

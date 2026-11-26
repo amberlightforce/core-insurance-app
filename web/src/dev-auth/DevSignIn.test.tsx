@@ -23,6 +23,7 @@ function json(body: unknown, status = 200): Response {
 describe('DevSignIn', () => {
   beforeEach(() => {
     sessionStorage.clear();
+    localStorage.clear();
   });
 
   afterEach(() => {
@@ -57,13 +58,13 @@ describe('DevSignIn', () => {
 
     const { user, container } = renderWithDs(<DevSignIn />);
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Τοπική σύνδεση ανάπτυξης' }),
+      await screen.findByRole('heading', { level: 1, name: 'Σύνδεση στην πύλη προσωπικού' }),
     ).toBeInTheDocument();
     await expectNoA11yViolations(container);
 
-    await user.click(screen.getByRole('button', { name: /Χρήστης/ }));
-    await user.click(await screen.findByRole('option', { name: /Dev Underwriter/ }));
-    await user.click(screen.getByRole('button', { name: 'Σύνδεση' }));
+    expect(screen.getByRole('button', { name: 'Σύνδεση' })).toBeDisabled();
+    await user.click(await screen.findByRole('option', { name: /^Underwriter/ }));
+    await user.click(screen.getByRole('button', { name: 'Συνέχεια ως Underwriter' }));
 
     expect(await screen.findByRole('status')).toHaveTextContent('Dev Underwriter (synthetic)');
     expect(readSession()?.accessToken).toBe('token-1');
@@ -90,5 +91,28 @@ describe('DevSignIn', () => {
     renderWithDs(<DevSignIn />);
     expect(await screen.findByText(/Οι χρήστες ανάπτυξης δεν φορτώθηκαν/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Δοκιμάστε ξανά|Επανάληψη/ })).toBeInTheDocument();
+  });
+
+  it('filters personas by role and signs in with Enter', async () => {
+    const fetchMock = vi.fn((url: string, init?: RequestInit) => {
+      if (url.endsWith('/dev/users')) return Promise.resolve(json(users));
+      if (url.endsWith('/dev/sign-in') && init?.method === 'POST') {
+        return Promise.resolve(
+          json({ accessToken: 'token-2', expiresAt: '2999-01-01T00:00:00Z', user: users.items[1] }),
+        );
+      }
+      return Promise.resolve(json({}));
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { user } = renderWithDs(<DevSignIn />);
+    const search = await screen.findByRole('searchbox');
+    await user.type(search, 'billing');
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    await user.keyboard('{ArrowDown}{Enter}');
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Dev Billing Clerk (synthetic)');
+    expect(readSession()?.accessToken).toBe('token-2');
+    expect(localStorage.getItem('coreins.devLastUser')).toBe('billing');
   });
 });
