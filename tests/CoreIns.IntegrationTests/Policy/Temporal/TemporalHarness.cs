@@ -67,10 +67,10 @@ public abstract class TemporalTestBase(PostgresFixture database) : IClassFixture
 
     internal static DateTime Utc(string text) => DateTime.Parse(text, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
 
-    internal async Task<Bound> BindAsync()
+    internal async Task<Bound> BindAsync(DateTimeOffset? effective = null)
     {
         var party = await Slice.CreatePartyAsync();
-        var (jobId, _, _) = await Slice.DraftAsync(party, DateTimeOffset.UtcNow.AddDays(2));
+        var (jobId, _, _) = await Slice.DraftAsync(party, effective ?? DateTimeOffset.UtcNow.AddDays(2));
         (await Slice.QuoteAsync(jobId)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
         var (response, bind) = await Slice.BindAsync(jobId);
         response.StatusCode.ShouldBe(HttpStatusCode.OK, bind?.ToJsonString());
