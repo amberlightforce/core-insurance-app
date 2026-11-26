@@ -628,6 +628,10 @@ internal sealed partial class RefundWorkflow(
         {
             return DomainError.Of(ModuleCode.BIL, "REFUND-OPEN", "The billing account already has an open refund; decide it first (one open refund per account).");
         }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "ux_refund_disbursement" })
+        {
+            return Stale("The disbursement is already linked to a refund; load the refund and try again.");
+        }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: Allocator.OverAllocationState })
         {
             return Stale("The credit or the open invoices of the account changed meanwhile; propose the refund again.");

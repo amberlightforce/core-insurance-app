@@ -4,6 +4,7 @@ using CoreIns.Platform;
 using CoreIns.Platform.Configuration;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Events;
+using CoreIns.Platform.Telemetry;
 using CoreIns.Platform.Persistence;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
@@ -107,10 +108,12 @@ internal sealed partial class SlaSweeper(SlaSweepRunner runner, IOptions<WorkOpt
                 try
                 {
                     await runner.RunAsync(stoppingToken).ConfigureAwait(false);
+                    CoreInsMetrics.SweeperSucceeded("work-sla");
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     LogRunFailed(logger, ex);
+                    CoreInsMetrics.SweeperFailed("work-sla");
                 }
             }
             while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false));

@@ -36,7 +36,7 @@ public sealed class PackActivationApiTests(PostgresFixture database) : IClassFix
         var (previewStatus, preview) = await SendAsync("/api/mkt/v1/packs/rollback?dryRun=true", "pack-maker", "Platform.ReleaseManager", body);
         previewStatus.ShouldBe(HttpStatusCode.OK, preview.ToJsonString());
         preview["activationId"].ShouldBeNull();
-        preview.Text("preview.fromVersion").ShouldBe("0.2.0");
+        preview.Text("preview.fromVersion").ShouldBe("0.3.0");
         preview["preview"]!["keyDiff"]!.AsArray().Count.ShouldBeGreaterThan(0);
 
         var key = Guid.NewGuid();
@@ -53,13 +53,13 @@ public sealed class PackActivationApiTests(PostgresFixture database) : IClassFix
         approved.ShouldBe(HttpStatusCode.OK, applied.ToJsonString());
         applied.Text("activation.status").ShouldBe("ACTIVE");
         applied.Text("activation.reason").ShouldBe(body.reason);
-        applied.Text("activation.from").ShouldBe("0.2.0");
+        applied.Text("activation.from").ShouldBe("0.3.0");
         applied.Text("activation.resultingHash").Length.ShouldBe(64);
         var (twice, _) = await SendAsync("/api/mkt/v1/pack-activations/decide", "pack-checker", "Platform.DesignAuthority", decide);
         twice.ShouldBe(HttpStatusCode.Conflict);
 
         var (restore, restoration) = await SendAsync("/api/mkt/v1/packs/schedule-activation", "pack-maker", "Platform.ReleaseManager",
-            new { pack = "gr", legalEntity = "GR-TEST", version = "0.2.0", reason = "Reactivate the treatment pack after rollback acceptance completed" });
+            new { pack = "gr", legalEntity = "GR-TEST", version = "0.3.0", reason = "Reactivate the treatment pack after rollback acceptance completed" });
         restore.ShouldBe(HttpStatusCode.OK, restoration.ToJsonString());
         var (restored, restoredBody) = await SendAsync("/api/mkt/v1/pack-activations/decide", "pack-checker", "Platform.DesignAuthority",
             new { activationId = restoration.Text("activationId"), decision = "APPROVE", reason = "Restore the treatment configuration after independent validation" });

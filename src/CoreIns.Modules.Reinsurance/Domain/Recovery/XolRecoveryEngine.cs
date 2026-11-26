@@ -1,3 +1,5 @@
+using CoreIns.Rules;
+
 namespace CoreIns.Modules.Reinsurance.Domain.Recovery;
 
 /// <summary>
@@ -100,30 +102,19 @@ internal static class XolRecoveryEngine
     }
 
     /// <summary>
-    /// Largest-remainder allocation: floor each share to cents, then hand the remaining cents to the largest fractional
-    /// remainders (ties: lead first, then participant id). Shares are never negative and sum exactly to the total.
+    /// Largest-remainder allocation (<see cref="CentAllocation"/>): parts sum exactly to the total, negative totals included
+    /// (ties: lead first, then participant id).
     /// </summary>
     private static Dictionary<string, decimal> Split(decimal total, List<Participation> participants)
     {
-        var rows = participants
-            .Select(p =>
-            {
-                var exact = total * p.SignedLine;
-                var floor = Math.Floor(exact * 100m) / 100m;
-                return (p.ParticipantId, p.IsLead, Floor: floor, Remainder: exact - floor);
-            })
-            .ToList();
-        var cents = (int)Math.Round((total - rows.Sum(r => r.Floor)) * 100m, MidpointRounding.ToZero);
-        var order = rows.OrderByDescending(r => r.Remainder).ThenByDescending(r => r.IsLead).ThenBy(r => r.ParticipantId, StringComparer.Ordinal).ToList();
-        var result = rows.ToDictionary(r => r.ParticipantId, r => r.Floor, StringComparer.Ordinal);
-        for (var i = 0; i < cents && i < order.Count; i++)
+        var ordered = participants.OrderByDescending(p => p.IsLead).ThenBy(p => p.ParticipantId, StringComparer.Ordinal).ToList();
+        var parts = CentAllocation.Allocate(total, [.. ordered.Select(p => p.SignedLine)]);
+        var result = new Dictionary<string, decimal>(StringComparer.Ordinal);
+        for (var i = 0; i < ordered.Count; i++)
         {
-            result[order[i].ParticipantId] += 0.01m;
+            result[ordered[i].ParticipantId] = parts[i];
         }
 
-        // Any sub-cent leftover (a rounding rule finer than cents) goes to the lead so the sum stays exact.
-        var lead = participants.Single(p => p.IsLead).ParticipantId;
-        result[lead] += total - result.Values.Sum();
         return result;
     }
 

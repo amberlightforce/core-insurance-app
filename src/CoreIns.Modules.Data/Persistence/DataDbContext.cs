@@ -33,7 +33,7 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
             e.HasKey(x => x.SubjectToken).HasName("pk_subject_key");
             e.Property(x => x.SubjectToken).HasColumnName("subject_token");
             e.Property(x => x.KeyId).HasColumnName("key_id");
-            // TODO(hardening): wrap the key with a KMS/HSM master key; the raw key in the row is the DAT-CORE stand-in.
+            // Wrapped under the platform KEK (SubjectKeyProtector); a legacy raw 32-byte value stays readable and is re-wrapped on the next fact write.
             e.Property(x => x.KeyMaterial).HasColumnName("key_material");
             e.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             e.Property(x => x.DestroyedAt).HasColumnName("destroyed_at").HasColumnType("timestamptz");

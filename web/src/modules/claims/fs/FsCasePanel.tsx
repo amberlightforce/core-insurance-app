@@ -50,7 +50,7 @@ function EligibilityBlock({ eligibility }: { eligibility: FsEligibility }) {
         />
       </p>
       {eligibility.reasons.length > 0 ? (
-        <ul aria-label={t('fs.reasons')}>
+        <ul aria-label={t('fs.reasons')} className={styles.reasonList}>
           {eligibility.reasons.map((r) => (
             <li key={r}>{t(`fs.reason.${r}`, { defaultValue: r })}</li>
           ))}

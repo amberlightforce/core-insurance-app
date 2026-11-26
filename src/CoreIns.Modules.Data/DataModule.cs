@@ -1,6 +1,7 @@
 using CoreIns.Modules.Data.Commands;
 using CoreIns.Modules.Data.Contracts.Api;
 using CoreIns.Modules.Data.Contracts;
+using CoreIns.Modules.Data.Domain;
 using CoreIns.Modules.Data.Persistence;
 using CoreIns.Modules.Data.Services;
 using CoreIns.Platform;
@@ -50,6 +51,7 @@ public static class DataModule
         services.AddModuleDbContext<DataDbContext>(Schema);
         services.AddScoped<ModelReader>();
         services.AddScoped<SubjectFactStore>();
+        services.AddScoped<SubjectKeyProtector>();
 
         services.AddScoped<IValidator<ExportSubject>, ExportSubjectValidator>();
         services.AddScoped<IValidator<ExecuteErasure>, ExecuteErasureValidator>();

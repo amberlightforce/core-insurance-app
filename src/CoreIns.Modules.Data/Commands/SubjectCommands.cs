@@ -46,7 +46,7 @@ internal sealed class ApplyRestrictionValidator : AbstractValidator<ApplyRestric
 }
 
 /// <summary>Exports the facts of a subject by decrypting them under the subject key; an erased subject yields none.</summary>
-internal sealed class ExportSubjectHandler(DataDbContext db) : ICommandHandler<ExportSubject, SubjectExportResponse>
+internal sealed class ExportSubjectHandler(DataDbContext db, SubjectKeyProtector protector) : ICommandHandler<ExportSubject, SubjectExportResponse>
 {
     public async Task<Result<SubjectExportResponse>> HandleAsync(ExportSubject command, CancellationToken cancellationToken)
     {
@@ -62,13 +62,14 @@ internal sealed class ExportSubjectHandler(DataDbContext db) : ICommandHandler<E
             return new SubjectExportResponse { SubjectToken = token, Status = SubjectExportResponse.StatusValue.Erased, FactCount = 0, KeyDestroyed = true, Facts = [] };
         }
 
+        var rawKey = await protector.UnwrapAsync(token, key.KeyMaterial, cancellationToken).ConfigureAwait(false);
         var rows = await db.SubjectFacts.AsNoTracking().Where(f => f.SubjectToken == token && !f.Blanked)
             .OrderBy(f => f.CreatedAt).ToListAsync(cancellationToken).ConfigureAwait(false);
         var facts = rows.Select(f => new SubjectExportResponse.FactItem
         {
             Category = f.Category,
             Key = f.FactKey,
-            Value = SubjectCrypto.Open(key.KeyMaterial, f.Cipher!),
+            Value = SubjectCrypto.Open(rawKey, f.Cipher!),
         }).ToList();
         return new SubjectExportResponse
         {
@@ -165,7 +166,7 @@ internal sealed class ExecuteErasureHandler(DataDbContext db, IClock clock, IEve
 }
 
 /// <summary>Restricts processing of a subject (facts stay, status RESTRICTED); an erased subject cannot be restricted.</summary>
-internal sealed class ApplyRestrictionHandler(DataDbContext db, IClock clock) : ICommandHandler<ApplyRestriction, RestrictionApplyResponse>
+internal sealed class ApplyRestrictionHandler(DataDbContext db, IClock clock, SubjectKeyProtector protector) : ICommandHandler<ApplyRestriction, RestrictionApplyResponse>
 {
     public async Task<Result<RestrictionApplyResponse>> HandleAsync(ApplyRestriction command, CancellationToken cancellationToken)
     {
@@ -173,7 +174,13 @@ internal sealed class ApplyRestrictionHandler(DataDbContext db, IClock clock) : 
         var key = await db.SubjectKeys.SingleOrDefaultAsync(k => k.SubjectToken == token, cancellationToken).ConfigureAwait(false);
         if (key is null)
         {
-            key = new SubjectKeyRow { SubjectToken = token, KeyId = Guid.CreateVersion7(), KeyMaterial = SubjectCrypto.NewKey(), CreatedAt = clock.Now };
+            key = new SubjectKeyRow
+            {
+                SubjectToken = token,
+                KeyId = Guid.CreateVersion7(),
+                KeyMaterial = await protector.WrapAsync(token, SubjectCrypto.NewKey(), cancellationToken).ConfigureAwait(false),
+                CreatedAt = clock.Now,
+            };
             db.SubjectKeys.Add(key);
         }
 
@@ -190,14 +197,20 @@ internal sealed class ApplyRestrictionHandler(DataDbContext db, IClock clock) : 
 }
 
 /// <summary>Writes subject facts, encrypted under the subject key (created on first use). Used by seeding and tests until a lakehouse feed exists.</summary>
-internal sealed class SubjectFactStore(DataDbContext db, IClock clock)
+internal sealed class SubjectFactStore(DataDbContext db, IClock clock, SubjectKeyProtector protector)
 {
     public async Task<bool> RecordAsync(string subjectToken, string category, string factKey, string value, CancellationToken cancellationToken)
     {
         var key = await db.SubjectKeys.SingleOrDefaultAsync(k => k.SubjectToken == subjectToken, cancellationToken).ConfigureAwait(false);
         if (key is null)
         {
-            key = new SubjectKeyRow { SubjectToken = subjectToken, KeyId = Guid.CreateVersion7(), KeyMaterial = SubjectCrypto.NewKey(), CreatedAt = clock.Now };
+            key = new SubjectKeyRow
+            {
+                SubjectToken = subjectToken,
+                KeyId = Guid.CreateVersion7(),
+                KeyMaterial = await protector.WrapAsync(subjectToken, SubjectCrypto.NewKey(), cancellationToken).ConfigureAwait(false),
+                CreatedAt = clock.Now,
+            };
             db.SubjectKeys.Add(key);
         }
 
@@ -206,13 +219,20 @@ internal sealed class SubjectFactStore(DataDbContext db, IClock clock)
             return false; // erased: the key is gone and is never recreated
         }
 
+        var rawKey = await protector.UnwrapAsync(subjectToken, key.KeyMaterial, cancellationToken).ConfigureAwait(false);
+        if (SubjectKeyProtector.IsLegacy(key.KeyMaterial))
+        {
+            // Upgrade a legacy raw key to the wrapped format on first write.
+            key.KeyMaterial = await protector.WrapAsync(subjectToken, rawKey, cancellationToken).ConfigureAwait(false);
+        }
+
         db.SubjectFacts.Add(new SubjectFactRow
         {
             FactId = Guid.CreateVersion7(),
             SubjectToken = subjectToken,
             Category = category,
             FactKey = factKey,
-            Cipher = SubjectCrypto.Seal(key.KeyMaterial, value),
+            Cipher = SubjectCrypto.Seal(rawKey, value),
             CreatedAt = clock.Now,
         });
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

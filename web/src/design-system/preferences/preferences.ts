@@ -31,7 +31,7 @@ export const defaultPreferences: Preferences = {
   reduceMotion: 'auto',
   reduceTransparency: 'auto',
   effects: 'auto',
-  regionFormat: 'el-GR',
+  regionFormat: 'en-GB',
   celebrations: true,
   singleKeyShortcuts: true,
   railExpanded: false,

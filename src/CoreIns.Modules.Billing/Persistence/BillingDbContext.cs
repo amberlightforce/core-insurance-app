@@ -354,6 +354,10 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
             entity.HasIndex(e => new { e.LegalEntityId, e.ReceiptNumber }).IsUnique().HasDatabaseName("ux_receipt_number");
+            // NX-EC-08: one receipt per bank statement line. The 7-day idempotency record expires, so a retry after that must not
+            // post the same money again; cashier receipts carry no bank statement line.
+            entity.HasIndex(e => new { e.LegalEntityId, e.BankReference }).IsUnique()
+                .HasFilter("bank_reference IS NOT NULL AND method = 'BANK_TRANSFER'").HasDatabaseName("ux_receipt_bank_reference");
             entity.HasIndex(e => e.BillingAccountId).HasDatabaseName("ix_receipt_account");
             entity.HasOne<BillingAccountRow>().WithMany().HasForeignKey(e => e.BillingAccountId)
                 .HasConstraintName("fk_receipt_account").OnDelete(DeleteBehavior.Restrict);
@@ -804,6 +808,9 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
             entity.HasIndex(e => new { e.LegalEntityId, e.BillingAccountId }).HasDatabaseName("ix_refund_account");
             entity.HasIndex(e => e.ApprovalRequestId).HasDatabaseName("ix_refund_approval_request");
+
+            // NX-EC-08: a refund is paid by one disbursement, and a disbursement pays one refund.
+            entity.HasIndex(e => e.DisbursementId).IsUnique().HasFilter("disbursement_id IS NOT NULL").HasDatabaseName("ux_refund_disbursement");
 
             // One open refund per billing account: a rejected, paid or returned refund no longer blocks.
             entity.HasIndex(e => e.BillingAccountId).IsUnique()

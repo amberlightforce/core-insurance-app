@@ -121,11 +121,11 @@ internal sealed class CessionIntake(
 
         foreach (var treaty in matching.Where(t => t.Kind == TreatyKinds.QuotaShare))
         {
-            await ReconcileAsync(treaty, termId, setKey, now, cancellationToken).ConfigureAwait(false);
+            await ReconcileAsync(treaty, forCoverage.Where(t => t.Kind == TreatyKinds.QuotaShare && CessionEngine.InBase(t.Base, payload.ChargeCategory)).ToList(), termId, setKey, now, cancellationToken).ConfigureAwait(false);
         }
     }
 
-    private async Task ReconcileAsync(CessionTreatyRow treaty, Guid termId, Guid setKey, Instant now, CancellationToken cancellationToken)
+    private async Task ReconcileAsync(CessionTreatyRow treaty, IReadOnlyList<CessionTreatyRow> quotaShares, Guid termId, Guid setKey, Instant now, CancellationToken cancellationToken)
     {
         if (await db.Cessions.AnyAsync(c => c.TermId == termId && c.TreatyId == treaty.TreatyId && c.SetKey == setKey, cancellationToken).ConfigureAwait(false))
         {
@@ -136,9 +136,14 @@ internal sealed class CessionIntake(
         var coverage = treaty.CoverageCodes;
         var lines = await db.PremiumDeltas.Where(p => p.TermId == termId && coverage.Contains(p.CoverageCode)).ToListAsync(cancellationToken).ConfigureAwait(false);
         // Lines outside the cession base (NET: tax, levies) are stored only so that a set counts as complete.
-        var written = lines.Where(p => CessionEngine.InBase(mode, p.ChargeCategory) && Covers(treaty, p.ValidFrom)).Sum(p => p.Amount);
+        var written = WrittenFor(treaty, lines);
         var booked = await db.Cessions.Where(c => c.TermId == termId && c.TreatyId == treaty.TreatyId).SumAsync(c => (decimal?)c.Delta, cancellationToken).ConfigureAwait(false) ?? 0m;
-        var target = CessionEngine.Target(treaty.SharePct, written);
+        // Joint largest-remainder target over every quota share of the term, so the cents ceded across treaties (premium lines either
+        // side of a treaty boundary) sum to the rounded total share instead of drifting by independent rounding (NX-EC-06).
+        // TODO(hardening): a sibling treaty not matched by this set converges at its own next set, not here.
+        var group = quotaShares.Where(t => t.TreatyVersionId != treaty.TreatyVersionId).Append(treaty)
+            .OrderBy(t => t.TreatyId, StringComparer.Ordinal).ThenBy(t => t.ContractYear).ThenBy(t => t.TreatyVersionId).ToList();
+        var target = CessionEngine.JointTargets(group.Select(t => (t.SharePct, WrittenFor(t, lines))).ToList())[group.FindIndex(t => t.TreatyVersionId == treaty.TreatyVersionId)];
         var difference = CessionEngine.Difference(target, booked);
         if (difference == 0m)
         {
@@ -162,6 +167,9 @@ internal sealed class CessionIntake(
         });
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
+
+    private static decimal WrittenFor(CessionTreatyRow treaty, List<PremiumDeltaRow> lines) =>
+        lines.Where(p => treaty.CoverageCodes.Contains(p.CoverageCode) && CessionEngine.InBase(treaty.Base, p.ChargeCategory) && Covers(treaty, p.ValidFrom)).Sum(p => p.Amount);
 
     private static bool Covers(CessionTreatyRow treaty, BusinessDate date) => date >= treaty.ValidFrom && date < treaty.ValidTo;
 

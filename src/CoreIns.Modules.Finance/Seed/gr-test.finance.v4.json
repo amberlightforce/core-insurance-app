@@ -665,16 +665,6 @@
         "en": "Credit written: tax payable reduced (void or pro-rata reduction; account from the charge type GL key)"
       },
       {
-        "code": "CW-LEVY-PAYABLE",
-        "sourceEvent": "bil.BillingEntryPosted",
-        "entryType": "CREDIT_WRITTEN",
-        "sourceAccount": "LA-07",
-        "chargeCategory": "LEVY",
-        "deriveFrom": "GL_KEY",
-        "el": "Πίστωση εγγραφής: μείωση εισφοράς πληρωτέας (ακύρωση/μείωση ασφαλίστρου)",
-        "en": "Credit written: levy payable reduced (distance-withdrawal void; account from the charge type GL key; NX-HD-06)"
-      },
-      {
         "code": "CW-SURCHARGE",
         "sourceEvent": "bil.BillingEntryPosted",
         "entryType": "CREDIT_WRITTEN",

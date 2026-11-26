@@ -1,3 +1,4 @@
+using CoreIns.Platform.Telemetry;
 using System.Text.Json;
 using CoreIns.Platform.Audit;
 using CoreIns.Platform.Authority;
@@ -126,6 +127,7 @@ internal sealed class IdempotencyDecorator<TCommand, TResult>(
 
             if (!string.Equals(existing.RequestHash, hash.Value, StringComparison.Ordinal))
             {
+                CoreInsMetrics.IdempotencyConflict("command");
                 return new DomainError(
                     ErrorCode.For(descriptor.Module, PlatformErrors.IdempotencyMismatch),
                     $"Idempotency-Key {key} was used with a different {descriptor.Operation} request.");
