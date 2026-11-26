@@ -5,11 +5,22 @@ export interface ShellUser {
 }
 
 /** The legal entity until the PLT user profile and the MKT registry provide it (synthetic). */
-export const sampleEntityName = 'Παράδειγμα Ασφαλιστική Α.Ε.';
+export const sampleEntityName = 'Sample Insurance S.A.';
 
-/** Synthetic dev users carry a «(synthetic)» marker; the shell shows the person's name only. */
+/** Synthetic dev users carry a «Dev » prefix and «(synthetic)» marker; the shell shows the persona only. */
 export function displayName(name: string): string {
-  return name.replace(/\s*\([^)]*\)\s*$/u, '').trim() || name;
+  return (
+    name
+      .replace(/\s*\([^)]*\)\s*$/u, '')
+      .replace(/^Dev\s+/u, '')
+      .trim() || name
+  );
+}
+
+/** A role without a translation reads as words: `Staff.ReinsuranceManager` → `Reinsurance Manager`. */
+export function humanizeRole(role: string): string {
+  const name = role.split('.').at(-1) ?? role;
+  return name.replace(/([a-z])([A-Z])/gu, '$1 $2');
 }
 
 /** First word of the display name, for the home greeting. */
