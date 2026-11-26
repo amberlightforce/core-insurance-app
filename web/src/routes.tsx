@@ -9,6 +9,7 @@ import {
   claimsRoles,
   complianceRoles,
   dsarRoles,
+  financeRoles,
   migrationRoles,
   packRoles,
   packRollbackReviewerRoles,
@@ -248,6 +249,56 @@ const moduleRoutes: RouteObject[] = [
   {
     path: 'finance/journals/policy/:policyNumber',
     lazy: async () => ({ Component: (await import('./modules/finance/JournalPage')).JournalPage }),
+  },
+  {
+    path: 'finance',
+    element: <RequireRole roles={financeRoles} />,
+    children: [
+      {
+        path: 'trial-balance',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/TrialBalancePage')).TrialBalancePage,
+        }),
+      },
+      {
+        path: 'manual-journals',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/ManualJournalsPage')).ManualJournalsPage,
+        }),
+      },
+      {
+        path: 'manual-journals/new',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/ManualJournalFormPage'))
+            .ManualJournalFormPage,
+        }),
+      },
+      {
+        path: 'manual-journals/:id',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/ManualJournalPage')).ManualJournalPage,
+        }),
+      },
+      {
+        path: 'intake-exceptions',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/IntakeExceptionsPage'))
+            .IntakeExceptionsPage,
+        }),
+      },
+      {
+        path: 'period-close',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/PeriodClosePage')).PeriodClosePage,
+        }),
+      },
+      {
+        path: 'earning',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/EarningRunPage')).EarningRunPage,
+        }),
+      },
+    ],
   },
 ];
 
