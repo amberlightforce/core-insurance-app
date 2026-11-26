@@ -62,7 +62,7 @@ export function AppLayout() {
         id: `nav-${item.id}`,
         group: 'navigation',
         title: t(`shell:nav.${item.id}`),
-        icon: moduleIcons[item.id],
+        icon: moduleIcons[item.icon ?? item.id],
         onAction: () => {
           void navigate(item.to);
         },

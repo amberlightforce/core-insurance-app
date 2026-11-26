@@ -12,7 +12,7 @@ import { usePreferences, type Density, type ThemePreference } from '../design-sy
 import { cx } from '../design-system/utils/cx';
 import styles from './AppShell.module.css';
 import { LanguageSwitch } from './LanguageSwitch';
-import { displayName, isKnownRole, roleKeys, type ShellUser } from './user';
+import { displayName, humanizeRole, isKnownRole, roleKeys, type ShellUser } from './user';
 
 export interface UserMenuProps {
   /** The signed-in user; `null` shows the signed-out trigger and a sign-in action. */
@@ -42,7 +42,9 @@ export function UserMenu({ user, onOpenHelp, onAccount }: UserMenuProps) {
   const { t } = useTranslation('shell');
   const { preferences, setPreference } = usePreferences();
   const name = user ? displayName(user.name) : null;
-  const roles = (user?.roles ?? []).map((role) => (isKnownRole(role) ? t(roleKeys[role]) : role));
+  const roles = (user?.roles ?? []).map((role) =>
+    isKnownRole(role) ? t(roleKeys[role]) : humanizeRole(role),
+  );
   const [open, setOpen] = useState(false);
   // Help and the account action leave the menu: close it first so only one dialog is open at a time.
   const leave = (action: () => void) => () => {

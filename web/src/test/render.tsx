@@ -11,14 +11,17 @@ export interface RenderWithDsOptions extends Omit<RenderOptions, 'wrapper'> {
 
 /**
  * Renders inside the design-system providers (preferences, React Aria locale, portal root) and returns a
- * userEvent instance. Change the language with `await i18n.changeLanguage('en')` before rendering.
+ * userEvent instance. Change the language with `await i18n.changeLanguage('en')` before rendering. Tests pin
+ * the Greek region format (the app default is en-GB), as setup.ts pins the Greek language.
  */
 export function renderWithDs(
   ui: ReactElement,
   { preferences, ...options }: RenderWithDsOptions = {},
 ): RenderResult & { user: ReturnType<typeof userEvent.setup> } {
   const Wrapper = ({ children }: { children: ReactNode }) => (
-    <DesignSystemProvider preferences={preferences ?? {}}>{children}</DesignSystemProvider>
+    <DesignSystemProvider preferences={{ regionFormat: 'el-GR', ...preferences }}>
+      {children}
+    </DesignSystemProvider>
   );
   const user = userEvent.setup();
   return { user, ...render(ui, { wrapper: Wrapper, ...options }) };
