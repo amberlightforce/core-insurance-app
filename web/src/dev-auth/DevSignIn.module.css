@@ -1,8 +1,8 @@
 /*
  * Dev sign-in (D-SLC-03): a full-bleed two-panel page outside the shell.
  * Showcase: aurora blobs with pointer parallax, staggered blur-in headline, glass env chip, module marquee.
- * Card: cursor spotlight border, staggered entrance, search with «/», persona list with a sliding selection pill,
- * magnetic gradient CTA with a sheen sweep, shake on failure, a burst + drawn check on success.
+ * Card: cursor spotlight border, staggered entrance, search with «/», persona rows that sign in on click with one
+ * highlight pill gliding between them, a spinner on the chosen row and a shake on failure.
  * Motion is transform / opacity / filter only, on motion tokens; prefers-reduced-motion stills everything.
  */
 
@@ -569,9 +569,45 @@
   transform: scale(0.8);
 }
 
-/* Persona list */
+/* Persona list: every row is an action (click / Enter signs in). One highlight pill glides between rows. */
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .listWrap {
-  margin: calc(var(--space-2) * -1) calc(var(--space-2) * -1) var(--space-0);
+  position: relative;
+  isolation: isolate;
+  margin: var(--space-0) calc(var(--space-2) * -1);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+/* Shared hover: one element, moved with translate; it fades in on first hover and out when the pointer leaves. */
+.highlight {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: var(--space-2);
+  z-index: calc(var(--z-raised) * -1);
+  border-radius: var(--radius-lg);
+  background-color: color-mix(
+    in srgb,
+    var(--color-interactive-accent-bg) 7%,
+    var(--color-surface-sheet)
+  );
+  box-shadow:
+    inset 0 0 0 var(--border-width-hairline) var(--color-status-brand-border),
+    var(--elevation-1);
+  opacity: 0;
+  transition:
+    transform var(--motion-duration-transition-md) var(--motion-ease-emphasized),
+    opacity var(--motion-duration-transition-sm) var(--motion-ease-standard);
+  pointer-events: none;
+}
+
+.highlight[data-visible] {
+  opacity: 1;
 }
 
 .list {
@@ -579,15 +615,15 @@
   flex-direction: column;
   gap: var(--space-0_5);
   max-block-size: calc(var(--size-control-lg) * 6.4);
-  padding: var(--space-2);
+
+  /* Bottom padding = the fade, so the last row is never washed out when scrolled to the end. */
+  padding: var(--space-0) var(--space-2) var(--space-5);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   outline: none;
   mask-image: linear-gradient(
     180deg,
-    transparent 0,
-    var(--color-text-primary) var(--space-3),
     var(--color-text-primary) calc(100% - var(--space-5)),
     transparent 100%
   );
@@ -595,7 +631,6 @@
 
 .option {
   position: relative;
-  isolation: isolate;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
@@ -607,14 +642,8 @@
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   transition:
-    background-color var(--motion-duration-feedback-md) var(--motion-ease-feedback),
-    transform var(--motion-duration-feedback-sm) var(--motion-ease-standard);
-  animation: rise var(--motion-duration-transition-lg) var(--motion-ease-enter) both;
-}
-
-.option[data-hovered]:not([data-selected]),
-.option[data-focused]:not([data-selected]) {
-  background-color: var(--color-state-row-hover);
+    transform var(--motion-duration-feedback-sm) var(--motion-ease-standard),
+    opacity var(--motion-duration-transition-sm) var(--motion-ease-standard);
 }
 
 .option[data-pressed] {
@@ -630,32 +659,61 @@
   pointer-events: none;
 }
 
-.option > :nth-child(2) {
+/* Hover / keyboard focus: the avatar lifts, the text nudges right, the arrow slides in. No rotation. */
+.option > :first-child,
+.optionText {
   transition: transform var(--motion-duration-transition-sm) var(--motion-ease-emphasized);
 }
 
-.option[data-hovered] > :nth-child(2) {
-  transform: scale(1.06) rotate(-3deg);
+.option[data-hovered] > :first-child,
+.option[data-focused] > :first-child {
+  transform: scale(1.06);
 }
 
-/* MI: the selection pill slides between rows (React Aria SelectionIndicator, translate only). */
-.pill {
-  position: absolute;
-  inset: 0;
-  z-index: calc(var(--z-raised) * -1);
-  border-radius: inherit;
-  background-color: color-mix(
-    in srgb,
-    var(--color-interactive-accent-bg) 9%,
-    var(--color-surface-sheet)
-  );
-  box-shadow:
-    inset 0 0 0 var(--border-width-hairline) var(--color-status-brand-border),
-    var(--elevation-1);
+.option[data-hovered] .optionText,
+.option[data-focused] .optionText {
+  transform: translateX(var(--space-0_5));
+}
+
+.go {
+  display: grid;
+  place-items: center;
+  inline-size: var(--size-icon-lg);
+  block-size: var(--size-icon-lg);
+  color: var(--color-text-link);
+  opacity: 0;
+  transform: translateX(calc(var(--space-1_5) * -1));
   transition:
-    translate var(--motion-duration-transition-md) var(--motion-ease-emphasized),
-    scale var(--motion-duration-transition-md) var(--motion-ease-emphasized);
-  pointer-events: none;
+    opacity var(--motion-duration-feedback-lg) var(--motion-ease-feedback),
+    transform var(--motion-duration-transition-sm) var(--motion-ease-emphasized);
+}
+
+.option[data-hovered] .go,
+.option[data-focused] .go,
+.option[data-pending] .go {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* While one persona signs in, the others step back. */
+.listWrap[data-busy] .option:not([data-pending]) {
+  opacity: 0.45;
+}
+
+.spinner {
+  inline-size: var(--size-icon-md);
+  block-size: var(--size-icon-md);
+  border: var(--border-width-thick) solid
+    color-mix(in srgb, var(--color-text-link) 25%, transparent);
+  border-block-start-color: var(--color-text-link);
+  border-radius: var(--radius-full);
+  animation: spin var(--motion-duration-signature-beat) var(--motion-ease-linear) infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
 }
 
 .optionText {
@@ -665,23 +723,39 @@
 }
 
 .optionName {
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-inline-size: 0;
   color: var(--color-text-primary);
   font: var(--type-label-lg);
   letter-spacing: var(--type-label-lg-tracking);
+}
+
+.nameText,
+.roleText {
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.tag {
+  flex: none;
+  padding: var(--space-0) var(--space-1_5);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-success-bg);
+  color: var(--color-status-success-fg);
+  font: var(--type-caption);
 }
 
 .optionRoles {
   display: flex;
   align-items: center;
   gap: var(--space-1_5);
-  overflow: hidden;
+  min-inline-size: 0;
   color: var(--color-text-secondary);
   font: var(--type-caption);
   letter-spacing: var(--type-caption-tracking);
-  white-space: nowrap;
 }
 
 .more {
@@ -691,30 +765,6 @@
   background-color: var(--color-status-brand-bg);
   color: var(--color-status-brand-fg);
   font: var(--type-caption);
-}
-
-.tick {
-  display: grid;
-  place-items: center;
-  inline-size: var(--size-icon-lg);
-  block-size: var(--size-icon-lg);
-  border-radius: var(--radius-full);
-  background: var(--gradient-iris);
-  color: var(--color-text-on-accent);
-  opacity: 0;
-  transform: scale(0.4) rotate(-45deg);
-  transition:
-    opacity var(--motion-duration-feedback-lg) var(--motion-ease-feedback),
-    transform var(--motion-duration-transition-md) var(--motion-ease-emphasized);
-}
-
-.option[data-selected] .tick {
-  opacity: 1;
-  transform: scale(1) rotate(0);
-}
-
-.option[data-selected] .optionName {
-  color: var(--color-status-brand-fg);
 }
 
 .noMatch {
@@ -735,142 +785,17 @@
   animation: rise var(--motion-duration-transition-md) var(--motion-ease-enter) both;
 }
 
-/* CTA: gradient, magnetic, sheen sweep on hover, label crossfade when the persona changes. */
-.ctaRow {
+.footerRow {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.cta {
-  --_nx: 0;
-  --_ny: 0;
-
-  position: relative;
-  isolation: isolate;
-  display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: var(--space-2);
-  inline-size: 100%;
-  min-block-size: calc(var(--size-control-lg) + var(--space-1));
-  padding: var(--space-0) var(--space-5);
-  overflow: hidden;
-  border: none;
-  border-radius: var(--radius-lg);
-  background: var(--gradient-cta);
-  background-size: 160% 100%;
-  box-shadow: var(--shadow-button-commit);
-  color: var(--color-text-on-accent);
-  font: var(--type-label-lg);
-  letter-spacing: var(--type-label-lg-tracking);
-  text-decoration: none;
-  cursor: pointer;
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-  translate: calc(var(--_nx) * var(--space-1)) calc(var(--_ny) * var(--space-0_5));
-  transition:
-    translate var(--motion-duration-transition-sm) var(--motion-ease-standard),
-    transform var(--motion-duration-feedback-md) var(--motion-ease-standard),
-    box-shadow var(--motion-duration-transition-sm) var(--motion-ease-standard),
-    background-position var(--motion-duration-signature-beat) var(--motion-ease-standard),
-    opacity var(--motion-duration-transition-sm) var(--motion-ease-standard),
-    filter var(--motion-duration-transition-sm) var(--motion-ease-standard);
-}
-
-.cta[data-hovered] {
-  background-position: 100% 0;
-  box-shadow:
-    var(--shadow-button-commit),
-    0 var(--space-2) var(--space-6) calc(var(--space-2) * -1) var(--color-interactive-primary-glow);
-}
-
-.cta[data-pressed] {
-  transform: scale(0.97);
-}
-
-.cta[data-focus-visible] {
-  outline: var(--focus-ring-width) solid var(--color-border-focus);
-  outline-offset: var(--focus-ring-offset);
-}
-
-.cta[data-disabled] {
-  cursor: not-allowed;
-  opacity: 0.55;
-  filter: saturate(0.4);
-  box-shadow: none;
-}
-
-.cta[data-pending] {
-  cursor: progress;
-}
-
-.ctaShine {
-  position: absolute;
-  inset: 0;
-  z-index: calc(var(--z-raised) * -1);
-  background: linear-gradient(
-    105deg,
-    transparent 30%,
-    color-mix(in srgb, var(--color-text-on-accent) 35%, transparent) 50%,
-    transparent 70%
-  );
-  transform: translateX(-110%);
-  pointer-events: none;
-}
-
-.cta[data-hovered] .ctaShine,
-a.cta:hover .ctaShine {
-  transform: translateX(110%);
-  transition: transform var(--motion-duration-signature-beat) var(--motion-ease-standard);
-}
-
-.ctaLabel {
-  display: inline-block;
-  animation: label-in var(--motion-duration-transition-md) var(--motion-ease-enter) both;
-}
-
-@keyframes label-in {
-  from {
-    opacity: 0;
-    transform: translateY(40%);
-    filter: blur(var(--space-1));
-  }
-}
-
-.ctaArrow {
-  transition: transform var(--motion-duration-transition-sm) var(--motion-ease-emphasized);
-}
-
-.cta[data-hovered] .ctaArrow,
-a.cta:hover .ctaArrow {
-  transform: translateX(var(--space-1));
-}
-
-.cta[data-pending] .ctaArrow {
-  opacity: 0;
-}
-
-.ctaSpinner {
-  inline-size: var(--size-icon-md);
-  block-size: var(--size-icon-md);
-  border: var(--border-width-thick) solid
-    color-mix(in srgb, var(--color-text-on-accent) 30%, transparent);
-  border-block-start-color: var(--color-text-on-accent);
-  border-radius: var(--radius-full);
-  animation: spin var(--motion-duration-signature-beat) var(--motion-ease-linear) infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(1turn);
-  }
 }
 
 .hint {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: var(--space-1_5);
   margin: var(--space-0);
   color: var(--color-text-tertiary);
@@ -878,130 +803,11 @@ a.cta:hover .ctaArrow {
   letter-spacing: var(--type-caption-tracking);
 }
 
-/* ───────────────────────── Success ───────────────────────── */
-
-.success {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-4);
-  text-align: center;
-}
-
-.successMark {
-  position: relative;
-  display: grid;
-  place-items: center;
-  margin-block: var(--space-2);
-  animation: pop var(--motion-duration-signature-beat) var(--motion-ease-emphasized) both;
-}
-
-@keyframes pop {
-  from {
-    opacity: 0;
-    transform: scale(0.6);
+/* No Enter key on touch screens. */
+@media (pointer: coarse) {
+  .hint {
+    display: none;
   }
-}
-
-.burst {
-  position: absolute;
-  inset: 0;
-  border: var(--border-width-thick) solid var(--color-interactive-accent-bg);
-  border-radius: var(--radius-full);
-  opacity: 0;
-  animation: burst calc(var(--motion-duration-signature-beat) * 1.6) var(--motion-ease-enter) both;
-}
-
-.burstLate {
-  border-color: var(--color-status-teal-solid);
-  animation-delay: var(--motion-duration-transition-sm);
-}
-
-@keyframes burst {
-  from {
-    opacity: 0.9;
-    transform: scale(0.9);
-  }
-
-  to {
-    opacity: 0;
-    transform: scale(2.1);
-  }
-}
-
-.badge {
-  position: absolute;
-  inset-block-end: calc(var(--space-1) * -1);
-  inset-inline-end: calc(var(--space-1) * -1);
-  display: grid;
-  place-items: center;
-  inline-size: var(--size-control-sm);
-  block-size: var(--size-control-sm);
-  border: var(--border-width-thick) solid var(--color-surface-sheet);
-  border-radius: var(--radius-full);
-  background-color: var(--color-status-success-solid);
-  animation: pop var(--motion-duration-transition-lg) var(--motion-ease-emphasized) both;
-  animation-delay: var(--motion-duration-transition-md);
-}
-
-.checkSvg {
-  inline-size: var(--size-icon-md);
-  block-size: var(--size-icon-md);
-  fill: none;
-  stroke: var(--color-text-on-accent);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 24;
-  stroke-dashoffset: 24;
-  animation: draw var(--motion-duration-transition-xl) var(--motion-ease-standard) forwards;
-  animation-delay: var(--motion-duration-transition-xl);
-}
-
-@keyframes draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.status {
-  margin: var(--space-0);
-}
-
-.statusLead {
-  display: block;
-  color: var(--color-text-primary);
-  font: var(--type-heading-2);
-  letter-spacing: var(--type-heading-2-tracking);
-  animation: rise var(--motion-duration-transition-xl) var(--motion-ease-enter) both;
-  animation-delay: var(--motion-duration-transition-sm);
-}
-
-.roleList {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-1_5);
-  margin: var(--space-0);
-  padding: var(--space-0);
-  list-style: none;
-}
-
-.role {
-  padding: var(--space-0_5) var(--space-2);
-  border: var(--border-width-hairline) solid var(--color-status-brand-border);
-  border-radius: var(--radius-full);
-  background-color: var(--color-status-brand-bg);
-  color: var(--color-status-brand-fg);
-  font: var(--type-caption);
-  animation: rise var(--motion-duration-transition-lg) var(--motion-ease-enter) both;
-  animation-delay: calc(
-    var(--motion-duration-transition-lg) + var(--_i, 0) * var(--motion-duration-stagger-list) / 2
-  );
-}
-
-.success .cta {
-  margin-block-start: var(--space-2);
 }
 
 .switch {
@@ -1074,8 +880,7 @@ a.cta:hover .ctaArrow {
   }
 
   .blob,
-  .pitch,
-  .cta {
+  .pitch {
     translate: none;
   }
 

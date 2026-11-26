@@ -1,9 +1,9 @@
 import {
   ArrowRight,
   Banknote,
-  Check,
   FileText,
   Landmark,
+  Layers,
   LifeBuoy,
   Search,
   ShieldCheck,
@@ -20,23 +20,22 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
+  type RefObject,
 } from 'react';
 import {
   Autocomplete,
   Button as AriaButton,
   Input,
-  Link,
   ListBox,
   ListBoxItem,
   SearchField,
-  SelectionIndicator,
   Text,
   useFilter,
-  type Key,
 } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 
-import { displayName } from '../app-shell/user';
+import { displayName, roleKeys } from '../app-shell/user';
 import { Avatar } from '../design-system/components/Avatar';
 import { Banner } from '../design-system/components/Banner';
 import { Kbd } from '../design-system/components/Kbd';
@@ -124,6 +123,79 @@ function usePointerVars<T extends HTMLElement>() {
   );
 }
 
+/**
+ * One highlight pill that glides between persona rows (Framer-style shared hover): it follows the pointer, and
+ * the keyboard's virtually focused row when the pointer is elsewhere. Translate only; re-measured on scroll.
+ */
+function useRowHighlight(wrapRef: RefObject<HTMLDivElement | null>) {
+  const target = useRef<HTMLElement | null>(null);
+  const hovering = useRef(false);
+  const [box, setBox] = useState<{ y: number; h: number } | null>(null);
+
+  const moveTo = useCallback(
+    (row: HTMLElement | null) => {
+      const wrap = wrapRef.current;
+      target.current = row;
+      if (!wrap || !row?.isConnected) {
+        setBox(null);
+        return;
+      }
+      const outer = wrap.getBoundingClientRect();
+      const inner = row.getBoundingClientRect();
+      setBox({ y: inner.top - outer.top, h: inner.height });
+    },
+    [wrapRef],
+  );
+
+  const focusedRow = useCallback(
+    () => wrapRef.current?.querySelector<HTMLElement>('[role="option"][data-focused]') ?? null,
+    [wrapRef],
+  );
+
+  const followFocus = useCallback(() => {
+    requestAnimationFrame(() => {
+      if (!hovering.current) moveTo(focusedRow());
+    });
+  }, [focusedRow, moveTo]);
+
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const onScroll = () => {
+      moveTo(target.current);
+    };
+    wrap.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    return () => {
+      wrap.removeEventListener('scroll', onScroll, { capture: true });
+    };
+  });
+
+  return {
+    visible: box !== null,
+    style: box
+      ? ({
+          transform: `translateY(${String(box.y)}px)`,
+          blockSize: `${String(box.h)}px`,
+        } as CSSProperties)
+      : undefined,
+    followFocus,
+    onPointerOver: (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (event.pointerType === 'touch') return;
+      hovering.current = true;
+      const row = (event.target as HTMLElement).closest<HTMLElement>('[role="option"]');
+      if (row && row !== target.current) moveTo(row);
+    },
+    onPointerLeave: () => {
+      hovering.current = false;
+      moveTo(focusedRow());
+    },
+    onKeyUp: () => {
+      hovering.current = false;
+      followFocus();
+    },
+  };
+}
+
 const modules: { key: string; icon: LucideIcon }[] = [
   { key: 'policies', icon: FileText },
   { key: 'underwriting', icon: ShieldCheck },
@@ -131,7 +203,7 @@ const modules: { key: string; icon: LucideIcon }[] = [
   { key: 'finance', icon: Landmark },
   { key: 'claims', icon: LifeBuoy },
   { key: 'recovery', icon: Undo2 },
-  { key: 'reinsurance', icon: ShieldCheck },
+  { key: 'reinsurance', icon: Layers },
   { key: 'parties', icon: Users },
 ];
 
@@ -143,24 +215,26 @@ function enter(index: number): CSSProperties {
 /**
  * Development-only sign-in page (D-SLC-03): pick a configured synthetic user, obtain a token from the api's dev
  * scheme. A full-bleed two-panel page outside the shell: a brand showcase (aurora, staggered headline, module
- * marquee) and a searchable persona list with a sliding selection pill, a magnetic sign-in button and a success
- * state. Enter signs in as the highlighted user; the last-used persona is preselected. Reduced motion stills it all.
+ * marquee) and a searchable persona list with one highlight pill gliding between rows. Clicking a persona (or
+ * Enter on the highlighted one) signs in and goes straight to home. Reduced motion stills it all.
  */
 export function DevSignIn() {
-  const { t } = useTranslation('dev-auth');
+  const { t } = useTranslation(['dev-auth', 'shell']);
+  const navigate = useNavigate();
   const [load, setLoad] = useState<Load>({ kind: 'loading' });
-  const [selected, setSelected] = useState<string | null>(() => readLastUser());
+  const [lastUser] = useState<string | null>(() => readLastUser());
   const [session, setSession] = useState<DevSession | null>(() => readSession());
+  const [pending, setPending] = useState<string | null>(null);
   const [failed, setFailed] = useState(0);
-  const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState('');
   // Sent here by a 401: the previous token is no longer valid.
   const [expired] = useState(() => new URLSearchParams(window.location.search).has('expired'));
   const { contains } = useFilter({ sensitivity: 'base' });
   const page = usePointerVars<HTMLDivElement>();
   const card = usePointerVars<HTMLDivElement>();
-  const cta = usePointerVars<HTMLButtonElement>();
   const searchRef = useRef<HTMLInputElement>(null);
+  const listWrapRef = useRef<HTMLDivElement>(null);
+  const highlight = useRowHighlight(listWrapRef);
 
   // Sets state only when the request settles (never synchronously inside the effect).
   const loadUsers = useCallback((signal?: AbortSignal) => {
@@ -199,23 +273,25 @@ export function DevSignIn() {
   }, []);
 
   const users = useMemo(() => (load.kind === 'ready' ? load.users : []), [load]);
-  const selectedUser = users.find((user) => user.id === selected) ?? null;
 
-  const submit = (userId: string | null = selected) => {
-    if (!userId || busy) return;
-    setSelected(userId);
-    setBusy(true);
+  const roleName = (role: string) => {
+    const key = (roleKeys as Record<string, string | undefined>)[role];
+    return key ? t(`shell:${key}`) : roleLabel(role);
+  };
+
+  /** Clicking a persona (or Enter on the highlighted one) signs in and goes straight to home. */
+  const signInAs = (userId: string) => {
+    if (pending) return;
+    setPending(userId);
+    setFailed(0);
     signIn(userId)
-      .then((next) => {
+      .then(() => {
         rememberUser(userId);
-        setFailed(0);
-        setSession(next);
+        void navigate('/', { replace: true });
       })
       .catch(() => {
+        setPending(null);
         setFailed((count) => count + 1);
-      })
-      .finally(() => {
-        setBusy(false);
       });
   };
 
@@ -241,154 +317,126 @@ export function DevSignIn() {
         description={t('unavailableBody')}
       />
     );
-  } else if (session) {
-    const name = personaName(session.user.name);
-    content = (
-      <div className={cx(styles.success)}>
-        <div className={cx(styles.successMark)} aria-hidden="true">
-          <span className={cx(styles.burst)} />
-          <span className={cx(styles.burst, styles.burstLate)} />
-          <Avatar name={name} size="xl" decorative />
-          <span className={cx(styles.badge)}>
-            <svg viewBox="0 0 24 24" className={cx(styles.checkSvg)}>
-              <path d="M5 12.5l4.5 4.5L19 7.5" />
-            </svg>
-          </span>
-        </div>
-        <p role="status" className={cx(styles.status)}>
-          <span className={cx(styles.statusLead)}>{t('welcome', { name })}</span>
-          <span className={cx(styles.visuallyHidden)}>
-            {t('signedInAs', { name: session.user.name, roles: session.user.roles.join(', ') })}
-          </span>
-        </p>
-        <ul className={cx(styles.roleList)} aria-label={t('rolesLabel')}>
-          {session.user.roles.map((role, index) => (
-            <li key={role} className={cx(styles.role)} style={enter(index)}>
-              {roleLabel(role)}
-            </li>
-          ))}
-        </ul>
-        <Link href="/" className={cx(styles.cta)} autoFocus>
-          <span className={cx(styles.ctaShine)} aria-hidden="true" />
-          <span className={cx(styles.ctaLabel)}>{t('continue')}</span>
-          <Icon icon={ArrowRight} size={16} className={cx(styles.ctaArrow)} />
-        </Link>
-        <AriaButton
-          className={cx(styles.switch)}
-          onPress={() => {
-            clearSession();
-            setSession(null);
-          }}
-        >
-          {t('signOut')}
-        </AriaButton>
-      </div>
-    );
   } else {
-    const ctaLabel = selectedUser
-      ? t('signInAs', { name: personaName(selectedUser.name) })
-      : t('signIn');
     content = (
       <>
-        <Autocomplete
-          inputValue={query}
-          onInputChange={setQuery}
-          filter={(text) => contains(text, query)}
-        >
-          <SearchField
-            className={cx(styles.search)}
-            aria-label={t('searchLabel')}
-            data-enter=""
-            style={enter(4)}
+        <div className={cx(styles.picker)} onKeyUp={highlight.onKeyUp}>
+          <Autocomplete
+            inputValue={query}
+            onInputChange={(value) => {
+              setQuery(value);
+              highlight.followFocus();
+            }}
+            filter={(text) => contains(text, query)}
           >
-            <Icon icon={Search} size={16} className={cx(styles.searchIcon)} />
-            <Input ref={searchRef} className={cx(styles.searchInput)} placeholder={t('search')} />
-            <span className={cx(styles.searchKbd)} aria-hidden="true">
-              <Kbd shortcut="/" />
-            </span>
-          </SearchField>
-          <div className={cx(styles.listWrap)} data-enter="" style={enter(5)}>
-            <ListBox
-              aria-label={t('userLabel')}
-              className={cx(styles.list)}
-              items={users}
-              selectionMode="single"
-              selectionBehavior="replace"
-              disallowEmptySelection
-              selectedKeys={selected ? [selected] : []}
-              onSelectionChange={(keys) => {
-                if (keys === 'all') return;
-                const [first] = [...keys] as Key[];
-                setFailed(0);
-                setSelected(first === undefined ? null : String(first));
-              }}
-              onAction={(key) => {
-                submit(String(key));
-              }}
-              renderEmptyState={() => (
-                <p className={cx(styles.noMatch)}>{t('noMatch', { query })}</p>
-              )}
+            <SearchField
+              className={cx(styles.search)}
+              aria-label={t('searchLabel')}
+              data-enter=""
+              style={enter(4)}
             >
-              {(user) => {
-                const name = personaName(user.name);
-                const [firstRole, ...more] = user.roles.map(roleLabel);
-                return (
-                  <ListBoxItem
-                    id={user.id}
-                    textValue={`${name} ${user.roles.join(' ')}`}
-                    className={cx(styles.option)}
-                  >
-                    <SelectionIndicator className={cx(styles.pill)} />
-                    <Avatar name={name} size="md" decorative />
-                    <span className={cx(styles.optionText)}>
-                      <Text slot="label" className={cx(styles.optionName)}>
-                        {name}
-                      </Text>
-                      <Text slot="description" className={cx(styles.optionRoles)}>
-                        {firstRole}
-                        {more.length > 0 ? (
-                          <span className={cx(styles.more)}>
-                            {t('moreRoles', { count: more.length })}
-                          </span>
-                        ) : null}
-                      </Text>
-                    </span>
-                    <span className={cx(styles.tick)} aria-hidden="true">
-                      <Icon icon={Check} size={14} />
-                    </span>
-                  </ListBoxItem>
-                );
-              }}
-            </ListBox>
-          </div>
-        </Autocomplete>
+              <Icon icon={Search} size={16} className={cx(styles.searchIcon)} />
+              <Input ref={searchRef} className={cx(styles.searchInput)} placeholder={t('search')} />
+              <span className={cx(styles.searchKbd)} aria-hidden="true">
+                <Kbd shortcut="/" />
+              </span>
+            </SearchField>
+            <div
+              ref={listWrapRef}
+              className={cx(styles.listWrap)}
+              data-enter=""
+              data-busy={pending ? '' : undefined}
+              style={enter(5)}
+              onPointerOver={highlight.onPointerOver}
+              onPointerLeave={highlight.onPointerLeave}
+            >
+              <span
+                className={cx(styles.highlight)}
+                style={highlight.style}
+                data-visible={highlight.visible || undefined}
+                aria-hidden="true"
+              />
+              <ListBox
+                aria-label={t('userLabel')}
+                className={cx(styles.list)}
+                items={users}
+                onAction={(key) => {
+                  signInAs(String(key));
+                }}
+                renderEmptyState={() => (
+                  <p className={cx(styles.noMatch)}>{t('noMatch', { query })}</p>
+                )}
+              >
+                {(user) => {
+                  const name = personaName(user.name);
+                  const [firstRole, ...more] = user.roles.map(roleName);
+                  const isCurrent = session?.user.id === user.id;
+                  const isLast = !session && lastUser === user.id;
+                  return (
+                    <ListBoxItem
+                      id={user.id}
+                      textValue={`${name} ${user.roles.join(' ')}`}
+                      className={cx(styles.option)}
+                      data-pending={pending === user.id || undefined}
+                    >
+                      <Avatar name={name} size="md" decorative />
+                      <span className={cx(styles.optionText)}>
+                        <Text slot="label" className={cx(styles.optionName)}>
+                          <span className={cx(styles.nameText)}>{name}</span>
+                          {isCurrent || isLast ? (
+                            <span className={cx(styles.tag)}>
+                              {isCurrent ? t('current') : t('lastUsed')}
+                            </span>
+                          ) : null}
+                        </Text>
+                        <Text slot="description" className={cx(styles.optionRoles)}>
+                          <span className={cx(styles.roleText)}>{firstRole}</span>
+                          {more.length > 0 ? (
+                            <span className={cx(styles.more)}>
+                              {t('moreRoles', { count: more.length })}
+                            </span>
+                          ) : null}
+                        </Text>
+                      </span>
+                      <span className={cx(styles.go)} aria-hidden="true">
+                        {pending === user.id ? (
+                          <span className={cx(styles.spinner)} />
+                        ) : (
+                          <Icon icon={ArrowRight} size={16} />
+                        )}
+                      </span>
+                    </ListBoxItem>
+                  );
+                }}
+              </ListBox>
+            </div>
+          </Autocomplete>
+        </div>
+        {pending ? (
+          <p className={cx(styles.visuallyHidden)} role="status">
+            {t('signingIn')}
+          </p>
+        ) : null}
         {failed > 0 ? (
           <p key={failed} className={cx(styles.error)} role="alert">
             {t('signInError')}
           </p>
         ) : null}
-        <div className={cx(styles.ctaRow)} data-enter="" style={enter(6)}>
-          <AriaButton
-            className={cx(styles.cta)}
-            onPointerMove={cta.onPointerMove}
-            onPointerLeave={cta.onPointerLeave}
-            onPress={() => {
-              submit();
-            }}
-            isDisabled={!selected}
-            isPending={busy}
-            aria-label={busy ? t('signingIn') : ctaLabel}
-          >
-            <span className={cx(styles.ctaShine)} aria-hidden="true" />
-            {busy ? <span className={cx(styles.ctaSpinner)} aria-hidden="true" /> : null}
-            <span key={ctaLabel} className={cx(styles.ctaLabel)}>
-              {busy ? t('signingIn') : ctaLabel}
-            </span>
-            <Icon icon={ArrowRight} size={16} className={cx(styles.ctaArrow)} />
-          </AriaButton>
+        <div className={cx(styles.footerRow)} data-enter="" style={enter(6)}>
           <p className={cx(styles.hint)}>
             <Kbd shortcut="Enter" /> {t('enterHint')}
           </p>
+          {session ? (
+            <AriaButton
+              className={cx(styles.switch)}
+              onPress={() => {
+                clearSession();
+                setSession(null);
+              }}
+            >
+              {t('signOut')}
+            </AriaButton>
+          ) : null}
         </div>
       </>
     );
@@ -470,16 +518,14 @@ export function DevSignIn() {
           </div>
           <div className={cx(styles.heading)}>
             <p className={cx(styles.eyebrow)} data-enter="" style={enter(1)}>
-              {session ? t('eyebrowDone') : t('eyebrow')}
+              {t('eyebrow')}
             </p>
             <h1 className={cx(styles.title)} data-enter="" style={enter(2)}>
               {t('title')}
             </h1>
-            {session ? null : (
-              <p className={cx(styles.intro)} data-enter="" style={enter(3)}>
-                {t('intro')}
-              </p>
-            )}
+            <p className={cx(styles.intro)} data-enter="" style={enter(3)}>
+              {t('intro')}
+            </p>
           </div>
           {expired && !session ? (
             <Banner variant="warning" title={t('expiredTitle')}>

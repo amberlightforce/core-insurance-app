@@ -1,10 +1,8 @@
 {
-  "title": "Sign in to the staff portal",
-  "intro": "Development only: pick a synthetic persona. Production sign-in uses Entra ID.",
+  "title": "Sign in",
+  "intro": "Development only: choose a synthetic persona to sign in as. Production uses Entra ID.",
   "userLabel": "Personas",
-  "signIn": "Sign in",
-  "signOut": "Switch persona",
-  "signedInAs": "Signed in as {name} (roles: {roles}).",
+  "signOut": "Sign out",
   "signInError": "Sign-in failed. Try again.",
   "loadError": "The development users could not be loaded. Check that the API is running.",
   "unavailableTitle": "Local sign-in is not available",
@@ -12,19 +10,14 @@
   "expiredTitle": "Your session ended",
   "expiredBody": "The api was restarted or the token expired. Sign in again.",
   "product": "Core Insurance · Staff portal",
-  "continue": "Continue to home",
   "note": "Synthetic users and data. Do not enter real customer details.",
   "eyebrow": "Welcome back",
-  "eyebrowDone": "You're in",
   "search": "Search by name or role",
   "searchLabel": "Search personas",
   "noMatch": "No persona matches “{query}”.",
   "moreRoles": "+{count}",
-  "signInAs": "Continue as {name}",
   "signingIn": "Signing in…",
-  "enterHint": "to sign in as the highlighted persona",
-  "welcome": "Welcome, {name}",
-  "rolesLabel": "Roles",
+  "enterHint": "signs in as the highlighted persona",
   "env": "Development · synthetic data",
   "headline": "Every policy, premium and claim, in one",
   "headlineAccent": "calm workspace.",
@@ -39,5 +32,7 @@
     "recovery": "Recoveries",
     "reinsurance": "Reinsurance",
     "parties": "Parties"
-  }
+  },
+  "current": "Signed in",
+  "lastUsed": "Last used"
 }

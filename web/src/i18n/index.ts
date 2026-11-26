@@ -15,7 +15,7 @@ import { initReactI18next } from 'react-i18next';
  * Greek is the default language and the language of record; English falls back to Greek, never to the key
  * (Part 4 §8.6). Formats follow the region-format preference, never the language (see src/format).
  */
-export const defaultLanguage = 'el';
+export const defaultLanguage = 'en';
 export const supportedLanguages = ['el', 'en'] as const;
 export type Language = (typeof supportedLanguages)[number];
 
@@ -112,7 +112,8 @@ void i18n
   .use(initReactI18next)
   .init({
     lng: readStoredLanguage() ?? defaultLanguage,
-    fallbackLng: defaultLanguage,
+    // English first; Greek covers any key English has not caught up with yet.
+    fallbackLng: ['en', 'el'],
     supportedLngs: supportedLanguages,
     ns: namespaces,
     defaultNS: 'common',

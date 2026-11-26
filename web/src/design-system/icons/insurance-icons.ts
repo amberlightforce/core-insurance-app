@@ -1,5 +1,12 @@
 import {
+  Blocks,
   BookOpen,
+  BrainCircuit,
+  DatabaseZap,
+  DoorOpen,
+  FileSearch,
+  History,
+  ReceiptText,
   Boxes,
   Car,
   ChartColumn,
@@ -74,6 +81,14 @@ export const moduleIcons = {
   reports: ChartColumn,
   products: Boxes,
   admin: Settings,
+  // Sub-destinations that share a module id get their own glyph, so no two rail entries look alike.
+  packRollback: History,
+  withdrawals: DoorOpen,
+  fsStatements: ReceiptText,
+  dsar: FileSearch,
+  packs: Blocks,
+  migration: DatabaseZap,
+  aiControl: BrainCircuit,
 } as const satisfies Record<string, LucideIcon>;
 
 export type ModuleIconName = keyof typeof moduleIcons;
