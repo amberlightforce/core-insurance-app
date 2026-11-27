@@ -54,6 +54,10 @@ internal sealed class DocumentsDbContext(DbContextOptions<DocumentsDbContext> op
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.RenderedAt).HasColumnName("rendered_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Hidden).HasColumnName("hidden").HasDefaultValue(false);
+            entity.Property(e => e.HiddenReason).HasColumnName("hidden_reason");
+            entity.Property(e => e.SupersededBy).HasColumnName("superseded_by");
+            entity.Property(e => e.WithdrawnReason).HasColumnName("withdrawn_reason");
 
             // De-duplication of a request (REQ-DOC RT-11): one document per template and request number.
             entity.HasIndex(e => new { e.LegalEntityId, e.TemplateKey, e.RequestNo }).IsUnique().HasDatabaseName("ux_document_request");
@@ -120,6 +124,7 @@ internal sealed class DocumentsDbContext(DbContextOptions<DocumentsDbContext> op
             entity.Property(e => e.TitleEl).HasColumnName("title_el");
             entity.Property(e => e.TitleEn).HasColumnName("title_en");
             entity.Property(e => e.RequiredFields).HasColumnName("required_fields").HasColumnType("text[]");
+            entity.Property(e => e.CustomerVisible).HasColumnName("customer_visible").HasDefaultValue(false);
         });
 
         // Versioned letter templates (BO-DOC-05). A NULL scope column is a wildcard; only APPROVED versions are ever resolved.
@@ -221,6 +226,17 @@ internal sealed class DocumentRow
     public string CreatedBy { get; set; } = string.Empty;
 
     public Instant? RenderedAt { get; set; }
+
+    /// <summary>Hidden from the default library lists (BO-DOC-02); the document, its archive and deliveries are untouched.</summary>
+    public bool Hidden { get; set; }
+
+    public string? HiddenReason { get; set; }
+
+    /// <summary>The document that replaced this one (set with status Superseded); null when withdrawn or not superseded.</summary>
+    public DocumentId? SupersededBy { get; set; }
+
+    /// <summary>Why the document was withdrawn or replaced; set together with status Superseded.</summary>
+    public string? WithdrawnReason { get; set; }
 }
 
 internal sealed class DeliveryRow
@@ -313,6 +329,9 @@ internal sealed class DocumentTypeRow
     public string TitleEn { get; set; } = string.Empty;
 
     public string[] RequiredFields { get; set; } = [];
+
+    /// <summary>Letters of this type may be shown to the customer (portal). False for internal types; a new type is internal until set.</summary>
+    public bool CustomerVisible { get; set; }
 }
 
 internal sealed class TemplateRow

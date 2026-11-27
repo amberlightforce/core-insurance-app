@@ -4,15 +4,26 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Review.release request. PRD inputs: "job ref"</summary>
+/// <summary>uw.Review.release request: give the lock back, or break it (manager, with a reason).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReviewReleaseRequest
 {
-    /// <summary>PRD: "job ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>POL job id of the referred job</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("jobRef")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobRef { get; init; }
+
+    /// <summary>A manager breaks another underwriter's lock; reason is then mandatory and the break is audited</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("breakLock")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? JobRef { get; init; }
+    public bool? BreakLock { get; init; }
+
+    /// <summary>Mandatory with breakLock</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Reason { get; init; }
+
+    /// <summary>Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? ExpectedRecordVersion { get; init; }
 }

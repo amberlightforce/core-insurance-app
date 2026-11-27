@@ -4,23 +4,49 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Issue.listForChannel result. PRD outputs: "issues, explanation"</summary>
+/// <summary>uw.Issue.listForChannel result (BO-UW-03): what a customer or agent may see of an issue. No rule id, severity, lane, issue key, decider or decision reason, and the message is in the request language.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record IssueListForChannelItem
 {
-    /// <summary>PRD: "issues"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("issues")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Issues { get; init; }
+    /// <summary>Contract member 'issueId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issueId")]
+    public required global::CoreIns.SharedKernel.Identifiers.UwIssueId IssueId { get; init; }
 
-    /// <summary>PRD: "explanation"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("explanation")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Explanation { get; init; }
+    /// <summary>Contract member 'issueType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issueType")]
+    public required string IssueType { get; init; }
+
+    /// <summary>Contract member 'blockingPoint'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("blockingPoint")]
+    public required global::CoreIns.Platform.Contracts.Common.BlockingPoint BlockingPoint { get; init; }
+
+    /// <summary>Open is UNDER_REVIEW, Approved(WithConditions) is CLEARED, Rejected is NOT_ACCEPTED. Closed and Invalidated issues are not listed.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("channelStatus")]
+    public required ChannelStatusValue ChannelStatus { get; init; }
+
+    /// <summary>Customer-safe wording in the Accept-Language language</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("message")]
+    public required string Message { get; init; }
+
+    /// <summary>Contract member 'raisedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("raisedAt")]
+    public required global::CoreIns.SharedKernel.Instant RaisedAt { get; init; }
+
+    /// <summary>Open is UNDER_REVIEW, Approved(WithConditions) is CLEARED, Rejected is NOT_ACCEPTED. Closed and Invalidated issues are not listed.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ChannelStatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ChannelStatusValue
+    {
+        /// <summary><c>UNDER_REVIEW</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("UNDER_REVIEW")]
+        UnderReview,
+
+        /// <summary><c>CLEARED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CLEARED")]
+        Cleared,
+
+        /// <summary><c>NOT_ACCEPTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NOT_ACCEPTED")]
+        NotAccepted,
+    }
 }

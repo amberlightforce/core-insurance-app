@@ -27,4 +27,12 @@ public sealed record PortalRenewalDue
     /// <summary>Contract member 'daysLeft'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("daysLeft")]
     public required int DaysLeft { get; init; }
+
+    /// <summary>Contract member 'renewalJobId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'renewalJobId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("renewalJobId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? RenewalJobId { get; init; }
 }

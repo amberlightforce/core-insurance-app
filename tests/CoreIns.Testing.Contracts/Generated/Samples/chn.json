@@ -94,52 +94,91 @@
       "product": "unspecified"
     },
     "ChangeConfirmRequest": {
-      "policy": "unspecified",
-      "intent": "unspecified",
-      "values": "unspecified",
-      "effectiveDate": "2026-10-07"
+      "changeId": "019244f4-6ca2-73a3-8822-efd2b8699a09",
+      "acknowledged": true
     },
     "ChangeConfirmResponse": {
-      "diff": "unspecified",
-      "premium": {
+      "changeId": "019213f7-d080-755d-873b-49315fd76b12",
+      "policyId": "01927d66-bd9d-701b-81b8-d579fb092762",
+      "outcome": "CONFIRMED",
+      "ticketId": "0192e8b7-e3ac-7b1e-8847-3342e571a8bf",
+      "transactionId": "0192d92c-05cc-7495-8bc5-418bebbdc407",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "totalChange": {
         "amount": "120.50",
         "currency": "EUR"
-      },
-      "billingPreview": "unspecified",
-      "outcome": "unspecified",
-      "requestNumberWhenReferred": "unspecified"
+      }
+    },
+    "ChangeInstruction": {
+      "op": "SET_VEHICLE",
+      "locator": "sample",
+      "vehicle": "unspecified",
+      "driver": "unspecified",
+      "coverages": "unspecified",
+      "questionSet": "unspecified"
     },
     "ChangePreviewRequest": {
-      "policy": "unspecified",
-      "intent": "unspecified",
-      "values": "unspecified",
-      "effectiveDate": "2026-10-07"
+      "policyId": "019290c1-c94c-7f76-8eb4-b2de8f7f978e",
+      "effectiveDate": "2026-10-07",
+      "instructions": [
+        {
+          "op": "SET_VEHICLE",
+          "locator": "sample",
+          "vehicle": "unspecified",
+          "driver": "unspecified",
+          "coverages": "unspecified",
+          "questionSet": "unspecified"
+        }
+      ]
     },
     "ChangePreviewResponse": {
-      "diff": "unspecified",
-      "premium": {
+      "changeId": "0192d9a0-654b-789a-8997-7257bb12d419",
+      "policyId": "0192f36d-ec99-7724-8b09-9b9815cbe361",
+      "jobId": "0192abde-bcc5-723e-87f1-0afe74085644",
+      "versionNo": 1,
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "outcome": "ALLOW",
+      "reasons": [
+        "sample"
+      ],
+      "annualBefore": {
         "amount": "120.50",
         "currency": "EUR"
       },
-      "billingPreview": "unspecified",
-      "outcome": "unspecified",
-      "requestNumberWhenReferred": "unspecified"
+      "annualAfter": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "premiumChange": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "taxChange": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "totalChange": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "additionalDue": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "refundDue": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "validUntil": "2026-10-07T09:00:00Z"
     },
     "ChangeReferRequest": {
-      "policy": "unspecified",
-      "intent": "unspecified",
-      "values": "unspecified",
-      "effectiveDate": "2026-10-07"
+      "changeId": "0192f58c-ef54-776b-8983-6d717c00678b"
     },
     "ChangeReferResponse": {
-      "diff": "unspecified",
-      "premium": {
-        "amount": "120.50",
-        "currency": "EUR"
-      },
-      "billingPreview": "unspecified",
-      "outcome": "unspecified",
-      "requestNumberWhenReferred": "unspecified"
+      "changeId": "01923239-cfa9-7205-8946-a77c3a9d33ec",
+      "policyId": "01921426-3245-732f-8fba-8ed042199d07",
+      "outcome": "REFERRED",
+      "ticketId": "0192b58c-bccc-7599-8807-b00225a9fca1"
     },
     "ClientApproveRequest": {
       "organisation": "unspecified",
@@ -623,6 +662,141 @@
       "openInvoiceCount": 1,
       "overdueInvoiceCount": 1
     },
+    "PortalCancellationSubmitRequest": {
+      "policyId": "0192284b-b14d-7d4d-85e8-e89178656419",
+      "effectiveDate": "2026-10-07",
+      "reasonCode": "NO_LONGER_NEEDED"
+    },
+    "PortalCancellationSubmitResponse": {
+      "policyId": "01923ac5-6262-7508-8ff8-c6ae10a0afd2",
+      "outcome": "REQUESTED",
+      "ticketId": "019227e2-3c54-75d1-8828-738d4fb0d89b"
+    },
+    "PortalContactAddress": {
+      "addressId": "0192361f-d1b2-7ec8-898c-8179e920f4fe",
+      "types": [
+        "sample"
+      ],
+      "primary": true,
+      "country": "sample",
+      "street": "sample",
+      "number": "sample",
+      "building": "sample",
+      "floor": "sample",
+      "unit": "sample",
+      "postcode": "sample",
+      "locality": "sample",
+      "municipality": "sample",
+      "regionalUnit": "sample",
+      "region": "sample",
+      "formattedLines": [
+        "sample"
+      ]
+    },
+    "PortalContactAddressInput": {
+      "types": [
+        "LEGAL"
+      ],
+      "primary": true,
+      "country": "sa",
+      "street": "sample",
+      "number": "sample",
+      "building": "sample",
+      "floor": "sample",
+      "unit": "sample",
+      "postcode": "sample",
+      "locality": "sample",
+      "municipality": "sample",
+      "regionalUnit": "sample",
+      "region": "sample"
+    },
+    "PortalContactPoint": {
+      "contactPointId": "0192022c-8010-7395-8b7f-7bbe4333d893",
+      "type": "MOBILE",
+      "value": "sample",
+      "purpose": "sample",
+      "primary": true,
+      "verified": true
+    },
+    "PortalContactPointInput": {
+      "type": "MOBILE",
+      "value": "sample",
+      "purpose": "PERSONAL",
+      "primary": true
+    },
+    "PortalContactUpdateRequest": {
+      "action": "ADD",
+      "kind": "ADDRESS",
+      "locationId": "0192f852-710c-78a1-8305-329dd404f097",
+      "address": {
+        "types": [
+          "LEGAL"
+        ],
+        "primary": true,
+        "country": "sa",
+        "street": "sample",
+        "number": "sample",
+        "building": "sample",
+        "floor": "sample",
+        "unit": "sample",
+        "postcode": "sample",
+        "locality": "sample",
+        "municipality": "sample",
+        "regionalUnit": "sample",
+        "region": "sample"
+      },
+      "contactPoint": {
+        "type": "MOBILE",
+        "value": "sample",
+        "purpose": "PERSONAL",
+        "primary": true
+      },
+      "expectedRecordVersion": 1
+    },
+    "PortalContactUpdateResponse": {
+      "outcome": "APPLIED",
+      "action": "ADD",
+      "kind": "ADDRESS",
+      "locationId": "0192bf5f-63da-7f21-86e3-93e8bc6407f8",
+      "recordVersion": 1,
+      "ticketId": "01924da8-6121-7f0f-8dce-f0bb0c87588d"
+    },
+    "PortalContactView": {
+      "recordVersion": 1,
+      "addresses": [
+        {
+          "addressId": "0192b8ce-3948-778b-8aba-211a397e2e60",
+          "types": [
+            "sample"
+          ],
+          "primary": true,
+          "country": "sample",
+          "street": "sample",
+          "number": "sample",
+          "building": "sample",
+          "floor": "sample",
+          "unit": "sample",
+          "postcode": "sample",
+          "locality": "sample",
+          "municipality": "sample",
+          "regionalUnit": "sample",
+          "region": "sample",
+          "formattedLines": [
+            "sample"
+          ]
+        }
+      ],
+      "contactPoints": [
+        {
+          "contactPointId": "0192b68d-876f-785f-8a3e-1c6e18725ea8",
+          "type": "MOBILE",
+          "value": "sample",
+          "purpose": "sample",
+          "primary": true,
+          "verified": true
+        }
+      ]
+    },
     "PortalCoverage": {
       "coverageCode": "sample",
       "selected": true
@@ -636,7 +810,8 @@
           "policyNumber": "SAMPLE-000001",
           "productCode": "SAMPLE_CODE",
           "expiresAt": "2026-10-07T09:00:00Z",
-          "daysLeft": 1
+          "daysLeft": 1,
+          "renewalJobId": "0192ab69-bd1a-7097-8625-0f15c3eb6f41"
         }
       ],
       "unpaidInvoices": [
@@ -792,6 +967,7 @@
     },
     "PortalPolicyDetailResponse": {
       "policyId": "0192776f-7489-79d7-8ac5-3772711ec29b",
+      "renewalJobId": "0192d569-0f32-790c-89b0-7bd3bbdd3010",
       "policyNumber": "SAMPLE-000001",
       "productCode": "SAMPLE_CODE",
       "status": "sample",
@@ -880,12 +1056,37 @@
         }
       ]
     },
+    "PortalRenewalAcceptRequest": {
+      "policyId": "01926f60-0c55-7814-85ef-3468d700cdd1",
+      "jobId": "01924722-c676-7587-8604-54c23a1a8b95",
+      "acknowledged": true
+    },
+    "PortalRenewalAcceptResponse": {
+      "policyId": "0192a0ac-47b9-7f70-843c-51cd4ca6b9ea",
+      "jobId": "0192ed66-b59e-77b0-81e4-b7c5234493c3",
+      "outcome": "ACCEPTED",
+      "ticketId": "019208ca-a3ec-7737-89d0-ca47285cc841",
+      "newTermId": "0192f5ff-5faa-7073-839d-61ba701ac9ce",
+      "newTermNumber": 1
+    },
+    "PortalRenewalDeclineRequest": {
+      "policyId": "0192a118-df7f-75fe-8500-8ae713e52617",
+      "jobId": "01921cfe-bbff-732a-8987-630d0832d8a3",
+      "reasonCode": "PRICE"
+    },
+    "PortalRenewalDeclineResponse": {
+      "policyId": "0192ef87-40c6-77cc-862f-7c63a1bf2cb4",
+      "jobId": "0192f9f7-fd18-705c-8493-dfa3230daf93",
+      "outcome": "DECLINED",
+      "ticketId": "0192f652-88b4-7c81-84a7-8b87d548db87"
+    },
     "PortalRenewalDue": {
       "policyId": "019239e6-e961-7bd3-891a-b1e533778eee",
       "policyNumber": "SAMPLE-000001",
       "productCode": "SAMPLE_CODE",
       "expiresAt": "2026-10-07T09:00:00Z",
-      "daysLeft": 1
+      "daysLeft": 1,
+      "renewalJobId": "0192d59d-0203-70fe-8a1f-106dcca4d411"
     },
     "PortalUnpaidInvoice": {
       "invoiceId": "01922784-59d6-7e61-87cd-6d6c58a49026",

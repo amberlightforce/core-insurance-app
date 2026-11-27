@@ -112,8 +112,34 @@ internal sealed class DecisionEligibility(RequestContext context, IAuthorityServ
                 subject, clock.Now),
             cancellationToken);
 
+    /// <summary>
+    /// Why the referral's handling state bars the caller (BO-UW-05): another underwriter holds the live review lock, or the referral was
+    /// referred up to a role the caller does not hold. Empty without a state. Lock and refer-up are checked here and nowhere else.
+    /// </summary>
+    public IReadOnlyList<DecidabilityReason> HandlingReasons(ReferralStateRecord? state)
+    {
+        var reasons = new List<DecidabilityReason>();
+        if (state is null)
+        {
+            return reasons;
+        }
+
+        var holder = state.LiveLockOwner(clock.Now.ToUtcDateTime());
+        if (holder is not null && !string.Equals(holder, context.Actor.ToString(), StringComparison.Ordinal))
+        {
+            reasons.Add(DecidabilityReason.LockedByOther);
+        }
+
+        if (state.IsActive && state.RequiredRole is { } role && !context.Roles.Contains(role))
+        {
+            reasons.Add(DecidabilityReason.ReferredUp);
+        }
+
+        return reasons;
+    }
+
     /// <summary>Whether the caller can decide <paramref name="issue"/> now, with every reason that says no. Dry: records nothing.</summary>
-    public IssueEligibility Evaluate(IssueRecord issue, JobParticipation job, AuthorityCheckResult check, bool jobChanged)
+    public IssueEligibility Evaluate(IssueRecord issue, JobParticipation job, AuthorityCheckResult check, bool jobChanged, ReferralStateRecord? handling = null)
     {
         var reasons = new List<DecidabilityReason>();
         if (issue.Status != IssueStatus.Open)
@@ -135,6 +161,11 @@ internal sealed class DecisionEligibility(RequestContext context, IAuthorityServ
         if (issue.Status == IssueStatus.Open && (issue.Fingerprint is null || jobChanged))
         {
             reasons.Add(DecidabilityReason.NeedsReevaluation);
+        }
+
+        if (issue.Status == IssueStatus.Open)
+        {
+            reasons.AddRange(HandlingReasons(handling));
         }
 
         return new IssueEligibility(reasons, check);

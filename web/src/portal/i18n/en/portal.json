@@ -33,8 +33,6 @@
     "overline": "Customer portal",
     "lead": "See your policies, payments and documents, and ask for changes without a phone call.",
     "shortcuts": "Where to next",
-    "pendingTitle": "Your overview is on its way",
-    "pendingBody": "Your policies, balances and open requests will appear here as soon as they are connected. Until then you can use the areas below.",
     "shortcut": {
       "policies": "See your cover, term and documents.",
       "billing": "Check what is due and pay online.",
@@ -44,11 +42,6 @@
     "withdrawalTitle": "Changed your mind?",
     "withdrawalBody": "If you bought a policy at a distance you can withdraw within the legal period.",
     "withdrawalAction": "Withdraw from a policy"
-  },
-  "soon": {
-    "title": "{area} is coming soon",
-    "body": "This area of the portal is being built. Nothing is lost: your policies and payments stay as they are.",
-    "back": "Back to the overview"
   },
   "notFound": {
     "title": "This page does not exist",

@@ -1,5 +1,6 @@
 using CoreIns.Modules.Policy.Commands;
 using CoreIns.Modules.Policy.Commands.Change;
+using CoreIns.Modules.Policy.Commands.Renewal;
 using CoreIns.Modules.Policy.Commands.Withdrawal;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
@@ -85,9 +86,27 @@ internal sealed class PolicyJobService(
     public Task<JobBindResponse> BindAsync(JobBindRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         InProcess.RunAsync(context, bind, new BindJob(request), options, cancellationToken);
 
-    public Task<JobListPage> ListAsync(
+    /// <summary>
+    /// pol.Job.list for ONE policy (the <c>policy</c> filter, required) and optionally one state: each item's <c>jobs</c> is a slim
+    /// <c>{jobId, jobType, state, createdAt}</c> object, newest first. Other filters and paging are not built.
+    /// TODO(hardening): account / participant filters, cursor paging, typed items.
+    /// </summary>
+    public async Task<JobListPage> ListAsync(
         string? cursor = null, int? limit = null, string? account = null, string? policy = null, string? participant = null, string? state = null,
-        CancellationToken cancellationToken = default) => throw InProcess.NotAvailable("pol.Job.list");
+        CancellationToken cancellationToken = default)
+    {
+        if (cursor is not null || account is not null || participant is not null || !Guid.TryParse(policy, out var policyId))
+        {
+            throw InProcess.NotAvailable("pol.Job.list without the policy filter (or with cursor, account or participant)");
+        }
+
+        var rows = await reader.ListForPolicyAsync(JobSupport.LegalEntity(context, legalEntities), policyId, state, cancellationToken).ConfigureAwait(false);
+        var items = rows.Take(Math.Clamp(limit ?? 50, 1, 50)).Select(r => new JobListItem
+        {
+            Jobs = System.Text.Json.JsonSerializer.SerializeToElement(new { jobId = r.JobId, jobType = r.JobType, state = r.State, createdAt = r.CreatedAt }),
+        }).ToList();
+        return new JobListPage { Items = items, NextCursor = null, Limit = items.Count };
+    }
 
     public Task<JobNewVersionResponse> NewVersionAsync(JobNewVersionRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         throw InProcess.NotAvailable("pol.Job.newVersion");
@@ -166,4 +185,37 @@ internal sealed class PolicyWithdrawalService(RequestContext context, ICommandHa
 {
     public Task<WithdrawalSubmitResponse> SubmitAsync(WithdrawalSubmitRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         InProcess.RunAsync(context, submit, new SubmitWithdrawal(request), options, cancellationToken);
+}
+
+/// <summary>
+/// The in-process contract <see cref="IPolicyPolicyChangeService"/> (BO-CHN-03): CHN starts a change job for a portal customer. The caller checks
+/// the transaction-permission matrix and ownership; the command runs through the same pipeline as HTTP.
+/// </summary>
+internal sealed class PolicyPolicyChangeService(RequestContext context, ICommandHandler<CreatePolicyChange, PolicyChangeCreateResponse> create) : IPolicyPolicyChangeService
+{
+    public Task<PolicyChangeCreateResponse> CreateAsync(PolicyChangeCreateRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        InProcess.RunAsync(context, create, new CreatePolicyChange(request), options, cancellationToken);
+}
+
+/// <summary>
+/// The in-process contract <see cref="IPolicyRenewalService"/> (BO-CHN-03): CHN accepts or declines an offered renewal for a portal customer.
+/// Create, offer and non-renew stay with the batch and staff paths.
+/// </summary>
+internal sealed class PolicyRenewalService(
+    RequestContext context, ICommandHandler<AcceptRenewal, RenewalAcceptResponse> accept, ICommandHandler<DeclineRenewal, RenewalDeclineResponse> decline) : IPolicyRenewalService
+{
+    public Task<RenewalAcceptResponse> AcceptAsync(RenewalAcceptRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        InProcess.RunAsync(context, accept, new AcceptRenewal(request), options, cancellationToken);
+
+    public Task<RenewalDeclineResponse> DeclineAsync(RenewalDeclineRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        InProcess.RunAsync(context, decline, new DeclineRenewal(request), options, cancellationToken);
+
+    public Task<RenewalCreateResponse> CreateAsync(RenewalCreateRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        throw InProcess.NotAvailable("pol.Renewal.create");
+
+    public Task<RenewalNonRenewResponse> NonRenewAsync(RenewalNonRenewRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        throw InProcess.NotAvailable("pol.Renewal.nonRenew");
+
+    public Task<RenewalOfferResponse> OfferAsync(RenewalOfferRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        throw InProcess.NotAvailable("pol.Renewal.offer");
 }

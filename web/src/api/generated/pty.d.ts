@@ -2481,52 +2481,110 @@ export interface components {
             /** @description Row number and reason of each invalid row */
             rejectedRows: string[];
         };
-        /** @description pty.ProducerOfRecord.get result. PRD outputs: "PoR" */
+        /** @description One producer-of-record segment of a policy (BO-PTY-09, REQ-PTY-218): the producer code responsible from validFrom until validTo (open end = still responsible). Append-only: a change supersedes rows (status SUPERSEDED) and never rewrites them. */
+        ProducerOfRecordEntry: {
+            porId: components["schemas"]["Uuid"];
+            policyId: components["schemas"]["Uuid"];
+            /** @description The term in whose context the change was made */
+            policyTermId: components["schemas"]["Uuid"];
+            intermediaryId: components["schemas"]["Uuid"];
+            producerCode: components["schemas"]["Code"];
+            validFrom: components["schemas"]["LocalDate"];
+            /** @description First day the code is no longer responsible; null = open ended */
+            validTo?: components["schemas"]["LocalDate"] | null;
+            /** @enum {string} */
+            reason: "BROKER_OF_RECORD_LETTER" | "INTERMEDIARY_LEFT" | "CUSTOMER_REQUEST" | "PORTFOLIO_TRANSFER" | "CORRECTION" | "OTHER";
+            note?: string | null;
+            /**
+             * @description Which producer earns the commission on the term from the effective date
+             * @enum {string}
+             */
+            commissionConsequence: "NEW_PRODUCER_FROM_DATE" | "OLD_PRODUCER_KEEPS_EARNED" | "OLD_PRODUCER_KEEPS_ALL";
+            /** @description Percent (above 0, at most 100) of the commission the new producer earns when it is shared with the previous one */
+            splitShare?: components["schemas"]["Decimal"] | null;
+            /** @description Broker-of-record letter reference; required when the responsible intermediary changes */
+            letterReference?: string | null;
+            /** @description Set when the row came from a bulk transfer */
+            transferId?: components["schemas"]["Uuid"] | null;
+            /**
+             * @description SUPERSEDED rows are history (a later change or a cancellation replaced them)
+             * @enum {string}
+             */
+            status: "CURRENT" | "SUPERSEDED";
+            recordedAt: components["schemas"]["Instant"];
+            recordedBy: string;
+        };
+        /** @description pty.ProducerOfRecord.get result (BO-PTY-09): the producer of record of a policy on a date and the whole history, oldest first */
         ProducerOfRecordGetResponse: {
-            /** @description PRD: "PoR" */
-            poR?: components["schemas"]["Unspecified"];
+            policyId: components["schemas"]["Uuid"];
+            date: components["schemas"]["LocalDate"];
+            /** @description The segment responsible on the date; null when no change was ever recorded (the term's own producer code applies) */
+            current?: components["schemas"]["ProducerOfRecordEntry"] | null;
+            history: components["schemas"]["ProducerOfRecordEntry"][];
         };
-        /** @description pty.ProducerOfRecord.change request. PRD inputs: "term, date / change" */
+        /** @description pty.ProducerOfRecord.change request (BO-PTY-09, REQ-PTY-218): change the producer of record of a policy term mid-term without a policy transaction. The new code must be active, its intermediary not suspended or terminated, and the product appointed. A change of intermediary needs the broker-of-record letter reference. The effective date must be inside the term and after the commission settled date. Supports dry-run. */
         ProducerOfRecordChangeRequest: {
-            /** @description PRD: "term" */
-            term?: components["schemas"]["Unspecified"];
-            /** @description PRD: "date" */
-            date?: components["schemas"]["LocalDate"];
-            /** @description PRD: "change" */
-            change?: components["schemas"]["Unspecified"];
+            termId: components["schemas"]["Uuid"];
+            producerCode: components["schemas"]["Code"];
+            /** @description Required unless atRenewal is true */
+            effectiveDate?: components["schemas"]["LocalDate"] | null;
+            /** @description true = the change starts on the first day after the term (the renewal); the effective date is then ignored */
+            atRenewal?: boolean;
+            /** @enum {string} */
+            reason: "BROKER_OF_RECORD_LETTER" | "INTERMEDIARY_LEFT" | "CUSTOMER_REQUEST" | "PORTFOLIO_TRANSFER" | "CORRECTION" | "OTHER";
+            note?: string | null;
+            /** @enum {string} */
+            commissionConsequence: "NEW_PRODUCER_FROM_DATE" | "OLD_PRODUCER_KEEPS_EARNED" | "OLD_PRODUCER_KEEPS_ALL";
+            splitShare?: components["schemas"]["Decimal"] | null;
+            letterReference?: string | null;
         };
-        /** @description pty.ProducerOfRecord.change result. PRD outputs: "PoR" */
+        /** @description pty.ProducerOfRecord.change result */
         ProducerOfRecordChangeResponse: {
-            /** @description PRD: "PoR" */
-            poR?: components["schemas"]["Unspecified"];
+            entry: components["schemas"]["ProducerOfRecordEntry"];
+            previousProducerCode?: components["schemas"]["Code"] | null;
         };
-        /** @description pty.ProducerOfRecord.bulkTransfer request. PRD inputs: "term, date / change" */
+        /** @description One policy term of a bulk transfer */
+        ProducerOfRecordBulkTransferItem: {
+            termId: components["schemas"]["Uuid"];
+        };
+        /** @description pty.ProducerOfRecord.bulkTransfer request (BO-PTY-09): move the given policy terms to one producer code with the same rules as change, one result per term (a refused term does not stop the others). At most 500 terms. Supports dry-run. */
         ProducerOfRecordBulkTransferRequest: {
-            /** @description PRD: "term" */
-            term?: components["schemas"]["Unspecified"];
-            /** @description PRD: "date" */
-            date?: components["schemas"]["LocalDate"];
-            /** @description PRD: "change" */
-            change?: components["schemas"]["Unspecified"];
+            terms: components["schemas"]["ProducerOfRecordBulkTransferItem"][];
+            producerCode: components["schemas"]["Code"];
+            effectiveDate?: components["schemas"]["LocalDate"] | null;
+            atRenewal?: boolean;
+            /** @enum {string} */
+            reason: "BROKER_OF_RECORD_LETTER" | "INTERMEDIARY_LEFT" | "CUSTOMER_REQUEST" | "PORTFOLIO_TRANSFER" | "CORRECTION" | "OTHER";
+            note?: string | null;
+            /** @enum {string} */
+            commissionConsequence: "NEW_PRODUCER_FROM_DATE" | "OLD_PRODUCER_KEEPS_EARNED" | "OLD_PRODUCER_KEEPS_ALL";
+            letterReference?: string | null;
         };
-        /** @description pty.ProducerOfRecord.bulkTransfer result. PRD outputs: "PoR" */
+        /** @description Outcome of one term in a bulk transfer */
+        ProducerOfRecordBulkTransferResult: {
+            termId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "TRANSFERRED" | "REFUSED";
+            errorCode?: string | null;
+            message?: string | null;
+            entry?: components["schemas"]["ProducerOfRecordEntry"] | null;
+        };
+        /** @description pty.ProducerOfRecord.bulkTransfer result: per-term outcome */
         ProducerOfRecordBulkTransferResponse: {
-            /** @description PRD: "PoR" */
-            poR?: components["schemas"]["Unspecified"];
+            transferId: components["schemas"]["Uuid"];
+            transferred: number;
+            refused: number;
+            results: components["schemas"]["ProducerOfRecordBulkTransferResult"][];
         };
-        /** @description pty.ProducerOfRecord.cancel request. PRD inputs: "term, date / change" */
+        /** @description pty.ProducerOfRecord.cancel request (BO-PTY-09): withdraw a change that has not taken effect yet (validFrom after today); the previous producer carries on. A change already in force cannot be cancelled: change it again. */
         ProducerOfRecordCancelRequest: {
-            /** @description PRD: "term" */
-            term?: components["schemas"]["Unspecified"];
-            /** @description PRD: "date" */
-            date?: components["schemas"]["LocalDate"];
-            /** @description PRD: "change" */
-            change?: components["schemas"]["Unspecified"];
+            porId: components["schemas"]["Uuid"];
+            reason: string;
         };
-        /** @description pty.ProducerOfRecord.cancel result. PRD outputs: "PoR" */
+        /** @description pty.ProducerOfRecord.cancel result: the policy history after the cancellation */
         ProducerOfRecordCancelResponse: {
-            /** @description PRD: "PoR" */
-            poR?: components["schemas"]["Unspecified"];
+            policyId: components["schemas"]["Uuid"];
+            history: components["schemas"]["ProducerOfRecordEntry"][];
         };
         /** @description pty.CommissionAgreement.resolve request. PRD inputs: "as named" */
         CommissionAgreementResolveRequest: Record<string, never>;
@@ -5274,7 +5332,10 @@ export interface operations {
     };
     "pty.ProducerOfRecord.get": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Business date to resolve the current producer for; today when omitted */
+                date?: components["schemas"]["LocalDate"];
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
@@ -5285,7 +5346,7 @@ export interface operations {
                 "Accept-Language"?: components["parameters"]["AcceptLanguage"];
             };
             path: {
-                /** @description Identifier of the ProducerOfRecord */
+                /** @description The policy id */
                 id: string;
             };
             cookie?: never;

@@ -4,15 +4,15 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.ProducerOfRecord.change result. PRD outputs: "PoR"</summary>
+/// <summary>pty.ProducerOfRecord.change result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProducerOfRecordChangeResponse
 {
-    /// <summary>PRD: "PoR"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("poR")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PoR { get; init; }
+    /// <summary>Contract member 'entry'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("entry")]
+    public required global::CoreIns.Modules.Party.Contracts.Api.ProducerOfRecordEntry Entry { get; init; }
+
+    /// <summary>Contract member 'previousProducerCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("previousProducerCode")]
+    public string? PreviousProducerCode { get; init; }
 }

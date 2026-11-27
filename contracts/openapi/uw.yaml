@@ -167,8 +167,8 @@ paths:
             schema:
               $ref: '#/components/schemas/RulesEvaluateBatchRequest'
       responses:
-        '202':
-          description: Accepted; result or job reference
+        '200':
+          description: One result per item, against one rule-set version
           content:
             application/json:
               schema:
@@ -300,6 +300,18 @@ paths:
         description: Issue status to list; without a job the default is Open (the referral queue)
         schema:
           $ref: '#/components/schemas/IssueStatusCode'
+      - name: issueType
+        in: query
+        required: false
+        description: Only issues of this issue type
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: blockingPoint
+        in: query
+        required: false
+        description: Only issues at this blocking point
+        schema:
+          $ref: ../events/common.schema.json#/$defs/BlockingPoint
       responses:
         '200':
           description: Success
@@ -357,6 +369,12 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: jobRef
+        in: query
+        required: true
+        description: POL job id (the quote or policy job whose issues the channel shows)
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -467,6 +485,12 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: issueId
+        in: query
+        required: true
+        description: Issue to explain
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -535,6 +559,8 @@ paths:
       - code: UW-ERR-HUMAN-DECISION-REQUIRED
         status: 422
       - code: UW-ERR-STALE
+        status: 409
+      - code: UW-ERR-LOCKED-BY-OTHER
         status: 409
       - code: UW-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -853,6 +879,7 @@ paths:
       - W3-UW-03
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-UW-004, REQ-UW-082, REQ-UW-085, REQ-UW-086 (BO-UW-05 referral commands and review lock)
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -872,6 +899,16 @@ paths:
         status: 422
       - code: UW-ERR-LICENCE-INVALID
         status: 422
+      - code: UW-ERR-STALE
+        status: 409
+      - code: UW-ERR-LOCKED-BY-OTHER
+        status: 409
+      - code: UW-ERR-HUMAN-DECISION-REQUIRED
+        status: 422
+      - code: UW-ERR-REASON-REQUIRED
+        status: 422
+      - code: UW-ERR-AUTHORITY-DENIED
+        status: 403
       - code: UW-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -931,6 +968,7 @@ paths:
       - W3-UW-03
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-UW-004, REQ-UW-082, REQ-UW-085, REQ-UW-086 (BO-UW-05 referral commands and review lock)
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -944,6 +982,16 @@ paths:
         status: 422
       - code: UW-ERR-LICENCE-INVALID
         status: 422
+      - code: UW-ERR-STALE
+        status: 409
+      - code: UW-ERR-LOCKED-BY-OTHER
+        status: 409
+      - code: UW-ERR-HUMAN-DECISION-REQUIRED
+        status: 422
+      - code: UW-ERR-REASON-REQUIRED
+        status: 422
+      - code: UW-ERR-AUTHORITY-DENIED
+        status: 403
       - code: UW-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1156,6 +1204,7 @@ paths:
       - W3-UW-03
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-UW-004, REQ-UW-082, REQ-UW-085, REQ-UW-086 (BO-UW-05 referral commands and review lock)
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1169,6 +1218,16 @@ paths:
         status: 422
       - code: UW-ERR-LICENCE-INVALID
         status: 422
+      - code: UW-ERR-STALE
+        status: 409
+      - code: UW-ERR-LOCKED-BY-OTHER
+        status: 409
+      - code: UW-ERR-HUMAN-DECISION-REQUIRED
+        status: 422
+      - code: UW-ERR-REASON-REQUIRED
+        status: 422
+      - code: UW-ERR-AUTHORITY-DENIED
+        status: 403
       - code: UW-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1226,6 +1285,7 @@ paths:
       - W3-UW-03
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-UW-004, REQ-UW-082, REQ-UW-085, REQ-UW-086 (BO-UW-05 referral commands and review lock)
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
@@ -1239,6 +1299,16 @@ paths:
         status: 422
       - code: UW-ERR-LICENCE-INVALID
         status: 422
+      - code: UW-ERR-STALE
+        status: 409
+      - code: UW-ERR-LOCKED-BY-OTHER
+        status: 409
+      - code: UW-ERR-HUMAN-DECISION-REQUIRED
+        status: 422
+      - code: UW-ERR-REASON-REQUIRED
+        status: 422
+      - code: UW-ERR-AUTHORITY-DENIED
+        status: 403
       - code: UW-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1291,6 +1361,7 @@ paths:
       - W3-UW-02
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-UW-004, REQ-UW-082, REQ-UW-085, REQ-UW-086 (BO-UW-05 referral commands and review lock)
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1302,6 +1373,12 @@ paths:
       x-error-codes:
       - code: UW-ERR-LOCKED-BY-OTHER
         status: 409
+      - code: UW-ERR-NOT-REFERRABLE
+        status: 422
+      - code: UW-ERR-STALE
+        status: 409
+      - code: UW-ERR-HUMAN-DECISION-REQUIRED
+        status: 422
       - code: UW-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1354,6 +1431,7 @@ paths:
       - W3-UW-02
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-UW-004, REQ-UW-082, REQ-UW-085, REQ-UW-086 (BO-UW-05 referral commands and review lock)
       x-io-shared: 2
       x-operation-kind: command
       x-idempotency: required
@@ -1365,6 +1443,14 @@ paths:
       x-error-codes:
       - code: UW-ERR-LOCKED-BY-OTHER
         status: 409
+      - code: UW-ERR-NOT-REFERRABLE
+        status: 422
+      - code: UW-ERR-STALE
+        status: 409
+      - code: UW-ERR-REASON-REQUIRED
+        status: 422
+      - code: UW-ERR-AUTHORITY-DENIED
+        status: 403
       - code: UW-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -5734,27 +5820,130 @@ components:
       description: 'Typed from REQ-UW-001, REQ-UW-055..058. PRD outputs: "issues, lane, evaluation id"'
     RulesEvaluateBatchRequest:
       type: object
-      description: 'uw.Rules.evaluateBatch request. PRD inputs: "selection, checkpoint, rule set"'
+      description: 'uw.Rules.evaluateBatch request (BO-UW-03): many risk snapshots evaluated against one rule-set version, without
+        any effect on jobs or issues. Pin a version (ruleSetCode + ruleSetVersion) or leave both out to use the version in force on
+        effectiveDate. At most 200 items per request (UW-ERR-LIMIT-EXCEEDED above).'
       properties:
-        selection:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "selection"'
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
         checkpoint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checkpoint"'
-        ruleSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule set"'
+          type: string
+          enum:
+          - PRE_QUOTE
+          - PRE_BIND
+        ruleSetCode:
+          type: string
+          maxLength: 64
+          description: Pins the rule set; needs ruleSetVersion
+        ruleSetVersion:
+          type: string
+          maxLength: 16
+          description: Pins the version (Active or Approved)
+        effectiveDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Default date the version in force is resolved at and the risks are evaluated at (default today)
+        items:
+          type: array
+          minItems: 1
+          description: At most 200 items; more is UW-ERR-LIMIT-EXCEEDED (422)
+          items:
+            type: object
+            properties:
+              itemRef:
+                type: string
+                maxLength: 200
+                description: Caller's reference, echoed in the result
+              effectiveDate:
+                $ref: ../events/common.schema.json#/$defs/LocalDate
+                description: Overrides the request date for this item (the version stays the one resolved)
+              riskSnapshot:
+                $ref: ../events/common.schema.json#/$defs/OpenObject
+            required:
+            - itemRef
+            - riskSnapshot
+      required:
+      - productCode
+      - checkpoint
+      - items
     RulesEvaluateBatchResponse:
       type: object
-      description: 'uw.Rules.evaluateBatch result. PRD outputs: "job id, results"'
+      description: 'uw.Rules.evaluateBatch result: one result per item in request order, all against the same rule-set version
+        (code, version and content hash are echoed, so a result is reproducible). Nothing is recorded.'
       properties:
-        jobId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "job id"'
+        ruleSetCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        ruleSetVersion:
+          type: string
+        ruleSetHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        dataStatus:
+          type: string
+          description: ILLUSTRATIVE_TEST_DATA when the rule set is made-up test data (D-SLC-04)
+        pinned:
+          type: boolean
+          description: True when the caller pinned the version
         results:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "results"'
+          type: array
+          items:
+            type: object
+            properties:
+              itemRef:
+                type: string
+              outcome:
+                type: string
+                enum:
+                - ACCEPT
+                - REFER
+                - DECLINE
+                - ERROR
+                description: ERROR when the item's snapshot is not a valid risk (see error)
+              lane:
+                type:
+                - string
+                - 'null'
+              hits:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ruleId:
+                      type: string
+                    ruleType:
+                      type: string
+                    issueType:
+                      $ref: ../events/common.schema.json#/$defs/Code
+                    blockingPoint:
+                      $ref: ../events/common.schema.json#/$defs/BlockingPoint
+                    messageEn:
+                      type: string
+                    messageEl:
+                      type: string
+                  required:
+                  - ruleId
+                  - ruleType
+                  - issueType
+                  - blockingPoint
+                  - messageEn
+                  - messageEl
+              error:
+                type:
+                - string
+                - 'null'
+                description: Why the item could not be evaluated
+            required:
+            - itemRef
+            - outcome
+            - hits
+        warnings:
+          type: array
+          items:
+            type: string
+      required:
+      - ruleSetCode
+      - ruleSetVersion
+      - ruleSetHash
+      - pinned
+      - results
     IssueBlockingStatusResponse:
       type: object
       properties:
@@ -5917,16 +6106,34 @@ components:
       description: Page of uw.Issue.list results (cursor pagination, contract §3.5.5)
     IssueListForChannelItem:
       type: object
-      description: 'uw.Issue.listForChannel result. PRD outputs: "issues, explanation"'
+      description: 'uw.Issue.listForChannel result (BO-UW-03): what a customer or agent may see of an issue. No rule id, severity,
+        lane, issue key, decider or decision reason, and the message is in the request language.'
       properties:
-        issues:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issues"'
-        explanation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "explanation"'
+        issueId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        issueType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        blockingPoint:
+          $ref: ../events/common.schema.json#/$defs/BlockingPoint
+        channelStatus:
+          type: string
+          enum:
+          - UNDER_REVIEW
+          - CLEARED
+          - NOT_ACCEPTED
+          description: Open is UNDER_REVIEW, Approved(WithConditions) is CLEARED, Rejected is NOT_ACCEPTED. Closed and Invalidated issues are not listed.
+        message:
+          type: string
+          description: Customer-safe wording in the Accept-Language language
+        raisedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - issueId
+      - issueType
+      - blockingPoint
+      - channelStatus
+      - message
+      - raisedAt
     IssueListForChannelPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -5937,30 +6144,78 @@ components:
             items:
               $ref: '#/components/schemas/IssueListForChannelItem'
       description: Page of uw.Issue.listForChannel results (cursor pagination, contract §3.5.5)
+    IssueExplanation:
+      type: object
+      description: 'Why an issue was raised (BO-UW-03): the rule and rule-set version that raised it, the derived fact the rule reads,
+        its value on the evaluated facts and the rules declared threshold (RuleExplainDto). P2 safe: a drivers age is its band.'
+      properties:
+        issueId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        ruleId:
+          type: string
+        ruleSetCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        ruleSetVersion:
+          type: string
+        ruleSetHash:
+          type:
+          - string
+          - 'null'
+        fact:
+          type:
+          - string
+          - 'null'
+          description: The derived fact the rule reads (facts read), null when the rule declares none
+        observed:
+          type:
+          - string
+          - 'null'
+          description: The facts value on the job's latest recorded facts (a driver's age as its band)
+        limit:
+          type:
+          - string
+          - 'null'
+          description: The rules threshold
+        limitUnavailableReason:
+          type:
+          - string
+          - 'null'
+          description: RULE_DECLARES_NO_LIMIT when the rule declares no threshold
+        messageEn:
+          type: string
+        messageEl:
+          type: string
+        explanationKeys:
+          type: array
+          items:
+            type: string
+      required:
+      - issueId
+      - ruleId
+      - ruleSetCode
+      - ruleSetVersion
+      - messageEn
+      - messageEl
+      - explanationKeys
     IssueGetResponse:
       type: object
-      description: 'uw.Issue.get result. PRD outputs: "issues, explanation"'
+      description: 'uw.Issue.get result (BO-UW-03): the issue and why it was raised'
       properties:
-        issues:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issues"'
+        issue:
+          $ref: '#/components/schemas/IssueListItem'
         explanation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "explanation"'
+          $ref: '#/components/schemas/IssueExplanation'
+      required:
+      - issue
+      - explanation
     IssueExplainResponse:
       type: object
-      description: 'uw.Issue.explain result. PRD outputs: "issues, explanation"'
+      description: 'uw.Issue.explain result (BO-UW-03)'
       properties:
-        issues:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issues"'
         explanation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "explanation"'
+          $ref: '#/components/schemas/IssueExplanation'
+      required:
+      - explanation
     IssueDecideRequest:
       type: object
       description: 'uw.Issue.decide request. PRD inputs: "issue ids, decision, scope, validity, tolerance, conditions, reason,
@@ -6100,13 +6355,59 @@ components:
           description: 'PRD: "issue"'
     ApprovalHistoryItem:
       type: object
-      description: 'uw.Approval.history result. PRD outputs: "rows"'
+      description: 'One event of an issues approval history (BO-UW-03): a decision, or the invalidation of an approval when the facts changed.'
       properties:
-        rows:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rows"'
+        issueId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        jobRef:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        issueKey:
+          type: string
+        issueType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        event:
+          type: string
+          enum:
+          - DECIDED
+          - INVALIDATED
+        decision:
+          oneOf:
+          - $ref: '#/components/schemas/IssueDecisionCode'
+          - type: 'null'
+          description: For DECIDED, the decision
+        approver:
+          type:
+          - string
+          - 'null'
+          description: For DECIDED, the actor that decided
+        reason:
+          type:
+          - string
+          - 'null'
+          description: For DECIDED the deciders reason; for INVALIDATED the closing reason (VALUE_CHANGED)
+        fingerprint:
+          type:
+          - string
+          - 'null'
+          description: Hash of the facts the decision was taken on (REQ-UW-091)
+        authorityCheckId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        invalidatedByEvaluationId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: For INVALIDATED, the evaluation whose changed facts invalidated the approval
+        at:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - issueId
+      - jobRef
+      - issueKey
+      - issueType
+      - event
+      - at
     ApprovalHistoryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -6119,54 +6420,64 @@ components:
       description: Page of uw.Approval.history results (cursor pagination, contract §3.5.5)
     ReferralRequestRequest:
       type: object
-      description: 'uw.Referral.request request. PRD inputs: "job ref, issue ids, comment, attachments"'
+      description: 'uw.Referral.request request: put a job in front of the underwriters, or resume it after information was supplied (BO-UW-05).'
       properties:
         jobRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job ref"'
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: POL job id of the referred job
         issueIds:
           type: array
+          maxItems: 20
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "issue ids"'
+          description: The Open issues the request is about; omit for every Open issue of the job
         comment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "comment"'
-        attachments:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "attachments"'
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Why the job is referred
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check.
+      required:
+      - jobRef
+      - comment
     ReferralRequestResponse:
       type: object
-      description: 'uw.Referral.request result. PRD outputs: "referral"'
+      description: 'uw.Referral.request result.'
       properties:
         referral:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "referral"'
+          $ref: '#/components/schemas/ReferralState'
+      required:
+      - referral
     ReferralWithdrawRequest:
       type: object
-      description: 'uw.Referral.withdraw request. PRD inputs: "job ref, issue ids, comment, attachments"'
+      description: 'uw.Referral.withdraw request: take the referral back (the requester or a manager; refused while another underwriter holds the review lock).'
       properties:
         jobRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job ref"'
-        issueIds:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "issue ids"'
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: POL job id of the referred job
         comment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "comment"'
-        attachments:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "attachments"'
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Why the referral is withdrawn
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check.
+      required:
+      - jobRef
+      - comment
     ReferralWithdrawResponse:
       type: object
-      description: 'uw.Referral.withdraw result. PRD outputs: "referral"'
+      description: 'uw.Referral.withdraw result.'
       properties:
         referral:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "referral"'
+          $ref: '#/components/schemas/ReferralState'
+      required:
+      - referral
     ReferralGetResponse:
       type: object
       description: 'uw.Referral.get result. PRD outputs: "referral"'
@@ -6188,6 +6499,81 @@ components:
         decide check per Open issue; refused with UW-ERR-VALIDATION above 500 open referrals in the legal entity). OPEN - a job issue waits for a decision; APPROVED_TODAY - an issue of the job
         was approved on the legal entity's business day; REJECTED - a rejection still stands on the job; DECIDED_BY_ME_TODAY
         - the caller decided an issue of the job today.
+    ReviewLock:
+      type: object
+      description: The soft review lock of a referred job. It expires at expiresAt (a lease); an expired lock holds nobody.
+      properties:
+        owner:
+          type: string
+          description: Actor id of the underwriter holding the review
+        acquiredAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        expiresAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        heldByMe:
+          type: boolean
+      required:
+      - owner
+      - acquiredAt
+      - expiresAt
+      - heldByMe
+    ReferralPriorityCode:
+      type: string
+      enum:
+      - NORMAL
+      - HIGH
+    ReferralLifecycleCode:
+      type: string
+      enum:
+      - Active
+      - Withdrawn
+      description: Active while the referral is with the underwriters, Withdrawn after uw.Referral.withdraw.
+    ReferralState:
+      type: object
+      description: The handling state of a referred job (uw.referral_state, BO-UW-05); decisions stay on the issues.
+      properties:
+        jobRef:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        lifecycle:
+          $ref: '#/components/schemas/ReferralLifecycleCode'
+        awaitingInformation:
+          type: boolean
+          description: Information was requested; the SLA clock is paused
+        requiredRole:
+          type:
+          - string
+          - 'null'
+          description: After refer-up, the role whose holders may decide; null means the normal UW.ISSUE_APPROVAL authority applies
+        referredBy:
+          type:
+          - string
+          - 'null'
+        priority:
+          $ref: '#/components/schemas/ReferralPriorityCode'
+        slaDue:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        requestedBy:
+          type: string
+        requestedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        lock:
+          oneOf:
+          - $ref: '#/components/schemas/ReviewLock'
+          - type: 'null'
+          description: The live review lock; null when nobody holds it or it expired
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - jobRef
+      - lifecycle
+      - awaitingInformation
+      - priority
+      - requestedBy
+      - requestedAt
+      - recordVersion
     ReferralStatusCode:
       type: string
       enum:
@@ -6494,11 +6880,13 @@ components:
       - NO_AUTHORITY
       - NOT_OPEN
       - NEEDS_REEVALUATION
+      - LOCKED_BY_OTHER
+      - REFERRED_UP
       description: Why the caller cannot decide now. SOD_CREATOR - created the job; SOD_PARTICIPANT - edited or otherwise worked
         on the job; SOD_PRODUCER - is the job's producer; SOD_EVALUATOR - ran or bound an evaluation of the job; NOT_HUMAN - the
         actor is not a person (REQ-UW-115); NO_AUTHORITY - UW.ISSUE_APPROVAL for the issue type is refused or refers up; NOT_OPEN -
         the issue is not Open; NEEDS_REEVALUATION - the issue was raised before decisions recorded the risk facts, so the
-        job must be re-evaluated (run the bind again) before it can be decided (uw.Issue.decide answers UW-ERR-STALE). SOD-UW-02, BR-UW-013.
+        job must be re-evaluated (run the bind again) before it can be decided (uw.Issue.decide answers UW-ERR-STALE); LOCKED_BY_OTHER - another underwriter holds the review lock; REFERRED_UP - the referral went to a role the caller does not hold. SOD-UW-02, BR-UW-013.
     AuthorityPreview:
       type: object
       description: The dry UW.ISSUE_APPROVAL check for the issue type (no check record, approval request or audit event is written).
@@ -6568,82 +6956,111 @@ components:
       - decidability
     ReferralReferUpRequest:
       type: object
-      description: 'uw.Referral.referUp request. PRD inputs: "job ref, issue ids, comment, attachments"'
+      description: 'uw.Referral.referUp request: send the referral to a higher authority (BO-UW-05); only holders of that role may decide it afterwards.'
       properties:
         jobRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job ref"'
-        issueIds:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "issue ids"'
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: POL job id of the referred job
+        targetRole:
+          type: string
+          maxLength: 128
+          description: The role that may decide from now on; omit to use the referral target the UW.ISSUE_APPROVAL check names for the job's first Open issue
         comment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "comment"'
-        attachments:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "attachments"'
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Why the referral goes up
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check.
+      required:
+      - jobRef
+      - comment
     ReferralReferUpResponse:
       type: object
-      description: 'uw.Referral.referUp result. PRD outputs: "referral"'
+      description: 'uw.Referral.referUp result.'
       properties:
         referral:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "referral"'
+          $ref: '#/components/schemas/ReferralState'
+      required:
+      - referral
     ReferralRequestInformationRequest:
       type: object
-      description: 'uw.Referral.requestInformation request. PRD inputs: "job ref, issue ids, comment, attachments"'
+      description: 'uw.Referral.requestInformation request: ask the producer or customer for more information; the SLA clock pauses and a Work task is raised (BO-UW-05).'
       properties:
         jobRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job ref"'
-        issueIds:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "issue ids"'
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: POL job id of the referred job
         comment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "comment"'
-        attachments:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "attachments"'
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: What information is needed
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check.
+      required:
+      - jobRef
+      - comment
     ReferralRequestInformationResponse:
       type: object
-      description: 'uw.Referral.requestInformation result. PRD outputs: "referral"'
+      description: 'uw.Referral.requestInformation result.'
       properties:
         referral:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "referral"'
+          $ref: '#/components/schemas/ReferralState'
+      required:
+      - referral
     ReviewLockRequest:
       type: object
-      description: 'uw.Review.lock request. PRD inputs: "job ref"'
+      description: 'uw.Review.lock request: take (or renew) the soft review lock of a referred job.'
       properties:
         jobRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job ref"'
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: POL job id of the referred job
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check.
+      required:
+      - jobRef
     ReviewLockResponse:
       type: object
-      description: 'uw.Review.lock result. PRD outputs: "lock"'
+      description: 'uw.Review.lock result.'
       properties:
-        lock:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lock"'
+        referral:
+          $ref: '#/components/schemas/ReferralState'
+      required:
+      - referral
     ReviewReleaseRequest:
       type: object
-      description: 'uw.Review.release request. PRD inputs: "job ref"'
+      description: 'uw.Review.release request: give the lock back, or break it (manager, with a reason).'
       properties:
         jobRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job ref"'
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: POL job id of the referred job
+        breakLock:
+          type: boolean
+          description: A manager breaks another underwriter's lock; reason is then mandatory and the break is audited
+        reason:
+          type: string
+          maxLength: 1000
+          description: Mandatory with breakLock
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check.
+      required:
+      - jobRef
     ReviewReleaseResponse:
       type: object
-      description: 'uw.Review.release result. PRD outputs: "lock"'
+      description: 'uw.Review.release result.'
       properties:
-        lock:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lock"'
+        referral:
+          $ref: '#/components/schemas/ReferralState'
+      required:
+      - referral
     DeclineCreateRequest:
       type: object
       description: 'uw.Decline.create request. PRD inputs: "job or intake ref, scope, reasons, pairs, wording"'

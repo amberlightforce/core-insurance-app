@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Programme.list result. PRD outputs: "programmes"</summary>
+/// <summary>ri.Programme.list result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProgrammeListItem
 {
-    /// <summary>PRD: "programmes"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("programmes")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Programmes { get; init; }
+    /// <summary>Contract member 'programme'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("programme")]
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiProgramme Programme { get; init; }
 }

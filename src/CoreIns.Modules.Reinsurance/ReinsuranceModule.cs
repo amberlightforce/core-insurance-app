@@ -81,6 +81,9 @@ public static class ReinsuranceModule
                 // BO-RI-15: a cash call moves through its workflow and its lines count what was received (UPDATE; the call is sealed by a trigger), receipts are append-only.
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.cash_call, {Schema}.cash_call_line TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.cash_call_receipt TO {appRole}",
+                // BO-RI-01: programmes and their versions move (UPDATE; a trigger seals identity and, past DRAFT, the content); the layers of a Draft are replaced (DELETE, guarded).
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.programme, {Schema}.programme_version TO {appRole}",
+                $"GRANT SELECT, INSERT, DELETE ON {Schema}.programme_layer TO {appRole}",
             ]),
     ];
 
@@ -125,6 +128,19 @@ public static class ReinsuranceModule
         services.AddCommand<ApproveEndorsement, ContractApproveEndorsementResponse, ApproveEndorsementHandler>(
             CommandDescriptor.For("ri.Contract.approveEndorsement") with { SupportsDryRun = true });
         services.AddScoped<ContractVersionQuery>();
+
+        // BO-RI-01: the programme aggregate (create, update, renew); reads through ProgrammeReader.
+        services.AddScoped<ProgrammeReader>();
+        services.AddScoped<IValidator<CreateProgramme>, CreateProgrammeValidator>();
+        services.AddCommandAuditor<CreateProgramme, ProgrammeCreateResponse, CreateProgrammeAuditor>();
+        services.AddCommand<CreateProgramme, ProgrammeCreateResponse, CreateProgrammeHandler>(CommandDescriptor.For("ri.Programme.create"));
+        services.AddScoped<IValidator<UpdateProgramme>, UpdateProgrammeValidator>();
+        services.AddCommandAuditor<UpdateProgramme, ProgrammeUpdateResponse, UpdateProgrammeAuditor>();
+        services.AddCommand<UpdateProgramme, ProgrammeUpdateResponse, UpdateProgrammeHandler>(CommandDescriptor.For("ri.Programme.update"));
+        services.AddScoped<IValidator<RenewProgramme>, RenewProgrammeValidator>();
+        services.AddCommandAuditor<RenewProgramme, ProgrammeRenewResponse, RenewProgrammeAuditor>();
+        services.AddCommand<RenewProgramme, ProgrammeRenewResponse, RenewProgrammeHandler>(
+            CommandDescriptor.For("ri.Programme.renew") with { SupportsDryRun = true });
 
         // BO-RI-10: premium accounting (deposit schedules, adjustment premium, sliding-scale commission). Adjustments and commission are
         // decided by their own approve operations, never in the generic approvals inbox.

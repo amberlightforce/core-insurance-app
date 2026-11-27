@@ -45,6 +45,8 @@ internal sealed class DecideIssuesHandler(
     RequestContext context,
     ILegalEntityDirectory legalEntities,
     DecisionEligibility eligibility,
+    ReferralStateStore referralStates,
+    IClock clock,
     IEventPublisher events) : ICommandHandler<DecideIssues, IssueDecideResponse>
 {
     public async Task<Result<IssueDecideResponse>> HandleAsync(DecideIssues command, CancellationToken cancellationToken)
@@ -88,6 +90,7 @@ internal sealed class DecideIssuesHandler(
         }
 
         var actor = context.Actor.ToString();
+        var held = new List<ReferralStateRecord>();
         var participation = await store.ParticipationAsync(legalEntity, [.. issues.Select(i => i.JobId).Distinct()], cancellationToken).ConfigureAwait(false);
         foreach (var jobId in issues.Select(i => i.JobId).Distinct())
         {
@@ -100,6 +103,24 @@ internal sealed class DecideIssuesHandler(
             if (eligibility.SodReasons(participation.GetValueOrDefault(jobId, JobParticipation.None)).Count > 0)
             {
                 return DomainError.Of(ModuleCode.UW, "SOD", "You created, edited, quoted or bound this job, so you cannot decide its underwriting issues; ask another underwriter with authority (SOD-UW-02).");
+            }
+
+            // BO-UW-05: another underwriter's live review lock, and a referral referred up to a role the caller does not hold.
+            var handling = await referralStates.GetAsync(legalEntity, jobId, cancellationToken).ConfigureAwait(false);
+            var barred = eligibility.HandlingReasons(handling);
+            if (barred.Contains(DecidabilityReason.LockedByOther))
+            {
+                return DomainError.Of(ModuleCode.UW, "LOCKED-BY-OTHER", $"{handling!.LockOwner} is reviewing this referral; wait for the lock to be released or expire.");
+            }
+
+            if (barred.Contains(DecidabilityReason.ReferredUp))
+            {
+                return DomainError.Of(ModuleCode.UW, "AUTHORITY-REFER", $"This referral was referred up to {handling!.RequiredRole}; only a holder of that role may decide it.");
+            }
+
+            if (handling is not null && handling.LiveLockOwner(clock.Now.ToUtcDateTime()) == context.Actor.ToString())
+            {
+                held.Add(handling);
             }
         }
 
@@ -187,6 +208,15 @@ internal sealed class DecideIssuesHandler(
                 RecordVersion = issue.RecordVersion + 1,
                 AuthorityCheckId = check.CheckId,
             });
+        }
+
+        // The decider's review lock is spent with the decision.
+        foreach (var state in held)
+        {
+            state.ClearLock();
+            state.UpdatedAt = clock.Now.ToUtcDateTime();
+            state.UpdatedBy = actor;
+            await referralStates.UpdateAsync(state, cancellationToken).ConfigureAwait(false);
         }
 
         return new IssueDecideResponse

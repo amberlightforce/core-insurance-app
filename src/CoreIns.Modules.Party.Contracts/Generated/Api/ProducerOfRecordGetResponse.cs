@@ -4,15 +4,23 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.ProducerOfRecord.get result. PRD outputs: "PoR"</summary>
+/// <summary>pty.ProducerOfRecord.get result (BO-PTY-09): the producer of record of a policy on a date and the whole history, oldest first</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProducerOfRecordGetResponse
 {
-    /// <summary>PRD: "PoR"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("poR")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PoR { get; init; }
+    /// <summary>Contract member 'policyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyId PolicyId { get; init; }
+
+    /// <summary>Contract member 'date'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("date")]
+    public required global::CoreIns.SharedKernel.BusinessDate Date { get; init; }
+
+    /// <summary>The segment responsible on the date; null when no change was ever recorded (the term's own producer code applies)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("current")]
+    public global::CoreIns.Modules.Party.Contracts.Api.ProducerOfRecordEntry? Current { get; init; }
+
+    /// <summary>Contract member 'history'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("history")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Party.Contracts.Api.ProducerOfRecordEntry> History { get; init; }
 }

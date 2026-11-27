@@ -331,6 +331,106 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.ReferralStateRow", b =>
+                {
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("job_id");
+
+                    b.Property<bool>("AwaitingInfo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("awaiting_info");
+
+                    b.Property<string>("InfoComment")
+                        .HasColumnType("text")
+                        .HasColumnName("info_comment");
+
+                    b.Property<string>("Lifecycle")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("lifecycle");
+
+                    b.Property<DateTime?>("LockAcquiredAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("lock_acquired_at");
+
+                    b.Property<DateTime?>("LockExpiresAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("lock_expires_at");
+
+                    b.Property<string>("LockOwner")
+                        .HasColumnType("text")
+                        .HasColumnName("lock_owner");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("priority");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("ReferredBy")
+                        .HasColumnType("text")
+                        .HasColumnName("referred_by");
+
+                    b.Property<string>("RequestComment")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("request_comment");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("requested_at");
+
+                    b.Property<string>("RequestedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("requested_by");
+
+                    b.Property<string>("RequiredRole")
+                        .HasColumnType("text")
+                        .HasColumnName("required_role");
+
+                    b.Property<DateTime?>("SlaDue")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("sla_due");
+
+                    b.Property<DateTime?>("SlaPausedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("sla_paused_at");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("LegalEntityId", "JobId")
+                        .HasName("pk_referral_state");
+
+                    b.HasIndex("LegalEntityId", "Lifecycle", "SlaDue")
+                        .HasDatabaseName("ix_referral_state_queue");
+
+                    b.ToTable("referral_state", "uw", t =>
+                        {
+                            t.HasCheckConstraint("ck_referral_state_lifecycle", "lifecycle IN ('Active', 'Withdrawn')");
+
+                            t.HasCheckConstraint("ck_referral_state_lock", "(lock_owner IS NULL) = (lock_expires_at IS NULL)");
+
+                            t.HasCheckConstraint("ck_referral_state_priority", "priority IN ('NORMAL', 'HIGH')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.RuleSetVersionRow", b =>
                 {
                     b.Property<string>("RuleSetCode")

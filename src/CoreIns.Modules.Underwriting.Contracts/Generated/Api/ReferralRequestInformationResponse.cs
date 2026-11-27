@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Referral.requestInformation result. PRD outputs: "referral"</summary>
+/// <summary>uw.Referral.requestInformation result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReferralRequestInformationResponse
 {
-    /// <summary>PRD: "referral"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'referral'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("referral")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Referral { get; init; }
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.ReferralState Referral { get; init; }
 }

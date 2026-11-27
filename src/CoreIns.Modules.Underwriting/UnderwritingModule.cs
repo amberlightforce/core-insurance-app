@@ -87,8 +87,37 @@ public static class UnderwritingModule
         services.AddCommandAuditor<DecideIssues, IssueDecideResponse, DecideIssuesAuditor>();
         services.AddCommand<DecideIssues, IssueDecideResponse, DecideIssuesHandler>(CommandDescriptor.For("uw.Issue.decide") with { SupportsDryRun = true });
         services.AddScoped<UnderwritingIssueQueries>();
+
+        // BO-UW-03: batch evaluation (no effect on jobs) and the issue reads.
+        services.AddScoped<IValidator<EvaluateRulesBatch>, EvaluateRulesBatchValidator>();
+        services.AddCommandAuditor<EvaluateRulesBatch, RulesEvaluateBatchResponse, EvaluateRulesBatchAuditor>();
+        services.AddCommand<EvaluateRulesBatch, RulesEvaluateBatchResponse, EvaluateRulesBatchHandler>(CommandDescriptor.For("uw.Rules.evaluateBatch") with { SupportsDryRun = true });
+        services.AddScoped<IssueReads>();
+        services.AddScoped<IssueReadQueries>();
         services.AddScoped<DecisionEligibility>();
         services.AddScoped<ReferralReads>();
+
+        // BO-UW-05: referral commands and the review lock.
+        services.AddScoped<ReferralStateStore>();
+        services.AddScoped<ReferralSupport>();
+        services.AddScoped<ReferralAuditNotes>();
+        services.AddScoped<UwWorkTasks>();
+        services.AddScoped<IValidator<RequestReferral>, RequestReferralValidator>();
+        services.AddScoped<IValidator<WithdrawReferral>, WithdrawReferralValidator>();
+        services.AddScoped<IValidator<ReferReferralUp>, ReferReferralUpValidator>();
+        services.AddScoped<IValidator<RequestReferralInformation>, RequestReferralInformationValidator>();
+        services.AddCommandAuditor<RequestReferral, ReferralRequestResponse, ReferralAuditor<RequestReferral, ReferralRequestResponse>>();
+        services.AddCommandAuditor<WithdrawReferral, ReferralWithdrawResponse, ReferralAuditor<WithdrawReferral, ReferralWithdrawResponse>>();
+        services.AddCommandAuditor<ReferReferralUp, ReferralReferUpResponse, ReferralAuditor<ReferReferralUp, ReferralReferUpResponse>>();
+        services.AddCommandAuditor<RequestReferralInformation, ReferralRequestInformationResponse, ReferralAuditor<RequestReferralInformation, ReferralRequestInformationResponse>>();
+        services.AddCommandAuditor<LockReview, ReviewLockResponse, ReferralAuditor<LockReview, ReviewLockResponse>>();
+        services.AddCommandAuditor<ReleaseReview, ReviewReleaseResponse, ReferralAuditor<ReleaseReview, ReviewReleaseResponse>>();
+        services.AddCommand<RequestReferral, ReferralRequestResponse, RequestReferralHandler>(CommandDescriptor.For("uw.Referral.request"));
+        services.AddCommand<WithdrawReferral, ReferralWithdrawResponse, WithdrawReferralHandler>(CommandDescriptor.For("uw.Referral.withdraw"));
+        services.AddCommand<ReferReferralUp, ReferralReferUpResponse, ReferReferralUpHandler>(CommandDescriptor.For("uw.Referral.referUp"));
+        services.AddCommand<RequestReferralInformation, ReferralRequestInformationResponse, RequestReferralInformationHandler>(CommandDescriptor.For("uw.Referral.requestInformation"));
+        services.AddCommand<LockReview, ReviewLockResponse, LockReviewHandler>(CommandDescriptor.For("uw.Review.lock"));
+        services.AddCommand<ReleaseReview, ReviewReleaseResponse, ReleaseReviewHandler>(CommandDescriptor.For("uw.Review.release"));
         services.AddScoped<ReferralQueries>();
 
         services.AddScoped<IUnderwritingRulesService, UnderwritingRulesService>();
@@ -130,6 +159,18 @@ public static class UnderwritingModule
             .Describe("Κάθε κανόνας πρέπει να αναμένεται να ενεργοποιείται σε τουλάχιστον μία δοκιμαστική περίπτωση που περνά.", "Every rule must be expected to hit in at least one passing test case."),
         ErrorDefinition.For(ModuleCode.UW, "DUPLICATE", 409, "Ο τύπος ζητήματος υπάρχει ήδη", "The issue type already exists")
             .Describe("Στείλτε την τρέχουσα έκδοση εγγραφής για να τον αλλάξετε.", "Send the current record version to change it."),
+        ErrorDefinition.For(ModuleCode.UW, "NOT-REFERRABLE", 422, "Η εργασία δεν μπορεί να παραπεμφθεί", "The job cannot be referred")
+            .Describe("Η εργασία δεν έχει ανοιχτό ζήτημα ανάληψης ή η παραπομπή έχει αποσυρθεί.", "The job has no Open underwriting issue, or the referral was withdrawn."),
+        ErrorDefinition.For(ModuleCode.UW, "LOCKED-BY-OTHER", 409, "Η παραπομπή εξετάζεται από άλλον αναδόχο", "Another underwriter is reviewing the referral", retryable: true)
+            .Describe("Άλλος ανάδοχος κρατά το κλείδωμα εξέτασης· περιμένετε να λήξει ή ζητήστε από διευθυντή να το άρει.", "Another underwriter holds the review lock; wait for it to expire or ask a manager to break it."),
+        ErrorDefinition.For(ModuleCode.UW, "REASON-REQUIRED", 422, "Απαιτείται αιτιολογία", "A reason is required")
+            .Describe("Η άρση του κλειδώματος άλλου αναδόχου απαιτεί αιτιολογία.", "Breaking another underwriter's lock needs a reason."),
+        ErrorDefinition.For(ModuleCode.UW, "AUTHORITY-DENIED", 403, "Δεν έχετε εξουσιοδότηση για την ενέργεια", "You are not authorised for this action")
+            .Describe("Η ενέργεια επιτρέπεται μόνο στον αιτούντα ή σε διευθυντή ανάληψης.", "Only the requester or an underwriting manager may do this."),
+        ErrorDefinition.For(ModuleCode.UW, "LIMIT-EXCEEDED", 422, "Η παρτίδα είναι πολύ μεγάλη", "The batch is too large")
+            .Describe("Μια παρτίδα αξιολογεί έως 200 κινδύνους· χωρίστε την σε περισσότερα αιτήματα.", "A batch evaluates at most 200 risks; split it into several requests."),
+        ErrorDefinition.For(ModuleCode.UW, "ISSUE-NOT-FOUND", 404, "Δεν βρέθηκε το ζήτημα", "The issue was not found")
+            .Describe("Δεν υπάρχει ζήτημα με αυτό το αναγνωριστικό στη νομική οντότητά σας.", "There is no issue with this id in your legal entity."),
         ErrorDefinition.For(ModuleCode.UW, "STALE", 409, "Το ζήτημα άλλαξε στο μεταξύ", "The issue changed meanwhile")
             .Describe("Φορτώστε ξανά το ζήτημα και αποφασίστε πάλι.", "Reload the issue and decide again."),
     ];

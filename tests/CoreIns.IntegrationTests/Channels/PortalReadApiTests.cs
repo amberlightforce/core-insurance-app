@@ -33,6 +33,8 @@ public sealed class PortalReadApiTests(PostgresFixture database) : IClassFixture
     private readonly FakePartyAccountService _accounts = new();
     private readonly FakePolicyPolicyService _policies = new();
     private readonly FakeBillingInvoiceService _invoices = new();
+    private readonly FakePolicyJobService _jobs = new();
+    private readonly Guid _renewalJob = Guid.NewGuid();
     private readonly ApiHostFactory _host = new(database.AppConnectionString);
     private Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program>? _factory;
     private HttpClient? _client;
@@ -169,6 +171,17 @@ public sealed class PortalReadApiTests(PostgresFixture database) : IClassFixture
         var cannedAccount = billingAccounts.Canned<BillingAccountGetResponse>("bil.BillingAccount.get");
         billingAccounts.Setup("bil.BillingAccount.get", _ => cannedAccount with { Account = cannedAccount.Account with { BillingAccountId = billingAccount, PayerPartyId = _alice } });
 
+        // Alice's own policy has an offered renewal job; Bob's (household) policy has none yet.
+        _jobs.Setup("pol.Job.list", call =>
+        {
+            var offered = call.Arguments[3] as string == _policyAlice.Value.ToString("D") && call.Arguments[5] as string == "QUOTED";
+            return new JobListPage
+            {
+                Items = offered ? [new JobListItem { Jobs = System.Text.Json.JsonSerializer.SerializeToElement(new { jobId = _renewalJob, jobType = "RENEWAL", state = "QUOTED" }) }] : [],
+                NextCursor = null,
+                Limit = 50,
+            };
+        });
         var parties = new FakePartyPartyService();
         var cannedParty = parties.Canned<PartyGetResponse>("pty.Party.get");
         parties.Setup("pty.Party.get", _ => cannedParty);
@@ -182,6 +195,8 @@ public sealed class PortalReadApiTests(PostgresFixture database) : IClassFixture
             services.AddSingleton<IPartyPartyService>(parties);
             services.RemoveAll<IBillingInvoiceService>();
             services.AddSingleton<IBillingInvoiceService>(_invoices);
+            services.RemoveAll<IPolicyJobService>();
+            services.AddSingleton<IPolicyJobService>(_jobs);
             services.RemoveAll<IBillingBillingAccountService>();
             services.AddSingleton<IBillingBillingAccountService>(billingAccounts);
         }));
@@ -283,6 +298,7 @@ public sealed class PortalReadApiTests(PostgresFixture database) : IClassFixture
         detail.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
         detail.Body!["policyNumber"]!.GetValue<string>().ShouldBe("POL-A");
         detail.Body["status"]!.GetValue<string>().ShouldBe("InForce");
+        detail.Body["renewalJobId"]!.GetValue<string>().ShouldBe(_renewalJob.ToString("D"));
         detail.Body["coverages"]!.AsArray()[0]!["coverageCode"]!.GetValue<string>().ShouldBe("MTPL");
         var vehicle = detail.Body["vehicles"]!.AsArray()[0]!;
         vehicle["plate"]!.GetValue<string>().ShouldBe("IKA1234");
@@ -310,6 +326,10 @@ public sealed class PortalReadApiTests(PostgresFixture database) : IClassFixture
         dash.Body["renewalsDue"]!.AsArray().Count.ShouldBe(2);
         var due = dash.Body["renewalsDue"]!.AsArray()[0]!["daysLeft"]!.GetValue<int>();
         due.ShouldBeInRange(29, 31);
+        // The renewal job id is exposed only for the policy that has an offered renewal.
+        var renewals = dash.Body["renewalsDue"]!.AsArray();
+        renewals.Count(r => r!["renewalJobId"] is not null).ShouldBe(1);
+        renewals.Single(r => r!["policyId"]!.GetValue<string>() == _policyAlice.Value.ToString("D"))!["renewalJobId"]!.GetValue<string>().ShouldBe(_renewalJob.ToString("D"));
         var unpaid = dash.Body["unpaidInvoices"]!.AsArray();
         unpaid.Count.ShouldBe(2, "one open invoice per policy in scope; the paid one is left out");
         unpaid[0]!["overdue"]!.GetValue<bool>().ShouldBeTrue();

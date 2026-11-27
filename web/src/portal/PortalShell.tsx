@@ -8,6 +8,7 @@ import { clearSession, useDevSession } from '../dev-auth/devAuth';
 import { Avatar, Button, Icon, NotificationBell, cx } from '../design-system';
 import { changeLanguage, isLanguage, supportedLanguages } from '../i18n';
 import styles from './PortalShell.module.css';
+import { usePortalDashboard } from './pages/portalApi';
 import { portalNav, withdrawalPath } from './ui/nav';
 
 const shortNames = { el: 'ΕΛ', en: 'EN' } as const;
@@ -67,6 +68,8 @@ export function PortalShell() {
   const isCustomer =
     session?.user.roles.some((r) => (portalRoles as readonly string[]).includes(r)) ?? false;
   const name = session ? personaName(session.user.name) : '';
+  // The bell shows the unread count of the portal dashboard read; a failed read shows no badge rather than a wrong one.
+  const unread = usePortalDashboard(isCustomer).data?.unreadNotificationCount ?? 0;
 
   return (
     <div className={styles.shell}>
@@ -107,17 +110,22 @@ export function PortalShell() {
           <LanguageSwitch />
           {isCustomer ? (
             <>
-              {/* TODO(BO-CHN-13): the count comes from the portal notifications read model once it exists. */}
               <NotificationBell
-                count={0}
+                count={unread}
+                attention={unread > 0}
                 onPress={() => {
                   void navigate('/portal/notifications');
                 }}
               />
-              <span className={styles.account} title={t('account.signedInAs', { name })}>
+              <Link
+                to="/portal/profile"
+                className={styles.account}
+                title={t('account.signedInAs', { name })}
+                aria-label={t('account.profile', { name })}
+              >
                 <Avatar name={name} size="sm" decorative />
                 <span className={styles.accountName}>{name}</span>
-              </span>
+              </Link>
               <Button
                 variant="ghost"
                 size="sm"

@@ -16,6 +16,12 @@ internal sealed class UnderwritingOptions
 
     /// <summary>Product codes for which the illustrative motor rule set is published (stands in for rule-set authoring and approval).</summary>
     public List<string> SeedProductCodes { get; set; } = ["MOTOR-GR"];
+
+    /// <summary>How long a review lock holds before it expires (a lease; BO-UW-05). Taking the lock again renews it.</summary>
+    public int ReviewLockMinutes { get; set; } = 15;
+
+    /// <summary>Hours from a referral request to its SLA due time until BO-UW-06 derives it from rule-set metadata and the working calendar.</summary>
+    public int ReferralSlaHours { get; set; } = 48;
 }
 
 /// <summary>A stored rule set version as read.</summary>
@@ -142,6 +148,27 @@ internal sealed class UnderwritingStore(DbSession session, IClock clock, Request
         return string.Equals(compiled.Hash, found.Hash, StringComparison.Ordinal) ? compiled : null;
     }
 
+    /// <summary>
+    /// A stored rule set version pinned by code and version (BO-UW-03 batch evaluation): Active or Approved only (a Draft is not
+    /// tested and compiled yet); null when it does not exist or is not in such a state. Shares the compiled-table cache of <see cref="ResolveAsync"/>.
+    /// </summary>
+    public async Task<CompiledRuleSet?> ResolveVersionAsync(string code, string version, string productCode, string checkpoint, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var row = await connection.QueryFirstOrDefaultAsync<RuleSetRecord>(new CommandDefinition(
+            """
+            SELECT content_hash AS Hash, rule_set_code AS Code, version_no AS Version, definition::text AS Definition FROM uw.rule_set_version
+             WHERE rule_set_code = @code AND version_no = @version AND product_code = @productCode AND checkpoint = @checkpoint AND status IN ('Active', 'Approved')
+            """, new { code, version, productCode, checkpoint }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        if (row is not { } found)
+        {
+            return null;
+        }
+
+        var compiled = Cache.GetOrAdd($"{found.Code}@{found.Version}#{found.Hash}", _ => CompiledRuleSet.Compile(RuleSetJson.Deserialize(found.Definition)));
+        return string.Equals(compiled.Hash, found.Hash, StringComparison.Ordinal) ? compiled : null;
+    }
+
     public async Task InsertEvaluationAsync(
         Guid evaluationId, Guid legalEntity, Guid jobId, string checkpoint, CompiledRuleSet ruleSet, string snapshotRef, string? snapshotHash,
         string outcome, string lane, string trace, string actor, IReadOnlyList<string> jobParticipants, string? producerCode, string? facts,
@@ -187,10 +214,11 @@ internal sealed class UnderwritingStore(DbSession session, IClock clock, Request
     /// Open: the referral queue), oldest first; keyset paging on (created_at, issue_id).
     /// </summary>
     public async Task<IReadOnlyList<IssueRecord>> ListIssuesAsync(
-        Guid legalEntity, Guid? jobId, string? status, (DateTime CreatedAt, Guid IssueId)? after, int limit, CancellationToken cancellationToken)
+        Guid legalEntity, Guid? jobId, string? status, (DateTime CreatedAt, Guid IssueId)? after, int limit, CancellationToken cancellationToken,
+        string? issueType = null, string? blockingPoint = null)
     {
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        var args = new DynamicParameters(new { legalEntity, status = status ?? (jobId is null ? IssueStatus.Open : null), limit });
+        var args = new DynamicParameters(new { legalEntity, status = status ?? (jobId is null ? IssueStatus.Open : null), limit, issueType, blockingPoint });
         args.Add("jobId", jobId, DbType.Guid);
         args.Add("afterAt", after?.CreatedAt, DbType.DateTime);
         args.Add("afterId", after?.IssueId, DbType.Guid);
@@ -201,6 +229,8 @@ internal sealed class UnderwritingStore(DbSession session, IClock clock, Request
              WHERE i.legal_entity_id = @legalEntity
                AND (@jobId::uuid IS NULL OR i.job_id = @jobId::uuid)
                AND (@status::text IS NULL OR i.status = @status::text)
+               AND (@issueType::text IS NULL OR i.issue_type = @issueType::text)
+               AND (@blockingPoint::text IS NULL OR i.blocking_point = @blockingPoint::text)
                AND (@afterAt::timestamptz IS NULL OR (i.created_at, i.issue_id) > (@afterAt::timestamptz, @afterId::uuid))
              ORDER BY i.created_at, i.issue_id
              LIMIT @limit

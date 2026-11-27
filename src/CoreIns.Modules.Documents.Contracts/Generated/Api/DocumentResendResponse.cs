@@ -4,12 +4,15 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Document.resend result. PRD outputs: "delivery id"</summary>
+/// <summary>doc.Document.resend result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DocumentResendResponse
 {
-    /// <summary>PRD: "delivery id"</summary>
+    /// <summary>Contract member 'deliveryId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("deliveryId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.DeliveryId? DeliveryId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.DeliveryId DeliveryId { get; init; }
+
+    /// <summary>Contract member 'medium'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("medium")]
+    public required string Medium { get; init; }
 }

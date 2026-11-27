@@ -214,8 +214,14 @@ public abstract class PortalEngagementHost(PostgresFixture database) : IAsyncDis
             services.AddSingleton<IDocumentContentService>(Content);
             services.RemoveAll<IClaimsClaimService>();
             services.AddSingleton<IClaimsClaimService>(claims);
+            ConfigureExtra(services, policies);
         }));
         return _factory;
+    }
+
+    /// <summary>Lets a subclass replace or add doubles (BO-CHN-03 adds the POL change/renewal and PTY location doubles).</summary>
+    protected virtual void ConfigureExtra(IServiceCollection services, FakePolicyPolicyService policies)
+    {
     }
 
     protected static string PolicyTag(PolicyId id) => id.Value.ToString("N")[..6];
@@ -239,6 +245,8 @@ public abstract class PortalEngagementHost(PostgresFixture database) : IAsyncDis
         DocumentId = new DocumentId(id), DocumentNumber = "DOC-" + id.ToString("N")[..6], DocumentType = type, RequestNo = "REQ-" + id.ToString("N")[..6], Subject = "POL/Policy/x",
         RecipientPartyId = recipient, Language = "el", Status = status, Medium = "EMAIL", ArchiveId = Guid.NewGuid(), ContentHash = new string('a', 64),
         CreatedAt = "2026-01-02T10:00:00+00:00", Deliveries = [],
+        // The DOC document-type flag (BO-DOC-02): internal types are not customer-visible.
+        CustomerVisible = !type.Contains("INTERNAL", StringComparison.Ordinal), Hidden = false,
     };
 
     protected static string InvoiceIdOf(PolicyId policy, byte tag)

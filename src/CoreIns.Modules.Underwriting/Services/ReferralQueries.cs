@@ -19,7 +19,7 @@ using CoreIns.SharedKernel.Results;
 namespace CoreIns.Modules.Underwriting.Services;
 
 /// <summary>What a referral rule declares to be read and the fact value observed.</summary>
-internal sealed record RuleReading(string? Observed, string Limit);
+internal sealed record RuleReading(string? Observed, string Limit, string? Fact = null);
 
 /// <summary>
 /// <c>uw.Referral.list</c> and <c>uw.Referral.get</c> (D-USR-13): the referral workbench reads. UW owns the queues (issues and
@@ -32,6 +32,7 @@ internal sealed class ReferralQueries(
     ReferralReads reads,
     UnderwritingStore store,
     DecisionEligibility eligibility,
+    ReferralStateStore states,
     RequestContext context,
     ILegalEntityDirectory legalEntities,
     IClock clock,
@@ -137,7 +138,8 @@ internal sealed class ReferralQueries(
         // Decidability: the decide check run dry for every issue (nothing is recorded; uw.Issue.decide re-runs it at commit).
         var checks = await eligibility.DryChecksAsync(issues, cancellationToken).ConfigureAwait(false);
         var changed = DecisionEligibility.JobChanged(job, participation);
-        var rows = issues.Select(issue => (Issue: issue, Eligibility: eligibility.Evaluate(issue, participation, checks[issue.IssueId], changed))).ToList();
+        var handling = await states.GetAsync(legalEntity, jobId, cancellationToken).ConfigureAwait(false);
+        var rows = issues.Select(issue => (Issue: issue, Eligibility: eligibility.Evaluate(issue, participation, checks[issue.IssueId], changed, handling))).ToList();
         var open = rows.Where(r => r.Issue.Status == IssueStatus.Open).ToList();
         var viewReasons = open.Count == 0 ? [DecidabilityReason.NotOpen] : open.SelectMany(r => r.Eligibility.Reasons).Distinct().ToList();
 
@@ -193,13 +195,14 @@ internal sealed class ReferralQueries(
         var jobIds = issues.Select(i => i.JobId).Distinct().ToList();
         var participation = await store.ParticipationAsync(legalEntity, jobIds, cancellationToken).ConfigureAwait(false);
         var checks = await eligibility.DryChecksAsync(issues.Where(i => i.Status == IssueStatus.Open), cancellationToken).ConfigureAwait(false);
+        var handling = await states.GetManyAsync(legalEntity, jobIds, cancellationToken).ConfigureAwait(false);
         var mine = new List<ReferralJobRecord>();
         foreach (var group in issues.GroupBy(i => i.JobId))
         {
             var part = participation.GetValueOrDefault(group.Key, JobParticipation.None);
             var open = group.Where(i => i.Status == IssueStatus.Open).ToList();
             var changed = DecisionEligibility.JobChanged(await eligibility.JobAsync(group.Key, cancellationToken).ConfigureAwait(false), part);
-            if (DecisionEligibility.AllDecidable([.. open.Select(i => eligibility.Evaluate(i, part, checks[i.IssueId], changed))]))
+            if (DecisionEligibility.AllDecidable([.. open.Select(i => eligibility.Evaluate(i, part, checks[i.IssueId], changed, handling.GetValueOrDefault(group.Key)))]))
             {
                 mine.Add(new ReferralJobRecord { JobId = group.Key, SortAt = group.Min(i => i.CreatedAt) });
             }
@@ -220,7 +223,7 @@ internal sealed class ReferralQueries(
     /// What each referral rule of the jobs declares (rule set <c>explain</c>) combined with the stored derived facts: per job and
     /// rule id, the observed value and the limit; a rule without a declared limit gets none and RULE_DECLARES_NO_LIMIT.
     /// </summary>
-    private async Task<Dictionary<Guid, Dictionary<string, RuleReading>>> ExplainsAsync(Guid legalEntity, List<Guid> jobIds, CancellationToken cancellationToken)
+    internal async Task<Dictionary<Guid, Dictionary<string, RuleReading>>> ExplainsAsync(Guid legalEntity, List<Guid> jobIds, CancellationToken cancellationToken)
     {
         var result = new Dictionary<Guid, Dictionary<string, RuleReading>>();
         if (jobIds.Count == 0)
@@ -238,7 +241,7 @@ internal sealed class ReferralQueries(
                 var explain = rule.Explain ?? BuiltInRuleSets.BuiltInExplain(set.Code, rule);
                 if (explain is not null)
                 {
-                    readings[rule.Id] = new RuleReading(Observed(explain.Fact, record), explain.Limit);
+                    readings[rule.Id] = new RuleReading(Observed(explain.Fact, record), explain.Limit, explain.Fact);
                 }
             }
         }

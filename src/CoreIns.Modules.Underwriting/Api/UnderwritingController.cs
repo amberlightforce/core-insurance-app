@@ -20,9 +20,20 @@ internal static class UnderwritingPermissions
     public const string Evaluate = "uw.Rules.evaluate";
     public const string BlockingStatus = "uw.Issue.blockingStatus";
     public const string List = "uw.Issue.list";
+    public const string EvaluateBatch = "uw.Rules.evaluateBatch";
+    public const string IssueGet = "uw.Issue.get";
+    public const string IssueExplain = "uw.Issue.explain";
+    public const string ListForChannel = "uw.Issue.listForChannel";
+    public const string ApprovalHistory = "uw.Approval.history";
     public const string Decide = "uw.Issue.decide";
     public const string ReferralList = "uw.Referral.list";
     public const string ReferralGet = "uw.Referral.get";
+    public const string ReferralRequest = "uw.Referral.request";
+    public const string ReferralWithdraw = "uw.Referral.withdraw";
+    public const string ReferralReferUp = "uw.Referral.referUp";
+    public const string ReferralRequestInformation = "uw.Referral.requestInformation";
+    public const string ReviewLock = "uw.Review.lock";
+    public const string ReviewRelease = "uw.Review.release";
 }
 
 /// <summary>REST facade of <c>uw.Rules.evaluate</c>, <c>uw.Issue.blockingStatus</c>, <c>uw.Issue.list</c> and <c>uw.Issue.decide</c>.</summary>
@@ -77,8 +88,27 @@ internal sealed class UnderwritingController : ControllerBase
     [Authorize(Policy = UnderwritingPermissions.List)]
     public async Task<IResult> ListAsync(
         [FromQuery] Guid? jobRef, [FromQuery] string? status, [FromQuery] string? cursor, [FromQuery] int? limit,
-        [FromServices] UnderwritingIssueQueries queries, CancellationToken cancellationToken)
+        [FromServices] UnderwritingIssueQueries queries, CancellationToken cancellationToken,
+        [FromQuery] string? issueType = null, [FromQuery] string? blockingPoint = null)
     {
+        BlockingPoint? point = null;
+        if (blockingPoint is not null)
+        {
+            point = blockingPoint switch
+            {
+                "PRE_QUOTE" => BlockingPoint.PreQuote,
+                "PRE_BIND" => BlockingPoint.PreBind,
+                "PRE_ISSUE" => BlockingPoint.PreIssue,
+                "NON_BLOCKING" => BlockingPoint.NonBlocking,
+                _ => null,
+            };
+            if (point is null)
+            {
+                return Problem(DomainError.Of(ModuleCode.UW, "VALIDATION", "blockingPoint must be PRE_QUOTE, PRE_BIND, PRE_ISSUE or NON_BLOCKING."), HttpContext);
+            }
+        }
+
+
         IssueStatusCode? statusCode = null;
         if (status is not null)
         {
@@ -90,7 +120,58 @@ internal sealed class UnderwritingController : ControllerBase
             statusCode = parsed;
         }
 
-        var result = await queries.ListAsync(jobRef, statusCode, cursor, limit, cancellationToken).ConfigureAwait(false);
+        var result = await queries.ListAsync(jobRef, statusCode, cursor, limit, cancellationToken, issueType, point).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Rules.evaluateBatch: many risks against one rule-set version, with no effect on jobs or issues (a command: Idempotency-Key required).</summary>
+    [HttpPost("rules/evaluate-batch")]
+    [Authorize(Policy = UnderwritingPermissions.EvaluateBatch)]
+    public Task<IResult> EvaluateBatchAsync(
+        [FromBody] RulesEvaluateBatchRequest request, [FromServices] ICommandHandler<EvaluateRulesBatch, RulesEvaluateBatchResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new EvaluateRulesBatch(request), cancellationToken);
+
+    /// <summary>uw.Issue.explain: why an issue was raised (rule, facts read, observed value, threshold).</summary>
+    [HttpGet("issues/explain")]
+    [Authorize(Policy = UnderwritingPermissions.IssueExplain)]
+    public async Task<IResult> ExplainAsync([FromQuery] Guid issueId, [FromServices] IssueReadQueries queries, CancellationToken cancellationToken)
+    {
+        var result = await queries.ExplainAsync(issueId, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Issue.listForChannel: the issues of a job with customer-safe wording (no rule ids or internals).</summary>
+    [HttpGet("issues/list-for-channel")]
+    [Authorize(Policy = UnderwritingPermissions.ListForChannel)]
+    public async Task<IResult> ListForChannelAsync(
+        [FromQuery] Guid? jobRef, [FromQuery] string? cursor, [FromQuery] int? limit, [FromServices] IssueReadQueries queries, CancellationToken cancellationToken)
+    {
+        if (jobRef is null || jobRef == Guid.Empty)
+        {
+            return Problem(DomainError.Of(ModuleCode.UW, "VALIDATION", "jobRef is required."), HttpContext);
+        }
+
+        var result = await queries.ListForChannelAsync(jobRef.Value, cursor, limit, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Issue.get: one issue with why it was raised.</summary>
+    [HttpGet("issues/{id:guid}")]
+    [Authorize(Policy = UnderwritingPermissions.IssueGet)]
+    public async Task<IResult> GetIssueAsync(Guid id, [FromServices] IssueReadQueries queries, CancellationToken cancellationToken)
+    {
+        var result = await queries.GetAsync(id, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Approval.history: decisions and approval invalidations per job and/or issue key.</summary>
+    [HttpGet("approval/history")]
+    [Authorize(Policy = UnderwritingPermissions.ApprovalHistory)]
+    public async Task<IResult> ApprovalHistoryAsync(
+        [FromQuery] Guid? jobRef, [FromQuery] string? issueKey, [FromQuery] string? cursor, [FromQuery] int? limit,
+        [FromServices] IssueReadQueries queries, CancellationToken cancellationToken)
+    {
+        var result = await queries.HistoryAsync(jobRef, issueKey, cursor, limit, cancellationToken).ConfigureAwait(false);
         return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
     }
 
@@ -138,6 +219,55 @@ internal sealed class UnderwritingController : ControllerBase
     public async Task<IResult> GetReferralAsync(string id, [FromServices] ReferralQueries queries, CancellationToken cancellationToken)
     {
         var result = await queries.GetAsync(id, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Referral.request: put a job in front of the underwriters, or resume it after information was supplied (BO-UW-05).</summary>
+    [HttpPost("referrals/request")]
+    [Authorize(Policy = UnderwritingPermissions.ReferralRequest)]
+    public Task<IResult> RequestReferralAsync(
+        [FromBody] ReferralRequestRequest request, [FromServices] ICommandHandler<RequestReferral, ReferralRequestResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new RequestReferral(request), cancellationToken);
+
+    /// <summary>uw.Referral.withdraw: take the referral back.</summary>
+    [HttpPost("referrals/withdraw")]
+    [Authorize(Policy = UnderwritingPermissions.ReferralWithdraw)]
+    public Task<IResult> WithdrawReferralAsync(
+        [FromBody] ReferralWithdrawRequest request, [FromServices] ICommandHandler<WithdrawReferral, ReferralWithdrawResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new WithdrawReferral(request), cancellationToken);
+
+    /// <summary>uw.Referral.referUp: send the referral to a higher authority.</summary>
+    [HttpPost("referrals/refer-up")]
+    [Authorize(Policy = UnderwritingPermissions.ReferralReferUp)]
+    public Task<IResult> ReferUpAsync(
+        [FromBody] ReferralReferUpRequest request, [FromServices] ICommandHandler<ReferReferralUp, ReferralReferUpResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new ReferReferralUp(request), cancellationToken);
+
+    /// <summary>uw.Referral.requestInformation: pause the SLA and ask for more information.</summary>
+    [HttpPost("referrals/request-information")]
+    [Authorize(Policy = UnderwritingPermissions.ReferralRequestInformation)]
+    public Task<IResult> RequestInformationAsync(
+        [FromBody] ReferralRequestInformationRequest request, [FromServices] ICommandHandler<RequestReferralInformation, ReferralRequestInformationResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new RequestReferralInformation(request), cancellationToken);
+
+    /// <summary>uw.Review.lock: take or renew the soft review lock of a referred job.</summary>
+    [HttpPost("review/lock")]
+    [Authorize(Policy = UnderwritingPermissions.ReviewLock)]
+    public Task<IResult> LockReviewAsync(
+        [FromBody] ReviewLockRequest request, [FromServices] ICommandHandler<LockReview, ReviewLockResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new LockReview(request), cancellationToken);
+
+    /// <summary>uw.Review.release: release the lock, or break another underwriter's (a manager, with a reason).</summary>
+    [HttpPost("review/release")]
+    [Authorize(Policy = UnderwritingPermissions.ReviewRelease)]
+    public Task<IResult> ReleaseReviewAsync(
+        [FromBody] ReviewReleaseRequest request, [FromServices] ICommandHandler<ReleaseReview, ReviewReleaseResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new ReleaseReview(request), cancellationToken);
+
+    private async Task<IResult> RunAsync<TCommand, TResult>(ICommandHandler<TCommand, TResult> handler, TCommand command, CancellationToken cancellationToken)
+        where TCommand : ICommand<TResult>
+    {
+        var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
         return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
     }
 

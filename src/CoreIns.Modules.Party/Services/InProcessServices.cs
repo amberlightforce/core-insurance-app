@@ -116,6 +116,26 @@ internal sealed class PartyProducerCodeService(IntermediaryQueries queries, IClo
 }
 
 /// <summary>
+/// The in-process contract <see cref="IPartyProducerOfRecordService"/> (BO-PTY-09): the producer of record of a policy (id = policy id) and the bulk
+/// transfer, for POL, BIL and CHN. Today is used when no date is given.
+/// </summary>
+internal sealed class PartyProducerOfRecordService(
+    ProducerOfRecordWriter writer, ICommandHandler<BulkTransferProducerOfRecord, ProducerOfRecordBulkTransferResponse> bulk, PartyProtection protection,
+    RequestContext context, IClock clock) : IPartyProducerOfRecordService
+{
+    public async Task<ProducerOfRecordBulkTransferResponse> BulkTransferAsync(ProducerOfRecordBulkTransferRequest request, CommandOptions options, CancellationToken cancellationToken = default)
+    {
+        var result = await bulk.HandleAsync(new BulkTransferProducerOfRecord(request), cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? result.Value : throw new DomainException(result.Error);
+    }
+
+    public Task<ProducerOfRecordGetResponse> GetAsync(string id, BusinessDate? date = null, CancellationToken cancellationToken = default) =>
+        Guid.TryParse(id, out var guid)
+            ? writer.GetAsync(protection.Current(context), new PolicyId(guid), date ?? RoleSupport.Today(clock), cancellationToken)
+            : throw new DomainException(DomainError.Of(ModuleCode.PTY, "VALIDATION", "The policy id is not a valid identifier."));
+}
+
+/// <summary>
 /// The in-process contract <see cref="IPartyVulnerabilityService"/>: <c>pty.Vulnerability.query</c> for the non-payment cancellation gate of POL
 /// (NX-HD-02). A page with no item means the party is unknown to the caller's legal entity; callers must treat that as vulnerable.
 /// </summary>
