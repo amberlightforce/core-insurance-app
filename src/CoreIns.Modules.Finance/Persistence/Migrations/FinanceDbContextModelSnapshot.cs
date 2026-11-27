@@ -277,6 +277,18 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("relevance");
 
+                    b.Property<string>("ResolutionReason")
+                        .HasColumnType("text")
+                        .HasColumnName("resolution_reason");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<string>("ResolvedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("resolved_by");
+
                     b.Property<string>("SchemaVersion")
                         .IsRequired()
                         .HasColumnType("text")
@@ -347,7 +359,7 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_business_event_relevance", "relevance IN ('POSTING', 'CONTEXT', 'IGNORED')");
 
-                            t.HasCheckConstraint("ck_business_event_status", "status IN ('RECEIVED', 'WAITING', 'POSTED', 'NO_POSTING', 'SUSPENDED')");
+                            t.HasCheckConstraint("ck_business_event_status", "status IN ('RECEIVED', 'WAITING', 'POSTED', 'NO_POSTING', 'SUSPENDED', 'DUPLICATE', 'REJECTED')");
 
                             t.HasCheckConstraint("ck_business_event_suspended", "(status = 'SUSPENDED') = (exception_reason IS NOT NULL)");
 

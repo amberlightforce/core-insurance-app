@@ -30,6 +30,9 @@ internal static class ProductPermissions
     public const string ChargeTypeList = "pfc.ChargeType.list";
     public const string QuestionSetGet = "pfc.QuestionSet.get";
     public const string QuestionSetEvaluate = "pfc.QuestionSet.evaluate";
+    public const string ChangeSetCreate = "pfc.ChangeSet.create";
+    public const string ChangeSetEdit = "pfc.ChangeSet.edit";
+    public const string ChangeSetAbandon = "pfc.ChangeSet.abandon";
 }
 
 /// <summary>Problem Details from a domain error.</summary>

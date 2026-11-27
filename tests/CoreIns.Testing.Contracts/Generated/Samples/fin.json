@@ -438,21 +438,53 @@
       "limit": 1
     },
     "IntakeExceptionMarkDuplicateRequest": {
-      "filters": "unspecified",
       "itemIds": [
         "0192f8e9-e526-7d35-8bb3-08c44ba2ff25"
+      ],
+      "reason": "sample"
+    },
+    "IntakeExceptionMarkDuplicateResponse": {
+      "outcomes": [
+        {
+          "eventId": "01926a07-9e3e-7e35-81d9-9ebd99421ab5",
+          "outcome": "POSTED",
+          "detail": "sample"
+        }
       ]
     },
+    "IntakeExceptionOutcome": {
+      "eventId": "01928adb-1b66-71a1-88ad-7b075b92c7de",
+      "outcome": "POSTED",
+      "detail": "sample"
+    },
     "IntakeExceptionRejectRequest": {
-      "filters": "unspecified",
       "itemIds": [
         "0192341d-1cde-7931-868c-b050664b8519"
+      ],
+      "reason": "sample"
+    },
+    "IntakeExceptionRejectResponse": {
+      "outcomes": [
+        {
+          "eventId": "01925ec3-7d30-765e-8f80-791d8ad3bf7e",
+          "outcome": "POSTED",
+          "detail": "sample"
+        }
       ]
     },
     "IntakeExceptionRerunRequest": {
-      "filters": "unspecified",
       "itemIds": [
         "019266ba-fee9-7be4-89d1-387ac75911d5"
+      ],
+      "reason": "sample"
+    },
+    "IntakeExceptionRerunResponse": {
+      "outcomes": [
+        {
+          "eventId": "0192514b-a2b8-772a-8222-2a2fe7bde847",
+          "outcome": "POSTED",
+          "detail": "sample"
+        }
       ]
     },
     "JournalGetResponse": {
