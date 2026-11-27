@@ -526,10 +526,7 @@ CONTRACT_NOT_SERVED POST /api/pfc/v1/product-versions/submit
 CONTRACT_NOT_SERVED POST /api/pfc/v1/products/describe
 CONTRACT_NOT_SERVED POST /api/pfc/v1/renewal-conversions/convert
 CONTRACT_NOT_SERVED POST /api/plt/v1/adapters/invoke
-CONTRACT_NOT_SERVED POST /api/plt/v1/approval-types/register
 CONTRACT_NOT_SERVED POST /api/plt/v1/approval/request
-CONTRACT_NOT_SERVED POST /api/plt/v1/approval/verify-for-execution
-CONTRACT_NOT_SERVED POST /api/plt/v1/approval/withdraw
 CONTRACT_NOT_SERVED POST /api/plt/v1/audit/append
 CONTRACT_NOT_SERVED POST /api/plt/v1/audit/export
 CONTRACT_NOT_SERVED POST /api/plt/v1/audit/verify

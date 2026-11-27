@@ -94,7 +94,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-CHECKER-MUST-BE-HUMAN (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.ApprovalType.register.</para>
+    /// <para>Declared by 4 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request.</para>
     /// </remarks>
     public const string CheckerMustBeHuman = "PLT-ERR-CHECKER-MUST-BE-HUMAN";
 
@@ -118,7 +118,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-EDITOR-CANNOT-APPROVE (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.ApprovalType.register.</para>
+    /// <para>Declared by 4 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request.</para>
     /// </remarks>
     public const string EditorCannotApprove = "PLT-ERR-EDITOR-CANNOT-APPROVE";
 
@@ -286,7 +286,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-SELF-APPROVAL (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 13 operation(s): bil.Refund.decide, pfc.ProductVersion.decideFallback, plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.ApprovalType.register, rat.RatingArtifact.build, rat.RatingArtifact.cancelSchedule, rat.RatingArtifact.return, rat.RatingArtifact.rollback, rat.RatingArtifact.schedule, ….</para>
+    /// <para>Declared by 12 operation(s): bil.Refund.decide, pfc.ProductVersion.decideFallback, plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, rat.RatingArtifact.build, rat.RatingArtifact.cancelSchedule, rat.RatingArtifact.return, rat.RatingArtifact.rollback, rat.RatingArtifact.schedule, rat.RatingArtifact.submit.</para>
     /// </remarks>
     public const string SelfApproval = "PLT-ERR-SELF-APPROVAL";
 
@@ -328,7 +328,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-UNKNOWN-TYPE (HTTP 400).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): plt.Approval.request, plt.Authority.check.</para>
+    /// <para>Declared by 3 operation(s): plt.Approval.request, plt.ApprovalType.register, plt.Authority.check.</para>
     /// </remarks>
     public const string UnknownType = "PLT-ERR-UNKNOWN-TYPE";
 

@@ -4,23 +4,23 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Contract.versionAt result. PRD outputs: "contracts, versions"</summary>
+/// <summary>ri.Contract.versionAt result: the contract version in force at validAt as known at knownAt</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ContractVersionAtResponse
 {
-    /// <summary>PRD: "contracts"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("contracts")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Contracts { get; init; }
+    /// <summary>Contract member 'contract'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contract")]
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractView Contract { get; init; }
 
-    /// <summary>PRD: "versions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("versions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Versions { get; init; }
+    /// <summary>Contract member 'validAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validAt")]
+    public required global::CoreIns.SharedKernel.BusinessDate ValidAt { get; init; }
+
+    /// <summary>Contract member 'knownAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("knownAt")]
+    public required global::CoreIns.SharedKernel.Instant KnownAt { get; init; }
+
+    /// <summary>When the returned version became known (creation for version 1, approval for an endorsement)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("knownFrom")]
+    public required global::CoreIns.SharedKernel.Instant KnownFrom { get; init; }
 }

@@ -70,7 +70,7 @@ public sealed record RiContractView
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
     public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractStatus Status { get; init; }
 
-    /// <summary>Contract version row number; always 1 in slice 4 (endorsement is later, D-SL4-04)</summary>
+    /// <summary>Contract version row number (1 = the original, 2 and up = endorsements)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("versionNo")]
     public required int VersionNo { get; init; }
 
