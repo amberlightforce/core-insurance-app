@@ -7,3 +7,5 @@ RIContractActivated $.payload.sectionsAndLayers[].sectionNo: anyOf
 RIContractActivated $.payload.sectionsAndLayers[].layerNo: anyOf
 # TODO(hardening): Finance emits a null currency in the suspended amount; the schema requires a string.
 BusinessEventSuspended $.payload.amount.currency: type string
+# TODO(hardening): NX-OT-14 dead-letter API tests seed archived events of a test-only type (DlqTestEvent) directly with SQL; it has no schema.
+DlqTestEvent $: no event schema
