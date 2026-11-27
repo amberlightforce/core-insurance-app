@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { Button } from 'react-aria-components';
+import { cx } from '../../../design-system/utils/cx';
 import { useTranslation } from 'react-i18next';
 
 import { useRegionFormat } from '../../../design-system';
@@ -36,8 +37,8 @@ export function ViewsRail({ active, counts, onSelect }: ViewsRailProps) {
         return (
           <Button
             key={queue}
-            className={styles.view}
-            aria-current={queue === active ? 'true' : undefined}
+            className={cx(styles.view)}
+            {...(queue === active ? { 'aria-current': 'true' as const } : {})}
             onPress={() => {
               onSelect(queue);
             }}
