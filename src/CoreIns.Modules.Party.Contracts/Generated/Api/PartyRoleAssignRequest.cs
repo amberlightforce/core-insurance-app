@@ -4,39 +4,27 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.PartyRole.assign request. PRD inputs: "party, role, context, period"</summary>
+/// <summary>pty.PartyRole.assign request (BO-PTY-03, REQ-PTY-002). Gives a party a role, optionally within a context object (a policy, claim, account...). The same party, role type and context cannot hold two overlapping periods (PTY-ERR-ROLE-DUPLICATE). A VENDOR role needs the party to have a verified AFM (vendor master, REQ-PTY-096).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PartyRoleAssignRequest
 {
-    /// <summary>PRD: "party"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("party")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Party { get; init; }
+    /// <summary>Contract member 'partyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PartyId { get; init; }
 
-    /// <summary>PRD: "role"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("role")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Role { get; init; }
+    /// <summary>Role catalogue code, for example POLICYHOLDER, INSURED, BENEFICIARY, CLAIMANT, PAYEE, VENDOR</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("roleType")]
+    public required string RoleType { get; init; }
 
-    /// <summary>PRD: "context"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("context")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Context { get; init; }
+    /// <summary>The business object the role is held in; null for a party-level role</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contextRef")]
+    public global::CoreIns.SharedKernel.Identifiers.ObjectRef? ContextRef { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    /// <summary>First day of the role; default today</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validFrom")]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidFrom { get; init; }
+
+    /// <summary>Day the role ends (exclusive); null for open-ended</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validTo")]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidTo { get; init; }
 }

@@ -5,7 +5,7 @@
 
 | Wave | Phase | Items | P0 | Modules | Status |
 |---|---|---|---|---|---|
-| 6 | MVP | 15 | 8 | WEB, PTY, PFC, RAT, UW, POL, RI, FIN, DOC, PLT, DAT, MIG | not started |
+| 6 | MVP | 15 | 8 | WEB, PTY, PFC, RAT, UW, POL, RI, FIN, DOC, PLT, DAT, MIG | done |
 | 7 | MVP | 15 | 5 | PTY, PFC, UW, BIL, CLM, RI, FIN, DOC, CHN, DAT, MIG | not started |
 | 8 | MVP | 15 | 4 | PTY, PFC, RAT, POL, BIL, CLM, RI, FIN, DAT, MIG, MKT | not started |
 | 9 | MVP | 15 | 2 | PTY, RAT, POL, CLM, RI, FIN, DOC, CMP, CHN, PLT, MIG | not started |

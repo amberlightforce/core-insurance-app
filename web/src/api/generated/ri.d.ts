@@ -3443,44 +3443,73 @@ export interface components {
         /** @description Typed from REQ-RI-003, REQ-RI-128. PRD outputs: "batch id" */
         RecoveryRecalculateResponse: {
             batchId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            contractYear: number;
+            /** @description Delta rows the restatement booked (0 when the booked recoveries already equalled the full recalculation) */
+            rowsBooked: number;
         };
         /** @description ri.Occurrence.link request. PRD inputs: "claim ids, reason" */
         OccurrenceLinkRequest: {
-            /** @description PRD: "claim ids" */
-            claimIds?: components["schemas"]["Uuid"][];
+            /** @description PRD: "claim ids"; all under one contract (a link needs at least two) */
+            claimIds: components["schemas"]["Uuid"][];
             /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            reason: string;
         };
         /** @description ri.Occurrence.link result. PRD outputs: "occurrence" */
         OccurrenceLinkResponse: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
+            occurrence: components["schemas"]["OccurrenceView"];
+        };
+        /** @description A group of claims treated as one occurrence for the per-occurrence layers of a contract (REQ-RI-115). */
+        OccurrenceView: {
+            occurrenceId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            contractYear: number;
+            /** @description The claims currently linked (empty once the occurrence is dissolved) */
+            claimIds: components["schemas"]["Uuid"][];
+            reason?: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "DISSOLVED";
         };
         /** @description ri.Occurrence.unlink request. PRD inputs: "claim ids, reason" */
         OccurrenceUnlinkRequest: {
-            /** @description PRD: "claim ids" */
-            claimIds?: components["schemas"]["Uuid"][];
+            /** @description PRD: "claim ids"; all under one contract */
+            claimIds: components["schemas"]["Uuid"][];
             /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            reason: string;
         };
         /** @description ri.Occurrence.unlink result. PRD outputs: "occurrence" */
         OccurrenceUnlinkResponse: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
+            occurrence: components["schemas"]["OccurrenceView"];
         };
         /** @description ri.Recovery.adjust request. PRD inputs: "occurrence, amount, reason" */
         RecoveryAdjustRequest: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "amount" */
-            amount?: components["schemas"]["Money"];
+            contractId: components["schemas"]["Uuid"];
+            /** @description PRD: "occurrence" - the claim, or any claim of the linked occurrence */
+            claimId: components["schemas"]["Uuid"];
+            layerId: components["schemas"]["Uuid"];
+            /** @description PRD: "amount" - signed change of the incurred recoverable, EUR, split over the panel by largest remainder */
+            amount: components["schemas"]["Money"];
             /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            reason: string;
         };
         /** @description ri.Recovery.adjust result. PRD outputs: "item" */
         RecoveryAdjustResponse: {
-            /** @description PRD: "item" */
-            item?: components["schemas"]["Unspecified"];
+            item: components["schemas"]["RecoveryAdjustmentItem"];
+        };
+        /** @description One manual adjustment (a sealed delta, never an update). */
+        RecoveryAdjustmentItem: {
+            adjustmentId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            /** @description The claim the adjustment is booked on (the representative claim of a linked occurrence) */
+            claimId: components["schemas"]["Uuid"];
+            layerId: components["schemas"]["Uuid"];
+            amount: components["schemas"]["Money"];
+            reason: string;
+            recordedAt: components["schemas"]["Instant"];
+            parts: {
+                participantPartyId: components["schemas"]["Uuid"];
+                amount: components["schemas"]["Money"];
+            }[];
         };
         /** @description ri.CatOccurrence.propose request. PRD inputs: "cat code, contract, windows, damage ratio" */
         CatOccurrenceProposeRequest: {
@@ -3556,8 +3585,21 @@ export interface components {
         };
         /** @description ri.AggregateTracker.get result. PRD outputs: "schedule" */
         AggregateTrackerGetResponse: {
-            /** @description PRD: "schedule" */
-            schedule?: components["schemas"]["Unspecified"];
+            schedule: components["schemas"]["AggregateTrackerRow"][];
+        };
+        /** @description Aggregate position of one layer of one contract year (booked recoveries plus manual adjustments, after the placed percentage). */
+        AggregateTrackerRow: {
+            contractId: components["schemas"]["Uuid"];
+            contractYear: number;
+            layerId: components["schemas"]["Uuid"];
+            layerNo: number;
+            /** @description Annual aggregate limit of the layer (null = unlimited) */
+            aggregateLimit?: components["schemas"]["Money"] | null;
+            recoverableIncurred: components["schemas"]["Money"];
+            recoverablePaid: components["schemas"]["Money"];
+            recoverableOutstanding: components["schemas"]["Money"];
+            /** @description Part of recoverableIncurred that comes from manual adjustments */
+            adjustments: components["schemas"]["Money"];
         };
         /** @description ri.DepositSchedule.get result. PRD outputs: "schedule, adjustment" */
         DepositScheduleGetResponse: {
@@ -7236,11 +7278,11 @@ export interface operations {
     };
     "ri.AggregateTracker.get": {
         parameters: {
-            query?: {
-                /** @description PRD: "layer" */
+            query: {
+                /** @description PRD: "layer" - a layer id or a layer number */
                 layer?: string;
-                /** @description PRD: "year" */
-                year?: string;
+                /** @description PRD: "year" - the contract year */
+                year: number;
             };
             header?: {
                 /**
