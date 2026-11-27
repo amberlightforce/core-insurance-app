@@ -95,7 +95,7 @@ public sealed class SuspenseTests(PostgresFixture database) : IClassFixture<Post
         filtered!["items"]!.AsArray().Count.ShouldBe(1);
         (await Slice.GetAsync($"/api/bil/v1/suspense?billingAccountId={Guid.CreateVersion7()}")).Body!["items"]!.AsArray().Count.ShouldBe(0);
         (await Slice.GetAsync($"/api/bil/v1/suspense?state=ALLOCATED&billingAccountId={account}")).Body!["items"]!.AsArray().Count.ShouldBe(0);
-        (await Slice.GetAsync("/api/bil/v1/suspense?state=NOPE")).Response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableContent);
+        (await Slice.GetAsync("/api/bil/v1/suspense?state=NOPE")).Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
         // Money out and moves are for billing roles only.
         (await Slice.GetAsync("/api/bil/v1/suspense", roles: Underwriter)).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
