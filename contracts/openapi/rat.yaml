@@ -1562,6 +1562,24 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: productCode
+        in: query
+        required: false
+        description: 'Contract addition (BO-RAT-04): filter by product code'
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        description: 'Contract addition (BO-RAT-04): filter by lifecycle status (DRAFT, SCHEDULED, ACTIVE, SUPERSEDED, WITHDRAWN)'
+        schema:
+          type: string
+      - name: dataStatus
+        in: query
+        required: false
+        description: 'Contract addition (BO-RAT-04): ILLUSTRATIVE_TEST_DATA or APPROVED'
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -1610,6 +1628,18 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: artefactHash
+        in: query
+        required: true
+        description: 'Contract addition (BO-RAT-04): hash of the artefact'
+        schema:
+          type: string
+      - name: productVersion
+        in: query
+        required: false
+        description: 'Contract addition (BO-RAT-04): product version to check against (default: the pinned one)'
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -4108,26 +4138,114 @@ components:
       description: 'rat.RatingArtifact.get result. PRD outputs: "manifest, status, compatibility records"'
       properties:
         manifest:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/RatingArtifactManifest'
           description: 'PRD: "manifest"'
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/RatingArtifactStatus'
           description: 'PRD: "status"'
         compatibilityRecords:
-          $ref: common.yaml#/components/schemas/Unspecified
+          type: array
+          items:
+            $ref: '#/components/schemas/RatingArtifactCompatibilityRecord'
           description: 'PRD: "compatibility records"'
+    RatingArtifactManifest:
+      type: object
+      description: 'Contract addition (BO-RAT-04): the artefact manifest (REQ-RAT-061), pinning table hashes to a product version.'
+      properties:
+        artefactHash:
+          type: string
+          description: SHA-256 content hash of the artefact.
+        artefactCode:
+          type: string
+        label:
+          type: string
+        productCode:
+          type: string
+        productVersion:
+          type: string
+        engineVersion:
+          type: string
+        dataStatus:
+          type: string
+          description: ILLUSTRATIVE_TEST_DATA or APPROVED (D-SLC-04).
+        stepCount:
+          type: integer
+        tables:
+          type: array
+          items:
+            type: object
+            properties:
+              slot:
+                type: string
+              hash:
+                type: string
+            required: [slot, hash]
+        createdAt:
+          type: string
+          format: date-time
+      required: [artefactHash, artefactCode, label, productCode, productVersion, engineVersion, dataStatus, stepCount, tables, createdAt]
+    RatingArtifactStatus:
+      type: object
+      description: 'Contract addition (BO-RAT-04): lifecycle status derived from the activation rows. DRAFT = no activation yet (hidden from roles that may only see released artefacts).'
+      properties:
+        lifecycle:
+          type: string
+          enum: [DRAFT, SCHEDULED, ACTIVE, SUPERSEDED, WITHDRAWN]
+        effectiveFrom:
+          type: [string, 'null']
+          format: date
+        effectiveTo:
+          type: [string, 'null']
+          format: date
+        activations:
+          type: array
+          items:
+            type: object
+            properties:
+              activationId:
+                type: string
+              productVersion:
+                type: string
+              status:
+                type: string
+              effectiveFrom:
+                type: string
+                format: date
+              effectiveTo:
+                type: [string, 'null']
+                format: date
+            required: [activationId, productVersion, status, effectiveFrom, effectiveTo]
+      required: [lifecycle, effectiveFrom, effectiveTo, activations]
+    RatingArtifactCompatibilityRecord:
+      type: object
+      description: 'Contract addition (BO-RAT-04): whether the artefact is pinned to or activated for a product version.'
+      properties:
+        productCode:
+          type: string
+        productVersion:
+          type: string
+        relation:
+          type: string
+          enum: [PINNED, ACTIVATED]
+        compatible:
+          type: boolean
+        reason:
+          type: [string, 'null']
+      required: [productCode, productVersion, relation, compatible, reason]
     RatingArtifactListItem:
       type: object
       description: 'rat.RatingArtifact.list result. PRD outputs: "manifest, status, compatibility records"'
       properties:
         manifest:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/RatingArtifactManifest'
           description: 'PRD: "manifest"'
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/RatingArtifactStatus'
           description: 'PRD: "status"'
         compatibilityRecords:
-          $ref: common.yaml#/components/schemas/Unspecified
+          type: array
+          items:
+            $ref: '#/components/schemas/RatingArtifactCompatibilityRecord'
           description: 'PRD: "compatibility records"'
     RatingArtifactListPage:
       allOf:
@@ -4144,13 +4262,15 @@ components:
       description: 'rat.RatingArtifact.compatibility result. PRD outputs: "manifest, status, compatibility records"'
       properties:
         manifest:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/RatingArtifactManifest'
           description: 'PRD: "manifest"'
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
+          $ref: '#/components/schemas/RatingArtifactStatus'
           description: 'PRD: "status"'
         compatibilityRecords:
-          $ref: common.yaml#/components/schemas/Unspecified
+          type: array
+          items:
+            $ref: '#/components/schemas/RatingArtifactCompatibilityRecord'
           description: 'PRD: "compatibility records"'
     RatingChangeSetCreateRequest:
       type: object

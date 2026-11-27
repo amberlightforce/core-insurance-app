@@ -1310,6 +1310,26 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: partyId
+        in: query
+        required: false
+        description: Accounts this party holds or belongs to (active membership)
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - PENDING
+          - ACTIVE
+          - WITHDRAWN
+      - name: accountNumber
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
       responses:
         '200':
           description: Success
@@ -5665,22 +5685,144 @@ components:
             items:
               $ref: '#/components/schemas/RelationshipQueryItem'
       description: Page of pty.Relationship.query results (cursor pagination, contract §3.5.5)
+    AccountView:
+      type: object
+      description: 'A PTY account (BO-PTY-04, REQ-PTY-004): the holder, its members and its status. Accounts start PENDING (D-CON-05) and turn ACTIVE once the holder has a verified identifier; WITHDRAWN is terminal.'
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        accountNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        accountType:
+          type: string
+          enum:
+          - INDIVIDUAL
+          - HOUSEHOLD
+          - BUSINESS
+        name:
+          oneOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+        status:
+          type: string
+          enum:
+          - PENDING
+          - ACTIVE
+          - WITHDRAWN
+        holderPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The party holding the POLICYHOLDER role of this account (one at a time)
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountMemberView'
+          description: Current members (removed members are not listed)
+        withdrawnOn:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Day the account was withdrawn
+        withdrawReason:
+          oneOf:
+          - type: string
+          - type: 'null'
+          description: Reason given at withdrawal
+      required:
+      - accountId
+      - accountNumber
+      - accountType
+      - status
+      - holderPartyId
+      - members
+    AccountMemberView:
+      type: object
+      description: A party that belongs to an account (household member, employee, dependant)
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        memberRole:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: SPOUSE, PARTNER, CHILD, DEPENDANT, EMPLOYEE or OTHER
+        addedOn:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      required:
+      - partyId
+      - memberRole
+      - addedOn
     AccountCreateRequest:
       type: object
-      description: 'pty.Account.create request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Account.create request (BO-PTY-04). The holder party must exist and be changeable; the account starts PENDING unless the holder already has a verified identifier. Supports dry-run.'
+      properties:
+        holderPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        accountType:
+          type: string
+          enum:
+          - INDIVIDUAL
+          - HOUSEHOLD
+          - BUSINESS
+        name:
+          oneOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+      required:
+      - holderPartyId
+      - accountType
     AccountCreateResponse:
       type: object
-      description: 'pty.Account.create result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.create result'
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountView'
+      required:
+      - account
     AccountGetResponse:
       type: object
-      description: 'pty.Account.get result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.get result'
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountView'
+      required:
+      - account
     AccountSearchItem:
       type: object
-      description: 'pty.Account.search result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.search result row (BO-PTY-04)'
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        accountNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        accountType:
+          type: string
+          enum:
+          - INDIVIDUAL
+          - HOUSEHOLD
+          - BUSINESS
+        name:
+          oneOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+        status:
+          type: string
+          enum:
+          - PENDING
+          - ACTIVE
+          - WITHDRAWN
+        holderPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        memberCount:
+          type: integer
+          minimum: 0
+      required:
+      - accountId
+      - accountNumber
+      - accountType
+      - status
+      - holderPartyId
+      - memberCount
     AccountSearchPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -5693,36 +5835,86 @@ components:
       description: Page of pty.Account.search results (cursor pagination, contract §3.5.5)
     AccountSetHolderRequest:
       type: object
-      description: 'pty.Account.setHolder request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Account.setHolder request (BO-PTY-04). Ends the current holder role and starts the new one; an account has one holder at a time.'
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        holderPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - accountId
+      - holderPartyId
     AccountSetHolderResponse:
       type: object
-      description: 'pty.Account.setHolder result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.setHolder result'
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountView'
+      required:
+      - account
     AccountAddMemberRequest:
       type: object
-      description: 'pty.Account.addMember request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Account.addMember request (BO-PTY-04). The member cannot be the holder or already a member; a HOUSEHOLD member can belong to one household only (PTY-ERR-MEMBER-IN-USE); the account member limit applies (PTY-ERR-MEMBER-LIMIT).'
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        memberRole:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: SPOUSE, PARTNER, CHILD, DEPENDANT, EMPLOYEE or OTHER
+      required:
+      - accountId
+      - partyId
+      - memberRole
     AccountAddMemberResponse:
       type: object
-      description: 'pty.Account.addMember result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.addMember result'
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountView'
+      required:
+      - account
     AccountRemoveMemberRequest:
       type: object
-      description: 'pty.Account.removeMember request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Account.removeMember request (BO-PTY-04)'
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - accountId
+      - partyId
     AccountRemoveMemberResponse:
       type: object
-      description: 'pty.Account.removeMember result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.removeMember result'
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountView'
+      required:
+      - account
     AccountWithdrawRequest:
       type: object
-      description: 'pty.Account.withdraw request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Account.withdraw request (BO-PTY-04). Refused while the holder has a policy in force, scheduled or pending cancellation (PTY-ERR-ACCOUNT-HAS-JOBS).'
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - accountId
+      - reason
     AccountWithdrawResponse:
       type: object
-      description: 'pty.Account.withdraw result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.withdraw result'
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountView'
+      required:
+      - account
     AccountMergeRequest:
       type: object
       description: 'pty.Account.merge request. PRD inputs: "source, target, policies"'

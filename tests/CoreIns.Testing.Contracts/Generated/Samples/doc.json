@@ -52,7 +52,13 @@
       "limit": 1
     },
     "doc.Document.preview": {
-      "rendition": "unspecified"
+      "documentType": "sample",
+      "templateId": "01921de7-63b6-74e1-8626-357640671295",
+      "templateVersion": 1,
+      "templateStatus": "sample",
+      "language": "el",
+      "title": "sample",
+      "html": "sample"
     },
     "doc.Document.request": {
       "documentId": "01924637-e43f-71dd-8793-219538569988",
@@ -236,8 +242,26 @@
       "nextCursor": "sample",
       "limit": 1
     },
+    "DocumentPreviewRequest": {
+      "documentType": "sample",
+      "language": "el",
+      "validAt": "2026-10-07",
+      "templateId": "01921e15-d99c-7f7e-8817-b473aee78a78",
+      "productCode": "sample",
+      "lineOfBusiness": "sample",
+      "jurisdiction": "sample",
+      "payload": {
+        "sample": "sample"
+      }
+    },
     "DocumentPreviewResponse": {
-      "rendition": "unspecified"
+      "documentType": "sample",
+      "templateId": "01923d67-fd7c-7e40-80cc-79e196c2467a",
+      "templateVersion": 1,
+      "templateStatus": "sample",
+      "language": "el",
+      "title": "sample",
+      "html": "sample"
     },
     "DocumentRenderAsOfRequest": {
       "subject": "unspecified",

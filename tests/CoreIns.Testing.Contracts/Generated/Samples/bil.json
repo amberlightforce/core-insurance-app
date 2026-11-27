@@ -2973,52 +2973,186 @@
       "recordVersion": 1
     },
     "SuspenseListItem": {
-      "items": [
-        "unspecified"
-      ],
-      "suggestions": "unspecified"
+      "suspenseItemId": "0192a669-f66e-7e30-8495-01fd19ac2041",
+      "receiptId": "0192a5b7-04e6-7c2d-8584-849a3bd7ad28",
+      "receiptNumber": "SAMPLE-000001",
+      "billingAccountId": "0192b6a2-f3f5-73d5-86b6-bb27e62d2ff2",
+      "state": "OPEN",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "reason": "SAMPLE_CODE",
+      "bankReference": "Sample text",
+      "valueDate": "2026-10-07",
+      "refundId": "0192da5b-7a25-7c99-8997-3e52869c103f",
+      "recordedAt": "2026-10-07T09:00:00Z",
+      "resolvedAt": "2026-10-07T09:00:00Z"
     },
     "SuspenseListPage": {
       "items": [
         {
-          "items": [
-            "unspecified"
-          ],
-          "suggestions": "unspecified"
+          "suspenseItemId": "01921491-5f7a-769e-88fe-159b82b3a32f",
+          "receiptId": "01924e73-0347-7ecd-83a2-8d24a7febe73",
+          "receiptNumber": "SAMPLE-000001",
+          "billingAccountId": "0192a291-e091-77c3-8fb8-28ed8806307a",
+          "state": "OPEN",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "reason": "SAMPLE_CODE",
+          "bankReference": "Sample text",
+          "valueDate": "2026-10-07",
+          "refundId": "0192a836-d5a6-7f1c-89ec-14aa0313c490",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "resolvedAt": "2026-10-07T09:00:00Z"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "SuspenseRefundToSenderRequest": {
-      "filters": "unspecified",
-      "item": "unspecified"
+      "suspenseItemId": "0192b94d-6a17-71bd-80b3-cb7f78f600a7",
+      "payeeAccountId": "0192bef9-f09b-7e12-8204-ad9e931d19f3",
+      "reasonCode": "SAMPLE_CODE",
+      "comment": "Sample text"
     },
     "SuspenseRefundToSenderResponse": {
-      "items": [
-        "unspecified"
-      ],
-      "suggestions": "unspecified"
+      "item": {
+        "suspenseItemId": "0192cbf0-5aad-76d7-8c7e-55f5dffd8f82",
+        "receiptId": "0192db06-654f-76fc-83e1-0998b9d7dfdc",
+        "receiptNumber": "SAMPLE-000001",
+        "billingAccountId": "019276d1-28a5-7d19-85c7-137c0d81b57e",
+        "state": "OPEN",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "reason": "SAMPLE_CODE",
+        "bankReference": "Sample text",
+        "valueDate": "2026-10-07",
+        "refundId": "01922333-ea92-7bf7-8a27-d8eb3cdee7b0",
+        "recordedAt": "2026-10-07T09:00:00Z",
+        "resolvedAt": "2026-10-07T09:00:00Z"
+      },
+      "refund": {
+        "refundId": "0192dbd7-74ef-7186-880b-1a70e2aa354e",
+        "billingAccountId": "019279e9-916d-7bc2-8488-f049626539c2",
+        "state": "PROPOSED",
+        "approvalState": "NOT_REQUIRED",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "breakdown": [
+          {
+            "policyId": "01924202-ef2d-7cd5-87cc-bb3625953e83",
+            "policyTermId": "0192ff8b-ed75-7632-84f4-bf9c7c352c37",
+            "transactionId": "0192df02-f227-7026-893a-f1838ea5870a",
+            "creditNoteId": "0192b1e0-8e94-7d83-83b1-b591084a1aa9",
+            "chargeType": "SAMPLE_CODE",
+            "chargeCategory": "SAMPLE_CODE",
+            "transactionKind": "sample",
+            "cancellationSource": "SAMPLE_CODE",
+            "treatmentRuleId": "SAMPLE_CODE",
+            "legalStatus": "SAMPLE_CODE",
+            "provisional": true,
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "netting": [
+          {
+            "kind": "OPEN_INVOICE",
+            "invoiceId": "01926e28-6777-7f9f-8a25-cb34ba800071",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "payee": {
+          "payeePartyId": "01924c50-2073-7913-8743-7cb42c66d28d",
+          "payeeAccountId": "0192bcfc-f40f-7e38-8f46-c5a15c68adbe",
+          "maskedIban": "GR1601101250000000012300695",
+          "verificationStatus": "Unverified"
+        },
+        "payoutMethod": "SAMPLE_CODE",
+        "reasonCode": "SAMPLE_CODE",
+        "sourcePolicyIds": [
+          "01924ae7-bc95-7537-8603-36442d20f47d"
+        ],
+        "requestedBy": "0192f899-8b6f-7378-80fb-f1042fe9ce60",
+        "decidedBy": "01923863-dfd8-79e9-83bc-1632ace2c3f2",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "Sample text",
+        "disbursementId": "019215e9-d9b4-77e4-8602-b95fbdd31b6c",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
     },
     "SuspenseSuggestRequest": {
-      "filters": "unspecified",
-      "item": "unspecified"
+      "suspenseItemId": "01925cae-e011-7308-8368-683eb2b1adcf"
     },
     "SuspenseSuggestResponse": {
-      "items": [
-        "unspecified"
+      "item": {
+        "suspenseItemId": "0192032f-4f3e-790e-8937-14d665307ef2",
+        "receiptId": "0192cbbb-93db-7f6c-8ebc-fabf8858be90",
+        "receiptNumber": "SAMPLE-000001",
+        "billingAccountId": "0192d602-98cf-7c35-80d6-50cacb31c0a7",
+        "state": "OPEN",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "reason": "SAMPLE_CODE",
+        "bankReference": "Sample text",
+        "valueDate": "2026-10-07",
+        "refundId": "01924e57-b139-7d1d-80d8-91cb2eb7b166",
+        "recordedAt": "2026-10-07T09:00:00Z",
+        "resolvedAt": "2026-10-07T09:00:00Z"
+      },
+      "suggestions": [
+        {
+          "invoiceNo": "Sample text",
+          "score": 1,
+          "exactAmount": true
+        }
       ],
-      "suggestions": "unspecified"
+      "note": "Sample text"
+    },
+    "SuspenseSuggestion": {
+      "invoiceNo": "Sample text",
+      "score": 1,
+      "exactAmount": true
     },
     "SuspenseTransferRequest": {
-      "filters": "unspecified",
-      "item": "unspecified"
+      "suspenseItemId": "01929590-bd2b-791f-8c13-d80297b0d047",
+      "targetBillingAccountId": "019248ed-38d0-7faf-8e23-71ab1727809c",
+      "comment": "Sample text"
     },
     "SuspenseTransferResponse": {
-      "items": [
-        "unspecified"
-      ],
-      "suggestions": "unspecified"
+      "item": {
+        "suspenseItemId": "01926800-7fab-7133-8373-45f498a6cb80",
+        "receiptId": "019289bd-3a27-7fe4-8dc2-3aa620c0a27c",
+        "receiptNumber": "SAMPLE-000001",
+        "billingAccountId": "0192274e-803d-75d8-8897-7cfc738dda0e",
+        "state": "OPEN",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "reason": "SAMPLE_CODE",
+        "bankReference": "Sample text",
+        "valueDate": "2026-10-07",
+        "refundId": "0192687f-4766-7913-8ee0-e57629a20862",
+        "recordedAt": "2026-10-07T09:00:00Z",
+        "resolvedAt": "2026-10-07T09:00:00Z"
+      },
+      "ledgerEntryId": "01928a6e-e9c0-727b-83c9-2ad45ba5bb4b"
     },
     "TaxLevyDetailResponse": {
       "totals": "unspecified",

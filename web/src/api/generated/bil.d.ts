@@ -2776,58 +2776,72 @@ export interface components {
             /** @description PRD: "allocations" */
             allocations?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Suspense.list result. PRD outputs: "items, suggestions" */
+        /**
+         * @description State of a suspense item: OPEN (unapplied cash awaiting a decision), REFUND_PENDING (a refund to the sender waits for approval), ALLOCATED (applied to invoices), REFUNDED (paid back to the sender)
+         * @enum {string}
+         */
+        SuspenseState: "OPEN" | "REFUND_PENDING" | "ALLOCATED" | "REFUNDED";
+        /** @description An unmatched payment held in suspense (REQ-BIL-135): the receipt, its unapplied amount and why it could not be applied */
         SuspenseListItem: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "suggestions" */
-            suggestions?: components["schemas"]["Unspecified"];
+            suspenseItemId: components["schemas"]["Uuid"];
+            receiptId: components["schemas"]["Uuid"];
+            receiptNumber: components["schemas"]["BusinessNumber"];
+            /** @description Account holding the cash now (changes with a transfer) */
+            billingAccountId: components["schemas"]["Uuid"];
+            state: components["schemas"]["SuspenseState"];
+            amount: components["schemas"]["Money"];
+            /** @description Why the receipt is unapplied, e.g. AMOUNT_MISMATCH, NO_OPEN_INVOICE, AMBIGUOUS_MATCH, CONCURRENT_ALLOCATION, TRANSFERRED */
+            reason: components["schemas"]["Code"];
+            bankReference?: components["schemas"]["Text"];
+            valueDate: components["schemas"]["LocalDate"];
+            /** @description The refund-to-sender of the item, when one was requested */
+            refundId?: components["schemas"]["Uuid"];
+            recordedAt: components["schemas"]["Instant"];
+            resolvedAt?: components["schemas"]["Instant"];
         };
         /** @description Page of bil.Suspense.list results (cursor pagination, contract §3.5.5) */
         SuspenseListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["SuspenseListItem"][];
         };
-        /** @description bil.Suspense.suggest request. PRD inputs: "filters, item" */
+        /** @description bil.Suspense.suggest request. The payment and the open invoices are loaded server-side from the item; nothing the client sends feeds the scoring. */
         SuspenseSuggestRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
-            /** @description PRD: "item" */
-            item?: components["schemas"]["Unspecified"];
+            suspenseItemId: components["schemas"]["Uuid"];
         };
-        /** @description bil.Suspense.suggest result. PRD outputs: "items, suggestions" */
+        /** @description One ranked invoice candidate (deterministic score; a suggestion only, allocation stays a manual action) */
+        SuspenseSuggestion: {
+            invoiceNo: components["schemas"]["Text"];
+            score: number;
+            exactAmount: boolean;
+        };
+        /** @description bil.Suspense.suggest result: up to three ranked candidates */
         SuspenseSuggestResponse: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "suggestions" */
-            suggestions?: components["schemas"]["Unspecified"];
+            item: components["schemas"]["SuspenseListItem"];
+            suggestions: components["schemas"]["SuspenseSuggestion"][];
+            note?: components["schemas"]["Text"];
         };
-        /** @description bil.Suspense.transfer request. PRD inputs: "filters, item" */
+        /** @description bil.Suspense.transfer request: move the unapplied cash of an OPEN item to another billing account of the legal entity (same currency, Active). Posts a ledger move (SUSPENSE_TRANSFERRED) and keeps the item OPEN on the target account. */
         SuspenseTransferRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
-            /** @description PRD: "item" */
-            item?: components["schemas"]["Unspecified"];
+            suspenseItemId: components["schemas"]["Uuid"];
+            targetBillingAccountId: components["schemas"]["Uuid"];
+            comment?: components["schemas"]["Text"];
         };
-        /** @description bil.Suspense.transfer result. PRD outputs: "items, suggestions" */
+        /** @description bil.Suspense.transfer result */
         SuspenseTransferResponse: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "suggestions" */
-            suggestions?: components["schemas"]["Unspecified"];
+            item: components["schemas"]["SuspenseListItem"];
+            ledgerEntryId?: components["schemas"]["Uuid"];
         };
-        /** @description bil.Suspense.refundToSender request. PRD inputs: "filters, item" */
+        /** @description bil.Suspense.refundToSender request: pay the unapplied cash of an OPEN item back to the sender. The refund path applies: the payee is a verified REFUND payee account (VoP), sanctions screening, BIL.REFUND authority and a second approver (decided with bil.Refund.decide), then the disbursement. The IBAN never travels here. */
         SuspenseRefundToSenderRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
-            /** @description PRD: "item" */
-            item?: components["schemas"]["Unspecified"];
+            suspenseItemId: components["schemas"]["Uuid"];
+            /** @description Verified payee account with purpose REFUND of the sender */
+            payeeAccountId: components["schemas"]["Uuid"];
+            reasonCode: components["schemas"]["Code"];
+            comment?: components["schemas"]["Text"];
         };
-        /** @description bil.Suspense.refundToSender result. PRD outputs: "items, suggestions" */
+        /** @description bil.Suspense.refundToSender result: the item (REFUND_PENDING) and the refund waiting for approval */
         SuspenseRefundToSenderResponse: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "suggestions" */
-            suggestions?: components["schemas"]["Unspecified"];
+            item: components["schemas"]["SuspenseListItem"];
+            refund: components["schemas"]["RefundView"];
         };
         /** @description bil.IntermediaryCollection.report request. PRD inputs: "producer code, items, receipt data" */
         IntermediaryCollectionReportRequest: {
@@ -5602,6 +5616,9 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                billingAccountId?: components["schemas"]["Uuid"];
+                /** @description Default OPEN (the unapplied cash that still needs a decision) */
+                state?: components["schemas"]["SuspenseState"];
             };
             header?: {
                 /**
@@ -5678,6 +5695,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -5729,6 +5747,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -5780,6 +5799,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
