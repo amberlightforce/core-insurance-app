@@ -4,28 +4,16 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.Reconciliation.run request. PRD inputs: "key, date, items"</summary>
+/// <summary>fin.Reconciliation.run request: runs one definition, or all of them when none is named, for a period.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReconciliationRunRequest
 {
-    /// <summary>PRD: "key"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("key")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Key { get; init; }
+    /// <summary>Calendar month, yyyy-MM.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
+    public required string Period { get; init; }
 
-    /// <summary>PRD: "date"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("date")]
+    /// <summary>Contract member 'definition'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("definition")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? Date { get; init; }
-
-    /// <summary>PRD: "items"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Items { get; init; }
+    public string? Definition { get; init; }
 }

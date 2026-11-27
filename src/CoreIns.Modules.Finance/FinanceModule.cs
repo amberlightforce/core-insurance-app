@@ -132,6 +132,12 @@ public static class FinanceModule
         // BO-FIN-06a: the earning engine; its run gates the EARNING_RUN close task.
         services.AddScoped<Services.EarningEngine>();
         services.AddScoped<Domain.ICloseTaskGate, Commands.EarningRunGate>();
+        // BO-FIN-08: the reconciliation framework; its open breaks gate the RECONCILIATIONS close task.
+        services.AddScoped<Services.ReconciliationService>();
+        services.AddScoped<Domain.ICloseTaskGate, Commands.ReconciliationsCloseGate>();
+        services.AddCommand<Commands.RunReconciliation, CoreIns.Modules.Finance.Contracts.Api.ReconciliationRunResponse, Commands.RunReconciliationHandler>(CommandDescriptor.For("fin.Reconciliation.run"));
+        services.AddCommand<Commands.MatchReconciliationBreak, CoreIns.Modules.Finance.Contracts.Api.ReconciliationMatchResponse, Commands.MatchReconciliationBreakHandler>(CommandDescriptor.For("fin.Reconciliation.match"));
+        services.AddCommand<Commands.ExchangeReconciliationTotals, CoreIns.Modules.Finance.Contracts.Api.ReconciliationExchangeResponse, Commands.ExchangeReconciliationTotalsHandler>(CommandDescriptor.For("fin.Reconciliation.exchange"));
         services.AddCommand<Commands.RunEarning, CoreIns.Modules.Finance.Contracts.Api.EarningRunResponse, Commands.RunEarningHandler>(CommandDescriptor.For("fin.Earning.run"));
 
         services.AddOptions<FinanceOptions>().Bind(configuration.GetSection(FinanceOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
@@ -167,6 +173,8 @@ public static class FinanceModule
             .Describe("Όλες οι εργασίες κλεισίματος πρέπει να έχουν υπογραφεί και να μην εκκρεμεί κάποιος έλεγχος.", "Every close task must be signed off and no check may be pending."),
         ErrorDefinition.For(ModuleCode.FIN, "APPROVAL-REQUIRED", 422, "Απαιτείται δεύτερο πρόσωπο", "A second person is required")
             .Describe("Η ενέργεια πρέπει να γίνει ή να εγκριθεί από άλλο πρόσωπο.", "The action must be done or approved by a different person."),
+        ErrorDefinition.For(ModuleCode.FIN, "TOTALS-SCHEMA", 422, "Μη έγκυρα σύνολα ελέγχου", "Invalid control totals")
+            .Describe("Τα σύνολα ελέγχου πρέπει να έχουν νόμισμα, ποσό με έως 2 δεκαδικά και μία γραμμή ανά νόμισμα.", "Control totals need a currency, an amount with at most 2 decimals and one line per currency."),
         ErrorDefinition.For(ModuleCode.FIN, "PERIOD-LOCKED", 409, "Η περίοδος είναι κλειδωμένη", "The period is locked")
             .Describe("Η λογιστική περίοδος είναι κλειδωμένη.", "The accounting period is locked."),
     ];

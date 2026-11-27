@@ -1582,6 +1582,231 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.ReconBreakRow", b =>
+                {
+                    b.Property<Guid>("BreakId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("break_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DefinitionCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("definition_code");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("LastRunBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("last_run_by");
+
+                    b.Property<Guid>("LastRunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("last_run_id");
+
+                    b.Property<decimal>("LedgerAmount")
+                        .HasColumnType("numeric(19,2)")
+                        .HasColumnName("ledger_amount");
+
+                    b.Property<int?>("LedgerCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("ledger_count");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("PeriodCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("period_code");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("Resolution")
+                        .HasColumnType("text")
+                        .HasColumnName("resolution");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<decimal>("SourceAmount")
+                        .HasColumnType("numeric(19,2)")
+                        .HasColumnName("source_amount");
+
+                    b.Property<int?>("SourceCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("source_count");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.HasKey("BreakId")
+                        .HasName("pk_recon_break");
+
+                    b.HasIndex("LastRunId");
+
+                    b.HasIndex("RunId");
+
+                    b.HasIndex("LegalEntityId", "PeriodCode", "State")
+                        .HasDatabaseName("ix_recon_break_period");
+
+                    b.HasIndex("LegalEntityId", "DefinitionCode", "PeriodCode", "Currency", "Kind")
+                        .IsUnique()
+                        .HasDatabaseName("ux_recon_break_active")
+                        .HasFilter("state IN ('OPEN','ACCEPTED')");
+
+                    b.ToTable("recon_break", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_recon_break_kind", "kind IN ('AMOUNT','COUNT','MISSING_SOURCE','MISSING_LEDGER')");
+
+                            t.HasCheckConstraint("ck_recon_break_state", "state IN ('OPEN','ACCEPTED','RESOLVED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.ReconRunRow", b =>
+                {
+                    b.Property<Guid>("RunId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<string>("DefinitionCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("definition_code");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<int>("OpenBreaks")
+                        .HasColumnType("integer")
+                        .HasColumnName("open_breaks");
+
+                    b.Property<string>("PeriodCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("period_code");
+
+                    b.Property<DateTime>("RanAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("ran_at");
+
+                    b.Property<string>("RanBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ran_by");
+
+                    b.Property<int>("RunNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("run_no");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.Property<string>("Totals")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("totals");
+
+                    b.HasKey("RunId")
+                        .HasName("pk_recon_run");
+
+                    b.HasIndex("LegalEntityId", "DefinitionCode", "PeriodCode", "RunNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_recon_run_number");
+
+                    b.ToTable("recon_run", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_recon_run_period", "period_code ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'");
+
+                            t.HasCheckConstraint("ck_recon_run_state", "state IN ('CLEAN','BREAKS')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.ReconSourceTotalRow", b =>
+                {
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateOnly>("AsOf")
+                        .HasColumnType("date")
+                        .HasColumnName("as_of");
+
+                    b.Property<string>("Currency")
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<int?>("ItemCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("item_count");
+
+                    b.Property<string>("PeriodCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("period_code");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("received_at");
+
+                    b.Property<string>("ReceivedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("received_by");
+
+                    b.HasKey("LegalEntityId", "Source", "AsOf", "Currency")
+                        .HasName("pk_recon_source_total");
+
+                    b.HasIndex("LegalEntityId", "Source", "PeriodCode")
+                        .HasDatabaseName("ix_recon_source_total_period");
+
+                    b.ToTable("recon_source_total", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_recon_source_total_count", "item_count IS NULL OR item_count >= 0");
+
+                            t.HasCheckConstraint("ck_recon_source_total_currency", "currency ~ '^[A-Z]{3}$'");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Finance.MigrationImport.MigrationImportRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Finance.Persistence.JournalEntryRow", null)
@@ -1673,6 +1898,23 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_posting_rule_set");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.ReconBreakRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Finance.Persistence.ReconRunRow", null)
+                        .WithMany()
+                        .HasForeignKey("LastRunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_recon_break_last_run");
+
+                    b.HasOne("CoreIns.Modules.Finance.Persistence.ReconRunRow", null)
+                        .WithMany()
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_recon_break_run");
                 });
 #pragma warning restore 612, 618
         }

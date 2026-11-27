@@ -44,6 +44,12 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
 
     public DbSet<EarningRunRow> EarningRuns => Set<EarningRunRow>();
 
+    public DbSet<ReconSourceTotalRow> ReconSourceTotals => Set<ReconSourceTotalRow>();
+
+    public DbSet<ReconRunRow> ReconRuns => Set<ReconRunRow>();
+
+    public DbSet<ReconBreakRow> ReconBreaks => Set<ReconBreakRow>();
+
     public DbSet<EarnedPremiumRow> EarnedPremiums => Set<EarnedPremiumRow>();
 
     public DbSet<MigrationImport.MigrationImportRow> MigrationImports => Set<MigrationImport.MigrationImportRow>();
@@ -315,6 +321,7 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
         MigrationImport.FinanceMigrationModel.Configure(modelBuilder);
         ManualJournalModel.Configure(modelBuilder);
         EarningModel.Configure(modelBuilder);
+        ReconModel.Configure(modelBuilder);
 
         modelBuilder.Entity<JournalEntryRow>(entity =>
         {

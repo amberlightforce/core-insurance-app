@@ -75,7 +75,7 @@
       "closedForPosting": true
     },
     "fin.Reconciliation.exchange": {
-      "comparisonResult": "unspecified",
+      "comparisonResult": "MATCHED",
       "breakIds": [
         "01922b61-2f05-7750-87ce-2a5dd37599de"
       ]
@@ -1490,66 +1490,239 @@
       "goldenResults": "unspecified",
       "preview": "unspecified"
     },
-    "ReconciliationBreaksItem": {
-      "items": [
-        "unspecified"
+    "ReconBreakView": {
+      "breakId": "0192e6d9-e431-7796-8f36-bc86db9a71eb",
+      "runId": "01927506-4c2f-7556-88a9-00c4f37677f6",
+      "lastRunId": "01921b57-25c9-7af7-8294-dbaea3e081db",
+      "definition": "sample",
+      "period": "sample",
+      "currency": "sample",
+      "kind": "AMOUNT",
+      "state": "OPEN",
+      "sourceAmount": "sample",
+      "ledgerAmount": "sample",
+      "difference": "sample",
+      "sourceCount": 1,
+      "ledgerCount": 1,
+      "createdAt": "2026-10-07T09:00:00Z",
+      "decidedBy": "sample",
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "reason": "sample"
+    },
+    "ReconCurrencyTotal": {
+      "currency": "sam",
+      "sourceAmount": "sample",
+      "ledgerAmount": "sample",
+      "difference": "sample",
+      "sourceCount": 1,
+      "ledgerCount": 1
+    },
+    "ReconDefinitionView": {
+      "code": "sample",
+      "description": "sample",
+      "sourceModule": "sample",
+      "ledgerAccounts": [
+        "sample"
       ],
-      "matches": "unspecified"
+      "latestRun": {
+        "runId": "0192e8fd-6e84-7db8-8edc-9c95a3b9347f",
+        "definition": "sample",
+        "period": "sample",
+        "runNo": 1,
+        "state": "CLEAN",
+        "ranBy": "sample",
+        "ranAt": "2026-10-07T09:00:00Z",
+        "openBreaks": 1,
+        "currencies": [
+          {
+            "currency": "sam",
+            "sourceAmount": "sample",
+            "ledgerAmount": "sample",
+            "difference": "sample",
+            "sourceCount": 1,
+            "ledgerCount": 1
+          }
+        ]
+      },
+      "openBreaks": 1,
+      "acceptedBreaks": 1
+    },
+    "ReconRunView": {
+      "runId": "0192dd77-2a88-7826-83dc-650cff011c05",
+      "definition": "sample",
+      "period": "sample",
+      "runNo": 1,
+      "state": "CLEAN",
+      "ranBy": "sample",
+      "ranAt": "2026-10-07T09:00:00Z",
+      "openBreaks": 1,
+      "currencies": [
+        {
+          "currency": "sam",
+          "sourceAmount": "sample",
+          "ledgerAmount": "sample",
+          "difference": "sample",
+          "sourceCount": 1,
+          "ledgerCount": 1
+        }
+      ]
+    },
+    "ReconSourceTotal": {
+      "currency": "sam",
+      "amount": "sample",
+      "count": 1
     },
     "ReconciliationBreaksPage": {
       "items": [
         {
-          "items": [
-            "unspecified"
-          ],
-          "matches": "unspecified"
+          "breakId": "0192f004-27f4-7e35-8c44-809b2fc37298",
+          "runId": "0192a558-f120-72b1-890d-8a419add06d1",
+          "lastRunId": "0192037a-744e-79d7-8b80-314efc199f9f",
+          "definition": "sample",
+          "period": "sample",
+          "currency": "sample",
+          "kind": "AMOUNT",
+          "state": "OPEN",
+          "sourceAmount": "sample",
+          "ledgerAmount": "sample",
+          "difference": "sample",
+          "sourceCount": 1,
+          "ledgerCount": 1,
+          "createdAt": "2026-10-07T09:00:00Z",
+          "decidedBy": "sample",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "reason": "sample"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "ReconciliationDetailResponse": {
-      "items": [
-        "unspecified"
+      "period": "sample",
+      "definitions": [
+        {
+          "code": "sample",
+          "description": "sample",
+          "sourceModule": "sample",
+          "ledgerAccounts": [
+            "sample"
+          ],
+          "latestRun": {
+            "runId": "0192a56d-7486-7283-8254-286b160d8bb0",
+            "definition": "sample",
+            "period": "sample",
+            "runNo": 1,
+            "state": "CLEAN",
+            "ranBy": "sample",
+            "ranAt": "2026-10-07T09:00:00Z",
+            "openBreaks": 1,
+            "currencies": [
+              {
+                "currency": "sam",
+                "sourceAmount": "sample",
+                "ledgerAmount": "sample",
+                "difference": "sample",
+                "sourceCount": 1,
+                "ledgerCount": 1
+              }
+            ]
+          },
+          "openBreaks": 1,
+          "acceptedBreaks": 1
+        }
       ],
-      "matches": "unspecified"
+      "runs": [
+        {
+          "runId": "0192fc62-637b-7b4c-8bd2-20ff4c564b69",
+          "definition": "sample",
+          "period": "sample",
+          "runNo": 1,
+          "state": "CLEAN",
+          "ranBy": "sample",
+          "ranAt": "2026-10-07T09:00:00Z",
+          "openBreaks": 1,
+          "currencies": [
+            {
+              "currency": "sam",
+              "sourceAmount": "sample",
+              "ledgerAmount": "sample",
+              "difference": "sample",
+              "sourceCount": 1,
+              "ledgerCount": 1
+            }
+          ]
+        }
+      ]
     },
     "ReconciliationExchangeRequest": {
-      "source": "unspecified",
+      "source": "BIL",
       "date": "2026-10-07",
-      "totals": "unspecified"
+      "totals": [
+        {
+          "currency": "sam",
+          "amount": "sample",
+          "count": 1
+        }
+      ]
     },
     "ReconciliationExchangeResponse": {
-      "comparisonResult": "unspecified",
+      "comparisonResult": "MATCHED",
       "breakIds": [
         "01928a71-a660-76ee-8fe3-e6b760982997"
       ]
     },
     "ReconciliationMatchRequest": {
-      "key": "unspecified",
-      "date": "2026-10-07",
-      "items": [
-        "unspecified"
-      ]
+      "breakId": "0192122f-287b-7783-8704-753a51862e83",
+      "reason": "sample"
     },
     "ReconciliationMatchResponse": {
-      "items": [
-        "unspecified"
-      ],
-      "matches": "unspecified"
+      "break": {
+        "breakId": "0192a2a2-8baa-7177-832e-8f9fffbe4061",
+        "runId": "0192b8f8-43e1-7dba-8758-28dce2c9ef4c",
+        "lastRunId": "0192119e-9d9a-7e68-8f9f-e9ef4f064550",
+        "definition": "sample",
+        "period": "sample",
+        "currency": "sample",
+        "kind": "AMOUNT",
+        "state": "OPEN",
+        "sourceAmount": "sample",
+        "ledgerAmount": "sample",
+        "difference": "sample",
+        "sourceCount": 1,
+        "ledgerCount": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "reason": "sample"
+      }
     },
     "ReconciliationRunRequest": {
-      "key": "unspecified",
-      "date": "2026-10-07",
-      "items": [
-        "unspecified"
-      ]
+      "period": "samplex",
+      "definition": "sample"
     },
     "ReconciliationRunResponse": {
-      "items": [
-        "unspecified"
-      ],
-      "matches": "unspecified"
+      "runs": [
+        {
+          "runId": "0192042b-988c-7894-818f-8d5127d36c6f",
+          "definition": "sample",
+          "period": "sample",
+          "runNo": 1,
+          "state": "CLEAN",
+          "ranBy": "sample",
+          "ranAt": "2026-10-07T09:00:00Z",
+          "openBreaks": 1,
+          "currencies": [
+            {
+              "currency": "sam",
+              "sourceAmount": "sample",
+              "ledgerAmount": "sample",
+              "difference": "sample",
+              "sourceCount": 1,
+              "ledgerCount": 1
+            }
+          ]
+        }
+      ]
     },
     "TaxReturnAddAdjustmentRequest": {
       "tax": "unspecified",

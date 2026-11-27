@@ -10,7 +10,7 @@ public sealed record ReconciliationBreaksPage
 {
     /// <summary>Contract member 'items'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("items")]
-    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Finance.Contracts.Api.ReconciliationBreaksItem> Items { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Finance.Contracts.Api.ReconBreakView> Items { get; init; }
 
     /// <summary>Cursor of the next page, or null on the last page.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("nextCursor")]
