@@ -4,6 +4,7 @@ using System.Text.Json.Nodes;
 using CoreIns.Modules.Data.Contracts.Api;
 using CoreIns.Modules.Data.Domain;
 using CoreIns.Modules.Data.Persistence;
+using CoreIns.Modules.Data.Services;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Time;
@@ -125,9 +126,10 @@ internal sealed class RegisterDataContractHandler(DataDbContext db, IClock clock
 /// <summary>
 /// Re-validates the ledger events of one contract in a time window against the contract now in force (idempotent: the ledger is
 /// append-only, so a repeat gives the same counts). Scope above 10 000 events is refused (DAT-ERR-002).
-/// TODO(hardening): BO-DAT-02 re-drives the conformed projection from here; an approval for a broader scope.
+/// Valid events are also re-driven through the conformed projector (idempotent: already projected events are skipped).
+/// TODO(hardening): an approval for a broader scope; a full rebuild (truncate and re-project in occurred order).
 /// </summary>
-internal sealed class ReplayIngestionHandler(DataDbContext db, EventIngestion ingestion) : ICommandHandler<ReplayIngestion, IngestionReplayResponse>
+internal sealed class ReplayIngestionHandler(DataDbContext db, EventIngestion ingestion, ConformedProjector projector) : ICommandHandler<ReplayIngestion, IngestionReplayResponse>
 {
     public const int MaxScope = 10_000;
     private const int Batch = 500;
@@ -164,6 +166,7 @@ internal sealed class ReplayIngestionHandler(DataDbContext db, EventIngestion in
         }
 
         var valid = 0;
+        var projected = 0;
         var invalid = new List<Guid>();
         Guid after = Guid.Empty;
         while (true)
@@ -183,6 +186,10 @@ internal sealed class ReplayIngestionHandler(DataDbContext db, EventIngestion in
                 if (problems.Count == 0)
                 {
                     valid++;
+                    if (await projector.ProjectAsync((JsonObject)JsonNode.Parse(row.Envelope)!, cancellationToken).ConfigureAwait(false) == ProjectionOutcome.Projected)
+                    {
+                        projected++;
+                    }
                 }
                 else
                 {
@@ -196,7 +203,7 @@ internal sealed class ReplayIngestionHandler(DataDbContext db, EventIngestion in
         return new IngestionReplayResponse
         {
             JobId = new JobId(Guid.CreateVersion7()),
-            Counts = ContractJson.ToElement(new { scanned = total, valid, invalid = invalid.Count, invalidEventIds = invalid.Take(50), ingested = 0 }),
+            Counts = ContractJson.ToElement(new { scanned = total, valid, invalid = invalid.Count, invalidEventIds = invalid.Take(50), ingested = 0, projected }),
         };
     }
 

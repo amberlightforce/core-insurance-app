@@ -78,6 +78,7 @@ public static class BillingModule
         services.AddScoped<LedgerWriter>();
         services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationImporter, MigrationImport.BillingMigrationImporter>();
         services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationReverser, MigrationImport.BillingMigrationReverser>();
+        services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationReconciliationReader, MigrationImport.BillingMigrationReconciliationReader>();
         services.AddScoped<TermBilling>();
         services.AddScoped<Allocator>();
         services.AddScoped<BillingReader>();
