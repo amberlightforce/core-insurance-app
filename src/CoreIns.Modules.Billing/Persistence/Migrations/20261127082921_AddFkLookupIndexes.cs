@@ -5,7 +5,7 @@
 namespace CoreIns.Modules.Billing.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class AddFkLookupIndexes : Migration
+    public partial class AddFkLookupIndexes : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
