@@ -53,8 +53,12 @@ public interface IReinsuranceContractService
     /// <remarks>
     /// <para>Operation ri.Contract.versionAt (query; HTTP GET /api/ri/v1/contracts/version-at).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W7.</para>
+    /// <para>Status: full; fully typed from BO-RI-03: contract versions (endorse, versionAt); REQ-RI-001, REQ-RI-031..REQ-RI-065. Wave W7.</para>
     /// <para>Exposure: ui; consumers: FIN.</para>
+    /// <para>Errors: RI-ERR-NOT-FOUND (404), RI-ERR-VALIDATION (422).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractVersionAtResponse> VersionAtAsync(global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
+    /// <param name="knownAt">Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including</param>
+    /// <param name="contractId">query parameter 'contractId'</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Reinsurance.Contracts.Api.ContractVersionAtResponse> VersionAtAsync(global::CoreIns.SharedKernel.Identifiers.RiContractId contractId, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

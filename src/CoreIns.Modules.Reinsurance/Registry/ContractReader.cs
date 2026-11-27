@@ -77,7 +77,7 @@ internal sealed class ContractReader(
         var rows = await (
                 from c in query
                 join v in db.Versions.AsNoTracking() on c.ContractId equals v.ContractId
-                where v.KnownTo == null
+                where v.VersionNo == 1 // TODO(hardening): the list summarises the base version; show the endorsed terms in force
                 orderby c.CreatedAt descending, c.ContractId
                 select new { c, v })
             .Skip(offset).Take(size + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -140,20 +140,29 @@ internal sealed class ContractReader(
         var legalEntity = LegalEntity;
         var active = ContractStateModel.Code(ContractStatus.Active);
         var expired = ContractStateModel.Code(ContractStatus.Expired);
-        var contracts = await (
+        var candidates = await (
                 from c in db.Contracts.AsNoTracking()
                 join v in db.Versions.AsNoTracking() on c.ContractId equals v.ContractId
-                join s in db.Sections.AsNoTracking() on new { v.VersionId, Rev = v.ContentRev } equals new { s.VersionId, s.Rev }
-                where c.LegalEntityId == legalEntity && (c.Status == active || c.Status == expired) && v.KnownTo == null
+                where c.LegalEntityId == legalEntity && (c.Status == active || c.Status == expired) && v.VersionNo == 1
                     && v.ValidFrom <= lossDate && lossDate < v.ValidTo
-                    && s.ProductCodes.Contains(productCode) && s.CoverageCodes.Contains(coverageCode)
                 orderby c.ContractNumber
                 select c)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var views = new List<RiContractView>();
-        foreach (var contract in contracts)
+        foreach (var contract in candidates)
         {
-            views.Add(await ViewAsync(contract, cancellationToken).ConfigureAwait(false));
+            // The version in force at the loss date (an endorsement applies from its own valid-from) decides the scope.
+            var version = await ContractVersions.InForceAsync(db, contract.ContractId, lossDate, Instant.MaxValue, approvedOnly: true, cancellationToken).ConfigureAwait(false);
+            if (version is null)
+            {
+                continue;
+            }
+
+            var content = await ContractSupport.ReadContentAsync(db, contract, version, cancellationToken).ConfigureAwait(false);
+            if (content.ProductCodes.Contains(productCode) && content.CoverageCodes.Contains(coverageCode))
+            {
+                views.Add(ContractSupport.ToView(contract, version, content, LegalEntityCode, zone));
+            }
         }
 
         return new ContractApplicableResponse { Contracts = views, ValidAt = lossInstant };
@@ -161,9 +170,10 @@ internal sealed class ContractReader(
 
     private async Task<RiContractView> ViewAsync(ContractRow contract, CancellationToken cancellationToken)
     {
-        var version = await db.Versions.AsNoTracking().SingleAsync(v => v.ContractId == contract.ContractId && v.KnownTo == null, cancellationToken).ConfigureAwait(false);
+        var zone = options.Value.Zone;
+        var version = await ContractVersions.CurrentAsync(db, contract.ContractId, clock.Now.ToBusinessDate(zone), Instant.MaxValue, cancellationToken).ConfigureAwait(false);
         var content = await ContractSupport.ReadContentAsync(db, contract, version, cancellationToken).ConfigureAwait(false);
-        return ContractSupport.ToView(contract, version, content, LegalEntityCode, options.Value.Zone);
+        return ContractSupport.ToView(contract, version, content, LegalEntityCode, zone);
     }
 
     private (BusinessDate Date, Instant Instant) Resolve(ValidAt? validAt, TimeZoneInfo zone)

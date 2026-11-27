@@ -11,7 +11,11 @@
         "doc.EvidencePack.get": [ "Platform.Admin" ],
         "doc.Archive.store": [ "Platform.Admin" ],
         "doc.Archive.get": [ "Staff.Billing", "Platform.Admin" ],
-        "doc.ProviderEvent.receive": [ "Platform.Admin" ]
+        "doc.ProviderEvent.receive": [ "Platform.Admin" ],
+        "doc.DocumentType.list": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.Template.list": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.Clause.get": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.Binding.resolve": [ "Staff.Billing", "Platform.Admin" ]
       }
     }
   }

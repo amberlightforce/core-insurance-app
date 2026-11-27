@@ -4,36 +4,25 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.ApprovalType.register request. PRD inputs: "type, object ref, payload hash, diff"</summary>
+/// <summary>plt.ApprovalType.register request: registers (or updates, idempotently by type) an approval type definition. Administrator only.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ApprovalTypeRegisterRequest
 {
-    /// <summary>PRD: "type"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Approval type code, e.g. CLM.TRANSACTION_SET</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("type")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Type { get; init; }
+    public required string Type { get; init; }
 
-    /// <summary>PRD: "object ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("objectRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ObjectRef { get; init; }
+    /// <summary>What the approval type decides</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("description")]
+    public required string Description { get; init; }
 
-    /// <summary>PRD: "payload hash"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("payloadHash")]
+    /// <summary>Role whose inbox receives requests of this type unless the owning module names another</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("defaultReferralRole")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? PayloadHash { get; init; }
+    public string? DefaultReferralRole { get; init; }
 
-    /// <summary>PRD: "diff"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("diff")]
+    /// <summary>Registered authority type a checker must hold for this approval type</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("defaultAuthorityType")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Diff { get; init; }
+    public string? DefaultAuthorityType { get; init; }
 }

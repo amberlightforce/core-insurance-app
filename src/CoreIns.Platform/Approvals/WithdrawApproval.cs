@@ -14,7 +14,7 @@ using FluentValidation;
 
 namespace CoreIns.Platform.Approvals;
 
-internal sealed record WithdrawApproval(ApprovalWithdrawRequest Request, ModuleCode? CallerModule) : ICommand<ApprovalWithdrawResponse>;
+internal sealed record WithdrawApproval(ApprovalWithdrawRequest Request, ModuleCode? CallerModule, bool ByMaker = false) : ICommand<ApprovalWithdrawResponse>;
 
 internal sealed class WithdrawApprovalValidator : AbstractValidator<WithdrawApproval>
 {
@@ -26,16 +26,18 @@ internal sealed class WithdrawApprovalValidator : AbstractValidator<WithdrawAppr
 }
 
 /// <summary>Only a trusted registered owning-module command can withdraw; caller identity is not a public claim.</summary>
-internal sealed class WithdrawApprovalHandler(DbSession session, RequestContext context, IClock clock, IEventPublisher events)
+internal sealed class WithdrawApprovalHandler(DbSession session, RequestContext context, IClock clock, IEventPublisher events, OwnerDecidedApprovalTypes owners)
     : ICommandHandler<WithdrawApproval, ApprovalWithdrawResponse>
 {
     public async Task<Result<ApprovalWithdrawResponse>> HandleAsync(WithdrawApproval command, CancellationToken cancellationToken)
     {
-        if (command.CallerModule is null)
+        // Over REST (ByMaker, set only by the controller) the maker withdraws their own request (BO-PLT-02); an unstamped in-process call stays refused.
+        if (command.CallerModule is null && !command.ByMaker)
         {
             return ApprovalErrors.Of("NOT-OWNER", "Withdrawal requires an owning module command.");
         }
 
+        var makerWithdraw = command.CallerModule is null;
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         var transaction = session.Transaction ?? throw new InvalidOperationException("Withdrawal requires the command transaction.");
         var legalEntity = context.LegalEntity?.Value ?? throw new InvalidOperationException("The request context has no legal entity.");
@@ -45,7 +47,19 @@ internal sealed class WithdrawApprovalHandler(DbSession session, RequestContext 
             return DomainError.Of(ModuleCode.PLT, PlatformErrors.NotFound, "The approval request does not exist.");
         }
 
-        if (row.ObjectRef.Module != command.CallerModule)
+        if (makerWithdraw)
+        {
+            if (ApprovalStore.ActorKey(row.Maker) != ApprovalStore.ActorKey(context.Actor))
+            {
+                return ApprovalErrors.Of("NOT-OWNER", "Only the maker of the request, or the subject's owning module, can withdraw it.");
+            }
+
+            if (owners.Contains(row.ApprovalType))
+            {
+                return ApprovalErrors.Of(ApprovalErrors.OwnerDecided, $"Requests of type {row.ApprovalType} are withdrawn in the owning module's own screen.");
+            }
+        }
+        else if (row.ObjectRef.Module != command.CallerModule)
         {
             return ApprovalErrors.Of("NOT-OWNER", "Only the subject's owning module can withdraw the request.");
         }

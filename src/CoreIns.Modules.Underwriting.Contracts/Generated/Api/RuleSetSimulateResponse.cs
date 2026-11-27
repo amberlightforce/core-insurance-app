@@ -4,23 +4,39 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.RuleSet.simulate result. PRD outputs: "versions, reports"</summary>
+/// <summary>Hit changes of the simulated version against what was recorded. youngestDriverAge is rebuilt from the stored age band, so it is approximate (see warnings).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RuleSetSimulateResponse
 {
-    /// <summary>PRD: "versions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("versions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Versions { get; init; }
+    /// <summary>Contract member 'ruleSetCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetCode")]
+    public required string RuleSetCode { get; init; }
 
-    /// <summary>PRD: "reports"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reports")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reports { get; init; }
+    /// <summary>Contract member 'version'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    public required string Version { get; init; }
+
+    /// <summary>Contract member 'evaluated'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("evaluated")]
+    public required int Evaluated { get; init; }
+
+    /// <summary>Contract member 'changed'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("changed")]
+    public required int Changed { get; init; }
+
+    /// <summary>Evaluations that gain a REFER outcome they did not have.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("newReferrals")]
+    public required int NewReferrals { get; init; }
+
+    /// <summary>Contract member 'newDeclines'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("newDeclines")]
+    public required int NewDeclines { get; init; }
+
+    /// <summary>Contract member 'items'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Underwriting.Contracts.Api.RuleSetSimulateItem> Items { get; init; }
+
+    /// <summary>Contract member 'warnings'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("warnings")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> Warnings { get; init; }
 }
