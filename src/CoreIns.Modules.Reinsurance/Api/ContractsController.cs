@@ -33,6 +33,11 @@ internal static class ReinsurancePermissions
     public const string ProgrammeList = "ri.Programme.list";
     public const string ProgrammeGet = "ri.Programme.get";
     public const string ParticipationList = "ri.Participation.list";
+    public const string RecoveryRecalculate = "ri.Recovery.recalculate";
+    public const string RecoveryAdjust = "ri.Recovery.adjust";
+    public const string OccurrenceLink = "ri.Occurrence.link";
+    public const string OccurrenceUnlink = "ri.Occurrence.unlink";
+    public const string AggregateTrackerGet = "ri.AggregateTracker.get";
 }
 
 /// <summary>

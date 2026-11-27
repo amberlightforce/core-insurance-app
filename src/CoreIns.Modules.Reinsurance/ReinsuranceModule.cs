@@ -66,6 +66,9 @@ public static class ReinsuranceModule
                 // SL6-RI-CESSION-DELTA: the premium ledger, cession rows, exception log and tracker are sealed (SELECT, INSERT only).
                 $"GRANT SELECT, INSERT ON {Schema}.premium_delta, {Schema}.cession, {Schema}.cession_exception, {Schema}.tracker TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.cession_treaty TO {appRole}",
+                // BO-RI-08: occurrences (a link is stamped when unlinked) and the sealed manual adjustments.
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.occurrence, {Schema}.occurrence_claim TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.recovery_adjustment TO {appRole}",
             ]),
     ];
 
@@ -120,6 +123,21 @@ public static class ReinsuranceModule
         // SL4-RI-RECOVERY: claim view (CLM event consumers), recovery booking and the recovery queries.
         services.AddScoped<RecoveryBooker>();
         services.AddScoped<RecoveryReader>();
+
+        // BO-RI-08: full restatement, occurrences, manual adjustments and the aggregate tracker.
+        services.AddScoped<AggregateTrackerReader>();
+        services.AddScoped<IValidator<RecalculateRecoveries>, RecalculateRecoveriesValidator>();
+        services.AddCommandAuditor<RecalculateRecoveries, RecoveryRecalculateResponse, RecalculateRecoveriesAuditor>();
+        services.AddCommand<RecalculateRecoveries, RecoveryRecalculateResponse, RecalculateRecoveriesHandler>(CommandDescriptor.For("ri.Recovery.recalculate"));
+        services.AddScoped<IValidator<LinkOccurrence>, LinkOccurrenceValidator>();
+        services.AddCommandAuditor<LinkOccurrence, OccurrenceLinkResponse, LinkOccurrenceAuditor>();
+        services.AddCommand<LinkOccurrence, OccurrenceLinkResponse, LinkOccurrenceHandler>(CommandDescriptor.For("ri.Occurrence.link") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<UnlinkOccurrence>, UnlinkOccurrenceValidator>();
+        services.AddCommandAuditor<UnlinkOccurrence, OccurrenceUnlinkResponse, UnlinkOccurrenceAuditor>();
+        services.AddCommand<UnlinkOccurrence, OccurrenceUnlinkResponse, UnlinkOccurrenceHandler>(CommandDescriptor.For("ri.Occurrence.unlink") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<AdjustRecovery>, AdjustRecoveryValidator>();
+        services.AddCommandAuditor<AdjustRecovery, RecoveryAdjustResponse, AdjustRecoveryAuditor>();
+        services.AddCommand<AdjustRecovery, RecoveryAdjustResponse, AdjustRecoveryHandler>(CommandDescriptor.For("ri.Recovery.adjust") with { SupportsDryRun = true });
         services.AddScoped<ClaimIntake>();
         services.AddEventHandler<ClaimReportedV1, ClaimReportedHandler>(EventDescriptor.From(ClaimReportedV1.Descriptor), ClaimReportedHandler.Name, ModuleCode.RI);
         services.AddEventHandler<ExposureCreatedV1, ExposureCreatedHandler>(EventDescriptor.From(ExposureCreatedV1.Descriptor), ExposureCreatedHandler.Name, ModuleCode.RI);
@@ -158,6 +176,12 @@ public static class ReinsuranceModule
             .Describe("Το άθροισμα των υπογεγραμμένων μεριδίων πρέπει να ισούται με το τοποθετημένο ποσοστό, με ακριβώς έναν ηγέτη.", "Signed lines must add up to the placed share, with exactly one lead."),
         ErrorDefinition.For(ModuleCode.RI, "REINSURER-ID", 422, "Μη έγκυρος αντασφαλιστής ή μεσίτης", "The reinsurer or broker is not valid")
             .Describe("Ο αντασφαλιστής και ο μεσίτης πρέπει να είναι ενεργά νομικά πρόσωπα του μητρώου μερών.", "The reinsurer and the broker must be usable organisation parties."),
+        ErrorDefinition.For(ModuleCode.RI, "OCCURRENCE", 422, "Μη έγκυρη ομαδοποίηση συμβάντος", "The occurrence is not valid")
+            .Describe("Οι απαιτήσεις πρέπει να ανήκουν στην ίδια σύμβαση και να μη συμμετέχουν σε άλλο συμβάν.", "The claims must fall under one contract and not belong to another occurrence."),
+        ErrorDefinition.For(ModuleCode.RI, "AUTHORITY", 403, "Ανεπαρκής εξουσιοδότηση", "Not enough authority")
+            .Describe("Δεν διαθέτετε εξουσιοδότηση για το ποσό της προσαρμογής.", "You do not hold the authority for the amount of the adjustment."),
+        ErrorDefinition.For(ModuleCode.RI, "RECALCULATION-REFUSED", 422, "Ο επανυπολογισμός απορρίφθηκε", "The recalculation was refused")
+            .Describe("Ο υπολογισμός δεν μπορεί να ολοκληρωθεί με τα τρέχοντα δεδομένα· δεν καταχωρήθηκε τίποτα.", "The calculation cannot complete on the current data; nothing was booked."),
         ErrorDefinition.For(ModuleCode.RI, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

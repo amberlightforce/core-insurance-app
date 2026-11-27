@@ -14,4 +14,16 @@ public sealed record RecoveryRecalculateResponse
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("batchId")]
     public required global::System.Guid BatchId { get; init; }
+
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
+
+    /// <summary>Contract member 'contractYear'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractYear")]
+    public required int ContractYear { get; init; }
+
+    /// <summary>Delta rows the restatement booked (0 when the booked recoveries already equalled the full recalculation)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("rowsBooked")]
+    public required int RowsBooked { get; init; }
 }
