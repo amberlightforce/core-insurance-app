@@ -4,23 +4,34 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.ProductVersion.submit result. PRD outputs: "version status, check results"</summary>
+/// <summary>pfc.ProductVersion.submit result: the change set (SUBMITTED on a real call), the lint result and the release request. On a dry run only the checks run and nothing is stored.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProductVersionSubmitResponse
 {
-    /// <summary>PRD: "version status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("versionStatus")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? VersionStatus { get; init; }
+    /// <summary>Contract member 'dryRun'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dryRun")]
+    public required bool DryRun { get; init; }
 
-    /// <summary>PRD: "check results"</summary>
+    /// <summary>Contract member 'changeSetState'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("changeSetState")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.ChangeSetState ChangeSetState { get; init; }
+
+    /// <summary>Contract member 'validation'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validation")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.ChangeSetValidation Validation { get; init; }
+
+    /// <summary>The version number the draft will carry when released</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    public required global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber Version { get; init; }
+
+    /// <summary>Null on a dry run</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'releaseId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("checkResults")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? CheckResults { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("releaseId")]
+    public required global::System.Guid? ReleaseId { get; init; }
+
+    /// <summary>In-process PLT approval request (type PFC.Release, authority PFC.RELEASE); null on a dry run</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequestId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ApprovalRequestId? ApprovalRequestId { get; init; }
 }

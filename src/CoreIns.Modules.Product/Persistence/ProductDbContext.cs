@@ -24,6 +24,8 @@ internal sealed class ProductDbContext(DbContextOptions<ProductDbContext> option
 
     public DbSet<ChangeSetEditRow> ChangeSetEdits => Set<ChangeSetEditRow>();
 
+    public DbSet<ReleaseRequestRow> Releases => Set<ReleaseRequestRow>();
+
     protected override string Schema => ProductModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -172,6 +174,58 @@ internal sealed class ProductDbContext(DbContextOptions<ProductDbContext> option
             entity.HasIndex(e => new { e.LegalEntityId, e.ProductId, e.Status }).HasDatabaseName("ix_change_set_product");
             entity.HasOne<ProductRow>().WithMany().HasForeignKey(e => e.ProductId).HasConstraintName("fk_change_set_product").OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<ProductVersionRow>().WithMany().HasForeignKey(e => e.BaseVersionId).HasConstraintName("fk_change_set_base_version").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ReleaseRequestRow>(entity =>
+        {
+            entity.ToTable("release_request", table =>
+            {
+                table.HasCheckConstraint("ck_release_status", "status IN ('SUBMITTED', 'APPROVED', 'RETURNED', 'SCHEDULED', 'PUBLISHED')");
+                table.HasCheckConstraint("ck_release_hash", "payload_hash ~ '^[0-9a-f]{64}$' AND candidate_artefact_hash ~ '^[0-9a-f]{64}$'");
+                table.HasCheckConstraint("ck_release_new_number", "new_major >= 0 AND new_minor >= 0");
+                table.HasCheckConstraint("ck_release_sod", "decided_by IS NULL OR decided_by <> submitted_by");
+                table.HasCheckConstraint("ck_release_scheduled", "(status IN ('SCHEDULED', 'PUBLISHED')) = (new_business_from IS NOT NULL AND renewal_from IS NOT NULL AND activation_date IS NOT NULL)");
+                table.HasCheckConstraint("ck_release_published", "(status = 'PUBLISHED') = (published_version_id IS NOT NULL)");
+                table.HasCheckConstraint("ck_release_record_version", "record_version >= 1");
+            });
+            entity.HasKey(e => e.ReleaseId).HasName("pk_release_request");
+            entity.Property(e => e.ReleaseId).HasColumnName("release_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Jurisdiction).HasColumnName("jurisdiction").HasColumnType("char(2)");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.ChangeSetId).HasColumnName("change_set_id");
+            entity.Property(e => e.NewMajor).HasColumnName("new_major");
+            entity.Property(e => e.NewMinor).HasColumnName("new_minor");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.PayloadHash).HasColumnName("payload_hash").HasColumnType("char(64)");
+            entity.Property(e => e.CandidateArtefactHash).HasColumnName("candidate_artefact_hash").HasColumnType("char(64)");
+            entity.Property(e => e.ApprovalRequestId).HasColumnName("approval_request_id");
+            entity.Property(e => e.SubmittedBy).HasColumnName("submitted_by");
+            entity.Property(e => e.SubmittedByPrincipal).HasColumnName("submitted_by_principal");
+            entity.Property(e => e.SubmittedAt).HasColumnName("submitted_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecidedBy).HasColumnName("decided_by");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecisionComment).HasColumnName("decision_comment");
+            entity.Property(e => e.ActivationDate).HasColumnName("activation_date");
+            entity.Property(e => e.NewBusinessFrom).HasColumnName("new_business_from");
+            entity.Property(e => e.NewBusinessTo).HasColumnName("new_business_to");
+            entity.Property(e => e.RenewalFrom).HasColumnName("renewal_from");
+            entity.Property(e => e.RenewalTo).HasColumnName("renewal_to");
+            entity.Property(e => e.ScheduledBy).HasColumnName("scheduled_by");
+            entity.Property(e => e.ScheduledAt).HasColumnName("scheduled_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ScheduleReason).HasColumnName("schedule_reason");
+            entity.Property(e => e.PublishedVersionId).HasColumnName("published_version_id");
+            entity.Property(e => e.PublishedAt).HasColumnName("published_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+
+            // One live release per change set, and one live release per version number of a product.
+            entity.HasIndex(e => e.ChangeSetId).IsUnique().HasFilter("status IN ('SUBMITTED', 'APPROVED', 'SCHEDULED')").HasDatabaseName("ux_release_live_per_change_set");
+            entity.HasIndex(e => new { e.ProductId, e.NewMajor, e.NewMinor }).IsUnique().HasFilter("status IN ('SUBMITTED', 'APPROVED', 'SCHEDULED')").HasDatabaseName("ux_release_live_per_number");
+            entity.HasIndex(e => e.ApprovalRequestId).IsUnique().HasDatabaseName("ux_release_approval");
+            entity.HasIndex(e => new { e.Status, e.ActivationDate }).HasDatabaseName("ix_release_due");
+            entity.HasOne<ProductRow>().WithMany().HasForeignKey(e => e.ProductId).HasConstraintName("fk_release_product").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<ChangeSetRow>().WithMany().HasForeignKey(e => e.ChangeSetId).HasConstraintName("fk_release_change_set").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<ProductVersionRow>().WithMany().HasForeignKey(e => e.PublishedVersionId).HasConstraintName("fk_release_published_version").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<ChangeSetEditRow>(entity =>

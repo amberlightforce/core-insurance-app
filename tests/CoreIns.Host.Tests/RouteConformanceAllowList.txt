@@ -527,11 +527,6 @@ CONTRACT_NOT_SERVED POST /api/pfc/v1/pogs/record-review
 CONTRACT_NOT_SERVED POST /api/pfc/v1/pogs/record-test
 CONTRACT_NOT_SERVED POST /api/pfc/v1/policy-drafts/validate
 CONTRACT_NOT_SERVED POST /api/pfc/v1/product-imports/import
-CONTRACT_NOT_SERVED POST /api/pfc/v1/product-versions/cancel-schedule
-CONTRACT_NOT_SERVED POST /api/pfc/v1/product-versions/fall-back
-CONTRACT_NOT_SERVED POST /api/pfc/v1/product-versions/schedule
-CONTRACT_NOT_SERVED POST /api/pfc/v1/product-versions/sign-off
-CONTRACT_NOT_SERVED POST /api/pfc/v1/product-versions/submit
 CONTRACT_NOT_SERVED POST /api/pfc/v1/products/describe
 CONTRACT_NOT_SERVED POST /api/pfc/v1/renewal-conversions/convert
 CONTRACT_NOT_SERVED POST /api/plt/v1/adapters/invoke
