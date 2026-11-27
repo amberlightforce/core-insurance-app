@@ -17,7 +17,14 @@
         "doc.Clause.get": [ "Staff.Billing", "Platform.Admin" ],
         "doc.Binding.resolve": [ "Staff.Billing", "Platform.Admin" ],
         "doc.Document.preview": [ "Staff.Billing", "Platform.Admin" ],
-        "doc.Document.search": [ "Staff.Billing", "Platform.Admin" ]
+        "doc.Document.search": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.Archive.verify": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.Archive.addRendition": [ "Platform.Admin" ],
+        "doc.Archive.setRetentionClass": [ "Platform.Admin" ],
+        "doc.Archive.listForObject": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.Archive.completeness": [ "Platform.Admin" ],
+        "doc.Archive.download": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.EvidencePack.export": [ "Platform.Admin" ]
       }
     }
   }

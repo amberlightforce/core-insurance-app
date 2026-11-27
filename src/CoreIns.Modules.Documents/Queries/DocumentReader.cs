@@ -181,6 +181,44 @@ internal sealed class DocumentReader(DocumentsDbContext db, RequestContext conte
         return row is null ? null : (row.Content, row.ContentType);
     }
 
+    /// <summary>Archive entries (letters and their renditions) of the documents about one object; no bytes are read.</summary>
+    public async Task<IReadOnlyList<ArchiveListForObjectItem>> ListArchivesForObjectAsync(ObjectRef subject, int limit, CancellationToken cancellationToken)
+    {
+        var entity = LegalEntity;
+        var module = subject.Module.ToString();
+        var documents = await db.Documents.AsNoTracking()
+            .Where(d => d.LegalEntityId == entity && d.SubjectModule == module && d.SubjectType == subject.Type && d.SubjectId == subject.Id)
+            .OrderBy(d => d.CreatedAt).ThenBy(d => d.DocumentId).Take(limit).Select(d => new { d.DocumentId, d.ArchiveId }).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var ids = documents.Select(d => (Guid?)d.ArchiveId).ToList();
+        var archives = await db.Archives.AsNoTracking()
+            .Where(a => a.LegalEntityId == entity && (ids.Contains(a.ArchiveId) || ids.Contains(a.ParentArchiveId)))
+            .OrderBy(a => a.CreatedAt).ThenBy(a => a.ArchiveId)
+            .Select(a => new { a.ArchiveId, a.ContentHash, a.ContentType, a.ParentArchiveId, a.RenditionKind, a.RetentionClass, a.CreatedAt })
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return
+        [
+            .. archives.Select(a => new ArchiveListForObjectItem
+            {
+                ArchiveId = a.ArchiveId,
+                Hash = Sha256Hash.Parse(a.ContentHash),
+                DocumentId = documents.First(d => d.ArchiveId == (a.ParentArchiveId ?? a.ArchiveId)).DocumentId,
+                ContentType = a.ContentType,
+                ParentArchiveId = a.ParentArchiveId,
+                RenditionKind = a.RenditionKind,
+                RetentionClass = a.RetentionClass,
+                CreatedAt = a.CreatedAt.ToDateTimeOffset().ToString("O", System.Globalization.CultureInfo.InvariantCulture),
+            }),
+        ];
+    }
+
+    /// <summary>The stored bytes of an archive entry with its media type and stored hash (BO-DOC-04 download).</summary>
+    public async Task<(byte[] Content, string ContentType, string Hash)?> DownloadAsync(Guid archiveId, CancellationToken cancellationToken)
+    {
+        var entity = LegalEntity;
+        var row = await db.Archives.AsNoTracking().SingleOrDefaultAsync(a => a.ArchiveId == archiveId && a.LegalEntityId == entity, cancellationToken).ConfigureAwait(false);
+        return row is null ? null : (row.Content, row.ContentType, row.ContentHash);
+    }
+
     public static JsonElement ToJson<T>(T value) => JsonSerializer.SerializeToElement(value, SharedKernelJson.Options);
 
     private async Task<IReadOnlyList<DocumentView>> ViewsAsync(IReadOnlyList<DocumentRow> rows, CancellationToken cancellationToken)

@@ -924,6 +924,49 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/doc/v1/archives/completeness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Archive completeness report
+         * @description Read-only (BO-DOC-04). For every issued document (status Rendered or Superseded) created in the range, checks that the
+         *     archived artefact exists and that its recomputed SHA-256 equals both the stored archive hash and the document's hash.
+         *     Reports gaps per UTC month plus orphan archive entries; changes nothing. Capped at 2000 documents per call.
+         */
+        get: operations["doc.Archive.completeness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/doc/v1/archives/{id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download archived bytes
+         * @description Streams the stored bytes of an archive entry (a letter, a rendition or an evidence-pack zip) with its media type and
+         *     `X-Content-SHA256`. Scoped to the caller's legal entity.
+         */
+        get: operations["doc.Archive.download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/doc/v1/subject/export": {
         parameters: {
             query?: never;
@@ -1425,17 +1468,33 @@ export interface components {
             /** @description PRD: "sealed archive" */
             sealedArchive?: components["schemas"]["Unspecified"];
         };
-        /** @description doc.EvidencePack.export request. PRD inputs: "pack id / filters" */
+        /**
+         * @description doc.EvidencePack.export request (BO-DOC-04). Scope: `packId` (one document id) or any of `subject` (MODULE/Type/id),
+         *     `partyId` (recipient), `createdFrom`/`createdTo` (UTC dates, inclusive); at least one selector is required.
+         */
         EvidencePackExportRequest: {
-            /** @description PRD: "pack id" */
+            /** @description One document id */
             packId?: components["schemas"]["Uuid"];
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
+            /** @description MODULE/Type/id */
+            subject?: string;
+            /** @description Recipient party */
+            partyId?: components["schemas"]["Uuid"];
+            /** Format: date */
+            createdFrom?: string;
+            /** Format: date */
+            createdTo?: string;
+            /** @description Needed to include documents of recipients under a DSAR restriction (GDPR Art. 18(2), legal claims); without it they are listed in the manifest as excluded. */
+            legalClaimReason?: string;
         };
-        /** @description doc.EvidencePack.export result. PRD outputs: "sealed archive" */
+        /** @description doc.EvidencePack.export result: the sealed zip, stored as an archive entry (download with doc.Archive.download). */
         EvidencePackExportResponse: {
-            /** @description PRD: "sealed archive" */
-            sealedArchive?: components["schemas"]["Unspecified"];
+            archiveId: components["schemas"]["Uuid"];
+            hash: components["schemas"]["Sha256"];
+            documentCount: number;
+            /** @description Documents listed in the manifest but not included (DSAR restriction without a legal-claim reason). */
+            excludedCount: number;
+            /** @description Files in the zip, manifest included. */
+            entryCount: number;
         };
         /** @description doc.Signature.createEnvelope request. PRD inputs: "documents, signatories, level, deadline" */
         SignatureCreateEnvelopeRequest: {
@@ -1529,64 +1588,86 @@ export interface components {
             /** @description PRD: "hash" */
             hash?: components["schemas"]["Sha256"];
         };
-        /** @description doc.Archive.verify request. PRD inputs: "binary stream + declared hash, metadata" */
+        /** @description doc.Archive.verify request: recompute the SHA-256 of the stored bytes and compare it with the stored hash. */
         ArchiveVerifyRequest: {
-            /** @description PRD: "binary stream + declared hash" */
-            binaryStream?: components["schemas"]["Unspecified"];
-            /** @description PRD: "binary stream + declared hash" */
-            declaredHash?: components["schemas"]["Sha256"];
-            /** @description PRD: "metadata" */
-            metadata?: components["schemas"]["Unspecified"];
+            archiveId: components["schemas"]["Uuid"];
         };
-        /** @description doc.Archive.verify result. PRD outputs: "archive id, hash" */
+        /** @description doc.Archive.verify result: OK when the recomputed hash equals the stored hash, otherwise TAMPERED. */
         ArchiveVerifyResponse: {
-            /** @description PRD: "archive id" */
-            archiveId?: components["schemas"]["Uuid"];
-            /** @description PRD: "hash" */
-            hash?: components["schemas"]["Sha256"];
+            archiveId: components["schemas"]["Uuid"];
+            /** @description Stored hash */
+            hash: components["schemas"]["Sha256"];
+            computedHash: components["schemas"]["Sha256"];
+            /** @enum {string} */
+            result: "OK" | "TAMPERED";
         };
-        /** @description doc.Archive.addRendition request. PRD inputs: "binary stream + declared hash, metadata" */
+        /** @description doc.Archive.addRendition request: another artefact of the same archive entry (e.g. the PDF next to the HTML). */
         ArchiveAddRenditionRequest: {
-            /** @description PRD: "binary stream + declared hash" */
-            binaryStream?: components["schemas"]["Unspecified"];
-            /** @description PRD: "binary stream + declared hash" */
+            parentArchiveId: components["schemas"]["Uuid"];
+            /** @description Base64 bytes (at most 5 MB) */
+            binaryStream: string;
             declaredHash?: components["schemas"]["Sha256"];
-            /** @description PRD: "metadata" */
+            /** @description Media type, e.g. application/pdf */
+            contentType: string;
+            /** @description Free label such as PDF or PDFA3 */
+            renditionKind: string;
             metadata?: components["schemas"]["Unspecified"];
         };
-        /** @description doc.Archive.addRendition result. PRD outputs: "archive id, hash" */
+        /** @description doc.Archive.addRendition result. */
         ArchiveAddRenditionResponse: {
-            /** @description PRD: "archive id" */
-            archiveId?: components["schemas"]["Uuid"];
-            /** @description PRD: "hash" */
-            hash?: components["schemas"]["Sha256"];
+            archiveId: components["schemas"]["Uuid"];
+            hash: components["schemas"]["Sha256"];
         };
-        /** @description doc.Archive.setRetentionClass request. PRD inputs: "binary stream + declared hash, metadata" */
+        /** @description doc.Archive.setRetentionClass request. The class must be in the market pack list (Documents:RetentionClasses); that list is empty until the market pack supplies it (D-REG-07), so every class is refused until then. */
         ArchiveSetRetentionClassRequest: {
-            /** @description PRD: "binary stream + declared hash" */
-            binaryStream?: components["schemas"]["Unspecified"];
-            /** @description PRD: "binary stream + declared hash" */
-            declaredHash?: components["schemas"]["Sha256"];
-            /** @description PRD: "metadata" */
-            metadata?: components["schemas"]["Unspecified"];
+            archiveId: components["schemas"]["Uuid"];
+            retentionClass: string;
         };
-        /** @description doc.Archive.setRetentionClass result. PRD outputs: "archive id, hash" */
+        /** @description doc.Archive.setRetentionClass result. */
         ArchiveSetRetentionClassResponse: {
-            /** @description PRD: "archive id" */
-            archiveId?: components["schemas"]["Uuid"];
-            /** @description PRD: "hash" */
-            hash?: components["schemas"]["Sha256"];
+            archiveId: components["schemas"]["Uuid"];
+            retentionClass: string;
         };
-        /** @description doc.Archive.listForObject result. PRD outputs: "archive id, hash" */
+        /** @description doc.Archive.listForObject result: the archived artefacts (documents and their renditions) about one object. */
         ArchiveListForObjectItem: {
-            /** @description PRD: "archive id" */
-            archiveId?: components["schemas"]["Uuid"];
-            /** @description PRD: "hash" */
-            hash?: components["schemas"]["Sha256"];
+            archiveId: components["schemas"]["Uuid"];
+            hash: components["schemas"]["Sha256"];
+            documentId: components["schemas"]["Uuid"];
+            contentType: string;
+            parentArchiveId?: components["schemas"]["Uuid"];
+            renditionKind?: string;
+            retentionClass?: string;
+            /** Format: date-time */
+            createdAt: string;
         };
         /** @description Page of doc.Archive.listForObject results (cursor pagination, contract §3.5.5) */
         ArchiveListForObjectPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["ArchiveListForObjectItem"][];
+        };
+        ArchiveCompletenessGap: {
+            documentId: components["schemas"]["Uuid"];
+            documentNumber: string;
+            archiveId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            kind: "MISSING_ARCHIVE" | "HASH_MISMATCH" | "DOCUMENT_HASH_DIFFERS";
+        };
+        ArchiveCompletenessPeriod: {
+            /** @description yyyy-MM (UTC creation month) */
+            period: string;
+            issued: number;
+            ok: number;
+            gaps: components["schemas"]["ArchiveCompletenessGap"][];
+            /** @description Archive entries created in the period that no document and no rendition refers to (informational; other modules store through doc.Archive.store). */
+            orphanArchiveIds: components["schemas"]["Uuid"][];
+        };
+        ArchiveCompletenessResponse: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            periods: components["schemas"]["ArchiveCompletenessPeriod"][];
+            /** @description True when the cap on checked documents was reached; narrow the range. */
+            truncated: boolean;
         };
         /** @description doc.Subject.export request. PRD inputs: "party id, scope" */
         SubjectExportRequest: {
@@ -3551,7 +3632,9 @@ export interface operations {
     };
     "doc.Archive.listForObject": {
         parameters: {
-            query?: {
+            query: {
+                /** @description MODULE/Type/id of the object the documents are about */
+                objectRef: string;
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
@@ -3584,6 +3667,78 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "doc.Archive.completeness": {
+        parameters: {
+            query: {
+                /** @description First creation date (UTC date, inclusive) */
+                from: string;
+                /** @description Last creation date (UTC date, inclusive) */
+                to: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArchiveCompletenessResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "doc.Archive.download": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The bytes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
         };
     };
