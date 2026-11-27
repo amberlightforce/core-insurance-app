@@ -1,6 +1,7 @@
 using CoreIns.Modules.Channels.Commands;
 using CoreIns.Modules.Channels.Contracts.Api;
 using CoreIns.Modules.Channels.Queries;
+using CoreIns.Modules.Channels.Services;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
@@ -80,12 +81,7 @@ internal sealed class WithdrawalsController : ControllerBase
     /// A caller holding only the portal role sees just the requests they declared (null = no restriction: staff by permission).
     /// Fails closed: anyone without a staff or platform role is restricted.
     /// </summary>
-    private string? OwnerFilter()
-    {
-        var context = HttpContext.RequestServices.GetRequiredService<RequestContext>();
-        var staff = context.Roles.Any(r => r.StartsWith("Staff.", StringComparison.Ordinal) || r.StartsWith("Platform.", StringComparison.Ordinal));
-        return staff ? null : context.Actor.ToString();
-    }
+    private string? OwnerFilter() => PortalScope.OwnerFilter(HttpContext.RequestServices.GetRequiredService<RequestContext>());
 
     private LegalEntityId LegalEntity()
     {

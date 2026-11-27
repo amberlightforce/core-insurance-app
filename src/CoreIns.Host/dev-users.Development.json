@@ -11,6 +11,7 @@
       { "Id": "finance2", "Name": "Dev Finance Accountant 2 - checker (synthetic)", "Roles": [ "Staff.Finance" ] },
       { "Id": "claims", "Name": "Dev Claims Handler (synthetic)", "Roles": [ "Staff.ClaimsHandler" ] },
       { "Id": "claimsmgr", "Name": "Dev Claims Manager (synthetic)", "Roles": [ "Staff.ClaimsManager" ] },
+      { "Id": "customer", "Name": "Dev Customer (synthetic)", "Roles": [ "Customer.Portal" ] },
       { "Id": "admin", "Name": "Dev Platform Admin (synthetic)", "Roles": [ "Platform.Admin" ] },
       { "Id": "releasemgr", "Name": "Dev Release Manager (synthetic)", "Roles": [ "Platform.ReleaseManager" ] },
       { "Id": "designauth", "Name": "Dev Design Authority (synthetic)", "Roles": [ "Platform.DesignAuthority" ] },

@@ -461,6 +461,35 @@
       "results": "unspecified",
       "diff": "unspecified"
     },
+    "PortalIdentityLinkRequest": {
+      "subject": "sample",
+      "partyId": "0192d71d-2643-7250-8e46-b7789f8eb880",
+      "verification": "sample"
+    },
+    "PortalIdentityLinkResponse": {
+      "identity": {
+        "subject": "sample",
+        "partyId": "01921f64-9fe7-7284-860f-5449b9987b43",
+        "status": "LINKED",
+        "linkedAt": "2026-10-07T09:00:00Z",
+        "linkedBy": "sample",
+        "unlinkedAt": "2026-10-07T09:00:00Z",
+        "unlinkedBy": "sample"
+      }
+    },
+    "PortalIdentityUnlinkRequest": {
+      "subject": "sample",
+      "reason": "sample"
+    },
+    "PortalIdentityView": {
+      "subject": "sample",
+      "partyId": "0192f62f-f857-7fca-8169-907633c09c63",
+      "status": "LINKED",
+      "linkedAt": "2026-10-07T09:00:00Z",
+      "linkedBy": "sample",
+      "unlinkedAt": "2026-10-07T09:00:00Z",
+      "unlinkedBy": "sample"
+    },
     "PurchaseConfirmRequest": {
       "jobRef": "unspecified",
       "version": "unspecified",
