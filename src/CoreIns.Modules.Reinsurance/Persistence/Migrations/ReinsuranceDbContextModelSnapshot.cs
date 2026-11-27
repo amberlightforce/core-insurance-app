@@ -297,6 +297,9 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                     b.HasKey("EventId")
                         .HasName("pk_premium_delta");
 
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_premium_delta_policy");
+
                     b.HasIndex("SetId")
                         .HasDatabaseName("ix_premium_delta_set");
 
@@ -502,6 +505,9 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
 
                     b.HasKey("ClaimId")
                         .HasName("pk_claim_view");
+
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_claim_view_policy");
 
                     b.ToTable("claim_view", "ri");
                 });
@@ -976,6 +982,9 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                     b.HasKey("ParticipationId")
                         .HasName("pk_participation");
 
+                    b.HasIndex("BrokerPartyId")
+                        .HasDatabaseName("ix_participation_broker_party");
+
                     b.HasIndex("ReinsurerPartyId")
                         .HasDatabaseName("ix_participation_reinsurer");
 
@@ -1049,6 +1058,9 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
 
                     b.HasKey("BatchId")
                         .HasName("pk_recovery_batch");
+
+                    b.HasIndex("ClaimId")
+                        .HasDatabaseName("ix_recovery_batch_claim");
 
                     b.HasIndex("ContractId", "RecordedAt")
                         .HasDatabaseName("ix_recovery_batch_contract");
@@ -1129,6 +1141,9 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
 
                     b.HasIndex("ClaimId")
                         .HasDatabaseName("ix_recovery_claim");
+
+                    b.HasIndex("LayerId")
+                        .HasDatabaseName("ix_recovery_layer");
 
                     b.HasIndex("ContractId", "ClaimId")
                         .HasDatabaseName("ix_recovery_contract_claim");
