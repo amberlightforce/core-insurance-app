@@ -441,6 +441,59 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                     b.ToTable("fact_premium", "rpt_conformed");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.MartAdjustmentRow", b =>
+                {
+                    b.Property<Guid>("AdjustmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("adjustment_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(20,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("EvidenceRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_ref");
+
+                    b.Property<string>("FigureKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("figure_key");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.HasKey("AdjustmentId")
+                        .HasName("pk_mart_adjustment");
+
+                    b.HasIndex("RunId", "CreatedAt")
+                        .HasDatabaseName("ix_mart_adjustment_run");
+
+                    b.ToTable("mart_adjustment", "rpt_mart");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Data.Persistence.MartFigureRow", b =>
                 {
                     b.Property<Guid>("FigureId")
@@ -584,6 +637,55 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                         .HasDatabaseName("ix_mart_run_entity_mart");
 
                     b.ToTable("mart_run", "rpt_mart");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.MartSignOffRow", b =>
+                {
+                    b.Property<Guid>("SignOffId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("signoff_id");
+
+                    b.Property<string>("AdjustmentsHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("adjustments_hash");
+
+                    b.Property<string>("BoundHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bound_hash");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("comment");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<DateTime>("SignedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("signed_at");
+
+                    b.Property<string>("SignedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("signed_by");
+
+                    b.Property<string>("SnapshotHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("snapshot_hash");
+
+                    b.HasKey("SignOffId")
+                        .HasName("pk_mart_signoff");
+
+                    b.HasIndex("RunId", "SignedAt")
+                        .HasDatabaseName("ix_mart_signoff_run");
+
+                    b.ToTable("mart_signoff", "rpt_mart");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Data.Persistence.ModelRow", b =>
@@ -784,6 +886,16 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.MartAdjustmentRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Data.Persistence.MartRunRow", null)
+                        .WithMany()
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_mart_adjustment_run");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Data.Persistence.MartFigureRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Data.Persistence.MartRunRow", null)
@@ -792,6 +904,16 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_mart_figure_run");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.MartSignOffRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Data.Persistence.MartRunRow", null)
+                        .WithMany()
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_mart_signoff_run");
                 });
 #pragma warning restore 612, 618
         }

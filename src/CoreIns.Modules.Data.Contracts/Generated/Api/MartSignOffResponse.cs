@@ -4,15 +4,38 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Mart.signOff result. PRD outputs: "status"</summary>
+/// <summary>dat.Mart.signOff result (BO-DAT-04).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MartSignOffResponse
 {
-    /// <summary>PRD: "status"</summary>
+    /// <summary>The sign-off record.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'signOffId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("signOffId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? SignOffId { get; init; }
+
+    /// <summary>The run.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'runId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("runId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? RunId { get; init; }
+
+    /// <summary>SIGNED_OFF.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Status { get; init; }
+    public string? Status { get; init; }
+
+    /// <summary>SHA-256 over the snapshot hash and the adjustments hash the sign-off is bound to.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("boundHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? BoundHash { get; init; }
+
+    /// <summary>The signer (actor kind:id).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("signedBy")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? SignedBy { get; init; }
 }

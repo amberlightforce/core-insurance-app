@@ -4,15 +4,34 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Mart.export request. PRD inputs: "run id"</summary>
+/// <summary>dat.Mart.export request (BO-DAT-04). Only a run whose current sign-off is valid can be exported.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MartExportRequest
 {
-    /// <summary>PRD: "run id"</summary>
+    /// <summary>The signed-off run.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'runId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("runId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Guid? RunId { get; init; }
+
+    /// <summary>File format (default CSV).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("format")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public FormatValue? Format { get; init; }
+
+    /// <summary>File format (default CSV).</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<FormatValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum FormatValue
+    {
+        /// <summary><c>CSV</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CSV")]
+        Csv,
+
+        /// <summary><c>JSON</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("JSON")]
+        Json,
+    }
 }

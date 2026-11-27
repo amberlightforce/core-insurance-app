@@ -27,6 +27,24 @@ internal sealed class MartsController : ControllerBase
         return result.IsSuccess ? Results.Json(result.Value, statusCode: StatusCodes.Status202Accepted) : result.ToHttpResult(HttpContext);
     }
 
+    /// <summary>dat.Mart.adjust: adds an adjustment line (reason and evidence required); the stored figures never change.</summary>
+    [HttpPost("api/dat/v1/marts/adjust")]
+    [Authorize(Policy = "dat.Mart.adjust")]
+    public async Task<IResult> AdjustAsync([FromBody] MartAdjustRequest request, [FromServices] ICommandHandler<AdjustMart, MartAdjustResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new AdjustMart(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>dat.Mart.signOff: a second person signs the run with its adjustments.</summary>
+    [HttpPost("api/dat/v1/marts/sign-off")]
+    [Authorize(Policy = "dat.Mart.signOff")]
+    public async Task<IResult> SignOffAsync([FromBody] MartSignOffRequest request, [FromServices] ICommandHandler<SignOffMart, MartSignOffResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new SignOffMart(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>dat.Mart.export: the deterministic file of a signed-off run.</summary>
+    [HttpPost("api/dat/v1/marts/export")]
+    [Authorize(Policy = "dat.Mart.export")]
+    public async Task<IResult> ExportAsync([FromBody] MartExportRequest request, [FromServices] ICommandHandler<ExportMart, MartExportResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ExportMart(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
     /// <summary>dat.Mart.get.</summary>
     [HttpGet("api/dat/v1/marts/{id}")]
     [Authorize(Policy = "dat.Mart.get")]

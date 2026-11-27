@@ -4,20 +4,42 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Mart.export result. PRD outputs: "package ref (DOC archive), manifest hash"</summary>
+/// <summary>dat.Mart.export result (BO-DAT-04): a deterministic file with the snapshot hash in its header.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MartExportResponse
 {
-    /// <summary>PRD: "package ref (DOC archive)"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Suggested file name.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fileName")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? FileName { get; init; }
+
+    /// <summary>text/csv or application/json.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contentType")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ContentType { get; init; }
+
+    /// <summary>The file content (UTF-8, LF line endings).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("content")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Content { get; init; }
+
+    /// <summary>Reference of the export: mart-run/&lt;runId&gt;/&lt;format&gt;.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("packageRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PackageRef { get; init; }
+    public string? PackageRef { get; init; }
 
-    /// <summary>PRD: "manifest hash"</summary>
+    /// <summary>SHA-256 of the content.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("manifestHash")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? ManifestHash { get; init; }
+
+    /// <summary>The run snapshot hash carried in the header.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("snapshotHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? SnapshotHash { get; init; }
+
+    /// <summary>The mart legal status; Unverified layouts are refused in Production.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LegalStatus { get; init; }
 }

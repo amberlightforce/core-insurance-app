@@ -39,6 +39,10 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
 
     public DbSet<MartFigureRow> MartFigures => Set<MartFigureRow>();
 
+    public DbSet<MartAdjustmentRow> MartAdjustments => Set<MartAdjustmentRow>();
+
+    public DbSet<MartSignOffRow> MartSignOffs => Set<MartSignOffRow>();
+
     protected override string Schema => DataModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -257,6 +261,39 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
             e.Property(x => x.SourceCount).HasColumnName("source_count");
             e.HasIndex(x => new { x.RunId, x.FigureKey }).IsUnique().HasDatabaseName("ux_mart_figure_run_key");
             e.HasOne<MartRunRow>().WithMany().HasForeignKey(x => x.RunId).HasConstraintName("fk_mart_figure_run");
+        });
+
+        modelBuilder.Entity<MartAdjustmentRow>(e =>
+        {
+            e.ToTable("mart_adjustment", DataModule.ReportingMartSchema);
+            e.HasKey(x => x.AdjustmentId).HasName("pk_mart_adjustment");
+            e.Property(x => x.AdjustmentId).HasColumnName("adjustment_id");
+            e.Property(x => x.RunId).HasColumnName("run_id");
+            e.Property(x => x.FigureKey).HasColumnName("figure_key");
+            e.Property(x => x.Amount).HasColumnName("amount").HasColumnType("numeric(20,4)");
+            e.Property(x => x.Currency).HasColumnName("currency");
+            e.Property(x => x.Reason).HasColumnName("reason");
+            e.Property(x => x.EvidenceRef).HasColumnName("evidence_ref");
+            e.Property(x => x.CreatedBy).HasColumnName("created_by");
+            e.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            e.HasIndex(x => new { x.RunId, x.CreatedAt }).HasDatabaseName("ix_mart_adjustment_run");
+            e.HasOne<MartRunRow>().WithMany().HasForeignKey(x => x.RunId).HasConstraintName("fk_mart_adjustment_run");
+        });
+
+        modelBuilder.Entity<MartSignOffRow>(e =>
+        {
+            e.ToTable("mart_signoff", DataModule.ReportingMartSchema);
+            e.HasKey(x => x.SignOffId).HasName("pk_mart_signoff");
+            e.Property(x => x.SignOffId).HasColumnName("signoff_id");
+            e.Property(x => x.RunId).HasColumnName("run_id");
+            e.Property(x => x.SnapshotHash).HasColumnName("snapshot_hash");
+            e.Property(x => x.AdjustmentsHash).HasColumnName("adjustments_hash");
+            e.Property(x => x.BoundHash).HasColumnName("bound_hash");
+            e.Property(x => x.Comment).HasColumnName("comment");
+            e.Property(x => x.SignedBy).HasColumnName("signed_by");
+            e.Property(x => x.SignedAt).HasColumnName("signed_at").HasColumnType("timestamptz");
+            e.HasIndex(x => new { x.RunId, x.SignedAt }).HasDatabaseName("ix_mart_signoff_run");
+            e.HasOne<MartRunRow>().WithMany().HasForeignKey(x => x.RunId).HasConstraintName("fk_mart_signoff_run");
         });
     }
 
@@ -570,4 +607,46 @@ internal sealed class MartFigureRow
     public string Unit { get; set; } = string.Empty;
 
     public long SourceCount { get; set; }
+}
+
+/// <summary>A manual adjustment line on one figure of a run (BO-DAT-04). Append-only; the stored figure never changes: adjusted = figure + sum of lines.</summary>
+internal sealed class MartAdjustmentRow
+{
+    public Guid AdjustmentId { get; set; }
+
+    public Guid RunId { get; set; }
+
+    public string FigureKey { get; set; } = string.Empty;
+
+    public decimal Amount { get; set; }
+
+    public string Currency { get; set; } = string.Empty;
+
+    public string Reason { get; set; } = string.Empty;
+
+    public string EvidenceRef { get; set; } = string.Empty;
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public Instant CreatedAt { get; set; }
+}
+
+/// <summary>A sign-off of a run, bound to the snapshot hash plus the adjustments hash at signing time (BO-DAT-04). It is valid only while the run's current bound hash equals it.</summary>
+internal sealed class MartSignOffRow
+{
+    public Guid SignOffId { get; set; }
+
+    public Guid RunId { get; set; }
+
+    public string SnapshotHash { get; set; } = string.Empty;
+
+    public string AdjustmentsHash { get; set; } = string.Empty;
+
+    public string BoundHash { get; set; } = string.Empty;
+
+    public string Comment { get; set; } = string.Empty;
+
+    public string SignedBy { get; set; } = string.Empty;
+
+    public Instant SignedAt { get; set; }
 }
