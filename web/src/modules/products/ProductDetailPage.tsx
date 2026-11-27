@@ -160,10 +160,10 @@ export function ProductDetailPage() {
                     announceChanges={false}
                   />
                 ) : null}
-                <Section title={t('coverage.title')}>
+                <Section title={t('coverage.title')} family="teal">
                   <CoverageTable hash={selected.artefactHash} />
                 </Section>
-                <Section title={t('rating.title')}>
+                <Section title={t('rating.title')} family="brand">
                   <RatingSummary hash={selected.artefactHash} />
                 </Section>
               </>

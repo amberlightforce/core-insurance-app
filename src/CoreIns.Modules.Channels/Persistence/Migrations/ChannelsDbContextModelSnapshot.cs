@@ -93,6 +93,83 @@ namespace CoreIns.Modules.Channels.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Channels.Domain.PortalIdentityRow", b =>
+                {
+                    b.Property<Guid>("PortalIdentityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("portal_identity_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime>("LinkedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("linked_at");
+
+                    b.Property<string>("LinkedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("linked_by");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("subject");
+
+                    b.Property<string>("UnlinkReason")
+                        .HasColumnType("text")
+                        .HasColumnName("unlink_reason");
+
+                    b.Property<DateTime?>("UnlinkedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("unlinked_at");
+
+                    b.Property<string>("UnlinkedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("unlinked_by");
+
+                    b.Property<string>("Verification")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("verification");
+
+                    b.HasKey("PortalIdentityId")
+                        .HasName("pk_portal_identity");
+
+                    b.HasIndex("LegalEntityId", "PartyId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_portal_identity_party")
+                        .HasFilter("status = 'LINKED'");
+
+                    b.HasIndex("LegalEntityId", "Subject")
+                        .IsUnique()
+                        .HasDatabaseName("ux_portal_identity_subject")
+                        .HasFilter("status = 'LINKED'");
+
+                    b.ToTable("portal_identity", "chn", t =>
+                        {
+                            t.HasCheckConstraint("ck_portal_identity_status", "status IN ('LINKED', 'UNLINKED')");
+
+                            t.HasCheckConstraint("ck_portal_identity_unlinked", "status = 'LINKED' OR (unlinked_at IS NOT NULL AND unlinked_by IS NOT NULL)");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Channels.Persistence.PermissionMatrixEntryRow", b =>
                 {
                     b.Property<Guid>("EntryId")

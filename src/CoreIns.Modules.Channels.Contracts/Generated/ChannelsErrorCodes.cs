@@ -40,9 +40,15 @@ public static class ChannelsErrorCodes
 
     /// <summary>CHN-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 58 operation(s): chn.Agent.mcp, chn.Aggregator.quote, chn.ApiProduct.create, chn.ApiProduct.deprecate, chn.ApiProduct.publish, chn.ApiProduct.retire, chn.Change.confirm, chn.Change.refer, chn.Client.approve, chn.Client.request, chn.Client.revoke, chn.Client.suspend, ….</para>
+    /// <para>Declared by 60 operation(s): chn.Agent.mcp, chn.Aggregator.quote, chn.ApiProduct.create, chn.ApiProduct.deprecate, chn.ApiProduct.publish, chn.ApiProduct.retire, chn.Change.confirm, chn.Change.refer, chn.Client.approve, chn.Client.request, chn.Client.revoke, chn.Client.suspend, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "CHN-ERR-IDEMPOTENCY-MISMATCH";
+
+    /// <summary>CHN-ERR-IDENTITY-LINKED (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): chn.PortalIdentity.get, chn.PortalIdentity.link, chn.PortalIdentity.unlink.</para>
+    /// </remarks>
+    public const string IdentityLinked = "CHN-ERR-IDENTITY-LINKED";
 
     /// <summary>CHN-ERR-LANGUAGE-NOT-ENABLED (HTTP 422).</summary>
     /// <remarks>
@@ -64,7 +70,7 @@ public static class ChannelsErrorCodes
 
     /// <summary>CHN-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): chn.Dsar.erase, chn.Dsar.export, chn.Dsar.restrict, chn.Withdrawal.close, chn.Withdrawal.confirm, chn.Withdrawal.declare, chn.Withdrawal.get, chn.Withdrawal.list.</para>
+    /// <para>Declared by 11 operation(s): chn.Dsar.erase, chn.Dsar.export, chn.Dsar.restrict, chn.PortalIdentity.get, chn.PortalIdentity.link, chn.PortalIdentity.unlink, chn.Withdrawal.close, chn.Withdrawal.confirm, chn.Withdrawal.declare, chn.Withdrawal.get, chn.Withdrawal.list.</para>
     /// </remarks>
     public const string NotFound = "CHN-ERR-NOT-FOUND";
 
@@ -91,6 +97,12 @@ public static class ChannelsErrorCodes
     /// <para>Declared by 7 operation(s): chn.PermissionMatrix.createDraft, chn.PermissionMatrix.diff, chn.PermissionMatrix.get, chn.PermissionMatrix.runScenarios, chn.PermissionMatrix.schedule, chn.PermissionMatrix.submit, chn.PermissionMatrix.updateEntry.</para>
     /// </remarks>
     public const string ScenarioFailed = "CHN-ERR-SCENARIO-FAILED";
+
+    /// <summary>CHN-ERR-SELF-LINK (HTTP 403).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): chn.PortalIdentity.link.</para>
+    /// </remarks>
+    public const string SelfLink = "CHN-ERR-SELF-LINK";
 
     /// <summary>CHN-ERR-TICKET-EXPIRED (HTTP 422).</summary>
     /// <remarks>
@@ -138,7 +150,7 @@ public static class ChannelsErrorCodes
     public const string Prefix = "CHN-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [ChannelDisabled, CodeExpired, DeeplinkInvalid, EndpointNotHttps, FinalEntry, IdempotencyMismatch, LanguageNotEnabled, LimitExceeded, Mapping, NotFound, NotPermitted, Pol, RightExpired, ScenarioFailed, TicketExpired, TicketStale, TokenInvalid, UnknownTransaction, WalletTimeout, WalletUnavailable, WrongState];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [ChannelDisabled, CodeExpired, DeeplinkInvalid, EndpointNotHttps, FinalEntry, IdempotencyMismatch, IdentityLinked, LanguageNotEnabled, LimitExceeded, Mapping, NotFound, NotPermitted, Pol, RightExpired, ScenarioFailed, SelfLink, TicketExpired, TicketStale, TokenInvalid, UnknownTransaction, WalletTimeout, WalletUnavailable, WrongState];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -149,6 +161,7 @@ public static class ChannelsErrorCodes
         [EndpointNotHttps] = 422,
         [FinalEntry] = 422,
         [IdempotencyMismatch] = 409,
+        [IdentityLinked] = 409,
         [LanguageNotEnabled] = 422,
         [LimitExceeded] = 422,
         [Mapping] = 422,
@@ -157,6 +170,7 @@ public static class ChannelsErrorCodes
         [Pol] = 422,
         [RightExpired] = 422,
         [ScenarioFailed] = 422,
+        [SelfLink] = 403,
         [TicketExpired] = 422,
         [TicketStale] = 409,
         [TokenInvalid] = 422,

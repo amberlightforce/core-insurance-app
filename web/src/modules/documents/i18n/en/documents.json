@@ -31,6 +31,8 @@
     "CMP": "Compliance"
   },
   "subject": {
+    "invalidTitle": "This object reference is not valid",
+    "invalidBody": "Use a module code ({modules}), an object type and an id, for example POL/Policy/1234. Go back and look the object up again.",
     "title": "Documents of the object",
     "documents": "Documents",
     "notFound": "The object was not found in your legal entity.",

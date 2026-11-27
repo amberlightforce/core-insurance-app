@@ -98,15 +98,17 @@ export function TrialBalancePage() {
   return (
     <div className={styles.page}>
       <PageHeader
+        variant="landing"
         title={t('ops.trialBalance.title')}
         overline={t('overline')}
+        description={t('ops.trialBalance.lead')}
         actions={
           <LinkButton variant="secondary" to="/finance">
             {t('ops.back')}
           </LinkButton>
         }
       />
-      <Section title={t('ops.trialBalance.filters')}>
+      <Section title={t('ops.trialBalance.filters')} family="brand">
         <div className={styles.row}>
           <TextField
             label={t('ops.trialBalance.period')}
@@ -126,7 +128,7 @@ export function TrialBalancePage() {
           />
         </div>
       </Section>
-      <Section title={t('ops.trialBalance.title')}>
+      <Section title={t('ops.trialBalance.title')} family="teal">
         {validPeriod ? (
           <QueryView query={query}>{(data) => <Balances data={data} />}</QueryView>
         ) : (

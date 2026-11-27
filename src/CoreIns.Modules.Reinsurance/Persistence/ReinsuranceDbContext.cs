@@ -56,6 +56,9 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
     public DbSet<CommissionRow> Commissions => Set<CommissionRow>();
 
     public DbSet<AccountingDecisionRow> AccountingDecisions => Set<AccountingDecisionRow>();
+
+    public DbSet<AccountItemRow> AccountItems => Set<AccountItemRow>();
+
     public DbSet<OccurrenceRow> Occurrences => Set<OccurrenceRow>();
 
     public DbSet<OccurrenceClaimRow> OccurrenceClaims => Set<OccurrenceClaimRow>();
@@ -71,6 +74,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
         ConfigureRecovery(modelBuilder);
         ConfigureCession(modelBuilder);
         AccountingModel.Configure(modelBuilder);
+        AccountItemModel.Configure(modelBuilder);
         ConfigureOccurrences(modelBuilder);
 
         modelBuilder.Entity<ContractRow>(entity =>

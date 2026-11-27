@@ -102,6 +102,191 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal-identities/link:
+    post:
+      operationId: chn.PortalIdentity.link
+      summary: Portal identity link
+      description: |-
+        Links a customer sign-in identity (external subject) to exactly one party after verification (BO-CHN-01). Staff only; a customer cannot link themselves. A subject linked to another party is refused (CHN-ERR-IDENTITY-LINKED); relink needs an explicit unlink first.
+      tags:
+      - PortalIdentity
+      x-requirement:
+      - REQ-CHN-305
+      x-wave: W4
+      x-work-packages:
+      - W4-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalIdentity.link
+      x-error-codes:
+      - code: CHN-ERR-IDENTITY-LINKED
+        status: 409
+      - code: CHN-ERR-SELF-LINK
+        status: 403
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      - code: CHN-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - BO-CHN-01
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortalIdentityLinkRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalIdentityLinkResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal-identities/unlink:
+    post:
+      operationId: chn.PortalIdentity.unlink
+      summary: Portal identity link
+      description: |-
+        Unlinks a customer sign-in identity from its party (audited).
+      tags:
+      - PortalIdentity
+      x-requirement:
+      - REQ-CHN-305
+      x-wave: W4
+      x-work-packages:
+      - W4-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalIdentity.unlink
+      x-error-codes:
+      - code: CHN-ERR-IDENTITY-LINKED
+        status: 409
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      - code: CHN-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - BO-CHN-01
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortalIdentityUnlinkRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalIdentityLinkResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal-identities/{subject}:
+    get:
+      operationId: chn.PortalIdentity.get
+      summary: Portal identity link
+      description: |-
+        The link of a customer sign-in identity, or 404.
+      tags:
+      - PortalIdentity
+      x-requirement:
+      - REQ-CHN-305
+      x-wave: W4
+      x-work-packages:
+      - W4-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalIdentity.get
+      x-error-codes:
+      - code: CHN-ERR-IDENTITY-LINKED
+        status: 409
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-CHN-01
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: subject
+        in: path
+        required: true
+        description: The external subject of the sign-in identity
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalIdentityLinkResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/chn/v1/permission-matrices/create-draft:
     post:
       operationId: chn.PermissionMatrix.createDraft
@@ -6322,6 +6507,76 @@ components:
         diff:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "diff"'
+    PortalIdentityLinkRequest:
+      type: object
+      description: 'chn.PortalIdentity.link request (BO-CHN-01).'
+      properties:
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: The external subject of the sign-in identity (token sub / dev user id)
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        verification:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: How the person was verified (recorded in the audit)
+      required:
+      - subject
+      - partyId
+      - verification
+    PortalIdentityUnlinkRequest:
+      type: object
+      description: 'chn.PortalIdentity.unlink request (BO-CHN-01).'
+      properties:
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - subject
+      - reason
+    PortalIdentityView:
+      type: object
+      description: 'A customer sign-in identity and the one party it is linked to.'
+      properties:
+        subject:
+          type: string
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+          enum:
+          - LINKED
+          - UNLINKED
+        linkedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        linkedBy:
+          type: string
+        unlinkedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        unlinkedBy:
+          type: string
+      required:
+      - subject
+      - partyId
+      - status
+      - linkedAt
+      - linkedBy
+    PortalIdentityLinkResponse:
+      type: object
+      description: 'chn.PortalIdentity.link/unlink/get result'
+      properties:
+        identity:
+          $ref: '#/components/schemas/PortalIdentityView'
+      required:
+      - identity
     JourneyStartRequest:
       type: object
       description: 'chn.Journey.start request. PRD inputs: "journey type, context"'

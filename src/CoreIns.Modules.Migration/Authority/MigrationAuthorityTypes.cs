@@ -1,4 +1,5 @@
 using CoreIns.Modules.Migration.Domain;
+using CoreIns.Modules.Migration.Services.SignOff;
 using CoreIns.Platform;
 using CoreIns.Platform.Authority;
 using CoreIns.SharedKernel;
@@ -21,6 +22,9 @@ internal static class MigrationAuthorityTypes
         services.AddAuthorityType(new AuthorityTypeDefinition(
             BatchRun, ModuleCode.MIG, new LocalizedText("Έγκριση εκτέλεσης δέσμης μετάπτωσης", "Approve migration batch run"),
             [new AuthorityDimensionDefinition(BatchApproval.ScopeDimension, DimensionKind.Code)]));
+        services.AddAuthorityType(new AuthorityTypeDefinition(
+            AuthorityTypeCode.Parse(SignOffApproval.Type), ModuleCode.MIG, new LocalizedText("Έγκριση ολοκλήρωσης κύματος μετάπτωσης", "Sign off a migration wave"),
+            [new AuthorityDimensionDefinition(SignOffApproval.SignatoryDimension, DimensionKind.Code)]));
         return services;
     }
 }

@@ -64,6 +64,14 @@ public static class ChannelsModule
         services.AddCommandAuditor<ConfirmWithdrawal, WithdrawalConfirmResponse, ConfirmWithdrawalAuditor>();
         services.AddCommand<ConfirmWithdrawal, WithdrawalConfirmResponse, ConfirmWithdrawalHandler>(CommandDescriptor.For("chn.Withdrawal.confirm"));
 
+        services.AddScoped<PortalScope>();
+        services.AddScoped<IValidator<LinkPortalIdentity>, LinkPortalIdentityValidator>();
+        services.AddCommandAuditor<LinkPortalIdentity, PortalIdentityLinkResponse, LinkPortalIdentityAuditor>();
+        services.AddCommand<LinkPortalIdentity, PortalIdentityLinkResponse, LinkPortalIdentityHandler>(CommandDescriptor.For("chn.PortalIdentity.link"));
+        services.AddScoped<IValidator<UnlinkPortalIdentity>, UnlinkPortalIdentityValidator>();
+        services.AddCommandAuditor<UnlinkPortalIdentity, PortalIdentityLinkResponse, UnlinkPortalIdentityAuditor>();
+        services.AddCommand<UnlinkPortalIdentity, PortalIdentityLinkResponse, UnlinkPortalIdentityHandler>(CommandDescriptor.For("chn.PortalIdentity.unlink"));
+
         services.AddCommand<CloseWithdrawal, WithdrawalCloseResponse, CloseWithdrawalHandler>(CommandDescriptor.For("chn.Withdrawal.close"));
 
         services.AddErrorDefinitions(Errors);
@@ -95,6 +103,10 @@ public static class ChannelsModule
             .Describe("Η εγγραφή ή το σενάριο δεν είναι έγκυρο.", "The entry or scenario is not valid."),
         ErrorDefinition.For(ModuleCode.CHN, "SELF-APPROVAL", 403, "Δεν επιτρέπεται αυτοέγκριση", "You cannot approve your own work")
             .Describe("Ο δημιουργός ή υποβάλλων δεν μπορεί να εγκρίνει τον πίνακα.", "The person who prepared or submitted the matrix cannot approve it."),
+        ErrorDefinition.For(ModuleCode.CHN, "IDENTITY-LINKED", 409, "Η ταυτότητα είναι ήδη συνδεδεμένη", "The identity is already linked")
+            .Describe("Η ταυτότητα ή ο πελάτης έχει ήδη ενεργό σύνδεσμο. Αποσυνδέστε τον πρώτα.", "The identity or the party already has a live link; unlink it first."),
+        ErrorDefinition.For(ModuleCode.CHN, "SELF-LINK", 403, "Δεν επιτρέπεται αυτοσύνδεση", "You cannot link your own identity")
+            .Describe("Δεν μπορείτε να συνδέσετε τη δική σας ταυτότητα με πελάτη.", "You cannot link your own sign-in identity to a party."),
         ErrorDefinition.For(ModuleCode.CHN, "HUMAN-REQUIRED", 403, "Απαιτείται άνθρωπος", "A person is required")
             .Describe("Μόνο φυσικό πρόσωπο μπορεί να κάνει αυτή την ενέργεια.", "Only a person can do this."),
     ];
