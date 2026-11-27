@@ -507,10 +507,44 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("legal_entity_id");
 
+                    b.Property<int>("LockCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("lock_count");
+
+                    b.Property<DateTime?>("LockedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("locked_at");
+
+                    b.Property<string>("LockedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("locked_by");
+
                     b.Property<string>("PeriodCode")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("period_code");
+
+                    b.Property<string>("ReopenReason")
+                        .HasColumnType("text")
+                        .HasColumnName("reopen_reason");
+
+                    b.Property<DateTime?>("ReopenRequestedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("reopen_requested_at");
+
+                    b.Property<string>("ReopenRequestedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("reopen_requested_by");
+
+                    b.Property<DateTime?>("SoftClosedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("soft_closed_at");
+
+                    b.Property<string>("SoftClosedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("soft_closed_by");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -528,7 +562,7 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_financial_period_code", "period_code ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'");
 
-                            t.HasCheckConstraint("ck_financial_period_status", "status IN ('OPEN', 'LOCKED')");
+                            t.HasCheckConstraint("ck_financial_period_status", "status IN ('OPEN', 'SOFT_CLOSED', 'LOCKED')");
                         });
                 });
 
@@ -977,6 +1011,46 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.PeriodCloseTaskRow", b =>
+                {
+                    b.Property<Guid>("PeriodId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("period_id");
+
+                    b.Property<string>("TaskCode")
+                        .HasColumnType("text")
+                        .HasColumnName("task_code");
+
+                    b.Property<bool>("BreakAccepted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("break_accepted");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime?>("SignedOffAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("signed_off_at");
+
+                    b.Property<string>("SignedOffBy")
+                        .HasColumnType("text")
+                        .HasColumnName("signed_off_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("PeriodId", "TaskCode")
+                        .HasName("pk_period_close_task");
+
+                    b.ToTable("period_close_task", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_period_close_task_status", "status IN ('OPEN', 'SIGNED_OFF')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.PolicyContextRow", b =>
                 {
                     b.Property<Guid>("PolicyTermId")
@@ -1239,6 +1313,16 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_journal_line_entry");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.PeriodCloseTaskRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Finance.Persistence.FinancialPeriodRow", null)
+                        .WithMany()
+                        .HasForeignKey("PeriodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_period_close_task_period");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.PostingRuleRow", b =>
