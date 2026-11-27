@@ -43,6 +43,7 @@ public static class DocumentsModule
         services.AddModuleDbContext<DocumentsDbContext>(Schema);
         services.AddSingleton<IDsarParticipant, DocumentsDsarParticipant>();
         services.AddScoped<DocumentReader>();
+        services.AddScoped<TemplateCatalogue>();
 
         // The request is idempotent on (template key, request number) by itself; callers inside a unit of work pass no HTTP key.
         services.AddScoped<IValidator<RequestDocument>, RequestDocumentValidator>();
@@ -71,6 +72,8 @@ public static class DocumentsModule
             .Describe("Επιτρέπονται μόνο τα ελληνικά και τα αγγλικά.", "Only Greek and English are approved."),
         ErrorDefinition.For(ModuleCode.DOC, "CHANNEL-NOT-PERMITTED", 403, "Το κανάλι δεν επιτρέπεται", "The channel is not permitted")
             .Describe("Το μέσο ή ο πάροχος δεν είναι διαθέσιμος για αυτή την παράδοση.", "The medium or provider is not available for this delivery."),
+        ErrorDefinition.For(ModuleCode.DOC, "BINDING-MISSING", 422, "Δεν βρέθηκε πρότυπο", "No template binding")
+            .Describe("Δεν υπάρχει εγκεκριμένη έκδοση προτύπου σε ισχύ για τον τύπο και το πεδίο.", "No approved template version is in force for the document type and scope."),
         ErrorDefinition.For(ModuleCode.DOC, "HASH-MISMATCH", 422, "Το αποτύπωμα δεν ταιριάζει", "The hash does not match")
             .Describe("Το δηλωμένο αποτύπωμα SHA-256 διαφέρει από το περιεχόμενο.", "The declared SHA-256 differs from the content."),
     ];

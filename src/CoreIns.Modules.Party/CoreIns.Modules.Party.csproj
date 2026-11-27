@@ -19,6 +19,8 @@
     <ProjectReference Include="..\CoreIns.Modules.Party.Contracts\CoreIns.Modules.Party.Contracts.csproj" />
     <!-- Country-pack SPIs (IdValidator, NameTransliterator, AddressFormatter) and MKT language rules: contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
+    <!-- BO-MIG-06: IMigrationImporter / IMigrationReverser (contracts only). -->
+    <ProjectReference Include="..\CoreIns.Modules.Migration.Contracts\CoreIns.Modules.Migration.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.Platform.DataProtection\CoreIns.Platform.DataProtection.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />

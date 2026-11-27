@@ -4,15 +4,27 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.DocumentType.list result. PRD outputs: "types"</summary>
+/// <summary>doc.DocumentType.list result: one document type of the catalogue (BO-DOC-05).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DocumentTypeListItem
 {
-    /// <summary>PRD: "types"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("types")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Types { get; init; }
+    /// <summary>Contract member 'documentType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("documentType")]
+    public required string DocumentType { get; init; }
+
+    /// <summary>Contract member 'defaultMedium'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("defaultMedium")]
+    public required string DefaultMedium { get; init; }
+
+    /// <summary>Contract member 'titleEl'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("titleEl")]
+    public required string TitleEl { get; init; }
+
+    /// <summary>Contract member 'titleEn'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("titleEn")]
+    public required string TitleEn { get; init; }
+
+    /// <summary>Contract member 'requiredFields'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("requiredFields")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> RequiredFields { get; init; }
 }

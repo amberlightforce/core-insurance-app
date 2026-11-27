@@ -49,7 +49,7 @@ internal sealed class RecoveryBooker(ReinsuranceDbContext db, IClock clock, IEve
             return 0;
         }
 
-        var version = await db.Versions.AsNoTracking().SingleAsync(v => v.ContractId == id && v.KnownTo == null, cancellationToken).ConfigureAwait(false);
+        var version = await db.Versions.AsNoTracking().SingleAsync(v => v.ContractId == id && v.VersionNo == 1, cancellationToken).ConfigureAwait(false);
         var content = await ContractSupport.ReadContentAsync(db, contract, version, cancellationToken).ConfigureAwait(false);
         var layerRows = await db.Layers.AsNoTracking().Where(l => l.VersionId == version.VersionId && l.Rev == version.ContentRev)
             .ToListAsync(cancellationToken).ConfigureAwait(false);

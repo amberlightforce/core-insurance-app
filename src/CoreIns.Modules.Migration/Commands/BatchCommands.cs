@@ -14,6 +14,7 @@ using CoreIns.SharedKernel.Results;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace CoreIns.Modules.Migration.Commands;
 
@@ -30,7 +31,7 @@ internal static class Batches
         return new BatchView(
             batch.BatchId, batch.Name, batch.Status, batch.BaselineHash, batch.ContentHash,
             batch.DryRunHash is not null && batch.DryRunHash == batch.ContentHash, batch.StartedBy, batch.ApprovalRequestId,
-            counts.Sum(c => c.Count), counts.ToDictionary(c => c.Key, c => c.Count, StringComparer.Ordinal));
+            counts.Sum(c => c.Count), counts.ToDictionary(c => c.Key, c => c.Count, StringComparer.Ordinal), batch.ProcessedCount, batch.FailedCount);
     }
 
     public static OutcomeView Outcome(BatchItemRow i) => new(i.Seq, i.ModuleName, i.ObjectType, i.LegacyId, i.Outcome, i.CoreId, i.ErrorCode, i.Message);
@@ -61,7 +62,7 @@ internal sealed class CreateBatchValidator : AbstractValidator<CreateBatch>
     public CreateBatchValidator()
     {
         RuleFor(c => c.Request.Name).NotEmpty().MaximumLength(200);
-        RuleFor(c => c.Request.Items).NotEmpty().Must(i => i.Count <= 5000).WithMessage("A batch holds at most 5000 items.");
+        RuleFor(c => c.Request.Items).NotEmpty().Must(i => i.Count <= 20000).WithMessage("A batch holds at most 20000 items.");
         RuleForEach(c => c.Request.Items).ChildRules(item =>
         {
             item.RuleFor(i => i.Module).NotEmpty().MaximumLength(8);
@@ -307,7 +308,8 @@ internal sealed class StartBatchHandler(
 internal sealed record ApproveBatch(ApproveBatchRequest Request) : ICommand<BatchResponse>;
 
 internal sealed class ApproveBatchHandler(
-    MigrationDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, BatchRunner runner, IServiceProvider services)
+    MigrationDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, BatchProcessor processor,
+    IOptions<MigrationBatchOptions> options, IServiceProvider services)
     : ICommandHandler<ApproveBatch, BatchResponse>
 {
     public async Task<Result<BatchResponse>> HandleAsync(ApproveBatch command, CancellationToken cancellationToken)
@@ -377,10 +379,19 @@ internal sealed class ApproveBatchHandler(
         }
         else
         {
+            // The run happens on the worker (BO-MIG-01); a small batch is finished in the request so the caller sees the outcome at once.
             batch.Status = BatchStatus.Running;
-            var items = await db.Items.Where(i => i.BatchId == batch.BatchId).OrderBy(i => i.Seq).ToListAsync(cancellationToken).ConfigureAwait(false);
-            await runner.RunAsync(batch, items, dryRun: false, cancellationToken).ConfigureAwait(false);
-            batch.Status = items.Any(i => i.Outcome == ItemOutcome.Failed) ? BatchStatus.CompletedWithErrors : BatchStatus.Completed;
+            batch.LeaseUntil = null;
+            batch.UpdatedAt = now;
+            batch.RecordVersion++;
+            await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            if (storedItems.Count <= options.Value.InlineRunMaxItems)
+            {
+                await processor.ProcessAsync(batch.BatchId, null, cancellationToken).ConfigureAwait(false);
+            }
+
+            var current = await Batches.LoadAsync(db, legalEntity, request.BatchId, cancellationToken).ConfigureAwait(false);
+            return await Batches.ResponseAsync(db, current!, cancellationToken).ConfigureAwait(false);
         }
 
         batch.UpdatedAt = now;
@@ -412,10 +423,10 @@ internal sealed class PauseBatchHandler(MigrationDbContext db, RequestContext co
             return MigrationErrors.NotFound("The batch");
         }
 
-        // TODO(hardening): batches run in one request, so only a batch that has not run yet can be held.
+        // A running batch is held at the next chunk boundary of the worker; items already processed keep their outcome.
         if (pause)
         {
-            if (batch.Status is not (BatchStatus.Draft or BatchStatus.PendingApproval))
+            if (batch.Status is not (BatchStatus.Draft or BatchStatus.PendingApproval or BatchStatus.Running))
             {
                 return MigrationErrors.State($"A batch in status {batch.Status} cannot be paused.");
             }
@@ -432,6 +443,7 @@ internal sealed class PauseBatchHandler(MigrationDbContext db, RequestContext co
 
             batch.Status = batch.PausedFrom;
             batch.PausedFrom = null;
+            batch.LeaseUntil = null; // the worker picks a resumed run up from its cursor
         }
 
         batch.UpdatedAt = clock.Now;

@@ -46,6 +46,14 @@ public static class MigrationModule
         services.AddMigrationAuthorityTypes();
         services.AddOwnerDecidedApprovalType(BatchApproval.Type);
         services.AddScoped<BatchRunner>();
+        services.AddOptions<MigrationBatchOptions>().Bind(configuration.GetSection(MigrationBatchOptions.Section));
+        services.AddScoped<BatchProcessor>();
+        services.AddSingleton<BatchWorkerRunner>();
+        if (string.Equals(configuration["APP_ROLE"], "worker", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddHostedService<BatchWorker>();
+        }
+
         services.AddScoped<MigrationReader>();
         services.AddScoped<MigrationArchiveReader>();
 
