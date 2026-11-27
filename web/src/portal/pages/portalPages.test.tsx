@@ -289,8 +289,8 @@ describe('portal Renewal and Cancellation', () => {
   });
 
   it('says there is no offer yet instead of inventing one', async () => {
-    const { renewalJobId: _unused, ...withoutOffer } = policy;
-    void _unused;
+    const withoutOffer: Record<string, unknown> = { ...policy };
+    delete withoutOffer.renewalJobId;
     mockApi([get(`${api}/portal/policies/${policyId}`, withoutOffer)]);
     renderScreen(<RenewalPage />, { path: '/p/:id/renew', url: `/p/${policyId}/renew` });
     await screen.findByText('Η πρότασή μας δεν είναι ακόμη έτοιμη');
@@ -664,15 +664,15 @@ describe('portal Profile', () => {
     await user.click(screen.getByRole('button', { name: 'Αλλαγή: +306900000000' }));
     const field = screen.getByLabelText('Τηλέφωνο ή e-mail');
     await user.clear(field);
-    await user.type(field, '+306911111111');
+    await user.type(field, '6911111111');
     await user.click(screen.getByRole('button', { name: 'Αποθήκευση' }));
-    await screen.findByText('Τα στοιχεία σας ενημερώθηκαν');
+    await screen.findAllByText('Τα στοιχεία σας ενημερώθηκαν');
     expect(mock.callsTo('POST', `${api}/portal/contact/update`)[0]?.body).toMatchObject({
       action: 'REPLACE',
       kind: 'CONTACT_POINT',
       locationId: 'cp1',
       expectedRecordVersion: 4,
-      contactPoint: { type: 'MOBILE', value: '+306911111111' },
+      contactPoint: { type: 'MOBILE', value: '6911111111' },
     });
   });
 
@@ -716,6 +716,6 @@ describe('portal Profile', () => {
     const { user } = renderScreen(<ProfilePage />, { path: '/p', url: '/p' });
     await user.click(await screen.findByRole('button', { name: /Διαγραφή: Ερμού 10/ }));
     await user.click(screen.getByRole('button', { name: 'Ναι, διαγραφή' }));
-    await screen.findByText('Το αίτημα στάλθηκε στην ομάδα μας');
+    await screen.findAllByText('Το αίτημα στάλθηκε στην ομάδα μας');
   });
 });

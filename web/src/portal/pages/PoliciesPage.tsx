@@ -2,7 +2,14 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
-import { Button, EmptyState, LoadingState, SkeletonText, StatusPill } from '../../design-system';
+import {
+  Button,
+  EmptyState,
+  LoadingState,
+  SkeletonText,
+  StatusPill,
+  cx,
+} from '../../design-system';
 import { PortalHero, PortalPage, PortalProblem, PortalSection } from '../ui/PortalUi';
 import { usePortalFormat, usePortalTitle } from '../ui/hooks';
 import { norm, useCodeLabel } from '../ui/labels';
@@ -52,7 +59,7 @@ export function PoliciesPage() {
               <li key={p.policyId} className={rows.row}>
                 <Link
                   to={`/portal/policies/${p.policyId}`}
-                  className={`${rows.rowMain} ${rows.rowLink}`}
+                  className={cx(rows.rowMain, rows.rowLink)}
                 >
                   <span className={rows.rowTitle}>
                     {label('product', p.productCode)} ·{' '}

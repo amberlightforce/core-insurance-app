@@ -158,9 +158,10 @@ internal sealed class PortalDocumentReader(
         }
     }
 
+    /// <summary>Rendered (not superseded or withdrawn), addressed to the household, of a customer-visible document type (DOC lifecycle flag) and not hidden.</summary>
     private static bool Visible(DocumentSearchItem d, PortalCaller caller) =>
         string.Equals(d.Status, "Rendered", StringComparison.Ordinal)
         && caller.PartyIds.Contains(d.RecipientPartyId)
-        // TODO(hardening): a customer-visibility flag on the DOC document type (BO-DOC-05 catalogue) instead of this naming convention; DSAR-restricted recipients (DOC's own restriction table).
-        && !d.DocumentType.Contains("INTERNAL", StringComparison.OrdinalIgnoreCase);
+        && d.CustomerVisible == true
+        && d.Hidden != true;
 }

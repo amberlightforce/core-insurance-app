@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
 import { useIdempotencyKey } from '../../api/idempotency';
-import { Button, EmptyState, Switch, announce } from '../../design-system';
+import { Button, EmptyState, Switch, announce, cx } from '../../design-system';
 import { PortalHero, PortalPage, PortalProblem, PortalSection } from '../ui/PortalUi';
 import { QueryView } from '../ui/QueryView';
 import { usePortalFormat, usePortalTitle } from '../ui/hooks';
@@ -76,7 +76,7 @@ function Row({ item, onRead }: { item: NotificationItem; onRead: (id: string) =>
   const unread = item.readAt === undefined;
   const to = destinations[item.notificationClass];
   return (
-    <li className={`${rows.row} ${unread ? rows.unread : ''}`}>
+    <li className={cx(rows.row, unread && rows.unread)}>
       <div className={rows.rowMain}>
         <p className={rows.rowTitle}>{t(`ntf.kind.${item.kind}`)}</p>
         <p className={rows.rowMeta}>
@@ -89,7 +89,9 @@ function Row({ item, onRead }: { item: NotificationItem; onRead: (id: string) =>
           <Link
             className={styles.textLink}
             to={to}
-            onClick={() => unread && onRead(item.notificationId)}
+            onClick={() => {
+              if (unread) onRead(item.notificationId);
+            }}
           >
             {t('ntf.open')}
           </Link>

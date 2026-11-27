@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
 
 import { isApiError } from '../../api/client';
-import { EmptyState, KeyValueList, StatusPill } from '../../design-system';
+import { EmptyState, KeyValueList, StatusPill, cx } from '../../design-system';
 import { PortalHero, PortalPage, PortalSection } from '../ui/PortalUi';
 import { QueryView } from '../ui/QueryView';
 import { usePortalFormat, usePortalTitle } from '../ui/hooks';
@@ -87,7 +87,7 @@ function Coverages({ policy }: { policy: PortalPolicy }) {
             {vehicles.map((v) => (
               <li key={v.plate} className={rows.row}>
                 <div className={rows.rowMain}>
-                  <p className={`${rows.rowTitle} ${rows.mono}`}>{v.plate}</p>
+                  <p className={cx(rows.rowTitle, rows.mono)}>{v.plate}</p>
                   <p className={rows.rowMeta}>
                     {[v.make, v.model, v.firstRegistrationYear].filter(Boolean).join(' · ')}
                   </p>
