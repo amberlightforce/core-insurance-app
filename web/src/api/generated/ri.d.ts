@@ -1849,6 +1849,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ri/v1/cash-calls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cash calls with aging
+         * @description Cash calls with their outstanding amount and aging (BO-RI-15)
+         */
+        get: operations["ri.CashCall.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ri/v1/cash-calls/raise": {
         parameters: {
             query?: never;
@@ -1859,11 +1879,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Cash calls
-         * @description Cash calls
-         *
-         *     PRD inputs: occurrence, amounts
-         *     PRD outputs: cash call
+         * Raise a cash call
+         * @description BO-RI-15: raise a cash call when the paid recoveries of one claim exceed the threshold
          */
         post: operations["ri.CashCall.raise"];
         delete?: never;
@@ -1882,11 +1899,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Cash calls
-         * @description Cash calls
-         *
-         *     PRD inputs: occurrence, amounts
-         *     PRD outputs: cash call
+         * Issue a cash call
+         * @description BO-RI-15: send a RAISED cash call to the reinsurers
          */
         post: operations["ri.CashCall.issue"];
         delete?: never;
@@ -1905,11 +1919,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Cash calls
-         * @description Cash calls
-         *
-         *     PRD inputs: occurrence, amounts
-         *     PRD outputs: cash call
+         * Record a cash call receipt
+         * @description BO-RI-15: record cash received from one reinsurer, idempotent on the bank reference
          */
         post: operations["ri.CashCall.recordReceipt"];
         delete?: never;
@@ -1928,11 +1939,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Cash calls
-         * @description Cash calls
-         *
-         *     PRD inputs: occurrence, amounts
-         *     PRD outputs: cash call
+         * Cancel a cash call
+         * @description BO-RI-15: cancel a cash call that has no receipt, by someone other than the raiser
          */
         post: operations["ri.CashCall.cancel"];
         delete?: never;
@@ -4069,53 +4077,102 @@ export interface components {
         StatementReissueResponse: {
             statement: components["schemas"]["StatementView"];
         };
-        /** @description ri.CashCall.raise request. PRD inputs: "occurrence, amounts" */
+        /** @description The share of one reinsurer in a cash call; the shares sum exactly to the total (NX-EC-06) */
+        CashCallLine: {
+            reinsurerPartyId: components["schemas"]["Uuid"];
+            amount: components["schemas"]["Money"];
+            received: components["schemas"]["Money"];
+            outstanding: components["schemas"]["Money"];
+        };
+        /** @description Cash received on a cash call; posted as a positive RECOVERY account item that appears on the next statement */
+        CashCallReceipt: {
+            receiptId: components["schemas"]["Uuid"];
+            reinsurerPartyId: components["schemas"]["Uuid"];
+            amount: components["schemas"]["Money"];
+            bankReference: components["schemas"]["Text"];
+            receivedOn: components["schemas"]["LocalDate"];
+            itemId: components["schemas"]["Uuid"];
+            createdAt: components["schemas"]["Instant"];
+            createdBy: components["schemas"]["Text"];
+        };
+        /** @description A cash call on the reinsurers for the paid recoveries of one claim above the threshold (BO-RI-15) */
+        CashCallView: {
+            cashCallId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            /** @description The claim the recoveries belong to (the idempotency key of the call) */
+            occurrence: components["schemas"]["Text"];
+            /** @enum {string} */
+            status: "RAISED" | "SENT" | "PARTIALLY_SETTLED" | "SETTLED" | "CANCELLED";
+            total: components["schemas"]["Money"];
+            /** @description The threshold the call was raised against */
+            threshold: components["schemas"]["Money"];
+            received: components["schemas"]["Money"];
+            outstanding: components["schemas"]["Money"];
+            dueDate: components["schemas"]["LocalDate"];
+            /** @description Days past the due date while an amount is outstanding; 0 otherwise */
+            daysOverdue: number;
+            /** @enum {string} */
+            agingBucket: "NOT_DUE" | "D1_30" | "D31_60" | "D61_90" | "D90_PLUS" | "CLOSED";
+            lines: components["schemas"]["CashCallLine"][];
+            receipts: components["schemas"]["CashCallReceipt"][];
+            raisedAt: components["schemas"]["Instant"];
+            raisedBy: components["schemas"]["Text"];
+            sentAt?: components["schemas"]["Instant"] | null;
+            sentBy?: components["schemas"]["Text"] | null;
+            cancelledAt?: components["schemas"]["Instant"] | null;
+            cancelledBy?: components["schemas"]["Text"] | null;
+            cancelReason?: components["schemas"]["Text"] | null;
+            settledAt?: components["schemas"]["Instant"] | null;
+        };
+        /** @description ri.CashCall.list result, newest first */
+        CashCallListResponse: {
+            items: components["schemas"]["CashCallView"][];
+        };
+        /** @description ri.CashCall.raise request. Raised when the paid recoveries of the claim on the contract exceed the call threshold; raising it again returns the call. */
         CashCallRaiseRequest: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "amounts" */
-            amounts?: components["schemas"]["Money"][];
+            contractId: components["schemas"]["Uuid"];
+            /** @description The claim id the recoveries belong to */
+            occurrence: components["schemas"]["Text"];
+            /** @description The configured number of days from today when omitted */
+            dueDate?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description ri.CashCall.raise result. PRD outputs: "cash call" */
+        /** @description ri.CashCall.raise result */
         CashCallRaiseResponse: {
-            /** @description PRD: "cash call" */
-            cashCall?: components["schemas"]["Unspecified"];
+            cashCall: components["schemas"]["CashCallView"];
+            /** @description true when the call already existed */
+            replayed: boolean;
         };
-        /** @description ri.CashCall.issue request. PRD inputs: "occurrence, amounts" */
+        /** @description ri.CashCall.issue request. A RAISED call is sent to the reinsurers. */
         CashCallIssueRequest: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "amounts" */
-            amounts?: components["schemas"]["Money"][];
+            cashCallId: components["schemas"]["Uuid"];
         };
-        /** @description ri.CashCall.issue result. PRD outputs: "cash call" */
+        /** @description ri.CashCall.issue result */
         CashCallIssueResponse: {
-            /** @description PRD: "cash call" */
-            cashCall?: components["schemas"]["Unspecified"];
+            cashCall: components["schemas"]["CashCallView"];
         };
-        /** @description ri.CashCall.recordReceipt request. PRD inputs: "occurrence, amounts" */
+        /** @description ri.CashCall.recordReceipt request. Idempotent on the bank reference per reinsurer; a partial receipt keeps the call open. */
         CashCallRecordReceiptRequest: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "amounts" */
-            amounts?: components["schemas"]["Money"][];
+            cashCallId: components["schemas"]["Uuid"];
+            reinsurerPartyId: components["schemas"]["Uuid"];
+            amount: components["schemas"]["Money"];
+            bankReference: components["schemas"]["Text"];
+            /** @description Today when omitted */
+            receivedOn?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description ri.CashCall.recordReceipt result. PRD outputs: "cash call" */
+        /** @description ri.CashCall.recordReceipt result */
         CashCallRecordReceiptResponse: {
-            /** @description PRD: "cash call" */
-            cashCall?: components["schemas"]["Unspecified"];
+            cashCall: components["schemas"]["CashCallView"];
+            /** @description true when the bank reference was recorded before and nothing changed */
+            replayed: boolean;
         };
-        /** @description ri.CashCall.cancel request. PRD inputs: "occurrence, amounts" */
+        /** @description ri.CashCall.cancel request. Maker-checker (the person who raised the call cannot cancel it); refused once cash was received. */
         CashCallCancelRequest: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "amounts" */
-            amounts?: components["schemas"]["Money"][];
+            cashCallId: components["schemas"]["Uuid"];
+            reason: components["schemas"]["Text"];
         };
-        /** @description ri.CashCall.cancel result. PRD outputs: "cash call" */
+        /** @description ri.CashCall.cancel result */
         CashCallCancelResponse: {
-            /** @description PRD: "cash call" */
-            cashCall?: components["schemas"]["Unspecified"];
+            cashCall: components["schemas"]["CashCallView"];
         };
         /** @description ri.Settlement.propose request. PRD inputs: "counterparty, statements, items" */
         SettlementProposeRequest: {
@@ -8578,6 +8635,46 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "ri.CashCall.list": {
+        parameters: {
+            query?: {
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                contractId?: string;
+                /** @description RAISED, SENT, PARTIALLY_SETTLED, SETTLED or CANCELLED */
+                status?: string;
+                /** @description true lists only calls with an outstanding amount */
+                openOnly?: boolean;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CashCallListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             500: components["responses"]["InternalError"];
         };
     };

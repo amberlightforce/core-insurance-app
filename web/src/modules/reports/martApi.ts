@@ -1,5 +1,4 @@
-import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiRequest } from '../../api/client';
 import { newIdempotencyKey } from '../../api/idempotency';
@@ -120,41 +119,36 @@ export function useCompare(runA: string | null, runB: string | null) {
   });
 }
 
-// TODO(hardening): there is no run-list read yet (dat.Mart.list); history is the runs started from this browser.
-const historyKey = 'coreins.reports.runs';
 const historyLimit = 20;
 
-function readHistory(): string[] {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(historyKey) ?? '[]');
-    return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
-  } catch {
-    return [];
-  }
-}
+/** One row of dat.Mart.list (the run header without figures or adjustments). */
+export type MartRunSummary = Pick<
+  MartRun,
+  | 'runId'
+  | 'mart'
+  | 'period'
+  | 'productCode'
+  | 'status'
+  | 'snapshotHash'
+  | 'legalStatus'
+  | 'figureCount'
+  | 'createdAt'
+  | 'createdBy'
+> & {
+  signOff: { signedBy: string; signedAt: string; valid: boolean } | null;
+};
 
-/** Run ids started from this browser (newest first) and their server-side detail. */
+/** The newest runs of the legal entity (dat.Mart.list), newest first. */
 export function useRunHistory() {
-  const [ids, setIds] = useState<string[]>(readHistory);
-  const remember = useCallback((runId: string) => {
-    setIds((current) => {
-      const next = [runId, ...current.filter((id) => id !== runId)].slice(0, historyLimit);
-      try {
-        localStorage.setItem(historyKey, JSON.stringify(next));
-      } catch {
-        /* storage unavailable: history lasts for this page only */
-      }
-      return next;
-    });
-  }, []);
-  const queries = useQueries({
-    queries: ids.map((id) => ({
-      queryKey: ['dat', 'run', id],
-      queryFn: ({ signal }: { signal: AbortSignal }) => fetchRun(id, signal),
-    })),
+  const query = useQuery({
+    queryKey: ['dat', 'runs'],
+    queryFn: ({ signal }) =>
+      apiRequest<{ items: MartRunSummary[]; nextCursor: string | null }>(`${base}/marts/runs`, {
+        query: { limit: historyLimit },
+        signal,
+      }),
   });
-  const runs = queries.flatMap((q) => (q.data ? [q.data.run] : []));
-  return { runs, remember, isPending: queries.some((q) => q.isPending) };
+  return { runs: query.data?.items ?? [], isPending: query.isPending };
 }
 
 /** dat.Mart.run: computes a mart inline; each click is a new action with its own idempotency key. */

@@ -4,15 +4,15 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.CashCall.raise result. PRD outputs: "cash call"</summary>
+/// <summary>ri.CashCall.raise result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CashCallRaiseResponse
 {
-    /// <summary>PRD: "cash call"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'cashCall'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("cashCall")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? CashCall { get; init; }
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.CashCallView CashCall { get; init; }
+
+    /// <summary>true when the call already existed</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("replayed")]
+    public required bool Replayed { get; init; }
 }

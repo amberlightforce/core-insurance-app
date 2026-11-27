@@ -23,4 +23,8 @@ public sealed record LineageTraceResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("sourceRecordsRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? SourceRecordsRef { get; init; }
+
+    /// <summary>Cursor of the next page of source rows, or null on the last page (BO-DAT-05 contract addition).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("nextCursor")]
+    public string? NextCursor { get; init; }
 }

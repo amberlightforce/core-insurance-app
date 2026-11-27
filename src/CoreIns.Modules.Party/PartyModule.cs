@@ -44,6 +44,7 @@ public static class PartyModule
 
         // Domain services and the read side.
         services.AddScoped<NameForms>();
+        services.AddScoped<AddressBuilder>();
         services.AddScoped<PartyProtection>();
         services.AddScoped<PartyReader>();
         services.AddScoped<PartySearch>();
@@ -83,6 +84,18 @@ public static class PartyModule
         services.AddScoped<IValidator<UpdateIntermediary>, UpdateIntermediaryValidator>();
         services.AddCommandAuditor<UpdateIntermediary, IntermediaryUpdateResponse, IntermediaryAuditor>();
         services.AddCommand<UpdateIntermediary, IntermediaryUpdateResponse, UpdateIntermediaryHandler>(CommandDescriptor.For("pty.Intermediary.update"));
+
+        services.AddScoped<LocationWriter>();
+        services.AddScoped<IValidator<AddLocation>, AddLocationValidator>();
+        services.AddScoped<IValidator<UpdateLocation>, UpdateLocationValidator>();
+        services.AddScoped<IValidator<RemoveLocation>, RemoveLocationValidator>();
+        services.AddCommandAuditor<AddLocation, LocationAddResponse, LocationAuditor>();
+        services.AddCommandAuditor<UpdateLocation, LocationUpdateResponse, LocationAuditor>();
+        services.AddCommandAuditor<RemoveLocation, LocationRemoveResponse, LocationAuditor>();
+        services.AddCommand<AddLocation, LocationAddResponse, AddLocationHandler>(CommandDescriptor.For("pty.Location.add"));
+        services.AddCommand<UpdateLocation, LocationUpdateResponse, UpdateLocationHandler>(CommandDescriptor.For("pty.Location.update"));
+        services.AddCommand<RemoveLocation, LocationRemoveResponse, RemoveLocationHandler>(CommandDescriptor.For("pty.Location.remove"));
+        services.AddScoped<IPartyLocationService, PartyLocationService>();
 
         services.AddScoped<IValidator<AssignPartyRole>, AssignPartyRoleValidator>();
         services.AddScoped<IValidator<EndPartyRole>, EndPartyRoleValidator>();

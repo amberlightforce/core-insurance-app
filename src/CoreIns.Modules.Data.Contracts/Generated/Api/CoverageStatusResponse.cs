@@ -31,4 +31,33 @@ public sealed record CoverageStatusResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("reasons")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? Reasons { get; init; }
+
+    /// <summary>Contract member 'period'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
+    public string? Period { get; init; }
+
+    /// <summary>Contract member 'generatedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("generatedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? GeneratedAt { get; init; }
+
+    /// <summary>Events accepted for a handled type that are neither projected nor quarantined (BO-DAT-05).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("gapCount")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? GapCount { get; init; }
+
+    /// <summary>Per conformed fact table and period: raw events projected, quarantined, or in a gap.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("tables")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Data.Contracts.Api.CoverageLine>? Tables { get; init; }
+
+    /// <summary>Per mart and period: source events projected (or read directly), quarantined, or in a gap.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("marts")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Data.Contracts.Api.CoverageLine>? Marts { get; init; }
+
+    /// <summary>Event types with no conformed fact and no mart, per period: counted, not projected.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("notHandled")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Data.Contracts.Api.CoverageLine>? NotHandled { get; init; }
 }

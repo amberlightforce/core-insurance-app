@@ -10,7 +10,43 @@
     "dat.Coverage.status": {
       "governed": "unspecified",
       "ungoverned": "unspecified",
-      "reasons": "unspecified"
+      "reasons": "unspecified",
+      "period": "sample",
+      "generatedAt": "sample",
+      "gapCount": 1,
+      "tables": [
+        {
+          "name": "sample",
+          "period": "sample",
+          "received": 1,
+          "projected": 1,
+          "quarantined": 1,
+          "gap": 1,
+          "notHandled": 1
+        }
+      ],
+      "marts": [
+        {
+          "name": "sample",
+          "period": "sample",
+          "received": 1,
+          "projected": 1,
+          "quarantined": 1,
+          "gap": 1,
+          "notHandled": 1
+        }
+      ],
+      "notHandled": [
+        {
+          "name": "sample",
+          "period": "sample",
+          "received": 1,
+          "projected": 1,
+          "quarantined": 1,
+          "gap": 1,
+          "notHandled": 1
+        }
+      ]
     },
     "dat.DataContract.register": {
       "version": "unspecified",
@@ -146,10 +182,55 @@
       "breached": true,
       "modelStatus": "sample"
     },
+    "CoverageLine": {
+      "name": "sample",
+      "period": "sample",
+      "received": 1,
+      "projected": 1,
+      "quarantined": 1,
+      "gap": 1,
+      "notHandled": 1
+    },
     "CoverageStatusResponse": {
       "governed": "unspecified",
       "ungoverned": "unspecified",
-      "reasons": "unspecified"
+      "reasons": "unspecified",
+      "period": "sample",
+      "generatedAt": "sample",
+      "gapCount": 1,
+      "tables": [
+        {
+          "name": "sample",
+          "period": "sample",
+          "received": 1,
+          "projected": 1,
+          "quarantined": 1,
+          "gap": 1,
+          "notHandled": 1
+        }
+      ],
+      "marts": [
+        {
+          "name": "sample",
+          "period": "sample",
+          "received": 1,
+          "projected": 1,
+          "quarantined": 1,
+          "gap": 1,
+          "notHandled": 1
+        }
+      ],
+      "notHandled": [
+        {
+          "name": "sample",
+          "period": "sample",
+          "received": 1,
+          "projected": 1,
+          "quarantined": 1,
+          "gap": 1,
+          "notHandled": 1
+        }
+      ]
     },
     "DataContractGetResponse": {
       "contractVersions": "unspecified"
@@ -221,7 +302,8 @@
     },
     "LineageTraceResponse": {
       "graph": "unspecified",
-      "sourceRecordsRef": "unspecified"
+      "sourceRecordsRef": "unspecified",
+      "nextCursor": "sample"
     },
     "MartAdjustRequest": {
       "runId": "0192adde-69e4-781f-87a0-bfe147783f85",
@@ -269,6 +351,46 @@
       "figures": "unspecified",
       "lineagePointer": "unspecified",
       "diff": "unspecified"
+    },
+    "MartRunListItem": {
+      "runId": "0192225d-1131-78df-8ffb-21e9a5b5a7a7",
+      "mart": "PORTFOLIO_PREMIUM",
+      "period": "sample",
+      "productCode": "sample",
+      "status": "COMPLETED",
+      "legalStatus": "sample",
+      "figureCount": 1,
+      "snapshotHash": "sample",
+      "createdBy": "sample",
+      "createdAt": "sample",
+      "signOff": {
+        "signedBy": "sample",
+        "signedAt": "sample",
+        "valid": true
+      }
+    },
+    "MartRunListPage": {
+      "items": [
+        {
+          "runId": "019224ff-c0ad-70da-8609-e40e6894b399",
+          "mart": "PORTFOLIO_PREMIUM",
+          "period": "sample",
+          "productCode": "sample",
+          "status": "COMPLETED",
+          "legalStatus": "sample",
+          "figureCount": 1,
+          "snapshotHash": "sample",
+          "createdBy": "sample",
+          "createdAt": "sample",
+          "signOff": {
+            "signedBy": "sample",
+            "signedAt": "sample",
+            "valid": true
+          }
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
     },
     "MartRunRequest": {
       "mart": "PORTFOLIO_PREMIUM",

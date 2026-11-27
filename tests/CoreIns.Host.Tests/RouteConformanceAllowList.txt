@@ -43,9 +43,7 @@ CONTRACT_NOT_SERVED GET /api/cmp/v1/taxonomies
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/footprint
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/snapshot
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/trend
-CONTRACT_NOT_SERVED GET /api/dat/v1/coverage/status
 CONTRACT_NOT_SERVED GET /api/dat/v1/feature-store/get-online
-CONTRACT_NOT_SERVED GET /api/dat/v1/lineage/trace
 CONTRACT_NOT_SERVED GET /api/dat/v1/scr-results/{}
 CONTRACT_NOT_SERVED GET /api/doc/v1/forms/{}
 CONTRACT_NOT_SERVED GET /api/doc/v1/ipids/get
@@ -167,7 +165,6 @@ CONTRACT_NOT_SERVED PATCH /api/bil/v1/billing-accounts/{}
 CONTRACT_NOT_SERVED PATCH /api/clm/v1/services/{}
 CONTRACT_NOT_SERVED PATCH /api/pfc/v1/pogs/{}
 CONTRACT_NOT_SERVED PATCH /api/plt/v1/users/{}
-CONTRACT_NOT_SERVED PATCH /api/pty/v1/locations/{}
 CONTRACT_NOT_SERVED PATCH /api/ri/v1/programmes/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/contingencies/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
@@ -527,8 +524,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/complete
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/start
-CONTRACT_NOT_SERVED POST /api/pty/v1/locations/add
-CONTRACT_NOT_SERVED POST /api/pty/v1/locations/remove
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/unmerge
 CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/bulk-transfer
@@ -564,10 +559,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/approve
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/generate
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/issue
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/submit
-CONTRACT_NOT_SERVED POST /api/ri/v1/cash-calls/cancel
-CONTRACT_NOT_SERVED POST /api/ri/v1/cash-calls/issue
-CONTRACT_NOT_SERVED POST /api/ri/v1/cash-calls/raise
-CONTRACT_NOT_SERVED POST /api/ri/v1/cash-calls/record-receipt
 CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/confirm
 CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/estimate
 CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/propose
