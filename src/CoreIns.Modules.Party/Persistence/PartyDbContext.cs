@@ -44,11 +44,61 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
 
     public DbSet<PartyRelationshipRow> Relationships => Set<PartyRelationshipRow>();
 
+    public DbSet<AccountRow> Accounts => Set<AccountRow>();
+
+    public DbSet<AccountMemberRow> AccountMembers => Set<AccountMemberRow>();
+
     protected override string Schema => PartyModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<AccountRow>(entity =>
+        {
+            entity.ToTable("account", table =>
+            {
+                table.HasCheckConstraint("ck_account_status", "status IN ('PENDING','ACTIVE','WITHDRAWN')");
+                table.HasCheckConstraint("ck_account_type", "account_type IN ('INDIVIDUAL','HOUSEHOLD','BUSINESS')");
+            });
+            entity.HasKey(e => e.AccountId).HasName("pk_account");
+            entity.Property(e => e.AccountId).HasColumnName("account_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.AccountNumber).HasColumnName("account_number");
+            entity.Property(e => e.AccountType).HasColumnName("account_type");
+            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.HolderPartyId).HasColumnName("holder_party_id");
+            entity.Property(e => e.WithdrawnOn).HasColumnName("withdrawn_on");
+            entity.Property(e => e.WithdrawReason).HasColumnName("withdraw_reason");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.LegalEntityId, e.AccountNumber }).IsUnique().HasDatabaseName("ux_account_number");
+            entity.HasIndex(e => e.HolderPartyId).HasDatabaseName("ix_account_holder");
+            entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.HolderPartyId).HasConstraintName("fk_account_holder").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AccountMemberRow>(entity =>
+        {
+            entity.ToTable("account_member");
+            entity.HasKey(e => e.MemberId).HasName("pk_account_member");
+            entity.Property(e => e.MemberId).HasColumnName("member_id");
+            entity.Property(e => e.AccountId).HasColumnName("account_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.MemberRole).HasColumnName("member_role");
+            entity.Property(e => e.AddedOn).HasColumnName("added_on");
+            entity.Property(e => e.AddedAt).HasColumnName("added_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RemovedAt).HasColumnName("removed_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.HasIndex(e => e.AccountId).HasDatabaseName("ix_account_member_account");
+            entity.HasIndex(e => e.PartyId).HasDatabaseName("ix_account_member_party");
+            entity.HasIndex(e => new { e.AccountId, e.PartyId }).IsUnique().HasFilter("removed_at IS NULL").HasDatabaseName("ux_account_member_current");
+            entity.HasOne<AccountRow>().WithMany().HasForeignKey(e => e.AccountId).HasConstraintName("fk_account_member_account").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.PartyId).HasConstraintName("fk_account_member_party").OnDelete(DeleteBehavior.Restrict);
+        });
 
         modelBuilder.Entity<PartyRoleRow>(entity =>
         {
