@@ -21,11 +21,11 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [CMP](#cmp) | 90 | 53 | 37 | 69 | 21 | 21 | 0 | 3 |
 | [CHN](#chn) | 86 | 62 | 24 | 58 | 28 | 3 | 25 | 2 |
 | [WRK](#wrk) | 58 | 23 | 35 | 40 | 18 | 9 | 3 | 14 |
-| [PLT](#plt) | 101 | 67 | 34 | 63 | 38 | 26 | 0 | 10 |
+| [PLT](#plt) | 101 | 67 | 34 | 63 | 38 | 25 | 0 | 10 |
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
 | [MIG](#mig) | 22 | 22 | 0 | 14 | 8 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 36 | 12 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1152 | 940 | 212 | 749 | 403 | 129 | 69 | 65 |
+| **Total** | 1152 | 940 | 212 | 749 | 403 | 128 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -1150,7 +1150,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `plt.Approval.request` | POST `/api/plt/v1/approval/request` | C |  | internal | BIL, CHN, CLM, CMP, DOC, FIN, MIG, MKT, PFC, PTY, RAT, UW | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
 | `plt.Approval.verifyForExecution` | POST `/api/plt/v1/approval/verify-for-execution` | Q |  | internal | BIL, CLM, MIG, MKT, PFC, PTY | W1 | full | REQ-PLT-117 |
 | `plt.Approval.withdraw` | POST `/api/plt/v1/approval/withdraw` | C |  | internal | CLM | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
-| `plt.ApprovalType.register` | POST `/api/plt/v1/approval-types/register` | C |  | internal | MKT | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
+| `plt.ApprovalType.register` | POST `/api/plt/v1/approval-types/register` | C |  | internal |  | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
 | `plt.Audit.append` | POST `/api/plt/v1/audit/append` | C |  | internal | BIL, CHN, CLM, CMP, DOC, FIN, MIG, MKT, PFC, PTY, RAT | W1 | minimal | REQ-PLT-002, REQ-PLT-124 |
 | `plt.Audit.export` | POST `/api/plt/v1/audit/export` | C |  | ui | CLM | W1 | full | REQ-PLT-128..REQ-PLT-131 |
 | `plt.Audit.query` | GET `/api/plt/v1/audit/query` | Q |  | ui | CLM | W1 | full | REQ-PLT-128..REQ-PLT-131 |
