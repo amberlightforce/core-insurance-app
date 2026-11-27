@@ -8,6 +8,11 @@ namespace CoreIns.Modules.Channels.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PermissionEvaluateRequest
 {
+    /// <summary>Contract addition (BO-CHN-05): raise a confirmation ticket when the outcome is REFER (default true; false for a pure what-if).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("raiseTicket")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? RaiseTicket { get; init; }
+
     /// <summary>PRD: "transactionType"</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>

@@ -4,15 +4,35 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Document.preview result. PRD outputs: "rendition (DRAFT)"</summary>
+/// <summary>doc.Document.preview result (BO-DOC-06): the composed HTML. Nothing is stored.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DocumentPreviewResponse
 {
-    /// <summary>PRD: "rendition (DRAFT)"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("rendition")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Rendition { get; init; }
+    /// <summary>Contract member 'documentType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("documentType")]
+    public required string DocumentType { get; init; }
+
+    /// <summary>Contract member 'templateId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("templateId")]
+    public required global::CoreIns.SharedKernel.Identifiers.TemplateId TemplateId { get; init; }
+
+    /// <summary>Contract member 'templateVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("templateVersion")]
+    public required int TemplateVersion { get; init; }
+
+    /// <summary>DRAFT or APPROVED.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("templateStatus")]
+    public required string TemplateStatus { get; init; }
+
+    /// <summary>Contract member 'language'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("language")]
+    public required string Language { get; init; }
+
+    /// <summary>Contract member 'title'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("title")]
+    public required string Title { get; init; }
+
+    /// <summary>Contract member 'html'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("html")]
+    public required string Html { get; init; }
 }

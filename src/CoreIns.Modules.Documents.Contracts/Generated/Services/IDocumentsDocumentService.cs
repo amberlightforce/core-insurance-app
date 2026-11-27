@@ -56,10 +56,11 @@ public interface IDocumentsDocumentService
     /// <remarks>
     /// <para>Operation doc.Document.preview (query; HTTP POST /api/doc/v1/documents/preview).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: minimal. Wave W2.</para>
+    /// <para>Status: full. Wave W2.</para>
     /// <para>Exposure: ui, partner; consumers: PFC, POL.</para>
+    /// <para>Errors: DOC-ERR-PAYLOAD-INVALID (422), DOC-ERR-BINDING-MISSING (422).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Documents.Contracts.Api.DocumentPreviewResponse> PreviewAsync(global::System.Text.Json.JsonElement request, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Documents.Contracts.Api.DocumentPreviewResponse> PreviewAsync(global::CoreIns.Modules.Documents.Contracts.Api.DocumentPreviewRequest request, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Request a document</summary>
     /// <remarks>

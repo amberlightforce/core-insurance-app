@@ -18,8 +18,10 @@ public interface IDataKpiService
     /// <para>Status: full. Wave W8.</para>
     /// <para>Exposure: ui; consumers: PFC.</para>
     /// </remarks>
+    /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
+    /// <param name="knownAt">Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including</param>
     /// <param name="kpiCode">PRD: "KPI code"</param>
     /// <param name="filters">PRD: "filters"</param>
     /// <param name="period">PRD: "period"</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.KpiGetResponse> GetAsync(string? kpiCode = null, string? filters = null, string? period = null, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.KpiGetResponse> GetAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, string? kpiCode = null, string? filters = null, string? period = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

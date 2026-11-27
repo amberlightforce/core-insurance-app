@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using CoreIns.Modules.Data.Domain;
 using CoreIns.Modules.Data.Persistence;
+using CoreIns.Modules.Data.Services;
 using CoreIns.Platform.Events;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
@@ -28,7 +29,7 @@ internal enum IngestOutcome
 /// writes it once to the ledger (unique on <c>event_id</c>) or to the quarantine. Only plain INSERT ... ON CONFLICT DO NOTHING
 /// on the handler's own transaction, so a redelivery is a no-op and the outbox of other modules is never touched.
 /// </summary>
-internal sealed class EventIngestion(DataDbContext db, IClock clock)
+internal sealed class EventIngestion(DataDbContext db, IClock clock, ConformedProjector projector)
 {
     /// <summary>The report-relevant event types DAT ingests into the raw layer (producer module code, event type; all major 1).</summary>
     public static readonly IReadOnlyList<(ModuleCode Producer, string EventType)> ReportRelevant =
@@ -106,6 +107,10 @@ internal sealed class EventIngestion(DataDbContext db, IClock clock)
                         {Long(wire, "aggregateSequence")}, {occurred}, {Text(wire, "legalEntity")}, {Text(wire, "origin")}, {envelopeJson}::jsonb, {now})
                 ON CONFLICT (event_id) DO NOTHING
                 """, cancellationToken).ConfigureAwait(false);
+
+            // BO-DAT-02: conform the event in the same transaction. Idempotent on event_id (a duplicate or a release re-offers it
+            // harmlessly) and never throws for a data problem: a failure goes to the quarantine instead.
+            _ = await projector.ProjectAsync(wire, cancellationToken).ConfigureAwait(false);
             return written == 1 ? IngestOutcome.Ingested : IngestOutcome.Duplicate;
         }
 

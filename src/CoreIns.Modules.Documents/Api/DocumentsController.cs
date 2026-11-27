@@ -2,6 +2,7 @@ using System.Text.Json;
 using CoreIns.Modules.Documents.Commands;
 using CoreIns.Modules.Documents.Contracts;
 using CoreIns.Modules.Documents.Contracts.Api;
+using CoreIns.Modules.Documents.Persistence;
 using CoreIns.Modules.Documents.Queries;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
@@ -34,6 +35,7 @@ internal static class DocumentsPermissions
     public const string TemplateList = "doc.Template.list";
     public const string ClauseGet = "doc.Clause.get";
     public const string BindingResolve = "doc.Binding.resolve";
+    public const string DocumentPreview = "doc.Document.preview";
 }
 
 /// <summary>REST facade of the SL6-DOC-CORE operations (contracts/openapi/doc.yaml).</summary>
@@ -262,6 +264,60 @@ internal sealed class DocumentsController : ControllerBase
         return template is null
             ? Problem(DomainError.Of(ModuleCode.DOC, "BINDING-MISSING", "No approved template version is in force for this document type and scope."))
             : Results.Ok(new BindingResolveResponse { TemplateId = new TemplateId(template.TemplateId), DocumentType = template.DocumentType, Version = template.Version, Language = request.Language });
+    }
+
+    /// <summary>
+    /// doc.Document.preview: composes a template with a payload and returns the HTML. Reads only; no document, archive, number
+    /// or event is created. Without <c>templateId</c> the approved version in force at <c>validAt</c> (default: today in the legal entity's zone) is used.
+    /// </summary>
+    [HttpPost("documents/preview")]
+    [Authorize(Policy = DocumentsPermissions.DocumentPreview)]
+    public async Task<IResult> PreviewAsync(
+        [FromBody] DocumentPreviewRequest request,
+        [FromServices] TemplateCatalogue catalogue,
+        [FromServices] IClock clock,
+        [FromServices] Microsoft.Extensions.Options.IOptions<DocumentsOptions> options,
+        CancellationToken cancellationToken)
+    {
+        var zone = options.Value.Zone;
+        var language = request.Language.ToString();
+        if (!Domain.Templates.IsLanguage(language))
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "LANGUAGE-NOT-APPROVED", $"Language '{language}' is not approved for this template (el, en)."));
+        }
+
+        TemplateRow? template;
+        if (request.TemplateId is { } templateId)
+        {
+            template = await catalogue.GetTemplateAsync(templateId.Value, cancellationToken).ConfigureAwait(false);
+            if (template is not null && template.DocumentType != request.DocumentType)
+            {
+                template = null;
+            }
+        }
+        else
+        {
+            var at = request.ValidAt?.Value ?? clock.Now.ToBusinessDate(zone).Value;
+            template = await catalogue.ResolveAsync(new TemplateScope(request.DocumentType, at, request.ProductCode, request.LineOfBusiness, request.Jurisdiction), cancellationToken).ConfigureAwait(false);
+        }
+
+        if (template is null)
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "BINDING-MISSING", "No template version matches the document type and scope."));
+        }
+
+        var el = language == "el";
+        var clauses = await catalogue.ApprovedClausesAsync(cancellationToken).ConfigureAwait(false);
+        var composed = Rendering.TemplateComposer.Compose(
+            template.DocumentType, language, el ? template.TitleEl : template.TitleEn, el ? template.BodyEl : template.BodyEn,
+            request.Payload ?? new Dictionary<string, string>(), clauses, zone);
+        return composed.IsSuccess
+            ? Results.Ok(new DocumentPreviewResponse
+            {
+                DocumentType = template.DocumentType, TemplateId = new TemplateId(template.TemplateId), TemplateVersion = template.Version, TemplateStatus = template.Status,
+                Language = request.Language, Title = el ? template.TitleEl : template.TitleEn, Html = composed.Html!,
+            })
+            : Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", string.Join(" ", composed.Problems)));
     }
 
     internal static bool TryParseObjectRef(string? text, out ObjectRef subject)

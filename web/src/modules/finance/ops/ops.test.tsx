@@ -147,7 +147,7 @@ describe('ManualJournalFormPage', () => {
     const api = mockApi([
       {
         method: 'POST',
-        path: '/api/fin/v1/manual-journals/submit',
+        path: '/api/fin/v1/manual-journals',
         respond: () => ({ body: { manualJournal: journal() } }),
       },
       {
@@ -169,17 +169,17 @@ describe('ManualJournalFormPage', () => {
     const amounts = screen.getAllByRole('textbox', { name: /Ποσό/ });
     await user.type(nth(amounts, 0), '120');
     await user.type(nth(amounts, 1), '100');
-    await user.click(screen.getByRole('button', { name: 'Υποβολή για έγκριση' }));
+    await user.click(screen.getByRole('button', { name: 'Αποθήκευση πρόχειρου' }));
     expect((await screen.findAllByText(/πρέπει να είναι ίσες/)).length).toBeGreaterThan(0);
-    expect(api.callsTo('POST', '/api/fin/v1/manual-journals/submit')).toHaveLength(0);
+    expect(api.callsTo('POST', '/api/fin/v1/manual-journals')).toHaveLength(0);
 
     await user.clear(nth(amounts, 1));
     await user.type(nth(amounts, 1), '120');
-    await user.click(screen.getByRole('button', { name: 'Υποβολή για έγκριση' }));
+    await user.click(screen.getByRole('button', { name: 'Αποθήκευση πρόχειρου' }));
     await waitFor(() => {
-      expect(api.callsTo('POST', '/api/fin/v1/manual-journals/submit')).toHaveLength(1);
+      expect(api.callsTo('POST', '/api/fin/v1/manual-journals')).toHaveLength(1);
     });
-    const call = api.callsTo('POST', '/api/fin/v1/manual-journals/submit')[0];
+    const call = api.callsTo('POST', '/api/fin/v1/manual-journals')[0];
     expect(call?.headers.get('Idempotency-Key')).toBeTruthy();
     expect(call?.body).toMatchObject({
       book: 'IFRS',

@@ -208,7 +208,7 @@ paths:
       x-wave: W2
       x-work-packages:
       - W2-DOC-02
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-operation-kind: query
       x-idempotency: none
@@ -221,7 +221,11 @@ paths:
       - PFC
       - POL
       x-permission: doc.Document.preview
-      x-error-codes: []
+      x-error-codes:
+      - code: DOC-ERR-PAYLOAD-INVALID
+        status: 422
+      - code: DOC-ERR-BINDING-MISSING
+        status: 422
       x-source:
       - PRD-10 §9.1 l.1635
       parameters:
@@ -246,6 +250,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '429':
           $ref: common.yaml#/components/responses/TooManyRequests
         '500':
@@ -3114,15 +3120,58 @@ components:
           description: 'PRD: "batch id"'
     DocumentPreviewRequest:
       type: object
-      description: 'doc.Document.preview request. PRD inputs: "as request"'
-      x-status: minimal
+      description: 'doc.Document.preview request (BO-DOC-06): render a template with a payload without persisting anything. Payload keys must be declared in the payload dictionary of the document type (unknown keys are refused). Without templateId the approved version in force at validAt is used; with templateId that exact version (also a DRAFT) is rendered.'
+      properties:
+        documentType:
+          type: string
+        language:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+        validAt:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        templateId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        productCode:
+          type: string
+        lineOfBusiness:
+          type: string
+        jurisdiction:
+          type: string
+        payload:
+          type: object
+          additionalProperties:
+            type: string
+          description: Payload field name to text value (dates ISO yyyy-MM-dd or an ISO instant, money as a plain decimal).
+      required:
+      - documentType
+      - language
+      - payload
     DocumentPreviewResponse:
       type: object
-      description: 'doc.Document.preview result. PRD outputs: "rendition (DRAFT)"'
+      description: 'doc.Document.preview result (BO-DOC-06): the composed HTML. Nothing is stored.'
       properties:
-        rendition:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rendition (DRAFT)"'
+        documentType:
+          type: string
+        templateId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        templateVersion:
+          type: integer
+        templateStatus:
+          type: string
+          description: DRAFT or APPROVED.
+        language:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+        title:
+          type: string
+        html:
+          type: string
+      required:
+      - documentType
+      - templateId
+      - templateVersion
+      - templateStatus
+      - language
+      - title
+      - html
     DocumentGetItem:
       type: object
       description: 'doc.Document.get result. PRD outputs: "documents with statuses"'

@@ -63,9 +63,9 @@ export default defineConfig({
       ],
       reporter: ['text-summary', 'json-summary'],
       reportOnFailure: true,
-      // NX-TST-09: conservative initial floor (the full run was too slow under load to measure exactly);
+      // NX-TST-09: measured 2026-11-27 (lines 80.8, statements 79.31, functions 72.08, branches 75.65), floored minus 2;
       // TODO(hardening): raise to just below the coverage CI prints.
-      thresholds: { lines: 60, statements: 60, functions: 55, branches: 50 },
+      thresholds: { lines: 78, statements: 77, functions: 70, branches: 73 },
     },
   },
 });

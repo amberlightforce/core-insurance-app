@@ -33,6 +33,10 @@ internal static class ProductPermissions
     public const string ChangeSetCreate = "pfc.ChangeSet.create";
     public const string ChangeSetEdit = "pfc.ChangeSet.edit";
     public const string ChangeSetAbandon = "pfc.ChangeSet.abandon";
+    public const string Submit = "pfc.ProductVersion.submit";
+    public const string SignOff = "pfc.ProductVersion.signOff";
+    public const string Schedule = "pfc.ProductVersion.schedule";
+    public const string CancelSchedule = "pfc.ProductVersion.cancelSchedule";
 }
 
 /// <summary>Problem Details from a domain error.</summary>
