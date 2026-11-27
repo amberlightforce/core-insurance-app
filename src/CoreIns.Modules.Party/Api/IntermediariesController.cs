@@ -46,6 +46,33 @@ internal sealed class IntermediariesController : ControllerBase
         var result = await handler.HandleAsync(new UpdateIntermediary(new IntermediaryId(id), request), cancellationToken).ConfigureAwait(false);
         return result.ToHttpResult(HttpContext);
     }
+
+    /// <summary>pty.Intermediary.suspend.</summary>
+    [HttpPost("suspend")]
+    [Authorize(Policy = PartyPermissions.IntermediarySuspend)]
+    public async Task<IResult> SuspendAsync(
+        [FromBody] IntermediarySuspendRequest request,
+        [FromServices] ICommandHandler<SuspendIntermediary, IntermediarySuspendResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new SuspendIntermediary(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>pty.Intermediary.terminate (ends the producer codes).</summary>
+    [HttpPost("terminate")]
+    [Authorize(Policy = PartyPermissions.IntermediaryTerminate)]
+    public async Task<IResult> TerminateAsync(
+        [FromBody] IntermediaryTerminateRequest request,
+        [FromServices] ICommandHandler<TerminateIntermediary, IntermediaryTerminateResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new TerminateIntermediary(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>pty.Intermediary.importRegister (idempotent by register number).</summary>
+    [HttpPost("import-register")]
+    [Authorize(Policy = PartyPermissions.IntermediaryImportRegister)]
+    public async Task<IResult> ImportRegisterAsync(
+        [FromBody] IntermediaryImportRegisterRequest request,
+        [FromServices] ICommandHandler<ImportIntermediaryRegister, IntermediaryImportRegisterResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ImportIntermediaryRegister(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 }
 
 /// <summary>REST facade of <c>pty.ProducerCode.validate</c> / <c>search</c>.</summary>
