@@ -107,7 +107,9 @@ internal sealed class ConfigurationCatalogue
             Add(core, ConfigEntry.CoreNode, packId: null, packVersion: null);
         }
 
-        foreach (var named in state.Manifest.Packs)
+        // Overlay versions (BO-MKT-01, approved configuration changes) are applied after the shipped packs: their values replace what a
+        // pack states for the same key where the validity overlaps (the pack value is kept outside the overlap).
+        foreach (var named in state.Manifest.Packs.OrderBy(p => ConfigOverlay.IsOverlay(p.PackId) ? 1 : 0))
         {
             var content = state.Packs.SingleOrDefault(p => p.PackId == named.PackId && p.Version == named.Version)
                 ?? throw new InvalidOperationException($"Pack version {named.PackId}@{named.Version} named by the state manifest is not registered.");
@@ -118,7 +120,7 @@ internal sealed class ConfigurationCatalogue
 
             foreach (var value in content.Values)
             {
-                Add(value, "country:" + named.Country, named.PackId, named.Version);
+                Add(value, "country:" + named.Country, named.PackId, named.Version, replace: ConfigOverlay.IsOverlay(named.PackId));
             }
         }
     }
@@ -138,7 +140,7 @@ internal sealed class ConfigurationCatalogue
             .OrderBy(e => e.IsCore ? 0 : 1)
             .LastOrDefault();
 
-    private void Add(PackConfigValue value, string node, string? packId, string? packVersion)
+    private void Add(PackConfigValue value, string node, string? packId, string? packVersion, bool replace = false)
     {
         var descriptor = ConfigKeys.Find(value.Key)
             ?? throw new InvalidOperationException($"Pack value '{value.Key}' is not a registered configuration key (REQ-MKT-033).");
@@ -161,6 +163,24 @@ internal sealed class ConfigurationCatalogue
         var entry = new ConfigEntry(
             descriptor, value.Key, node, value.Type, value.Value, value.LegalStatus, value.SourceRef, value.MotorPath,
             value.ValidFrom, value.ValidTo, packId, packVersion, value.Note);
+        if (replace)
+        {
+            for (var i = _entries.Count - 1; i >= 0; i--)
+            {
+                var existing = _entries[i];
+                if (existing.Key != entry.Key || existing.Node != entry.Node || !existing.Validity.Overlaps(entry.Validity))
+                {
+                    continue;
+                }
+
+                _entries.RemoveAt(i);
+                foreach (var (from, to) in ConfigOverlay.Remainder(existing.ValidFrom, existing.ValidTo, entry.ValidFrom, entry.ValidTo))
+                {
+                    _entries.Insert(i, existing with { ValidFrom = from, ValidTo = to });
+                }
+            }
+        }
+
         if (_entries.Any(e => e.Key == entry.Key && e.Node == entry.Node && e.Validity.Overlaps(entry.Validity)))
         {
             throw new InvalidOperationException($"Overlapping validity for '{value.Key}' at {node} (REQ-MKT-042).");
