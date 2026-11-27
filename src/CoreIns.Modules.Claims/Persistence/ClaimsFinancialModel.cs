@@ -105,6 +105,7 @@ internal static class ClaimsFinancialModel
             entity.Property(e => e.RecoveryId).HasColumnName("recovery_id");
             entity.HasOne<RecoveryRow>().WithMany().HasForeignKey(e => e.RecoveryId).OnDelete(DeleteBehavior.Restrict).HasConstraintName("fk_financial_transaction_recovery");
             entity.Property(e => e.ExposureId).HasColumnName("exposure_id");
+            entity.HasIndex(e => e.ExposureId).HasDatabaseName("ix_financial_transaction_exposure");
             entity.Property(e => e.Sequence).HasColumnName("sequence");
             entity.Property(e => e.TxnNumber).HasColumnName("txn_number");
             entity.Property(e => e.Kind).HasColumnName("kind");
@@ -118,6 +119,7 @@ internal static class ClaimsFinancialModel
             entity.Property(e => e.Eroding).HasColumnName("eroding");
             entity.Property(e => e.PaymentType).HasColumnName("payment_type");
             entity.Property(e => e.ClaimPaymentId).HasColumnName("claim_payment_id");
+            entity.HasIndex(e => e.ClaimPaymentId).HasDatabaseName("ix_financial_transaction_claim_payment");
             entity.Property(e => e.ReversesTxnId).HasColumnName("reverses_txn_id");
             entity.Property(e => e.ReasonCode).HasColumnName("reason_code");
             entity.Property(e => e.Proposed).HasColumnName("proposed");
@@ -150,6 +152,7 @@ internal static class ClaimsFinancialModel
             entity.Property(e => e.SetId).HasColumnName("set_id");
             entity.Property(e => e.ExposureId).HasColumnName("exposure_id");
             entity.Property(e => e.PayeePartyId).HasColumnName("payee_party_id");
+            entity.HasIndex(e => e.PayeePartyId).HasDatabaseName("ix_claim_payment_payee_party");
             entity.Property(e => e.PayeeAccountId).HasColumnName("payee_account_id");
             entity.Property(e => e.MaskedAccount).HasColumnName("masked_account");
             entity.Property(e => e.Method).HasColumnName("method");

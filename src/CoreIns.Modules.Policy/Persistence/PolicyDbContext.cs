@@ -182,6 +182,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.ProductCode).HasColumnName("product_code");
             entity.Property(e => e.PolicyholderPartyId).HasColumnName("policyholder_party_id");
             entity.Property(e => e.AccountId).HasColumnName("account_id");
+            entity.HasIndex(e => e.AccountId).HasDatabaseName("ix_policy_account");
             entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
@@ -238,6 +239,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
             entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.HasIndex(e => e.TermId).HasDatabaseName("ix_policy_transaction_term");
             entity.Property(e => e.JobId).HasColumnName("job_id");
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.Kind).HasColumnName("kind");
@@ -273,6 +275,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.SegmentId).HasColumnName("segment_id");
             entity.Property(e => e.TermId).HasColumnName("term_id");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_segment_policy");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             MapPeriods(entity, e => e.ValidFrom, e => e.ValidTo, e => e.RecordedFrom, e => e.RecordedTo);
@@ -298,6 +301,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
             entity.Property(e => e.TermId).HasColumnName("term_id");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_charge_line_policy");
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.ElementLocator).HasColumnName("element_locator");
             entity.Property(e => e.CoverageCode).HasColumnName("coverage_code");
@@ -355,6 +359,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.SetId).HasColumnName("set_id");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
             entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.HasIndex(e => e.TermId).HasDatabaseName("ix_oos_correction_term");
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
             entity.Property(e => e.JobId).HasColumnName("job_id");
@@ -411,6 +416,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.NonPaymentId).HasColumnName("nonpay_id");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_psr_exception_policy");
             entity.Property(e => e.TermId).HasColumnName("term_id");
             entity.Property(e => e.Reason).HasColumnName("reason");
             entity.Property(e => e.Status).HasColumnName("status");
@@ -441,6 +447,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.FromVersion).HasColumnName("from_version");
             entity.Property(e => e.ToVersion).HasColumnName("to_version");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_pack_rollback_exception_policy");
             entity.Property(e => e.TermId).HasColumnName("term_id");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
             entity.Property(e => e.TransactionKind).HasColumnName("transaction_kind");
@@ -467,6 +474,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
             entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.HasIndex(e => e.TermId).HasDatabaseName("ix_withdrawal_term");
             entity.Property(e => e.JobId).HasColumnName("job_id");
             entity.Property(e => e.ChannelRef).HasColumnName("channel_ref");
             entity.Property(e => e.Right).HasColumnName("right");

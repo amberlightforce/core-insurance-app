@@ -211,6 +211,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.Property(e => e.Rev).HasColumnName("rev");
             entity.Property(e => e.ReinsurerPartyId).HasColumnName("reinsurer_party_id");
             entity.Property(e => e.BrokerPartyId).HasColumnName("broker_party_id");
+            entity.HasIndex(e => e.BrokerPartyId).HasDatabaseName("ix_participation_broker_party");
             entity.Property(e => e.SignedLinePct).HasColumnName("signed_line_pct").HasColumnType("numeric(9,6)");
             entity.Property(e => e.Lead).HasColumnName("lead");
             entity.HasIndex(e => new { e.VersionId, e.Rev, e.ReinsurerPartyId }).IsUnique().HasDatabaseName("ux_participation_reinsurer");
@@ -264,6 +265,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.Property(e => e.EventId).HasColumnName("event_id");
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_premium_delta_policy");
             entity.Property(e => e.TermId).HasColumnName("term_id");
             entity.Property(e => e.CoverageCode).HasColumnName("coverage_code");
             entity.Property(e => e.ChargeCategory).HasColumnName("charge_category");
@@ -336,6 +338,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_claim_view_policy");
             entity.Property(e => e.ProductCode).HasColumnName("product_code");
             entity.Property(e => e.LossDate).HasColumnName("loss_date").HasColumnType("date");
             entity.Property(e => e.Closed).HasColumnName("closed");
@@ -392,6 +395,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.Property(e => e.ContractId).HasColumnName("contract_id");
             entity.Property(e => e.ContractYear).HasColumnName("contract_year");
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.HasIndex(e => e.ClaimId).HasDatabaseName("ix_recovery_batch_claim");
             entity.Property(e => e.SourceEventId).HasColumnName("source_event_id");
             entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
             entity.Property(e => e.CalcHash).HasColumnName("calc_hash");
@@ -412,6 +416,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.Property(e => e.ContractYear).HasColumnName("contract_year");
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
             entity.Property(e => e.LayerId).HasColumnName("layer_id");
+            entity.HasIndex(e => e.LayerId).HasDatabaseName("ix_recovery_layer");
             entity.Property(e => e.LayerNo).HasColumnName("layer_no");
             entity.Property(e => e.ParticipantPartyId).HasColumnName("participant_party_id");
             entity.Property(e => e.IncurredDelta).HasColumnName("incurred_delta").HasColumnType("numeric(19,4)");
