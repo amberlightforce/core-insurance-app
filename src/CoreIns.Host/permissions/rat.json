@@ -5,7 +5,10 @@
         "rat.Rate.rate": [ "Staff.Underwriter", "Staff.Billing" ],
         "rat.Worksheet.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "rat.RatingArtifact.resolve": [ "Staff.Underwriter", "Staff.Billing" ],
-        "rat.Proration.prorate": [ "Staff.Underwriter", "Staff.Billing" ]
+        "rat.Proration.prorate": [ "Staff.Underwriter", "Staff.Billing" ],
+        "rat.RateTable.import": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "rat.RateTable.validate": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "rat.RateTable.diff": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ]
       }
     }
   }
