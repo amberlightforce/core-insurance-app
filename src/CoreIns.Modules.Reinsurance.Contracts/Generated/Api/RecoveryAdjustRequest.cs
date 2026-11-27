@@ -8,24 +8,23 @@ namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RecoveryAdjustRequest
 {
-    /// <summary>PRD: "occurrence"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("occurrence")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Occurrence { get; init; }
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
 
-    /// <summary>PRD: "amount"</summary>
+    /// <summary>PRD: "occurrence" - the claim, or any claim of the linked occurrence</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ClaimId ClaimId { get; init; }
+
+    /// <summary>Contract member 'layerId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("layerId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiLayerId LayerId { get; init; }
+
+    /// <summary>PRD: "amount" - signed change of the incurred recoverable, EUR, split over the panel by largest remainder</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Money? Amount { get; init; }
+    public required global::CoreIns.SharedKernel.Money Amount { get; init; }
 
     /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public required string Reason { get; init; }
 }

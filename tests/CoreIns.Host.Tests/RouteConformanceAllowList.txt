@@ -134,9 +134,7 @@ CONTRACT_NOT_SERVED GET /api/pty/v1/accounts/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/commission-agreements/compare
 CONTRACT_NOT_SERVED GET /api/pty/v1/commission-agreements/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
-CONTRACT_NOT_SERVED GET /api/pty/v1/party-roles/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/producer-of-records/{}
-CONTRACT_NOT_SERVED GET /api/pty/v1/relationships/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/screening/case-get
 CONTRACT_NOT_SERVED GET /api/rat/v1/breakdowns/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/change-explanations/get
@@ -154,11 +152,9 @@ CONTRACT_NOT_SERVED GET /api/rat/v1/worksheets/explain
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/footprint
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/query
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/zone
-CONTRACT_NOT_SERVED GET /api/ri/v1/aggregate-tracker/get
 CONTRACT_NOT_SERVED GET /api/ri/v1/close/status
 CONTRACT_NOT_SERVED GET /api/ri/v1/collaterals
 CONTRACT_NOT_SERVED GET /api/ri/v1/commission/history
-CONTRACT_NOT_SERVED GET /api/ri/v1/contracts/version-at
 CONTRACT_NOT_SERVED GET /api/ri/v1/data-products/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/deposit-schedules/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs
@@ -637,13 +633,9 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/locations/add
 CONTRACT_NOT_SERVED POST /api/pty/v1/locations/remove
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/unmerge
-CONTRACT_NOT_SERVED POST /api/pty/v1/party-roles/assign
-CONTRACT_NOT_SERVED POST /api/pty/v1/party-roles/end
 CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/bulk-transfer
 CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/cancel
 CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/change
-CONTRACT_NOT_SERVED POST /api/pty/v1/relationships/add
-CONTRACT_NOT_SERVED POST /api/pty/v1/relationships/end
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/bulk
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/case-decide
 CONTRACT_NOT_SERVED POST /api/rat/v1/bonus-malus/transition
@@ -705,7 +697,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/commission/adjust
 CONTRACT_NOT_SERVED POST /api/ri/v1/commission/approve
 CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/close
 CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/commute
-CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/endorse
 CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/expire
 CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/simulate
 CONTRACT_NOT_SERVED POST /api/ri/v1/deposit-schedules/reschedule
@@ -732,8 +723,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/line-tables/set
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/acknowledge
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/draft
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/send
-CONTRACT_NOT_SERVED POST /api/ri/v1/occurrences/link
-CONTRACT_NOT_SERVED POST /api/ri/v1/occurrences/unlink
 CONTRACT_NOT_SERVED POST /api/ri/v1/participations/add
 CONTRACT_NOT_SERVED POST /api/ri/v1/participations/replace
 CONTRACT_NOT_SERVED POST /api/ri/v1/programmes
@@ -742,8 +731,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/renew
 CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/return
 CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/submit
 CONTRACT_NOT_SERVED POST /api/ri/v1/reconciliation/fin
-CONTRACT_NOT_SERVED POST /api/ri/v1/recoveries/adjust
-CONTRACT_NOT_SERVED POST /api/ri/v1/recoveries/recalculate
 CONTRACT_NOT_SERVED POST /api/ri/v1/securities/report
 CONTRACT_NOT_SERVED POST /api/ri/v1/security-rules/set
 CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/approve
