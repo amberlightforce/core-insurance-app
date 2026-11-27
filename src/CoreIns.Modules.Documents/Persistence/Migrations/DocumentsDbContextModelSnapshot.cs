@@ -67,6 +67,56 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Documents.Persistence.ClauseRow", b =>
+                {
+                    b.Property<Guid>("ClauseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("clause_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TextEl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("text_el");
+
+                    b.Property<string>("TextEn")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("text_en");
+
+                    b.Property<string>("TitleEl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title_el");
+
+                    b.Property<string>("TitleEn")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title_en");
+
+                    b.HasKey("ClauseId")
+                        .HasName("pk_clause");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ux_clause_code");
+
+                    b.ToTable("clause", "doc", t =>
+                        {
+                            t.HasCheckConstraint("ck_clause_status", "status IN ('DRAFT','APPROVED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Documents.Persistence.DeliveryRow", b =>
                 {
                     b.Property<Guid>("DeliveryId")
@@ -223,6 +273,10 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("template_key");
 
+                    b.Property<int?>("TemplateVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("template_version");
+
                     b.HasKey("DocumentId")
                         .HasName("pk_document");
 
@@ -247,6 +301,38 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_document_status", "status IN ('Requested','Rendering','Rendered','Failed','Superseded')");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Documents.Persistence.DocumentTypeRow", b =>
+                {
+                    b.Property<string>("DocumentType")
+                        .HasColumnType("text")
+                        .HasColumnName("document_type");
+
+                    b.Property<string>("DefaultMedium")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("default_medium");
+
+                    b.PrimitiveCollection<string[]>("RequiredFields")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("required_fields");
+
+                    b.Property<string>("TitleEl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title_el");
+
+                    b.Property<string>("TitleEn")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title_en");
+
+                    b.HasKey("DocumentType")
+                        .HasName("pk_document_type");
+
+                    b.ToTable("document_type", "doc");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Documents.Persistence.EvidenceRow", b =>
@@ -310,6 +396,90 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                         .HasDatabaseName("ux_evidence_provider_event");
 
                     b.ToTable("evidence", "doc");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Documents.Persistence.TemplateRow", b =>
+                {
+                    b.Property<Guid>("TemplateId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("template_id");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("approved_at");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("approved_by");
+
+                    b.Property<string>("BodyEl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("body_el");
+
+                    b.Property<string>("BodyEn")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("body_en");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("document_type");
+
+                    b.Property<string>("Jurisdiction")
+                        .HasColumnType("text")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<string>("LineOfBusiness")
+                        .HasColumnType("text")
+                        .HasColumnName("line_of_business");
+
+                    b.Property<string>("ProductCode")
+                        .HasColumnType("text")
+                        .HasColumnName("product_code");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TitleEl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title_el");
+
+                    b.Property<string>("TitleEn")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title_en");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateOnly?>("ValidTo")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_to");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("TemplateId")
+                        .HasName("pk_template");
+
+                    b.HasIndex("DocumentType", "Version")
+                        .IsUnique()
+                        .HasDatabaseName("ux_template_version");
+
+                    b.ToTable("template", "doc", t =>
+                        {
+                            t.HasCheckConstraint("ck_template_status", "status IN ('DRAFT','APPROVED')");
+
+                            t.HasCheckConstraint("ck_template_valid", "valid_to IS NULL OR valid_to >= valid_from");
+                        });
                 });
 
             modelBuilder.Entity("CoreIns.Platform.Persistence.DsarRestrictionRow", b =>

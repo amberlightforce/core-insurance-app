@@ -1639,19 +1639,13 @@ paths:
       x-idempotency: required
       x-dry-run: false
       x-dry-run-note: 'PRD dry-run: No; PRD idempotency: Yes'
-      x-in-process: true
       x-exposure:
       - internal
-      x-consumers:
-      - MKT
+      x-typed: BO-PLT-02 (administrator only; audited)
       x-permission: plt.ApprovalType.register
       x-error-codes:
-      - code: PLT-ERR-SELF-APPROVAL
-        status: 403
-      - code: PLT-ERR-EDITOR-CANNOT-APPROVE
-        status: 403
-      - code: PLT-ERR-CHECKER-MUST-BE-HUMAN
-        status: 422
+      - code: PLT-ERR-UNKNOWN-TYPE
+        status: 400
       - code: PLT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1916,7 +1910,7 @@ paths:
       x-in-process: true
       x-consumers:
       - CLM
-      x-typed: 'REQ-PLT-004, REQ-PLT-114 (SL4-CONTRACTS, D-SL4-14: owner module only, audited, no REST)'
+      x-typed: 'REQ-PLT-004, REQ-PLT-114 (SL4-CONTRACTS, D-SL4-14: owner module in process; BO-PLT-02: over REST only the maker withdraws own pending request, never an owner-decided type; audited)'
       x-source:
       - PRD-14 §9.1 l.1965
       parameters:
@@ -7461,30 +7455,46 @@ components:
       x-status: minimal
     ApprovalTypeRegisterRequest:
       type: object
-      description: 'plt.ApprovalType.register request. PRD inputs: "type, object ref, payload hash, diff"'
+      description: 'plt.ApprovalType.register request: registers (or updates, idempotently by type) an approval type definition. Administrator only.'
+      required:
+      - type
+      - description
       properties:
         type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
-        objectRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "object ref"'
-        payloadHash:
-          $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "payload hash"'
-        diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
+          type: string
+          description: 'Approval type code, e.g. CLM.TRANSACTION_SET'
+        description:
+          type: string
+          maxLength: 512
+          description: What the approval type decides
+        defaultReferralRole:
+          type: string
+          maxLength: 128
+          description: Role whose inbox receives requests of this type unless the owning module names another
+        defaultAuthorityType:
+          type: string
+          maxLength: 128
+          description: Registered authority type a checker must hold for this approval type
     ApprovalTypeRegisterResponse:
       type: object
-      description: 'plt.ApprovalType.register result. PRD outputs: "request; decision"'
+      description: plt.ApprovalType.register result
+      required:
+      - type
+      - description
+      - version
       properties:
-        request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
-        decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+        type:
+          type: string
+        description:
+          type: string
+        defaultReferralRole:
+          type: string
+        defaultAuthorityType:
+          type: string
+        version:
+          type: integer
+          format: int32
+          description: 1 on first registration, incremented on every update
     ApprovalStatus:
       type: string
       enum:

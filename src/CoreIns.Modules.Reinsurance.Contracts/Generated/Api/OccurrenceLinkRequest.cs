@@ -8,16 +8,11 @@ namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record OccurrenceLinkRequest
 {
-    /// <summary>PRD: "claim ids"</summary>
+    /// <summary>PRD: "claim ids"; all under one contract (a link needs at least two)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("claimIds")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.ClaimId>? ClaimIds { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.ClaimId> ClaimIds { get; init; }
 
     /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public required string Reason { get; init; }
 }

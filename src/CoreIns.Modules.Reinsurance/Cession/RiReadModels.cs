@@ -125,7 +125,8 @@ internal sealed class RiReadModels(ReinsuranceDbContext db, RequestContext conte
             from p in db.Participations.AsNoTracking()
             join v in db.Versions.AsNoTracking() on p.VersionId equals v.VersionId
             join c in db.Contracts.AsNoTracking() on v.ContractId equals c.ContractId
-            where c.LegalEntityId == legalEntity && v.KnownTo == null && p.Rev == v.ContentRev
+            where c.LegalEntityId == legalEntity && p.Rev == v.ContentRev
+                && v.VersionNo == db.Versions.Where(x => x.ContractId == v.ContractId && (x.VersionNo == 1 || x.EndorsementStatus == "APPROVED")).Max(x => x.VersionNo)
             select new { p, v, c };
         if (contractId is { } wanted)
         {

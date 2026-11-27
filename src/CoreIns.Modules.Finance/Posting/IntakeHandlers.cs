@@ -56,6 +56,12 @@ internal sealed class ContextEventHandler(Intake intake) : IEventHandler<JsonEle
             // The catalogue says POSTING but FIN has no posting mapping for this event: an intake exception, not a journal.
             await intake.PostAsync(row, cancellationToken).ConfigureAwait(false);
         }
+
+        // A correction can overtake its delta: entries of this policy suspended as PERIOD_LOCKED are re-recognised now (BO-FIN-03).
+        if (row is { PolicyId: { } policyId } && row.RegistryName == OosCorrections.ChargeDeltaEmitted)
+        {
+            await intake.RetryPeriodLockedAsync(policyId, cancellationToken).ConfigureAwait(false);
+        }
     }
 }
 

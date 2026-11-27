@@ -225,27 +225,8 @@ internal sealed class CompiledRuleSet
     {
         try
         {
-            var environment = RuleEnvironment.Create(Schema);
-            var definition = new DecisionTableDefinition(
-                new DecisionTableMetadata(dto.Code, dto.Version, DecisionTableStatus.Active, DateOnly.ParseExact(dto.EffectiveFrom, "yyyy-MM-dd", CultureInfo.InvariantCulture)),
-                Enum.Parse<HitPolicy>(dto.HitPolicy, ignoreCase: true),
-                [.. dto.Inputs.Select(i => new InputColumn(i.Name, ParseType(i.Type), i.Expression))],
-                [.. dto.Outputs.Select(o => new OutputColumn(o.Name, ParseType(o.Type)))],
-                [.. dto.Rules.Select(r => new DecisionRule(r.Id, r.Conditions, r.Outputs))])
-            {
-                Variables = [.. dto.Variables.Select(v => new TableVariable(v.Name, ParseType(v.Type), v.Expression))],
-            };
-            var table = CompiledDecisionTable.Compile(definition, environment);
-            var cases = dto.TestCases.Select(c => new DecisionTableTestCase(
-                c.Name,
-                Facts(
-                    new UwRisk(
-                        "vehicle-1", new DateOnly(int.Parse(c.FirstRegistrationYear, CultureInfo.InvariantCulture), 1, 1),
-                        decimal.Parse(c.VehicleValue, CultureInfo.InvariantCulture), c.EngineCc, c.Usage,
-                        [.. c.DriverBirthDates.Select(d => DateOnly.ParseExact(d, "yyyy-MM-dd", CultureInfo.InvariantCulture))], c.ClaimsLast5Years),
-                    DateOnly.ParseExact(c.EffectiveDate, "yyyy-MM-dd", CultureInfo.InvariantCulture)),
-                c.ExpectedRuleIds)).ToList();
-            var readiness = table.CheckActivationReadiness(cases, requireEveryRuleCovered: true);
+            var table = BuildTable(dto);
+            var readiness = table.CheckActivationReadiness(BuildCases(dto), requireEveryRuleCovered: true);
             if (!readiness.CanActivate)
             {
                 throw new DomainException(DomainError.Of(ModuleCode.UW, "RULESET-UNRESOLVED", $"Rule set {dto.Code} {dto.Version} cannot be activated: {readiness.RefusalReason}"));
@@ -258,6 +239,34 @@ internal sealed class CompiledRuleSet
             throw new DomainException(DomainError.Of(ModuleCode.UW, "RULESET-UNRESOLVED", $"Rule set {dto.Code} does not compile: {ex.Message}"));
         }
     }
+
+    /// <summary>Compiles the decision table of a definition without the test-case gate (authoring: <see cref="RuleSetAnalysis"/>).</summary>
+    internal static CompiledDecisionTable BuildTable(RuleSetDto dto)
+    {
+        var environment = RuleEnvironment.Create(Schema);
+        var definition = new DecisionTableDefinition(
+            new DecisionTableMetadata(dto.Code, dto.Version, DecisionTableStatus.Active, DateOnly.ParseExact(dto.EffectiveFrom, "yyyy-MM-dd", CultureInfo.InvariantCulture)),
+            Enum.Parse<HitPolicy>(dto.HitPolicy, ignoreCase: true),
+            [.. dto.Inputs.Select(i => new InputColumn(i.Name, ParseType(i.Type), i.Expression))],
+            [.. dto.Outputs.Select(o => new OutputColumn(o.Name, ParseType(o.Type)))],
+            [.. dto.Rules.Select(r => new DecisionRule(r.Id, r.Conditions, r.Outputs))])
+        {
+            Variables = [.. dto.Variables.Select(v => new TableVariable(v.Name, ParseType(v.Type), v.Expression))],
+        };
+        return CompiledDecisionTable.Compile(definition, environment);
+    }
+
+    internal static List<DecisionTableTestCase> BuildCases(RuleSetDto dto) => [.. dto.TestCases.Select(BuildCase)];
+
+    internal static DecisionTableTestCase BuildCase(RuleTestCaseDto c) => new(
+        c.Name,
+        Facts(
+            new UwRisk(
+                "vehicle-1", new DateOnly(int.Parse(c.FirstRegistrationYear, CultureInfo.InvariantCulture), 1, 1),
+                decimal.Parse(c.VehicleValue, CultureInfo.InvariantCulture), c.EngineCc, c.Usage,
+                [.. c.DriverBirthDates.Select(d => DateOnly.ParseExact(d, "yyyy-MM-dd", CultureInfo.InvariantCulture))], c.ClaimsLast5Years),
+            DateOnly.ParseExact(c.EffectiveDate, "yyyy-MM-dd", CultureInfo.InvariantCulture)),
+        c.ExpectedRuleIds);
 
     private static RuleType ParseType(string type) => type switch
     {
@@ -333,20 +342,28 @@ internal static class BuiltInRuleSets
 
     private static RuleSetDto Build(string code, string productCode, string checkpoint, RuleRowDto[] rules, List<RuleTestCaseDto> cases) => new(
         code, "1.0", productCode, checkpoint, "2026-01-01", "ILLUSTRATIVE_TEST_DATA", Note, "Collect",
-        [
-            new("youngestDriverAge", "int", "ageAt(max(driverBirthDates), effectiveDate)"),
-            new("vehicleAgeYears", "int", "yearsBetween(vehicleFirstRegistration, effectiveDate)"),
-        ],
-        [
-            new("driverAgeIn", "int", "youngestDriverAge"),
-            new("vehicleAgeIn", "int", "vehicleAgeYears"),
-            new("vehicleValueIn", "decimal", "vehicleValue"),
-            new("claimsIn", "int", "claimsLast5Years"),
-            new("usageIn", "string", "usage"),
-        ],
-        [new("ruleType", "string"), new("issueType", "string"), new("severity", "string"), new("blockingPoint", "string"), new("messageEn", "string"), new("messageEl", "string")],
-        [.. rules],
-        cases);
+        StandardVariables(), StandardInputs(), StandardOutputs(), [.. rules], cases);
+
+    /// <summary>The derived variables of the standard motor table (rule authoring starts from these columns).</summary>
+    public static List<RuleVariableDto> StandardVariables() =>
+    [
+        new("youngestDriverAge", "int", "ageAt(max(driverBirthDates), effectiveDate)"),
+        new("vehicleAgeYears", "int", "yearsBetween(vehicleFirstRegistration, effectiveDate)"),
+    ];
+
+    /// <summary>The condition columns of the standard motor table.</summary>
+    public static List<RuleColumnDto> StandardInputs() =>
+    [
+        new("driverAgeIn", "int", "youngestDriverAge"),
+        new("vehicleAgeIn", "int", "vehicleAgeYears"),
+        new("vehicleValueIn", "decimal", "vehicleValue"),
+        new("claimsIn", "int", "claimsLast5Years"),
+        new("usageIn", "string", "usage"),
+    ];
+
+    /// <summary>The output columns every rule set must have (the evaluation reads them by name).</summary>
+    public static List<RuleOutputDto> StandardOutputs() =>
+        [new("ruleType", "string"), new("issueType", "string"), new("severity", "string"), new("blockingPoint", "string"), new("messageEn", "string"), new("messageEl", "string")];
 
     private static List<RuleTestCaseDto> DeclineCases() =>
     [

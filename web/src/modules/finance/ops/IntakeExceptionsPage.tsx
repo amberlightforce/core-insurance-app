@@ -7,6 +7,7 @@ import {
   Dialog,
   EmptyState,
   KeyValueList,
+  TextField,
   announce,
   dateColumn,
   identifierColumn,
@@ -29,15 +30,36 @@ function Selected({ item, onDone }: { item: IntakeException; onDone: () => void 
   const { keyFor, release } = useIdempotencyKey();
   const [confirmReject, setConfirmReject] = useState(false);
   const [last, setLast] = useState<IntakeAction | null>(null);
-  const mutation = useIntakeAction(() => {
+  const [reason, setReason] = useState('');
+  const [tried, setTried] = useState(false);
+  const mutation = useIntakeAction((response) => {
     release();
-    announce(t(`ops.intake.done.${last ?? 'rerun'}`));
+    const outcome = response.outcomes[0]?.outcome;
+    announce(
+      outcome === 'STILL_SUSPENDED' || outcome === 'NO_OP'
+        ? t(`ops.intake.done.${outcome}`)
+        : t(`ops.intake.done.${last ?? 'rerun'}`),
+    );
     onDone();
   });
+  const missing = reason.trim() === '';
   const run = (action: IntakeAction) => {
     setLast(action);
     const itemIds = [item.eventId];
-    mutation.mutate({ action, itemIds, key: keyFor({ action, itemIds }) });
+    const trimmed = reason.trim();
+    mutation.mutate({
+      action,
+      itemIds,
+      ...(trimmed ? { reason: trimmed } : {}),
+      key: keyFor({ action, itemIds, reason: trimmed }),
+    });
+  };
+  // markDuplicate and reject close the event for good: the server requires (and audits) a reason.
+  const close = (action: 'mark-duplicate' | 'reject') => {
+    setTried(true);
+    if (missing) return;
+    if (action === 'reject') setConfirmReject(true);
+    else run(action);
   };
   return (
     <div className={styles.stack}>
@@ -65,6 +87,15 @@ function Selected({ item, onDone }: { item: IntakeException; onDone: () => void 
           },
         ]}
       />
+      <TextField
+        label={t('ops.intake.actionReason')}
+        helperText={t('ops.intake.actionReasonHelp')}
+        multiline
+        maxLength={1000}
+        value={reason}
+        onChange={setReason}
+        errorMessage={tried && missing ? t('ops.intake.actionReasonRequired') : undefined}
+      />
       {mutation.isError ? (
         <ProblemBanner error={mutation.error} title={t('ops.intake.failed')} />
       ) : null}
@@ -84,7 +115,7 @@ function Selected({ item, onDone }: { item: IntakeException; onDone: () => void 
           isLoading={mutation.isPending && last === 'mark-duplicate'}
           isDisabled={mutation.isPending}
           onPress={() => {
-            run('mark-duplicate');
+            close('mark-duplicate');
           }}
         >
           {t('ops.intake.markDuplicate')}
@@ -93,7 +124,7 @@ function Selected({ item, onDone }: { item: IntakeException; onDone: () => void 
           variant="danger"
           isDisabled={mutation.isPending}
           onPress={() => {
-            setConfirmReject(true);
+            close('reject');
           }}
         >
           {t('ops.intake.reject')}

@@ -36,6 +36,10 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
 
     public DbSet<JournalLineRow> JournalLines => Set<JournalLineRow>();
 
+    public DbSet<ManualJournalRow> ManualJournals => Set<ManualJournalRow>();
+
+    public DbSet<ManualJournalLineRow> ManualJournalLines => Set<ManualJournalLineRow>();
+
     public DbSet<MigrationImport.MigrationImportRow> MigrationImports => Set<MigrationImport.MigrationImportRow>();
 
     protected override string Schema => FinanceModule.Schema;
@@ -245,6 +249,9 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
             entity.Property(e => e.ReceivedAt).HasColumnName("received_at").HasColumnType("timestamptz");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.Property(e => e.ResolutionReason).HasColumnName("resolution_reason");
+            entity.Property(e => e.ResolvedBy).HasColumnName("resolved_by");
+            entity.Property(e => e.ResolvedAt).HasColumnName("resolved_at").HasColumnType("timestamptz");
 
             // REQ-FIN-031: one business event per source event, whatever the delivery count.
             entity.HasIndex(e => e.SourceEventId).IsUnique().HasDatabaseName("ux_business_event_source");
@@ -273,6 +280,7 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
         });
 
         MigrationImport.FinanceMigrationModel.Configure(modelBuilder);
+        ManualJournalModel.Configure(modelBuilder);
 
         modelBuilder.Entity<JournalEntryRow>(entity =>
         {

@@ -49,6 +49,12 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
 
     public DbSet<TrackerRow> Trackers => Set<TrackerRow>();
 
+    public DbSet<OccurrenceRow> Occurrences => Set<OccurrenceRow>();
+
+    public DbSet<OccurrenceClaimRow> OccurrenceClaims => Set<OccurrenceClaimRow>();
+
+    public DbSet<RecoveryAdjustmentRow> RecoveryAdjustments => Set<RecoveryAdjustmentRow>();
+
     protected override string Schema => ReinsuranceModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -57,6 +63,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
         DsarRestrictionModel.Configure(modelBuilder);
         ConfigureRecovery(modelBuilder);
         ConfigureCession(modelBuilder);
+        ConfigureOccurrences(modelBuilder);
 
         modelBuilder.Entity<ContractRow>(entity =>
         {
@@ -116,6 +123,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
                 table.HasCheckConstraint("ck_contract_version_hash", "content_hash ~ '^[0-9a-f]{64}$'");
                 table.HasCheckConstraint("ck_contract_version_rev", "content_rev >= 1");
                 table.HasCheckConstraint("ck_contract_version_approved", "(approved_at IS NULL) = (approved_by IS NULL)");
+                table.HasCheckConstraint("ck_contract_version_endorsement", "(version_no = 1) = (endorsement_status IS NULL) AND (endorsement_status IS NULL OR endorsement_status IN ('PENDING', 'APPROVED', 'REJECTED'))");
             });
             entity.HasKey(e => e.VersionId).HasName("pk_contract_version");
             entity.Property(e => e.VersionId).HasColumnName("version_id");
@@ -133,6 +141,8 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.Property(e => e.ApprovedBy).HasColumnName("approved_by");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.EndorsementStatus).HasColumnName("endorsement_status");
+            entity.Property(e => e.EndorsementReason).HasColumnName("endorsement_reason");
             entity.HasIndex(e => new { e.ContractId, e.VersionNo }).IsUnique().HasDatabaseName("ux_contract_version_no");
             entity.HasOne<ContractRow>().WithMany().HasForeignKey(e => e.ContractId).HasConstraintName("fk_contract_version_contract").OnDelete(DeleteBehavior.Restrict);
         });
@@ -218,6 +228,60 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.HasIndex(e => new { e.VersionId, e.Rev }).IsUnique().HasFilter("lead").HasDatabaseName("ux_participation_one_lead");
             entity.HasIndex(e => e.ReinsurerPartyId).HasDatabaseName("ix_participation_reinsurer");
             entity.HasOne<ContractVersionRow>().WithMany().HasForeignKey(e => e.VersionId).HasConstraintName("fk_participation_version").OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureOccurrences(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<OccurrenceRow>(entity =>
+        {
+            entity.ToTable("occurrence");
+            entity.HasKey(e => e.OccurrenceId).HasName("pk_occurrence");
+            entity.Property(e => e.OccurrenceId).HasColumnName("occurrence_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.ContractId).HasColumnName("contract_id");
+            entity.Property(e => e.ContractYear).HasColumnName("contract_year");
+            entity.Property(e => e.Reason).HasColumnName("reason");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DissolvedAt).HasColumnName("dissolved_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.ContractId).HasDatabaseName("ix_occurrence_contract");
+        });
+
+        modelBuilder.Entity<OccurrenceClaimRow>(entity =>
+        {
+            entity.ToTable("occurrence_claim");
+            entity.HasKey(e => new { e.OccurrenceId, e.ClaimId }).HasName("pk_occurrence_claim");
+            entity.Property(e => e.OccurrenceId).HasColumnName("occurrence_id");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.LinkedAt).HasColumnName("linked_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UnlinkedAt).HasColumnName("unlinked_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UnlinkReason).HasColumnName("unlink_reason");
+            entity.HasIndex(e => e.ClaimId).IsUnique().HasFilter("unlinked_at IS NULL").HasDatabaseName("ux_occurrence_claim_active");
+            entity.HasOne<OccurrenceRow>().WithMany().HasForeignKey(e => e.OccurrenceId).HasConstraintName("fk_occurrence_claim_occurrence").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RecoveryAdjustmentRow>(entity =>
+        {
+            entity.ToTable("recovery_adjustment");
+            entity.HasKey(e => e.AdjustmentRowId).HasName("pk_recovery_adjustment");
+            entity.Property(e => e.AdjustmentRowId).HasColumnName("adjustment_row_id");
+            entity.Property(e => e.AdjustmentId).HasColumnName("adjustment_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.ContractId).HasColumnName("contract_id");
+            entity.Property(e => e.ContractYear).HasColumnName("contract_year");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.LayerId).HasColumnName("layer_id");
+            entity.Property(e => e.LayerNo).HasColumnName("layer_no");
+            entity.Property(e => e.ParticipantPartyId).HasColumnName("participant_party_id");
+            entity.Property(e => e.IncurredDelta).HasColumnName("incurred_delta").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Reason).HasColumnName("reason");
+            entity.Property(e => e.RecordedBy).HasColumnName("recorded_by");
+            entity.Property(e => e.AuthorityCheckId).HasColumnName("authority_check_id");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.ContractId, e.LayerId }).HasDatabaseName("ix_recovery_adjustment_contract_layer");
+            entity.HasIndex(e => e.AdjustmentId).HasDatabaseName("ix_recovery_adjustment_item");
         });
     }
 

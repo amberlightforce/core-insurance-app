@@ -57,7 +57,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Create or update party
+         * Update party
          * @description Create or update party
          *
          *     PRD inputs: party data, reason
@@ -1734,33 +1734,43 @@ export interface components {
         PartySearchPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["PartySearchItem"][];
         };
-        /** @description pty.Party.update request. PRD inputs: "party data, reason" */
+        /** @description pty.Party.update request (BO-PTY-01). Name, birth date and language change of a party; omitted parts stay as they are. The name change is bitemporal (effective today, history kept) and the search keys are rebuilt. */
         PartyUpdateRequest: {
-            /** @description PRD: "party data" */
-            partyData?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Optimistic concurrency (REQ-PTY-043); a stale value is refused with PTY-ERR-STALE */
+            expectedRecordVersion: number;
+            person?: components["schemas"]["PersonUpdateInput"] | null;
+            organisation?: components["schemas"]["OrganisationInput"] | null;
+            preferredLanguage?: components["schemas"]["LanguageCode"] | null;
+            reason?: string | null;
         };
-        /** @description pty.Party.update result. PRD outputs: "party, duplicate suggestions, missing data" */
+        /** @description Person changes of pty.Party.update. givenNames and familyName are given together (a new name replaces the old); birthDate alone changes only the birth date. */
+        PersonUpdateInput: {
+            givenNames?: string | null;
+            familyName?: string | null;
+            fatherName?: string | null;
+            motherName?: string | null;
+            birthDate?: components["schemas"]["LocalDate"] | null;
+        };
+        /** @description pty.Party.update result (BO-PTY-01): the party after the change, with possible duplicates of the new name. */
         PartyUpdateResponse: {
-            /** @description PRD: "party" */
-            party?: components["schemas"]["Unspecified"];
-            /** @description PRD: "duplicate suggestions" */
-            duplicateSuggestions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "missing data" */
-            missingData?: components["schemas"]["Unspecified"];
+            party: components["schemas"]["PartyView"];
+            duplicateSuggestions: components["schemas"]["PartySearchItem"][];
+            missingData: components["schemas"]["Code"][];
         };
-        /** @description pty.Party.validate request. PRD inputs: "party data" */
+        /** @description pty.Party.validate request (BO-PTY-01): the data of a would-be pty.Party.create, checked without saving. */
         PartyValidateRequest: {
-            /** @description PRD: "party data" */
-            partyData?: components["schemas"]["Unspecified"];
+            partyData: components["schemas"]["PartyCreateRequest"];
         };
-        /** @description pty.Party.validate result. PRD outputs: "issues, candidates" */
+        /** @description pty.Party.validate result (BO-PTY-01): rule violations of the create rules (none = valid) and possible duplicates. */
         PartyValidateResponse: {
-            /** @description PRD: "issues" */
-            issues?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "candidates" */
-            candidates?: components["schemas"]["Unspecified"];
+            issues: components["schemas"]["PartyValidationIssue"][];
+            candidates: components["schemas"]["PartySearchItem"][];
+        };
+        /** @description One rule violation of pty.Party.validate. */
+        PartyValidationIssue: {
+            field: string;
+            code: components["schemas"]["Code"];
+            message: string;
         };
         /** @description pty.Party.merge request. PRD inputs: "candidates, survivorship decisions" */
         PartyMergeRequest: {
@@ -1790,19 +1800,17 @@ export interface components {
             /** @description PRD: "approval request" */
             approvalRequest?: components["schemas"]["Unspecified"];
         };
-        /** @description pty.Identifier.verify request. PRD inputs: "party_id, scheme" */
+        /** @description pty.Identifier.verify request (BO-PTY-01): re-checks the current identifier of a scheme with the bound IdValidator. */
         IdentifierVerifyRequest: {
-            /** @description PRD: "party_id" */
-            partyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "scheme" */
-            scheme?: components["schemas"]["Unspecified"];
+            partyId: components["schemas"]["Uuid"];
+            scheme: components["schemas"]["Code"];
         };
-        /** @description pty.Identifier.verify result. PRD outputs: "status, suggestions" */
+        /** @description pty.Identifier.verify result (BO-PTY-01). valid = the IdValidator accepts the value (format and check digit). No registry or VIES adapter is bound yet, so a valid value stays SELF_DECLARED (source ID_VALIDATOR) and an invalid one becomes VERIFICATION_FAILED. */
         IdentifierVerifyResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
-            /** @description PRD: "suggestions" */
-            suggestions?: components["schemas"]["Unspecified"];
+            /** @enum {string} */
+            status: "SELF_DECLARED" | "DOCUMENT_VERIFIED" | "REGISTRY_VERIFIED" | "VERIFICATION_FAILED" | "EXPIRED";
+            valid: boolean;
+            suggestions: string[];
         };
         /** @description pty.PartyRole.assign request. PRD inputs: "party, role, context, period" */
         PartyRoleAssignRequest: {
@@ -2314,6 +2322,13 @@ export interface components {
             authorities: components["schemas"]["ProducerAuthorities"];
             validFrom: components["schemas"]["LocalDate"];
             recordVersion: number;
+            /** @description Hierarchy parent (REQ-PTY-193) */
+            parentIntermediaryId?: components["schemas"]["Uuid"] | null;
+            /**
+             * @description Computed from the CPD hours table (REQ-PTY-191)
+             * @enum {string}
+             */
+            cpdStatus?: "COMPLIANT" | "AT_RISK" | "NON_COMPLIANT";
         };
         /** @description pty.Intermediary.create result. Typed by SL-0. */
         IntermediaryCreateResponse: {
@@ -2330,18 +2345,45 @@ export interface components {
         IntermediaryUpdateResponse: {
             intermediary: components["schemas"]["IntermediaryView"];
         };
-        /** @description pty.Intermediary.suspend request. PRD inputs: "as named" */
-        IntermediarySuspendRequest: Record<string, never>;
-        /** @description pty.Intermediary.suspend result. PRD outputs: "—" */
-        IntermediarySuspendResponse: Record<string, never>;
-        /** @description pty.Intermediary.terminate request. PRD inputs: "as named" */
-        IntermediaryTerminateRequest: Record<string, never>;
-        /** @description pty.Intermediary.terminate result. PRD outputs: "—" */
-        IntermediaryTerminateResponse: Record<string, never>;
-        /** @description pty.Intermediary.importRegister request. PRD inputs: "as named" */
-        IntermediaryImportRegisterRequest: Record<string, never>;
-        /** @description pty.Intermediary.importRegister result. PRD outputs: "—" */
-        IntermediaryImportRegisterResponse: Record<string, never>;
+        /** @description pty.Intermediary.suspend request (REQ-PTY-198, REQ-PTY-190): Active to Suspended; validate then refuses the producer codes. */
+        IntermediarySuspendRequest: {
+            intermediaryId: components["schemas"]["Uuid"];
+            expectedRecordVersion: number;
+            reason: string;
+        };
+        /** @description pty.Intermediary.suspend result. */
+        IntermediarySuspendResponse: {
+            intermediary: components["schemas"]["IntermediaryView"];
+        };
+        /** @description pty.Intermediary.terminate request (REQ-PTY-198, REQ-PTY-202): ends every producer code of the intermediary on the effective date. */
+        IntermediaryTerminateRequest: {
+            intermediaryId: components["schemas"]["Uuid"];
+            expectedRecordVersion: number;
+            reason: string;
+            /** @description Last-day boundary of the producer codes (defaults to today) */
+            effectiveDate?: components["schemas"]["LocalDate"];
+        };
+        /** @description pty.Intermediary.terminate result. */
+        IntermediaryTerminateResponse: {
+            intermediary: components["schemas"]["IntermediaryView"];
+            terminatedProducerCodes: components["schemas"]["Code"][];
+        };
+        /** @description pty.Intermediary.importRegister request. A register extract (CSV with header, or JSON array) matched to intermediaries by register number; re-importing the same file changes nothing. */
+        IntermediaryImportRegisterRequest: {
+            /** @enum {string} */
+            format: "CSV" | "JSON";
+            /** @description Rows with registerNumber, registerStatus (ACTIVE, SUSPENDED, DELETED), optional registerName, chamber, registrationCategory, cpdYear, cpdHours, parentRegisterNumber */
+            content: string;
+        };
+        /** @description pty.Intermediary.importRegister result. */
+        IntermediaryImportRegisterResponse: {
+            processed: number;
+            updated: number;
+            unchanged: number;
+            unmatchedRegisterNumbers: string[];
+            /** @description Row number and reason of each invalid row */
+            rejectedRows: string[];
+        };
         /** @description pty.ProducerOfRecord.get result. PRD outputs: "PoR" */
         ProducerOfRecordGetResponse: {
             /** @description PRD: "PoR" */

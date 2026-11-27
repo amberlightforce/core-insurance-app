@@ -15,11 +15,14 @@ internal static class ApprovalPermissions
     public const string Decide = "plt.Approval.decide";
     public const string Get = "plt.Approval.get";
     public const string List = "plt.Approval.list";
+    public const string Withdraw = "plt.Approval.withdraw";
+    public const string Verify = "plt.Approval.verifyForExecution";
 }
 
 /// <summary>
 /// REST facade of <c>plt.Approval.*</c> (contracts/openapi/plt.yaml): decide, get and the approvals inbox (<c>list</c>).
-/// <c>plt.Approval.request</c> is in-process only (SL2-PLT review D1): the owning module fixes the subject, the required
+/// BO-PLT-02 adds withdraw (the maker withdraws their own pending request), verify-for-execution and the admin-only type register
+/// (<see cref="ApprovalTypesController"/>). <c>plt.Approval.request</c> stays in-process only (SL2-PLT review D1): the owning module fixes the subject, the required
 /// authority, the referral role and supersession, never a maker over HTTP. The checker is the signed-in actor.
 /// </summary>
 [ApiController]
@@ -65,4 +68,38 @@ internal sealed class ApprovalsController : ControllerBase
             ? Results.Ok(page.Value with { Items = [.. page.Value.Items.Where(i => !owners.Contains(i.Request.Type))] })
             : page.ToHttpResult(HttpContext);
     }
+
+    /// <summary>plt.Approval.withdraw: the maker withdraws their own pending request (owning modules withdraw in process).</summary>
+    [HttpPost("withdraw")]
+    [Authorize(Policy = ApprovalPermissions.Withdraw)]
+    public async Task<IResult> WithdrawAsync(
+        [FromBody] ApprovalWithdrawRequest body, [FromServices] ICommandHandler<WithdrawApproval, ApprovalWithdrawResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new WithdrawApproval(body, null, ByMaker: true), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>plt.Approval.verifyForExecution: ok only when the request is approved for exactly this type, subject and content hash.</summary>
+    [HttpPost("verify-for-execution")]
+    [Authorize(Policy = ApprovalPermissions.Verify)]
+    public async Task<IResult> VerifyAsync([FromBody] ApprovalVerifyForExecutionRequest body, [FromServices] ApprovalQueries queries, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Results.Ok(await queries.VerifyForExecutionAsync(body, cancellationToken).ConfigureAwait(false));
+        }
+        catch (DomainException ex)
+        {
+            return ((Result<ApprovalVerifyForExecutionResponse>)ex.Error).ToHttpResult(HttpContext);
+        }
+    }
+}
+
+/// <summary>REST facade of <c>plt.ApprovalType.register</c> (BO-PLT-02): administrator only.</summary>
+[ApiController]
+[Route("api/plt/v1/approval-types")]
+internal sealed class ApprovalTypesController : ControllerBase
+{
+    [HttpPost("register")]
+    [Authorize(Policy = "plt.ApprovalType.register")]
+    public async Task<IResult> RegisterAsync(
+        [FromBody] ApprovalTypeRegisterRequest body, [FromServices] ICommandHandler<RegisterApprovalType, ApprovalTypeRegisterResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new RegisterApprovalType(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 }
