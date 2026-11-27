@@ -358,6 +358,218 @@
     "ImportContractConformanceResponse": {
       "passFailPerContractElement": "unspecified"
     },
+    "MappingCodeEntry": {
+      "legacy": "sample",
+      "core": "sample"
+    },
+    "MappingCodeMap": {
+      "name": "sample",
+      "entries": [
+        {
+          "legacy": "sample",
+          "core": "sample"
+        }
+      ]
+    },
+    "MappingCreateRequest": {
+      "name": "sample",
+      "sourceObjectType": "sample",
+      "targetModule": "sample",
+      "targetObjectType": "sample",
+      "description": "sample",
+      "fields": [
+        {
+          "target": "sample",
+          "source": "sample",
+          "transform": "COPY",
+          "format": "sample",
+          "scale": 1,
+          "codeMap": "sample",
+          "value": "sample",
+          "required": true
+        }
+      ],
+      "codeMaps": [
+        {
+          "name": "sample",
+          "entries": [
+            {
+              "legacy": "sample",
+              "core": "sample"
+            }
+          ]
+        }
+      ]
+    },
+    "MappingFieldSpec": {
+      "target": "sample",
+      "source": "sample",
+      "transform": "COPY",
+      "format": "sample",
+      "scale": 1,
+      "codeMap": "sample",
+      "value": "sample",
+      "required": true
+    },
+    "MappingIssue": {
+      "code": "UNMAPPED_CODE",
+      "field": "sample",
+      "value": "sample",
+      "message": "sample"
+    },
+    "MappingPreview": {
+      "specId": "0192bb4f-923f-7b71-84f2-ec31b14ea1b8",
+      "specVersion": 1,
+      "specStatus": "sample",
+      "snapshotId": "0192fd37-8eaa-771b-8bbe-4d6f4d3ba4dc",
+      "dqRunId": "01928103-f3b6-7ff3-8a29-eacfd058f8ee",
+      "sampled": 1,
+      "clean": 1,
+      "withIssues": 1,
+      "items": [
+        {
+          "legacyKey": "sample",
+          "objectType": "sample",
+          "legacyId": "sample",
+          "itemHash": "sample",
+          "payload": "unspecified",
+          "issues": [
+            {
+              "code": "UNMAPPED_CODE",
+              "field": "sample",
+              "value": "sample",
+              "message": "sample"
+            }
+          ]
+        }
+      ],
+      "unmappedCodes": [
+        {
+          "codeMap": "sample",
+          "value": "sample",
+          "count": 1
+        }
+      ]
+    },
+    "MappingPreviewItem": {
+      "legacyKey": "sample",
+      "objectType": "sample",
+      "legacyId": "sample",
+      "itemHash": "sample",
+      "payload": "unspecified",
+      "issues": [
+        {
+          "code": "UNMAPPED_CODE",
+          "field": "sample",
+          "value": "sample",
+          "message": "sample"
+        }
+      ]
+    },
+    "MappingPreviewRequest": {
+      "specId": "0192f3e8-35cf-7c64-8b39-3dbd6a81898a",
+      "snapshotId": "019208ac-c548-78cf-8d90-8bf5712f853b",
+      "source": "sample",
+      "snapshot": "sample",
+      "sampleSize": 1,
+      "requireCleanDq": true
+    },
+    "MappingPublishRequest": {
+      "specId": "01926c6e-b93a-70b4-8db5-a9b85b07cf24",
+      "reject": true,
+      "comment": "sample"
+    },
+    "MappingSpec": {
+      "specId": "0192e6ac-3cc6-709e-86ae-323aeb05ec30",
+      "name": "sample",
+      "version": 1,
+      "status": "DRAFT",
+      "sourceObjectType": "sample",
+      "targetModule": "sample",
+      "targetObjectType": "sample",
+      "description": "sample",
+      "fields": [
+        {
+          "target": "sample",
+          "source": "sample",
+          "transform": "COPY",
+          "format": "sample",
+          "scale": 1,
+          "codeMap": "sample",
+          "value": "sample",
+          "required": true
+        }
+      ],
+      "codeMaps": [
+        {
+          "name": "sample",
+          "entries": [
+            {
+              "legacy": "sample",
+              "core": "sample"
+            }
+          ]
+        }
+      ],
+      "contentHash": "sample",
+      "createdBy": "sample",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "requestedBy": "sample",
+      "approvalRequestId": "0192e73b-56fa-71b2-8637-e78ea5ed60a3",
+      "decidedBy": "sample",
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "decisionComment": "sample"
+    },
+    "MappingSpecList": {
+      "items": [
+        {
+          "specId": "01925950-d581-7334-84e2-5d8e0f7d8294",
+          "name": "sample",
+          "version": 1,
+          "status": "DRAFT",
+          "sourceObjectType": "sample",
+          "targetModule": "sample",
+          "targetObjectType": "sample",
+          "description": "sample",
+          "fields": [
+            {
+              "target": "sample",
+              "source": "sample",
+              "transform": "COPY",
+              "format": "sample",
+              "scale": 1,
+              "codeMap": "sample",
+              "value": "sample",
+              "required": true
+            }
+          ],
+          "codeMaps": [
+            {
+              "name": "sample",
+              "entries": [
+                {
+                  "legacy": "sample",
+                  "core": "sample"
+                }
+              ]
+            }
+          ],
+          "contentHash": "sample",
+          "createdBy": "sample",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "requestedBy": "sample",
+          "approvalRequestId": "01928874-2ce3-7ab7-8cdc-51022767e50f",
+          "decidedBy": "sample",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "decisionComment": "sample"
+        }
+      ]
+    },
+    "MappingUnmappedCode": {
+      "codeMap": "sample",
+      "value": "sample",
+      "count": 1
+    },
     "ProfileRunRequest": {
       "snapshotId": "0192f451-90b0-731e-83e5-75a4bc89bb5d",
       "source": "sample",

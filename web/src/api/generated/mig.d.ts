@@ -796,6 +796,100 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/mig/v1/mapping/specs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List mapping specs
+         * @description List mapping specs
+         *
+         *     Inputs: optional name and status. Outputs: spec versions, newest first, with status and content hash.
+         */
+        get: operations["mig.Mapping.list"];
+        put?: never;
+        /**
+         * Create a mapping spec version
+         * @description Create a mapping spec version
+         *
+         *     Inputs: a spec name, the staged object type it reads, the module object type it produces, field mappings (target path, source field, transform: COPY, TRIM, UPPER, DATE, DECIMAL, ENUM, CONSTANT) and the code tables the ENUM fields look up (legacy code to core code). Outputs: the spec as a new DRAFT version of that name. A spec version is never edited: a change is a new version, and once it is put forward for approval or approved it is frozen (also in the database).
+         */
+        post: operations["mig.Mapping.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/mapping/specs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a mapping spec version
+         * @description Get a mapping spec version
+         *
+         *     Inputs: spec id. Outputs: the spec with its field mappings, code tables and approval state.
+         */
+        get: operations["mig.Mapping.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/mapping/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publish a mapping spec (maker-checker)
+         * @description Publish a mapping spec (maker-checker)
+         *
+         *     Inputs: spec id, and optionally reject with a comment. Outputs: the spec. A DRAFT spec is put forward for approval by its maker (PENDING_APPROVAL); a different person then calls publish again to approve it (APPROVED, immutable) or with reject. The maker cannot approve their own spec. Only an APPROVED spec can be referenced by a migration batch.
+         */
+        post: operations["mig.Mapping.publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/mapping/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview a mapping over staged records
+         * @description Preview a mapping over staged records
+         *
+         *     Inputs: spec id and a staged snapshot (id, or source and label), a sample size (default 25, at most 500) and whether a snapshot with open data quality errors is refused (default true). Outputs: the first records of the spec's object type mapped to migration import items (object type, legacy id, payload, item hash) with the issues of each, and the code values that have no entry in the code table. Nothing is written; an unmapped code is reported and the field left out, never guessed.
+         */
+        post: operations["mig.Mapping.preview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1283,6 +1377,124 @@ export interface components {
             waivedBy: string;
             /** Format: date-time */
             waivedAt: string;
+        };
+        MappingFieldSpec: {
+            /** @description Dotted path of the field in the importer payload, for example person.familyName. */
+            target: string;
+            /** @description Field of the staged record; not used by CONSTANT. */
+            source?: string | null;
+            /** @enum {string} */
+            transform: "COPY" | "TRIM" | "UPPER" | "DATE" | "DECIMAL" | "ENUM" | "CONSTANT";
+            /** @description DATE only, the input pattern (default yyyy-MM-dd, for example dd/MM/yyyy); the output is always yyyy-MM-dd. */
+            format?: string | null;
+            /** @description DECIMAL only, decimal places of the output (0 to 6, default 2); an input with more places than the scale is an issue, never rounded. */
+            scale?: number | null;
+            /** @description ENUM only, the name of the code table. */
+            codeMap?: string | null;
+            /** @description CONSTANT only. */
+            value?: string | null;
+            /** @description A missing source value is an issue (default false). */
+            required?: boolean | null;
+        };
+        MappingCodeEntry: {
+            legacy: string;
+            core: string;
+        };
+        MappingCodeMap: {
+            name: string;
+            entries: components["schemas"]["MappingCodeEntry"][];
+        };
+        MappingCreateRequest: {
+            name: string;
+            /** @description Object type of the staged records, for example Person. */
+            sourceObjectType: string;
+            /** @description Module code of the importer, for example PTY. */
+            targetModule: string;
+            /** @description Object type of the importer, for example Person. */
+            targetObjectType: string;
+            description?: string | null;
+            fields: components["schemas"]["MappingFieldSpec"][];
+            codeMaps?: components["schemas"]["MappingCodeMap"][];
+        };
+        MappingSpec: {
+            specId: components["schemas"]["Uuid"];
+            name: string;
+            version: number;
+            /** @enum {string} */
+            status: "DRAFT" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED";
+            sourceObjectType: string;
+            targetModule: string;
+            targetObjectType: string;
+            description?: string | null;
+            fields: components["schemas"]["MappingFieldSpec"][];
+            codeMaps: components["schemas"]["MappingCodeMap"][];
+            /** @description SHA-256 of the fields and code tables; the approval covers this hash. */
+            contentHash: string;
+            createdBy: string;
+            /** Format: date-time */
+            createdAt: string;
+            requestedBy?: string | null;
+            /** @description The platform approval request, once put forward. */
+            approvalRequestId?: components["schemas"]["Uuid"];
+            decidedBy?: string | null;
+            /** Format: date-time */
+            decidedAt?: string | null;
+            decisionComment?: string | null;
+        };
+        MappingSpecList: {
+            items: components["schemas"]["MappingSpec"][];
+        };
+        MappingPublishRequest: {
+            specId: components["schemas"]["Uuid"];
+            /** @description Reject a spec that is pending approval (default false means approve or put forward). */
+            reject?: boolean | null;
+            comment?: string | null;
+        };
+        MappingPreviewRequest: {
+            specId: components["schemas"]["Uuid"];
+            /** @description A specific snapshot; when absent give source and snapshot. */
+            snapshotId?: components["schemas"]["Uuid"];
+            source?: string | null;
+            snapshot?: string | null;
+            sampleSize?: number | null;
+            requireCleanDq?: boolean | null;
+        };
+        MappingIssue: {
+            /** @enum {string} */
+            code: "UNMAPPED_CODE" | "REQUIRED_MISSING" | "BAD_DATE" | "BAD_AMOUNT";
+            /** @description The target path. */
+            field: string;
+            /** @description The legacy value that could not be mapped. */
+            value?: string | null;
+            message: string;
+        };
+        MappingPreviewItem: {
+            legacyKey: string;
+            /** @description The target object type of the import item. */
+            objectType: string;
+            legacyId: string;
+            /** @description SHA-256 of object type, legacy id and payload; the same record and spec always give the same hash. */
+            itemHash: string;
+            payload: unknown;
+            issues: components["schemas"]["MappingIssue"][];
+        };
+        MappingUnmappedCode: {
+            codeMap: string;
+            value: string;
+            count: number;
+        };
+        MappingPreview: {
+            specId: components["schemas"]["Uuid"];
+            specVersion: number;
+            specStatus: string;
+            snapshotId: components["schemas"]["Uuid"];
+            /** @description The latest data quality run of the snapshot, when there is one. */
+            dqRunId?: components["schemas"]["Uuid"];
+            sampled: number;
+            clean: number;
+            withIssues: number;
+            items: components["schemas"]["MappingPreviewItem"][];
+            unmappedCodes: components["schemas"]["MappingUnmappedCode"][];
         };
         SignoffRequestRequest: {
             scope?: string | null;
@@ -3020,6 +3232,208 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DqWaiver"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Mapping.list": {
+        parameters: {
+            query?: {
+                /** @description Spec name. */
+                name?: string;
+                /** @description DRAFT, PENDING_APPROVAL, APPROVED or REJECTED. */
+                status?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MappingSpecList"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Mapping.create": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MappingCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MappingSpec"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Mapping.get": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the mapping spec version. */
+                id: components["schemas"]["Uuid"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MappingSpec"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Mapping.publish": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MappingPublishRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MappingSpec"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Mapping.preview": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MappingPreviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MappingPreview"];
                 };
             };
             400: components["responses"]["BadRequest"];

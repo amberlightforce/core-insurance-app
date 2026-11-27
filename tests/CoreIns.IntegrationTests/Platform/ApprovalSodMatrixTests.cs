@@ -13,7 +13,7 @@ namespace CoreIns.IntegrationTests.Platform;
 /// NX-EC-09: the segregation-of-duties matrix. One scenario set runs over every approval type that carries an amount authority
 /// (each row of <see cref="Rows"/> is one type; add a row when a module registers another): maker = checker, the maker's delegate and
 /// principal, an earlier editor after edit-then-approve, a checker whose authority is below the amount, and the one valid checker.
-/// Types with no amount (MIG.BATCH_RUN, PFC.Fallback, MKT.PackActivation, RI.CONTRACT_APPROVE) share the same platform decide path
+/// Types with no amount (MIG.BATCH_RUN, MIG.MAPPING_SPEC (maker, creator and checker are also asserted in MappingSpecTests), PFC.Fallback, MKT.PackActivation, RI.CONTRACT_APPROVE) share the same platform decide path
 /// exercised here but have no amount row to compare.
 /// </summary>
 public sealed class ApprovalSodMatrixTests(PostgresFixture database) : IClassFixture<PostgresFixture>, IAsyncLifetime
