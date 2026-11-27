@@ -141,6 +141,14 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("legal_entity_id");
 
+                    b.Property<string>("MappingContentHash")
+                        .HasColumnType("text")
+                        .HasColumnName("mapping_content_hash");
+
+                    b.Property<Guid?>("MappingSpecId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("mapping_spec_id");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1094,6 +1102,174 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Waves.WaveRow", b =>
+                {
+                    b.Property<Guid>("WaveId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("wave_id");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("closed_at");
+
+                    b.Property<string>("ClosedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("closed_by");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("object_type");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope");
+
+                    b.Property<int>("SelectedCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("selected_count");
+
+                    b.Property<string>("Snapshot")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("snapshot");
+
+                    b.Property<Guid>("SnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("snapshot_id");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TermEndField")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("term_end_field");
+
+                    b.Property<DateOnly>("WindowFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("window_from");
+
+                    b.Property<DateOnly>("WindowTo")
+                        .HasColumnType("date")
+                        .HasColumnName("window_to");
+
+                    b.HasKey("WaveId")
+                        .HasName("pk_wave");
+
+                    b.HasIndex("LegalEntityId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("ux_wave_name");
+
+                    b.ToTable("wave", "mig", t =>
+                        {
+                            t.HasCheckConstraint("ck_wave_status", "status IN ('PLANNED','IN_PROGRESS','CLOSED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Waves.WaveTermRow", b =>
+                {
+                    b.Property<Guid>("TermId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.Property<Guid?>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<Guid?>("CoreId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("core_id");
+
+                    b.Property<string>("LegacyKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legacy_key");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("object_type");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.Property<DateOnly>("TermEnd")
+                        .HasColumnType("date")
+                        .HasColumnName("term_end");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("WaveId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("wave_id");
+
+                    b.HasKey("TermId")
+                        .HasName("pk_wave_term");
+
+                    b.HasIndex("BatchId")
+                        .HasDatabaseName("ix_wave_term_batch");
+
+                    b.HasIndex("WaveId", "LegacyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_wave_term_wave_key");
+
+                    b.HasIndex("LegalEntityId", "ObjectType", "LegacyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_wave_term_claim")
+                        .HasFilter("state IN ('PLANNED','OFFERED','CONVERTED')");
+
+                    b.ToTable("wave_term", "mig", t =>
+                        {
+                            t.HasCheckConstraint("ck_wave_term_state", "state IN ('PLANNED','OFFERED','CONVERTED','EXCLUDED','WITHDRAWN','NOT_CONVERTED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Platform.Persistence.DsarRestrictionRow", b =>
                 {
                     b.Property<Guid>("RestrictionId")
@@ -1197,6 +1373,16 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_staging_record_snapshot");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Waves.WaveTermRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Migration.Services.Waves.WaveRow", null)
+                        .WithMany()
+                        .HasForeignKey("WaveId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_wave_term_wave");
                 });
 #pragma warning restore 612, 618
         }

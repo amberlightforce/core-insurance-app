@@ -29,6 +29,7 @@ tags:
 - name: Staging
 - name: Quality
 - name: Mapping
+- name: Wave
 paths:
   /api/mig/v1/xrefs/register:
     post:
@@ -2611,19 +2612,332 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/waves/plan:
+    post:
+      operationId: mig.Wave.plan
+      summary: Plan a renewal-conversion wave
+      description: |-
+        Plan a renewal-conversion wave
+
+        Inputs: wave name, staged source and snapshot, the object type of the policy records (default Policy), the field holding the legacy term end (default endDate) and the renewal window (windowFrom to windowTo, both inclusive). Outputs: the wave with one PLANNED term per staged policy whose legacy term ends inside the window. Idempotent by name: planning the same wave again adds only the terms not yet in it. A policy already planned, offered or converted in any wave is never selected again.
+      tags:
+      - Wave
+      x-requirement:
+      - REQ-MIG-031..REQ-MIG-033
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-07: a wave step is planned, converted or closed; the batch it creates has its own dry run'
+      x-exposure:
+      - ui
+      x-permission: mig.Wave.plan
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      x-source:
+      - BO-MIG-07
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WavePlanRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wave'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/waves/{id}:
+    get:
+      operationId: mig.Wave.get
+      summary: Get a wave with its term states
+      description: |-
+        Get a wave with its term states
+
+        Inputs: wave id, optional term state filter and limit. Outputs: the wave, counts per term state, the count equation, its mapping batches, the sign-off status and a page of terms.
+      tags:
+      - Wave
+      x-requirement:
+      - REQ-MIG-031..REQ-MIG-033
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-07: a read'
+      x-exposure:
+      - ui
+      x-permission: mig.Wave.get
+      x-error-codes:
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      x-source:
+      - BO-MIG-07
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the wave.
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: state
+        in: query
+        required: false
+        description: Only terms in this state.
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        description: Terms to return (default 200, at most 1000).
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wave'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/waves/convert:
+    post:
+      operationId: mig.Wave.convert
+      summary: Create the conversion batch of a wave from an approved mapping
+      description: |-
+        Create the conversion batch of a wave from an approved mapping
+
+        Inputs: wave id and the id of an APPROVED mapping spec whose source object type is the wave object type. Outputs: the wave. Every PLANNED term is mapped; a term with an open data quality error or a mapping issue is held (stays PLANNED with the reason); the others become OFFERED and a DRAFT batch is created that goes through the normal dry run and maker-checker approval. When the batch imports a term, the policy routes to CORE from its renewal date in the same save.
+      tags:
+      - Wave
+      x-requirement:
+      - REQ-MIG-031..REQ-MIG-033
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-07: a wave step is planned, converted or closed; the batch it creates has its own dry run'
+      x-exposure:
+      - ui
+      x-permission: mig.Wave.convert
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      x-source:
+      - BO-MIG-07
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WaveConvertRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wave'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/waves/adjust:
+    post:
+      operationId: mig.Wave.adjust
+      summary: Exclude or withdraw a wave term
+      description: |-
+        Exclude or withdraw a wave term
+
+        Inputs: wave id, the policy legacy key, an action EXCLUDE (a PLANNED term leaves the wave) or WITHDRAW (a PLANNED or OFFERED term is withdrawn, for example by the policyholder), and a reason. Outputs: the wave. The policy keeps legacy routing and can be planned again in a later wave.
+      tags:
+      - Wave
+      x-requirement:
+      - REQ-MIG-031..REQ-MIG-033
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-07: a wave step is planned, converted or closed; the batch it creates has its own dry run'
+      x-exposure:
+      - ui
+      x-permission: mig.Wave.adjust
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      x-source:
+      - BO-MIG-07
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WaveAdjustRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wave'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/waves/close:
+    post:
+      operationId: mig.Wave.close
+      summary: Close a wave
+      description: |-
+        Close a wave
+
+        Inputs: wave id. Outputs: the closed wave. Refused unless the count equation holds (every selected term is in exactly one state), no term is OFFERED, every batch of the wave has finished and the wave sign-off (scope of the wave) is ready. Terms still PLANNED become NOT_CONVERTED and are left for a later wave.
+      tags:
+      - Wave
+      x-requirement:
+      - REQ-MIG-031..REQ-MIG-033
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-07: a wave step is planned, converted or closed; the batch it creates has its own dry run'
+      x-exposure:
+      - ui
+      x-permission: mig.Wave.close
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      x-source:
+      - BO-MIG-07
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WaveCloseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wave'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
 x-operation-families:
-- family: mig.Wave.*
-  summary: Plan and run waves and cohorts
-  inputs: definitions
-  outputs: ids, status
-  x-requirement:
-  - REQ-MIG-031..REQ-MIG-033
-  x-wave: W9
-  x-status: unexpanded
-  x-maturity: pre-release
-  note: PRD names the family only; members are named by the owning work package (no invented verbs)
-  x-source:
-  - PRD-16 §9.1 l.1286
 - family: mig.Cohort.*
   summary: Plan and run waves and cohorts
   inputs: definitions
@@ -3937,3 +4251,146 @@ components:
           items:
             $ref: '#/components/schemas/SignoffSignatory'
       required: [scope, green, variances, waivedVariances, ready, blockers, signatories]
+    WavePlanRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        source:
+          type: string
+        snapshot:
+          type: string
+        objectType:
+          type: [string, 'null']
+          description: Object type of the policy records in staging (default Policy).
+        termEndField:
+          type: [string, 'null']
+          description: Field of the staged payload holding the legacy term end, yyyy-MM-dd (default endDate).
+        windowFrom:
+          type: string
+          description: First renewal date of the window (yyyy-MM-dd, inclusive).
+        windowTo:
+          type: string
+          description: Last renewal date of the window (yyyy-MM-dd, inclusive).
+        scope:
+          type: [string, 'null']
+          description: Reconciliation and sign-off scope of the wave (default the wave name).
+      required: [name, source, snapshot, windowFrom, windowTo]
+    WaveConvertRequest:
+      type: object
+      properties:
+        waveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        specId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        batchName:
+          type: [string, 'null']
+      required: [waveId, specId]
+    WaveAdjustRequest:
+      type: object
+      properties:
+        waveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        legacyKey:
+          type: string
+        action:
+          type: string
+          description: EXCLUDE or WITHDRAW.
+        reason:
+          type: string
+      required: [waveId, legacyKey, action, reason]
+    WaveCloseRequest:
+      type: object
+      properties:
+        waveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required: [waveId]
+    WaveTerm:
+      type: object
+      properties:
+        legacyKey:
+          type: string
+        termEnd:
+          type: string
+          description: Legacy term end (yyyy-MM-dd); the policy routes to CORE from this date.
+        state:
+          type: string
+          description: PLANNED, OFFERED, CONVERTED, EXCLUDED, WITHDRAWN or NOT_CONVERTED.
+        reason:
+          type: [string, 'null']
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        coreId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required: [legacyKey, termEnd, state]
+    WaveBatch:
+      type: object
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        specId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+        itemCount:
+          type: integer
+      required: [batchId, status, itemCount]
+    Wave:
+      type: object
+      properties:
+        waveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        name:
+          type: string
+        status:
+          type: string
+          description: PLANNED, IN_PROGRESS or CLOSED.
+        source:
+          type: string
+        snapshot:
+          type: string
+        objectType:
+          type: string
+        termEndField:
+          type: string
+        windowFrom:
+          type: string
+        windowTo:
+          type: string
+        scope:
+          type: string
+        selectedCount:
+          type: integer
+          description: Terms selected from staging so far.
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Terms per state.
+        equationHolds:
+          type: boolean
+          description: True when the terms in all states add up to the selected count.
+        batches:
+          type: array
+          items:
+            $ref: '#/components/schemas/WaveBatch'
+        signoff:
+          $ref: '#/components/schemas/SignoffStatus'
+        terms:
+          type: array
+          items:
+            $ref: '#/components/schemas/WaveTerm'
+        createdBy:
+          type: string
+        closedBy:
+          type: [string, 'null']
+        closedAt:
+          type: [string, 'null']
+          format: date-time
+        added:
+          type: [integer, 'null']
+          description: Terms added by this plan call.
+        held:
+          type: [integer, 'null']
+          description: Terms held back by this convert call.
+      required: [waveId, name, status, source, snapshot, objectType, termEndField, windowFrom, windowTo, scope, selectedCount, counts, equationHolds, batches, terms, createdBy]

@@ -86,13 +86,29 @@ internal sealed class OverrideRoutingValidator : AbstractValidator<OverrideRouti
     }
 }
 
-internal sealed class OverrideRoutingHandler(
-    MigrationDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, IEventPublisher events)
-    : ICommandHandler<OverrideRouting, RoutingView>
+internal sealed class OverrideRoutingHandler(MigrationDbContext db, RoutingPeriods periods) : ICommandHandler<OverrideRouting, RoutingView>
 {
     public async Task<Result<RoutingView>> HandleAsync(OverrideRouting command, CancellationToken cancellationToken)
     {
-        var body = command.Body;
+        var staged = await periods.StageAsync(command.Body, cancellationToken).ConfigureAwait(false);
+        if (!staged.IsSuccess)
+        {
+            return staged.Error;
+        }
+
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return MigrationReader.ToView(staged.Value);
+    }
+}
+
+/// <summary>
+/// The routing periods of one object (policy): stages a new master period without saving, so a caller (the override command, a wave
+/// conversion) can save it in the same unit of work as its own changes.
+/// </summary>
+internal sealed class RoutingPeriods(MigrationDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, IEventPublisher events)
+{
+    public async Task<Result<RoutingRow>> StageAsync(RoutingOverrideBody body, CancellationToken cancellationToken)
+    {
         var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
         var from = new BusinessDate(DateOnly.Parse(body.From, System.Globalization.CultureInfo.InvariantCulture));
         BusinessDate? to = body.To is null ? null : new BusinessDate(DateOnly.Parse(body.To, System.Globalization.CultureInfo.InvariantCulture));
@@ -147,7 +163,6 @@ internal sealed class OverrideRoutingHandler(
             },
             BusinessKeys.Empty.With("routeId", route.RouteId.ToString())) { OccurredAt = now });
 
-        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return MigrationReader.ToView(route);
+        return route;
     }
 }

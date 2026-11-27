@@ -1,5 +1,6 @@
 using CoreIns.Modules.Migration.Domain;
 using CoreIns.Modules.Migration.Persistence;
+using CoreIns.Modules.Migration.Services.Mapping;
 using CoreIns.Platform.Configuration;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Events;
@@ -37,12 +38,17 @@ internal sealed class MigrationBatchOptions
 /// crash) continues where it stopped and an item is never run twice; the importers' xref idempotency covers a chunk lost to a crash.
 /// A worker owns a batch through a lease that is renewed per chunk.
 /// </summary>
-internal sealed class BatchProcessor(MigrationDbContext db, BatchRunner runner, IClock clock, IOptions<MigrationBatchOptions> options)
+internal sealed class BatchProcessor(MigrationDbContext db, BatchRunner runner, IClock clock, IOptions<MigrationBatchOptions> options, MappingService mappings)
 {
     /// <summary>Processes the batch until it is finished, paused, or <paramref name="maxChunks"/> chunks are done; true when finished.</summary>
     public async Task<bool> ProcessAsync(Guid batchId, int? maxChunks, CancellationToken cancellationToken)
     {
         var settings = options.Value;
+        if (!await MappingStillApprovedAsync(batchId, cancellationToken).ConfigureAwait(false))
+        {
+            return false;
+        }
+
         if (!await ClaimAsync(batchId, cancellationToken).ConfigureAwait(false))
         {
             return false;
@@ -78,6 +84,35 @@ internal sealed class BatchProcessor(MigrationDbContext db, BatchRunner runner, 
             await RefreshCountersAsync(batchId, cancellationToken).ConfigureAwait(false);
             chunks++;
         }
+    }
+
+    /// <summary>
+    /// A batch built from a mapping spec runs only while that spec is still APPROVED with the content hash recorded at creation (BO-MIG-07). Otherwise
+    /// the batch is paused (PausedFrom RUNNING) so nothing is imported with a spec nobody approved; a person looks at it.
+    /// </summary>
+    private async Task<bool> MappingStillApprovedAsync(Guid batchId, CancellationToken cancellationToken)
+    {
+        db.ChangeTracker.Clear();
+        var batch = await db.Batches.AsNoTracking().SingleOrDefaultAsync(b => b.BatchId == batchId, cancellationToken).ConfigureAwait(false);
+        if (batch is not { Status: BatchStatus.Running, MappingSpecId: { } specId })
+        {
+            return true;
+        }
+
+        if ((await mappings.LoadApprovedAsync(specId, batch.MappingContentHash, cancellationToken).ConfigureAwait(false)).IsSuccess)
+        {
+            return true;
+        }
+
+        await UpdateAsync(batchId, b =>
+        {
+            b.PausedFrom = b.Status;
+            b.Status = BatchStatus.Paused;
+            b.LeaseUntil = null;
+            b.UpdatedAt = clock.Now;
+            b.RecordVersion++;
+        }, requireRunning: true, cancellationToken).ConfigureAwait(false);
+        return false;
     }
 
     /// <summary>Takes the lease of a RUNNING batch whose lease is free or expired. The record version arbitrates two claimants.</summary>
