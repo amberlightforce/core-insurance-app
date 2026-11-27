@@ -45,6 +45,9 @@ internal sealed class ManualJournalRow
 
     public Guid[] PostedJournalIds { get; set; } = [];
 
+    /// <summary>The <c>plt.Approval</c> request of the submitted journal (set on submit).</summary>
+    public Guid? ApprovalRequestId { get; set; }
+
     public int RecordVersion { get; set; }
 
     public string Number => ManualJournalRowNumber.Format(NumberSeq);
@@ -103,6 +106,7 @@ internal static class ManualJournalModel
             e.Property(r => r.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
             e.Property(r => r.DecisionReason).HasColumnName("decision_reason");
             e.Property(r => r.PostedJournalIds).HasColumnName("posted_journal_ids");
+            e.Property(r => r.ApprovalRequestId).HasColumnName("approval_request_id");
             e.Property(r => r.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
             e.Ignore(r => r.Number);
             e.HasIndex(r => new { r.LegalEntityId, r.NumberSeq }).IsUnique().HasDatabaseName("ux_manual_journal_number");

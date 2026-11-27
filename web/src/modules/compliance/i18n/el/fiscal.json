@@ -32,7 +32,8 @@
     "status": {
       "PENDING": "Σε αναμονή",
       "REGISTERED": "Καταχωρισμένο",
-      "REJECTED": "Απορρίφθηκε"
+      "REJECTED": "Απορρίφθηκε",
+      "CANCELLED": "Ακυρώθηκε"
     },
     "role": {
       "ISSUE": "Έκδοση",

@@ -47,6 +47,7 @@ public static class ProductModule
         services.AddScoped<ProductReader>();
         services.AddScoped<CatalogueQueries>();
         services.AddScoped<ProductListQueries>();
+        services.AddScoped<RuntimeQueries>();
 
         // The one state-changing path: import a product source document (the seed and, later, the authoring workflow).
         services.AddScoped<IValidator<ImportProductVersion>, ImportProductVersionValidator>();
@@ -102,6 +103,10 @@ public static class ProductModule
         services.AddScoped<IProductChargeTypeService, ProductChargeTypeService>();
         services.AddScoped<IProductQuestionSetService, ProductQuestionSetService>();
         services.AddScoped<IProductArtifactService, ProductArtifactService>();
+        services.AddScoped<IProductAvailabilityService, ProductAvailabilityService>();
+        services.AddScoped<IProductProductService, ProductProductService>();
+        // IProductPolicyDraftService (ProductPolicyDraftService) is deliberately not registered yet: POL still sends its own RiskTree, which must be
+        // mapped to the PolicyDraft shape first (TODO(hardening), BO-POL); until then POL keeps its documented fail-closed/missing-service path.
 
         services.AddErrorDefinitions(Errors);
         return services;

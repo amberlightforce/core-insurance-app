@@ -107,7 +107,8 @@ export interface ManualJournalEnvelope {
   postedIds?: string[];
 }
 
-export interface ManualJournalSubmitRequest {
+/** fin.ManualJournal.create request. */
+export interface ManualJournalCreateRequest {
   description: string;
   book: string;
   accountingDate: string;
@@ -116,23 +117,40 @@ export interface ManualJournalSubmitRequest {
   evidence: { reference: string };
 }
 
+/** fin.ManualJournal.submit request: the maker sends a DRAFT for approval. */
+export interface ManualJournalSubmitRequest {
+  id: string;
+}
+
 export interface ManualJournalDecideRequest {
   id: string;
   decision: 'APPROVE' | 'REJECT';
-  reason?: string;
+  /** Required for a rejection. */
+  comment?: string;
 }
 
-/** fin.Earning.status: every member is optional until the backend defines the run record. */
+export interface EarningMoney {
+  amount: string;
+  currency: string;
+}
+
+/** An earning run (fin.Earning.status, fin.Earning.run): amounts are per currency. */
 export interface EarningRun {
   id?: string;
-  state?: string;
-  asOf?: string;
+  period: string;
+  asOf: string;
+  state: 'DONE' | 'SIMULATED';
+  simulated: boolean;
   startedAt?: string;
   finishedAt?: string;
-  policiesProcessed?: number;
+  policiesProcessed: number;
+  termsSkipped: number;
+  earnedToDate?: EarningMoney[];
+  postedDelta?: EarningMoney[];
+  journalIds: string[];
 }
 
+/** fin.Earning.status: `run` is absent until the first run. */
 export interface EarningStatus {
   run?: EarningRun | null;
-  results?: unknown;
 }

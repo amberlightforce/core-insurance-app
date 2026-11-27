@@ -4,31 +4,14 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.ManualJournal.withdraw request. PRD inputs: "template, lines, evidence"</summary>
+/// <summary>fin.ManualJournal.withdraw request: the maker takes a DRAFT or SUBMITTED journal back</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ManualJournalWithdrawRequest
 {
-    /// <summary>PRD: "template"</summary>
+    /// <summary>Contract member 'id'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'id' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("template")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Template { get; init; }
-
-    /// <summary>PRD: "lines"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("lines")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Lines { get; init; }
-
-    /// <summary>PRD: "evidence"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("evidence")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Evidence { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("id")]
+    public required global::System.Guid Id { get; init; }
 }

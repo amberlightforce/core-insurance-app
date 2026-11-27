@@ -563,28 +563,45 @@
     "IssueReopenResponse": {
       "issue": "unspecified"
     },
-    "IssueTypeGetResponse": {
-      "types": "unspecified"
-    },
-    "IssueTypeSearchItem": {
-      "types": "unspecified"
+    "IssueTypeItem": {
+      "code": "sample",
+      "nameEl": "sample",
+      "nameEn": "sample",
+      "severity": "REFER",
+      "defaultLane": "STRAIGHT_THROUGH",
+      "blockingPoint": "PRE_QUOTE",
+      "active": true,
+      "recordVersion": 1,
+      "updatedAt": "sample",
+      "updatedBy": "sample"
     },
     "IssueTypeSearchPage": {
       "items": [
         {
-          "types": "unspecified"
+          "code": "sample",
+          "nameEl": "sample",
+          "nameEn": "sample",
+          "severity": "REFER",
+          "defaultLane": "STRAIGHT_THROUGH",
+          "blockingPoint": "PRE_QUOTE",
+          "active": true,
+          "recordVersion": 1,
+          "updatedAt": "sample",
+          "updatedBy": "sample"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "IssueTypeUpsertRequest": {
-      "name": "unspecified",
-      "description": "unspecified",
-      "code": "unspecified"
-    },
-    "IssueTypeUpsertResponse": {
-      "types": "unspecified"
+      "code": "sample",
+      "nameEl": "sample",
+      "nameEn": "sample",
+      "severity": "REFER",
+      "defaultLane": "STRAIGHT_THROUGH",
+      "blockingPoint": "PRE_QUOTE",
+      "active": true,
+      "recordVersion": 1
     },
     "NatCatAssessRequest": {
       "subject": "unspecified",
@@ -1169,9 +1186,11 @@
     "ReviewReleaseResponse": {
       "lock": "unspecified"
     },
-    "RuleSetApproveResponse": {
-      "versions": "unspecified",
-      "reports": "unspecified"
+    "RuleSetApproveRequest": {
+      "ruleSetCode": "sample",
+      "version": "sample",
+      "decision": "Approve",
+      "reason": "sample"
     },
     "RuleSetAuthoringResponse": {
       "version": {
@@ -1188,6 +1207,13 @@
         "testCaseCount": 1,
         "createdAt": "sample",
         "createdBy": "sample",
+        "recordVersion": 1,
+        "submittedBy": "sample",
+        "submittedAt": "sample",
+        "approvalRequestId": "sample",
+        "decidedBy": "sample",
+        "decidedAt": "sample",
+        "decisionReason": "sample",
         "definition": {
           "code": "sample",
           "version": "sample",
@@ -1461,6 +1487,7 @@
     "RuleSetEditRequest": {
       "ruleSetCode": "sample",
       "version": "sample",
+      "recordVersion": 1,
       "patches": [
         {
           "op": "SET_CELL",
@@ -1715,6 +1742,94 @@
       "ruleSetCode": "sample",
       "version": "sample"
     },
+    "RuleSetReleaseResponse": {
+      "version": {
+        "ruleSetCode": "sample",
+        "version": "sample",
+        "productCode": "sample",
+        "checkpoint": "sample",
+        "status": "Draft",
+        "effectiveFrom": "sample",
+        "dataStatus": "sample",
+        "contentHash": "sample",
+        "definitionHash": "sample",
+        "ruleCount": 1,
+        "testCaseCount": 1,
+        "createdAt": "sample",
+        "createdBy": "sample",
+        "recordVersion": 1,
+        "submittedBy": "sample",
+        "submittedAt": "sample",
+        "approvalRequestId": "sample",
+        "decidedBy": "sample",
+        "decidedAt": "sample",
+        "decisionReason": "sample",
+        "definition": {
+          "code": "sample",
+          "version": "sample",
+          "productCode": "sample",
+          "checkpoint": "sample",
+          "effectiveFrom": "sample",
+          "dataStatus": "sample",
+          "note": "sample",
+          "hitPolicy": "sample",
+          "variables": [
+            {
+              "name": "sample",
+              "type": "sample",
+              "expression": "sample"
+            }
+          ],
+          "inputs": [
+            {
+              "name": "sample",
+              "type": "sample",
+              "expression": "sample"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "sample",
+              "type": "sample"
+            }
+          ],
+          "rules": [
+            {
+              "id": "sample",
+              "conditions": [
+                "sample"
+              ],
+              "outputs": [
+                "sample"
+              ],
+              "explain": {
+                "fact": "sample",
+                "limit": "sample"
+              }
+            }
+          ],
+          "testCases": [
+            {
+              "name": "sample",
+              "firstRegistrationYear": "samp",
+              "vehicleValue": "sample",
+              "engineCc": 1,
+              "usage": "sample",
+              "driverBirthDates": [
+                "sample"
+              ],
+              "claimsLast5Years": 1,
+              "effectiveDate": "sample",
+              "expectedRuleIds": [
+                "sample"
+              ]
+            }
+          ]
+        }
+      },
+      "approvalRequestId": "sample",
+      "inEffect": true
+    },
     "RuleSetRule": {
       "id": "sample",
       "conditions": [
@@ -1728,9 +1843,10 @@
         "limit": "sample"
       }
     },
-    "RuleSetScheduleResponse": {
-      "versions": "unspecified",
-      "reports": "unspecified"
+    "RuleSetScheduleRequest": {
+      "ruleSetCode": "sample",
+      "version": "sample",
+      "effectiveFrom": "sample"
     },
     "RuleSetSimulateItem": {
       "evaluationId": "sample",
@@ -1786,9 +1902,10 @@
         "sample"
       ]
     },
-    "RuleSetSubmitResponse": {
-      "versions": "unspecified",
-      "reports": "unspecified"
+    "RuleSetSubmitRequest": {
+      "ruleSetCode": "sample",
+      "version": "sample",
+      "reason": "sample"
     },
     "RuleSetTestCase": {
       "name": "sample",
@@ -1861,6 +1978,13 @@
       "testCaseCount": 1,
       "createdAt": "sample",
       "createdBy": "sample",
+      "recordVersion": 1,
+      "submittedBy": "sample",
+      "submittedAt": "sample",
+      "approvalRequestId": "sample",
+      "decidedBy": "sample",
+      "decidedAt": "sample",
+      "decisionReason": "sample",
       "definition": {
         "code": "sample",
         "version": "sample",

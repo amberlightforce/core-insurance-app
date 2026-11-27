@@ -7,6 +7,7 @@ using CoreIns.Modules.Finance.Queries;
 using CoreIns.Modules.Policy.Contracts.Events;
 using CoreIns.Modules.Reinsurance.Contracts.Events;
 using CoreIns.Platform;
+using CoreIns.Platform.Approvals;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Contracts.Events;
 using CoreIns.Platform.Errors;
@@ -73,6 +74,13 @@ public static class FinanceModule
         services.AddCommand<Commands.CreateManualJournal, Domain.ManualJournalEnvelope, Commands.CreateManualJournalHandler>(
             CommandDescriptor.For("fin.ManualJournal.create") with { SupportsDryRun = true });
         services.AddCommand<Commands.WithdrawManualJournal, Domain.ManualJournalEnvelope, Commands.WithdrawManualJournalHandler>(CommandDescriptor.For("fin.ManualJournal.withdraw"));
+        services.AddCommand<Commands.SubmitManualJournal, Domain.ManualJournalEnvelope, Commands.SubmitManualJournalHandler>(CommandDescriptor.For("fin.ManualJournal.submit"));
+        services.AddCommand<Commands.DecideManualJournal, Domain.ManualJournalEnvelope, Commands.DecideManualJournalHandler>(CommandDescriptor.For("fin.ManualJournal.decide"));
+
+        // Maker-checker of manual journals (BO-FIN-01b): FIN decides through its own operation, which posts the approved journal.
+        services.AddAuthorityType(Commands.ManualJournalApproval.Definition);
+        services.AddOwnerDecidedApprovalType(Commands.ManualJournalApproval.Type);
+        services.AddScoped<Domain.ICloseTaskGate, Commands.ManualJournalsCloseGate>();
         services.AddScoped<FluentValidation.IValidator<Commands.RerunIntakeExceptions>, Commands.IntakeExceptionValidator<Commands.RerunIntakeExceptions>>();
         services.AddCommandAuditor<Commands.RerunIntakeExceptions, CoreIns.Modules.Finance.Contracts.Api.IntakeExceptionRerunResponse, Commands.IntakeExceptionAuditor<Commands.RerunIntakeExceptions>>();
         services.AddCommand<Commands.RerunIntakeExceptions, CoreIns.Modules.Finance.Contracts.Api.IntakeExceptionRerunResponse, Commands.IntakeExceptionHandler<Commands.RerunIntakeExceptions>>(CoreIns.Platform.Commands.CommandDescriptor.For("fin.IntakeException.rerun"));
@@ -120,6 +128,11 @@ public static class FinanceModule
         }
 
         Commands.PeriodCloseRegistration.AddPeriodClose(services);
+
+        // BO-FIN-06a: the earning engine; its run gates the EARNING_RUN close task.
+        services.AddScoped<Services.EarningEngine>();
+        services.AddScoped<Domain.ICloseTaskGate, Commands.EarningRunGate>();
+        services.AddCommand<Commands.RunEarning, CoreIns.Modules.Finance.Contracts.Api.EarningRunResponse, Commands.RunEarningHandler>(CommandDescriptor.For("fin.Earning.run"));
 
         services.AddOptions<FinanceOptions>().Bind(configuration.GetSection(FinanceOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
 

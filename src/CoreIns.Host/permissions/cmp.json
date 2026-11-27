@@ -4,6 +4,11 @@
       "Grants": {
         "cmp.FiscalDocument.request": [ "Platform.Admin" ],
         "cmp.FiscalDocument.get": [ "Staff.Billing", "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.FiscalDocument.qrPayload": [ "Staff.Billing", "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.FiscalDocument.resubmit": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.FiscalDocument.bulkResubmit": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.FiscalDocument.correct": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.FiscalDocument.cancel": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
         "cmp.FiscalDocument.listBySource": [ "Staff.Billing", "Staff.ComplianceOfficer", "Platform.Admin" ],
         "cmp.FiscalReconciliation.breaks": [ "Staff.Billing", "Staff.ComplianceOfficer", "Platform.Admin" ],
         "cmp.AiSystem.register": [ "Staff.ComplianceOfficer", "Platform.Admin" ],

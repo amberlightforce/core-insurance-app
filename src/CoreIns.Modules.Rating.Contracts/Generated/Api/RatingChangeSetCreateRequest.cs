@@ -4,42 +4,28 @@
 
 namespace CoreIns.Modules.Rating.Contracts.Api;
 
-/// <summary>rat.RatingChangeSet.create request. PRD inputs: "file or rows, mapping, change set"</summary>
-/// <remarks>
-/// <para>Exactly one of: file | rows.</para>
-/// </remarks>
+/// <summary>Contract addition (BO-RAT-06): rat.RatingChangeSet.create request: a draft change set for one product version. The tables it points at are imported through rat.RateTable.import (or named here by hash).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RatingChangeSetCreateRequest
 {
-    /// <summary>PRD: "file or rows" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("file")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? File { get; init; }
+    /// <summary>Contract member 'productCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productCode")]
+    public required string ProductCode { get; init; }
 
-    /// <summary>PRD: "file or rows" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("rows")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Rows { get; init; }
+    /// <summary>Contract member 'productVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productVersion")]
+    public required string ProductVersion { get; init; }
 
-    /// <summary>PRD: "mapping"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("mapping")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Mapping { get; init; }
+    /// <summary>The artefact whose steps and tax plan are reused (default the one active for the product version).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("baseArtefactHash")]
+    public string? BaseArtefactHash { get; init; }
 
-    /// <summary>PRD: "change set"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("changeSet")]
+    /// <summary>Table slot to rate-table hash, overriding the base artefact's pins.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("tableHashes")]
+    public global::System.Collections.Generic.IReadOnlyDictionary<string, string>? TableHashes { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ChangeSet { get; init; }
+    public string? Reason { get; init; }
 }

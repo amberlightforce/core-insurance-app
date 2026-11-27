@@ -35,6 +35,17 @@ internal sealed class RenewalOptions
     /// <summary>A renewal can be created when the expiring term ends within this many Athens calendar days (REQ-POL-245).</summary>
     [Range(1, 365)]
     public int LeadDays { get; set; } = 45;
+
+    /// <summary>
+    /// Days before the term end by which a non-renewal notice must be given. ILLUSTRATIVE: the statutory period for Greek P&amp;C
+    /// non-renewal is not settled, so the value stays <c>Unverified</c> and Production refuses non-renewal (D-USR-19).
+    /// </summary>
+    [Range(0, 365)]
+    public int NonRenewalNoticeDays { get; set; } = 60;
+
+    /// <summary>Legal status of <see cref="NonRenewalNoticeDays"/>: Settled, Unverified or PendingOpinion. Only Settled passes in Production.</summary>
+    [RegularExpression("^(Settled|Unverified|PendingOpinion)$")]
+    public string NonRenewalNoticeLegalStatus { get; set; } = "Unverified";
 }
 
 /// <summary>Error codes of the renewal commands that no other POL work package registers.</summary>
@@ -47,6 +58,14 @@ internal static class RenewalErrors
             .Describe(
                 "Μετά τη δημιουργία της ανανέωσης δεσμεύτηκε αλλαγή στον τρέχοντα όρο. Κάντε νέα προσφορά· ξαναχτίζεται πάνω στην τελευταία κατάσταση.",
                 "A change was bound on the expiring term after the renewal was created. Offer the renewal again; it is rebuilt on the latest state."),
+        ErrorDefinition.For(ModuleCode.POL, "NOTICE-TOO-LATE", 422, "Η ειδοποίηση μη ανανέωσης έχει καθυστερήσει", "The non-renewal notice is too late")
+            .Describe(
+                "Η ειδοποίηση πρέπει να δοθεί πριν από το νόμιμο όριο προ της λήξης του όρου.",
+                "The notice must be given before the statutory latest day ahead of the term end."),
+        ErrorDefinition.For(ModuleCode.POL, "NOTICE-PERIOD-UNSETTLED", 422, "Η προθεσμία ειδοποίησης δεν είναι νομικά τεκμηριωμένη", "The notice period is not legally settled")
+            .Describe(
+                "Η νόμιμη προθεσμία ειδοποίησης μη ανανέωσης δεν έχει επιβεβαιωθεί· η μη ανανέωση απορρίπτεται στην παραγωγή.",
+                "The statutory non-renewal notice period is not confirmed; non-renewal is refused in Production (D-USR-19)."),
     ];
 }
 
@@ -168,7 +187,7 @@ internal sealed partial class RenewalPricing(
             },
             cancellationToken).ConfigureAwait(false);
         return validated.Errors is { Count: > 0 } errors
-            ? Invalid("The product rejects the renewal.", errors.Select((e, i) => new FieldError($"riskTree[{i}]", "PRODUCT_RULE", "pol.product_rule", e.GetRawText())))
+            ? Invalid("The product rejects the renewal.", errors.Select((e, i) => new FieldError($"riskTree[{i}]", "PRODUCT_RULE", "pol.product_rule", e.Rule + ": " + e.Message.En)))
             : null;
     }
 

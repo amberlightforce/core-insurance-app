@@ -30,6 +30,14 @@ internal static class RenewalRegistration
         services.AddCommandAuditor<AcceptRenewal, RenewalAcceptResponse, AcceptRenewalAuditor>();
         services.AddCommand<AcceptRenewal, RenewalAcceptResponse, AcceptRenewalHandler>(CommandDescriptor.For("pol.Renewal.accept") with { SupportsDryRun = true });
 
+        services.AddScoped<IValidator<DeclineRenewal>, DeclineRenewalValidator>();
+        services.AddCommandAuditor<DeclineRenewal, RenewalDeclineResponse, DeclineRenewalAuditor>();
+        services.AddCommand<DeclineRenewal, RenewalDeclineResponse, DeclineRenewalHandler>(CommandDescriptor.For("pol.Renewal.decline") with { SupportsDryRun = true });
+
+        services.AddScoped<IValidator<NonRenew>, NonRenewValidator>();
+        services.AddCommandAuditor<NonRenew, RenewalNonRenewResponse, NonRenewAuditor>();
+        services.AddCommand<NonRenew, RenewalNonRenewResponse, NonRenewHandler>(CommandDescriptor.For("pol.Renewal.nonRenew") with { SupportsDryRun = true });
+
         services.AddErrorDefinitions(RenewalErrors.Definitions);
         return services;
     }

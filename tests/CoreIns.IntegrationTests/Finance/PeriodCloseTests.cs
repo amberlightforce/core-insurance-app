@@ -30,8 +30,14 @@ public sealed class PeriodCloseTests(PostgresFixture database) : IClassFixture<P
         var (response, body) = await ProductApi.ImportAsync(_client, ProductApi.Seed("MOTOR-FIN"));
         response.IsSuccessStatusCode.ShouldBeTrue(body?.ToJsonString());
         _artefactHash = body.Text("artefactHash");
+        // The period may already hold journals (earning posts into it), so it is reset in place instead of deleted.
         await database.ExecuteAsSuperuserAsync(
-            $"DELETE FROM fin.financial_period WHERE legal_entity_id = '{ApiHostFactory.LegalEntityId}' AND period_code = '{Period}'", TestContext.Current.CancellationToken);
+            $"""
+            DELETE FROM fin.period_close_task WHERE period_id IN (SELECT period_id FROM fin.financial_period WHERE legal_entity_id = '{ApiHostFactory.LegalEntityId}' AND period_code = '{Period}');
+            UPDATE fin.financial_period SET status = 'OPEN', soft_closed_by = NULL, soft_closed_at = NULL, locked_by = NULL, locked_at = NULL, lock_count = 0,
+                reopen_requested_by = NULL, reopen_requested_at = NULL, reopen_reason = NULL
+             WHERE legal_entity_id = '{ApiHostFactory.LegalEntityId}' AND period_code = '{Period}';
+            """, TestContext.Current.CancellationToken);
     }
 
     public async ValueTask DisposeAsync()
@@ -67,6 +73,9 @@ public sealed class PeriodCloseTests(PostgresFixture database) : IClassFixture<P
 
     private async Task SignOffAllAsync(string user)
     {
+        // BO-FIN-06a: the EARNING_RUN task is blocked until the period is earned to its last day.
+        var (earning, earningBody) = await SendAsync(HttpMethod.Post, "/api/fin/v1/earning/run", user, new { asOf = "2026-11-30" });
+        earning.StatusCode.ShouldBe(HttpStatusCode.OK, earningBody?.ToJsonString());
         foreach (var task in Tasks)
         {
             var (response, body) = await SendAsync(HttpMethod.Post, "/api/fin/v1/close/sign-off", user, new { period = Period, task });

@@ -42,6 +42,10 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
 
     public DbSet<ManualJournalLineRow> ManualJournalLines => Set<ManualJournalLineRow>();
 
+    public DbSet<EarningRunRow> EarningRuns => Set<EarningRunRow>();
+
+    public DbSet<EarnedPremiumRow> EarnedPremiums => Set<EarnedPremiumRow>();
+
     public DbSet<MigrationImport.MigrationImportRow> MigrationImports => Set<MigrationImport.MigrationImportRow>();
 
     protected override string Schema => FinanceModule.Schema;
@@ -194,6 +198,8 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
             entity.Property(e => e.ProductVersion).HasColumnName("product_version");
             entity.Property(e => e.ArtefactHash).HasColumnName("artefact_hash").HasColumnType("char(64)");
             entity.Property(e => e.ChargeTypesLoaded).HasColumnName("charge_types_loaded");
+            entity.Property(e => e.TermStart).HasColumnName("term_start");
+            entity.Property(e => e.TermEnd).HasColumnName("term_end");
             entity.Property(e => e.SourceEventId).HasColumnName("source_event_id");
             entity.Property(e => e.AggregateSequence).HasColumnName("aggregate_sequence");
             entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
@@ -308,12 +314,13 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
 
         MigrationImport.FinanceMigrationModel.Configure(modelBuilder);
         ManualJournalModel.Configure(modelBuilder);
+        EarningModel.Configure(modelBuilder);
 
         modelBuilder.Entity<JournalEntryRow>(entity =>
         {
             entity.ToTable("journal_entry", t =>
             {
-                t.HasCheckConstraint("ck_journal_entry_source_type", In("source_type", [SourceTypes.Event, SourceTypes.Reversal]));
+                t.HasCheckConstraint("ck_journal_entry_source_type", In("source_type", [SourceTypes.Event, SourceTypes.Reversal, SourceTypes.Manual]));
                 t.HasCheckConstraint("ck_journal_entry_reversal", "(source_type = 'REVERSAL') = (reverses_journal_id IS NOT NULL)");
                 t.HasCheckConstraint("ck_journal_entry_currency", "functional_currency ~ '^[A-Z]{3}$'");
             });

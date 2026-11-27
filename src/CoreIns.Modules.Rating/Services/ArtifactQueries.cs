@@ -20,9 +20,12 @@ namespace CoreIns.Modules.Rating.Services;
 internal sealed class ArtifactQueries(DbSession session, RequestContext context, IClock clock)
 {
     /// <summary>Roles that author artefacts and may therefore see unreleased (DRAFT) ones.</summary>
-    internal static readonly string[] AuthoringRoles = ["Staff.UnderwritingManager", "Platform.Admin"];
+    internal static readonly string[] AuthoringRoles = ["Staff.UnderwritingManager", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority"];
 
-    private static readonly string[] Lifecycles = ["DRAFT", "SCHEDULED", "ACTIVE", "SUPERSEDED", "WITHDRAWN"];
+    private static readonly string[] Lifecycles = ["DRAFT", "SUBMITTED", "APPROVED", "SCHEDULED", "ACTIVE", "SUPERSEDED", "WITHDRAWN"];
+
+    // Not yet released: no activation. Hidden from roles outside AuthoringRoles.
+    private static readonly string[] PreRelease = ["DRAFT", "SUBMITTED", "APPROVED"];
     private static readonly string[] DataStatuses = ["ILLUSTRATIVE_TEST_DATA", "APPROVED"];
 
     // One row per artefact with its derived lifecycle. The catalogue is a platform-level library of product-version
@@ -32,17 +35,19 @@ internal sealed class ArtifactQueries(DbSession session, RequestContext context,
         SELECT a.artefact_hash AS ArtefactHash, a.artefact_code AS ArtefactCode, a.label AS Label, a.product_code AS ProductCode,
                a.product_version AS ProductVersion, a.engine_version AS EngineVersion, a.data_status AS DataStatus,
                a.definition::text AS Definition, a.created_at AS CreatedAt,
-               CASE WHEN x.n IS NULL THEN 'DRAFT'
+               CASE WHEN x.n IS NULL THEN CASE rel.status WHEN 'SUBMITTED' THEN 'SUBMITTED' WHEN 'APPROVED' THEN 'APPROVED' ELSE 'DRAFT' END
                     WHEN x.cur THEN 'ACTIVE'
                     WHEN x.fut THEN 'SCHEDULED'
                     WHEN x.live THEN 'SUPERSEDED'
+                    WHEN rel.status = 'APPROVED' THEN 'APPROVED'
                     ELSE 'WITHDRAWN' END AS Lifecycle
           FROM rat.rating_artifact a
+          LEFT JOIN rat.artifact_release rel ON rel.artefact_hash = a.artefact_hash
           LEFT JOIN (
               SELECT artefact_hash, count(*) AS n,
-                     bool_or(status <> 'Withdrawn' AND effective_from <= @today AND (effective_to IS NULL OR effective_to >= @today)) AS cur,
-                     bool_or(status <> 'Withdrawn' AND effective_from > @today) AS fut,
-                     bool_or(status <> 'Withdrawn') AS live
+                     bool_or(status NOT IN ('Withdrawn', 'Cancelled', 'RolledBack') AND effective_from <= @today AND (effective_to IS NULL OR effective_to >= @today)) AS cur,
+                     bool_or(status NOT IN ('Withdrawn', 'Cancelled', 'RolledBack') AND effective_from > @today) AS fut,
+                     bool_or(status NOT IN ('Withdrawn', 'Cancelled', 'RolledBack')) AS live
                 FROM rat.rate_activation GROUP BY artefact_hash) x ON x.artefact_hash = a.artefact_hash
         """;
 
@@ -92,11 +97,11 @@ internal sealed class ArtifactQueries(DbSession session, RequestContext context,
         }
 
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        var args = new DynamicParameters(new { product = productCode, status, dataStatus, drafts = SeesDrafts, afterHash, take = take + 1, after });
+        var args = new DynamicParameters(new { product = productCode, status, dataStatus, drafts = SeesDrafts, preRelease = PreRelease, afterHash, take = take + 1, after });
         args.Add("today", Today, DbType.Date);
         var rows = (await connection.QueryAsync<Row>(new CommandDefinition(
             "SELECT * FROM (" + Projection + ") r WHERE (@product::text IS NULL OR r.ProductCode = @product) AND (@dataStatus::text IS NULL OR r.DataStatus = @dataStatus)" +
-            " AND (@status::text IS NULL OR r.Lifecycle = @status) AND (@drafts OR r.Lifecycle <> 'DRAFT')" +
+            " AND (@status::text IS NULL OR r.Lifecycle = @status) AND (@drafts OR r.Lifecycle <> ALL(@preRelease))" +
             " AND (@after::timestamptz IS NULL OR r.CreatedAt < @after OR (r.CreatedAt = @after AND r.ArtefactHash > @afterHash))" +
             " ORDER BY r.CreatedAt DESC, r.ArtefactHash ASC LIMIT @take",
             args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
@@ -148,7 +153,7 @@ internal sealed class ArtifactQueries(DbSession session, RequestContext context,
         args.Add("today", Today, DbType.Date);
         var row = await connection.QueryFirstOrDefaultAsync<Row>(new CommandDefinition(
             "SELECT * FROM (" + Projection + ") r WHERE r.ArtefactHash = @id", args, session.Transaction, cancellationToken: ct)).ConfigureAwait(false);
-        if (row is null || (row.Lifecycle == "DRAFT" && !SeesDrafts))
+        if (row is null || (PreRelease.Contains(row.Lifecycle, StringComparer.Ordinal) && !SeesDrafts))
         {
             throw new DomainException(DomainError.Of(ModuleCode.RAT, PlatformErrors.NotFound, "The rating artefact does not exist."));
         }
@@ -194,7 +199,7 @@ internal sealed class ArtifactQueries(DbSession session, RequestContext context,
 
     private static RatingArtifactStatus StatusOf(Row row, List<ActivationReadRow> activations)
     {
-        var live = activations.Where(a => a.Status != "Withdrawn").ToList();
+        var live = activations.Where(a => a.Status is not ("Withdrawn" or "Cancelled" or "RolledBack")).ToList();
         return new RatingArtifactStatus
         {
             Lifecycle = Enum.Parse<RatingArtifactStatus.LifecycleValue>(row.Lifecycle, ignoreCase: true),
@@ -218,7 +223,7 @@ internal sealed class ArtifactQueries(DbSession session, RequestContext context,
         {
             new() { ProductCode = row.ProductCode, ProductVersion = row.ProductVersion, Relation = RatingArtifactCompatibilityRecord.RelationValue.Pinned, Compatible = true, Reason = null },
         };
-        foreach (var version in activations.Where(a => a.Status != "Withdrawn").Select(a => a.ProductVersion).Distinct(StringComparer.Ordinal).Where(v => v != row.ProductVersion))
+        foreach (var version in activations.Where(a => a.Status is not ("Withdrawn" or "Cancelled" or "RolledBack")).Select(a => a.ProductVersion).Distinct(StringComparer.Ordinal).Where(v => v != row.ProductVersion))
         {
             records.Add(new RatingArtifactCompatibilityRecord { ProductCode = row.ProductCode, ProductVersion = version, Relation = RatingArtifactCompatibilityRecord.RelationValue.Activated, Compatible = true, Reason = null });
         }

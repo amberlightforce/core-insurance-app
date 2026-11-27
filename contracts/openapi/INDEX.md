@@ -8,8 +8,8 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 
 | Module | Operations | Full | Minimal | Commands | Queries | In-process only | Partner-facing | Unexpanded families |
 |---|---|---|---|---|---|---|---|---|
-| [PTY](#pty) | 67 | 47 | 20 | 47 | 20 | 5 | 0 | 5 |
-| [PFC](#pfc) | 35 | 32 | 3 | 18 | 17 | 1 | 1 | 0 |
+| [PTY](#pty) | 67 | 50 | 17 | 47 | 20 | 5 | 0 | 5 |
+| [PFC](#pfc) | 34 | 31 | 3 | 17 | 17 | 1 | 1 | 0 |
 | [RAT](#rat) | 47 | 47 | 0 | 24 | 23 | 3 | 2 | 0 |
 | [UW](#uw) | 82 | 55 | 27 | 57 | 25 | 3 | 2 | 4 |
 | [POL](#pol) | 58 | 54 | 4 | 40 | 18 | 8 | 10 | 0 |
@@ -25,7 +25,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
 | [MIG](#mig) | 25 | 25 | 0 | 16 | 9 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 36 | 12 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1155 | 943 | 212 | 751 | 404 | 128 | 69 | 65 |
+| **Total** | 1154 | 945 | 209 | 750 | 404 | 128 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -92,9 +92,9 @@ Contract anchors: 174; covered by operations or families: 164; not an API (reaso
 | `pty.ProducerOfRecord.cancel` | POST `/api/pty/v1/producer-of-records/cancel` | C | yes | ui |  | W2 | full | REQ-PTY-009 |
 | `pty.ProducerOfRecord.change` | POST `/api/pty/v1/producer-of-records/change` | C | yes | ui |  | W2 | full | REQ-PTY-009 |
 | `pty.ProducerOfRecord.get` | GET `/api/pty/v1/producer-of-records/{id}` | Q |  | ui | BIL, CHN, DOC, PLT, POL | W2 | full | REQ-PTY-009 |
-| `pty.Relationship.add` | POST `/api/pty/v1/relationships/add` | C |  | ui |  | W2 | minimal | REQ-PTY-104 |
-| `pty.Relationship.end` | POST `/api/pty/v1/relationships/end` | C |  | ui |  | W2 | minimal | REQ-PTY-104 |
-| `pty.Relationship.query` | GET `/api/pty/v1/relationships/query` | Q |  | ui |  | W2 | minimal | REQ-PTY-104 |
+| `pty.Relationship.add` | POST `/api/pty/v1/relationships/add` | C |  | ui |  | W2 | full | REQ-PTY-104 |
+| `pty.Relationship.end` | POST `/api/pty/v1/relationships/end` | C |  | ui |  | W2 | full | REQ-PTY-104 |
+| `pty.Relationship.query` | GET `/api/pty/v1/relationships/query` | Q |  | ui |  | W2 | full | REQ-PTY-104 |
 | `pty.Screening.bulk` | POST `/api/pty/v1/screening/bulk` | C |  | ui | MIG | W2 | full | REQ-PTY-185, REQ-PTY-177 |
 | `pty.Screening.caseDecide` | POST `/api/pty/v1/screening/case-decide` | C |  | ui |  | W2 | full | REQ-PTY-185, REQ-PTY-177 |
 | `pty.Screening.caseGet` | GET `/api/pty/v1/screening/case-get` | Q |  | ui |  | W2 | full | REQ-PTY-185, REQ-PTY-177 |
@@ -139,10 +139,9 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `pfc.Product.describe` | POST `/api/pfc/v1/products/describe` | Q |  | ui, partner | BIL, CHN, POL | W2 | full | REQ-PFC-222 |
 | `pfc.Product.list` | GET `/api/pfc/v1/products` | Q |  | ui |  | W2 | full | REQ-PFC-031, REQ-PFC-032 |
 | `pfc.ProductImport.import` | POST `/api/pfc/v1/product-imports/import` | C | yes | internal | MIG | W2 | full | REQ-PFC-240 |
-| `pfc.ProductVersion.cancelSchedule` | POST `/api/pfc/v1/product-versions/cancel-schedule` | C | yes | ui |  | W2 | full | REQ-PFC-211..REQ-PFC-213 |
+| `pfc.ProductVersion.cancelSchedule` | POST `/api/pfc/v1/product-versions/cancel-schedule` | C |  | ui |  | W2 | full | REQ-PFC-211..REQ-PFC-213 |
 | `pfc.ProductVersion.decideFallback` | POST `/api/pfc/v1/product-versions/decide-fallback` | C |  | ui |  | W2 | full | REQ-PFC-213 |
 | `pfc.ProductVersion.diff` | GET `/api/pfc/v1/product-versions/diff` | Q |  | ui |  | W2 | full | REQ-PFC-200 |
-| `pfc.ProductVersion.fallBack` | POST `/api/pfc/v1/product-versions/fall-back` | C | yes | ui |  | W2 | full | REQ-PFC-211..REQ-PFC-213 |
 | `pfc.ProductVersion.fallback` | POST `/api/pfc/v1/product-versions/fallback` | C | yes | ui |  | W2 | full | REQ-PFC-213 |
 | `pfc.ProductVersion.import` | POST `/api/pfc/v1/product-versions/import` | C |  | ui |  | W2 | full | REQ-PFC-031, REQ-PFC-032, REQ-PFC-162 |
 | `pfc.ProductVersion.resolve` | POST `/api/pfc/v1/product-versions/resolve` | Q |  | ui | DOC, MIG, MKT, POL, RAT | W2 | full | REQ-PFC-001, REQ-PFC-167, REQ-PFC-221 |

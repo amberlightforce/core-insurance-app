@@ -15,4 +15,29 @@ public sealed record MartRunResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("runId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Guid? RunId { get; init; }
+
+    /// <summary>COMPLETED (the run is computed inline); BO-DAT-03 addition.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Status { get; init; }
+
+    /// <summary>Deterministic snapshot key: mart|entity|period|product|first 16 hex of the hash (BO-DAT-03).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("snapshotKey")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? SnapshotKey { get; init; }
+
+    /// <summary>SHA-256 over the ordered figures; the same inputs give the same hash (BO-DAT-03).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("snapshotHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? SnapshotHash { get; init; }
+
+    /// <summary>Number of figures written (BO-DAT-03).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("figureCount")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? FigureCount { get; init; }
+
+    /// <summary>NotRegulatory for the management marts; regulatory layouts stay Unverified (BO-DAT-03).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LegalStatus { get; init; }
 }

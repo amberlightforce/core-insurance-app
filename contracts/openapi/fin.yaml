@@ -1967,6 +1967,8 @@ paths:
       - ui
       x-permission: fin.Earning.run
       x-error-codes:
+      - code: FIN-ERR-PERIOD-LOCKED
+        status: 422
       - code: FIN-ERR-RUN-IN-PROGRESS
         status: 409
       - code: FIN-ERR-IDEMPOTENCY-MISMATCH
@@ -2103,7 +2105,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EarningSimulateRequest'
+              $ref: '#/components/schemas/EarningRunRequest'
       responses:
         '200':
           description: Success
@@ -6775,138 +6777,251 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/IntakeExceptionOutcome'
+    ManualJournalEvidence:
+      type: object
+      description: The evidence of a manual journal, a document or ticket reference (REQ-FIN-216)
+      required:
+      - reference
+      properties:
+        reference:
+          type: string
+          maxLength: 200
+    ManualJournalLineInput:
+      type: object
+      required:
+      - account
+      - side
+      - amount
+      properties:
+        account:
+          type: string
+          maxLength: 32
+        side:
+          type: string
+          enum:
+          - DEBIT
+          - CREDIT
+        amount:
+          type: string
+          description: Positive decimal with at most two places (invariant format)
+    ManualJournalLineView:
+      type: object
+      required:
+      - account
+      - side
+      - amount
+      properties:
+        account:
+          type: string
+        side:
+          type: string
+          enum:
+          - DEBIT
+          - CREDIT
+        amount:
+          type: string
+    ManualJournalView:
+      type: object
+      description: A manual journal (maker-checker workflow record; the ledger changes only when it is approved and POSTED)
+      required:
+      - id
+      - number
+      - status
+      - description
+      - book
+      - accountingDate
+      - currency
+      - lines
+      - evidenceRef
+      - createdBy
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        number:
+          type: string
+          description: MJ plus six digits
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - SUBMITTED
+          - APPROVED
+          - REJECTED
+          - WITHDRAWN
+          - POSTED
+        description:
+          type: string
+        book:
+          type: string
+        accountingDate:
+          type: string
+          format: date
+        currency:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManualJournalLineView'
+        evidenceRef:
+          type: string
+        createdBy:
+          type: string
+        submittedBy:
+          type: string
+          nullable: true
+        submittedAt:
+          type: string
+          nullable: true
+        decidedBy:
+          type: string
+          nullable: true
+        decisionReason:
+          type: string
+          nullable: true
     ManualJournalCreateRequest:
       type: object
-      description: 'fin.ManualJournal.create request. PRD inputs: "template, lines, evidence"'
+      description: fin.ManualJournal.create request
+      required:
+      - description
+      - book
+      - accountingDate
+      - currency
+      - lines
+      - evidence
       properties:
-        template:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "template"'
+        description:
+          type: string
+          maxLength: 200
+        book:
+          type: string
+        accountingDate:
+          type: string
+          format: date
+        currency:
+          type: string
         lines:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
+            $ref: '#/components/schemas/ManualJournalLineInput'
         evidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence"'
+          $ref: '#/components/schemas/ManualJournalEvidence'
     ManualJournalCreateResponse:
       type: object
-      description: 'fin.ManualJournal.create result. PRD outputs: "manual journal, posted ids"'
+      description: 'fin.ManualJournal.create result'
+      required:
+      - manualJournal
+      - postedIds
       properties:
         manualJournal:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manual journal"'
+          $ref: '#/components/schemas/ManualJournalView'
         postedIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "posted ids"'
+          description: Ids of the sealed journals the approval posted (empty until POSTED)
     ManualJournalSubmitRequest:
       type: object
-      description: 'fin.ManualJournal.submit request. PRD inputs: "template, lines, evidence"'
+      description: 'fin.ManualJournal.submit request: submit a DRAFT journal of the caller for approval'
+      required:
+      - id
       properties:
-        template:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "template"'
-        lines:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
-        evidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence"'
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
     ManualJournalSubmitResponse:
       type: object
-      description: 'fin.ManualJournal.submit result. PRD outputs: "manual journal, posted ids"'
+      description: 'fin.ManualJournal.submit result'
+      required:
+      - manualJournal
+      - postedIds
       properties:
         manualJournal:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manual journal"'
+          $ref: '#/components/schemas/ManualJournalView'
         postedIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "posted ids"'
+          description: Ids of the sealed journals the approval posted (empty until POSTED)
     ManualJournalWithdrawRequest:
       type: object
-      description: 'fin.ManualJournal.withdraw request. PRD inputs: "template, lines, evidence"'
+      description: 'fin.ManualJournal.withdraw request: the maker takes a DRAFT or SUBMITTED journal back'
+      required:
+      - id
       properties:
-        template:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "template"'
-        lines:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
-        evidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence"'
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
     ManualJournalWithdrawResponse:
       type: object
-      description: 'fin.ManualJournal.withdraw result. PRD outputs: "manual journal, posted ids"'
+      description: 'fin.ManualJournal.withdraw result'
+      required:
+      - manualJournal
+      - postedIds
       properties:
         manualJournal:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manual journal"'
+          $ref: '#/components/schemas/ManualJournalView'
         postedIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "posted ids"'
+          description: Ids of the sealed journals the approval posted (empty until POSTED)
     ManualJournalDecideRequest:
       type: object
-      description: 'fin.ManualJournal.decide request. PRD inputs: "template, lines, evidence"'
+      description: 'fin.ManualJournal.decide request: a checker approves (posting the journal) or rejects a SUBMITTED journal'
+      required:
+      - id
+      - decision
       properties:
-        template:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "template"'
-        lines:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
-        evidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence"'
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        comment:
+          type: string
+          maxLength: 1024
+          description: Required for a rejection
     ManualJournalDecideResponse:
       type: object
-      description: 'fin.ManualJournal.decide result. PRD outputs: "manual journal, posted ids"'
+      description: 'fin.ManualJournal.decide result (a repeated decision returns the current state)'
+      required:
+      - manualJournal
+      - postedIds
       properties:
         manualJournal:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manual journal"'
+          $ref: '#/components/schemas/ManualJournalView'
         postedIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "posted ids"'
+          description: Ids of the sealed journals the approval posted (empty until POSTED)
     ManualJournalGetResponse:
       type: object
-      description: 'fin.ManualJournal.get result. PRD outputs: "manual journal, posted ids"'
+      description: 'fin.ManualJournal.get result'
+      required:
+      - manualJournal
+      - postedIds
       properties:
         manualJournal:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manual journal"'
+          $ref: '#/components/schemas/ManualJournalView'
         postedIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "posted ids"'
+          description: Ids of the sealed journals the approval posted (empty until POSTED)
     ManualJournalListItem:
       type: object
-      description: 'fin.ManualJournal.list result. PRD outputs: "manual journal, posted ids"'
+      description: fin.ManualJournal.list result item
+      required:
+      - manualJournal
+      - postedIds
       properties:
         manualJournal:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manual journal"'
+          $ref: '#/components/schemas/ManualJournalView'
         postedIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "posted ids"'
     ManualJournalListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -6939,54 +7054,144 @@ components:
           description: 'PRD: "reversal journal"'
     EarningRunRequest:
       type: object
-      description: 'fin.Earning.run request. PRD inputs: "entity, as-of"'
+      description: 'fin.Earning.run / fin.Earning.simulate request: earn premium up to and including this date (its calendar month is the accounting period the movement is posted in; the legal entity comes from the caller).'
+      required:
+      - asOf
       properties:
-        entity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entity"'
-        as:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "as-of"'
+        asOf:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Earn up to and including this Europe/Athens calendar date; the period of this date must be open.
+    EarningTermResult:
+      type: object
+      description: The earning of one policy term in one book (pro rata temporis by day, TERM_RATIO).
+      required:
+      - policyTermId
+      - book
+      - writtenPremium
+      - earnedToDate
+      - previouslyEarned
+      - delta
+      - daysEarned
+      - termDays
+      properties:
+        policyTermId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          type: string
+        book:
+          type: string
+        termStart:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        termEnd:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Exclusive end of the term.
+        writtenPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Net written premium of the term (written less credits) posted so far.
+        earnedToDate:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Premium earned up to the as-of date after this run.
+        previouslyEarned:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Premium already earned before this run.
+        delta:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Earned in this run (negative when a credit made the term over-earned).
+        daysEarned:
+          type: integer
+        termDays:
+          type: integer
+    EarningRunView:
+      type: object
+      description: One earning run (or a simulation of one) for an accounting period.
+      required:
+      - period
+      - asOf
+      - state
+      - simulated
+      - policiesProcessed
+      - termsSkipped
+      - journalIds
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Run id; absent for a simulation.
+        period:
+          type: string
+          description: Accounting period, yyyy-MM.
+        asOf:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        state:
+          type: string
+          enum:
+          - DONE
+          - SIMULATED
+        simulated:
+          type: boolean
+        startedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        finishedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        policiesProcessed:
+          type: integer
+          description: Policy terms earned (with written premium and known term dates).
+        termsSkipped:
+          type: integer
+          description: Terms with written premium but no term dates, or not in the functional currency; not earned.
+        earnedToDate:
+          type: array
+          description: Total premium earned to date per currency after this run.
+          items:
+            $ref: ../events/common.schema.json#/$defs/Money
+        postedDelta:
+          type: array
+          description: Net movement posted (or that would be posted) by this run per currency.
+          items:
+            $ref: ../events/common.schema.json#/$defs/Money
+        journalIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
     EarningRunResponse:
       type: object
-      description: 'fin.Earning.run result. PRD outputs: "run, results"'
+      description: 'fin.Earning.run result: the run and its per-term results (at most 200; fin.Earning.result pages them).'
+      required:
+      - run
+      - results
+      - resultsTruncated
       properties:
         run:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "run"'
+          $ref: '#/components/schemas/EarningRunView'
         results:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "results"'
+          type: array
+          items:
+            $ref: '#/components/schemas/EarningTermResult'
+        resultsTruncated:
+          type: boolean
     EarningStatusResponse:
       type: object
-      description: 'fin.Earning.status result. PRD outputs: "run, results"'
+      description: 'fin.Earning.status result: the latest completed earning run of the legal entity; absent until a first run.'
       properties:
         run:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "run"'
-        results:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "results"'
-    EarningSimulateRequest:
-      type: object
-      description: 'fin.Earning.simulate request. PRD inputs: "entity, as-of"'
-      properties:
-        entity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entity"'
-        as:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "as-of"'
+          oneOf:
+          - $ref: '#/components/schemas/EarningRunView'
+          - type: 'null'
     EarningSimulateResponse:
       type: object
-      description: 'fin.Earning.simulate result. PRD outputs: "run, results"'
+      description: 'fin.Earning.simulate result: what a run would earn and post; nothing is written.'
+      required:
+      - run
+      - results
+      - resultsTruncated
       properties:
         run:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "run"'
+          $ref: '#/components/schemas/EarningRunView'
         results:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "results"'
+          type: array
+          items:
+            $ref: '#/components/schemas/EarningTermResult'
+        resultsTruncated:
+          type: boolean
     EarningResultRequest:
       type: object
       description: 'fin.Earning.result request. PRD inputs: "entity, as-of"'

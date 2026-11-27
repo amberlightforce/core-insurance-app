@@ -4,23 +4,11 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.Earning.run request. PRD inputs: "entity, as-of"</summary>
+/// <summary>fin.Earning.run / fin.Earning.simulate request: earn premium up to and including this date (its calendar month is the accounting period the movement is posted in; the legal entity comes from the caller).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record EarningRunRequest
 {
-    /// <summary>PRD: "entity"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("entity")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Entity { get; init; }
-
-    /// <summary>PRD: "as-of"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("as")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? As { get; init; }
+    /// <summary>Earn up to and including this Europe/Athens calendar date; the period of this date must be open.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("asOf")]
+    public required global::CoreIns.SharedKernel.BusinessDate AsOf { get; init; }
 }

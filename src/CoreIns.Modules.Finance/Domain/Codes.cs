@@ -79,6 +79,9 @@ internal static class SourceTypes
 {
     public const string Event = "EVENT";
     public const string Reversal = "REVERSAL";
+
+    /// <summary>A maker-checker approved manual journal (BO-FIN-01b).</summary>
+    public const string Manual = "MANUAL";
 }
 
 /// <summary>Account derivation sources of a rule (REQ-FIN-050).</summary>
