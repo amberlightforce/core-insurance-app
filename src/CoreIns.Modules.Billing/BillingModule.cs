@@ -60,6 +60,7 @@ public static class BillingModule
                 $"GRANT SELECT, INSERT ON {Schema}.respread TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.receivable, {Schema}.receivable_allocation, {Schema}.allocation, {Schema}.credit_application, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.migration_receivable, {Schema}.migration_mandate TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.suspense_item TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
@@ -123,6 +124,7 @@ public static class BillingModule
         services.AddScoped<TaxLevyReader>();
         services.AddScoped<MigratedRecordsReader>();
         services.AddScoped<BillingOpsReader>();
+        services.AddScoped<SuspenseReader>();
         services.AddScoped<IValidator<CreatePayeeAccount>, CreatePayeeAccountValidator>();
         services.AddCommandAuditor<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountAuditor>();
         services.AddCommand<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountHandler>(
@@ -164,6 +166,17 @@ public static class BillingModule
         services.AddScoped<IValidator<ResubmitRefund>, ResubmitRefundValidator>();
         services.AddCommandAuditor<ResubmitRefund, RefundResubmitResponse, ResubmitRefundAuditor>();
         services.AddCommand<ResubmitRefund, RefundResubmitResponse, ResubmitRefundHandler>(CommandDescriptor.For("bil.Refund.resubmit") with { SupportsDryRun = true });
+
+        // BO-BIL-08: the suspense workbench (unapplied cash as items): suggest (read-only), transfer (ledger move) and refund to the sender (refund path).
+        services.AddScoped<IValidator<TransferSuspense>, TransferSuspenseValidator>();
+        services.AddScoped<IValidator<RefundSuspenseToSender>, RefundSuspenseToSenderValidator>();
+        services.AddCommandAuditor<SuggestSuspense, SuspenseSuggestResponse, SuspenseAuditor<SuggestSuspense, SuspenseSuggestResponse>>();
+        services.AddCommand<SuggestSuspense, SuspenseSuggestResponse, SuggestSuspenseHandler>(CommandDescriptor.For("bil.Suspense.suggest"));
+        services.AddCommandAuditor<TransferSuspense, SuspenseTransferResponse, SuspenseAuditor<TransferSuspense, SuspenseTransferResponse>>();
+        services.AddCommand<TransferSuspense, SuspenseTransferResponse, TransferSuspenseHandler>(CommandDescriptor.For("bil.Suspense.transfer") with { SupportsDryRun = true });
+        services.AddCommandAuditor<RefundSuspenseToSender, SuspenseRefundToSenderResponse, SuspenseAuditor<RefundSuspenseToSender, SuspenseRefundToSenderResponse>>();
+        services.AddCommand<RefundSuspenseToSender, SuspenseRefundToSenderResponse, RefundSuspenseToSenderHandler>(
+            CommandDescriptor.For("bil.Suspense.refundToSender") with { SupportsDryRun = true });
 
         // SL6-BIL-DELINQ: non-payment cases (notice, waiting clock, cure, cancellation request). DOC and CMP are reached through their
         // contract interfaces, resolved when used.
@@ -279,6 +292,8 @@ public static class BillingModule
             .Describe("Η επιστροφή πληρώνεται μόνο σε επαληθευμένο λογαριασμό του πληρωτή.", "A refund is paid only to the payer's verified bank account."),
         ErrorDefinition.For(ModuleCode.BIL, "NOT-PERMITTED", 403, "Δεν έχετε εξουσιοδότηση για αυτό το ποσό", "No authority for this amount")
             .Describe("Δεν υπάρχει εξουσιοδότηση επιστροφής για αυτό το ποσό.", "No refund authority covers this amount."),
+        ErrorDefinition.For(ModuleCode.BIL, "SUSPENSE-STATE", 409, "Η εγγραφή αδιάθετου δεν είναι στην κατάλληλη κατάσταση", "The suspense item is not in the right state")
+            .Describe("Η ενέργεια επιτρέπεται μόνο σε ανοιχτή εγγραφή αδιάθετης είσπραξης.", "The action is allowed only on an open suspense item."),
         ErrorDefinition.For(ModuleCode.BIL, "DELINQUENCY-STATE", 409, "Η εκκρεμότητα δεν είναι στην κατάλληλη κατάσταση", "The delinquency case is not in the right state")
             .Describe("Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση της εκκρεμότητας οφειλής.", "The action is not allowed in the delinquency case's current state."),
         ErrorDefinition.For(ModuleCode.BIL, "FISCAL-TREATMENT-OPEN", 422, "Ανοικτή φορολογική μεταχείριση", "Fiscal treatment is open"),

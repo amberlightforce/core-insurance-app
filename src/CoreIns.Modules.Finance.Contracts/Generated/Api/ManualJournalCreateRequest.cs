@@ -4,31 +4,31 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.ManualJournal.create request. PRD inputs: "template, lines, evidence"</summary>
+/// <summary>fin.ManualJournal.create request</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ManualJournalCreateRequest
 {
-    /// <summary>PRD: "template"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("template")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Template { get; init; }
+    /// <summary>Contract member 'description'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("description")]
+    public required string Description { get; init; }
 
-    /// <summary>PRD: "lines"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'book'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("book")]
+    public required string Book { get; init; }
+
+    /// <summary>Contract member 'accountingDate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("accountingDate")]
+    public required string AccountingDate { get; init; }
+
+    /// <summary>Contract member 'currency'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("currency")]
+    public required string Currency { get; init; }
+
+    /// <summary>Contract member 'lines'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("lines")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Lines { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Finance.Contracts.Api.ManualJournalLineInput> Lines { get; init; }
 
-    /// <summary>PRD: "evidence"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'evidence'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("evidence")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Evidence { get; init; }
+    public required global::CoreIns.Modules.Finance.Contracts.Api.ManualJournalEvidence Evidence { get; init; }
 }

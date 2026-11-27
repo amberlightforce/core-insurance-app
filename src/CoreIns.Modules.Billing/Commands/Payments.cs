@@ -188,6 +188,7 @@ internal sealed class TakePaymentHandler(
             receipt.State = Codes.Of(PaymentStateModel.Machine.FireOrThrow(PaymentState.Received, PaymentTrigger.MoveToSuspense));
             receipt.SuspenseReason = reason;
             receipt.RecordVersion++;
+            db.SuspenseItems.Add(SuspenseWorkbench.NewItem(receipt, now));
             await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Respond(receipt, [], PaymentTakeResponse.AllocationOutcomeValue.Suspense);
         }
@@ -208,6 +209,7 @@ internal sealed class TakePaymentHandler(
             receipt.State = Codes.Of(PaymentStateModel.Machine.FireOrThrow(PaymentState.Received, PaymentTrigger.MoveToSuspense));
             receipt.SuspenseReason = ReceiptCodes.ConcurrentAllocation;
             receipt.RecordVersion++;
+            db.SuspenseItems.Add(SuspenseWorkbench.NewItem(receipt, now));
             await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Respond(receipt, [], PaymentTakeResponse.AllocationOutcomeValue.Suspense);
         }

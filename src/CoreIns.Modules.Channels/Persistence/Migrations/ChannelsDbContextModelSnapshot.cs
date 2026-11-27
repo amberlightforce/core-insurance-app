@@ -93,6 +93,147 @@ namespace CoreIns.Modules.Channels.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Channels.Persistence.PermissionMatrixEntryRow", b =>
+                {
+                    b.Property<Guid>("EntryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("entry_id");
+
+                    b.Property<string>("ActorType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actor_type");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("channel");
+
+                    b.Property<string>("Level")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("level");
+
+                    b.Property<Guid>("MatrixId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("matrix_id");
+
+                    b.Property<decimal?>("MaxAmount")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("max_amount");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("outcome");
+
+                    b.Property<string>("ProductLine")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("product_line");
+
+                    b.Property<bool>("Removed")
+                        .HasColumnType("boolean")
+                        .HasColumnName("removed");
+
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("transaction_type");
+
+                    b.HasKey("EntryId")
+                        .HasName("pk_permission_matrix_entry");
+
+                    b.HasIndex("MatrixId", "TransactionType", "Channel", "ActorType", "ProductLine")
+                        .IsUnique()
+                        .HasDatabaseName("ux_permission_matrix_entry_key");
+
+                    b.ToTable("permission_matrix_entry", "chn", t =>
+                        {
+                            t.HasCheckConstraint("ck_permission_matrix_entry_level", "level IN ('EU', 'COUNTRY', 'LE')");
+
+                            t.HasCheckConstraint("ck_permission_matrix_entry_max", "max_amount IS NULL OR max_amount >= 0");
+
+                            t.HasCheckConstraint("ck_permission_matrix_entry_outcome", "outcome IN ('ALLOW', 'REFER', 'DENY')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Channels.Persistence.PermissionMatrixRow", b =>
+                {
+                    b.Property<Guid>("MatrixId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("matrix_id");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("approved_at");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("approved_by");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("EffectiveFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("effective_from");
+
+                    b.Property<string>("LastEditedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("last_edited_by");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Scenarios")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("scenarios");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
+
+                    b.Property<int>("VersionNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("version_no");
+
+                    b.HasKey("MatrixId")
+                        .HasName("pk_permission_matrix");
+
+                    b.HasIndex("LegalEntityId", "VersionNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_permission_matrix_version");
+
+                    b.HasIndex("LegalEntityId", "Status", "EffectiveFrom")
+                        .HasDatabaseName("ix_permission_matrix_effective");
+
+                    b.ToTable("permission_matrix", "chn", t =>
+                        {
+                            t.HasCheckConstraint("ck_permission_matrix_status", "status IN ('DRAFT', 'SUBMITTED', 'SCHEDULED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Channels.Persistence.WithdrawalRequestRow", b =>
                 {
                     b.Property<Guid>("WithdrawalRequestId")
@@ -264,6 +405,16 @@ namespace CoreIns.Modules.Channels.Persistence.Migrations
                         .HasDatabaseName("ux_dsar_restriction_subject_class");
 
                     b.ToTable("dsar_restriction", "chn");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Channels.Persistence.PermissionMatrixEntryRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Channels.Persistence.PermissionMatrixRow", null)
+                        .WithMany()
+                        .HasForeignKey("MatrixId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_permission_matrix_entry_matrix");
                 });
 #pragma warning restore 612, 618
         }

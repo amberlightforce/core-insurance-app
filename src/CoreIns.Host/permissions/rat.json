@@ -8,8 +8,25 @@
         "rat.Proration.prorate": [ "Staff.Underwriter", "Staff.Billing" ],
         "rat.RateTable.import": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "rat.RateTable.validate": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
-        "rat.RateTable.diff": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ]
+        "rat.RateTable.diff": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "rat.RatingArtifact.get": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ],
+        "rat.RatingArtifact.list": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ],
+        "rat.RatingArtifact.compatibility": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "rat.RatingChangeSet.create": [ "Staff.UnderwritingManager", "Platform.ReleaseManager", "Platform.Admin" ],
+        "rat.RatingArtifact.build": [ "Staff.UnderwritingManager", "Platform.ReleaseManager", "Platform.Admin" ],
+        "rat.RatingArtifact.submit": [ "Staff.UnderwritingManager", "Platform.ReleaseManager", "Platform.Admin" ],
+        "rat.RatingArtifact.return": [ "Platform.DesignAuthority", "Platform.Admin" ],
+        "rat.RatingArtifact.schedule": [ "Platform.DesignAuthority", "Platform.Admin" ],
+        "rat.RatingArtifact.cancelSchedule": [ "Platform.DesignAuthority", "Platform.ReleaseManager", "Platform.Admin" ],
+        "rat.RatingArtifact.rollback": [ "Platform.DesignAuthority", "Platform.ReleaseManager", "Platform.Admin" ]
       }
+    },
+    "Authority": {
+      // ILLUSTRATIVE TEST DATA (PRD-03 12: RAT.RateArtifactApproval / RAT.RateActivation, one authority RAT.RELEASE here; no approved matrix exists): the design
+      // authority may sign off a rating artefact for any product and jurisdiction. Ignored in Production (fail closed: DENY), see D-SL2-03.
+      "Grants": [
+        { "Id": "rat-design-authority-release-illustrative", "Role": "Platform.DesignAuthority", "Type": "RAT.RELEASE", "Illustrative": true }
+      ]
     }
   }
 }

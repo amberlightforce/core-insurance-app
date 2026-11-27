@@ -2724,6 +2724,91 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.SuspenseItemRow", b =>
+                {
+                    b.Property<Guid>("SuspenseItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("suspense_item_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("BillingAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("billing_account_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("ReceiptId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("receipt_id");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<Guid?>("RefundId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("refund_id");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<string>("ResolvedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("resolved_by");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.HasKey("SuspenseItemId")
+                        .HasName("pk_suspense_item");
+
+                    b.HasIndex("BillingAccountId")
+                        .HasDatabaseName("ix_suspense_item_account");
+
+                    b.HasIndex("ReceiptId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_suspense_item_receipt");
+
+                    b.HasIndex("RefundId")
+                        .HasDatabaseName("ix_suspense_item_refund");
+
+                    b.HasIndex("LegalEntityId", "State", "SuspenseItemId")
+                        .HasDatabaseName("ix_suspense_item_state");
+
+                    b.ToTable("suspense_item", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_suspense_item_amount", "amount > 0");
+
+                            t.HasCheckConstraint("ck_suspense_item_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_suspense_item_state", "state IN ('OPEN', 'REFUND_PENDING', 'ALLOCATED', 'REFUNDED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Billing.MigrationImport.MigrationMandateRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Billing.Persistence.BillingAccountRow", null)
@@ -2985,6 +3070,23 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_refund_payee_account");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.SuspenseItemRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.BillingAccountRow", null)
+                        .WithMany()
+                        .HasForeignKey("BillingAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_suspense_item_account");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.ReceiptRow", null)
+                        .WithMany()
+                        .HasForeignKey("ReceiptId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_suspense_item_receipt");
                 });
 #pragma warning restore 612, 618
         }

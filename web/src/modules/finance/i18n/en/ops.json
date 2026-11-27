@@ -101,6 +101,9 @@
         "withdraw": "Withdraw",
         "approved": "The manual journal was approved and posted.",
         "rejected": "The manual journal was rejected.",
+        "submitForApproval": "Submit for approval",
+        "submitted": "The manual journal was submitted for approval.",
+        "submitFailed": "The journal could not be submitted",
         "withdrawn": "The manual journal was withdrawn.",
         "failed": "The decision was not recorded",
         "withdrawFailed": "The journal could not be withdrawn",
@@ -184,7 +187,8 @@
       "action": {
         "soft-close": "Soft close",
         "lock": "Lock period",
-        "reopen": "Reopen"
+        "reopen": "Reopen",
+        "approveReopen": "Approve reopen"
       },
       "confirm": {
         "lock": {
@@ -195,6 +199,18 @@
           "title": "Reopen period {period}?",
           "body": "Postings into this month become possible again and reports for it may change."
         }
+      },
+      "tasks": "Close checklist",
+      "taskDone": "Signed off",
+      "taskOpen": "Open",
+      "signOff": "Sign off",
+      "signedBy": "by {who}",
+      "reopenPending": "Reopen requested by {who}: {reason}. A different person approves it.",
+      "task": {
+        "INTAKE_EXCEPTIONS": "Intake exceptions cleared",
+        "RECONCILIATIONS": "Reconciliations clean",
+        "EARNING_RUN": "Earning run done",
+        "MANUAL_JOURNALS": "Manual journals decided"
       }
     },
     "earning": {
@@ -207,6 +223,10 @@
       "startedAt": "Started",
       "finishedAt": "Finished",
       "processed": "Policies processed",
+      "period": "Period",
+      "skipped": "Terms skipped (no term dates)",
+      "earnedToDate": "Earned to date",
+      "postedDelta": "Posted by this run",
       "runTitle": "Run earning",
       "warnTitle": "Posts to the books",
       "warnBody": "The run posts journals. Check the period is open and the date is right before you start.",

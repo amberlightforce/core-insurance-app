@@ -32,6 +32,8 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
 
     public DbSet<FinancialPeriodRow> Periods => Set<FinancialPeriodRow>();
 
+    public DbSet<PeriodCloseTaskRow> PeriodCloseTasks => Set<PeriodCloseTaskRow>();
+
     public DbSet<JournalEntryRow> Journals => Set<JournalEntryRow>();
 
     public DbSet<JournalLineRow> JournalLines => Set<JournalLineRow>();
@@ -39,6 +41,10 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
     public DbSet<ManualJournalRow> ManualJournals => Set<ManualJournalRow>();
 
     public DbSet<ManualJournalLineRow> ManualJournalLines => Set<ManualJournalLineRow>();
+
+    public DbSet<EarningRunRow> EarningRuns => Set<EarningRunRow>();
+
+    public DbSet<EarnedPremiumRow> EarnedPremiums => Set<EarnedPremiumRow>();
 
     public DbSet<MigrationImport.MigrationImportRow> MigrationImports => Set<MigrationImport.MigrationImportRow>();
 
@@ -192,6 +198,8 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
             entity.Property(e => e.ProductVersion).HasColumnName("product_version");
             entity.Property(e => e.ArtefactHash).HasColumnName("artefact_hash").HasColumnType("char(64)");
             entity.Property(e => e.ChargeTypesLoaded).HasColumnName("charge_types_loaded");
+            entity.Property(e => e.TermStart).HasColumnName("term_start");
+            entity.Property(e => e.TermEnd).HasColumnName("term_end");
             entity.Property(e => e.SourceEventId).HasColumnName("source_event_id");
             entity.Property(e => e.AggregateSequence).HasColumnName("aggregate_sequence");
             entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
@@ -268,7 +276,7 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
             entity.ToTable("financial_period", t =>
             {
                 t.HasCheckConstraint("ck_financial_period_code", "period_code ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'");
-                t.HasCheckConstraint("ck_financial_period_status", In("status", ["OPEN", "LOCKED"]));
+                t.HasCheckConstraint("ck_financial_period_status", In("status", ["OPEN", "SOFT_CLOSED", "LOCKED"]));
             });
             entity.HasKey(e => e.PeriodId).HasName("pk_financial_period");
             entity.Property(e => e.PeriodId).HasColumnName("period_id");
@@ -277,16 +285,42 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.HasIndex(e => new { e.LegalEntityId, e.PeriodCode }).IsUnique().HasDatabaseName("ux_financial_period_code");
+            entity.Property(e => e.SoftClosedBy).HasColumnName("soft_closed_by");
+            entity.Property(e => e.SoftClosedAt).HasColumnName("soft_closed_at").HasColumnType("timestamptz");
+            entity.Property(e => e.LockedBy).HasColumnName("locked_by");
+            entity.Property(e => e.LockedAt).HasColumnName("locked_at").HasColumnType("timestamptz");
+            entity.Property(e => e.LockCount).HasColumnName("lock_count").HasDefaultValue(0);
+            entity.Property(e => e.ReopenRequestedBy).HasColumnName("reopen_requested_by");
+            entity.Property(e => e.ReopenRequestedAt).HasColumnName("reopen_requested_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ReopenReason).HasColumnName("reopen_reason");
+        });
+
+        modelBuilder.Entity<PeriodCloseTaskRow>(entity =>
+        {
+            entity.ToTable("period_close_task", t =>
+            {
+                t.HasCheckConstraint("ck_period_close_task_status", In("status", ["OPEN", "SIGNED_OFF"]));
+            });
+            entity.HasKey(e => new { e.PeriodId, e.TaskCode }).HasName("pk_period_close_task");
+            entity.Property(e => e.PeriodId).HasColumnName("period_id");
+            entity.Property(e => e.TaskCode).HasColumnName("task_code");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.SignedOffBy).HasColumnName("signed_off_by");
+            entity.Property(e => e.SignedOffAt).HasColumnName("signed_off_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Reason).HasColumnName("reason");
+            entity.Property(e => e.BreakAccepted).HasColumnName("break_accepted");
+            entity.HasOne<FinancialPeriodRow>().WithMany().HasForeignKey(e => e.PeriodId).HasConstraintName("fk_period_close_task_period").OnDelete(DeleteBehavior.Cascade);
         });
 
         MigrationImport.FinanceMigrationModel.Configure(modelBuilder);
         ManualJournalModel.Configure(modelBuilder);
+        EarningModel.Configure(modelBuilder);
 
         modelBuilder.Entity<JournalEntryRow>(entity =>
         {
             entity.ToTable("journal_entry", t =>
             {
-                t.HasCheckConstraint("ck_journal_entry_source_type", In("source_type", [SourceTypes.Event, SourceTypes.Reversal]));
+                t.HasCheckConstraint("ck_journal_entry_source_type", In("source_type", [SourceTypes.Event, SourceTypes.Reversal, SourceTypes.Manual]));
                 t.HasCheckConstraint("ck_journal_entry_reversal", "(source_type = 'REVERSAL') = (reverses_journal_id IS NOT NULL)");
                 t.HasCheckConstraint("ck_journal_entry_currency", "functional_currency ~ '^[A-Z]{3}$'");
             });

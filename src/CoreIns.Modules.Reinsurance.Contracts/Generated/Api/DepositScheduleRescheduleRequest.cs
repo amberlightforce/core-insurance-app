@@ -4,23 +4,44 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.DepositSchedule.reschedule request. PRD inputs: "layer, year"</summary>
+/// <summary>ri.DepositSchedule.reschedule request, sets (first call) or replaces (next calls) the minimum and deposit premium schedule of a layer for the contract's year. The deposit is split over the instalments with the largest-remainder rule.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DepositScheduleRescheduleRequest
 {
-    /// <summary>PRD: "layer"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("layer")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Layer { get; init; }
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
 
-    /// <summary>PRD: "year"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("year")]
+    /// <summary>Contract member 'layerNo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("layerNo")]
+    public required int LayerNo { get; init; }
+
+    /// <summary>Minimum premium; not above the deposit premium</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("minimumPremium")]
+    public required global::CoreIns.SharedKernel.Money MinimumPremium { get; init; }
+
+    /// <summary>Contract member 'depositPremium'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("depositPremium")]
+    public required global::CoreIns.SharedKernel.Money DepositPremium { get; init; }
+
+    /// <summary>Contract member 'instalmentCount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("instalmentCount")]
+    public required int InstalmentCount { get; init; }
+
+    /// <summary>Contract member 'firstDueDate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("firstDueDate")]
+    public required global::CoreIns.SharedKernel.BusinessDate FirstDueDate { get; init; }
+
+    /// <summary>Months between instalments (1, 2, 3, 4, 6 or 12)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("intervalMonths")]
+    public required int IntervalMonths { get; init; }
+
+    /// <summary>The current revision the user saw (0 for none); a different current revision is RI-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRevision")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Year { get; init; }
+    public int? ExpectedRevision { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
 }

@@ -5,8 +5,8 @@ import type { components as Cmp } from '../../../api/generated/cmp';
 
 /**
  * Fiscal documents (NX-UI-11): cmp.FiscalDocument.listBySource / get and cmp.FiscalReconciliation.breaks.
- * TODO(hardening): resubmit, bulk-resubmit, correct and cancel are in the contract but not yet served by the Host,
- * so no screen drives them; submissions and annual returns are likewise contract-only.
+ * TODO(hardening): resubmit, bulk-resubmit, correct and cancel are served by the Host (BO-CMP-06) but no screen drives
+ * them yet (BO-CMP-14); submissions and annual returns are contract-only.
  */
 type Schemas = Cmp['schemas'];
 const root = '/api/cmp/v1';

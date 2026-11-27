@@ -4,44 +4,49 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.Product.describe request. PRD inputs: "product or hash, channel, transactionType, language, date"</summary>
+/// <summary>pfc.Product.describe request: a product code (resolved to the published version in force on validAt for the channel and transaction type) or an artefact hash.</summary>
 /// <remarks>
-/// <para>Exactly one of: product | hash.</para>
+/// <para>Exactly one of: product + channel | hash.</para>
 /// </remarks>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProductDescribeRequest
 {
-    /// <summary>PRD: "product or hash" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'product'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("product")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Product { get; init; }
+    public string? Product { get; init; }
 
-    /// <summary>PRD: "product or hash" (optional)</summary>
+    /// <summary>Contract member 'hash'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? Hash { get; init; }
 
-    /// <summary>PRD: "channel"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Required with product.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Channel { get; init; }
+    public string? Channel { get; init; }
 
-    /// <summary>PRD: "transactionType"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Defaults to NewBusiness.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("transactionType")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? TransactionType { get; init; }
+    public TransactionTypeValue? TransactionType { get; init; }
 
-    /// <summary>PRD: "language"</summary>
+    /// <summary>Echoed; both languages are always returned.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("language")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? Language { get; init; }
+
+    /// <summary>Defaults to NewBusiness.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<TransactionTypeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum TransactionTypeValue
+    {
+        /// <summary><c>NewBusiness</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NewBusiness")]
+        NewBusiness,
+
+        /// <summary><c>Renewal</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Renewal")]
+        Renewal,
+    }
 }

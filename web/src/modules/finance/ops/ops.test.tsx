@@ -231,6 +231,25 @@ describe('ManualJournalPage four-eyes', () => {
     expect(screen.getByText('PLT-ERR-SOD')).toBeInTheDocument();
   });
 
+  it('lets the maker submit a draft for approval by id', async () => {
+    const draft = journal({ status: 'DRAFT', createdBy: 'fin-maker' });
+    const api = mockApi([
+      getRoute(draft),
+      {
+        method: 'POST',
+        path: '/api/fin/v1/manual-journals/submit',
+        respond: () => ({ body: { manualJournal: journal(), postedIds: [] } }),
+      },
+    ]);
+    const { user } = page();
+    await user.click(await screen.findByRole('button', { name: 'Υποβολή για έγκριση' }));
+    await waitFor(() => {
+      expect(api.callsTo('POST', '/api/fin/v1/manual-journals/submit')[0]?.body).toEqual({
+        id: journalId,
+      });
+    });
+  });
+
   it('requires a reason to reject and sends the decision', async () => {
     signIn('fin-checker', ['Staff.Finance']);
     const api = mockApi([
@@ -251,7 +270,7 @@ describe('ManualJournalPage four-eyes', () => {
       expect(api.callsTo('POST', '/api/fin/v1/manual-journals/decide')[0]?.body).toEqual({
         id: journalId,
         decision: 'REJECT',
-        reason: 'Λάθος λογαριασμός',
+        comment: 'Λάθος λογαριασμός',
       });
     });
   });
@@ -349,6 +368,64 @@ describe('PeriodClosePage', () => {
     await expectNoA11yViolations(container);
   });
 
+  it('shows the checklist of a period and offers sign-off while it is open', async () => {
+    const signed: unknown[] = [];
+    mockApi([
+      {
+        method: 'GET',
+        path: '/api/fin/v1/periods',
+        respond: () => ({
+          body: {
+            items: [{ period: '2026-10', state: 'OPEN', closedForPosting: false }],
+            nextCursor: null,
+          },
+        }),
+      },
+      {
+        method: 'GET',
+        path: '/api/fin/v1/close/tasks',
+        respond: () => ({
+          body: {
+            period: '2026-10',
+            state: 'OPEN',
+            closedForPosting: false,
+            tasks: [
+              {
+                task: 'INTAKE_EXCEPTIONS',
+                status: 'OPEN',
+                signOffRole: 'Staff.Finance',
+                blocker: null,
+              },
+              {
+                task: 'RECONCILIATIONS',
+                status: 'SIGNED_OFF',
+                signOffRole: 'Staff.Finance',
+                signedOffBy: 'ann',
+              },
+            ],
+          },
+        }),
+      },
+      {
+        method: 'POST',
+        path: '/api/fin/v1/close/sign-off',
+        respond: ({ body }) => {
+          signed.push(body);
+          return { body: {} };
+        },
+      },
+    ]);
+    const { user } = renderScreen(<PeriodClosePage />, {
+      path: '/finance/period-close',
+      url: '/finance/period-close',
+    });
+    await user.dblClick(await screen.findByText('2026-10'));
+    await user.click(await screen.findByRole('button', { name: 'Υπογραφή' }));
+    await waitFor(() => {
+      expect(signed).toEqual([{ period: '2026-10', task: 'INTAKE_EXCEPTIONS' }]);
+    });
+  });
+
   it('shows the no-permission banner on a 403', async () => {
     mockApi([
       {
@@ -383,6 +460,54 @@ describe('EarningRunPage', () => {
     ).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Εκτέλεση κατάκτησης' }));
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+});
+
+describe('EarningRunPage with a run', () => {
+  it('shows the latest run and posts the as-of date as asOf', async () => {
+    let posted: unknown;
+    mockApi([
+      {
+        method: 'GET',
+        path: '/api/fin/v1/earning/status',
+        respond: () => ({
+          body: {
+            run: {
+              id: '0192f3a0-0000-7000-8000-000000000001',
+              period: '2026-11',
+              asOf: '2026-11-30',
+              state: 'DONE',
+              simulated: false,
+              policiesProcessed: 12,
+              termsSkipped: 1,
+              earnedToDate: [{ amount: '1234.50', currency: 'EUR' }],
+              postedDelta: [{ amount: '100.00', currency: 'EUR' }],
+              journalIds: [],
+            },
+          },
+        }),
+      },
+      {
+        method: 'POST',
+        path: '/api/fin/v1/earning/run',
+        respond: ({ body }) => {
+          posted = body;
+          return { body: { run: {}, results: [], resultsTruncated: false } };
+        },
+      },
+    ]);
+    const { user } = renderScreen(<EarningRunPage />, {
+      path: '/finance/earning',
+      url: '/finance/earning',
+    });
+    expect(await screen.findByText('2026-11')).toBeInTheDocument();
+    expect(screen.getByText('12')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Εκτέλεση κατάκτησης' }));
+    const dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Εκτέλεση κατάκτησης' }));
+    await waitFor(() => {
+      expect((posted as { asOf: string }).asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
   });
 });
 

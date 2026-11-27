@@ -4,31 +4,61 @@
 
 namespace CoreIns.Modules.Rating.Contracts.Api;
 
-/// <summary>rat.RatingChangeSet.create result. PRD outputs: "table version, validation report, diff"</summary>
+/// <summary>Contract addition (BO-RAT-06): rat.RatingChangeSet.create result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RatingChangeSetCreateResponse
 {
-    /// <summary>PRD: "table version"</summary>
+    /// <summary>Contract member 'changeSetId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'changeSetId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("tableVersion")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? TableVersion { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("changeSetId")]
+    public required global::System.Guid ChangeSetId { get; init; }
 
-    /// <summary>PRD: "validation report"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("validationReport")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ValidationReport { get; init; }
+    /// <summary>Contract member 'productCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productCode")]
+    public required string ProductCode { get; init; }
 
-    /// <summary>PRD: "diff"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("diff")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Diff { get; init; }
+    /// <summary>Contract member 'productVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productVersion")]
+    public required string ProductVersion { get; init; }
+
+    /// <summary>Contract member 'baseArtefactHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("baseArtefactHash")]
+    public required string? BaseArtefactHash { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Contract member 'tables'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("tables")]
+    public required global::System.Collections.Generic.IReadOnlyList<TableItem> Tables { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>OPEN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("OPEN")]
+        Open,
+
+        /// <summary><c>BUILT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("BUILT")]
+        Built,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record TableItem
+    {
+        /// <summary>Contract member 'slot'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("slot")]
+        public required string Slot { get; init; }
+
+        /// <summary>Contract member 'hash'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
+        public required string Hash { get; init; }
+    }
 }

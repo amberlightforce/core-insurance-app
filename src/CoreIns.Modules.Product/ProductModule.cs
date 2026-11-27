@@ -47,6 +47,7 @@ public static class ProductModule
         services.AddScoped<ProductReader>();
         services.AddScoped<CatalogueQueries>();
         services.AddScoped<ProductListQueries>();
+        services.AddScoped<RuntimeQueries>();
 
         // The one state-changing path: import a product source document (the seed and, later, the authoring workflow).
         services.AddScoped<IValidator<ImportProductVersion>, ImportProductVersionValidator>();
@@ -74,12 +75,38 @@ public static class ProductModule
         services.AddCommandAuditor<AbandonChangeSet, ChangeSetAbandonResponse, AbandonChangeSetAuditor>();
         services.AddCommand<AbandonChangeSet, ChangeSetAbandonResponse, AbandonChangeSetHandler>(CommandDescriptor.For("pfc.ChangeSet.abandon"));
 
+        // BO-PFC-04: release lifecycle (submit, sign-off with PLT approval PFC.Release / authority PFC.RELEASE, schedule, cancel) and the due-date publisher.
+        services.AddOwnerDecidedApprovalType(ProductAuthorityTypes.ReleaseApprovalType);
+        services.AddScoped<ReleasePublisher>();
+        services.AddScoped<IValidator<SubmitChangeSet>, SubmitChangeSetValidator>();
+        services.AddCommandAuditor<SubmitChangeSet, ProductVersionSubmitResponse, SubmitChangeSetAuditor>();
+        services.AddCommand<SubmitChangeSet, ProductVersionSubmitResponse, SubmitChangeSetHandler>(CommandDescriptor.For("pfc.ProductVersion.submit") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<SignOffRelease>, SignOffReleaseValidator>();
+        services.AddCommandAuditor<SignOffRelease, ProductVersionSignOffResponse, SignOffReleaseAuditor>();
+        services.AddCommand<SignOffRelease, ProductVersionSignOffResponse, SignOffReleaseHandler>(CommandDescriptor.For("pfc.ProductVersion.signOff"));
+        services.AddScoped<IValidator<ScheduleRelease>, ScheduleReleaseValidator>();
+        services.AddCommandAuditor<ScheduleRelease, ProductVersionScheduleResponse, ScheduleReleaseAuditor>();
+        services.AddCommand<ScheduleRelease, ProductVersionScheduleResponse, ScheduleReleaseHandler>(CommandDescriptor.For("pfc.ProductVersion.schedule") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<CancelScheduledRelease>, CancelScheduledReleaseValidator>();
+        services.AddCommandAuditor<CancelScheduledRelease, ProductVersionCancelScheduleResponse, CancelScheduledReleaseAuditor>();
+        services.AddCommand<CancelScheduledRelease, ProductVersionCancelScheduleResponse, CancelScheduledReleaseHandler>(CommandDescriptor.For("pfc.ProductVersion.cancelSchedule"));
+        services.AddCommand<PublishDueRelease, string, PublishDueReleaseHandler>(CommandDescriptor.For("pfc.ProductVersion.publishDue") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddSingleton<ReleaseSweepRunner>();
+        if (string.Equals(configuration["APP_ROLE"], "worker", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddHostedService<ReleaseSweeper>();
+        }
+
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IProductProductVersionService, ProductProductVersionService>();
         services.AddScoped<IProductCatalogueService, ProductCatalogueService>();
         services.AddScoped<IProductChargeTypeService, ProductChargeTypeService>();
         services.AddScoped<IProductQuestionSetService, ProductQuestionSetService>();
         services.AddScoped<IProductArtifactService, ProductArtifactService>();
+        services.AddScoped<IProductAvailabilityService, ProductAvailabilityService>();
+        services.AddScoped<IProductProductService, ProductProductService>();
+        // IProductPolicyDraftService (ProductPolicyDraftService) is deliberately not registered yet: POL still sends its own RiskTree, which must be
+        // mapped to the PolicyDraft shape first (TODO(hardening), BO-POL); until then POL keeps its documented fail-closed/missing-service path.
 
         services.AddErrorDefinitions(Errors);
         return services;
@@ -122,6 +149,12 @@ public static class ProductModule
             .Describe("Μόνο ανοιχτό σύνολο αλλαγών μπορεί να τροποποιηθεί ή να εγκαταλειφθεί.", "Only an open change set can be edited or abandoned."),
         ErrorDefinition.For(ModuleCode.PFC, "INVALID-EDIT", 422, "Μη έγκυρη επεξεργασία", "Invalid edit")
             .Describe("Η διαδρομή ή η τιμή της επεξεργασίας δεν ταιριάζει με το προσχέδιο.", "The edit's path or value does not fit the draft."),
+        ErrorDefinition.For(ModuleCode.PFC, "CHECKS-FAILED", 422, "Οι έλεγχοι υποβολής απέτυχαν", "Submit checks failed")
+            .Describe("Το προσχέδιο έχει ευρήματα ελέγχου ή αλλάζει την ταυτότητα του προϊόντος. Δείτε τα πεδία σφάλματος.", "The draft has lint findings or changes the product identity. See the field errors."),
+        ErrorDefinition.For(ModuleCode.PFC, "RELEASE-STATE", 409, "Η κυκλοφορία δεν είναι σε κατάλληλη κατάσταση", "The release is not in a valid state")
+            .Describe("Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση της κυκλοφορίας (υποβολή, έγκριση, προγραμματισμός).", "The action is not allowed in the release's current state (submitted, approved, scheduled)."),
+        ErrorDefinition.For(ModuleCode.PFC, "INVALID-WINDOW", 422, "Μη έγκυρο παράθυρο", "Invalid window")
+            .Describe("Η ημερομηνία ενεργοποίησης ή τα παράθυρα δεν είναι έγκυρα.", "The activation date or the windows are not valid."),
         ErrorDefinition.For(ModuleCode.PFC, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

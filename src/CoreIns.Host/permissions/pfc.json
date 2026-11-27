@@ -4,6 +4,10 @@
       "Grants": {
         "pfc.ProductVersion.resolve": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pfc.Product.list": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        // BO-PFC-05 runtime services (roles illustrative): availability, describe and draft validation for staff, quote and admin screens.
+        "pfc.Availability.check": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        "pfc.Product.describe": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        "pfc.PolicyDraft.validate": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pfc.ProductVersion.import": [ "Platform.Admin" ],
         // BO-PFC-01 authoring (roles are illustrative): drafting product changes.
         "pfc.ChangeSet.create": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
@@ -18,14 +22,20 @@
         // SL5-PFC-FALLBACK (D-SL5-08/09; roles are illustrative): the release manager asks for a fall-back, the design authority decides it.
         // Maker != checker (the maker's principal included) is enforced by plt.Approval; the checker also needs the PFC.EMERGENCY_CHANGE authority below.
         "pfc.ProductVersion.fallback": [ "Platform.ReleaseManager" ],
-        "pfc.ProductVersion.decideFallback": [ "Platform.DesignAuthority" ]
+        "pfc.ProductVersion.decideFallback": [ "Platform.DesignAuthority" ],
+        // BO-PFC-04 release lifecycle (roles illustrative): the release manager submits and schedules, the design authority signs off (maker != checker, plt.Approval).
+        "pfc.ProductVersion.submit": [ "Platform.ReleaseManager", "Platform.Admin" ],
+        "pfc.ProductVersion.signOff": [ "Platform.DesignAuthority" ],
+        "pfc.ProductVersion.schedule": [ "Platform.ReleaseManager", "Platform.Admin" ],
+        "pfc.ProductVersion.cancelSchedule": [ "Platform.ReleaseManager", "Platform.Admin" ]
       }
     },
     "Authority": {
       // ILLUSTRATIVE TEST DATA (PRD-02 12.2 PFC.EmergencyChange, written PFC.EMERGENCY_CHANGE; no approved matrix exists): the design authority may
       // decide a fall-back for any product line and jurisdiction. Ignored in Production (fail closed: DENY), see D-SL2-03.
       "Grants": [
-        { "Id": "pfc-design-authority-emergency-change-illustrative", "Role": "Platform.DesignAuthority", "Type": "PFC.EMERGENCY_CHANGE", "Illustrative": true }
+        { "Id": "pfc-design-authority-emergency-change-illustrative", "Role": "Platform.DesignAuthority", "Type": "PFC.EMERGENCY_CHANGE", "Illustrative": true },
+        { "Id": "pfc-design-authority-release-illustrative", "Role": "Platform.DesignAuthority", "Type": "PFC.RELEASE", "Illustrative": true }
       ]
     }
   }

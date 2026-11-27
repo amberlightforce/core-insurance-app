@@ -4,23 +4,14 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Suspense.suggest request. PRD inputs: "filters, item"</summary>
+/// <summary>bil.Suspense.suggest request. The payment and the open invoices are loaded server-side from the item; nothing the client sends feeds the scoring.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SuspenseSuggestRequest
 {
-    /// <summary>PRD: "filters"</summary>
+    /// <summary>Contract member 'suspenseItemId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'suspenseItemId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("filters")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Filters { get; init; }
-
-    /// <summary>PRD: "item"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("item")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Item { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("suspenseItemId")]
+    public required global::System.Guid SuspenseItemId { get; init; }
 }

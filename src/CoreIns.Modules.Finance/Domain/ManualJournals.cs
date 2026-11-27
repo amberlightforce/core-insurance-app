@@ -33,6 +33,12 @@ internal sealed record ManualJournalCreateInput(
 /// <summary><c>fin.ManualJournal.withdraw</c> request.</summary>
 internal sealed record ManualJournalWithdrawInput(Guid? Id);
 
+/// <summary><c>fin.ManualJournal.submit</c> request: the DRAFT journal to send for approval.</summary>
+internal sealed record ManualJournalSubmitInput(Guid? Id);
+
+/// <summary><c>fin.ManualJournal.decide</c> request: <c>decision</c> is APPROVE or REJECT; a rejection needs a comment.</summary>
+internal sealed record ManualJournalDecideInput(Guid? Id, string? Decision, string? Comment);
+
 /// <summary>A manual journal as the API returns it (amounts as invariant decimal strings).</summary>
 internal sealed record ManualJournalLineView(string Account, string Side, string Amount);
 

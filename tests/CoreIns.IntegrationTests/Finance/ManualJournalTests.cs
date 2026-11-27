@@ -5,7 +5,7 @@ using Npgsql;
 
 namespace CoreIns.IntegrationTests.Finance;
 
-/// <summary>BO-FIN-01a: manual journal create, list, get and withdraw on a real PostgreSQL through the real Host.</summary>
+/// <summary>BO-FIN-01a/01b: manual journal create, list, get, withdraw, submit and decide (maker-checker posting) on a real PostgreSQL through the real Host.</summary>
 public sealed class ManualJournalTests(PostgresFixture database) : IClassFixture<PostgresFixture>, IAsyncLifetime
 {
     private const string Roles = "Staff.Finance";
@@ -105,7 +105,7 @@ public sealed class ManualJournalTests(PostgresFixture database) : IClassFixture
             $"INSERT INTO fin.financial_period (period_id, legal_entity_id, period_code, status, created_at) VALUES ('{Guid.CreateVersion7()}', '{ApiHostFactory.LegalEntityId}', '2025-03', 'LOCKED', now()) ON CONFLICT (legal_entity_id, period_code) DO UPDATE SET status = 'LOCKED'",
             TestContext.Current.CancellationToken);
         var (locked, c) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals", Journal(date: "2025-03-10"));
-        locked.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, c?.ToJsonString());
+        locked.StatusCode.ShouldBe(HttpStatusCode.Conflict, c?.ToJsonString());
         c!.ToJsonString().ShouldContain("FIN-ERR-PERIOD-LOCKED");
     }
 
@@ -156,6 +156,127 @@ public sealed class ManualJournalTests(PostgresFixture database) : IClassFixture
         var ex = await Should.ThrowAsync<PostgresException>(() => database.ExecuteAsSuperuserAsync(
             $"UPDATE fin.manual_journal SET status = 'APPROVED' WHERE manual_journal_id = '{id}'", TestContext.Current.CancellationToken));
         ex.SqlState.ShouldBe("55000");
+    }
+
+    private async Task<string> DraftAsync(object journal, string user = "maker-1")
+    {
+        var (created, body) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals", journal, user: user);
+        created.StatusCode.ShouldBe(HttpStatusCode.Created, body?.ToJsonString());
+        return body!["manualJournal"]!["id"]!.GetValue<string>();
+    }
+
+    private async Task<string> SubmittedAsync(object journal, string user = "maker-1")
+    {
+        var id = await DraftAsync(journal, user);
+        var (submitted, body) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/submit", new { id }, user: user);
+        submitted.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        body!["manualJournal"]!["status"]!.GetValue<string>().ShouldBe("SUBMITTED");
+        return id;
+    }
+
+    [Fact]
+    public async Task Submit_then_a_second_person_approves_and_one_sealed_balanced_journal_posts_exactly_once()
+    {
+        var id = await SubmittedAsync(Journal(date: "2026-10-16"));
+        var before = await CountAsync("fin.journal_entry");
+
+        // Maker is not checker: FIN refuses the maker before the platform is asked.
+        var (self, sod) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/decide", new { id, decision = "APPROVE" });
+        self.StatusCode.ShouldBe(HttpStatusCode.Forbidden, sod?.ToJsonString());
+        sod!.ToJsonString().ShouldContain("FIN-ERR-SOD");
+        (await CountAsync("fin.journal_entry")).ShouldBe(before);
+
+        var (approved, body) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/decide", new { id, decision = "APPROVE" }, user: "checker-1");
+        approved.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        body!["manualJournal"]!["status"]!.GetValue<string>().ShouldBe("POSTED");
+        body["manualJournal"]!["decidedBy"]!.GetValue<string>().ShouldContain("checker-1");
+        var postedIds = body["postedIds"]!.AsArray();
+        postedIds.Count.ShouldBe(1);
+        var postedId = postedIds[0]!.GetValue<string>();
+        (await CountAsync("fin.journal_entry")).ShouldBe(before + 1);
+
+        // The posted journal is an ordinary sealed MANUAL entry, readable through the journal API, and in the trial balance of its period.
+        var (got, journal) = await SendAsync(HttpMethod.Get, $"/api/fin/v1/journals/{postedId}");
+        got.StatusCode.ShouldBe(HttpStatusCode.OK, journal?.ToJsonString());
+        journal!.ToJsonString().ShouldContain("MANUAL");
+        var (queried, page) = await SendAsync(HttpMethod.Get, "/api/fin/v1/journals/query?accountingDateFrom=2026-10-16&accountingDateTo=2026-10-16&limit=200");
+        queried.StatusCode.ShouldBe(HttpStatusCode.OK, page?.ToJsonString());
+        page!["items"]!.ToJsonString().ShouldContain(postedId);
+        var (_, balance) = await SendAsync(HttpMethod.Get, "/api/fin/v1/balances/trial-balance?period=2026-10");
+        balance!["balances"]!.AsArray().Any(b => b!["account"]!.GetValue<string>() == "GL-1110").ShouldBeTrue();
+        balance["totalDebit"]!.GetValue<string>().ShouldBe(balance["totalCredit"]!.GetValue<string>());
+
+        // Deciding again is a replay: same state, no second journal.
+        var (again, replay) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/decide", new { id, decision = "APPROVE" }, user: "checker-2");
+        again.StatusCode.ShouldBe(HttpStatusCode.OK, replay?.ToJsonString());
+        replay!["postedIds"]!.AsArray().Count.ShouldBe(1);
+        replay["postedIds"]![0]!.GetValue<string>().ShouldBe(postedId);
+        (await CountAsync("fin.journal_entry")).ShouldBe(before + 1);
+
+        // A decided journal cannot be rejected or withdrawn afterwards.
+        (await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/decide", new { id, decision = "REJECT", comment = "late" }, user: "checker-1")).Response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        (await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/withdraw", new { id })).Response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+    }
+
+    [Fact]
+    public async Task A_checker_below_the_total_is_refused_and_the_admin_holding_the_authority_approves()
+    {
+        var big = new
+        {
+            description = "Large reclassification", book = "IFRS17", accountingDate = "2026-10-17", currency = "EUR", evidence = new { reference = "DOC-90" },
+            lines = new[] { new { account = "GL-1110", side = "DEBIT", amount = "50000.00" }, new { account = "GL-1210", side = "CREDIT", amount = "50000.00" } },
+        };
+        var id = await SubmittedAsync(big);
+        var before = await CountAsync("fin.journal_entry");
+
+        var (low, problem) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/decide", new { id, decision = "APPROVE" }, user: "checker-1");
+        low.StatusCode.ShouldBe(HttpStatusCode.Forbidden, problem?.ToJsonString());
+        problem!.ToJsonString().ShouldContain("PLT-ERR-AUTHORITY");
+        (await CountAsync("fin.journal_entry")).ShouldBe(before);
+        (await SendAsync(HttpMethod.Get, $"/api/fin/v1/manual-journals/{id}")).Body!["manualJournal"]!["status"]!.GetValue<string>().ShouldBe("SUBMITTED");
+
+        var (ok, body) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/decide", new { id, decision = "APPROVE" }, roles: "Platform.Admin", user: "admin-1");
+        ok.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        body!["manualJournal"]!["status"]!.GetValue<string>().ShouldBe("POSTED");
+    }
+
+    [Fact]
+    public async Task A_rejection_needs_a_reason_posts_nothing_and_is_final_and_only_the_maker_submits_a_draft_once()
+    {
+        var id = await DraftAsync(Journal());
+        (await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/submit", new { id }, user: "someone-else")).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        (await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/decide", new { id, decision = "APPROVE" }, user: "checker-1")).Response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        (await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/submit", new { id })).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/submit", new { id })).Response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+
+        var before = await CountAsync("fin.journal_entry");
+        (await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/decide", new { id, decision = "REJECT" }, user: "checker-1")).Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        var (rejected, body) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/decide", new { id, decision = "REJECT", comment = "Wrong account" }, user: "checker-1");
+        rejected.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        body!["manualJournal"]!["status"]!.GetValue<string>().ShouldBe("REJECTED");
+        body["manualJournal"]!["decisionReason"]!.GetValue<string>().ShouldBe("Wrong account");
+        body["postedIds"]!.AsArray().Count.ShouldBe(0);
+        (await CountAsync("fin.journal_entry")).ShouldBe(before);
+        (await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/decide", new { id, decision = "APPROVE" }, user: "checker-2")).Response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+    }
+
+    [Fact]
+    public async Task Approval_into_a_period_locked_after_submit_is_refused_and_posts_nothing_then_the_maker_withdraws()
+    {
+        var id = await SubmittedAsync(Journal(date: "2025-04-10"));
+        await database.ExecuteAsSuperuserAsync(
+            $"INSERT INTO fin.financial_period (period_id, legal_entity_id, period_code, status, created_at) VALUES ('{Guid.CreateVersion7()}', '{ApiHostFactory.LegalEntityId}', '2025-04', 'LOCKED', now()) ON CONFLICT (legal_entity_id, period_code) DO UPDATE SET status = 'LOCKED'",
+            TestContext.Current.CancellationToken);
+        var before = await CountAsync("fin.journal_entry");
+
+        var (locked, problem) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/decide", new { id, decision = "APPROVE" }, user: "checker-1");
+        locked.StatusCode.ShouldBe(HttpStatusCode.Conflict, problem?.ToJsonString());
+        problem!.ToJsonString().ShouldContain("FIN-ERR-PERIOD-LOCKED");
+        (await CountAsync("fin.journal_entry")).ShouldBe(before);
+
+        var (withdrawn, body) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/withdraw", new { id });
+        withdrawn.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        body!["manualJournal"]!["status"]!.GetValue<string>().ShouldBe("WITHDRAWN");
     }
 
     private async Task<long> CountAsync(string table)

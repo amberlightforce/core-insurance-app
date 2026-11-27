@@ -166,6 +166,11 @@ internal sealed class PolicyContextRow
 
     public bool ChargeTypesLoaded { get; set; }
 
+    /// <summary>Term dates (Europe/Athens calendar, end exclusive) from POL PolicyBound; null until known. The earning engine needs them (BO-FIN-06a).</summary>
+    public BusinessDate? TermStart { get; set; }
+
+    public BusinessDate? TermEnd { get; set; }
+
     public Guid SourceEventId { get; set; }
 
     public long AggregateSequence { get; set; }
@@ -272,6 +277,42 @@ internal sealed class FinancialPeriodRow
     public string Status { get; set; } = string.Empty;
 
     public Instant CreatedAt { get; set; }
+
+    public string? SoftClosedBy { get; set; }
+
+    public Instant? SoftClosedAt { get; set; }
+
+    public string? LockedBy { get; set; }
+
+    public Instant? LockedAt { get; set; }
+
+    /// <summary>How many times the period has been locked; above 1 the PeriodClosed event is a re-lock.</summary>
+    public int LockCount { get; set; }
+
+    public string? ReopenRequestedBy { get; set; }
+
+    public Instant? ReopenRequestedAt { get; set; }
+
+    public string? ReopenReason { get; set; }
+}
+
+/// <summary><c>fin.period_close_task</c>: the sign-off of one close checklist task of one period (BO-FIN-04).</summary>
+internal sealed class PeriodCloseTaskRow
+{
+    public Guid PeriodId { get; set; }
+
+    public string TaskCode { get; set; } = string.Empty;
+
+    public string Status { get; set; } = string.Empty;
+
+    public string? SignedOffBy { get; set; }
+
+    public Instant? SignedOffAt { get; set; }
+
+    public string? Reason { get; set; }
+
+    /// <summary>True when the task was signed off by accepting reconciliation breaks (fin.Close.acceptBreak).</summary>
+    public bool BreakAccepted { get; set; }
 }
 
 /// <summary><c>fin.journal_entry</c> (REQ-FIN-067): append-only journal header.</summary>

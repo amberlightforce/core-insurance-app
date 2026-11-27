@@ -127,14 +127,8 @@
       "balances": "unspecified"
     },
     "CloseAcceptBreakRequest": {
-      "period": "unspecified",
-      "task": "unspecified",
-      "reason": "unspecified"
-    },
-    "CloseAcceptBreakResponse": {
-      "state": "unspecified",
-      "impact": "unspecified",
-      "pack": "unspecified"
+      "period": "samplex",
+      "reason": "sample"
     },
     "CloseEvidencePackRequest": {
       "period": "unspecified",
@@ -147,49 +141,51 @@
       "pack": "unspecified"
     },
     "CloseLockRequest": {
-      "period": "unspecified",
-      "task": "unspecified",
-      "reason": "unspecified"
+      "period": "samplex",
+      "reason": "sample"
     },
-    "CloseLockResponse": {
-      "state": "unspecified",
-      "impact": "unspecified",
-      "pack": "unspecified"
+    "ClosePeriodView": {
+      "period": "sample",
+      "state": "OPEN",
+      "closedForPosting": true,
+      "tasks": [
+        {
+          "task": "INTAKE_EXCEPTIONS",
+          "status": "OPEN",
+          "signOffRole": "sample",
+          "blocker": "sample",
+          "signedOffBy": "sample",
+          "signedOffAt": "2026-10-07T09:00:00Z",
+          "reason": "sample"
+        }
+      ],
+      "softClosedBy": "sample",
+      "lockedBy": "sample",
+      "reopenRequestedBy": "sample",
+      "reopenRequestedAt": "2026-10-07T09:00:00Z",
+      "reopenReason": "sample"
     },
     "CloseReopenRequest": {
-      "period": "unspecified",
-      "task": "unspecified",
-      "reason": "unspecified"
-    },
-    "CloseReopenResponse": {
-      "state": "unspecified",
-      "impact": "unspecified",
-      "pack": "unspecified"
+      "period": "samplex",
+      "reason": "sample"
     },
     "CloseSignOffRequest": {
-      "period": "unspecified",
-      "task": "unspecified",
-      "reason": "unspecified"
-    },
-    "CloseSignOffResponse": {
-      "state": "unspecified",
-      "impact": "unspecified",
-      "pack": "unspecified"
+      "period": "samplex",
+      "task": "INTAKE_EXCEPTIONS",
+      "reason": "sample"
     },
     "CloseSoftCloseRequest": {
-      "period": "unspecified",
-      "task": "unspecified",
-      "reason": "unspecified"
+      "period": "samplex",
+      "reason": "sample"
     },
-    "CloseSoftCloseResponse": {
-      "state": "unspecified",
-      "impact": "unspecified",
-      "pack": "unspecified"
-    },
-    "CloseTasksResponse": {
-      "state": "unspecified",
-      "impact": "unspecified",
-      "pack": "unspecified"
+    "CloseTaskView": {
+      "task": "INTAKE_EXCEPTIONS",
+      "status": "OPEN",
+      "signOffRole": "sample",
+      "blocker": "sample",
+      "signedOffBy": "sample",
+      "signedOffAt": "2026-10-07T09:00:00Z",
+      "reason": "sample"
     },
     "DsarExportRequest": {
       "partyId": "01920977-c650-77fb-878a-7ebb21d9e00a"
@@ -215,24 +211,198 @@
       "results": "unspecified"
     },
     "EarningRunRequest": {
-      "entity": "unspecified",
-      "as": "unspecified"
+      "asOf": "2026-10-07"
     },
     "EarningRunResponse": {
-      "run": "unspecified",
-      "results": "unspecified"
+      "run": {
+        "id": "019222dc-4649-7b16-833f-1041f7ce2d13",
+        "period": "sample",
+        "asOf": "2026-10-07",
+        "state": "DONE",
+        "simulated": true,
+        "startedAt": "2026-10-07T09:00:00Z",
+        "finishedAt": "2026-10-07T09:00:00Z",
+        "policiesProcessed": 1,
+        "termsSkipped": 1,
+        "earnedToDate": [
+          {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        ],
+        "postedDelta": [
+          {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        ],
+        "journalIds": [
+          "01924c56-92b7-77ce-8a7a-3258d164d14d"
+        ]
+      },
+      "results": [
+        {
+          "policyTermId": "019204a0-6a47-700b-8db8-a4c36d2002e4",
+          "policyNumber": "sample",
+          "book": "sample",
+          "termStart": "2026-10-07",
+          "termEnd": "2026-10-07",
+          "writtenPremium": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "earnedToDate": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "previouslyEarned": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "delta": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "daysEarned": 1,
+          "termDays": 1
+        }
+      ],
+      "resultsTruncated": true
     },
-    "EarningSimulateRequest": {
-      "entity": "unspecified",
-      "as": "unspecified"
+    "EarningRunView": {
+      "id": "01929a77-9945-7bce-8641-ead0755ef6f6",
+      "period": "sample",
+      "asOf": "2026-10-07",
+      "state": "DONE",
+      "simulated": true,
+      "startedAt": "2026-10-07T09:00:00Z",
+      "finishedAt": "2026-10-07T09:00:00Z",
+      "policiesProcessed": 1,
+      "termsSkipped": 1,
+      "earnedToDate": [
+        {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      ],
+      "postedDelta": [
+        {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      ],
+      "journalIds": [
+        "01924a9d-42bf-7b60-8b99-1a32bdc76658"
+      ]
     },
     "EarningSimulateResponse": {
-      "run": "unspecified",
-      "results": "unspecified"
+      "run": {
+        "id": "01928b7d-a5ff-7cdc-8dcc-b4315a843e78",
+        "period": "sample",
+        "asOf": "2026-10-07",
+        "state": "DONE",
+        "simulated": true,
+        "startedAt": "2026-10-07T09:00:00Z",
+        "finishedAt": "2026-10-07T09:00:00Z",
+        "policiesProcessed": 1,
+        "termsSkipped": 1,
+        "earnedToDate": [
+          {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        ],
+        "postedDelta": [
+          {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        ],
+        "journalIds": [
+          "019283a7-f0de-7111-8216-5369611905fd"
+        ]
+      },
+      "results": [
+        {
+          "policyTermId": "01922691-8634-789e-853e-c4b7433f0636",
+          "policyNumber": "sample",
+          "book": "sample",
+          "termStart": "2026-10-07",
+          "termEnd": "2026-10-07",
+          "writtenPremium": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "earnedToDate": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "previouslyEarned": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "delta": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "daysEarned": 1,
+          "termDays": 1
+        }
+      ],
+      "resultsTruncated": true
     },
     "EarningStatusResponse": {
-      "run": "unspecified",
-      "results": "unspecified"
+      "run": {
+        "id": "0192317d-4436-7ecc-8015-db362db9eaa4",
+        "period": "sample",
+        "asOf": "2026-10-07",
+        "state": "DONE",
+        "simulated": true,
+        "startedAt": "2026-10-07T09:00:00Z",
+        "finishedAt": "2026-10-07T09:00:00Z",
+        "policiesProcessed": 1,
+        "termsSkipped": 1,
+        "earnedToDate": [
+          {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        ],
+        "postedDelta": [
+          {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        ],
+        "journalIds": [
+          "01921bfb-6b84-7c00-874c-2f961d842022"
+        ]
+      }
+    },
+    "EarningTermResult": {
+      "policyTermId": "019210a9-ba37-763d-8951-930c6541e2de",
+      "policyNumber": "sample",
+      "book": "sample",
+      "termStart": "2026-10-07",
+      "termEnd": "2026-10-07",
+      "writtenPremium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "earnedToDate": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "previouslyEarned": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "delta": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "daysEarned": 1,
+      "termDays": 1
     },
     "FinLocalizedText": {
       "el": "Sample text",
@@ -930,39 +1100,143 @@
       "return": "unspecified"
     },
     "ManualJournalCreateRequest": {
-      "template": "unspecified",
+      "description": "sample",
+      "book": "sample",
+      "accountingDate": "2026-10-07",
+      "currency": "sample",
       "lines": [
-        "unspecified"
+        {
+          "account": "sample",
+          "side": "DEBIT",
+          "amount": "sample"
+        }
       ],
-      "evidence": "unspecified"
+      "evidence": {
+        "reference": "sample"
+      }
     },
     "ManualJournalCreateResponse": {
-      "manualJournal": "unspecified",
+      "manualJournal": {
+        "id": "0192cc23-7159-71b9-8df4-c1f6ac0139b6",
+        "number": "sample",
+        "status": "DRAFT",
+        "description": "sample",
+        "book": "sample",
+        "accountingDate": "2026-10-07",
+        "currency": "sample",
+        "lines": [
+          {
+            "account": "sample",
+            "side": "DEBIT",
+            "amount": "sample"
+          }
+        ],
+        "evidenceRef": "sample",
+        "createdBy": "sample",
+        "submittedBy": "sample",
+        "submittedAt": "sample",
+        "decidedBy": "sample",
+        "decisionReason": "sample"
+      },
       "postedIds": [
         "0192d539-80c4-70cc-8851-7f2da9e328c9"
       ]
     },
     "ManualJournalDecideRequest": {
-      "template": "unspecified",
-      "lines": [
-        "unspecified"
-      ],
-      "evidence": "unspecified"
+      "id": "0192c5c5-950c-773b-8e73-bf49582b6ab6",
+      "decision": "APPROVE",
+      "comment": "sample"
     },
     "ManualJournalDecideResponse": {
-      "manualJournal": "unspecified",
+      "manualJournal": {
+        "id": "0192161f-523e-7dd4-803e-a8fe7ab008bc",
+        "number": "sample",
+        "status": "DRAFT",
+        "description": "sample",
+        "book": "sample",
+        "accountingDate": "2026-10-07",
+        "currency": "sample",
+        "lines": [
+          {
+            "account": "sample",
+            "side": "DEBIT",
+            "amount": "sample"
+          }
+        ],
+        "evidenceRef": "sample",
+        "createdBy": "sample",
+        "submittedBy": "sample",
+        "submittedAt": "sample",
+        "decidedBy": "sample",
+        "decisionReason": "sample"
+      },
       "postedIds": [
         "0192d3c8-98b1-7277-8c86-6f9342076bb3"
       ]
     },
+    "ManualJournalEvidence": {
+      "reference": "sample"
+    },
     "ManualJournalGetResponse": {
-      "manualJournal": "unspecified",
+      "manualJournal": {
+        "id": "01928c37-de21-7613-8810-b80f5368dc58",
+        "number": "sample",
+        "status": "DRAFT",
+        "description": "sample",
+        "book": "sample",
+        "accountingDate": "2026-10-07",
+        "currency": "sample",
+        "lines": [
+          {
+            "account": "sample",
+            "side": "DEBIT",
+            "amount": "sample"
+          }
+        ],
+        "evidenceRef": "sample",
+        "createdBy": "sample",
+        "submittedBy": "sample",
+        "submittedAt": "sample",
+        "decidedBy": "sample",
+        "decisionReason": "sample"
+      },
       "postedIds": [
         "0192c8d4-8791-7ed3-836e-b93f1e0d4ed0"
       ]
     },
+    "ManualJournalLineInput": {
+      "account": "sample",
+      "side": "DEBIT",
+      "amount": "sample"
+    },
+    "ManualJournalLineView": {
+      "account": "sample",
+      "side": "DEBIT",
+      "amount": "sample"
+    },
     "ManualJournalListItem": {
-      "manualJournal": "unspecified",
+      "manualJournal": {
+        "id": "01927d39-9b7a-7e59-83fd-71631c164b0d",
+        "number": "sample",
+        "status": "DRAFT",
+        "description": "sample",
+        "book": "sample",
+        "accountingDate": "2026-10-07",
+        "currency": "sample",
+        "lines": [
+          {
+            "account": "sample",
+            "side": "DEBIT",
+            "amount": "sample"
+          }
+        ],
+        "evidenceRef": "sample",
+        "createdBy": "sample",
+        "submittedBy": "sample",
+        "submittedAt": "sample",
+        "decidedBy": "sample",
+        "decisionReason": "sample"
+      },
       "postedIds": [
         "0192b384-22f1-71ee-807c-dd3b35843260"
       ]
@@ -970,7 +1244,28 @@
     "ManualJournalListPage": {
       "items": [
         {
-          "manualJournal": "unspecified",
+          "manualJournal": {
+            "id": "019257f7-a91c-7ff3-8479-661495e7f18f",
+            "number": "sample",
+            "status": "DRAFT",
+            "description": "sample",
+            "book": "sample",
+            "accountingDate": "2026-10-07",
+            "currency": "sample",
+            "lines": [
+              {
+                "account": "sample",
+                "side": "DEBIT",
+                "amount": "sample"
+              }
+            ],
+            "evidenceRef": "sample",
+            "createdBy": "sample",
+            "submittedBy": "sample",
+            "submittedAt": "sample",
+            "decidedBy": "sample",
+            "decisionReason": "sample"
+          },
           "postedIds": [
             "01927adb-f807-7538-8c20-fe8e0d15fe92"
           ]
@@ -980,38 +1275,98 @@
       "limit": 1
     },
     "ManualJournalSubmitRequest": {
-      "template": "unspecified",
-      "lines": [
-        "unspecified"
-      ],
-      "evidence": "unspecified"
+      "id": "01922128-07a3-7a39-8760-6ad03095c1cf"
     },
     "ManualJournalSubmitResponse": {
-      "manualJournal": "unspecified",
+      "manualJournal": {
+        "id": "0192e2b4-24d6-7b4d-83f8-7677da27d087",
+        "number": "sample",
+        "status": "DRAFT",
+        "description": "sample",
+        "book": "sample",
+        "accountingDate": "2026-10-07",
+        "currency": "sample",
+        "lines": [
+          {
+            "account": "sample",
+            "side": "DEBIT",
+            "amount": "sample"
+          }
+        ],
+        "evidenceRef": "sample",
+        "createdBy": "sample",
+        "submittedBy": "sample",
+        "submittedAt": "sample",
+        "decidedBy": "sample",
+        "decisionReason": "sample"
+      },
       "postedIds": [
         "0192d760-cddb-723c-8d42-638c482fa7cc"
       ]
     },
-    "ManualJournalWithdrawRequest": {
-      "template": "unspecified",
+    "ManualJournalView": {
+      "id": "0192127a-8135-793c-8f65-669d25c3001e",
+      "number": "sample",
+      "status": "DRAFT",
+      "description": "sample",
+      "book": "sample",
+      "accountingDate": "2026-10-07",
+      "currency": "sample",
       "lines": [
-        "unspecified"
+        {
+          "account": "sample",
+          "side": "DEBIT",
+          "amount": "sample"
+        }
       ],
-      "evidence": "unspecified"
+      "evidenceRef": "sample",
+      "createdBy": "sample",
+      "submittedBy": "sample",
+      "submittedAt": "sample",
+      "decidedBy": "sample",
+      "decisionReason": "sample"
+    },
+    "ManualJournalWithdrawRequest": {
+      "id": "0192c528-cade-761f-8ce6-cfaf1719822a"
     },
     "ManualJournalWithdrawResponse": {
-      "manualJournal": "unspecified",
+      "manualJournal": {
+        "id": "01928928-d16c-7793-837d-11d0e4044c16",
+        "number": "sample",
+        "status": "DRAFT",
+        "description": "sample",
+        "book": "sample",
+        "accountingDate": "2026-10-07",
+        "currency": "sample",
+        "lines": [
+          {
+            "account": "sample",
+            "side": "DEBIT",
+            "amount": "sample"
+          }
+        ],
+        "evidenceRef": "sample",
+        "createdBy": "sample",
+        "submittedBy": "sample",
+        "submittedAt": "sample",
+        "decidedBy": "sample",
+        "decisionReason": "sample"
+      },
       "postedIds": [
         "01921ac0-09b7-7f1c-8e6b-4a9fdc6c4090"
       ]
     },
     "PeriodListItem": {
-      "state": "unspecified"
+      "period": "sample",
+      "state": "OPEN",
+      "closedForPosting": true
     },
     "PeriodListPage": {
       "items": [
         {
-          "state": "unspecified"
+          "period": "sample",
+          "state": "OPEN",
+          "closedForPosting": true
         }
       ],
       "nextCursor": "sample",

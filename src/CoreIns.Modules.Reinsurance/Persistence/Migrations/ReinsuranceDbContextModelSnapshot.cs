@@ -357,6 +357,137 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.AccountingDecisionRow", b =>
+                {
+                    b.Property<string>("Kind")
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("subject_id");
+
+                    b.Property<DateTime>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("Decision")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("decision");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.HasKey("Kind", "SubjectId")
+                        .HasName("pk_accounting_decision");
+
+                    b.ToTable("accounting_decision", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_accounting_decision_decision", "decision IN ('APPROVED', 'REJECTED')");
+
+                            t.HasCheckConstraint("ck_accounting_decision_kind", "kind IN ('ADJUSTMENT', 'COMMISSION')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.AdjustmentRow", b =>
+                {
+                    b.Property<Guid>("AdjustmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("adjustment_id");
+
+                    b.Property<decimal>("AdjustmentAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("adjustment_amount");
+
+                    b.Property<Guid>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<decimal>("CalculatedPremium")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("calculated_premium");
+
+                    b.Property<Guid>("ContractId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("contract_id");
+
+                    b.Property<int>("ContractYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("contract_year");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<decimal>("DepositPremium")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("deposit_premium");
+
+                    b.Property<int>("LayerNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("layer_no");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<decimal>("MinimumPremium")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("minimum_premium");
+
+                    b.Property<decimal>("RatePct")
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("rate_pct");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("ScheduleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("schedule_id");
+
+                    b.Property<decimal>("SubjectPremium")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("subject_premium");
+
+                    b.HasKey("AdjustmentId")
+                        .HasName("pk_adjustment");
+
+                    b.HasIndex("ScheduleId")
+                        .HasDatabaseName("ix_adjustment_schedule");
+
+                    b.HasIndex("ContractId", "LayerNo", "ContractYear")
+                        .HasDatabaseName("ix_adjustment_layer");
+
+                    b.ToTable("adjustment", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_adjustment_amounts", "subject_premium >= 0 AND calculated_premium >= 0 AND minimum_premium >= 0 AND deposit_premium >= 0");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ClaimAmountRow", b =>
                 {
                     b.Property<Guid>("ClaimId")
@@ -552,6 +683,96 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                             t.HasCheckConstraint("ck_clause_inure", "recoveries_inure IN ('REALISED_ONLY')");
 
                             t.HasCheckConstraint("ck_clause_rev", "rev >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.CommissionRow", b =>
+                {
+                    b.Property<Guid>("CommissionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("commission_id");
+
+                    b.Property<decimal>("AdjustmentAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("adjustment_amount");
+
+                    b.Property<Guid>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<decimal>("CededPremium")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("ceded_premium");
+
+                    b.Property<Guid>("ContractId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("contract_id");
+
+                    b.Property<int>("ContractYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("contract_year");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<decimal>("EarnedCommission")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("earned_commission");
+
+                    b.Property<decimal>("EarnedRatePct")
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("earned_rate_pct");
+
+                    b.Property<decimal>("IncurredLoss")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("incurred_loss");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<decimal>("LossRatioPct")
+                        .HasColumnType("numeric(12,6)")
+                        .HasColumnName("loss_ratio_pct");
+
+                    b.Property<decimal>("ProvisionalCommission")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("provisional_commission");
+
+                    b.Property<decimal>("ProvisionalRatePct")
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("provisional_rate_pct");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("Scale")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("scale");
+
+                    b.HasKey("CommissionId")
+                        .HasName("pk_commission");
+
+                    b.HasIndex("ContractId", "ContractYear", "CreatedAt")
+                        .HasDatabaseName("ix_commission_contract");
+
+                    b.ToTable("commission", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_commission_amounts", "ceded_premium >= 0 AND incurred_loss >= 0 AND provisional_commission >= 0 AND earned_commission >= 0");
                         });
                 });
 
@@ -791,6 +1012,82 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                             t.HasCheckConstraint("ck_contract_version_placed", "placed_pct > 0 AND placed_pct <= 100");
 
                             t.HasCheckConstraint("ck_contract_version_rev", "content_rev >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.DepositScheduleRow", b =>
+                {
+                    b.Property<Guid>("ScheduleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("schedule_id");
+
+                    b.Property<Guid>("ContractId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("contract_id");
+
+                    b.Property<int>("ContractYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("contract_year");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<decimal>("DepositPremium")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("deposit_premium");
+
+                    b.Property<string>("Instalments")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("instalments");
+
+                    b.Property<int>("LayerNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("layer_no");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<decimal>("MinimumPremium")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("minimum_premium");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("Revision")
+                        .HasColumnType("integer")
+                        .HasColumnName("revision");
+
+                    b.HasKey("ScheduleId")
+                        .HasName("pk_deposit_schedule");
+
+                    b.HasIndex("ContractId", "LayerNo", "Revision")
+                        .IsUnique()
+                        .HasDatabaseName("ux_deposit_schedule_revision");
+
+                    b.ToTable("deposit_schedule", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_deposit_schedule_amounts", "minimum_premium >= 0 AND deposit_premium >= minimum_premium");
+
+                            t.HasCheckConstraint("ck_deposit_schedule_layer", "layer_no >= 1");
+
+                            t.HasCheckConstraint("ck_deposit_schedule_revision", "revision >= 1");
                         });
                 });
 
@@ -1364,6 +1661,23 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.AdjustmentRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.ContractRow", null)
+                        .WithMany()
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_adjustment_contract");
+
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.DepositScheduleRow", null)
+                        .WithMany()
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_adjustment_schedule");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ClauseRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Reinsurance.Persistence.ContractVersionRow", null)
@@ -1374,6 +1688,16 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .HasConstraintName("fk_clause_version");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.CommissionRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.ContractRow", null)
+                        .WithMany()
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_commission_contract");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ContractVersionRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Reinsurance.Persistence.ContractRow", null)
@@ -1382,6 +1706,16 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_contract_version_contract");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.DepositScheduleRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.ContractRow", null)
+                        .WithMany()
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_deposit_schedule_contract");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.LayerRow", b =>

@@ -14,5 +14,5 @@ public sealed class FakeProductAvailabilityService : global::CoreIns.Testing.Con
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Product.Contracts.Api.AvailabilityCheckResponse> CheckAsync(global::CoreIns.Modules.Product.Contracts.Api.AvailabilityCheckRequest request, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Product.Contracts.Api.AvailabilityCheckResponse>("pfc.Availability.check", [request], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Product.Contracts.Api.AvailabilityCheckResponse> CheckAsync(global::CoreIns.Modules.Product.Contracts.Api.AvailabilityCheckRequest request, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Product.Contracts.Api.AvailabilityCheckResponse>("pfc.Availability.check", [request, validAt], cancellationToken);
 }

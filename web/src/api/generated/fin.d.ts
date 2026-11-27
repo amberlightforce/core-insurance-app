@@ -2390,83 +2390,103 @@ export interface components {
         IntakeExceptionRejectResponse: {
             outcomes: components["schemas"]["IntakeExceptionOutcome"][];
         };
-        /** @description fin.ManualJournal.create request. PRD inputs: "template, lines, evidence" */
+        /** @description The evidence of a manual journal, a document or ticket reference (REQ-FIN-216) */
+        ManualJournalEvidence: {
+            reference: string;
+        };
+        ManualJournalLineInput: {
+            account: string;
+            /** @enum {string} */
+            side: "DEBIT" | "CREDIT";
+            /** @description Positive decimal with at most two places (invariant format) */
+            amount: string;
+        };
+        ManualJournalLineView: {
+            account: string;
+            /** @enum {string} */
+            side: "DEBIT" | "CREDIT";
+            amount: string;
+        };
+        /** @description A manual journal (maker-checker workflow record; the ledger changes only when it is approved and POSTED) */
+        ManualJournalView: {
+            id: components["schemas"]["Uuid"];
+            /** @description MJ plus six digits */
+            number: string;
+            /** @enum {string} */
+            status: "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED" | "WITHDRAWN" | "POSTED";
+            description: string;
+            book: string;
+            /** Format: date */
+            accountingDate: string;
+            currency: string;
+            lines: components["schemas"]["ManualJournalLineView"][];
+            evidenceRef: string;
+            createdBy: string;
+            submittedBy?: string | null;
+            submittedAt?: string | null;
+            decidedBy?: string | null;
+            decisionReason?: string | null;
+        };
+        /** @description fin.ManualJournal.create request */
         ManualJournalCreateRequest: {
-            /** @description PRD: "template" */
-            template?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "evidence" */
-            evidence?: components["schemas"]["Unspecified"];
+            description: string;
+            book: string;
+            /** Format: date */
+            accountingDate: string;
+            currency: string;
+            lines: components["schemas"]["ManualJournalLineInput"][];
+            evidence: components["schemas"]["ManualJournalEvidence"];
         };
-        /** @description fin.ManualJournal.create result. PRD outputs: "manual journal, posted ids" */
+        /** @description fin.ManualJournal.create result */
         ManualJournalCreateResponse: {
-            /** @description PRD: "manual journal" */
-            manualJournal?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posted ids" */
-            postedIds?: components["schemas"]["Uuid"][];
+            manualJournal: components["schemas"]["ManualJournalView"];
+            /** @description Ids of the sealed journals the approval posted (empty until POSTED) */
+            postedIds: components["schemas"]["Uuid"][];
         };
-        /** @description fin.ManualJournal.submit request. PRD inputs: "template, lines, evidence" */
+        /** @description fin.ManualJournal.submit request: submit a DRAFT journal of the caller for approval */
         ManualJournalSubmitRequest: {
-            /** @description PRD: "template" */
-            template?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "evidence" */
-            evidence?: components["schemas"]["Unspecified"];
+            id: components["schemas"]["Uuid"];
         };
-        /** @description fin.ManualJournal.submit result. PRD outputs: "manual journal, posted ids" */
+        /** @description fin.ManualJournal.submit result */
         ManualJournalSubmitResponse: {
-            /** @description PRD: "manual journal" */
-            manualJournal?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posted ids" */
-            postedIds?: components["schemas"]["Uuid"][];
+            manualJournal: components["schemas"]["ManualJournalView"];
+            /** @description Ids of the sealed journals the approval posted (empty until POSTED) */
+            postedIds: components["schemas"]["Uuid"][];
         };
-        /** @description fin.ManualJournal.withdraw request. PRD inputs: "template, lines, evidence" */
+        /** @description fin.ManualJournal.withdraw request: the maker takes a DRAFT or SUBMITTED journal back */
         ManualJournalWithdrawRequest: {
-            /** @description PRD: "template" */
-            template?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "evidence" */
-            evidence?: components["schemas"]["Unspecified"];
+            id: components["schemas"]["Uuid"];
         };
-        /** @description fin.ManualJournal.withdraw result. PRD outputs: "manual journal, posted ids" */
+        /** @description fin.ManualJournal.withdraw result */
         ManualJournalWithdrawResponse: {
-            /** @description PRD: "manual journal" */
-            manualJournal?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posted ids" */
-            postedIds?: components["schemas"]["Uuid"][];
+            manualJournal: components["schemas"]["ManualJournalView"];
+            /** @description Ids of the sealed journals the approval posted (empty until POSTED) */
+            postedIds: components["schemas"]["Uuid"][];
         };
-        /** @description fin.ManualJournal.decide request. PRD inputs: "template, lines, evidence" */
+        /** @description fin.ManualJournal.decide request: a checker approves (posting the journal) or rejects a SUBMITTED journal */
         ManualJournalDecideRequest: {
-            /** @description PRD: "template" */
-            template?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "evidence" */
-            evidence?: components["schemas"]["Unspecified"];
+            id: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            /** @description Required for a rejection */
+            comment?: string;
         };
-        /** @description fin.ManualJournal.decide result. PRD outputs: "manual journal, posted ids" */
+        /** @description fin.ManualJournal.decide result (a repeated decision returns the current state) */
         ManualJournalDecideResponse: {
-            /** @description PRD: "manual journal" */
-            manualJournal?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posted ids" */
-            postedIds?: components["schemas"]["Uuid"][];
+            manualJournal: components["schemas"]["ManualJournalView"];
+            /** @description Ids of the sealed journals the approval posted (empty until POSTED) */
+            postedIds: components["schemas"]["Uuid"][];
         };
-        /** @description fin.ManualJournal.get result. PRD outputs: "manual journal, posted ids" */
+        /** @description fin.ManualJournal.get result */
         ManualJournalGetResponse: {
-            /** @description PRD: "manual journal" */
-            manualJournal?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posted ids" */
-            postedIds?: components["schemas"]["Uuid"][];
+            manualJournal: components["schemas"]["ManualJournalView"];
+            /** @description Ids of the sealed journals the approval posted (empty until POSTED) */
+            postedIds: components["schemas"]["Uuid"][];
         };
-        /** @description fin.ManualJournal.list result. PRD outputs: "manual journal, posted ids" */
+        /** @description fin.ManualJournal.list result item */
         ManualJournalListItem: {
-            /** @description PRD: "manual journal" */
-            manualJournal?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posted ids" */
-            postedIds?: components["schemas"]["Uuid"][];
+            manualJournal: components["schemas"]["ManualJournalView"];
+            postedIds: components["schemas"]["Uuid"][];
         };
         /** @description Page of fin.ManualJournal.list results (cursor pagination, contract §3.5.5) */
         ManualJournalListPage: components["schemas"]["PageEnvelope"] & {
@@ -2486,40 +2506,67 @@ export interface components {
             /** @description PRD: "reversal journal" */
             reversalJournal?: components["schemas"]["Unspecified"];
         };
-        /** @description fin.Earning.run request. PRD inputs: "entity, as-of" */
+        /** @description fin.Earning.run / fin.Earning.simulate request: earn premium up to and including this date (its calendar month is the accounting period the movement is posted in; the legal entity comes from the caller). */
         EarningRunRequest: {
-            /** @description PRD: "entity" */
-            entity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "as-of" */
-            as?: components["schemas"]["Unspecified"];
+            /** @description Earn up to and including this Europe/Athens calendar date; the period of this date must be open. */
+            asOf: components["schemas"]["LocalDate"];
         };
-        /** @description fin.Earning.run result. PRD outputs: "run, results" */
+        /** @description The earning of one policy term in one book (pro rata temporis by day, TERM_RATIO). */
+        EarningTermResult: {
+            policyTermId: components["schemas"]["Uuid"];
+            policyNumber?: string;
+            book: string;
+            termStart?: components["schemas"]["LocalDate"];
+            /** @description Exclusive end of the term. */
+            termEnd?: components["schemas"]["LocalDate"];
+            /** @description Net written premium of the term (written less credits) posted so far. */
+            writtenPremium: components["schemas"]["Money"];
+            /** @description Premium earned up to the as-of date after this run. */
+            earnedToDate: components["schemas"]["Money"];
+            /** @description Premium already earned before this run. */
+            previouslyEarned: components["schemas"]["Money"];
+            /** @description Earned in this run (negative when a credit made the term over-earned). */
+            delta: components["schemas"]["Money"];
+            daysEarned: number;
+            termDays: number;
+        };
+        /** @description One earning run (or a simulation of one) for an accounting period. */
+        EarningRunView: {
+            /** @description Run id; absent for a simulation. */
+            id?: components["schemas"]["Uuid"];
+            /** @description Accounting period, yyyy-MM. */
+            period: string;
+            asOf: components["schemas"]["LocalDate"];
+            /** @enum {string} */
+            state: "DONE" | "SIMULATED";
+            simulated: boolean;
+            startedAt?: components["schemas"]["Instant"];
+            finishedAt?: components["schemas"]["Instant"];
+            /** @description Policy terms earned (with written premium and known term dates). */
+            policiesProcessed: number;
+            /** @description Terms with written premium but no term dates, or not in the functional currency; not earned. */
+            termsSkipped: number;
+            /** @description Total premium earned to date per currency after this run. */
+            earnedToDate?: components["schemas"]["Money"][];
+            /** @description Net movement posted (or that would be posted) by this run per currency. */
+            postedDelta?: components["schemas"]["Money"][];
+            journalIds: components["schemas"]["Uuid"][];
+        };
+        /** @description fin.Earning.run result: the run and its per-term results (at most 200; fin.Earning.result pages them). */
         EarningRunResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
-            /** @description PRD: "results" */
-            results?: components["schemas"]["Unspecified"];
+            run: components["schemas"]["EarningRunView"];
+            results: components["schemas"]["EarningTermResult"][];
+            resultsTruncated: boolean;
         };
-        /** @description fin.Earning.status result. PRD outputs: "run, results" */
+        /** @description fin.Earning.status result: the latest completed earning run of the legal entity; absent until a first run. */
         EarningStatusResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
-            /** @description PRD: "results" */
-            results?: components["schemas"]["Unspecified"];
+            run?: components["schemas"]["EarningRunView"] | null;
         };
-        /** @description fin.Earning.simulate request. PRD inputs: "entity, as-of" */
-        EarningSimulateRequest: {
-            /** @description PRD: "entity" */
-            entity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "as-of" */
-            as?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Earning.simulate result. PRD outputs: "run, results" */
+        /** @description fin.Earning.simulate result: what a run would earn and post; nothing is written. */
         EarningSimulateResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
-            /** @description PRD: "results" */
-            results?: components["schemas"]["Unspecified"];
+            run: components["schemas"]["EarningRunView"];
+            results: components["schemas"]["EarningTermResult"][];
+            resultsTruncated: boolean;
         };
         /** @description fin.Earning.result request. PRD inputs: "entity, as-of" */
         EarningResultRequest: {
@@ -2544,113 +2591,80 @@ export interface components {
             /** @description Closed-period guard for POL */
             closedForPosting?: boolean;
         };
-        /** @description fin.Period.list result. PRD outputs: "state" */
+        /** @description fin.Period.list result: one accounting month and its close state. */
         PeriodListItem: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
+            period: string;
+            /** @enum {string} */
+            state: "OPEN" | "SOFT_CLOSED" | "LOCKED";
+            closedForPosting: boolean;
         };
         /** @description Page of fin.Period.list results (cursor pagination, contract §3.5.5) */
         PeriodListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["PeriodListItem"][];
         };
-        /** @description fin.Close.tasks result. PRD outputs: "state, impact, pack" */
-        CloseTasksResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
-            /** @description PRD: "impact" */
-            impact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pack" */
-            pack?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Close.signOff request. PRD inputs: "period, task, reason" */
+        /** @description fin.Close.signOff request: the person responsible for a close task confirms it is done; a task with a blocker cannot be signed off. */
         CloseSignOffRequest: {
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "task" */
-            task?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Calendar month, yyyy-MM. */
+            period: string;
+            task: components["schemas"]["CloseTaskCode"];
+            /** @description Optional note kept with the sign-off. */
+            reason?: string;
         };
-        /** @description fin.Close.signOff result. PRD outputs: "state, impact, pack" */
-        CloseSignOffResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
-            /** @description PRD: "impact" */
-            impact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pack" */
-            pack?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Close.softClose request. PRD inputs: "period, task, reason" */
+        /** @description fin.Close.softClose request: every task of the period must be signed off. */
         CloseSoftCloseRequest: {
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "task" */
-            task?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Calendar month, yyyy-MM. */
+            period: string;
+            /** @description Why the period is closed now. */
+            reason: string;
         };
-        /** @description fin.Close.softClose result. PRD outputs: "state, impact, pack" */
-        CloseSoftCloseResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
-            /** @description PRD: "impact" */
-            impact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pack" */
-            pack?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Close.lock request. PRD inputs: "period, task, reason" */
+        /** @description fin.Close.lock request: locks a soft-closed period; the person who soft-closed it cannot lock it (two people). */
         CloseLockRequest: {
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "task" */
-            task?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Calendar month, yyyy-MM. */
+            period: string;
+            /** @description Why the period is locked. */
+            reason: string;
         };
-        /** @description fin.Close.lock result. PRD outputs: "state, impact, pack" */
-        CloseLockResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
-            /** @description PRD: "impact" */
-            impact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pack" */
-            pack?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Close.reopen request. PRD inputs: "period, task, reason" */
+        /** @description fin.Close.reopen request: the first call records the request and its reason; a different person repeating the call approves it and reopens the period. */
         CloseReopenRequest: {
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "task" */
-            task?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Calendar month, yyyy-MM. */
+            period: string;
+            /** @description Why the period is reopened (audited, sent to the approver). */
+            reason: string;
         };
-        /** @description fin.Close.reopen result. PRD outputs: "state, impact, pack" */
-        CloseReopenResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
-            /** @description PRD: "impact" */
-            impact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pack" */
-            pack?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Close.acceptBreak request. PRD inputs: "period, task, reason" */
+        /** @description fin.Close.acceptBreak request: accepts the open reconciliation breaks of the period with a reason; signs off the RECONCILIATIONS task. */
         CloseAcceptBreakRequest: {
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "task" */
-            task?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Calendar month, yyyy-MM. */
+            period: string;
+            /** @description Why the breaks are accepted. */
+            reason: string;
         };
-        /** @description fin.Close.acceptBreak result. PRD outputs: "state, impact, pack" */
-        CloseAcceptBreakResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
-            /** @description PRD: "impact" */
-            impact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pack" */
-            pack?: components["schemas"]["Unspecified"];
+        /** @enum {string} */
+        CloseTaskCode: "INTAKE_EXCEPTIONS" | "RECONCILIATIONS" | "EARNING_RUN" | "MANUAL_JOURNALS";
+        CloseTaskView: {
+            task: components["schemas"]["CloseTaskCode"];
+            /** @enum {string} */
+            status: "OPEN" | "SIGNED_OFF";
+            /** @description Role that signs the task off. */
+            signOffRole: string;
+            /** @description Why the task cannot be signed off yet, when it cannot. */
+            blocker?: string;
+            signedOffBy?: string;
+            signedOffAt?: components["schemas"]["Instant"];
+            reason?: string;
+        };
+        /** @description One accounting period with its close state and checklist. */
+        ClosePeriodView: {
+            period: string;
+            /** @enum {string} */
+            state: "OPEN" | "SOFT_CLOSED" | "LOCKED";
+            closedForPosting: boolean;
+            tasks: components["schemas"]["CloseTaskView"][];
+            softClosedBy?: string;
+            lockedBy?: string;
+            /** @description Set while a reopen is waiting for a second person. */
+            reopenRequestedBy?: string;
+            reopenRequestedAt?: components["schemas"]["Instant"];
+            reopenReason?: string;
         };
         /** @description fin.Close.evidencePack request. PRD inputs: "period, task, reason" */
         CloseEvidencePackRequest: {
@@ -4783,7 +4797,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["EarningSimulateRequest"];
+                "application/json": components["schemas"]["EarningRunRequest"];
             };
         };
         responses: {
@@ -4935,7 +4949,10 @@ export interface operations {
     };
     "fin.Close.tasks": {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Calendar month, yyyy-MM */
+                period: string;
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
@@ -4956,7 +4973,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CloseTasksResponse"];
+                    "application/json": components["schemas"]["ClosePeriodView"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4999,7 +5016,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CloseSignOffResponse"];
+                    "application/json": components["schemas"]["ClosePeriodView"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -5043,7 +5060,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CloseSoftCloseResponse"];
+                    "application/json": components["schemas"]["ClosePeriodView"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -5094,7 +5111,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CloseLockResponse"];
+                    "application/json": components["schemas"]["ClosePeriodView"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -5145,7 +5162,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CloseReopenResponse"];
+                    "application/json": components["schemas"]["ClosePeriodView"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -5189,7 +5206,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CloseAcceptBreakResponse"];
+                    "application/json": components["schemas"]["ClosePeriodView"];
                 };
             };
             400: components["responses"]["BadRequest"];

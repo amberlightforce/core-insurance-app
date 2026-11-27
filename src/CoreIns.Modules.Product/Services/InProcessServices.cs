@@ -72,6 +72,36 @@ internal sealed class ProductArtifactService(CatalogueQueries queries) : IProduc
     }
 }
 
+/// <summary><see cref="IProductAvailabilityService"/>: <c>pfc.Availability.check</c> (BO-PFC-05), today's date.</summary>
+internal sealed class ProductAvailabilityService(RuntimeQueries queries, IClock clock) : IProductAvailabilityService
+{
+    public async Task<AvailabilityCheckResponse> CheckAsync(AvailabilityCheckRequest request, ValidAt? validAt = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Dates.Unwrap(await queries.CheckAvailabilityAsync(request, Dates.ValidDate(validAt, clock.Now), cancellationToken).ConfigureAwait(false));
+    }
+}
+
+/// <summary><see cref="IProductProductService"/>: <c>pfc.Product.describe</c> (BO-PFC-05).</summary>
+internal sealed class ProductProductService(RuntimeQueries queries, IClock clock) : IProductProductService
+{
+    public async Task<ProductDescribeResponse> DescribeAsync(ProductDescribeRequest request, ValidAt? validAt = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Dates.Unwrap(await queries.DescribeAsync(request, Dates.ValidDate(validAt, clock.Now), cancellationToken).ConfigureAwait(false));
+    }
+}
+
+/// <summary><see cref="IProductPolicyDraftService"/>: <c>pfc.PolicyDraft.validate</c> (BO-PFC-05).</summary>
+internal sealed class ProductPolicyDraftService(RuntimeQueries queries) : IProductPolicyDraftService
+{
+    public async Task<PolicyDraftValidateResponse> ValidateAsync(PolicyDraftValidateRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Dates.Unwrap(await queries.ValidateDraftAsync(request, cancellationToken).ConfigureAwait(false));
+    }
+}
+
 internal static class Dates
 {
     public static BusinessDate ValidDate(ValidAt? validAt, Instant now) =>

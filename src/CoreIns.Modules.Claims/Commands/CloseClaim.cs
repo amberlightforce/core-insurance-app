@@ -45,6 +45,7 @@ internal sealed class CloseClaimHandler(
     IEventPublisher events,
     ClaimProtection protection,
     IClaimFinancialGuard financials,
+    ExposureClocks exposureClocks,
     ClaimReader reader) : ICommandHandler<CloseClaim, ClaimCloseResponse>
 {
     public async Task<Result<ClaimCloseResponse>> HandleAsync(CloseClaim command, CancellationToken cancellationToken)
@@ -123,6 +124,12 @@ internal sealed class CloseClaimHandler(
         catch (DbUpdateConcurrencyException)
         {
             return ClaimSupport.Stale();
+        }
+
+        // BO-CLM-05: the claim is closed, so the statutory clocks of its exposures stop running.
+        foreach (var exposure in open.Where(e => e.StatutoryClocks.StartsWith(ExposureClocks.Prefix, StringComparison.Ordinal)))
+        {
+            await exposureClocks.CancelLiveAsync(exposure.StatutoryClocks, $"Claim {claim.ClaimNumber.Value} closed ({outcome}).", cancellationToken).ConfigureAwait(false);
         }
 
         events.Publish(new OutgoingEvent(

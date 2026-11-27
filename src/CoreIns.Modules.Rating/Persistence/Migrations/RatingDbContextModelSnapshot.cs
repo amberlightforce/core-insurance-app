@@ -18,10 +18,123 @@ namespace CoreIns.Modules.Rating.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("rat")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("CoreIns.Modules.Rating.Persistence.ArtifactReleaseRow", b =>
+                {
+                    b.Property<Guid>("ReleaseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("release_id");
+
+                    b.Property<Guid?>("ActivationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("activation_id");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<string>("ArtefactHash")
+                        .IsRequired()
+                        .HasColumnType("char(64)")
+                        .HasColumnName("artefact_hash");
+
+                    b.Property<DateTime>("BuiltAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("built_at");
+
+                    b.Property<string>("BuiltBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("built_by");
+
+                    b.Property<Guid>("ChangeSetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("change_set_id");
+
+                    b.Property<string>("DataStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("data_status");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionComment")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_comment");
+
+                    b.Property<DateOnly?>("EffectiveFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("effective_from");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("PayloadHash")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("payload_hash");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("product_code");
+
+                    b.Property<string>("ProductVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("product_version");
+
+                    b.Property<int>("RecordVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
+
+                    b.Property<string>("SubmittedByPrincipal")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by_principal");
+
+                    b.HasKey("ReleaseId")
+                        .HasName("pk_artifact_release");
+
+                    b.HasIndex("ArtefactHash")
+                        .IsUnique()
+                        .HasDatabaseName("ux_artifact_release_artifact");
+
+                    b.HasIndex("ChangeSetId");
+
+                    b.ToTable("artifact_release", "rat", t =>
+                        {
+                            t.HasCheckConstraint("ck_artifact_release_status", "status IN ('BUILT', 'SUBMITTED', 'APPROVED', 'RETURNED', 'SCHEDULED', 'ROLLED_BACK')");
+                        });
+                });
 
             modelBuilder.Entity("CoreIns.Modules.Rating.Persistence.RateActivationRow", b =>
                 {
@@ -216,6 +329,84 @@ namespace CoreIns.Modules.Rating.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Rating.Persistence.RatingChangeSetRow", b =>
+                {
+                    b.Property<Guid>("ChangeSetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("change_set_id");
+
+                    b.Property<string>("BaseArtefactHash")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("base_artefact_hash");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("product_code");
+
+                    b.Property<string>("ProductVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("product_version");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("RecordVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Tables")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("tables");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("ChangeSetId")
+                        .HasName("pk_change_set");
+
+                    b.HasIndex("ProductCode", "ProductVersion")
+                        .HasDatabaseName("ix_change_set_product");
+
+                    b.ToTable("change_set", "rat", t =>
+                        {
+                            t.HasCheckConstraint("ck_change_set_status", "status IN ('OPEN', 'BUILT')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Rating.Persistence.WorksheetIndexRow", b =>
                 {
                     b.Property<long>("IndexId")
@@ -341,6 +532,23 @@ namespace CoreIns.Modules.Rating.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_worksheet_status", "data_status IN ('ILLUSTRATIVE_TEST_DATA', 'APPROVED')");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Rating.Persistence.ArtifactReleaseRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Rating.Persistence.RatingArtifactRow", null)
+                        .WithMany()
+                        .HasForeignKey("ArtefactHash")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_artifact_release_artifact");
+
+                    b.HasOne("CoreIns.Modules.Rating.Persistence.RatingChangeSetRow", null)
+                        .WithMany()
+                        .HasForeignKey("ChangeSetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_artifact_release_change_set");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Rating.Persistence.RateActivationRow", b =>

@@ -257,7 +257,7 @@ internal sealed partial class QuoteJobHandler(
                 cancellationToken).ConfigureAwait(false);
             if (validated.Errors is { Count: > 0 } errors)
             {
-                return Validation("The product rejects the draft.", errors.Select((e, i) => new FieldError($"riskTree[{i}]", "PRODUCT_RULE", "pol.product_rule", e.GetRawText())));
+                return Validation("The product rejects the draft.", errors.Select((e, i) => new FieldError($"riskTree[{i}]", "PRODUCT_RULE", "pol.product_rule", e.Rule + ": " + e.Message.En)));
             }
         }
 

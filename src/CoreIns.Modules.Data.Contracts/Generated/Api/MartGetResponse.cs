@@ -8,6 +8,14 @@ namespace CoreIns.Modules.Data.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MartGetResponse
 {
+    /// <summary>Run header: runId, mart, period, validAt, knownAt, status, snapshotHash, legalStatus, definitionVersion (BO-DAT-03).</summary>
+    /// <remarks>
+    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("run")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Text.Json.JsonElement? Run { get; init; }
+
     /// <summary>PRD: "figures"</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>

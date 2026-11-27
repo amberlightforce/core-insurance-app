@@ -20,6 +20,9 @@ namespace CoreIns.Modules.Product.Api;
 internal static class ProductPermissions
 {
     public const string ProductList = "pfc.Product.list";
+    public const string AvailabilityCheck = "pfc.Availability.check";
+    public const string ProductDescribe = "pfc.Product.describe";
+    public const string PolicyDraftValidate = "pfc.PolicyDraft.validate";
     public const string Resolve ="pfc.ProductVersion.resolve";
     public const string Import = "pfc.ProductVersion.import";
     public const string Fallback = "pfc.ProductVersion.fallback";
@@ -33,6 +36,10 @@ internal static class ProductPermissions
     public const string ChangeSetCreate = "pfc.ChangeSet.create";
     public const string ChangeSetEdit = "pfc.ChangeSet.edit";
     public const string ChangeSetAbandon = "pfc.ChangeSet.abandon";
+    public const string Submit = "pfc.ProductVersion.submit";
+    public const string SignOff = "pfc.ProductVersion.signOff";
+    public const string Schedule = "pfc.ProductVersion.schedule";
+    public const string CancelSchedule = "pfc.ProductVersion.cancelSchedule";
 }
 
 /// <summary>Problem Details from a domain error.</summary>
@@ -107,7 +114,7 @@ internal sealed class ProductVersionsController : ControllerBase
         CancellationToken cancellationToken) =>
         this.Respond(await handler.HandleAsync(new DecideFallback(request), cancellationToken).ConfigureAwait(false));
 
-    private static bool TryTime(IClock clock, string? validAt, string? knownAt, out BusinessDate valid, out Instant known)
+    internal static bool TryTime(IClock clock, string? validAt, string? knownAt, out BusinessDate valid, out Instant known)
     {
         var now = clock.Now;
         valid = Domain.FallbackPlanner.AthensDate(now);
@@ -176,8 +183,9 @@ internal sealed class ProductsController : ControllerBase
 {
     [HttpGet]
     [Authorize(Policy = ProductPermissions.ProductList)]
-    public async Task<IResult> ListAsync([FromServices] ProductListQueries queries, CancellationToken cancellationToken) =>
-        this.Respond<ProductListPage>(await queries.ListAsync(cancellationToken).ConfigureAwait(false));
+    public async Task<IResult> ListAsync(
+        [FromQuery] string? cursor, [FromQuery] int? limit, [FromServices] ProductListQueries queries, CancellationToken cancellationToken) =>
+        this.Respond<ProductListPage>(await queries.ListAsync(cursor, limit, cancellationToken).ConfigureAwait(false));
 }
 
 /// <summary>REST facade of <c>pfc.ChargeType.list</c>.</summary>

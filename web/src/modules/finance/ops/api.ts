@@ -2,9 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiRequest } from '../../../api/client';
 import type {
+  ClosePeriodView,
+  CloseTaskCode,
   EarningStatus,
   FinancePeriod,
   IntakeException,
+  ManualJournalCreateRequest,
   ManualJournalDecideRequest,
   ManualJournalEnvelope,
   ManualJournalSubmitRequest,
@@ -70,11 +73,11 @@ export function useManualJournal(id: string) {
   });
 }
 
-/** fin.ManualJournal.create: stores a balanced, evidenced DRAFT; nothing is posted (submit and decide are BO-FIN-01b). */
+/** fin.ManualJournal.create: stores a balanced, evidenced DRAFT; nothing is posted until it is submitted and approved. */
 export function useCreateManualJournal(onDone: (r: ManualJournalEnvelope) => void) {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: ({ request, key }: { request: ManualJournalSubmitRequest; key: string }) =>
+    mutationFn: ({ request, key }: { request: ManualJournalCreateRequest; key: string }) =>
       apiRequest<ManualJournalEnvelope>(`${base}/manual-journals`, {
         method: 'POST',
         body: request,
@@ -87,7 +90,7 @@ export function useCreateManualJournal(onDone: (r: ManualJournalEnvelope) => voi
   });
 }
 
-/** fin.ManualJournal.submit: the maker proposes the journal; it posts only after another user approves it. */
+/** fin.ManualJournal.submit: the maker sends a DRAFT for approval; it posts only after another user approves it. */
 export function useSubmitManualJournal(onDone: (r: ManualJournalEnvelope) => void) {
   const client = useQueryClient();
   return useMutation({
@@ -99,6 +102,7 @@ export function useSubmitManualJournal(onDone: (r: ManualJournalEnvelope) => voi
       }),
     onSuccess: (response) => {
       void client.invalidateQueries({ queryKey: ['fin', 'manual-journals'] });
+      void client.invalidateQueries({ queryKey: ['fin', 'manual-journal'] });
       onDone(response);
     },
   });
@@ -185,9 +189,26 @@ export function useIntakeAction(onDone: (response: IntakeActionResponse) => void
 
 export type CloseAction = 'soft-close' | 'lock' | 'reopen';
 
+/** fin.Close.tasks: the checklist, state and pending reopen request of one period. */
+export function useCloseTasks(period: string) {
+  return useQuery({
+    queryKey: ['fin', 'close-tasks', period],
+    queryFn: ({ signal }) =>
+      apiRequest<ClosePeriodView>(`${base}/close/tasks`, { query: { period }, signal }),
+  });
+}
+
+function useInvalidateClose() {
+  const client = useQueryClient();
+  return () => {
+    void client.invalidateQueries({ queryKey: ['fin', 'periods'] });
+    void client.invalidateQueries({ queryKey: ['fin', 'close-tasks'] });
+  };
+}
+
 /** fin.Close.softClose / lock / reopen for one period; a reason is always sent. */
 export function useCloseAction(onDone: () => void) {
-  const client = useQueryClient();
+  const invalidate = useInvalidateClose();
   return useMutation({
     mutationFn: ({
       action,
@@ -200,15 +221,29 @@ export function useCloseAction(onDone: () => void) {
       reason: string;
       key: string;
     }) =>
-      apiRequest<unknown>(`${base}/close/${action}`, {
+      apiRequest<ClosePeriodView>(`${base}/close/${action}`, {
         method: 'POST',
         body: { period, reason },
         idempotencyKey: key,
       }),
     onSuccess: () => {
-      void client.invalidateQueries({ queryKey: ['fin', 'periods'] });
+      invalidate();
       onDone();
     },
+  });
+}
+
+/** fin.Close.signOff: confirms one checklist task of a period. */
+export function useSignOffTask() {
+  const invalidate = useInvalidateClose();
+  return useMutation({
+    mutationFn: ({ period, task, key }: { period: string; task: CloseTaskCode; key: string }) =>
+      apiRequest<ClosePeriodView>(`${base}/close/sign-off`, {
+        method: 'POST',
+        body: { period, task },
+        idempotencyKey: key,
+      }),
+    onSuccess: invalidate,
   });
 }
 
@@ -227,7 +262,7 @@ export function useRunEarning(onDone: () => void) {
     mutationFn: ({ asOf, key }: { asOf: string; key: string }) =>
       apiRequest<unknown>(`${base}/earning/run`, {
         method: 'POST',
-        body: { as: asOf },
+        body: { asOf },
         idempotencyKey: key,
       }),
     onSuccess: () => {

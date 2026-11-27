@@ -1887,34 +1887,100 @@ export interface components {
         RelationshipQueryPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["RelationshipQueryItem"][];
         };
-        /** @description pty.Account.create request. PRD inputs: "as named" */
-        AccountCreateRequest: Record<string, never>;
-        /** @description pty.Account.create result. PRD outputs: "—" */
-        AccountCreateResponse: Record<string, never>;
-        /** @description pty.Account.get result. PRD outputs: "—" */
-        AccountGetResponse: Record<string, never>;
-        /** @description pty.Account.search result. PRD outputs: "—" */
-        AccountSearchItem: Record<string, never>;
+        /** @description A PTY account (BO-PTY-04, REQ-PTY-004): the holder, its members and its status. Accounts start PENDING (D-CON-05) and turn ACTIVE once the holder has a verified identifier; WITHDRAWN is terminal. */
+        AccountView: {
+            accountId: components["schemas"]["Uuid"];
+            accountNumber: components["schemas"]["BusinessNumber"];
+            /** @enum {string} */
+            accountType: "INDIVIDUAL" | "HOUSEHOLD" | "BUSINESS";
+            name?: string | null;
+            /** @enum {string} */
+            status: "PENDING" | "ACTIVE" | "WITHDRAWN";
+            /** @description The party holding the POLICYHOLDER role of this account (one at a time) */
+            holderPartyId: components["schemas"]["Uuid"];
+            /** @description Current members (removed members are not listed) */
+            members: components["schemas"]["AccountMemberView"][];
+            /** @description Day the account was withdrawn */
+            withdrawnOn?: components["schemas"]["LocalDate"] | null;
+            /** @description Reason given at withdrawal */
+            withdrawReason?: string | null;
+        };
+        /** @description A party that belongs to an account (household member, employee, dependant) */
+        AccountMemberView: {
+            partyId: components["schemas"]["Uuid"];
+            /** @description SPOUSE, PARTNER, CHILD, DEPENDANT, EMPLOYEE or OTHER */
+            memberRole: components["schemas"]["Code"];
+            addedOn: components["schemas"]["LocalDate"];
+        };
+        /** @description pty.Account.create request (BO-PTY-04). The holder party must exist and be changeable; the account starts PENDING unless the holder already has a verified identifier. Supports dry-run. */
+        AccountCreateRequest: {
+            holderPartyId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            accountType: "INDIVIDUAL" | "HOUSEHOLD" | "BUSINESS";
+            name?: string | null;
+        };
+        /** @description pty.Account.create result */
+        AccountCreateResponse: {
+            account: components["schemas"]["AccountView"];
+        };
+        /** @description pty.Account.get result */
+        AccountGetResponse: {
+            account: components["schemas"]["AccountView"];
+        };
+        /** @description pty.Account.search result row (BO-PTY-04) */
+        AccountSearchItem: {
+            accountId: components["schemas"]["Uuid"];
+            accountNumber: components["schemas"]["BusinessNumber"];
+            /** @enum {string} */
+            accountType: "INDIVIDUAL" | "HOUSEHOLD" | "BUSINESS";
+            name?: string | null;
+            /** @enum {string} */
+            status: "PENDING" | "ACTIVE" | "WITHDRAWN";
+            holderPartyId: components["schemas"]["Uuid"];
+            memberCount: number;
+        };
         /** @description Page of pty.Account.search results (cursor pagination, contract §3.5.5) */
         AccountSearchPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["AccountSearchItem"][];
         };
-        /** @description pty.Account.setHolder request. PRD inputs: "as named" */
-        AccountSetHolderRequest: Record<string, never>;
-        /** @description pty.Account.setHolder result. PRD outputs: "—" */
-        AccountSetHolderResponse: Record<string, never>;
-        /** @description pty.Account.addMember request. PRD inputs: "as named" */
-        AccountAddMemberRequest: Record<string, never>;
-        /** @description pty.Account.addMember result. PRD outputs: "—" */
-        AccountAddMemberResponse: Record<string, never>;
-        /** @description pty.Account.removeMember request. PRD inputs: "as named" */
-        AccountRemoveMemberRequest: Record<string, never>;
-        /** @description pty.Account.removeMember result. PRD outputs: "—" */
-        AccountRemoveMemberResponse: Record<string, never>;
-        /** @description pty.Account.withdraw request. PRD inputs: "as named" */
-        AccountWithdrawRequest: Record<string, never>;
-        /** @description pty.Account.withdraw result. PRD outputs: "—" */
-        AccountWithdrawResponse: Record<string, never>;
+        /** @description pty.Account.setHolder request (BO-PTY-04). Ends the current holder role and starts the new one; an account has one holder at a time. */
+        AccountSetHolderRequest: {
+            accountId: components["schemas"]["Uuid"];
+            holderPartyId: components["schemas"]["Uuid"];
+        };
+        /** @description pty.Account.setHolder result */
+        AccountSetHolderResponse: {
+            account: components["schemas"]["AccountView"];
+        };
+        /** @description pty.Account.addMember request (BO-PTY-04). The member cannot be the holder or already a member; a HOUSEHOLD member can belong to one household only (PTY-ERR-MEMBER-IN-USE); the account member limit applies (PTY-ERR-MEMBER-LIMIT). */
+        AccountAddMemberRequest: {
+            accountId: components["schemas"]["Uuid"];
+            partyId: components["schemas"]["Uuid"];
+            /** @description SPOUSE, PARTNER, CHILD, DEPENDANT, EMPLOYEE or OTHER */
+            memberRole: components["schemas"]["Code"];
+        };
+        /** @description pty.Account.addMember result */
+        AccountAddMemberResponse: {
+            account: components["schemas"]["AccountView"];
+        };
+        /** @description pty.Account.removeMember request (BO-PTY-04) */
+        AccountRemoveMemberRequest: {
+            accountId: components["schemas"]["Uuid"];
+            partyId: components["schemas"]["Uuid"];
+        };
+        /** @description pty.Account.removeMember result */
+        AccountRemoveMemberResponse: {
+            account: components["schemas"]["AccountView"];
+        };
+        /** @description pty.Account.withdraw request (BO-PTY-04). Refused while the holder has a policy in force, scheduled or pending cancellation (PTY-ERR-ACCOUNT-HAS-JOBS). */
+        AccountWithdrawRequest: {
+            accountId: components["schemas"]["Uuid"];
+            reason: string;
+        };
+        /** @description pty.Account.withdraw result */
+        AccountWithdrawResponse: {
+            account: components["schemas"]["AccountView"];
+        };
         /** @description pty.Account.merge request. PRD inputs: "source, target, policies" */
         AccountMergeRequest: {
             /** @description PRD: "source" */
@@ -3553,6 +3619,10 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description Accounts this party holds or belongs to (active membership) */
+                partyId?: components["schemas"]["Uuid"];
+                status?: "PENDING" | "ACTIVE" | "WITHDRAWN";
+                accountNumber?: components["schemas"]["BusinessNumber"];
             };
             header?: {
                 /**

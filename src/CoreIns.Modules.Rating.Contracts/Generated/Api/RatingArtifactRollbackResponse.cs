@@ -4,23 +4,60 @@
 
 namespace CoreIns.Modules.Rating.Contracts.Api;
 
-/// <summary>rat.RatingArtifact.rollback result. PRD outputs: "artefact status, governance bundle id"</summary>
+/// <summary>Contract addition (BO-RAT-06): rat.RatingArtifact.rollback result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RatingArtifactRollbackResponse
 {
-    /// <summary>PRD: "artefact status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("artefactStatus")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ArtefactStatus { get; init; }
+    /// <summary>Contract member 'withdrawnHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("withdrawnHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash WithdrawnHash { get; init; }
 
-    /// <summary>PRD: "governance bundle id"</summary>
+    /// <summary>Contract member 'reactivatedHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reactivatedHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash ReactivatedHash { get; init; }
+
+    /// <summary>Lifecycle of the reactivated artefact.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("artefactStatus")]
+    public required ArtefactStatusValue ArtefactStatus { get; init; }
+
+    /// <summary>Contract member 'governanceBundleId'.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'governanceBundleId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("governanceBundleId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? GovernanceBundleId { get; init; }
+    public required global::System.Guid GovernanceBundleId { get; init; }
+
+    /// <summary>Lifecycle of the reactivated artefact.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ArtefactStatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ArtefactStatusValue
+    {
+        /// <summary><c>DRAFT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DRAFT")]
+        Draft,
+
+        /// <summary><c>SUBMITTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUBMITTED")]
+        Submitted,
+
+        /// <summary><c>APPROVED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVED")]
+        Approved,
+
+        /// <summary><c>SCHEDULED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SCHEDULED")]
+        Scheduled,
+
+        /// <summary><c>ACTIVE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ACTIVE")]
+        Active,
+
+        /// <summary><c>SUPERSEDED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUPERSEDED")]
+        Superseded,
+
+        /// <summary><c>WITHDRAWN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("WITHDRAWN")]
+        Withdrawn,
+    }
 }

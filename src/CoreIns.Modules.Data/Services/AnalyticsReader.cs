@@ -25,7 +25,7 @@ internal sealed class AnalyticsReader(DataDbContext db, IClock clock)
     public const string DefinitionVersion = "1.0";
 
     // TODO(hardening): single reporting currency assumed (EUR); convert or group by currency when a second one is issued.
-    private const string ReportingCurrency = "EUR";
+    internal const string ReportingCurrency = "EUR";
 
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
@@ -292,11 +292,11 @@ internal sealed class AnalyticsReader(DataDbContext db, IClock clock)
     // ---- shared ------------------------------------------------------------------------------------------------------------
 
     /// <summary>A ratio (not money) truncated to four decimals.</summary>
-    private static decimal Ratio(decimal numerator, decimal denominator) => decimal.Truncate(numerator / denominator * 10000m) / 10000m;
+    internal static decimal Ratio(decimal numerator, decimal denominator) => decimal.Truncate(numerator / denominator * 10000m) / 10000m;
 
-    private sealed record SqlArgs(string Predicate, object[] Values);
+    internal sealed record SqlArgs(string Predicate, object[] Values);
 
-    private static SqlArgs Args(string legalEntity, DateTime valid, DateTime known, string? product, DateTime? from, DateTime? to)
+    internal static SqlArgs Args(string legalEntity, DateTime valid, DateTime known, string? product, DateTime? from, DateTime? to)
     {
                 var values = new List<object> { legalEntity, valid, known };
         var predicate = "legal_entity = {0} AND valid_from <= {1} AND (valid_to IS NULL OR valid_to > {1}) AND recorded_from <= {2} AND (recorded_to IS NULL OR recorded_to > {2})";
@@ -321,7 +321,7 @@ internal sealed class AnalyticsReader(DataDbContext db, IClock clock)
         return new SqlArgs(predicate, [.. values]);
     }
 
-    private bool TryInstants(string? validAt, string? knownAt, out DateTime valid, out DateTime known)
+    internal bool TryInstants(string? validAt, string? knownAt, out DateTime valid, out DateTime known)
     {
         var now = clock.Now.ToUtcDateTime();
         valid = now;
@@ -348,7 +348,7 @@ internal sealed class AnalyticsReader(DataDbContext db, IClock clock)
     }
 
     /// <summary>Period 'YYYY', 'YYYY-MM' or 'start..end' (each of those); half-open [from, to).</summary>
-    private static bool TryPeriod(string? text, out DateTime? from, out DateTime? to)
+    internal static bool TryPeriod(string? text, out DateTime? from, out DateTime? to)
     {
         from = null;
         to = null;
@@ -411,5 +411,5 @@ internal sealed class AnalyticsReader(DataDbContext db, IClock clock)
         return true;
     }
 
-    private static string Iso(DateTime utc) => utc.ToString("yyyy-MM-dd'T'HH:mm:ss.ffffff'Z'", CultureInfo.InvariantCulture);
+    internal static string Iso(DateTime utc) => utc.ToString("yyyy-MM-dd'T'HH:mm:ss.ffffff'Z'", CultureInfo.InvariantCulture);
 }

@@ -458,6 +458,161 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                     b.ToTable("dsar_restriction", "fin");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.EarnedPremiumRow", b =>
+                {
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<Guid>("PolicyTermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_term_id");
+
+                    b.Property<string>("Book")
+                        .HasColumnType("text")
+                        .HasColumnName("book");
+
+                    b.Property<string>("Currency")
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<int>("DaysEarned")
+                        .HasColumnType("integer")
+                        .HasColumnName("days_earned");
+
+                    b.Property<decimal>("Delta")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("delta");
+
+                    b.Property<decimal>("EarnedToDate")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("earned_to_date");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<string>("PolicyNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("policy_number");
+
+                    b.Property<int>("TermDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("term_days");
+
+                    b.Property<DateOnly>("TermEnd")
+                        .HasColumnType("date")
+                        .HasColumnName("term_end");
+
+                    b.Property<DateOnly>("TermStart")
+                        .HasColumnType("date")
+                        .HasColumnName("term_start");
+
+                    b.Property<decimal>("WrittenGross")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("written_gross");
+
+                    b.Property<decimal>("WrittenNet")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("written_net");
+
+                    b.HasKey("RunId", "PolicyTermId", "Book", "Currency")
+                        .HasName("pk_earned_premium");
+
+                    b.HasIndex("LegalEntityId", "PolicyTermId", "Book")
+                        .HasDatabaseName("ix_earned_premium_term");
+
+                    b.ToTable("earned_premium", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_earned_premium_currency", "currency ~ '^[A-Z]{3}$'");
+
+                            t.HasCheckConstraint("ck_earned_premium_days", "term_days > 0 AND days_earned >= 0 AND days_earned <= term_days");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.EarningRunRow", b =>
+                {
+                    b.Property<Guid>("RunId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<DateOnly>("AsOf")
+                        .HasColumnType("date")
+                        .HasColumnName("as_of");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<decimal>("EarnedToDate")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("earned_to_date");
+
+                    b.Property<DateTime>("FinishedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("finished_at");
+
+                    b.PrimitiveCollection<Guid[]>("JournalIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("journal_ids");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("PeriodCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("period_code");
+
+                    b.Property<int>("PoliciesProcessed")
+                        .HasColumnType("integer")
+                        .HasColumnName("policies_processed");
+
+                    b.Property<decimal>("PostedDelta")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("posted_delta");
+
+                    b.Property<string>("RunBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("run_by");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.Property<int>("TermsSkipped")
+                        .HasColumnType("integer")
+                        .HasColumnName("terms_skipped");
+
+                    b.HasKey("RunId")
+                        .HasName("pk_earning_run");
+
+                    b.HasIndex("LegalEntityId", "PeriodCode", "AsOf")
+                        .HasDatabaseName("ix_earning_run_period");
+
+                    b.ToTable("earning_run", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_earning_run_period", "period_code ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'");
+
+                            t.HasCheckConstraint("ck_earning_run_state", "state IN ('DONE')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.EventCatalogueRow", b =>
                 {
                     b.Property<string>("RegistryName")
@@ -507,10 +662,44 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("legal_entity_id");
 
+                    b.Property<int>("LockCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("lock_count");
+
+                    b.Property<DateTime?>("LockedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("locked_at");
+
+                    b.Property<string>("LockedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("locked_by");
+
                     b.Property<string>("PeriodCode")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("period_code");
+
+                    b.Property<string>("ReopenReason")
+                        .HasColumnType("text")
+                        .HasColumnName("reopen_reason");
+
+                    b.Property<DateTime?>("ReopenRequestedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("reopen_requested_at");
+
+                    b.Property<string>("ReopenRequestedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("reopen_requested_by");
+
+                    b.Property<DateTime?>("SoftClosedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("soft_closed_at");
+
+                    b.Property<string>("SoftClosedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("soft_closed_by");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -528,7 +717,7 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_financial_period_code", "period_code ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'");
 
-                            t.HasCheckConstraint("ck_financial_period_status", "status IN ('OPEN', 'LOCKED')");
+                            t.HasCheckConstraint("ck_financial_period_status", "status IN ('OPEN', 'SOFT_CLOSED', 'LOCKED')");
                         });
                 });
 
@@ -744,7 +933,7 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_journal_entry_reversal", "(source_type = 'REVERSAL') = (reverses_journal_id IS NOT NULL)");
 
-                            t.HasCheckConstraint("ck_journal_entry_source_type", "source_type IN ('EVENT', 'REVERSAL')");
+                            t.HasCheckConstraint("ck_journal_entry_source_type", "source_type IN ('EVENT', 'REVERSAL', 'MANUAL')");
                         });
                 });
 
@@ -1034,6 +1223,10 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .HasColumnType("date")
                         .HasColumnName("accounting_date");
 
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
                     b.Property<string>("Book")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1130,6 +1323,46 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.PeriodCloseTaskRow", b =>
+                {
+                    b.Property<Guid>("PeriodId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("period_id");
+
+                    b.Property<string>("TaskCode")
+                        .HasColumnType("text")
+                        .HasColumnName("task_code");
+
+                    b.Property<bool>("BreakAccepted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("break_accepted");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime?>("SignedOffAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("signed_off_at");
+
+                    b.Property<string>("SignedOffBy")
+                        .HasColumnType("text")
+                        .HasColumnName("signed_off_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("PeriodId", "TaskCode")
+                        .HasName("pk_period_close_task");
+
+                    b.ToTable("period_close_task", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_period_close_task_status", "status IN ('OPEN', 'SIGNED_OFF')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.PolicyContextRow", b =>
                 {
                     b.Property<Guid>("PolicyTermId")
@@ -1185,6 +1418,14 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                     b.Property<Guid>("SourceEventId")
                         .HasColumnType("uuid")
                         .HasColumnName("source_event_id");
+
+                    b.Property<DateOnly?>("TermEnd")
+                        .HasColumnType("date")
+                        .HasColumnName("term_end");
+
+                    b.Property<DateOnly?>("TermStart")
+                        .HasColumnType("date")
+                        .HasColumnName("term_start");
 
                     b.Property<Guid>("TransactionId")
                         .HasColumnType("uuid")
@@ -1361,6 +1602,16 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .HasConstraintName("fk_account_derivation_account");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.EarnedPremiumRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Finance.Persistence.EarningRunRow", null)
+                        .WithMany()
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_earned_premium_run");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.JournalEntryRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Finance.Persistence.FinancialPeriodRow", null)
@@ -1402,6 +1653,16 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_manual_journal_line_journal");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.PeriodCloseTaskRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Finance.Persistence.FinancialPeriodRow", null)
+                        .WithMany()
+                        .HasForeignKey("PeriodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_period_close_task_period");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.PostingRuleRow", b =>
