@@ -25,12 +25,12 @@
     <!-- OpenAPI 3.1 document generated from the ASP.NET Core controllers (ADR §1 web framework; feeds openapi-typescript). -->
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
     <!-- EF Core: data access and versioned schema migrations run by the migrate job (ADR §1 data access). -->
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.13" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.15" />
     <!-- EF Core provider for PostgreSQL 17 (ADR §1 data access). -->
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.4" />
     <!-- ADO.NET driver for PostgreSQL: data source for health checks, Dapper and the migrate job. -->
-    <PackageVersion Include="Npgsql" Version="10.0.3" />
+    <PackageVersion Include="Npgsql" Version="11.0.0" />
     <!-- Dapper: performance-critical and set-based SQL (ledger, reporting marts) (ADR §1 data access). -->
     <PackageVersion Include="Dapper" Version="2.1.89" />
     <!-- Hangfire: background, delayed and recurring jobs with a dashboard (ADR §1 background jobs). -->
