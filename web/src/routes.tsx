@@ -246,6 +246,30 @@ const moduleRoutes: RouteObject[] = [
     }),
   },
   {
+    path: 'documents',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/DocumentsHomePage')).DocumentsHomePage,
+    }),
+  },
+  {
+    path: 'documents/subject/:module/:type/:id',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/SubjectDocumentsPage')).SubjectDocumentsPage,
+    }),
+  },
+  {
+    path: 'documents/:documentId',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/DocumentDetailPage')).DocumentDetailPage,
+    }),
+  },
+  {
+    path: 'reports',
+    lazy: async () => ({
+      Component: (await import('./modules/reports/ReportsPage')).ReportsPage,
+    }),
+  },
+  {
     path: 'finance/journals/policy/:policyNumber',
     lazy: async () => ({ Component: (await import('./modules/finance/JournalPage')).JournalPage }),
   },
@@ -443,6 +467,8 @@ const implemented = new Set([
   '/policies',
   '/billing',
   '/finance',
+  '/documents',
+  '/reports',
   '/claims',
   '/underwriting',
   '/reinsurance',
