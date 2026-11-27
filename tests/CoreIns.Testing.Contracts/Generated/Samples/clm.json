@@ -326,10 +326,9 @@
       }
     },
     "clm.Fnol.saveDraft": {
-      "claim": "unspecified",
-      "exposures": "unspecified",
-      "checklist": "unspecified",
-      "assignment": "unspecified"
+      "draftId": "0192a528-1185-737c-84be-df593010d547",
+      "recordVersion": 1,
+      "savedAt": "2026-10-07T09:00:00Z"
     },
     "clm.Fnol.submit": {
       "claimId": "0192f99f-55f6-7e78-85c2-d6c99b61b809",
@@ -716,14 +715,74 @@
       }
     },
     "ClaimMergeRequest": {
-      "ids": [
-        "01924b75-4e94-7952-812f-ee16a92b476a"
-      ],
-      "changes": "unspecified",
-      "reason": "unspecified"
+      "survivorClaimId": "01926f05-1e95-70be-8d1e-11d14a7a5e3b",
+      "duplicateClaimId": "0192e86c-36cb-70e6-8ed2-f90bdca67baf",
+      "expectedRecordVersion": 1,
+      "reasonCode": "SAMPLE_CODE"
     },
     "ClaimMergeResponse": {
-      "claim": "unspecified"
+      "survivor": {
+        "claimId": "01921b1c-1b1c-78d7-821f-fcc3a607a34c",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "0192ef4f-0913-71c3-8129-ba587363f108",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "01922ab9-00aa-7478-8590-0103998f271b",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "0192c041-18be-739f-81c9-b87b3ec9c510",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      },
+      "duplicate": {
+        "claimId": "0192738d-e2a4-7529-8ed8-47df57530349",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "0192dbb1-034a-738d-8146-a7f8ef5ceb79",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "0192612d-1a20-7654-8bdc-7f76a5bf4f71",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "0192c346-328d-771d-8c8e-254ff18f8f07",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ClaimPayeeAccountView": {
       "payeeAccountId": "01928029-e420-7ec0-8ddd-16df04efba73",
@@ -761,14 +820,42 @@
       "fsStatementId": "0192bcf0-e0b4-7cc0-892c-dd4e49b1f664"
     },
     "ClaimReopenRequest": {
-      "ids": [
-        "01921567-2abe-7e2f-85c6-8d481858ced2"
-      ],
-      "changes": "unspecified",
-      "reason": "unspecified"
+      "claimId": "0192af36-e12d-7541-81f1-24777b8b2a99",
+      "expectedRecordVersion": 1,
+      "reasonCode": "SAMPLE_CODE"
     },
     "ClaimReopenResponse": {
-      "claim": "unspecified"
+      "claim": {
+        "claimId": "01926f47-42a7-73d0-8dbb-7b1c77b72387",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "019268d3-356f-79b8-810c-1008fbd1c815",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "01928570-0588-77fc-8f4a-5b0331dfe53a",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "01928411-e459-77c3-88a9-dcf7076be1a6",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ClaimSearchCriteria": {
       "claimNumber": "sample",
@@ -1645,6 +1732,76 @@
         }
       }
     },
+    "FnolDraftGetResponse": {
+      "draftId": "0192b406-ef51-70bd-8ab2-9ccd993c6223",
+      "recordVersion": 1,
+      "status": "DRAFT",
+      "savedAt": "2026-10-07T09:00:00Z",
+      "claimId": "0192c551-4b31-7fba-8f46-5d7c0b12f428",
+      "fnolPayload": {
+        "lineOfBusiness": "SAMPLE_CODE",
+        "policyId": "0192cb74-33f1-7c75-80ad-64df02b186f8",
+        "policyNumber": "SAMPLE-000001",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "lossLocation": "sample",
+        "description": "sample",
+        "lossData": {
+          "note": "sample"
+        },
+        "reporter": {
+          "partyId": "01928f88-86bc-752e-8913-035280a4a65b",
+          "relationship": "SAMPLE_CODE",
+          "adHoc": {
+            "note": "sample"
+          }
+        },
+        "involvedParties": [
+          {
+            "note": "sample"
+          }
+        ],
+        "incidents": [
+          {
+            "incidentType": "VEHICLE",
+            "vehicleRef": "sample",
+            "drivable": true,
+            "damageAreas": [
+              "SAMPLE_CODE"
+            ]
+          }
+        ],
+        "exposures": [
+          {
+            "kind": "OWN_DAMAGE",
+            "coverageCode": "SAMPLE_CODE"
+          }
+        ],
+        "duplicateDecision": {
+          "action": "LINK",
+          "linkedClaimId": "0192b379-9507-74f2-8516-38885d6405b2",
+          "reasonCode": "SAMPLE_CODE"
+        },
+        "attachmentRefs": [
+          "0192fbad-b3a7-7639-88e7-9e41f4026790"
+        ],
+        "channel": "SAMPLE_CODE",
+        "receiptMedium": "SAMPLE_CODE",
+        "channelMetadata": {
+          "note": "sample"
+        },
+        "liabilityFacts": {
+          "insuredFaultPct": "12.50",
+          "faultSource": "SAMPLE_CODE",
+          "counterpartyInsurerPartyId": "0192f030-bd90-78bb-86af-75f0af9f969a",
+          "jointReportFlag": true,
+          "vehicleCount": 1,
+          "accidentInGreece": true
+        },
+        "draftId": "0192cd49-ba77-70c3-8d91-6d68f82a502c"
+      }
+    },
     "FnolExposureInput": {
       "kind": "OWN_DAMAGE",
       "coverageCode": "SAMPLE_CODE"
@@ -1717,7 +1874,8 @@
           "jointReportFlag": true,
           "vehicleCount": 1,
           "accidentInGreece": true
-        }
+        },
+        "draftId": "0192314e-f55e-7ccb-8c1e-ea53061f6fa7"
       }
     },
     "FnolIncidentInput": {
@@ -1734,13 +1892,76 @@
       "message": "sample"
     },
     "FnolSaveDraftRequest": {
-      "fnolPayload": "unspecified"
+      "draftId": "01922329-b1fa-75a9-8805-d39528908423",
+      "expectedRecordVersion": 1,
+      "fnolPayload": {
+        "lineOfBusiness": "SAMPLE_CODE",
+        "policyId": "0192dacf-e46a-7710-828c-cb4d09a75675",
+        "policyNumber": "SAMPLE-000001",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "lossLocation": "sample",
+        "description": "sample",
+        "lossData": {
+          "note": "sample"
+        },
+        "reporter": {
+          "partyId": "01927ccd-b037-7664-8a1e-a5ab9cbbb9c7",
+          "relationship": "SAMPLE_CODE",
+          "adHoc": {
+            "note": "sample"
+          }
+        },
+        "involvedParties": [
+          {
+            "note": "sample"
+          }
+        ],
+        "incidents": [
+          {
+            "incidentType": "VEHICLE",
+            "vehicleRef": "sample",
+            "drivable": true,
+            "damageAreas": [
+              "SAMPLE_CODE"
+            ]
+          }
+        ],
+        "exposures": [
+          {
+            "kind": "OWN_DAMAGE",
+            "coverageCode": "SAMPLE_CODE"
+          }
+        ],
+        "duplicateDecision": {
+          "action": "LINK",
+          "linkedClaimId": "019215e6-a5a0-7960-80af-3feb5759cd8b",
+          "reasonCode": "SAMPLE_CODE"
+        },
+        "attachmentRefs": [
+          "0192c0a2-3a17-7cce-807b-632493db0a07"
+        ],
+        "channel": "SAMPLE_CODE",
+        "receiptMedium": "SAMPLE_CODE",
+        "channelMetadata": {
+          "note": "sample"
+        },
+        "liabilityFacts": {
+          "insuredFaultPct": "12.50",
+          "faultSource": "SAMPLE_CODE",
+          "counterpartyInsurerPartyId": "0192fda0-144b-7db0-8ed6-90290452ba62",
+          "jointReportFlag": true,
+          "vehicleCount": 1,
+          "accidentInGreece": true
+        },
+        "draftId": "01926920-e268-7c3a-84ec-7c972e61191d"
+      }
     },
     "FnolSaveDraftResponse": {
-      "claim": "unspecified",
-      "exposures": "unspecified",
-      "checklist": "unspecified",
-      "assignment": "unspecified"
+      "draftId": "0192b811-7043-735b-8b47-9f6eca59a59c",
+      "recordVersion": 1,
+      "savedAt": "2026-10-07T09:00:00Z"
     },
     "FnolSubmitRequest": {
       "lineOfBusiness": "SAMPLE_CODE",
@@ -1802,7 +2023,8 @@
         "jointReportFlag": true,
         "vehicleCount": 1,
         "accidentInGreece": true
-      }
+      },
+      "draftId": "019214ea-4aa1-7ea5-877b-3a20b173c5fb"
     },
     "FnolSubmitResponse": {
       "claimId": "0192a90d-a9c4-7dfc-89f6-0c3a50a153e8",
@@ -1948,7 +2170,8 @@
           "jointReportFlag": true,
           "vehicleCount": 1,
           "accidentInGreece": true
-        }
+        },
+        "draftId": "0192ff96-9ba4-7cbd-88ce-7470a6f4e40a"
       }
     },
     "FnolValidateResponse": {

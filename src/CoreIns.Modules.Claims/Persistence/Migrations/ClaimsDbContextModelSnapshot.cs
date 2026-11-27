@@ -966,6 +966,74 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.FnolDraftRow", b =>
+                {
+                    b.Property<Guid>("DraftId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("draft_id");
+
+                    b.Property<Guid?>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<byte[]>("PayloadEncrypted")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("payload_encrypted");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("DraftId")
+                        .HasName("pk_fnol_draft");
+
+                    b.HasIndex("ClaimId");
+
+                    b.HasIndex("LegalEntityId", "CreatedBy", "Status")
+                        .HasDatabaseName("ix_fnol_draft_owner");
+
+                    b.ToTable("fnol_draft", "clm", t =>
+                        {
+                            t.HasCheckConstraint("ck_fnol_draft_claim_shape", "(status = 'SUBMITTED') = (claim_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_fnol_draft_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+
+                            t.HasCheckConstraint("ck_fnol_draft_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_fnol_draft_status", "status IN ('DRAFT', 'SUBMITTED', 'DISCARDED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.FnolSnapshotRow", b =>
                 {
                     b.Property<Guid>("FnolId")
@@ -2252,6 +2320,15 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_financial_transaction_set");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.FnolDraftRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Claims.Persistence.ClaimRow", null)
+                        .WithMany()
+                        .HasForeignKey("ClaimId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_fnol_draft_claim");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.FnolSnapshotRow", b =>

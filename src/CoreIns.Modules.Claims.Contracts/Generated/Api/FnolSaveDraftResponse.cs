@@ -4,39 +4,22 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Fnol.saveDraft result. PRD outputs: "claim, exposures, checklist, assignment"</summary>
+/// <summary>clm.Fnol.saveDraft result (BO-CLM-02). Holds no FNOL content.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FnolSaveDraftResponse
 {
-    /// <summary>PRD: "claim"</summary>
+    /// <summary>Contract member 'draftId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'draftId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("claim")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Claim { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("draftId")]
+    public required global::System.Guid DraftId { get; init; }
 
-    /// <summary>PRD: "exposures"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exposures")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Exposures { get; init; }
+    /// <summary>Contract member 'recordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    public required int RecordVersion { get; init; }
 
-    /// <summary>PRD: "checklist"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("checklist")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Checklist { get; init; }
-
-    /// <summary>PRD: "assignment"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("assignment")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Assignment { get; init; }
+    /// <summary>Contract member 'savedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("savedAt")]
+    public required global::CoreIns.SharedKernel.Instant SavedAt { get; init; }
 }

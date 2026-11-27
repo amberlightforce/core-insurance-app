@@ -307,19 +307,16 @@ internal sealed class ReopenExposureHandler(
         // BO-CLM-05: paused clocks resume; clocks cancelled at close are started afresh (new key per reopen) once their values are usable.
         if (exposure.StatutoryClocks.StartsWith(ExposureClocks.Prefix, StringComparison.Ordinal))
         {
-            var restart = await exposureClocks.ResumeAsync(exposure.StatutoryClocks, $"Exposure reopened ({request.ReasonCode}).", cancellationToken).ConfigureAwait(false);
-            if (restart)
+            var noticeOn = await db.Claims.AsNoTracking().Where(c => c.ClaimId == claim.ClaimId).Select(c => c.NoticeOn).SingleAsync(cancellationToken).ConfigureAwait(false);
+            var clocks = await exposureClocks.ReopenAsync(
+                exposure.ExposureId, exposure.StatutoryClocks, noticeOn.StartOfDayIn(options.Value.Zone), $"reopen-{exposure.RecordVersion + 1}",
+                $"Exposure reopened ({request.ReasonCode}).", Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsProduction(environment), cancellationToken).ConfigureAwait(false);
+            if (clocks.IsFailure)
             {
-                if (Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsProduction(environment)
-                    && await exposureClocks.HasUnconfirmedValueAsync(cancellationToken).ConfigureAwait(false))
-                {
-                    return DomainError.Of(ModuleCode.CLM, "MTPL-CLOCKS-REQUIRED", "Third-party MTPL exposures need statutory clocks whose values are legally confirmed.");
-                }
-
-                var noticeOn = await db.Claims.AsNoTracking().Where(c => c.ClaimId == claim.ClaimId).Select(c => c.NoticeOn).SingleAsync(cancellationToken).ConfigureAwait(false);
-                exposure.StatutoryClocks = await exposureClocks.StartAsync(
-                    exposure.ExposureId, noticeOn.StartOfDayIn(options.Value.Zone), $"reopen-{exposure.RecordVersion + 1}", cancellationToken).ConfigureAwait(false);
+                return clocks.Error!;
             }
+
+            exposure.StatutoryClocks = clocks.Value;
         }
 
         (exposure.Status, exposure.SubStatus) = ExposureStates.ToColumns(reopened.Value);

@@ -112,6 +112,13 @@ public sealed record FnolSubmitRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.Modules.Claims.Contracts.Api.LiabilityFacts? LiabilityFacts { get; init; }
 
+    /// <summary>The saved draft (clm.Fnol.saveDraft) this submit completes; the draft is marked SUBMITTED in the same transaction (BO-CLM-02)</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'draftId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("draftId")]
+    public global::System.Guid? DraftId { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public sealed record ReporterDetail
