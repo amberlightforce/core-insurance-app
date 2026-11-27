@@ -4689,10 +4689,26 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: filters
+      - name: contractId
         in: query
         required: false
-        description: 'PRD: "filters"'
+        schema:
+          type: string
+      - name: reinsurerPartyId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: kind
+        in: query
+        required: false
+        description: CEDED_PREMIUM, DEPOSIT_INSTALMENT, PREMIUM_ADJUSTMENT, COMMISSION or RECOVERY
+        schema:
+          type: string
+      - name: period
+        in: query
+        required: false
+        description: Accounting period, yyyy-MM
         schema:
           type: string
       responses:
@@ -4708,6 +4724,124 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/ri/v1/items/generate:
+    post:
+      operationId: ri.Item.generate
+      summary: Generate technical account items
+      description: |-
+        Generate technical account items (BO-RI-11)
+      tags:
+      - Item
+      x-requirement:
+      - REQ-RI-173
+      - REQ-RI-183
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'Append-only ledger writes; idempotent on the source id'
+      x-exposure:
+      - ui
+      x-permission: ri.Item.generate
+      x-error-codes:
+      - code: RI-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-08 §9.1 l.1522
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemGenerateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemGenerateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/ri/v1/items/reverse:
+    post:
+      operationId: ri.Item.reverse
+      summary: Reverse a technical account item
+      description: |-
+        Reverse a technical account item (BO-RI-11)
+      tags:
+      - Item
+      x-requirement:
+      - REQ-RI-173
+      - REQ-RI-183
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'Append-only ledger writes; idempotent on the source id'
+      x-exposure:
+      - ui
+      x-permission: ri.Item.reverse
+      x-error-codes:
+      - code: RI-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-08 §9.1 l.1522
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemReverseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemReverseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/ri/v1/balances/report:
@@ -9937,18 +10071,72 @@ components:
         notice:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "notice"'
+    AccountItemView:
+      type: object
+      description: One technical account item of a reinsurer on a contract (BO-RI-11), append-only. Positive is payable by the cedant to the reinsurer, negative payable to the cedant. A reversal is a new item with the opposite sign.
+      properties:
+        itemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractYear:
+          type: integer
+        layerNo:
+          type: [integer, 'null']
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          type: string
+          enum:
+          - CEDED_PREMIUM
+          - DEPOSIT_INSTALMENT
+          - PREMIUM_ADJUSTMENT
+          - COMMISSION
+          - RECOVERY
+        sourceKind:
+          $ref: ../events/common.schema.json#/$defs/Text
+        sourceId:
+          $ref: ../events/common.schema.json#/$defs/Text
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        period:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Accounting period, yyyy-MM
+        itemDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        reversalOf:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        reason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        createdBy:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - itemId
+      - contractId
+      - contractYear
+      - reinsurerPartyId
+      - kind
+      - sourceKind
+      - sourceId
+      - amount
+      - period
+      - itemDate
+      - createdAt
+      - createdBy
     ItemListItem:
       type: object
-      description: 'ri.Item.list result. PRD outputs: "items, balances"'
+      description: One ri.Item.list result
       properties:
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        balances:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "balances"'
+        item:
+          $ref: '#/components/schemas/AccountItemView'
+      required:
+      - item
     ItemListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -9959,25 +10147,122 @@ components:
             items:
               $ref: '#/components/schemas/ItemListItem'
       description: Page of ri.Item.list results (cursor pagination, contract §3.5.5)
+    ItemGenerateRequest:
+      type: object
+      description: ri.Item.generate request. Produces the items not yet produced from the booked recoveries, cession premium deltas, instalments due, and approved adjustments and commission, up to the as-of date. Idempotent on the source id.
+      properties:
+        contractId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Only this contract (all when omitted)
+        asOf:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Instalments due up to this date are produced (today when omitted)
+    ItemGenerateResponse:
+      type: object
+      description: ri.Item.generate result
+      properties:
+        created:
+          type: integer
+        byKind:
+          type: object
+          additionalProperties:
+            type: integer
+        skipped:
+          type: integer
+          description: Sources that could not be produced yet (no matching contract, or no participant)
+      required:
+      - created
+      - byKind
+      - skipped
+    ItemReverseRequest:
+      type: object
+      description: ri.Item.reverse request. Appends the opposite item; an item is reversed once and a reversal is not reversed.
+      properties:
+        itemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - itemId
+      - reason
+    ItemReverseResponse:
+      type: object
+      description: ri.Item.reverse result
+      properties:
+        reversal:
+          $ref: '#/components/schemas/AccountItemView'
+      required:
+      - reversal
     BalanceReportRequest:
       type: object
-      description: 'ri.Balance.report request. PRD inputs: "filters"'
+      description: ri.Balance.report request. Balances per reinsurer, currency and period from the items.
       properties:
-        filters:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "filters"'
+        contractId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        reinsurerPartyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        periodFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: yyyy-MM
+        periodTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: yyyy-MM
+    BalanceLine:
+      type: object
+      description: The movement and the running balance of one reinsurer in one currency and period. Positive is payable to the reinsurer.
+      properties:
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        currency:
+          $ref: ../events/common.schema.json#/$defs/Text
+        period:
+          $ref: ../events/common.schema.json#/$defs/Text
+        premium:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Ceded, deposit and adjustment premium of the period
+        commission:
+          $ref: ../events/common.schema.json#/$defs/Money
+        recoveries:
+          $ref: ../events/common.schema.json#/$defs/Money
+        movement:
+          $ref: ../events/common.schema.json#/$defs/Money
+        closing:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Running balance at the end of the period
+        itemCount:
+          type: integer
+      required:
+      - reinsurerPartyId
+      - currency
+      - period
+      - premium
+      - commission
+      - recoveries
+      - movement
+      - closing
+      - itemCount
     BalanceReportResponse:
       type: object
-      description: 'ri.Balance.report result. PRD outputs: "items, balances"'
+      description: ri.Balance.report result
       properties:
-        items:
+        balances:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        balances:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "balances"'
+            $ref: '#/components/schemas/BalanceLine'
+      required:
+      - balances
     BordereauGenerateRequest:
       type: object
       description: 'ri.Bordereau.generate request. PRD inputs: "type, contract, counterparty, period, format"'

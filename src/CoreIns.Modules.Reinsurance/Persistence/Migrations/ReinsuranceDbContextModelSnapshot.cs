@@ -357,6 +357,114 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.AccountItemRow", b =>
+                {
+                    b.Property<Guid>("ItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("ContractId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("contract_id");
+
+                    b.Property<int>("ContractYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("contract_year");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateOnly>("ItemDate")
+                        .HasColumnType("date")
+                        .HasColumnName("item_date");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<int?>("LayerNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("layer_no");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Period")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("period");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("ReinsurerPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reinsurer_party_id");
+
+                    b.Property<Guid?>("ReversalOf")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reversal_of");
+
+                    b.Property<string>("SourceGroup")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_group");
+
+                    b.Property<string>("SourceId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_id");
+
+                    b.Property<string>("SourceKind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_kind");
+
+                    b.HasKey("ItemId")
+                        .HasName("pk_account_item");
+
+                    b.HasIndex("ReversalOf")
+                        .IsUnique()
+                        .HasDatabaseName("ux_account_item_reversal")
+                        .HasFilter("reversal_of IS NOT NULL");
+
+                    b.HasIndex("ContractId", "Period")
+                        .HasDatabaseName("ix_account_item_contract");
+
+                    b.HasIndex("Kind", "SourceId", "ReinsurerPartyId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_account_item_source");
+
+                    b.HasIndex("LegalEntityId", "ReinsurerPartyId", "Period")
+                        .HasDatabaseName("ix_account_item_reinsurer");
+
+                    b.ToTable("account_item", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_account_item_kind", "kind IN ('CEDED_PREMIUM', 'DEPOSIT_INSTALMENT', 'PREMIUM_ADJUSTMENT', 'COMMISSION', 'RECOVERY')");
+
+                            t.HasCheckConstraint("ck_account_item_period", "period ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.AccountingDecisionRow", b =>
                 {
                     b.Property<string>("Kind")
@@ -1659,6 +1767,16 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_section_scope", "cardinality(product_codes) >= 1 AND cardinality(coverage_codes) >= 1");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.AccountItemRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.ContractRow", null)
+                        .WithMany()
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_account_item_contract");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.AdjustmentRow", b =>
