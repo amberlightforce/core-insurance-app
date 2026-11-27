@@ -16,7 +16,14 @@
         "uw.RuleSet.test": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.RuleSet.simulate": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.RuleSet.export": [ "Staff.UnderwritingManager", "Platform.Admin" ],
-        "uw.RuleSet.import": [ "Staff.UnderwritingManager", "Platform.Admin" ]
+        "uw.RuleSet.import": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        // BO-UW-02: release is maker-checker (plt.Approval UW.RULESET_APPROVAL); the submitter can never approve, whatever the roles.
+        "uw.RuleSet.submit": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.RuleSet.approve": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.RuleSet.schedule": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.IssueType.search": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.IssueType.get": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.IssueType.upsert": [ "Staff.UnderwritingManager", "Platform.Admin" ]
       }
     },
     "Authority": {
@@ -26,7 +33,9 @@
         {
           "Id": "uw-manager-issue-approval-illustrative", "Role": "Staff.UnderwritingManager", "Type": "UW.ISSUE_APPROVAL", "Illustrative": true,
           "Limits": [ { "Dimension": "issueType", "Comparison": "InSet", "Codes": [ "DRIVER_AGE_REFERRAL", "VEHICLE_AGE_REFERRAL", "VEHICLE_VALUE_REFERRAL" ] } ]
-        }
+        },
+        // ILLUSTRATIVE TEST DATA (D-CON-17: four-eyes thresholds are configuration, no approved matrix): a manager may approve the release of any product's rule set.
+        { "Id": "uw-manager-ruleset-approval-illustrative", "Role": "Staff.UnderwritingManager", "Type": "UW.RULESET_APPROVAL", "Illustrative": true }
       ]
     }
   }

@@ -1887,6 +1887,16 @@ export interface components {
             coverageDecision: "PENDING" | "COVERED" | "COVERED_WITH_RESERVATION" | "PARTIALLY_COVERED" | "NOT_COVERED";
             duplicateReason?: components["schemas"]["Code"] | null;
             createdAt: components["schemas"]["Instant"];
+            /** @description The CMP statutory clocks of a third-party MTPL exposure (BO-CLM-05); empty when none are tracked. */
+            statutoryClocks?: components["schemas"]["ExposureClockView"][];
+        };
+        /** @description One statutory clock of an exposure, as CMP reports it (BO-CLM-05). */
+        ExposureClockView: {
+            instanceId: components["schemas"]["Uuid"];
+            clockCode: components["schemas"]["ClockCode"];
+            /** @description CMP clock state (RUNNING, WARNED, PAUSED, MET, BREACHED, ELAPSED, CANCELLED) */
+            status: string;
+            deadline?: components["schemas"]["Instant"] | null;
         };
         /** @description A claimant (REQ-CLM-066 subset) referring to a PTY party. */
         ClaimantView: {
@@ -3220,6 +3230,8 @@ export interface components {
         };
         /** @description Decimal number as a string (no binary floating point for money or rates). */
         Decimal: string;
+        /** @description Statutory or business clock code `<MOD>_<NAME>` (contract §3.6.1, R-28). */
+        ClockCode: string;
         ProblemFieldError: {
             /** @description JSON pointer or dotted path of the field. */
             path: string;

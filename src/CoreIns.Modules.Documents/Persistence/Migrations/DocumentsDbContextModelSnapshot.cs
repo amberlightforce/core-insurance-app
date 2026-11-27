@@ -294,6 +294,16 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_document_request");
 
+                    b.HasIndex("LegalEntityId", "CreatedAt", "DocumentNumber")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("ix_document_library");
+
+                    b.HasIndex("LegalEntityId", "Status", "CreatedAt")
+                        .HasDatabaseName("ix_document_library_status");
+
+                    b.HasIndex("LegalEntityId", "TemplateKey", "CreatedAt")
+                        .HasDatabaseName("ix_document_library_type");
+
                     b.HasIndex("SubjectModule", "SubjectType", "SubjectId")
                         .HasDatabaseName("ix_document_subject");
 

@@ -4,23 +4,37 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Commission.approve request. PRD inputs: "section, year"</summary>
+/// <summary>ri.Commission.approve request; the calculation is decided once. The person who calculated it cannot decide it (RI-ERR-SOD).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CommissionApproveRequest
 {
-    /// <summary>PRD: "section"</summary>
+    /// <summary>Contract member 'commissionId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'commissionId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("section")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Section { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("commissionId")]
+    public required global::System.Guid CommissionId { get; init; }
 
-    /// <summary>PRD: "year"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("year")]
+    /// <summary>Contract member 'decision'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
+    public required DecisionValue Decision { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Year { get; init; }
+    public string? Reason { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecisionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DecisionValue
+    {
+        /// <summary><c>APPROVE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVE")]
+        Approve,
+
+        /// <summary><c>REJECT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REJECT")]
+        Reject,
+    }
 }

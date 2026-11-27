@@ -899,8 +899,8 @@ paths:
       - code: CLM-ERR-NOT-FOUND
         status: 404
       - code: CLM-ERR-MTPL-CLOCKS-REQUIRED
-        note: Production refuses MTPL_PD/MTPL_BI third-party exposures until the CMP clock WP lands (D-SL4-09); outside Production they are created
-          with statutoryClocks NOT_TRACKED
+        note: Production refuses MTPL_PD/MTPL_BI third-party exposures while the CMP offer/assessment clock values are not Verified or
+          SecondarySource (D-REG-04, OQ-008); otherwise the offer and assessment clocks start in CMP
         status: 422
       x-source:
       - PRD-07 §9.1 l.1469
@@ -6002,6 +6002,11 @@ components:
           - type: 'null'
         createdAt:
           $ref: ../events/common.schema.json#/$defs/Instant
+        statutoryClocks:
+          type: array
+          description: The CMP statutory clocks of a third-party MTPL exposure (BO-CLM-05); empty when none are tracked.
+          items:
+            $ref: '#/components/schemas/ExposureClockView'
       required:
       - exposureId
       - exposureNumber
@@ -6013,6 +6018,25 @@ components:
       - coverageIndication
       - coverageDecision
       - createdAt
+    ExposureClockView:
+      type: object
+      description: One statutory clock of an exposure, as CMP reports it (BO-CLM-05).
+      properties:
+        instanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        clockCode:
+          $ref: ../events/common.schema.json#/$defs/ClockCode
+        status:
+          type: string
+          description: CMP clock state (RUNNING, WARNED, PAUSED, MET, BREACHED, ELAPSED, CANCELLED)
+        deadline:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+      required:
+      - instanceId
+      - clockCode
+      - status
     ClaimantView:
       type: object
       description: A claimant (REQ-CLM-066 subset) referring to a PTY party.

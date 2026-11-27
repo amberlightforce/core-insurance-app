@@ -1,4 +1,4 @@
-using CoreIns.Platform.Persistence;
+﻿using CoreIns.Platform.Persistence;
 using CoreIns.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -29,6 +29,46 @@ internal sealed class RuleSetVersionRow
     public Instant CreatedAt { get; set; }
 
     public string CreatedBy { get; set; } = string.Empty;
+
+    /// <summary>Incremented on every change (optimistic concurrency of edits).</summary>
+    public int RecordVersion { get; set; } = 1;
+
+    public string? SubmittedBy { get; set; }
+
+    public Instant? SubmittedAt { get; set; }
+
+    /// <summary>The plt.Approval request of the release (UW.RULESET_APPROVAL).</summary>
+    public Guid? ApprovalRequestId { get; set; }
+
+    public string? DecidedBy { get; set; }
+
+    public Instant? DecidedAt { get; set; }
+
+    public string? DecisionReason { get; set; }
+}
+
+/// <summary><c>uw.issue_type</c>: the catalogue of issue types (code, names, severity, default lane, blocking point).</summary>
+internal sealed class IssueTypeRow
+{
+    public string Code { get; set; } = string.Empty;
+
+    public string NameEl { get; set; } = string.Empty;
+
+    public string NameEn { get; set; } = string.Empty;
+
+    public string Severity { get; set; } = string.Empty;
+
+    public string DefaultLane { get; set; } = string.Empty;
+
+    public string BlockingPoint { get; set; } = string.Empty;
+
+    public bool Active { get; set; } = true;
+
+    public int RecordVersion { get; set; } = 1;
+
+    public Instant UpdatedAt { get; set; }
+
+    public string UpdatedBy { get; set; } = string.Empty;
 }
 
 /// <summary><c>uw.evaluation</c>: one non-dry evaluation with its rule-set version, outcome and trace (REQ-UW-042).</summary>
@@ -140,6 +180,8 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
 {
     public DbSet<RuleSetVersionRow> RuleSetVersions => Set<RuleSetVersionRow>();
 
+    public DbSet<IssueTypeRow> IssueTypes => Set<IssueTypeRow>();
+
     public DbSet<EvaluationRow> Evaluations => Set<EvaluationRow>();
 
     public DbSet<IssueRow> Issues => Set<IssueRow>();
@@ -170,7 +212,35 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
             entity.Property(e => e.Definition).HasColumnName("definition").HasColumnType("jsonb");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").HasDefaultValue(1);
+            entity.Property(e => e.SubmittedBy).HasColumnName("submitted_by");
+            entity.Property(e => e.SubmittedAt).HasColumnName("submitted_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ApprovalRequestId).HasColumnName("approval_request_id");
+            entity.Property(e => e.DecidedBy).HasColumnName("decided_by");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecisionReason).HasColumnName("decision_reason");
             entity.HasIndex(e => new { e.ProductCode, e.Checkpoint, e.Status, e.EffectiveFrom }).HasDatabaseName("ix_rule_set_version_product");
+        });
+
+        modelBuilder.Entity<IssueTypeRow>(entity =>
+        {
+            entity.ToTable("issue_type", table =>
+            {
+                table.HasCheckConstraint("ck_issue_type_severity", "severity IN ('REFER', 'DECLINE')");
+                table.HasCheckConstraint("ck_issue_type_lane", "default_lane IN ('STRAIGHT_THROUGH', 'ASSISTED', 'EXPERT')");
+                table.HasCheckConstraint("ck_issue_type_blocking", "blocking_point IN ('PRE_QUOTE', 'PRE_BIND', 'PRE_ISSUE', 'NON_BLOCKING')");
+            });
+            entity.HasKey(e => e.Code).HasName("pk_issue_type");
+            entity.Property(e => e.Code).HasColumnName("code");
+            entity.Property(e => e.NameEl).HasColumnName("name_el");
+            entity.Property(e => e.NameEn).HasColumnName("name_en");
+            entity.Property(e => e.Severity).HasColumnName("severity");
+            entity.Property(e => e.DefaultLane).HasColumnName("default_lane");
+            entity.Property(e => e.BlockingPoint).HasColumnName("blocking_point");
+            entity.Property(e => e.Active).HasColumnName("active");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
         });
 
         modelBuilder.Entity<EvaluationRow>(entity =>

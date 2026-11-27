@@ -15,6 +15,7 @@ using CoreIns.SharedKernel.Json;
 using CoreIns.SharedKernel.Results;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace CoreIns.Modules.Claims.Commands;
 
@@ -63,6 +64,17 @@ internal static class ExposureClockRule
 
     /// <summary>True when a running (or unacknowledged breached) clock blocks the close.</summary>
     public static bool Blocks(string statutoryClocks) => !Settled.Contains(statutoryClocks, StringComparer.Ordinal);
+
+    /// <summary>
+    /// With CMP clock instances (<c>CLOCKS:</c> value): a clock that is running, warned or paused blocks the close, unless the outcome pays nothing
+    /// (<paramref name="cancelsClocks"/>), where the close cancels the clocks; Met, Cancelled, Breached and Elapsed clocks pass (TODO(hardening):
+    /// breach acknowledgement). Any other value follows <see cref="Blocks(string)"/>.
+    /// </summary>
+    public static bool Blocks(string statutoryClocks, IEnumerable<CoreIns.Modules.Compliance.Contracts.Api.ClockInstanceView> states, bool cancelsClocks) =>
+        statutoryClocks.StartsWith(ExposureClocks.Prefix, StringComparison.Ordinal) ? !cancelsClocks && ExposureClocks.AnyLive(states) : Blocks(statutoryClocks);
+
+    /// <summary>Outcomes that pay nothing: closing with one stops the exposure's statutory clocks (BO-CLM-05).</summary>
+    public static bool CancelsClocks(ClaimOutcomeCode outcome) => outcome is ClaimOutcomeCode.Denied or ClaimOutcomeCode.Withdrawn or ClaimOutcomeCode.Duplicate or ClaimOutcomeCode.NoPayment;
 }
 
 /// <summary>Loads and guards the exposure and its claim for the three lifecycle commands.</summary>
@@ -192,7 +204,8 @@ internal sealed class UpdateExposureHandler(ClaimsDbContext db, RequestContext c
 /// idempotency key replays the first response. Publishes <c>ExposureClosed</c>.
 /// </summary>
 internal sealed class CloseExposureHandler(
-    ClaimsDbContext db, RequestContext context, IClock clock, IEventPublisher events, IClaimFinancialGuard financials, ExposureLifecycleSupport support)
+    ClaimsDbContext db, RequestContext context, IClock clock, IEventPublisher events, IClaimFinancialGuard financials, ExposureLifecycleSupport support,
+    ExposureClocks exposureClocks)
     : ICommandHandler<CloseExposure, ExposureCloseResponse>
 {
     public async Task<Result<ExposureCloseResponse>> HandleAsync(CloseExposure command, CancellationToken cancellationToken)
@@ -219,7 +232,9 @@ internal sealed class CloseExposureHandler(
             reasons.Add("OPEN_RECOVERY");
         }
 
-        if (ExposureClockRule.Blocks(exposure.StatutoryClocks))
+        var closeOutcome = Codes.Of(Codes.Map<ExposureCloseRequest.OutcomeValue, ClaimOutcomeCode>(request.Outcome));
+        var clockStates = await exposureClocks.StatesAsync(exposure.StatutoryClocks, cancellationToken).ConfigureAwait(false);
+        if (ExposureClockRule.Blocks(exposure.StatutoryClocks, clockStates, ExposureClockRule.CancelsClocks(Codes.Parse<ClaimOutcomeCode>(closeOutcome))))
         {
             reasons.Add("CLOCK_RUNNING");
         }
@@ -247,6 +262,11 @@ internal sealed class CloseExposureHandler(
             return saved;
         }
 
+        if (ExposureClocks.AnyLive(clockStates))
+        {
+            await exposureClocks.CancelLiveAsync(exposure.StatutoryClocks, $"Exposure {exposure.ExposureNumber.Value} closed ({outcome}).", cancellationToken).ConfigureAwait(false);
+        }
+
         events.Publish(new OutgoingEvent(
             EventDescriptor.From(ExposureClosedV1.Descriptor), ClaimEvents.AggregateType, claim.ClaimId.Value.ToString(),
             new ExposureClosedV1 { ExposureId = exposure.ExposureId, ExposureNumber = exposure.ExposureNumber, Outcome = outcome },
@@ -261,7 +281,9 @@ internal sealed class CloseExposureHandler(
 /// <c>clm.Exposure.reopen</c>: Closed to Open(InProgress) with a coded reason on an open claim; the exposure's outcome and
 /// close time are cleared. Publishes <c>ExposureReopened</c>.
 /// </summary>
-internal sealed class ReopenExposureHandler(RequestContext context, IClock clock, IEventPublisher events, ExposureLifecycleSupport support)
+internal sealed class ReopenExposureHandler(
+    RequestContext context, IClock clock, IEventPublisher events, ExposureLifecycleSupport support, ExposureClocks exposureClocks,
+    ClaimsDbContext db, IOptions<ClaimsOptions> options, Microsoft.Extensions.Hosting.IHostEnvironment environment)
     : ICommandHandler<ReopenExposure, ExposureReopenResponse>
 {
     public async Task<Result<ExposureReopenResponse>> HandleAsync(ReopenExposure command, CancellationToken cancellationToken)
@@ -281,6 +303,25 @@ internal sealed class ReopenExposureHandler(RequestContext context, IClock clock
         }
 
         var now = clock.Now;
+
+        // BO-CLM-05: paused clocks resume; clocks cancelled at close are started afresh (new key per reopen) once their values are usable.
+        if (exposure.StatutoryClocks.StartsWith(ExposureClocks.Prefix, StringComparison.Ordinal))
+        {
+            var restart = await exposureClocks.ResumeAsync(exposure.StatutoryClocks, $"Exposure reopened ({request.ReasonCode}).", cancellationToken).ConfigureAwait(false);
+            if (restart)
+            {
+                if (Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsProduction(environment)
+                    && await exposureClocks.HasUnconfirmedValueAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    return DomainError.Of(ModuleCode.CLM, "MTPL-CLOCKS-REQUIRED", "Third-party MTPL exposures need statutory clocks whose values are legally confirmed.");
+                }
+
+                var noticeOn = await db.Claims.AsNoTracking().Where(c => c.ClaimId == claim.ClaimId).Select(c => c.NoticeOn).SingleAsync(cancellationToken).ConfigureAwait(false);
+                exposure.StatutoryClocks = await exposureClocks.StartAsync(
+                    exposure.ExposureId, noticeOn.StartOfDayIn(options.Value.Zone), $"reopen-{exposure.RecordVersion + 1}", cancellationToken).ConfigureAwait(false);
+            }
+        }
+
         (exposure.Status, exposure.SubStatus) = ExposureStates.ToColumns(reopened.Value);
         exposure.Outcome = null;
         exposure.ClosedAt = null;

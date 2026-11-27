@@ -4,23 +4,29 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Adjustment.calculate request. PRD inputs: "layer, year"</summary>
+/// <summary>ri.Adjustment.calculate request. Opens a PENDING adjustment and its PLT approval; the layer needs a deposit schedule.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AdjustmentCalculateRequest
 {
-    /// <summary>PRD: "layer"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("layer")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Layer { get; init; }
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
 
-    /// <summary>PRD: "year"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("year")]
+    /// <summary>Contract member 'layerNo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("layerNo")]
+    public required int LayerNo { get; init; }
+
+    /// <summary>The final subject (gross written) premium of the contract year</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("subjectPremium")]
+    public required global::CoreIns.SharedKernel.Money SubjectPremium { get; init; }
+
+    /// <summary>The premium rate applied to the subject premium, in percent</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ratePct")]
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::CoreIns.Platform.Contracts.DecimalStringJsonConverter))]
+    public required decimal RatePct { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Year { get; init; }
+    public string? Reason { get; init; }
 }

@@ -1,4 +1,4 @@
-using CoreIns.Modules.Underwriting.Authority;
+﻿using CoreIns.Modules.Underwriting.Authority;
 using CoreIns.Modules.Underwriting.Commands;
 using CoreIns.Modules.Underwriting.Contracts;
 using CoreIns.Modules.Underwriting.Contracts.Api;
@@ -65,6 +65,23 @@ public static class UnderwritingModule
         services.AddCommand<EditRuleSet, RuleSetAuthoringResponse, EditRuleSetHandler>(CommandDescriptor.For("uw.RuleSet.edit"));
         services.AddCommand<ImportRuleSet, RuleSetAuthoringResponse, ImportRuleSetHandler>(CommandDescriptor.For("uw.RuleSet.import"));
 
+        services.AddScoped<RuleSetReleaseSupport>();
+        services.AddScoped<IValidator<SubmitRuleSet>, SubmitRuleSetValidator>();
+        services.AddScoped<IValidator<ApproveRuleSet>, ApproveRuleSetValidator>();
+        services.AddScoped<IValidator<ScheduleRuleSet>, ScheduleRuleSetValidator>();
+        services.AddCommandAuditor<SubmitRuleSet, RuleSetReleaseResponse, RuleSetReleaseAuditor<SubmitRuleSet>>();
+        services.AddCommandAuditor<ApproveRuleSet, RuleSetReleaseResponse, RuleSetReleaseAuditor<ApproveRuleSet>>();
+        services.AddCommandAuditor<ScheduleRuleSet, RuleSetReleaseResponse, RuleSetReleaseAuditor<ScheduleRuleSet>>();
+        services.AddCommand<SubmitRuleSet, RuleSetReleaseResponse, SubmitRuleSetHandler>(CommandDescriptor.For("uw.RuleSet.submit"));
+        services.AddCommand<ApproveRuleSet, RuleSetReleaseResponse, ApproveRuleSetHandler>(CommandDescriptor.For("uw.RuleSet.approve"));
+        services.AddCommand<ScheduleRuleSet, RuleSetReleaseResponse, ScheduleRuleSetHandler>(CommandDescriptor.For("uw.RuleSet.schedule"));
+
+        services.AddScoped<IssueTypeStore>();
+        services.AddScoped<IssueTypeQueries>();
+        services.AddScoped<IValidator<UpsertIssueType>, UpsertIssueTypeValidator>();
+        services.AddCommandAuditor<UpsertIssueType, IssueTypeItem, UpsertIssueTypeAuditor>();
+        services.AddCommand<UpsertIssueType, IssueTypeItem, UpsertIssueTypeHandler>(CommandDescriptor.For("uw.IssueType.upsert"));
+
         services.AddUnderwritingAuthorityTypes();
         services.AddScoped<IValidator<DecideIssues>, DecideIssuesValidator>();
         services.AddCommandAuditor<DecideIssues, IssueDecideResponse, DecideIssuesAuditor>();
@@ -109,6 +126,10 @@ public static class UnderwritingModule
             .Describe("Μόνο πρόχειρη έκδοση μπορεί να τροποποιηθεί.", "Only a draft version can be edited."),
         ErrorDefinition.For(ModuleCode.UW, "RULESET-EXISTS", 409, "Το σύνολο κανόνων υπάρχει ήδη", "The rule set already exists")
             .Describe("Υπάρχει ήδη σύνολο κανόνων με αυτόν τον κωδικό και αυτή την έκδοση.", "A rule set with this code and version already exists."),
+        ErrorDefinition.For(ModuleCode.UW, "RULE-UNTESTED", 422, "Υπάρχει κανόνας χωρίς δοκιμή", "A rule has no test case")
+            .Describe("Κάθε κανόνας πρέπει να αναμένεται να ενεργοποιείται σε τουλάχιστον μία δοκιμαστική περίπτωση που περνά.", "Every rule must be expected to hit in at least one passing test case."),
+        ErrorDefinition.For(ModuleCode.UW, "DUPLICATE", 409, "Ο τύπος ζητήματος υπάρχει ήδη", "The issue type already exists")
+            .Describe("Στείλτε την τρέχουσα έκδοση εγγραφής για να τον αλλάξετε.", "Send the current record version to change it."),
         ErrorDefinition.For(ModuleCode.UW, "STALE", 409, "Το ζήτημα άλλαξε στο μεταξύ", "The issue changed meanwhile")
             .Describe("Φορτώστε ξανά το ζήτημα και αποφασίστε πάλι.", "Reload the issue and decide again."),
     ];
