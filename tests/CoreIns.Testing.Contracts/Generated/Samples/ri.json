@@ -340,6 +340,26 @@
     }
   },
   "schemas": {
+    "AccountItemView": {
+      "itemId": "0192baf7-a57d-7821-8d1c-fe779c76c0b1",
+      "contractId": "0192357b-77c7-704e-8cd5-9b380bf4c288",
+      "contractYear": 1,
+      "layerNo": 1,
+      "reinsurerPartyId": "0192b5ef-4129-7e7d-87be-d1417919e6e8",
+      "kind": "CEDED_PREMIUM",
+      "sourceKind": "Sample text",
+      "sourceId": "Sample text",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "period": "Sample text",
+      "itemDate": "2026-10-07",
+      "reversalOf": "01927637-0974-7ef7-8996-8be9b97f43d9",
+      "reason": "Sample text",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "createdBy": "Sample text"
+    },
     "AccumulationEstimateRequest": {
       "peril": "unspecified",
       "scheme": "unspecified",
@@ -589,14 +609,67 @@
         "currency": "EUR"
       }
     },
+    "BalanceLine": {
+      "reinsurerPartyId": "0192f73b-d370-7d69-8166-218c94df9120",
+      "currency": "Sample text",
+      "period": "Sample text",
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "commission": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "recoveries": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "movement": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "closing": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "itemCount": 1
+    },
     "BalanceReportRequest": {
-      "filters": "unspecified"
+      "contractId": "01926dd5-b023-76f9-8d87-6a09a40e7af7",
+      "reinsurerPartyId": "01921654-7694-7de2-8f75-4e7eb51a06d3",
+      "periodFrom": "Sample text",
+      "periodTo": "Sample text"
     },
     "BalanceReportResponse": {
-      "items": [
-        "unspecified"
-      ],
-      "balances": "unspecified"
+      "balances": [
+        {
+          "reinsurerPartyId": "0192fbfc-032d-72cb-832f-f39459f63a05",
+          "currency": "Sample text",
+          "period": "Sample text",
+          "premium": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "commission": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "recoveries": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "movement": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "closing": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "itemCount": 1
+        }
+      ]
     },
     "BordereauApproveRequest": {
       "type": "unspecified",
@@ -2295,23 +2368,92 @@
     "ImportReverseResponse": {
       "reversalReport": "unspecified"
     },
+    "ItemGenerateRequest": {
+      "contractId": "01924ee2-462b-7c23-802c-8860d794a650",
+      "asOf": "2026-10-07"
+    },
+    "ItemGenerateResponse": {
+      "created": 1,
+      "byKind": {
+        "sample": 1
+      },
+      "skipped": 1
+    },
     "ItemListItem": {
-      "items": [
-        "unspecified"
-      ],
-      "balances": "unspecified"
+      "item": {
+        "itemId": "01926822-5e01-7695-8b1e-ad0dd87fc501",
+        "contractId": "01922a32-7b8d-75ec-8c27-39a47c486f65",
+        "contractYear": 1,
+        "layerNo": 1,
+        "reinsurerPartyId": "01927b0d-90f9-740d-8a09-f4e5672db3ba",
+        "kind": "CEDED_PREMIUM",
+        "sourceKind": "Sample text",
+        "sourceId": "Sample text",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "period": "Sample text",
+        "itemDate": "2026-10-07",
+        "reversalOf": "0192fdc2-000e-7d22-87fe-c8b401d5a111",
+        "reason": "Sample text",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "Sample text"
+      }
     },
     "ItemListPage": {
       "items": [
         {
-          "items": [
-            "unspecified"
-          ],
-          "balances": "unspecified"
+          "item": {
+            "itemId": "0192ffff-ce94-7fc7-84a5-f6af042b2191",
+            "contractId": "0192ef7a-f59a-7095-8761-c0b37815beaa",
+            "contractYear": 1,
+            "layerNo": 1,
+            "reinsurerPartyId": "01929b50-70bb-7a65-8716-5a14618f212b",
+            "kind": "CEDED_PREMIUM",
+            "sourceKind": "Sample text",
+            "sourceId": "Sample text",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "period": "Sample text",
+            "itemDate": "2026-10-07",
+            "reversalOf": "0192c8ce-299f-7d8f-800c-d85097b39c5b",
+            "reason": "Sample text",
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "ItemReverseRequest": {
+      "itemId": "0192935c-5a63-7d12-81ee-0353beb2cc6c",
+      "reason": "Sample text"
+    },
+    "ItemReverseResponse": {
+      "reversal": {
+        "itemId": "0192b63d-919c-7b4c-83bb-f2a24434bdd6",
+        "contractId": "01926135-8be4-73ff-806f-98ea1553bdc6",
+        "contractYear": 1,
+        "layerNo": 1,
+        "reinsurerPartyId": "0192de3e-fcaa-708d-8e52-6cdca73d87da",
+        "kind": "CEDED_PREMIUM",
+        "sourceKind": "Sample text",
+        "sourceId": "Sample text",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "period": "Sample text",
+        "itemDate": "2026-10-07",
+        "reversalOf": "01929758-d4b2-753e-88be-9a9aed93a87d",
+        "reason": "Sample text",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "Sample text"
+      }
     },
     "LineTableGetResponse": {
       "tableVersion": "unspecified"

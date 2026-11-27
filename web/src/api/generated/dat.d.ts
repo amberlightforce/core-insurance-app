@@ -1169,12 +1169,21 @@ export interface components {
         };
         /** @description dat.Mart.run request. PRD inputs: "mart, entity, period, regime, taxonomy version" */
         MartRunRequest: {
-            /** @description PRD: "mart" */
-            mart?: components["schemas"]["Unspecified"];
-            /** @description PRD: "entity" */
-            entity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            /**
+             * @description Mart code (BO-DAT-03). All three are management marts: legalStatus NotRegulatory.
+             * @enum {string}
+             */
+            mart?: "PORTFOLIO_PREMIUM" | "CLAIMS_EXPERIENCE" | "RI_CESSION_SUMMARY";
+            /** @description Legal entity; must equal the caller scope when given (BO-DAT-03). */
+            entity?: string;
+            /** @description Period YYYY, YYYY-MM or from..to (half-open on valid time); omitted = all. */
+            period?: string;
+            /** @description Optional product filter (not applied to RI_CESSION_SUMMARY). */
+            productCode?: string;
+            /** @description Valid-time instant or date (default now). */
+            validAt?: string;
+            /** @description Record-time instant or date (default now). */
+            knownAt?: string;
             /** @description PRD: "regime" */
             regime?: components["schemas"]["Unspecified"];
             /** @description PRD: "taxonomy version" */
@@ -1184,9 +1193,21 @@ export interface components {
         MartRunResponse: {
             /** @description PRD: "run id" */
             runId?: components["schemas"]["Uuid"];
+            /** @description COMPLETED (the run is computed inline); BO-DAT-03 addition. */
+            status?: string;
+            /** @description Deterministic snapshot key: mart|entity|period|product|first 16 hex of the hash (BO-DAT-03). */
+            snapshotKey?: string;
+            /** @description SHA-256 over the ordered figures; the same inputs give the same hash (BO-DAT-03). */
+            snapshotHash?: components["schemas"]["Sha256"];
+            /** @description Number of figures written (BO-DAT-03). */
+            figureCount?: number;
+            /** @description NotRegulatory for the management marts; regulatory layouts stay Unverified (BO-DAT-03). */
+            legalStatus?: string;
         };
         /** @description dat.Mart.get result. PRD outputs: "figures, lineage pointer, diff" */
         MartGetResponse: {
+            /** @description Run header: runId, mart, period, validAt, knownAt, status, snapshotHash, legalStatus, definitionVersion (BO-DAT-03). */
+            run?: components["schemas"]["Unspecified"];
             /** @description PRD: "figures" */
             figures?: components["schemas"]["Unspecified"];
             /** @description PRD: "lineage pointer" */
@@ -2401,7 +2422,12 @@ export interface operations {
     };
     "dat.Mart.figure": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Run id (BO-DAT-03) */
+                runId?: string;
+                /** @description Figure key within the run, e.g. GWP|MOTOR|2026-10| (BO-DAT-03) */
+                figureKey?: string;
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
@@ -2433,7 +2459,24 @@ export interface operations {
     };
     "dat.Mart.compare": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Base run id; with runB compares two stored runs (BO-DAT-03) */
+                runA?: string;
+                /** @description Other run id */
+                runB?: string;
+                /** @description Mart code when comparing two as-of instants without stored runs */
+                mart?: string;
+                /** @description Period YYYY, YYYY-MM or from..to */
+                period?: string;
+                /** @description Optional product filter */
+                productCode?: string;
+                /** @description Valid-time instant for both sides (default now) */
+                validAt?: string;
+                /** @description Record-time instant of the base side */
+                knownAtA?: string;
+                /** @description Record-time instant of the other side (default now) */
+                knownAtB?: string;
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key

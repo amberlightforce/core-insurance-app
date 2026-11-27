@@ -4,15 +4,23 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Balance.report request. PRD inputs: "filters"</summary>
+/// <summary>ri.Balance.report request. Balances per reinsurer, currency and period from the items.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BalanceReportRequest
 {
-    /// <summary>PRD: "filters"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("filters")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Filters { get; init; }
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public global::CoreIns.SharedKernel.Identifiers.RiContractId? ContractId { get; init; }
+
+    /// <summary>Contract member 'reinsurerPartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reinsurerPartyId")]
+    public global::CoreIns.SharedKernel.Identifiers.PartyId? ReinsurerPartyId { get; init; }
+
+    /// <summary>yyyy-MM</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("periodFrom")]
+    public string? PeriodFrom { get; init; }
+
+    /// <summary>yyyy-MM</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("periodTo")]
+    public string? PeriodTo { get; init; }
 }

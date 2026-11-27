@@ -194,6 +194,32 @@ else:
 summary["parties"] = [pno, pno2]
 
 
+# 3) Customer portal (BO-CHN-01): a dev baseline permission matrix (none is seeded by the app) and the dev `customer` identity
+#    linked to the first demo party. Local demo data only; Production never runs this script.
+def seed_portal():
+    probe = call("POST", "/api/chn/v1/permissions/evaluate",
+                 {"transactionType": "contact.update", "channel": "WEB_DIRECT", "actorType": "CUSTOMER"}, uw, key=False)
+    if probe[0] == 200 and "NO_ACTIVE_MATRIX" in (probe[1].get("reasons") or []):
+        maker, checker = uw, token("uwsenior")
+        draft = must("matrix draft", *call("POST", "/api/chn/v1/permission-matrices/create-draft", {"scenarios": []}, maker))
+        matrix_id = draft["version"]["matrix"]["matrixId"]
+        must("matrix submit", *call("POST", "/api/chn/v1/permission-matrices/submit", {"matrixId": matrix_id}, maker))
+        must("matrix schedule", *call("POST", "/api/chn/v1/permission-matrices/schedule", {"matrixId": matrix_id}, checker))
+        print("portal: baseline permission matrix scheduled")
+    else:
+        print("portal: permission matrix exists, skipped")
+    found = call("GET", "/api/chn/v1/portal-identities/customer", token=uw)
+    if found[0] == 200:
+        print("portal: customer identity already linked, skipped")
+        return
+    must("link customer", *call("POST", "/api/chn/v1/portal-identities/link",
+                                {"subject": "customer", "partyId": subject_party, "verification": "Demo seed: synthetic dev customer"}, uw))
+    print("portal: dev user `customer` linked to party", pno)
+
+
+seed_portal()
+
+
 def seed_claims():
     """3) Claims flow (E2E-02a): a motor policy whose term has started, a CLOSED paid claim and an OPEN claim with a reserve."""
     handler = token("claims")  # both amounts stay within the handler's illustrative EUR 5,000.00 authority: no approval needed
