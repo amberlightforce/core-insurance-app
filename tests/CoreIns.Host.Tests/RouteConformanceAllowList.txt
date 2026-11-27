@@ -108,7 +108,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
 CONTRACT_NOT_SERVED GET /api/pol/v1/jobs
 CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
-CONTRACT_NOT_SERVED GET /api/pty/v1/producer-of-records/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/screening/case-get
 CONTRACT_NOT_SERVED GET /api/rat/v1/breakdowns/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/change-explanations/get
@@ -518,9 +517,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/start
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/unmerge
-CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/bulk-transfer
-CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/cancel
-CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/change
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/bulk
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/case-decide
 CONTRACT_NOT_SERVED POST /api/rat/v1/bonus-malus/transition
