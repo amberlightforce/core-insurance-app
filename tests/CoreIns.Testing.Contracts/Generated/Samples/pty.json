@@ -921,6 +921,319 @@
       ],
       "description": "sample"
     },
+    "CommissionAgreementApproveRequest": {
+      "versionId": "01922210-7777-766f-82e9-ce13d3b954c6",
+      "decision": "APPROVE",
+      "comment": "sample",
+      "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "CommissionAgreementApproveResponse": {
+      "version": {
+        "versionId": "0192b9a9-6021-7192-85bc-b5d7da9f8397",
+        "agreementId": "0192c629-9cbc-729c-8bc9-88a0d7aa9fc7",
+        "versionNo": 1,
+        "status": "DRAFT",
+        "effectiveFrom": "2026-10-07",
+        "effectiveTo": "2026-10-07",
+        "expectedAnnualVolume": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "maxRatePct": "12.50",
+        "rateLines": [
+          {
+            "businessType": "NEW_BUSINESS",
+            "lineOfBusiness": "SAMPLE_CODE",
+            "basis": "NET_PREMIUM",
+            "ratePct": "12.50"
+          }
+        ],
+        "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "approvalRequestId": "01922841-54f9-7b70-8d7a-797e7d5192f2",
+        "notes": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "submittedBy": "sample",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "sample"
+      }
+    },
+    "CommissionAgreementCompareResponse": {
+      "agreementId": "0192fd33-3cec-7610-8e0a-f025fb4d3687",
+      "fromVersionId": "019223c1-64c8-7bbc-86b7-f7dd4db6ab40",
+      "toVersionId": "019211ad-e0cd-758d-8e51-361bb64bbd41",
+      "identical": true,
+      "fieldChanges": [
+        {
+          "field": "sample",
+          "from": "sample",
+          "to": "sample"
+        }
+      ],
+      "rateLineChanges": [
+        {
+          "kind": "ADDED",
+          "businessType": "sample",
+          "lineOfBusiness": "SAMPLE_CODE",
+          "basis": "sample",
+          "fromRatePct": "12.50",
+          "toRatePct": "12.50"
+        }
+      ]
+    },
+    "CommissionAgreementCreateVersionRequest": {
+      "intermediaryId": "01927335-ae23-7b74-803e-54a6ce0794b9",
+      "productCode": "SAMPLE_CODE",
+      "lineOfBusiness": "SAMPLE_CODE",
+      "effectiveFrom": "2026-10-07",
+      "expectedAnnualVolume": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "rateLines": [
+        {
+          "businessType": "NEW_BUSINESS",
+          "lineOfBusiness": "SAMPLE_CODE",
+          "basis": "NET_PREMIUM",
+          "ratePct": "12.50"
+        }
+      ],
+      "notes": "sample"
+    },
+    "CommissionAgreementCreateVersionResponse": {
+      "agreement": {
+        "agreementId": "01927248-fa6b-79e2-8b67-fdb1b99de246",
+        "intermediaryId": "0192ac71-7577-7fbb-8545-60d345d3a617",
+        "productCode": "SAMPLE_CODE",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "versions": [
+          {
+            "versionId": "019206c2-b3c4-7e7f-8b57-06084064d102",
+            "agreementId": "01921b9b-4890-71a8-800d-473d885b7c56",
+            "versionNo": 1,
+            "status": "DRAFT",
+            "effectiveFrom": "2026-10-07",
+            "effectiveTo": "2026-10-07",
+            "expectedAnnualVolume": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "maxRatePct": "12.50",
+            "rateLines": [
+              {
+                "businessType": "NEW_BUSINESS",
+                "lineOfBusiness": "SAMPLE_CODE",
+                "basis": "NET_PREMIUM",
+                "ratePct": "12.50"
+              }
+            ],
+            "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "approvalRequestId": "0192b080-7134-7c34-81ff-c6188784d7b6",
+            "notes": "sample",
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z",
+            "submittedBy": "sample",
+            "decidedBy": "sample",
+            "decidedAt": "2026-10-07T09:00:00Z",
+            "decisionComment": "sample"
+          }
+        ]
+      },
+      "version": {
+        "versionId": "0192bf73-bbb6-7edc-8a8c-7a068ba29e31",
+        "agreementId": "01921028-010b-7342-829c-73a1ecc29d9b",
+        "versionNo": 1,
+        "status": "DRAFT",
+        "effectiveFrom": "2026-10-07",
+        "effectiveTo": "2026-10-07",
+        "expectedAnnualVolume": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "maxRatePct": "12.50",
+        "rateLines": [
+          {
+            "businessType": "NEW_BUSINESS",
+            "lineOfBusiness": "SAMPLE_CODE",
+            "basis": "NET_PREMIUM",
+            "ratePct": "12.50"
+          }
+        ],
+        "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "approvalRequestId": "0192653b-263c-794c-80d5-5aef6d31fa67",
+        "notes": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "submittedBy": "sample",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "sample"
+      }
+    },
+    "CommissionAgreementGetResponse": {
+      "agreement": {
+        "agreementId": "01922d8a-3578-7e21-85ed-a5f93fa5b00a",
+        "intermediaryId": "0192f56d-3c85-77b2-8c61-90ac82e19e53",
+        "productCode": "SAMPLE_CODE",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "versions": [
+          {
+            "versionId": "0192c39c-54cc-7569-8c67-1ab621aeb3c4",
+            "agreementId": "0192bd67-3809-79b8-854b-4cf74a39e7f7",
+            "versionNo": 1,
+            "status": "DRAFT",
+            "effectiveFrom": "2026-10-07",
+            "effectiveTo": "2026-10-07",
+            "expectedAnnualVolume": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "maxRatePct": "12.50",
+            "rateLines": [
+              {
+                "businessType": "NEW_BUSINESS",
+                "lineOfBusiness": "SAMPLE_CODE",
+                "basis": "NET_PREMIUM",
+                "ratePct": "12.50"
+              }
+            ],
+            "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "approvalRequestId": "019228b1-b29d-7f88-89c6-1793a62aeae0",
+            "notes": "sample",
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z",
+            "submittedBy": "sample",
+            "decidedBy": "sample",
+            "decidedAt": "2026-10-07T09:00:00Z",
+            "decisionComment": "sample"
+          }
+        ]
+      }
+    },
+    "CommissionAgreementSubmitRequest": {
+      "versionId": "01925318-b15b-7605-8d0b-76286679c677",
+      "reason": "sample"
+    },
+    "CommissionAgreementSubmitResponse": {
+      "version": {
+        "versionId": "0192ec33-10d0-7362-887c-b6e3c7c2e93e",
+        "agreementId": "01923178-422c-7022-83c7-93224fb0d6ff",
+        "versionNo": 1,
+        "status": "DRAFT",
+        "effectiveFrom": "2026-10-07",
+        "effectiveTo": "2026-10-07",
+        "expectedAnnualVolume": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "maxRatePct": "12.50",
+        "rateLines": [
+          {
+            "businessType": "NEW_BUSINESS",
+            "lineOfBusiness": "SAMPLE_CODE",
+            "basis": "NET_PREMIUM",
+            "ratePct": "12.50"
+          }
+        ],
+        "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "approvalRequestId": "01922774-b3bb-781d-8613-247db451bbb6",
+        "notes": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "submittedBy": "sample",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "sample"
+      }
+    },
+    "CommissionAgreementVersionView": {
+      "versionId": "019226eb-4644-7e35-8501-086918d97165",
+      "agreementId": "019214d6-3555-7f1b-87a7-f5da3313febc",
+      "versionNo": 1,
+      "status": "DRAFT",
+      "effectiveFrom": "2026-10-07",
+      "effectiveTo": "2026-10-07",
+      "expectedAnnualVolume": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "maxRatePct": "12.50",
+      "rateLines": [
+        {
+          "businessType": "NEW_BUSINESS",
+          "lineOfBusiness": "SAMPLE_CODE",
+          "basis": "NET_PREMIUM",
+          "ratePct": "12.50"
+        }
+      ],
+      "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "approvalRequestId": "0192b474-9731-779c-8777-6173edad568c",
+      "notes": "sample",
+      "createdBy": "sample",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "submittedBy": "sample",
+      "decidedBy": "sample",
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "decisionComment": "sample"
+    },
+    "CommissionAgreementView": {
+      "agreementId": "0192f13c-a813-74ab-88d9-1f5dc0605cc1",
+      "intermediaryId": "0192e2dd-a558-7e1f-89ea-3f6d104c0556",
+      "productCode": "SAMPLE_CODE",
+      "lineOfBusiness": "SAMPLE_CODE",
+      "versions": [
+        {
+          "versionId": "0192e637-d0d5-714c-8013-aebecfed3646",
+          "agreementId": "0192b9ff-e444-7971-8856-d53924fc2c0f",
+          "versionNo": 1,
+          "status": "DRAFT",
+          "effectiveFrom": "2026-10-07",
+          "effectiveTo": "2026-10-07",
+          "expectedAnnualVolume": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "maxRatePct": "12.50",
+          "rateLines": [
+            {
+              "businessType": "NEW_BUSINESS",
+              "lineOfBusiness": "SAMPLE_CODE",
+              "basis": "NET_PREMIUM",
+              "ratePct": "12.50"
+            }
+          ],
+          "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "approvalRequestId": "0192e138-7229-76c3-8d52-94149aad7f19",
+          "notes": "sample",
+          "createdBy": "sample",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "submittedBy": "sample",
+          "decidedBy": "sample",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "decisionComment": "sample"
+        }
+      ]
+    },
+    "CommissionFieldChange": {
+      "field": "sample",
+      "from": "sample",
+      "to": "sample"
+    },
+    "CommissionRateLine": {
+      "businessType": "NEW_BUSINESS",
+      "lineOfBusiness": "SAMPLE_CODE",
+      "basis": "NET_PREMIUM",
+      "ratePct": "12.50"
+    },
+    "CommissionRateLineChange": {
+      "kind": "ADDED",
+      "businessType": "sample",
+      "lineOfBusiness": "SAMPLE_CODE",
+      "basis": "sample",
+      "fromRatePct": "12.50",
+      "toRatePct": "12.50"
+    },
     "CommunicationPreferenceResolveRequest": {
       "party": "unspecified",
       "purpose": "unspecified"
