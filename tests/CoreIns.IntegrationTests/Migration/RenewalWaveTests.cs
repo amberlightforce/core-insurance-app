@@ -104,7 +104,7 @@ public sealed class RenewalWaveTests(PostgresFixture database) : IClassFixture<P
         return node!;
     }
 
-    private static Dictionary<string, string> States(JsonNode wave) => wave["terms"]!.AsArray().ToDictionary(t => t!["legacyKey"]!.GetValue<string>(), t => t!["state"]!.GetValue<string>());
+    private static Dictionary<string, string> States(JsonNode wave) => wave["terms"]!.AsArray().OrderBy(t => t!["legacyKey"]!.GetValue<string>(), StringComparer.Ordinal).ToDictionary(t => t!["legacyKey"]!.GetValue<string>(), t => t!["state"]!.GetValue<string>());
 
     private static int Count(JsonNode wave, string state) => wave["counts"]![state]!.GetValue<int>();
 
