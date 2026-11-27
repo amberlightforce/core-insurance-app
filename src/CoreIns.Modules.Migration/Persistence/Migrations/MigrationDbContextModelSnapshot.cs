@@ -313,6 +313,243 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Quality.DqFindingRow", b =>
+                {
+                    b.Property<Guid>("FindingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("finding_id");
+
+                    b.Property<string>("Field")
+                        .HasColumnType("text")
+                        .HasColumnName("field");
+
+                    b.Property<string>("LegacyKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legacy_key");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message");
+
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("object_type");
+
+                    b.Property<Guid>("RecordId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("record_id");
+
+                    b.Property<string>("RuleCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("rule_code");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer")
+                        .HasColumnName("seq");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("severity");
+
+                    b.Property<Guid>("SnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("snapshot_id");
+
+                    b.HasKey("FindingId")
+                        .HasName("pk_dq_finding");
+
+                    b.HasIndex("RunId", "RuleCode")
+                        .HasDatabaseName("ix_dq_finding_rule");
+
+                    b.HasIndex("RunId", "Seq")
+                        .IsUnique()
+                        .HasDatabaseName("ux_dq_finding_run_seq");
+
+                    b.ToTable("dq_finding", "mig", t =>
+                        {
+                            t.HasCheckConstraint("ck_dq_finding_severity", "severity IN ('ERROR','WARNING')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Quality.DqRuleRow", b =>
+                {
+                    b.Property<Guid>("RuleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("rule_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("object_type");
+
+                    b.Property<int>("RuleSetVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("severity");
+
+                    b.HasKey("RuleId")
+                        .HasName("pk_dq_rule");
+
+                    b.HasIndex("RuleSetVersion", "Code", "ObjectType")
+                        .IsUnique()
+                        .HasDatabaseName("ux_dq_rule_version_code");
+
+                    b.ToTable("dq_rule", "mig");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Quality.DqRunRow", b =>
+                {
+                    b.Property<Guid>("RunId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<int>("ErrorCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("error_count");
+
+                    b.Property<string>("FindingsByRule")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("findings_by_rule");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Profile")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("profile");
+
+                    b.Property<int>("RecordCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("record_count");
+
+                    b.Property<int>("RuleSetVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("rule_set_version");
+
+                    b.Property<DateTime>("RunAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("run_at");
+
+                    b.Property<string>("RunBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("run_by");
+
+                    b.Property<Guid>("SnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("snapshot_id");
+
+                    b.Property<int>("WarningCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("warning_count");
+
+                    b.HasKey("RunId")
+                        .HasName("pk_dq_run");
+
+                    b.HasIndex("SnapshotId", "RunAt")
+                        .HasDatabaseName("ix_dq_run_snapshot");
+
+                    b.ToTable("dq_run", "mig");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Quality.DqWaiverRow", b =>
+                {
+                    b.Property<Guid>("WaiverId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("waiver_id");
+
+                    b.Property<DateOnly>("ExpiresOn")
+                        .HasColumnType("date")
+                        .HasColumnName("expires_on");
+
+                    b.Property<Guid>("FindingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("finding_id");
+
+                    b.Property<string>("LegacyKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legacy_key");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("object_type");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("RuleCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("rule_code");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime>("WaivedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("waived_at");
+
+                    b.Property<string>("WaivedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("waived_by");
+
+                    b.HasKey("WaiverId")
+                        .HasName("pk_dq_waiver");
+
+                    b.HasIndex("FindingId");
+
+                    b.HasIndex("LegalEntityId", "Source", "RuleCode", "ObjectType", "LegacyKey")
+                        .HasDatabaseName("ix_dq_waiver_key");
+
+                    b.ToTable("dq_waiver", "mig");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Migration.Services.Reconciliation.ControlTotalRow", b =>
                 {
                     b.Property<Guid>("ControlTotalId")
@@ -768,6 +1005,36 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         .HasDatabaseName("ux_dsar_restriction_subject_class");
 
                     b.ToTable("dsar_restriction", "mig");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Quality.DqFindingRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Migration.Services.Quality.DqRunRow", null)
+                        .WithMany()
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_dq_finding_run");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Quality.DqRunRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Migration.Services.Staging.StagingSnapshotRow", null)
+                        .WithMany()
+                        .HasForeignKey("SnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_dq_run_snapshot");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Quality.DqWaiverRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Migration.Services.Quality.DqFindingRow", null)
+                        .WithMany()
+                        .HasForeignKey("FindingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_dq_waiver_finding");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Migration.Services.SignOff.SignOffSignatoryRow", b =>
