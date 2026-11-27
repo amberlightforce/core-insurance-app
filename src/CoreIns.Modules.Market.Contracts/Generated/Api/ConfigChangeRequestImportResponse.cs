@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Market.Contracts.Api;
 
-/// <summary>mkt.ConfigChangeRequest.import result. PRD outputs: "validation report"</summary>
+/// <summary>mkt.ConfigChangeRequest.import result: the validation report</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConfigChangeRequestImportResponse
 {
-    /// <summary>PRD: "validation report"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'validationReport'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("validationReport")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ValidationReport { get; init; }
+    public required global::CoreIns.Modules.Market.Contracts.Api.ConfigChangeImportReport ValidationReport { get; init; }
 }

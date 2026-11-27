@@ -1,4 +1,4 @@
-using CoreIns.Platform.Persistence;
+﻿using CoreIns.Platform.Persistence;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -141,7 +141,8 @@ internal sealed class MarketDbContext(DbContextOptions<MarketDbContext> options)
         {
             entity.ToTable("config_change_request", table =>
             {
-                table.HasCheckConstraint("ck_config_change_request_status", "status IN ('DRAFT', 'PENDING_APPROVAL', 'APPLIED', 'REJECTED', 'WITHDRAWN')");
+                table.HasCheckConstraint("ck_config_change_request_status", "status IN ('DRAFT', 'PENDING_APPROVAL', 'SCHEDULED', 'APPLIED', 'REJECTED', 'WITHDRAWN')");
+                table.HasCheckConstraint("ck_config_change_request_cause", "cause IN ('MANUAL', 'IMPORT')");
                 table.HasCheckConstraint("ck_config_change_request_base_hash", "base_hash ~ '^[0-9a-f]{64}$'");
             });
             entity.HasKey(e => e.Id).HasName("pk_config_change_request");
@@ -158,6 +159,11 @@ internal sealed class MarketDbContext(DbContextOptions<MarketDbContext> options)
             entity.Property(e => e.ApprovalRequestId).HasColumnName("approval_request_id");
             entity.Property(e => e.ContentHash).HasColumnName("content_hash").HasColumnType("char(64)");
             entity.Property(e => e.ResultingHash).HasColumnName("resulting_hash").HasColumnType("char(64)");
+            entity.Property(e => e.EffectiveAt).HasColumnName("effective_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Cause).HasColumnName("cause").HasMaxLength(16).HasDefaultValue("MANUAL");
+            entity.Property(e => e.ImportDigest).HasColumnName("import_digest").HasColumnType("char(64)");
+            entity.HasIndex(e => new { e.LegalEntityId, e.ImportDigest }).HasDatabaseName("ix_config_change_request_import");
+            entity.HasIndex(e => new { e.Status, e.EffectiveAt }).HasDatabaseName("ix_config_change_request_due");
             entity.Property(e => e.AppliedAt).HasColumnName("applied_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
@@ -340,6 +346,15 @@ internal sealed class ConfigChangeRequestRow
     public string? ContentHash { get; set; }
 
     public string? ResultingHash { get; set; }
+
+    /// <summary>When a SCHEDULED change takes effect; part of the approved content (BO-MKT-02).</summary>
+    public Instant? EffectiveAt { get; set; }
+
+    /// <summary>MANUAL or IMPORT.</summary>
+    public string Cause { get; set; } = "MANUAL";
+
+    /// <summary>Digest of the imported content; makes a repeated import return the first request.</summary>
+    public string? ImportDigest { get; set; }
 
     public Instant? AppliedAt { get; set; }
 

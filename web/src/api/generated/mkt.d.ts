@@ -1274,12 +1274,15 @@ export interface components {
         ConfigChangeRequestRejectResponse: {
             request: components["schemas"]["ConfigChangeRequestView"];
         };
-        /** @description mkt.ConfigChangeRequest.schedule request. PRD inputs: "request body / decision" */
-        ConfigChangeRequestScheduleRequest: Record<string, never>;
-        /** @description mkt.ConfigChangeRequest.schedule result. PRD outputs: "request" */
+        /** @description mkt.ConfigChangeRequest.schedule request (BO-MKT-02). Sets the effective instant of a DRAFT request (maker only). The instant is part of what the checker approves (it is bound into the approval hash at submit); a request with an effective instant is applied by a sweeper when it is due, not at approval. */
+        ConfigChangeRequestScheduleRequest: {
+            requestId: components["schemas"]["Uuid"];
+            /** @description The instant the change takes effect; must be in the future. Null clears it (apply at approval). */
+            effectiveAt: components["schemas"]["Instant"] | null;
+        };
+        /** @description mkt.ConfigChangeRequest.schedule result: the request after the operation */
         ConfigChangeRequestScheduleResponse: {
-            /** @description PRD: "request" */
-            request?: components["schemas"]["Unspecified"];
+            request: components["schemas"]["ConfigChangeRequestView"];
         };
         /** @description mkt.ConfigChangeRequest.withdraw request (maker only, DRAFT or PENDING_APPROVAL). */
         ConfigChangeRequestWithdrawRequest: {
@@ -1291,32 +1294,85 @@ export interface components {
         ConfigChangeRequestWithdrawResponse: {
             request: components["schemas"]["ConfigChangeRequestView"];
         };
-        /** @description mkt.ConfigChangeRequest.rebase request. PRD inputs: "request body / decision" */
-        ConfigChangeRequestRebaseRequest: Record<string, never>;
-        /** @description mkt.ConfigChangeRequest.rebase result. PRD outputs: "request" */
+        /** @description mkt.ConfigChangeRequest.rebase request (BO-MKT-02, maker only). Re-bases a DRAFT, PENDING_APPROVAL or SCHEDULED request on the newest configuration state. Any approval is withdrawn and the request returns to DRAFT: the maker reviews the conflicts, edits if needed and submits again. */
+        ConfigChangeRequestRebaseRequest: {
+            requestId: components["schemas"]["Uuid"];
+            /** @description Reason of the maker or checker. No personal data. */
+            reason: string;
+        };
+        /** @description mkt.ConfigChangeRequest.rebase result: the DRAFT request on its new base and the keys that changed since the old base */
         ConfigChangeRequestRebaseResponse: {
-            /** @description PRD: "request" */
-            request?: components["schemas"]["Unspecified"];
+            request: components["schemas"]["ConfigChangeRequestView"];
+            previousBaseHash: components["schemas"]["Sha256"];
+            conflicts: components["schemas"]["ConfigChangeConflict"][];
         };
         /** @description mkt.ConfigChangeRequest.preview request. PRD inputs: "request id" */
         ConfigChangeRequestPreviewRequest: {
             /** @description PRD: "request id" */
-            requestId?: components["schemas"]["Uuid"];
+            requestId: components["schemas"]["Uuid"];
         };
-        /** @description mkt.ConfigChangeRequest.preview result. PRD outputs: "preview run" */
+        /** @description mkt.ConfigChangeRequest.preview result (BO-MKT-02). Nothing is written. */
         ConfigChangeRequestPreviewResponse: {
-            /** @description PRD: "preview run" */
-            previewRun?: components["schemas"]["Unspecified"];
+            previewRun: components["schemas"]["ConfigChangePreviewRun"];
         };
-        /** @description mkt.ConfigChangeRequest.import request. PRD inputs: "file" */
+        /** @description mkt.ConfigChangeRequest.import request (BO-MKT-02). Every key is validated against the key registry; a valid import creates a DRAFT request (cause IMPORT) that goes through the normal approval, it never applies directly. The same content imported twice returns the first request. */
         ConfigChangeRequestImportRequest: {
-            /** @description PRD: "file" */
-            file?: components["schemas"]["Unspecified"];
+            reason: string;
+            /** @description Name of the imported file or baseline (for example the migration baseline H0) */
+            sourceLabel: string;
+            items: components["schemas"]["ConfigChangeItemInput"][];
         };
-        /** @description mkt.ConfigChangeRequest.import result. PRD outputs: "validation report" */
+        /** @description mkt.ConfigChangeRequest.import result: the validation report */
         ConfigChangeRequestImportResponse: {
-            /** @description PRD: "validation report" */
-            validationReport?: components["schemas"]["Unspecified"];
+            validationReport: components["schemas"]["ConfigChangeImportReport"];
+        };
+        /** @description A key whose value changed between the base state of a request and the newest state. */
+        ConfigChangeConflict: {
+            key: components["schemas"]["Code"];
+            /** @description Resolved value in the base state (null when none) */
+            baseValue: string | null;
+            /** @description Resolved value in the newest state (null when none) */
+            currentValue: string | null;
+        };
+        ConfigChangePreviewItem: {
+            key: components["schemas"]["Code"];
+            legalStatus: string;
+            validFrom: components["schemas"]["LocalDate"] | null;
+            /** @description The date the resolved values are shown for (the item's validFrom, else today) */
+            referenceDate: components["schemas"]["LocalDate"];
+            /** @description Resolved value in the newest state; null when none */
+            before: string | null;
+            /** @description Resolved value once the request is applied on the newest state */
+            after: string | null;
+            changed: boolean;
+        };
+        /** @description Diff of a request against the newest state, with the hash the application would produce. */
+        ConfigChangePreviewRun: {
+            requestId: components["schemas"]["Uuid"];
+            baseHash: components["schemas"]["Sha256"];
+            currentHash: components["schemas"]["Sha256"];
+            /** @description True when a key of the request changed since its base state (the request needs a rebase) */
+            stale: boolean;
+            conflicts: components["schemas"]["ConfigChangeConflict"][];
+            items: components["schemas"]["ConfigChangePreviewItem"][];
+            /** @description Configuration hash the application on the newest state would give; null when the request cannot be applied (stale) */
+            resultingHash: components["schemas"]["Sha256"] | null;
+            effectiveAt: components["schemas"]["Instant"] | null;
+        };
+        ConfigChangeImportIssue: {
+            /** @description 1-based item number; 0 for an issue of the whole file */
+            line: number;
+            key: string | null;
+            code: string;
+            message: string;
+        };
+        ConfigChangeImportReport: {
+            valid: boolean;
+            /** @description True when the same content was imported before; request is then the earlier one */
+            duplicate: boolean;
+            issues: components["schemas"]["ConfigChangeImportIssue"][];
+            /** @description The DRAFT request created (null when the import is not valid) */
+            request: components["schemas"]["ConfigChangeRequestView"] | null;
         };
         /** @description mkt.Spi.catalogue result. PRD outputs: "SPIs, status" */
         SpiCatalogueResponse: {
@@ -1828,7 +1884,11 @@ export interface components {
         ConfigChangeRequestView: {
             id: components["schemas"]["Uuid"];
             /** @enum {string} */
-            status: "DRAFT" | "PENDING_APPROVAL" | "APPLIED" | "REJECTED" | "WITHDRAWN";
+            status: "DRAFT" | "PENDING_APPROVAL" | "SCHEDULED" | "APPLIED" | "REJECTED" | "WITHDRAWN";
+            /** @enum {string} */
+            cause: "MANUAL" | "IMPORT";
+            /** @description The instant a SCHEDULED (or about to be scheduled) change takes effect */
+            effectiveAt: components["schemas"]["Instant"] | null;
             reason: string;
             /** @description Country layer the items apply to (from the legal entity's pack) */
             country: string;

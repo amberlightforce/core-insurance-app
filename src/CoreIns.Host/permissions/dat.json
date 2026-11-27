@@ -19,7 +19,10 @@
         "dat.Mart.run": [ "Platform.Admin", "Staff.Finance", "Staff.ComplianceOfficer" ],
         "dat.Mart.get": [ "Platform.Admin", "Staff.Finance", "Staff.ComplianceOfficer", "Staff.UnderwritingManager" ],
         "dat.Mart.figure": [ "Platform.Admin", "Staff.Finance", "Staff.ComplianceOfficer", "Staff.UnderwritingManager" ],
-        "dat.Mart.compare": [ "Platform.Admin", "Staff.Finance", "Staff.ComplianceOfficer", "Staff.UnderwritingManager" ]
+        "dat.Mart.compare": [ "Platform.Admin", "Staff.Finance", "Staff.ComplianceOfficer", "Staff.UnderwritingManager" ],
+        "dat.Mart.adjust": [ "Platform.Admin", "Staff.Finance" ],
+        "dat.Mart.signOff": [ "Platform.Admin", "Staff.Finance", "Staff.ComplianceOfficer" ],
+        "dat.Mart.export": [ "Platform.Admin", "Staff.Finance", "Staff.ComplianceOfficer" ]
       }
     }
   }

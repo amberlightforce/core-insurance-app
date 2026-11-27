@@ -121,6 +121,58 @@
       "values": "unspecified",
       "activationState": "unspecified"
     },
+    "ConfigChangeConflict": {
+      "key": "SAMPLE_CODE",
+      "baseValue": "sample",
+      "currentValue": "sample"
+    },
+    "ConfigChangeImportIssue": {
+      "line": 1,
+      "key": "sample",
+      "code": "sample",
+      "message": "sample"
+    },
+    "ConfigChangeImportReport": {
+      "valid": true,
+      "duplicate": true,
+      "issues": [
+        {
+          "line": 1,
+          "key": "sample",
+          "code": "sample",
+          "message": "sample"
+        }
+      ],
+      "request": {
+        "id": "0192bc09-e17e-7960-817c-ddbfb3a20dcb",
+        "status": "DRAFT",
+        "cause": "MANUAL",
+        "effectiveAt": "2026-10-07T09:00:00Z",
+        "reason": "sample",
+        "country": "sample",
+        "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "items": [
+          {
+            "key": "SAMPLE_CODE",
+            "value": "sample",
+            "legalStatus": "sample",
+            "sourceRef": "sample",
+            "motorPath": true,
+            "validFrom": "2026-10-07",
+            "validTo": "2026-10-07",
+            "note": "sample"
+          }
+        ],
+        "createdBy": "sample",
+        "decidedBy": "sample",
+        "decisionReason": "sample",
+        "approvalRequestId": "019235e6-a685-7fbd-8dbe-66b4b2a58dd9",
+        "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "appliedAt": "2026-10-07T09:00:00Z",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
     "ConfigChangeItemInput": {
       "key": "SAMPLE_CODE",
       "value": "sample",
@@ -141,6 +193,41 @@
       "validTo": "2026-10-07",
       "note": "sample"
     },
+    "ConfigChangePreviewItem": {
+      "key": "SAMPLE_CODE",
+      "legalStatus": "sample",
+      "validFrom": "2026-10-07",
+      "referenceDate": "2026-10-07",
+      "before": "sample",
+      "after": "sample",
+      "changed": true
+    },
+    "ConfigChangePreviewRun": {
+      "requestId": "019209d4-f53f-7c24-854a-dd720fbbdb1c",
+      "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "currentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "stale": true,
+      "conflicts": [
+        {
+          "key": "SAMPLE_CODE",
+          "baseValue": "sample",
+          "currentValue": "sample"
+        }
+      ],
+      "items": [
+        {
+          "key": "SAMPLE_CODE",
+          "legalStatus": "sample",
+          "validFrom": "2026-10-07",
+          "referenceDate": "2026-10-07",
+          "before": "sample",
+          "after": "sample",
+          "changed": true
+        }
+      ],
+      "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "effectiveAt": "2026-10-07T09:00:00Z"
+    },
     "ConfigChangeRequestApproveRequest": {
       "requestId": "0192e5fc-abbb-7d41-8531-dc9ebc09c2bb",
       "reason": "sample"
@@ -149,6 +236,8 @@
       "request": {
         "id": "0192996c-f9e4-7145-8561-1a8e501b49ae",
         "status": "DRAFT",
+        "cause": "MANUAL",
+        "effectiveAt": "2026-10-07T09:00:00Z",
         "reason": "sample",
         "country": "sample",
         "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -193,6 +282,8 @@
       "request": {
         "id": "01923e2b-0597-7d86-8d6f-04177e17e66f",
         "status": "DRAFT",
+        "cause": "MANUAL",
+        "effectiveAt": "2026-10-07T09:00:00Z",
         "reason": "sample",
         "country": "sample",
         "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -219,16 +310,71 @@
       }
     },
     "ConfigChangeRequestImportRequest": {
-      "file": "unspecified"
+      "reason": "samplexxxx",
+      "sourceLabel": "sample",
+      "items": [
+        {
+          "key": "SAMPLE_CODE",
+          "value": "sample",
+          "legalStatus": "NotRegulatory",
+          "sourceRef": "sample",
+          "motorPath": true,
+          "validFrom": "2026-10-07",
+          "validTo": "2026-10-07",
+          "note": "sample"
+        }
+      ]
     },
     "ConfigChangeRequestImportResponse": {
-      "validationReport": "unspecified"
+      "validationReport": {
+        "valid": true,
+        "duplicate": true,
+        "issues": [
+          {
+            "line": 1,
+            "key": "sample",
+            "code": "sample",
+            "message": "sample"
+          }
+        ],
+        "request": {
+          "id": "01921883-3cf7-7999-837a-37b90d2384bf",
+          "status": "DRAFT",
+          "cause": "MANUAL",
+          "effectiveAt": "2026-10-07T09:00:00Z",
+          "reason": "sample",
+          "country": "sample",
+          "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "items": [
+            {
+              "key": "SAMPLE_CODE",
+              "value": "sample",
+              "legalStatus": "sample",
+              "sourceRef": "sample",
+              "motorPath": true,
+              "validFrom": "2026-10-07",
+              "validTo": "2026-10-07",
+              "note": "sample"
+            }
+          ],
+          "createdBy": "sample",
+          "decidedBy": "sample",
+          "decisionReason": "sample",
+          "approvalRequestId": "0192bde9-80bc-757f-8e66-189fd792d2be",
+          "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "appliedAt": "2026-10-07T09:00:00Z",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "recordVersion": 1
+        }
+      }
     },
     "ConfigChangeRequestListPage": {
       "items": [
         {
           "id": "0192784b-71c7-7a97-82ff-e37225484d2e",
           "status": "DRAFT",
+          "cause": "MANUAL",
+          "effectiveAt": "2026-10-07T09:00:00Z",
           "reason": "sample",
           "country": "sample",
           "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -261,10 +407,75 @@
       "requestId": "01924921-d69e-7f10-8c82-355ae00ff80d"
     },
     "ConfigChangeRequestPreviewResponse": {
-      "previewRun": "unspecified"
+      "previewRun": {
+        "requestId": "01922458-97fa-7e88-8f75-0ece22d80c1b",
+        "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "currentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "stale": true,
+        "conflicts": [
+          {
+            "key": "SAMPLE_CODE",
+            "baseValue": "sample",
+            "currentValue": "sample"
+          }
+        ],
+        "items": [
+          {
+            "key": "SAMPLE_CODE",
+            "legalStatus": "sample",
+            "validFrom": "2026-10-07",
+            "referenceDate": "2026-10-07",
+            "before": "sample",
+            "after": "sample",
+            "changed": true
+          }
+        ],
+        "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "effectiveAt": "2026-10-07T09:00:00Z"
+      }
+    },
+    "ConfigChangeRequestRebaseRequest": {
+      "requestId": "019230c9-9467-729e-8f6f-54037a37a3f1",
+      "reason": "sample"
     },
     "ConfigChangeRequestRebaseResponse": {
-      "request": "unspecified"
+      "request": {
+        "id": "0192b8d0-9ce6-7eb6-81a7-a133d8bcba0c",
+        "status": "DRAFT",
+        "cause": "MANUAL",
+        "effectiveAt": "2026-10-07T09:00:00Z",
+        "reason": "sample",
+        "country": "sample",
+        "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "items": [
+          {
+            "key": "SAMPLE_CODE",
+            "value": "sample",
+            "legalStatus": "sample",
+            "sourceRef": "sample",
+            "motorPath": true,
+            "validFrom": "2026-10-07",
+            "validTo": "2026-10-07",
+            "note": "sample"
+          }
+        ],
+        "createdBy": "sample",
+        "decidedBy": "sample",
+        "decisionReason": "sample",
+        "approvalRequestId": "0192ed95-b4c0-77b7-8f03-d4ea3cd24175",
+        "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "appliedAt": "2026-10-07T09:00:00Z",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      },
+      "previousBaseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "conflicts": [
+        {
+          "key": "SAMPLE_CODE",
+          "baseValue": "sample",
+          "currentValue": "sample"
+        }
+      ]
     },
     "ConfigChangeRequestRejectRequest": {
       "requestId": "01923404-3152-7e67-87c2-f193d0791d71",
@@ -274,6 +485,8 @@
       "request": {
         "id": "0192def8-0216-798d-86bc-daf448ab1368",
         "status": "DRAFT",
+        "cause": "MANUAL",
+        "effectiveAt": "2026-10-07T09:00:00Z",
         "reason": "sample",
         "country": "sample",
         "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -299,8 +512,40 @@
         "recordVersion": 1
       }
     },
+    "ConfigChangeRequestScheduleRequest": {
+      "requestId": "01926481-d9d7-7107-8972-7d20a47204c3",
+      "effectiveAt": "2026-10-07T09:00:00Z"
+    },
     "ConfigChangeRequestScheduleResponse": {
-      "request": "unspecified"
+      "request": {
+        "id": "01924081-202b-7ded-8101-90c4e109bd22",
+        "status": "DRAFT",
+        "cause": "MANUAL",
+        "effectiveAt": "2026-10-07T09:00:00Z",
+        "reason": "sample",
+        "country": "sample",
+        "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "items": [
+          {
+            "key": "SAMPLE_CODE",
+            "value": "sample",
+            "legalStatus": "sample",
+            "sourceRef": "sample",
+            "motorPath": true,
+            "validFrom": "2026-10-07",
+            "validTo": "2026-10-07",
+            "note": "sample"
+          }
+        ],
+        "createdBy": "sample",
+        "decidedBy": "sample",
+        "decisionReason": "sample",
+        "approvalRequestId": "0192d862-3c43-7d5c-8a7c-51369d071e0c",
+        "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "appliedAt": "2026-10-07T09:00:00Z",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
     },
     "ConfigChangeRequestSubmitRequest": {
       "requestId": "0192bf35-bf7a-725b-868f-13efaf5461a7",
@@ -310,6 +555,8 @@
       "request": {
         "id": "0192e1ec-24b4-7b1e-8a28-4be1ad0e7a04",
         "status": "DRAFT",
+        "cause": "MANUAL",
+        "effectiveAt": "2026-10-07T09:00:00Z",
         "reason": "sample",
         "country": "sample",
         "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -354,6 +601,8 @@
       "request": {
         "id": "0192a6d2-ae73-7fb2-8ecb-adbf22720717",
         "status": "DRAFT",
+        "cause": "MANUAL",
+        "effectiveAt": "2026-10-07T09:00:00Z",
         "reason": "sample",
         "country": "sample",
         "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -382,6 +631,8 @@
     "ConfigChangeRequestView": {
       "id": "019240e6-4507-7948-897b-ba19fc5273e5",
       "status": "DRAFT",
+      "cause": "MANUAL",
+      "effectiveAt": "2026-10-07T09:00:00Z",
       "reason": "sample",
       "country": "sample",
       "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
@@ -414,6 +665,8 @@
       "request": {
         "id": "01926395-5e1d-7c25-859e-2030b5b5c255",
         "status": "DRAFT",
+        "cause": "MANUAL",
+        "effectiveAt": "2026-10-07T09:00:00Z",
         "reason": "sample",
         "country": "sample",
         "baseHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",

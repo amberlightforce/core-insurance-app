@@ -140,11 +140,17 @@ public static class DataErrorCodes
     /// </remarks>
     public const string IdempotencyMismatch = "DAT-ERR-IDEMPOTENCY-MISMATCH";
 
+    /// <summary>DAT-ERR-LAYOUT-UNVERIFIED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): dat.Mart.export.</para>
+    /// </remarks>
+    public const string LayoutUnverified = "DAT-ERR-LAYOUT-UNVERIFIED";
+
     /// <summary>The code prefix of this module.</summary>
     public const string Prefix = "DAT-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [V001, V002, V010, V011, V020, V021, V022, V023, V024, V025, V026, V030, V031, V032, V033, V040, V050, V051, V060, V061, V070, IdempotencyMismatch];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [V001, V002, V010, V011, V020, V021, V022, V023, V024, V025, V026, V030, V031, V032, V033, V040, V050, V051, V060, V061, V070, IdempotencyMismatch, LayoutUnverified];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -171,5 +177,6 @@ public static class DataErrorCodes
         [V061] = 422,
         [V070] = 422,
         [IdempotencyMismatch] = 409,
+        [LayoutUnverified] = 422,
     };
 }

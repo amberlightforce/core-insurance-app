@@ -8,6 +8,7 @@ using CoreIns.Modules.Migration.Persistence;
 using CoreIns.Modules.Migration.Services;
 using CoreIns.Modules.Migration.Services.Reconciliation;
 using CoreIns.Modules.Migration.Services.SignOff;
+using CoreIns.Modules.Migration.Services.Quality;
 using CoreIns.Modules.Migration.Services.Staging;
 using CoreIns.Platform;
 using CoreIns.Platform.Approvals;
@@ -92,6 +93,10 @@ public static class MigrationModule
 
         services.AddScoped<LegacyStaging>();
         services.AddCommand<LoadStaging, StagingSnapshotView, LoadStagingHandler>(CommandDescriptor.For("mig.Staging.load"));
+
+        services.AddScoped<DataQualityService>();
+        services.AddCommand<RunProfile, DqRunView, RunProfileHandler>(CommandDescriptor.For("mig.Profile.run"));
+        services.AddCommand<WaiveFinding, DqWaiverView, WaiveFindingHandler>(CommandDescriptor.For("mig.Dq.waive"));
 
         services.AddScoped<IMigrationXrefService, MigrationXrefService>();
         services.AddScoped<IMigrationRoutingService, MigrationRoutingService>();

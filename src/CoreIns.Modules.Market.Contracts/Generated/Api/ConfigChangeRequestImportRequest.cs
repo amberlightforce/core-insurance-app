@@ -4,15 +4,19 @@
 
 namespace CoreIns.Modules.Market.Contracts.Api;
 
-/// <summary>mkt.ConfigChangeRequest.import request. PRD inputs: "file"</summary>
+/// <summary>mkt.ConfigChangeRequest.import request (BO-MKT-02). Every key is validated against the key registry; a valid import creates a DRAFT request (cause IMPORT) that goes through the normal approval, it never applies directly. The same content imported twice returns the first request.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConfigChangeRequestImportRequest
 {
-    /// <summary>PRD: "file"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("file")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? File { get; init; }
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
+
+    /// <summary>Name of the imported file or baseline (for example the migration baseline H0)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceLabel")]
+    public required string SourceLabel { get; init; }
+
+    /// <summary>Contract member 'items'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Market.Contracts.Api.ConfigChangeItemInput> Items { get; init; }
 }

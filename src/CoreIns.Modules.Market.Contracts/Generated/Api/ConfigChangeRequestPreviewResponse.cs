@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Market.Contracts.Api;
 
-/// <summary>mkt.ConfigChangeRequest.preview result. PRD outputs: "preview run"</summary>
+/// <summary>mkt.ConfigChangeRequest.preview result (BO-MKT-02). Nothing is written.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConfigChangeRequestPreviewResponse
 {
-    /// <summary>PRD: "preview run"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'previewRun'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("previewRun")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PreviewRun { get; init; }
+    public required global::CoreIns.Modules.Market.Contracts.Api.ConfigChangePreviewRun PreviewRun { get; init; }
 }

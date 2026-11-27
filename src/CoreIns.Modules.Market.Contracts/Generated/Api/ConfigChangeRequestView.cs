@@ -19,6 +19,14 @@ public sealed record ConfigChangeRequestView
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
     public required StatusValue Status { get; init; }
 
+    /// <summary>Contract member 'cause'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("cause")]
+    public required CauseValue Cause { get; init; }
+
+    /// <summary>The instant a SCHEDULED (or about to be scheduled) change takes effect</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveAt")]
+    public required global::CoreIns.SharedKernel.Instant? EffectiveAt { get; init; }
+
     /// <summary>Contract member 'reason'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     public required string Reason { get; init; }
@@ -80,6 +88,10 @@ public sealed record ConfigChangeRequestView
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PENDING_APPROVAL")]
         PendingApproval,
 
+        /// <summary><c>SCHEDULED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SCHEDULED")]
+        Scheduled,
+
         /// <summary><c>APPLIED</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPLIED")]
         Applied,
@@ -91,5 +103,19 @@ public sealed record ConfigChangeRequestView
         /// <summary><c>WITHDRAWN</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("WITHDRAWN")]
         Withdrawn,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<CauseValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum CauseValue
+    {
+        /// <summary><c>MANUAL</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MANUAL")]
+        Manual,
+
+        /// <summary><c>IMPORT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("IMPORT")]
+        Import,
     }
 }

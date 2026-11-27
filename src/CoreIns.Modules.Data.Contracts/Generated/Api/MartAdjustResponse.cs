@@ -4,15 +4,43 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Mart.adjust result. PRD outputs: "approval request"</summary>
+/// <summary>dat.Mart.adjust result (BO-DAT-04).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MartAdjustResponse
 {
-    /// <summary>PRD: "approval request"</summary>
+    /// <summary>The new adjustment line.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'adjustmentId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequest")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("adjustmentId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ApprovalRequest { get; init; }
+    public global::System.Guid? AdjustmentId { get; init; }
+
+    /// <summary>The run.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'runId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("runId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? RunId { get; init; }
+
+    /// <summary>The adjusted figure.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("figureKey")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? FigureKey { get; init; }
+
+    /// <summary>Stored figure plus all adjustment lines of the figure, 4 decimals.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("adjustedValue")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? AdjustedValue { get; init; }
+
+    /// <summary>SHA-256 over the ordered adjustment lines of the run.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("adjustmentsHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? AdjustmentsHash { get; init; }
+
+    /// <summary>True when a valid sign-off existed and this adjustment invalidated it.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("signOffInvalidated")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? SignOffInvalidated { get; init; }
 }

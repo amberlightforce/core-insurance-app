@@ -276,6 +276,7 @@ internal sealed class SampleGenerator(Documents docs)
 
         return node["format"]?.GetValue<string>() switch
         {
+            "uuid" => Uuid(path),
             "date" => "2026-10-07",
             "date-time" => "2026-10-07T09:00:00Z",
             "uri" => "https://contracts.invalid/sample",
