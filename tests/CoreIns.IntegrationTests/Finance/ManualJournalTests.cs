@@ -105,7 +105,7 @@ public sealed class ManualJournalTests(PostgresFixture database) : IClassFixture
             $"INSERT INTO fin.financial_period (period_id, legal_entity_id, period_code, status, created_at) VALUES ('{Guid.CreateVersion7()}', '{ApiHostFactory.LegalEntityId}', '2025-03', 'LOCKED', now()) ON CONFLICT (legal_entity_id, period_code) DO UPDATE SET status = 'LOCKED'",
             TestContext.Current.CancellationToken);
         var (locked, c) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals", Journal(date: "2025-03-10"));
-        locked.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, c?.ToJsonString());
+        locked.StatusCode.ShouldBe(HttpStatusCode.Conflict, c?.ToJsonString());
         c!.ToJsonString().ShouldContain("FIN-ERR-PERIOD-LOCKED");
     }
 
@@ -270,7 +270,7 @@ public sealed class ManualJournalTests(PostgresFixture database) : IClassFixture
         var before = await CountAsync("fin.journal_entry");
 
         var (locked, problem) = await SendAsync(HttpMethod.Post, "/api/fin/v1/manual-journals/decide", new { id, decision = "APPROVE" }, user: "checker-1");
-        locked.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, problem?.ToJsonString());
+        locked.StatusCode.ShouldBe(HttpStatusCode.Conflict, problem?.ToJsonString());
         problem!.ToJsonString().ShouldContain("FIN-ERR-PERIOD-LOCKED");
         (await CountAsync("fin.journal_entry")).ShouldBe(before);
 
