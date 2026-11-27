@@ -531,6 +531,20 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: query
+        required: true
+        description: Contract addition (BO-CHN-05) - the matrix to compare
+        schema:
+          type: string
+          format: uuid
+      - name: against
+        in: query
+        required: false
+        description: Contract addition (BO-CHN-05) - the matrix to compare against; omitted = the matrix in force now
+        schema:
+          type: string
+          format: uuid
       responses:
         '200':
           description: Success
@@ -6065,6 +6079,9 @@ components:
       description: 'chn.Permission.evaluate request. PRD inputs: "transactionType, channel, actor, onBehalfOf, objectRef,
         proposedValues"'
       properties:
+        raiseTicket:
+          type: boolean
+          description: 'Contract addition (BO-CHN-05): raise a confirmation ticket when the outcome is REFER (default true; false for a pure what-if).'
         transactionType:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "transactionType"'
@@ -6087,6 +6104,10 @@ components:
       type: object
       description: 'chn.Permission.evaluate result. PRD outputs: "outcome, limits, entry, version, reasons, explanation key"'
       properties:
+        ticketId:
+          type: string
+          format: uuid
+          description: 'Contract addition (BO-CHN-05): the confirmation ticket raised for a REFER outcome.'
         outcome:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "outcome"'
@@ -6139,6 +6160,10 @@ components:
       type: object
       description: 'chn.PermissionMatrix.updateEntry request. PRD inputs: "version, entries, scenarios"'
       properties:
+        matrixId:
+          type: string
+          format: uuid
+          description: 'Contract addition (BO-CHN-05): the matrix draft acted on.'
         version:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "version"'
@@ -6169,6 +6194,10 @@ components:
       type: object
       description: 'chn.PermissionMatrix.runScenarios request. PRD inputs: "version, entries, scenarios"'
       properties:
+        matrixId:
+          type: string
+          format: uuid
+          description: 'Contract addition (BO-CHN-05): the matrix draft acted on.'
         version:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "version"'
@@ -6199,6 +6228,10 @@ components:
       type: object
       description: 'chn.PermissionMatrix.submit request. PRD inputs: "version, entries, scenarios"'
       properties:
+        matrixId:
+          type: string
+          format: uuid
+          description: 'Contract addition (BO-CHN-05): the matrix draft acted on.'
         version:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "version"'
@@ -6229,6 +6262,14 @@ components:
       type: object
       description: 'chn.PermissionMatrix.schedule request. PRD inputs: "version, entries, scenarios"'
       properties:
+        effectiveFrom:
+          type: string
+          format: date-time
+          description: 'Contract addition (BO-CHN-05): activation instant; omitted = now.'
+        matrixId:
+          type: string
+          format: uuid
+          description: 'Contract addition (BO-CHN-05): the matrix draft acted on.'
         version:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "version"'

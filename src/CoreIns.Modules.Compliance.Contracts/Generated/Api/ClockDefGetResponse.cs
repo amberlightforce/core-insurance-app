@@ -30,7 +30,7 @@ public sealed record ClockDefGetResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? Jurisdiction { get; init; }
 
-    /// <summary>VERIFIED, SECONDARY_SOURCE or ILLUSTRATIVE</summary>
+    /// <summary>VERIFIED, SECONDARY_SOURCE, ILLUSTRATIVE or UNVERIFIED</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
     public required string LegalStatus { get; init; }
 

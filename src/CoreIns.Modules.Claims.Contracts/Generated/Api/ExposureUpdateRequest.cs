@@ -4,15 +4,18 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Exposure.update request. PRD inputs: "exposure data"</summary>
+/// <summary>clm.Exposure.update request (BO-CLM-01). Moves the exposure to another incident of the claim (REQ-CLM-063); coverage and claimant never change (open a new exposure instead). A handler action.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ExposureUpdateRequest
 {
-    /// <summary>PRD: "exposure data"</summary>
+    /// <summary>The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
+
+    /// <summary>Incident of the same claim, or null to detach</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'incidentId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exposureData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ExposureData { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("incidentId")]
+    public required global::System.Guid? IncidentId { get; init; }
 }

@@ -223,6 +223,224 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                     b.ToTable("event_ledger", "rpt_raw");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.FactClaimMovementRow", b =>
+                {
+                    b.Property<Guid>("RowId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("row_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("LegalEntity")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_entity");
+
+                    b.Property<string>("MovementKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("movement_key");
+
+                    b.Property<string>("MovementType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("movement_type");
+
+                    b.Property<Guid?>("PolicyTermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_term_id");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("product_code");
+
+                    b.Property<DateTime>("RecordedFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_from");
+
+                    b.Property<DateTime?>("RecordedTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_to");
+
+                    b.Property<Guid>("SourceEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_event_id");
+
+                    b.Property<DateTime>("ValidFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateTime?>("ValidTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("valid_to");
+
+                    b.HasKey("RowId")
+                        .HasName("pk_fact_claim_movement");
+
+                    b.HasIndex("LegalEntity", "MovementKey")
+                        .HasDatabaseName("ix_fact_claim_movement_key");
+
+                    b.HasIndex("LegalEntity", "ValidFrom")
+                        .HasDatabaseName("ix_fact_claim_movement_valid");
+
+                    b.ToTable("fact_claim_movement", "rpt_conformed");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.FactPolicyTermRow", b =>
+                {
+                    b.Property<Guid>("RowId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("row_id");
+
+                    b.Property<string>("LegalEntity")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_entity");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("product_code");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime>("RecordedFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_from");
+
+                    b.Property<DateTime?>("RecordedTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_to");
+
+                    b.Property<Guid>("SourceEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_event_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.Property<DateTime>("ValidFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateTime?>("ValidTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("valid_to");
+
+                    b.HasKey("RowId")
+                        .HasName("pk_fact_policy_term");
+
+                    b.HasIndex("LegalEntity", "TermId")
+                        .HasDatabaseName("ix_fact_policy_term_term");
+
+                    b.HasIndex("LegalEntity", "ValidFrom")
+                        .HasDatabaseName("ix_fact_policy_term_valid");
+
+                    b.ToTable("fact_policy_term", "rpt_conformed");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.FactPremiumRow", b =>
+                {
+                    b.Property<Guid>("RowId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("row_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("category");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("currency");
+
+                    b.Property<Guid>("InvoiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invoice_id");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("LegalEntity")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_entity");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("product_code");
+
+                    b.Property<DateTime>("RecordedFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_from");
+
+                    b.Property<DateTime?>("RecordedTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_to");
+
+                    b.Property<Guid>("SourceEventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_event_id");
+
+                    b.Property<Guid?>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.Property<DateTime>("ValidFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateTime?>("ValidTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("valid_to");
+
+                    b.HasKey("RowId")
+                        .HasName("pk_fact_premium");
+
+                    b.HasIndex("LegalEntity", "ValidFrom")
+                        .HasDatabaseName("ix_fact_premium_valid");
+
+                    b.HasIndex("LegalEntity", "InvoiceId", "Category")
+                        .HasDatabaseName("ix_fact_premium_key");
+
+                    b.ToTable("fact_premium", "rpt_conformed");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Data.Persistence.ModelRow", b =>
                 {
                     b.Property<Guid>("ModelId")
@@ -269,6 +487,23 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_model_status", "status IN ('ACTIVE','SUSPENDED')");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.ProjectedEventRow", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_id");
+
+                    b.Property<DateTime>("ProjectedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("projected_at");
+
+                    b.HasKey("EventId")
+                        .HasName("pk_projected_event");
+
+                    b.ToTable("projected_event", "rpt_conformed");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Data.Persistence.QuarantineRow", b =>

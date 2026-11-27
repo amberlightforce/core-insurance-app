@@ -3443,44 +3443,73 @@ export interface components {
         /** @description Typed from REQ-RI-003, REQ-RI-128. PRD outputs: "batch id" */
         RecoveryRecalculateResponse: {
             batchId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            contractYear: number;
+            /** @description Delta rows the restatement booked (0 when the booked recoveries already equalled the full recalculation) */
+            rowsBooked: number;
         };
         /** @description ri.Occurrence.link request. PRD inputs: "claim ids, reason" */
         OccurrenceLinkRequest: {
-            /** @description PRD: "claim ids" */
-            claimIds?: components["schemas"]["Uuid"][];
+            /** @description PRD: "claim ids"; all under one contract (a link needs at least two) */
+            claimIds: components["schemas"]["Uuid"][];
             /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            reason: string;
         };
         /** @description ri.Occurrence.link result. PRD outputs: "occurrence" */
         OccurrenceLinkResponse: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
+            occurrence: components["schemas"]["OccurrenceView"];
+        };
+        /** @description A group of claims treated as one occurrence for the per-occurrence layers of a contract (REQ-RI-115). */
+        OccurrenceView: {
+            occurrenceId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            contractYear: number;
+            /** @description The claims currently linked (empty once the occurrence is dissolved) */
+            claimIds: components["schemas"]["Uuid"][];
+            reason?: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "DISSOLVED";
         };
         /** @description ri.Occurrence.unlink request. PRD inputs: "claim ids, reason" */
         OccurrenceUnlinkRequest: {
-            /** @description PRD: "claim ids" */
-            claimIds?: components["schemas"]["Uuid"][];
+            /** @description PRD: "claim ids"; all under one contract */
+            claimIds: components["schemas"]["Uuid"][];
             /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            reason: string;
         };
         /** @description ri.Occurrence.unlink result. PRD outputs: "occurrence" */
         OccurrenceUnlinkResponse: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
+            occurrence: components["schemas"]["OccurrenceView"];
         };
         /** @description ri.Recovery.adjust request. PRD inputs: "occurrence, amount, reason" */
         RecoveryAdjustRequest: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "amount" */
-            amount?: components["schemas"]["Money"];
+            contractId: components["schemas"]["Uuid"];
+            /** @description PRD: "occurrence" - the claim, or any claim of the linked occurrence */
+            claimId: components["schemas"]["Uuid"];
+            layerId: components["schemas"]["Uuid"];
+            /** @description PRD: "amount" - signed change of the incurred recoverable, EUR, split over the panel by largest remainder */
+            amount: components["schemas"]["Money"];
             /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            reason: string;
         };
         /** @description ri.Recovery.adjust result. PRD outputs: "item" */
         RecoveryAdjustResponse: {
-            /** @description PRD: "item" */
-            item?: components["schemas"]["Unspecified"];
+            item: components["schemas"]["RecoveryAdjustmentItem"];
+        };
+        /** @description One manual adjustment (a sealed delta, never an update). */
+        RecoveryAdjustmentItem: {
+            adjustmentId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            /** @description The claim the adjustment is booked on (the representative claim of a linked occurrence) */
+            claimId: components["schemas"]["Uuid"];
+            layerId: components["schemas"]["Uuid"];
+            amount: components["schemas"]["Money"];
+            reason: string;
+            recordedAt: components["schemas"]["Instant"];
+            parts: {
+                participantPartyId: components["schemas"]["Uuid"];
+                amount: components["schemas"]["Money"];
+            }[];
         };
         /** @description ri.CatOccurrence.propose request. PRD inputs: "cat code, contract, windows, damage ratio" */
         CatOccurrenceProposeRequest: {
@@ -3556,86 +3585,172 @@ export interface components {
         };
         /** @description ri.AggregateTracker.get result. PRD outputs: "schedule" */
         AggregateTrackerGetResponse: {
-            /** @description PRD: "schedule" */
-            schedule?: components["schemas"]["Unspecified"];
+            schedule: components["schemas"]["AggregateTrackerRow"][];
         };
-        /** @description ri.DepositSchedule.get result. PRD outputs: "schedule, adjustment" */
+        /** @description Aggregate position of one layer of one contract year (booked recoveries plus manual adjustments, after the placed percentage). */
+        AggregateTrackerRow: {
+            contractId: components["schemas"]["Uuid"];
+            contractYear: number;
+            layerId: components["schemas"]["Uuid"];
+            layerNo: number;
+            /** @description Annual aggregate limit of the layer (null = unlimited) */
+            aggregateLimit?: components["schemas"]["Money"] | null;
+            recoverableIncurred: components["schemas"]["Money"];
+            recoverablePaid: components["schemas"]["Money"];
+            recoverableOutstanding: components["schemas"]["Money"];
+            /** @description Part of recoverableIncurred that comes from manual adjustments */
+            adjustments: components["schemas"]["Money"];
+        };
+        /** @description One instalment of a deposit schedule; the instalments sum exactly to the deposit premium (largest-remainder split) */
+        DepositInstalment: {
+            seq: number;
+            dueDate: components["schemas"]["LocalDate"];
+            amount: components["schemas"]["Money"];
+        };
+        /** @description One revision of the minimum and deposit premium schedule of a contract layer and year (BO-RI-10). Revisions are append-only; the highest revision is current. */
+        DepositScheduleView: {
+            scheduleId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            layerNo: number;
+            contractYear: number;
+            revision: number;
+            /** @description False when a later revision superseded this one */
+            current: boolean;
+            minimumPremium: components["schemas"]["Money"];
+            depositPremium: components["schemas"]["Money"];
+            instalments: components["schemas"]["DepositInstalment"][];
+            reason?: components["schemas"]["Text"];
+            createdAt: components["schemas"]["Instant"];
+            createdBy: string;
+        };
+        /** @description The adjustment premium of a contract layer and year (BO-RI-10), the premium earned on the subject premium (never below the minimum premium) less the deposit premium. Positive is an additional premium due to the reinsurer, negative a return. PENDING until decided once through PLT (RI.ADJUSTMENT_APPROVE). */
+        AdjustmentView: {
+            adjustmentId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            layerNo: number;
+            contractYear: number;
+            /** @description The deposit schedule revision the adjustment was calculated against */
+            scheduleId: components["schemas"]["Uuid"];
+            subjectPremium: components["schemas"]["Money"];
+            ratePct: components["schemas"]["Decimal"];
+            calculatedPremium: components["schemas"]["Money"];
+            minimumPremium: components["schemas"]["Money"];
+            depositPremium: components["schemas"]["Money"];
+            adjustmentAmount: components["schemas"]["Money"];
+            /** @enum {string} */
+            status: "PENDING" | "APPROVED" | "REJECTED";
+            approvalRequestId?: components["schemas"]["Uuid"];
+            reason?: components["schemas"]["Text"];
+            createdAt: components["schemas"]["Instant"];
+            createdBy: string;
+            decidedAt?: components["schemas"]["Instant"];
+            decidedBy?: string;
+        };
+        /** @description ri.DepositSchedule.get result; the adjustment is the latest one of the schedule's layer and year, if any */
         DepositScheduleGetResponse: {
-            /** @description PRD: "schedule" */
-            schedule?: components["schemas"]["Unspecified"];
-            /** @description PRD: "adjustment" */
-            adjustment?: components["schemas"]["Unspecified"];
+            schedule: components["schemas"]["DepositScheduleView"];
+            adjustment?: components["schemas"]["AdjustmentView"];
         };
-        /** @description ri.DepositSchedule.reschedule request. PRD inputs: "layer, year" */
+        /** @description ri.DepositSchedule.reschedule request, sets (first call) or replaces (next calls) the minimum and deposit premium schedule of a layer for the contract's year. The deposit is split over the instalments with the largest-remainder rule. */
         DepositScheduleRescheduleRequest: {
-            /** @description PRD: "layer" */
-            layer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "year" */
-            year?: components["schemas"]["Unspecified"];
+            contractId: components["schemas"]["Uuid"];
+            layerNo: number;
+            /** @description Minimum premium; not above the deposit premium */
+            minimumPremium: components["schemas"]["Money"];
+            depositPremium: components["schemas"]["Money"];
+            instalmentCount: number;
+            firstDueDate: components["schemas"]["LocalDate"];
+            /** @description Months between instalments (1, 2, 3, 4, 6 or 12) */
+            intervalMonths: number;
+            /** @description The current revision the user saw (0 for none); a different current revision is RI-ERR-STALE */
+            expectedRevision?: number;
+            reason: components["schemas"]["Text"];
         };
-        /** @description ri.DepositSchedule.reschedule result. PRD outputs: "schedule, adjustment" */
+        /** @description ri.DepositSchedule.reschedule result */
         DepositScheduleRescheduleResponse: {
-            /** @description PRD: "schedule" */
-            schedule?: components["schemas"]["Unspecified"];
-            /** @description PRD: "adjustment" */
-            adjustment?: components["schemas"]["Unspecified"];
+            schedule: components["schemas"]["DepositScheduleView"];
         };
-        /** @description ri.Adjustment.calculate request. PRD inputs: "layer, year" */
+        /** @description ri.Adjustment.calculate request. Opens a PENDING adjustment and its PLT approval; the layer needs a deposit schedule. */
         AdjustmentCalculateRequest: {
-            /** @description PRD: "layer" */
-            layer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "year" */
-            year?: components["schemas"]["Unspecified"];
+            contractId: components["schemas"]["Uuid"];
+            layerNo: number;
+            /** @description The final subject (gross written) premium of the contract year */
+            subjectPremium: components["schemas"]["Money"];
+            /** @description The premium rate applied to the subject premium, in percent */
+            ratePct: components["schemas"]["Decimal"];
+            reason?: components["schemas"]["Text"];
         };
-        /** @description ri.Adjustment.calculate result. PRD outputs: "schedule, adjustment" */
+        /** @description ri.Adjustment.calculate result */
         AdjustmentCalculateResponse: {
-            /** @description PRD: "schedule" */
-            schedule?: components["schemas"]["Unspecified"];
-            /** @description PRD: "adjustment" */
-            adjustment?: components["schemas"]["Unspecified"];
+            adjustment: components["schemas"]["AdjustmentView"];
         };
-        /** @description ri.Adjustment.approve request. PRD inputs: "layer, year" */
+        /** @description ri.Adjustment.approve request; the adjustment is decided once. The person who calculated it cannot decide it (RI-ERR-SOD). */
         AdjustmentApproveRequest: {
-            /** @description PRD: "layer" */
-            layer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "year" */
-            year?: components["schemas"]["Unspecified"];
+            adjustmentId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            reason?: components["schemas"]["Text"];
         };
-        /** @description ri.Adjustment.approve result. PRD outputs: "schedule, adjustment" */
+        /** @description ri.Adjustment.approve result */
         AdjustmentApproveResponse: {
-            /** @description PRD: "schedule" */
-            schedule?: components["schemas"]["Unspecified"];
-            /** @description PRD: "adjustment" */
-            adjustment?: components["schemas"]["Unspecified"];
+            adjustment: components["schemas"]["AdjustmentView"];
         };
-        /** @description ri.Commission.adjust request. PRD inputs: "section, year" */
+        /** @description One step of a sliding scale; the step with the highest lossRatioFromPct not above the loss ratio applies */
+        CommissionScaleStep: {
+            lossRatioFromPct: components["schemas"]["Decimal"];
+            commissionRatePct: components["schemas"]["Decimal"];
+        };
+        /** @description One sliding-scale commission calculation of a contract year (BO-RI-10), append-only. The adjustment is the earned commission less the provisional commission. PENDING until decided once through PLT (RI.ADJUSTMENT_APPROVE). */
+        CommissionView: {
+            commissionId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            contractYear: number;
+            cededPremium: components["schemas"]["Money"];
+            incurredLoss: components["schemas"]["Money"];
+            lossRatioPct: components["schemas"]["Decimal"];
+            provisionalRatePct: components["schemas"]["Decimal"];
+            earnedRatePct: components["schemas"]["Decimal"];
+            provisionalCommission: components["schemas"]["Money"];
+            earnedCommission: components["schemas"]["Money"];
+            adjustmentAmount: components["schemas"]["Money"];
+            scale: components["schemas"]["CommissionScaleStep"][];
+            /** @enum {string} */
+            status: "PENDING" | "APPROVED" | "REJECTED";
+            approvalRequestId?: components["schemas"]["Uuid"];
+            reason?: components["schemas"]["Text"];
+            createdAt: components["schemas"]["Instant"];
+            createdBy: string;
+            decidedAt?: components["schemas"]["Instant"];
+            decidedBy?: string;
+        };
+        /** @description ri.Commission.adjust request. Calculates the earned commission from the loss ratio on the sliding scale and opens a PENDING calculation with its PLT approval. */
         CommissionAdjustRequest: {
-            /** @description PRD: "section" */
-            section?: components["schemas"]["Unspecified"];
-            /** @description PRD: "year" */
-            year?: components["schemas"]["Unspecified"];
+            contractId: components["schemas"]["Uuid"];
+            cededPremium: components["schemas"]["Money"];
+            incurredLoss: components["schemas"]["Money"];
+            /** @description The provisional commission rate already allowed on the premium, in percent */
+            provisionalRatePct: components["schemas"]["Decimal"];
+            scale: components["schemas"]["CommissionScaleStep"][];
+            reason?: components["schemas"]["Text"];
         };
-        /** @description ri.Commission.adjust result. PRD outputs: "adjustment" */
+        /** @description ri.Commission.adjust result */
         CommissionAdjustResponse: {
-            /** @description PRD: "adjustment" */
-            adjustment?: components["schemas"]["Unspecified"];
+            commission: components["schemas"]["CommissionView"];
         };
-        /** @description ri.Commission.approve request. PRD inputs: "section, year" */
+        /** @description ri.Commission.approve request; the calculation is decided once. The person who calculated it cannot decide it (RI-ERR-SOD). */
         CommissionApproveRequest: {
-            /** @description PRD: "section" */
-            section?: components["schemas"]["Unspecified"];
-            /** @description PRD: "year" */
-            year?: components["schemas"]["Unspecified"];
+            commissionId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            reason?: components["schemas"]["Text"];
         };
-        /** @description ri.Commission.approve result. PRD outputs: "adjustment" */
+        /** @description ri.Commission.approve result */
         CommissionApproveResponse: {
-            /** @description PRD: "adjustment" */
-            adjustment?: components["schemas"]["Unspecified"];
+            commission: components["schemas"]["CommissionView"];
         };
-        /** @description ri.Commission.history result. PRD outputs: "adjustment" */
+        /** @description One commission calculation (ri.Commission.history result), newest first */
         CommissionHistoryItem: {
-            /** @description PRD: "adjustment" */
-            adjustment?: components["schemas"]["Unspecified"];
+            commission: components["schemas"]["CommissionView"];
         };
         /** @description Page of ri.Commission.history results (cursor pagination, contract §3.5.5) */
         CommissionHistoryPage: components["schemas"]["PageEnvelope"] & {
@@ -7236,11 +7351,11 @@ export interface operations {
     };
     "ri.AggregateTracker.get": {
         parameters: {
-            query?: {
-                /** @description PRD: "layer" */
+            query: {
+                /** @description PRD: "layer" - a layer id or a layer number */
                 layer?: string;
-                /** @description PRD: "year" */
-                year?: string;
+                /** @description PRD: "year" - the contract year */
+                year: number;
             };
             header?: {
                 /**
@@ -7565,6 +7680,8 @@ export interface operations {
     "ri.Commission.history": {
         parameters: {
             query?: {
+                /** @description Only the commission calculations of this contract */
+                contractId?: string;
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */

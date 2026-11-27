@@ -755,6 +755,10 @@ paths:
       - code: PTY-ERR-ROLE-DATA-MISSING
         note: structured
         status: 422
+      - code: PTY-ERR-ROLE-DUPLICATE
+        status: 409
+      - code: PTY-ERR-ROLE-TYPE
+        status: 422
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -899,6 +903,18 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      - name: partyId
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: roleType
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
       responses:
         '200':
           description: Success
@@ -932,7 +948,7 @@ paths:
       x-wave: W2
       x-work-packages:
       - W2-PTY-02
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
@@ -944,6 +960,8 @@ paths:
       x-permission: pty.Relationship.add
       x-error-codes:
       - code: PTY-ERR-OVERLAP
+        status: 422
+      - code: PTY-ERR-RELATIONSHIP-CYCLE
         status: 422
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -995,7 +1013,7 @@ paths:
       x-wave: W2
       x-work-packages:
       - W2-PTY-02
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
@@ -1058,7 +1076,7 @@ paths:
       x-wave: W2
       x-work-packages:
       - W2-PTY-02
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
@@ -1078,6 +1096,18 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      - name: partyId
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: relationshipType
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
       responses:
         '200':
           description: Success
@@ -1280,6 +1310,26 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: partyId
+        in: query
+        required: false
+        description: Accounts this party holds or belongs to (active membership)
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - PENDING
+          - ACTIVE
+          - WITHDRAWN
+      - name: accountNumber
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
       responses:
         '200':
           description: Success
@@ -5463,57 +5513,84 @@ components:
       - suggestions
     PartyRoleAssignRequest:
       type: object
-      description: 'pty.PartyRole.assign request. PRD inputs: "party, role, context, period"'
+      description: 'pty.PartyRole.assign request (BO-PTY-03, REQ-PTY-002). Gives a party a role, optionally within a context object (a policy, claim, account...). The same party, role type and context cannot hold two overlapping periods (PTY-ERR-ROLE-DUPLICATE). A VENDOR role needs the party to have a verified AFM (vendor master, REQ-PTY-096).'
       properties:
-        party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
-        role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
-        context:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "context"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        roleType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Role catalogue code, for example POLICYHOLDER, INSURED, BENEFICIARY, CLAIMANT, PAYEE, VENDOR
+        contextRef:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/ObjectRef
+          - type: 'null'
+          description: The business object the role is held in; null for a party-level role
+        validFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: First day of the role; default today
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Day the role ends (exclusive); null for open-ended
+      required:
+      - partyId
+      - roleType
+    PartyRoleView:
+      type: object
+      description: 'A party role as known at the asked time.'
+      properties:
+        roleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        roleType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        contextRef:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/ObjectRef
+          - type: 'null'
+        validPeriod:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+      required:
+      - roleId
+      - partyId
+      - roleType
+      - contextRef
+      - validPeriod
     PartyRoleAssignResponse:
       type: object
-      description: 'pty.PartyRole.assign result. PRD outputs: "role"'
+      description: 'pty.PartyRole.assign result.'
       properties:
         role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
+          $ref: '#/components/schemas/PartyRoleView'
+      required:
+      - role
     PartyRoleEndRequest:
       type: object
-      description: 'pty.PartyRole.end request. PRD inputs: "party, role, context, period"'
+      description: 'pty.PartyRole.end request (BO-PTY-03): end-dates a role (bitemporal, the earlier record stays in the history).'
       properties:
-        party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
-        role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
-        context:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "context"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+        roleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Day the role ends (exclusive); default today. Must be after the role start.
+      required:
+      - roleId
     PartyRoleEndResponse:
       type: object
-      description: 'pty.PartyRole.end result. PRD outputs: "role"'
+      description: 'pty.PartyRole.end result.'
       properties:
         role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
+          $ref: '#/components/schemas/PartyRoleView'
+      required:
+      - role
     PartyRoleQueryItem:
-      type: object
-      description: 'pty.PartyRole.query result. PRD outputs: "role"'
-      properties:
-        role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
+      $ref: '#/components/schemas/PartyRoleView'
     PartyRoleQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -5526,42 +5603,78 @@ components:
       description: Page of pty.PartyRole.query results (cursor pagination, contract §3.5.5)
     RelationshipAddRequest:
       type: object
-      description: 'pty.Relationship.add request. PRD inputs: "parties, type, period"'
+      description: 'pty.Relationship.add request (BO-PTY-03, REQ-PTY-104). A directed link from one party to another (from SPOUSE_OF to, PARENT_OF, SUBSIDIARY_OF...). Hierarchical types refuse a cycle (PTY-ERR-RELATIONSHIP-CYCLE); the same pair and type cannot overlap in time (PTY-ERR-OVERLAP).'
       properties:
-        parties:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "parties"'
-        type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+        fromPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        toPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        relationshipType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        validFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: First day of the relationship; default today
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+      required:
+      - fromPartyId
+      - toPartyId
+      - relationshipType
+    RelationshipView:
+      type: object
+      description: 'A party relationship as known at the asked time.'
+      properties:
+        relationshipId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        fromPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        toPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        relationshipType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        validPeriod:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+      required:
+      - relationshipId
+      - fromPartyId
+      - toPartyId
+      - relationshipType
+      - validPeriod
     RelationshipAddResponse:
       type: object
-      description: 'pty.Relationship.add result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Relationship.add result.'
+      properties:
+        relationship:
+          $ref: '#/components/schemas/RelationshipView'
+      required:
+      - relationship
     RelationshipEndRequest:
       type: object
-      description: 'pty.Relationship.end request. PRD inputs: "parties, type, period"'
+      description: 'pty.Relationship.end request (BO-PTY-03): end-dates a relationship.'
       properties:
-        parties:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "parties"'
-        type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+        relationshipId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Day the relationship ends (exclusive); default today
+      required:
+      - relationshipId
     RelationshipEndResponse:
       type: object
-      description: 'pty.Relationship.end result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Relationship.end result.'
+      properties:
+        relationship:
+          $ref: '#/components/schemas/RelationshipView'
+      required:
+      - relationship
     RelationshipQueryItem:
-      type: object
-      description: 'pty.Relationship.query result. PRD outputs: "—"'
-      x-status: minimal
+      $ref: '#/components/schemas/RelationshipView'
     RelationshipQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -5572,22 +5685,144 @@ components:
             items:
               $ref: '#/components/schemas/RelationshipQueryItem'
       description: Page of pty.Relationship.query results (cursor pagination, contract §3.5.5)
+    AccountView:
+      type: object
+      description: 'A PTY account (BO-PTY-04, REQ-PTY-004): the holder, its members and its status. Accounts start PENDING (D-CON-05) and turn ACTIVE once the holder has a verified identifier; WITHDRAWN is terminal.'
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        accountNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        accountType:
+          type: string
+          enum:
+          - INDIVIDUAL
+          - HOUSEHOLD
+          - BUSINESS
+        name:
+          oneOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+        status:
+          type: string
+          enum:
+          - PENDING
+          - ACTIVE
+          - WITHDRAWN
+        holderPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The party holding the POLICYHOLDER role of this account (one at a time)
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountMemberView'
+          description: Current members (removed members are not listed)
+        withdrawnOn:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Day the account was withdrawn
+        withdrawReason:
+          oneOf:
+          - type: string
+          - type: 'null'
+          description: Reason given at withdrawal
+      required:
+      - accountId
+      - accountNumber
+      - accountType
+      - status
+      - holderPartyId
+      - members
+    AccountMemberView:
+      type: object
+      description: A party that belongs to an account (household member, employee, dependant)
+      properties:
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        memberRole:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: SPOUSE, PARTNER, CHILD, DEPENDANT, EMPLOYEE or OTHER
+        addedOn:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      required:
+      - partyId
+      - memberRole
+      - addedOn
     AccountCreateRequest:
       type: object
-      description: 'pty.Account.create request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Account.create request (BO-PTY-04). The holder party must exist and be changeable; the account starts PENDING unless the holder already has a verified identifier. Supports dry-run.'
+      properties:
+        holderPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        accountType:
+          type: string
+          enum:
+          - INDIVIDUAL
+          - HOUSEHOLD
+          - BUSINESS
+        name:
+          oneOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+      required:
+      - holderPartyId
+      - accountType
     AccountCreateResponse:
       type: object
-      description: 'pty.Account.create result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.create result'
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountView'
+      required:
+      - account
     AccountGetResponse:
       type: object
-      description: 'pty.Account.get result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.get result'
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountView'
+      required:
+      - account
     AccountSearchItem:
       type: object
-      description: 'pty.Account.search result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.search result row (BO-PTY-04)'
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        accountNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        accountType:
+          type: string
+          enum:
+          - INDIVIDUAL
+          - HOUSEHOLD
+          - BUSINESS
+        name:
+          oneOf:
+          - type: string
+            maxLength: 200
+          - type: 'null'
+        status:
+          type: string
+          enum:
+          - PENDING
+          - ACTIVE
+          - WITHDRAWN
+        holderPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        memberCount:
+          type: integer
+          minimum: 0
+      required:
+      - accountId
+      - accountNumber
+      - accountType
+      - status
+      - holderPartyId
+      - memberCount
     AccountSearchPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -5600,36 +5835,86 @@ components:
       description: Page of pty.Account.search results (cursor pagination, contract §3.5.5)
     AccountSetHolderRequest:
       type: object
-      description: 'pty.Account.setHolder request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Account.setHolder request (BO-PTY-04). Ends the current holder role and starts the new one; an account has one holder at a time.'
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        holderPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - accountId
+      - holderPartyId
     AccountSetHolderResponse:
       type: object
-      description: 'pty.Account.setHolder result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.setHolder result'
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountView'
+      required:
+      - account
     AccountAddMemberRequest:
       type: object
-      description: 'pty.Account.addMember request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Account.addMember request (BO-PTY-04). The member cannot be the holder or already a member; a HOUSEHOLD member can belong to one household only (PTY-ERR-MEMBER-IN-USE); the account member limit applies (PTY-ERR-MEMBER-LIMIT).'
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        memberRole:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: SPOUSE, PARTNER, CHILD, DEPENDANT, EMPLOYEE or OTHER
+      required:
+      - accountId
+      - partyId
+      - memberRole
     AccountAddMemberResponse:
       type: object
-      description: 'pty.Account.addMember result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.addMember result'
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountView'
+      required:
+      - account
     AccountRemoveMemberRequest:
       type: object
-      description: 'pty.Account.removeMember request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Account.removeMember request (BO-PTY-04)'
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - accountId
+      - partyId
     AccountRemoveMemberResponse:
       type: object
-      description: 'pty.Account.removeMember result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.removeMember result'
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountView'
+      required:
+      - account
     AccountWithdrawRequest:
       type: object
-      description: 'pty.Account.withdraw request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Account.withdraw request (BO-PTY-04). Refused while the holder has a policy in force, scheduled or pending cancellation (PTY-ERR-ACCOUNT-HAS-JOBS).'
+      properties:
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - accountId
+      - reason
     AccountWithdrawResponse:
       type: object
-      description: 'pty.Account.withdraw result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Account.withdraw result'
+      properties:
+        account:
+          $ref: '#/components/schemas/AccountView'
+      required:
+      - account
     AccountMergeRequest:
       type: object
       description: 'pty.Account.merge request. PRD inputs: "source, target, policies"'

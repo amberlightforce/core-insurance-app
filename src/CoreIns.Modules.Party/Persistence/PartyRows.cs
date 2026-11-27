@@ -371,3 +371,104 @@ internal sealed class VulnerabilityRow
 
     public string UpdatedBy { get; set; } = string.Empty;
 }
+
+/// <summary>
+/// <c>pty.party_role</c> (BO-PTY-03): a role a party holds, optionally within a context object. Bitemporal: the logical role is
+/// <see cref="RoleId"/>; every change closes the current row (recorded_to) and inserts its successor under a new <see cref="RowId"/>.
+/// </summary>
+internal sealed class PartyRoleRow : BitemporalRow
+{
+    public Guid RowId { get; set; }
+
+    public Guid RoleId { get; set; }
+
+    public string RoleType { get; set; } = string.Empty;
+
+    public string? ContextModule { get; set; }
+
+    public string? ContextType { get; set; }
+
+    public string? ContextId { get; set; }
+}
+
+/// <summary><c>pty.party_relationship</c> (BO-PTY-03): a directed, bitemporal link between two parties.</summary>
+internal sealed class PartyRelationshipRow
+{
+    public Guid RowId { get; set; }
+
+    public Guid RelationshipId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public PartyId FromPartyId { get; set; }
+
+    public PartyId ToPartyId { get; set; }
+
+    public string RelationshipType { get; set; } = string.Empty;
+
+    public BusinessDate ValidFrom { get; set; }
+
+    public BusinessDate? ValidTo { get; set; }
+
+    public Instant RecordedFrom { get; set; }
+
+    public Instant? RecordedTo { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// <c>pty.account</c> (BO-PTY-04, REQ-PTY-004): the customer account. The holder is the POLICYHOLDER role in <c>party_role</c> whose context is
+/// this account (bitemporal, one at a time); <see cref="HolderPartyId"/> is the current holder kept here for reads and search.
+/// </summary>
+internal sealed class AccountRow
+{
+    public AccountId AccountId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public string AccountNumber { get; set; } = string.Empty;
+
+    public string AccountType { get; set; } = string.Empty;
+
+    public string? Name { get; set; }
+
+    /// <summary>PENDING, ACTIVE or WITHDRAWN.</summary>
+    public string Status { get; set; } = string.Empty;
+
+    public PartyId HolderPartyId { get; set; }
+
+    public BusinessDate? WithdrawnOn { get; set; }
+
+    public string? WithdrawReason { get; set; }
+
+    public int RecordVersion { get; set; }
+
+    public Instant CreatedAt { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public Instant UpdatedAt { get; set; }
+}
+
+/// <summary><c>pty.account_member</c> (BO-PTY-04): a party that belongs to an account; <see cref="RemovedAt"/> null = current member.</summary>
+internal sealed class AccountMemberRow
+{
+    public Guid MemberId { get; set; }
+
+    public AccountId AccountId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public PartyId PartyId { get; set; }
+
+    public string MemberRole { get; set; } = string.Empty;
+
+    public BusinessDate AddedOn { get; set; }
+
+    public Instant AddedAt { get; set; }
+
+    public Instant? RemovedAt { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+}

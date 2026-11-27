@@ -899,8 +899,8 @@ paths:
       - code: CLM-ERR-NOT-FOUND
         status: 404
       - code: CLM-ERR-MTPL-CLOCKS-REQUIRED
-        note: Production refuses MTPL_PD/MTPL_BI third-party exposures until the CMP clock WP lands (D-SL4-09); outside Production they are created
-          with statutoryClocks NOT_TRACKED
+        note: Production refuses MTPL_PD/MTPL_BI third-party exposures while the CMP offer/assessment clock values are not Verified or
+          SecondarySource (D-REG-04, OQ-008); otherwise the offer and assessment clocks start in CMP
         status: 422
       x-source:
       - PRD-07 §9.1 l.1469
@@ -965,6 +965,14 @@ paths:
       - ui
       x-permission: clm.Exposure.update
       x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-STALE
+        note: the claim changed meanwhile (record version)
+        status: 409
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        note: claim not Open, or exposure already in the target state
+        status: 422
       - code: CLM-ERR-EXPOSURE-DUPLICATE
         status: 409
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
@@ -1039,6 +1047,17 @@ paths:
       - ui
       x-permission: clm.Exposure.close
       x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-STALE
+        note: the claim changed meanwhile (record version)
+        status: 409
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        note: claim not Open, or exposure already in the target state
+        status: 422
+      - code: CLM-ERR-CLOSE-GUARD
+        note: open reserve, pending payment or running statutory clock (D-CON-04); errors[] carries { code, exposureIds[] }
+        status: 422
       - code: CLM-ERR-EXPOSURE-DUPLICATE
         status: 409
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
@@ -1108,6 +1127,14 @@ paths:
       - ui
       x-permission: clm.Exposure.reopen
       x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-STALE
+        note: the claim changed meanwhile (record version)
+        status: 409
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        note: claim not Open, or exposure already in the target state
+        status: 422
       - code: CLM-ERR-EXPOSURE-DUPLICATE
         status: 409
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
@@ -5975,6 +6002,11 @@ components:
           - type: 'null'
         createdAt:
           $ref: ../events/common.schema.json#/$defs/Instant
+        statutoryClocks:
+          type: array
+          description: The CMP statutory clocks of a third-party MTPL exposure (BO-CLM-05); empty when none are tracked.
+          items:
+            $ref: '#/components/schemas/ExposureClockView'
       required:
       - exposureId
       - exposureNumber
@@ -5986,6 +6018,25 @@ components:
       - coverageIndication
       - coverageDecision
       - createdAt
+    ExposureClockView:
+      type: object
+      description: One statutory clock of an exposure, as CMP reports it (BO-CLM-05).
+      properties:
+        instanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        clockCode:
+          $ref: ../events/common.schema.json#/$defs/ClockCode
+        status:
+          type: string
+          description: CMP clock state (RUNNING, WARNED, PAUSED, MET, BREACHED, ELAPSED, CANCELLED)
+        deadline:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+      required:
+      - instanceId
+      - clockCode
+      - status
     ClaimantView:
       type: object
       description: A claimant (REQ-CLM-066 subset) referring to a PTY party.
@@ -6250,46 +6301,91 @@ components:
       - claim
     ExposureUpdateRequest:
       type: object
-      description: 'clm.Exposure.update request. PRD inputs: "exposure data"'
+      description: 'clm.Exposure.update request (BO-CLM-01). Moves the exposure to another incident of the claim (REQ-CLM-063); coverage and claimant never change (open a new exposure instead). A handler action.'
       properties:
-        exposureData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposure data"'
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE
+        incidentId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Incident of the same claim, or null to detach
+      required:
+      - expectedRecordVersion
+      - incidentId
     ExposureUpdateResponse:
       type: object
       description: 'clm.Exposure.update result. PRD outputs: "exposure"'
       properties:
         exposure:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposure"'
+          $ref: '#/components/schemas/ExposureView'
+        claim:
+          $ref: '#/components/schemas/ClaimSummary'
+      required:
+      - exposure
+      - claim
     ExposureCloseRequest:
       type: object
-      description: 'clm.Exposure.close request. PRD inputs: "exposure data"'
+      description: 'clm.Exposure.close request (BO-CLM-01, D-CON-04). The close guard needs zero open reserve, no payment pending and every statutory clock Met, Cancelled or Breached-and-acknowledged.'
       properties:
-        exposureData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposure data"'
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE
+        outcome:
+          type: string
+          enum:
+          - COMPLETED
+          - WITHDRAWN
+          - DUPLICATE
+          - NO_PAYMENT
+          description: Closure outcome of the exposure
+      required:
+      - exposureId
+      - expectedRecordVersion
+      - outcome
     ExposureCloseResponse:
       type: object
       description: 'clm.Exposure.close result. PRD outputs: "exposure"'
       properties:
         exposure:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposure"'
+          $ref: '#/components/schemas/ExposureView'
+        claim:
+          $ref: '#/components/schemas/ClaimSummary'
+      required:
+      - exposure
+      - claim
     ExposureReopenRequest:
       type: object
-      description: 'clm.Exposure.reopen request. PRD inputs: "exposure data"'
+      description: 'clm.Exposure.reopen request (BO-CLM-01). Needs a reason code; the claim must be open.'
       properties:
-        exposureData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposure data"'
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - exposureId
+      - expectedRecordVersion
+      - reasonCode
     ExposureReopenResponse:
       type: object
       description: 'clm.Exposure.reopen result. PRD outputs: "exposure"'
       properties:
         exposure:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposure"'
+          $ref: '#/components/schemas/ExposureView'
+        claim:
+          $ref: '#/components/schemas/ClaimSummary'
+      required:
+      - exposure
+      - claim
     CoverageDecideRequest:
       type: object
       description: 'clm.Coverage.decide request. PRD inputs: "decision, reasons; adopt or keep"'

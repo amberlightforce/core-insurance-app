@@ -83,6 +83,35 @@ public static class PartyModule
         services.AddCommandAuditor<UpdateIntermediary, IntermediaryUpdateResponse, IntermediaryAuditor>();
         services.AddCommand<UpdateIntermediary, IntermediaryUpdateResponse, UpdateIntermediaryHandler>(CommandDescriptor.For("pty.Intermediary.update"));
 
+        services.AddScoped<IValidator<AssignPartyRole>, AssignPartyRoleValidator>();
+        services.AddScoped<IValidator<EndPartyRole>, EndPartyRoleValidator>();
+        services.AddScoped<IValidator<AddRelationship>, AddRelationshipValidator>();
+        services.AddScoped<IValidator<EndRelationship>, EndRelationshipValidator>();
+        services.AddCommandAuditor<AssignPartyRole, PartyRoleAssignResponse, RoleAuditor>();
+        services.AddCommandAuditor<EndPartyRole, PartyRoleEndResponse, RoleAuditor>();
+        services.AddCommandAuditor<AddRelationship, RelationshipAddResponse, RoleAuditor>();
+        services.AddCommandAuditor<EndRelationship, RelationshipEndResponse, RoleAuditor>();
+        services.AddCommand<AssignPartyRole, PartyRoleAssignResponse, AssignPartyRoleHandler>(CommandDescriptor.For("pty.PartyRole.assign"));
+        services.AddCommand<EndPartyRole, PartyRoleEndResponse, EndPartyRoleHandler>(CommandDescriptor.For("pty.PartyRole.end"));
+        services.AddCommand<AddRelationship, RelationshipAddResponse, AddRelationshipHandler>(CommandDescriptor.For("pty.Relationship.add"));
+        services.AddCommand<EndRelationship, RelationshipEndResponse, EndRelationshipHandler>(CommandDescriptor.For("pty.Relationship.end"));
+
+        services.AddScoped<IValidator<CreateAccount>, CreateAccountValidator>();
+        services.AddScoped<IValidator<SetAccountHolder>, SetAccountHolderValidator>();
+        services.AddScoped<IValidator<AddAccountMember>, AddAccountMemberValidator>();
+        services.AddScoped<IValidator<RemoveAccountMember>, RemoveAccountMemberValidator>();
+        services.AddScoped<IValidator<WithdrawAccount>, WithdrawAccountValidator>();
+        services.AddCommandAuditor<CreateAccount, AccountCreateResponse, AccountAuditor>();
+        services.AddCommandAuditor<SetAccountHolder, AccountSetHolderResponse, AccountAuditor>();
+        services.AddCommandAuditor<AddAccountMember, AccountAddMemberResponse, AccountAuditor>();
+        services.AddCommandAuditor<RemoveAccountMember, AccountRemoveMemberResponse, AccountAuditor>();
+        services.AddCommandAuditor<WithdrawAccount, AccountWithdrawResponse, AccountAuditor>();
+        services.AddCommand<CreateAccount, AccountCreateResponse, CreateAccountHandler>(CommandDescriptor.For("pty.Account.create") with { SupportsDryRun = true });
+        services.AddCommand<SetAccountHolder, AccountSetHolderResponse, SetAccountHolderHandler>(CommandDescriptor.For("pty.Account.setHolder"));
+        services.AddCommand<AddAccountMember, AccountAddMemberResponse, AddAccountMemberHandler>(CommandDescriptor.For("pty.Account.addMember"));
+        services.AddCommand<RemoveAccountMember, AccountRemoveMemberResponse, RemoveAccountMemberHandler>(CommandDescriptor.For("pty.Account.removeMember"));
+        services.AddCommand<WithdrawAccount, AccountWithdrawResponse, WithdrawAccountHandler>(CommandDescriptor.For("pty.Account.withdraw"));
+
         services.AddScoped<VulnerabilityQueries>();
         services.AddScoped<VulnerabilityWriter>();
         services.AddScoped<IValidator<RecordVulnerability>, RecordVulnerabilityValidator>();
@@ -129,6 +158,26 @@ public static class PartyModule
             .Describe("Λείπουν προϋποθέσεις (missing). Συμπληρώστε τες και επαναλάβετε.", "Preconditions are missing (missing). Complete them and try again."),
         ErrorDefinition.For(ModuleCode.PTY, "SCREEN-INPUT", 422, "Τα στοιχεία ελέγχου κυρώσεων δεν είναι έγκυρα", "The screening input is not valid")
             .Describe("Δώστε είτε πρόσωπο (partyId) είτε έκτακτο δικαιούχο με όνομα, όχι και τα δύο.", "Give either a party (partyId) or an ad-hoc payee with a name, not both."),
+        ErrorDefinition.For(ModuleCode.PTY, "ROLE-DUPLICATE", 409, "Το πρόσωπο έχει ήδη αυτόν τον ρόλο", "The party already holds this role")
+            .Describe("Ο ίδιος ρόλος στο ίδιο πλαίσιο δεν μπορεί να επικαλύπτεται χρονικά. Τερματίστε τον υπάρχοντα πρώτα.", "The same role in the same context cannot overlap in time. End the existing one first."),
+        ErrorDefinition.For(ModuleCode.PTY, "ROLE-TYPE", 422, "Άγνωστος τύπος ρόλου ή σχέσης", "Unknown role or relationship type")
+            .Describe("Ο τύπος δεν υπάρχει στον κατάλογο ρόλων και σχέσεων.", "The type is not in the role and relationship catalogue."),
+        ErrorDefinition.For(ModuleCode.PTY, "ROLE-DATA-MISSING", 422, "Λείπουν στοιχεία για τον ρόλο", "Data is missing for the role")
+            .Describe("Ο ρόλος απαιτεί στοιχεία που λείπουν από το πρόσωπο (π.χ. ΑΦΜ για προμηθευτή).", "The role needs data the party does not have (for example an AFM for a vendor)."),
+        ErrorDefinition.For(ModuleCode.PTY, "OVERLAP", 422, "Η περίοδος επικαλύπτεται", "The period overlaps")
+            .Describe("Υπάρχει ήδη η ίδια σχέση για επικαλυπτόμενη περίοδο.", "The same relationship already exists for an overlapping period."),
+        ErrorDefinition.For(ModuleCode.PTY, "RELATIONSHIP-CYCLE", 422, "Η σχέση θα δημιουργούσε κύκλο", "The relationship would close a cycle")
+            .Describe("Στις ιεραρχικές σχέσεις ένα πρόσωπο δεν μπορεί να είναι άμεσα ή έμμεσα πάνω από τον εαυτό του.", "In a hierarchical relationship a party cannot sit above itself, directly or indirectly."),
+        ErrorDefinition.For(ModuleCode.PTY, "ACCOUNT-WITHDRAWN", 409, "Ο λογαριασμός έχει αποσυρθεί", "The account was withdrawn")
+            .Describe("Ένας αποσυρθείς λογαριασμός δεν μπορεί να αλλάξει.", "A withdrawn account cannot be changed."),
+        ErrorDefinition.For(ModuleCode.PTY, "ACCOUNT-HAS-JOBS", 422, "Ο λογαριασμός έχει ενεργά ασφαλιστήρια", "The account still has active policies")
+            .Describe("Ο κάτοχος έχει ασφαλιστήριο σε ισχύ, προγραμματισμένο ή σε εκκρεμή ακύρωση. Ακυρώστε ή μεταφέρτε το πρώτα.", "The holder has a policy in force, scheduled or pending cancellation. Cancel or move it first."),
+        ErrorDefinition.For(ModuleCode.PTY, "MEMBER-IN-USE", 422, "Το μέλος ανήκει ήδη σε άλλο νοικοκυριό", "The member already belongs to another household")
+            .Describe("Ένα πρόσωπο μπορεί να ανήκει σε ένα μόνο νοικοκυριό. Αφαιρέστε το πρώτα από το άλλο.", "A party can belong to one household only. Remove it from the other one first."),
+        ErrorDefinition.For(ModuleCode.PTY, "MEMBER-DUPLICATE", 409, "Το πρόσωπο είναι ήδη μέλος", "The party is already a member")
+            .Describe("Το πρόσωπο είναι ήδη μέλος αυτού του λογαριασμού.", "The party is already a member of this account."),
+        ErrorDefinition.For(ModuleCode.PTY, "MEMBER-LIMIT", 422, "Έχει συμπληρωθεί το όριο μελών", "The member limit is reached")
+            .Describe("Ο λογαριασμός δεν μπορεί να έχει περισσότερα μέλη από το επιτρεπόμενο όριο.", "The account cannot have more members than the allowed limit."),
         ErrorDefinition.For(ModuleCode.PTY, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

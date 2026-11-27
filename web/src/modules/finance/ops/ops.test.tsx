@@ -147,7 +147,7 @@ describe('ManualJournalFormPage', () => {
     const api = mockApi([
       {
         method: 'POST',
-        path: '/api/fin/v1/manual-journals/submit',
+        path: '/api/fin/v1/manual-journals',
         respond: () => ({ body: { manualJournal: journal() } }),
       },
       {
@@ -169,17 +169,17 @@ describe('ManualJournalFormPage', () => {
     const amounts = screen.getAllByRole('textbox', { name: /Ποσό/ });
     await user.type(nth(amounts, 0), '120');
     await user.type(nth(amounts, 1), '100');
-    await user.click(screen.getByRole('button', { name: 'Υποβολή για έγκριση' }));
+    await user.click(screen.getByRole('button', { name: 'Αποθήκευση πρόχειρου' }));
     expect((await screen.findAllByText(/πρέπει να είναι ίσες/)).length).toBeGreaterThan(0);
-    expect(api.callsTo('POST', '/api/fin/v1/manual-journals/submit')).toHaveLength(0);
+    expect(api.callsTo('POST', '/api/fin/v1/manual-journals')).toHaveLength(0);
 
     await user.clear(nth(amounts, 1));
     await user.type(nth(amounts, 1), '120');
-    await user.click(screen.getByRole('button', { name: 'Υποβολή για έγκριση' }));
+    await user.click(screen.getByRole('button', { name: 'Αποθήκευση πρόχειρου' }));
     await waitFor(() => {
-      expect(api.callsTo('POST', '/api/fin/v1/manual-journals/submit')).toHaveLength(1);
+      expect(api.callsTo('POST', '/api/fin/v1/manual-journals')).toHaveLength(1);
     });
-    const call = api.callsTo('POST', '/api/fin/v1/manual-journals/submit')[0];
+    const call = api.callsTo('POST', '/api/fin/v1/manual-journals')[0];
     expect(call?.headers.get('Idempotency-Key')).toBeTruthy();
     expect(call?.body).toMatchObject({
       book: 'IFRS',
@@ -347,6 +347,64 @@ describe('PeriodClosePage', () => {
     expect(within(grid).getByText('2026-09')).toBeInTheDocument();
     expect(within(grid).getByText('Κλειδωμένη')).toBeInTheDocument();
     await expectNoA11yViolations(container);
+  });
+
+  it('shows the checklist of a period and offers sign-off while it is open', async () => {
+    const signed: unknown[] = [];
+    mockApi([
+      {
+        method: 'GET',
+        path: '/api/fin/v1/periods',
+        respond: () => ({
+          body: {
+            items: [{ period: '2026-10', state: 'OPEN', closedForPosting: false }],
+            nextCursor: null,
+          },
+        }),
+      },
+      {
+        method: 'GET',
+        path: '/api/fin/v1/close/tasks',
+        respond: () => ({
+          body: {
+            period: '2026-10',
+            state: 'OPEN',
+            closedForPosting: false,
+            tasks: [
+              {
+                task: 'INTAKE_EXCEPTIONS',
+                status: 'OPEN',
+                signOffRole: 'Staff.Finance',
+                blocker: null,
+              },
+              {
+                task: 'RECONCILIATIONS',
+                status: 'SIGNED_OFF',
+                signOffRole: 'Staff.Finance',
+                signedOffBy: 'ann',
+              },
+            ],
+          },
+        }),
+      },
+      {
+        method: 'POST',
+        path: '/api/fin/v1/close/sign-off',
+        respond: ({ body }) => {
+          signed.push(body);
+          return { body: {} };
+        },
+      },
+    ]);
+    const { user } = renderScreen(<PeriodClosePage />, {
+      path: '/finance/period-close',
+      url: '/finance/period-close',
+    });
+    await user.dblClick(await screen.findByText('2026-10'));
+    await user.click(await screen.findByRole('button', { name: 'Υπογραφή' }));
+    await waitFor(() => {
+      expect(signed).toEqual([{ period: '2026-10', task: 'INTAKE_EXCEPTIONS' }]);
+    });
   });
 
   it('shows the no-permission banner on a 403', async () => {

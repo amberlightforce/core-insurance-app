@@ -152,6 +152,53 @@ internal static class FinanceSql
         DROP FUNCTION IF EXISTS fin.check_journal_balanced();
         """;
 
+    /// <summary>
+    /// BO-FIN-01a: guards of the manual journal workflow tables (PITFALLS 47). The status moves only along DRAFT to SUBMITTED or
+    /// WITHDRAWN, SUBMITTED to APPROVED, REJECTED or WITHDRAWN, APPROVED to POSTED; a terminal journal is frozen; identity,
+    /// maker and the creation facts never change; POSTED needs posted journal ids (also a CHECK); lines are append-only and
+    /// only while the journal is DRAFT or SUBMITTED. The posted ledger journal itself stays sealed by its own triggers (D-ARC-34).
+    /// </summary>
+    public const string ManualJournalGuards = """
+        CREATE FUNCTION fin.guard_manual_journal() RETURNS trigger LANGUAGE plpgsql AS $$
+        BEGIN
+            IF NEW.manual_journal_id <> OLD.manual_journal_id OR NEW.legal_entity_id <> OLD.legal_entity_id OR NEW.number_seq <> OLD.number_seq
+               OR NEW.created_by <> OLD.created_by OR NEW.created_at <> OLD.created_at OR NEW.book <> OLD.book OR NEW.currency <> OLD.currency THEN
+                RAISE EXCEPTION 'fin.manual_journal: identity, maker, book and currency are immutable' USING ERRCODE = '55000';
+            END IF;
+            IF OLD.status IN ('REJECTED', 'WITHDRAWN', 'POSTED') THEN
+                RAISE EXCEPTION 'fin.manual_journal: a % journal is final', OLD.status USING ERRCODE = '55000';
+            END IF;
+            IF NEW.status <> OLD.status AND NOT (
+                   (OLD.status = 'DRAFT' AND NEW.status IN ('SUBMITTED', 'WITHDRAWN'))
+                OR (OLD.status = 'SUBMITTED' AND NEW.status IN ('APPROVED', 'REJECTED', 'WITHDRAWN'))
+                OR (OLD.status = 'APPROVED' AND NEW.status = 'POSTED')) THEN
+                RAISE EXCEPTION 'fin.manual_journal: % to % is not a transition', OLD.status, NEW.status USING ERRCODE = '55000';
+            END IF;
+            IF OLD.status = 'APPROVED' AND (NEW.description <> OLD.description OR NEW.accounting_date <> OLD.accounting_date OR NEW.evidence_ref <> OLD.evidence_ref) THEN
+                RAISE EXCEPTION 'fin.manual_journal: an approved journal cannot be edited' USING ERRCODE = '55000';
+            END IF;
+            RETURN NEW;
+        END $$;
+
+        CREATE TRIGGER trg_manual_journal_guard BEFORE UPDATE ON fin.manual_journal FOR EACH ROW EXECUTE FUNCTION fin.guard_manual_journal();
+
+        CREATE FUNCTION fin.guard_manual_journal_line() RETURNS trigger LANGUAGE plpgsql AS $$
+        DECLARE
+            current_status text;
+        BEGIN
+            IF TG_OP <> 'INSERT' THEN
+                RAISE EXCEPTION 'fin.manual_journal_line is append-only: % refused', TG_OP USING ERRCODE = '55000';
+            END IF;
+            SELECT status INTO current_status FROM fin.manual_journal WHERE manual_journal_id = NEW.manual_journal_id;
+            IF current_status IS NULL OR current_status NOT IN ('DRAFT', 'SUBMITTED') THEN
+                RAISE EXCEPTION 'fin.manual_journal_line: lines can be added only while the journal is DRAFT or SUBMITTED' USING ERRCODE = '55000';
+            END IF;
+            RETURN NEW;
+        END $$;
+
+        CREATE TRIGGER trg_manual_journal_line_guard BEFORE INSERT OR UPDATE OR DELETE ON fin.manual_journal_line FOR EACH ROW EXECUTE FUNCTION fin.guard_manual_journal_line();
+        """;
+
     /// <summary>Privileges of the application role (REQ-FIN-070, -088): reference data read-only, journals insert-only.</summary>
     public static IReadOnlyList<string> Grants(string appRole) =>
     [
@@ -162,6 +209,9 @@ internal static class FinanceSql
         $"GRANT SELECT, INSERT, UPDATE ON fin.business_event, fin.policy_context TO {appRole}",
         $"GRANT SELECT, INSERT, UPDATE ON fin.dsar_restriction TO {appRole}",
         $"GRANT SELECT, INSERT ON fin.migration_import TO {appRole}",
+        $"GRANT SELECT, INSERT, UPDATE ON fin.manual_journal TO {appRole}",
+        $"GRANT SELECT, INSERT ON fin.manual_journal_line TO {appRole}",
+        $"GRANT SELECT, INSERT, UPDATE, DELETE ON fin.period_close_task TO {appRole}",
         $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {FinanceModule.Schema} TO {appRole}",
     ];
 }

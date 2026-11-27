@@ -19,7 +19,7 @@ namespace CoreIns.Modules.Claims.Queries;
 /// entity's claim is "not found", never an error that reveals it. Lists never carry free text (description, loss
 /// location); only <see cref="GetAsync"/> and <see cref="GetFnolAsync"/> decrypt it.
 /// </summary>
-internal sealed class ClaimReader(DbSession session, ClaimProtection protection, IClock clock, IOptions<ClaimsOptions> options)
+internal sealed class ClaimReader(DbSession session, ClaimProtection protection, IClock clock, IOptions<ClaimsOptions> options, Commands.ExposureClocks exposureClocks)
 {
     private const string SummaryColumns =
         """
@@ -240,12 +240,26 @@ internal sealed class ClaimReader(DbSession session, ClaimProtection protection,
             SELECT e.exposure_id AS ExposureId, e.exposure_number AS ExposureNumber, e.kind AS Kind, e.coverage_code AS CoverageCode,
                    e.claimant_id AS ClaimantId, cl.party_id AS ClaimantPartyId, e.incident_id AS IncidentId, e.status AS Status,
                    e.outcome AS Outcome, e.coverage_indication AS CoverageIndication, e.coverage_decision AS CoverageDecision,
-                   e.duplicate_reason AS DuplicateReason, e.created_at AS CreatedAt
+                   e.duplicate_reason AS DuplicateReason, e.created_at AS CreatedAt, e.statutory_clocks AS StatutoryClocks
               FROM clm.exposure e JOIN clm.claimant cl ON cl.claimant_id = e.claimant_id
              WHERE e.claim_id = @claim
              ORDER BY e.sequence
             """, new { claim = claimId.Value }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
-        return [.. rows.Select(Exposure)];
+        var views = new List<ExposureView>();
+        foreach (var row in rows)
+        {
+            // BO-CLM-05: the exposure's CMP clocks, read live through the CMP contract.
+            var clocks = await exposureClocks.StatesAsync(row.StatutoryClocks, cancellationToken).ConfigureAwait(false);
+            views.Add(Exposure(row) with
+            {
+                StatutoryClocks = [.. clocks.Select(c => new ExposureClockView
+                {
+                    InstanceId = c.InstanceId, ClockCode = c.ClockCode, Status = c.Status.ToString().ToUpperInvariant(), Deadline = c.Deadline,
+                })],
+            });
+        }
+
+        return views;
     }
 
     internal static ExposureView Exposure(ExposureRecord e) => new()
@@ -390,6 +404,8 @@ internal sealed class ClaimReader(DbSession session, ClaimProtection protection,
 
     internal sealed class ExposureRecord
     {
+        public string StatutoryClocks { get; set; } = "NOT_TRACKED";
+
         public Guid ExposureId { get; set; }
 
         public string ExposureNumber { get; set; } = string.Empty;

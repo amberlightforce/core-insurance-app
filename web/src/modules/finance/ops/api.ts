@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiRequest } from '../../../api/client';
 import type {
+  ClosePeriodView,
+  CloseTaskCode,
   EarningStatus,
   FinancePeriod,
   IntakeException,
@@ -67,6 +69,23 @@ export function useManualJournal(id: string) {
       apiRequest<ManualJournalEnvelope>(`${base}/manual-journals/${encodeURIComponent(id)}`, {
         signal,
       }),
+  });
+}
+
+/** fin.ManualJournal.create: stores a balanced, evidenced DRAFT; nothing is posted (submit and decide are BO-FIN-01b). */
+export function useCreateManualJournal(onDone: (r: ManualJournalEnvelope) => void) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ request, key }: { request: ManualJournalSubmitRequest; key: string }) =>
+      apiRequest<ManualJournalEnvelope>(`${base}/manual-journals`, {
+        method: 'POST',
+        body: request,
+        idempotencyKey: key,
+      }),
+    onSuccess: (response) => {
+      void client.invalidateQueries({ queryKey: ['fin', 'manual-journals'] });
+      onDone(response);
+    },
   });
 }
 
@@ -168,9 +187,26 @@ export function useIntakeAction(onDone: (response: IntakeActionResponse) => void
 
 export type CloseAction = 'soft-close' | 'lock' | 'reopen';
 
+/** fin.Close.tasks: the checklist, state and pending reopen request of one period. */
+export function useCloseTasks(period: string) {
+  return useQuery({
+    queryKey: ['fin', 'close-tasks', period],
+    queryFn: ({ signal }) =>
+      apiRequest<ClosePeriodView>(`${base}/close/tasks`, { query: { period }, signal }),
+  });
+}
+
+function useInvalidateClose() {
+  const client = useQueryClient();
+  return () => {
+    void client.invalidateQueries({ queryKey: ['fin', 'periods'] });
+    void client.invalidateQueries({ queryKey: ['fin', 'close-tasks'] });
+  };
+}
+
 /** fin.Close.softClose / lock / reopen for one period; a reason is always sent. */
 export function useCloseAction(onDone: () => void) {
-  const client = useQueryClient();
+  const invalidate = useInvalidateClose();
   return useMutation({
     mutationFn: ({
       action,
@@ -183,15 +219,29 @@ export function useCloseAction(onDone: () => void) {
       reason: string;
       key: string;
     }) =>
-      apiRequest<unknown>(`${base}/close/${action}`, {
+      apiRequest<ClosePeriodView>(`${base}/close/${action}`, {
         method: 'POST',
         body: { period, reason },
         idempotencyKey: key,
       }),
     onSuccess: () => {
-      void client.invalidateQueries({ queryKey: ['fin', 'periods'] });
+      invalidate();
       onDone();
     },
+  });
+}
+
+/** fin.Close.signOff: confirms one checklist task of a period. */
+export function useSignOffTask() {
+  const invalidate = useInvalidateClose();
+  return useMutation({
+    mutationFn: ({ period, task, key }: { period: string; task: CloseTaskCode; key: string }) =>
+      apiRequest<ClosePeriodView>(`${base}/close/sign-off`, {
+        method: 'POST',
+        body: { period, task },
+        idempotencyKey: key,
+      }),
+    onSuccess: invalidate,
   });
 }
 

@@ -57,7 +57,15 @@
             "coverageIndication": "COVERED",
             "coverageDecision": "PENDING",
             "duplicateReason": "SAMPLE_CODE",
-            "createdAt": "2026-10-07T09:00:00Z"
+            "createdAt": "2026-10-07T09:00:00Z",
+            "statutoryClocks": [
+              {
+                "instanceId": "0192c05f-cd07-7184-8157-44e549445852",
+                "clockCode": "POL_REFUND_DUE",
+                "status": "sample",
+                "deadline": "2026-10-07T09:00:00Z"
+              }
+            ]
           }
         ],
         "claimants": [
@@ -371,7 +379,15 @@
           "coverageIndication": "COVERED",
           "coverageDecision": "PENDING",
           "duplicateReason": "SAMPLE_CODE",
-          "createdAt": "2026-10-07T09:00:00Z"
+          "createdAt": "2026-10-07T09:00:00Z",
+          "statutoryClocks": [
+            {
+              "instanceId": "0192ba36-bbee-7c64-8b41-46414a3b76fa",
+              "clockCode": "POL_REFUND_DUE",
+              "status": "sample",
+              "deadline": "2026-10-07T09:00:00Z"
+            }
+          ]
         }
       ],
       "coverageIndications": [
@@ -654,7 +670,15 @@
             "coverageIndication": "COVERED",
             "coverageDecision": "PENDING",
             "duplicateReason": "SAMPLE_CODE",
-            "createdAt": "2026-10-07T09:00:00Z"
+            "createdAt": "2026-10-07T09:00:00Z",
+            "statutoryClocks": [
+              {
+                "instanceId": "019240fc-1302-7812-8d9c-4670b71ee2d4",
+                "clockCode": "POL_REFUND_DUE",
+                "status": "sample",
+                "deadline": "2026-10-07T09:00:00Z"
+              }
+            ]
           }
         ],
         "claimants": [
@@ -977,7 +1001,15 @@
           "coverageIndication": "COVERED",
           "coverageDecision": "PENDING",
           "duplicateReason": "SAMPLE_CODE",
-          "createdAt": "2026-10-07T09:00:00Z"
+          "createdAt": "2026-10-07T09:00:00Z",
+          "statutoryClocks": [
+            {
+              "instanceId": "01924d23-8190-7244-8717-d4f969dbfc26",
+              "clockCode": "POL_REFUND_DUE",
+              "status": "sample",
+              "deadline": "2026-10-07T09:00:00Z"
+            }
+          ]
         }
       ],
       "claimants": [
@@ -1119,11 +1151,72 @@
       "linkedClaimId": "0192bc91-81f1-7c0c-8fd1-5abd6aa6ffab",
       "reasonCode": "SAMPLE_CODE"
     },
+    "ExposureClockView": {
+      "instanceId": "01921aeb-aa69-72b8-868f-8143107b2b1c",
+      "clockCode": "POL_REFUND_DUE",
+      "status": "sample",
+      "deadline": "2026-10-07T09:00:00Z"
+    },
     "ExposureCloseRequest": {
-      "exposureData": "unspecified"
+      "exposureId": "0192959a-7de0-787d-86cd-40c475b8db31",
+      "expectedRecordVersion": 1,
+      "outcome": "COMPLETED"
     },
     "ExposureCloseResponse": {
-      "exposure": "unspecified"
+      "exposure": {
+        "exposureId": "0192b91c-0ef4-7c87-85b3-80a30fc44d4e",
+        "exposureNumber": "SAMPLE-000001",
+        "kind": "OWN_DAMAGE",
+        "coverageCode": "SAMPLE_CODE",
+        "claimantId": "0192f0d6-c8f4-72af-8793-9361234a69e4",
+        "claimantPartyId": "0192d37e-afe1-780d-8d80-0b41d34f9321",
+        "incidentId": "019263f1-4615-75ca-8c2c-06e4fff78ad3",
+        "status": "OPEN",
+        "outcome": "sample",
+        "coverageIndication": "COVERED",
+        "coverageDecision": "PENDING",
+        "duplicateReason": "SAMPLE_CODE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "statutoryClocks": [
+          {
+            "instanceId": "01926ea5-57af-7cac-8a15-5f8cf9a892e4",
+            "clockCode": "POL_REFUND_DUE",
+            "status": "sample",
+            "deadline": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "claim": {
+        "claimId": "01928643-7874-75ad-8cf7-9f20ed162f7c",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "01924233-0fcf-73d7-8061-76cc804b6692",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "01921e44-b366-7a5b-8574-e3d501ebc391",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "019284e4-9f65-744e-80e2-915b0935700e",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ExposureCreateRequest": {
       "claimId": "019220c8-6492-7f70-82eb-253558d32665",
@@ -1148,7 +1241,15 @@
         "coverageIndication": "COVERED",
         "coverageDecision": "PENDING",
         "duplicateReason": "SAMPLE_CODE",
-        "createdAt": "2026-10-07T09:00:00Z"
+        "createdAt": "2026-10-07T09:00:00Z",
+        "statutoryClocks": [
+          {
+            "instanceId": "0192a434-44ea-78c2-8388-2b6e89a17a34",
+            "clockCode": "POL_REFUND_DUE",
+            "status": "sample",
+            "deadline": "2026-10-07T09:00:00Z"
+          }
+        ]
       },
       "claim": {
         "claimId": "0192b8ce-4d24-72c7-8730-159b2d38e645",
@@ -1183,16 +1284,125 @@
       }
     },
     "ExposureReopenRequest": {
-      "exposureData": "unspecified"
+      "exposureId": "0192dd66-1d1b-7285-8a02-a1dc95a9166a",
+      "expectedRecordVersion": 1,
+      "reasonCode": "SAMPLE_CODE"
     },
     "ExposureReopenResponse": {
-      "exposure": "unspecified"
+      "exposure": {
+        "exposureId": "0192ea6a-200b-7cc6-8482-092915ff75b7",
+        "exposureNumber": "SAMPLE-000001",
+        "kind": "OWN_DAMAGE",
+        "coverageCode": "SAMPLE_CODE",
+        "claimantId": "01921b53-88fd-7585-8412-7d701e257a65",
+        "claimantPartyId": "01929b49-7f0b-7219-8bff-1471cb0b1a41",
+        "incidentId": "0192ed4c-30dc-7b62-87b7-70fff7d16109",
+        "status": "OPEN",
+        "outcome": "sample",
+        "coverageIndication": "COVERED",
+        "coverageDecision": "PENDING",
+        "duplicateReason": "SAMPLE_CODE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "statutoryClocks": [
+          {
+            "instanceId": "01926e15-e8f9-7873-8243-83e5125f4dbf",
+            "clockCode": "POL_REFUND_DUE",
+            "status": "sample",
+            "deadline": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "claim": {
+        "claimId": "0192aeeb-bb54-73f7-8aec-30418b56cb19",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "0192834a-0cb8-7139-8a14-481e970d023c",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "019299d6-6711-7ba9-869c-2be9e95bfd95",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "019206fb-0efa-7c5f-86d9-7873f1c24d62",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ExposureUpdateRequest": {
-      "exposureData": "unspecified"
+      "expectedRecordVersion": 1,
+      "incidentId": "01926394-f8a5-7d0f-892b-7948eb37e81b"
     },
     "ExposureUpdateResponse": {
-      "exposure": "unspecified"
+      "exposure": {
+        "exposureId": "0192c929-c280-7eca-8b47-42bde45e1a00",
+        "exposureNumber": "SAMPLE-000001",
+        "kind": "OWN_DAMAGE",
+        "coverageCode": "SAMPLE_CODE",
+        "claimantId": "0192215f-3ceb-7792-8d53-59f03768d7bc",
+        "claimantPartyId": "01928ad4-e2dd-722f-80d2-3037fc4f8214",
+        "incidentId": "0192c57f-34fa-776a-81ea-c388f0ecf31c",
+        "status": "OPEN",
+        "outcome": "sample",
+        "coverageIndication": "COVERED",
+        "coverageDecision": "PENDING",
+        "duplicateReason": "SAMPLE_CODE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "statutoryClocks": [
+          {
+            "instanceId": "019282e2-310a-725a-891f-7f7fdc8a6165",
+            "clockCode": "POL_REFUND_DUE",
+            "status": "sample",
+            "deadline": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "claim": {
+        "claimId": "01926565-0464-71f2-8c96-a8d9417b785c",
+        "claimNumber": "SAMPLE-000001",
+        "policyId": "01929509-b4e9-7465-8efc-3e1f6bfbeffd",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "01925462-e187-79bc-8eaf-516d42a9a566",
+        "snapshotRef": "sample",
+        "snapshotKnownAt": "2026-10-07T09:00:00Z",
+        "snapshotStatus": "PENDING",
+        "policyInForceAtLoss": true,
+        "policyStatusAtLoss": "SAMPLE_CODE",
+        "productCode": "SAMPLE_CODE",
+        "productVersion": "sample",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "lossAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "lossCause": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "handlingSegment": "SAMPLE_CODE",
+        "status": "DRAFT",
+        "subStatus": "NEW",
+        "outcome": "COMPLETED",
+        "coverageInQuestion": true,
+        "duplicateOfClaimId": "01928027-5f3a-75f2-86ab-ef04bf320af7",
+        "handler": "sample",
+        "openDays": 1,
+        "recordVersion": 1,
+        "createdAt": "2026-10-07T09:00:00Z",
+        "closedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ExposureView": {
       "exposureId": "019204c7-f802-7a20-867c-7e1be954db2f",
@@ -1207,7 +1417,15 @@
       "coverageIndication": "COVERED",
       "coverageDecision": "PENDING",
       "duplicateReason": "SAMPLE_CODE",
-      "createdAt": "2026-10-07T09:00:00Z"
+      "createdAt": "2026-10-07T09:00:00Z",
+      "statutoryClocks": [
+        {
+          "instanceId": "01925269-9311-78f3-821f-55dd04c7cf2e",
+          "clockCode": "POL_REFUND_DUE",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "FinancialBalance": {
       "exposureId": "019263ea-3c60-7a67-8400-e727e84a146a",
@@ -1634,7 +1852,15 @@
           "coverageIndication": "COVERED",
           "coverageDecision": "PENDING",
           "duplicateReason": "SAMPLE_CODE",
-          "createdAt": "2026-10-07T09:00:00Z"
+          "createdAt": "2026-10-07T09:00:00Z",
+          "statutoryClocks": [
+            {
+              "instanceId": "0192e419-64a9-79aa-8d66-4c6380919a8b",
+              "clockCode": "POL_REFUND_DUE",
+              "status": "sample",
+              "deadline": "2026-10-07T09:00:00Z"
+            }
+          ]
         }
       ],
       "coverageIndications": [

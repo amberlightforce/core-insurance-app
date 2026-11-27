@@ -23,6 +23,140 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.AccountMemberRow", b =>
+                {
+                    b.Property<Guid>("MemberId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("member_id");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("added_at");
+
+                    b.Property<DateOnly>("AddedOn")
+                        .HasColumnType("date")
+                        .HasColumnName("added_on");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("MemberRole")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("member_role");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<DateTime?>("RemovedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("removed_at");
+
+                    b.HasKey("MemberId")
+                        .HasName("pk_account_member");
+
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_account_member_account");
+
+                    b.HasIndex("PartyId")
+                        .HasDatabaseName("ix_account_member_party");
+
+                    b.HasIndex("AccountId", "PartyId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_account_member_current")
+                        .HasFilter("removed_at IS NULL");
+
+                    b.ToTable("account_member", "pty");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.AccountRow", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("account_id");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("account_number");
+
+                    b.Property<string>("AccountType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("account_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("HolderPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("holder_party_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<int>("RecordVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("WithdrawReason")
+                        .HasColumnType("text")
+                        .HasColumnName("withdraw_reason");
+
+                    b.Property<DateOnly?>("WithdrawnOn")
+                        .HasColumnType("date")
+                        .HasColumnName("withdrawn_on");
+
+                    b.HasKey("AccountId")
+                        .HasName("pk_account");
+
+                    b.HasIndex("HolderPartyId")
+                        .HasDatabaseName("ix_account_holder");
+
+                    b.HasIndex("LegalEntityId", "AccountNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ux_account_number");
+
+                    b.ToTable("account", "pty", t =>
+                        {
+                            t.HasCheckConstraint("ck_account_status", "status IN ('PENDING','ACTIVE','WITHDRAWN')");
+
+                            t.HasCheckConstraint("ck_account_type", "account_type IN ('INDIVIDUAL','HOUSEHOLD','BUSINESS')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.DsarRestrictionRow", b =>
                 {
                     b.Property<Guid>("RestrictionId")
@@ -738,6 +872,151 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.PartyRelationshipRow", b =>
+                {
+                    b.Property<Guid>("RowId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("row_id");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("FromPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("from_party_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime>("RecordedFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_from");
+
+                    b.Property<DateTime?>("RecordedTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_to");
+
+                    b.Property<Guid>("RelationshipId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("relationship_id");
+
+                    b.Property<string>("RelationshipType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("relationship_type");
+
+                    b.Property<Guid>("ToPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("to_party_id");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateOnly?>("ValidTo")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_to");
+
+                    b.HasKey("RowId")
+                        .HasName("pk_party_relationship");
+
+                    b.HasIndex("FromPartyId")
+                        .HasDatabaseName("ix_party_relationship_from");
+
+                    b.HasIndex("RelationshipId")
+                        .HasDatabaseName("ix_party_relationship_rel");
+
+                    b.HasIndex("ToPartyId")
+                        .HasDatabaseName("ix_party_relationship_to");
+
+                    b.ToTable("party_relationship", "pty", t =>
+                        {
+                            t.HasCheckConstraint("ck_party_relationship_distinct", "from_party_id <> to_party_id");
+
+                            t.HasCheckConstraint("ck_party_relationship_recorded", "recorded_to IS NULL OR recorded_to > recorded_from");
+
+                            t.HasCheckConstraint("ck_party_relationship_valid", "valid_to IS NULL OR valid_to > valid_from");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.PartyRoleRow", b =>
+                {
+                    b.Property<Guid>("RowId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("row_id");
+
+                    b.Property<string>("ContextId")
+                        .HasColumnType("text")
+                        .HasColumnName("context_id");
+
+                    b.Property<string>("ContextModule")
+                        .HasColumnType("text")
+                        .HasColumnName("context_module");
+
+                    b.Property<string>("ContextType")
+                        .HasColumnType("text")
+                        .HasColumnName("context_type");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<DateTime>("RecordedFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_from");
+
+                    b.Property<DateTime?>("RecordedTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_to");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
+
+                    b.Property<string>("RoleType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("role_type");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateOnly?>("ValidTo")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_to");
+
+                    b.HasKey("RowId")
+                        .HasName("pk_party_role");
+
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_party_role_role");
+
+                    b.HasIndex("PartyId", "RoleType")
+                        .HasDatabaseName("ix_party_role_party");
+
+                    b.ToTable("party_role", "pty", t =>
+                        {
+                            t.HasCheckConstraint("ck_party_role_recorded", "recorded_to IS NULL OR recorded_to > recorded_from");
+
+                            t.HasCheckConstraint("ck_party_role_valid", "valid_to IS NULL OR valid_to > valid_from");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.PartyRow", b =>
                 {
                     b.Property<Guid>("PartyId")
@@ -999,6 +1278,33 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                     b.ToTable("vulnerability", "pty");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.AccountMemberRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.AccountRow", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_account_member_account");
+
+                    b.HasOne("CoreIns.Modules.Party.Persistence.PartyRow", null)
+                        .WithMany()
+                        .HasForeignKey("PartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_account_member_party");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.AccountRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.PartyRow", null)
+                        .WithMany()
+                        .HasForeignKey("HolderPartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_account_holder");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryAppointmentRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Party.Persistence.IntermediaryRow", null)
@@ -1077,6 +1383,33 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_party_name_party");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.PartyRelationshipRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.PartyRow", null)
+                        .WithMany()
+                        .HasForeignKey("FromPartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_party_relationship_from");
+
+                    b.HasOne("CoreIns.Modules.Party.Persistence.PartyRow", null)
+                        .WithMany()
+                        .HasForeignKey("ToPartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_party_relationship_to");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.PartyRoleRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.PartyRow", null)
+                        .WithMany()
+                        .HasForeignKey("PartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_party_role_party");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.PartySearchKeyRow", b =>

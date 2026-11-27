@@ -56,6 +56,7 @@ public static class FinanceModule
         services.AddScoped<JournalReversal>();
         services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationImporter, MigrationImport.FinanceMigrationImporter>();
         services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationReverser, MigrationImport.FinanceMigrationReverser>();
+        services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationReconciliationReader, MigrationImport.FinanceMigrationReconciliationReader>();
         services.AddScoped<PaymentVoidPosting>();
         services.AddScoped<TaxTreatmentCheck>();
         services.AddScoped<Intake>();
@@ -66,6 +67,12 @@ public static class FinanceModule
         services.AddScoped<ClearingInvariants>();
         services.AddScoped<PostingRuleReader>();
         services.AddScoped<FinanceOpsReader>();
+        services.AddScoped<ManualJournalReader>();
+
+        // BO-FIN-01a: manual journal proposals (create, withdraw); submit and decide are BO-FIN-01b.
+        services.AddCommand<Commands.CreateManualJournal, Domain.ManualJournalEnvelope, Commands.CreateManualJournalHandler>(
+            CommandDescriptor.For("fin.ManualJournal.create") with { SupportsDryRun = true });
+        services.AddCommand<Commands.WithdrawManualJournal, Domain.ManualJournalEnvelope, Commands.WithdrawManualJournalHandler>(CommandDescriptor.For("fin.ManualJournal.withdraw"));
         services.AddScoped<FluentValidation.IValidator<Commands.RerunIntakeExceptions>, Commands.IntakeExceptionValidator<Commands.RerunIntakeExceptions>>();
         services.AddCommandAuditor<Commands.RerunIntakeExceptions, CoreIns.Modules.Finance.Contracts.Api.IntakeExceptionRerunResponse, Commands.IntakeExceptionAuditor<Commands.RerunIntakeExceptions>>();
         services.AddCommand<Commands.RerunIntakeExceptions, CoreIns.Modules.Finance.Contracts.Api.IntakeExceptionRerunResponse, Commands.IntakeExceptionHandler<Commands.RerunIntakeExceptions>>(CoreIns.Platform.Commands.CommandDescriptor.For("fin.IntakeException.rerun"));
@@ -112,6 +119,8 @@ public static class FinanceModule
             services.AddEventHandler<JsonElement, ContextEventHandler>(Descriptor(contract), "FIN.Intake." + name, ModuleCode.FIN);
         }
 
+        Commands.PeriodCloseRegistration.AddPeriodClose(services);
+
         services.AddOptions<FinanceOptions>().Bind(configuration.GetSection(FinanceOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddErrorDefinitions(Errors);
@@ -129,7 +138,23 @@ public static class FinanceModule
             .Describe("Ελέγξτε τις παραμέτρους του αιτήματος.", "Check the request parameters."),
         ErrorDefinition.For(ModuleCode.FIN, "ALREADY-REVERSED", 409, "Η εγγραφή έχει ήδη αντιλογιστεί", "The journal is already reversed")
             .Describe("Μια ημερολογιακή εγγραφή αντιλογίζεται μία μόνο φορά.", "A journal can be reversed only once."),
+        ErrorDefinition.For(ModuleCode.FIN, "EVIDENCE-REQUIRED", 422, "Απαιτείται τεκμήριο", "Evidence is required")
+            .Describe("Μια χειρόγραφη εγγραφή χρειάζεται παραπομπή σε έγγραφο ή αίτημα.", "A manual journal needs a document or ticket reference."),
+        ErrorDefinition.For(ModuleCode.FIN, "TEMPLATE-ACCOUNT", 422, "Μη επιτρεπτός λογαριασμός", "Account not allowed")
+            .Describe("Ο λογαριασμός δεν υπάρχει στο ενεργό λογιστικό σχέδιο ή τηρείται μόνο από κανόνες καταχώρισης.", "The account is not in the active chart or is kept by posting rules only."),
+        ErrorDefinition.For(ModuleCode.FIN, "PERIOD-LOCKED", 422, "Η περίοδος είναι κλειδωμένη", "The period is locked")
+            .Describe("Δεν επιτρέπονται εγγραφές σε κλειδωμένη λογιστική περίοδο.", "No entries are accepted in a locked accounting period."),
+        ErrorDefinition.For(ModuleCode.FIN, "SOD", 403, "Διαχωρισμός καθηκόντων", "Segregation of duties")
+            .Describe("Μόνο ο δημιουργός της εγγραφής μπορεί να την αποσύρει.", "Only the maker of the journal can withdraw it."),
+        ErrorDefinition.For(ModuleCode.FIN, "STATE", 409, "Η κατάσταση δεν το επιτρέπει", "The state does not allow this")
+            .Describe("Η χειρόγραφη εγγραφή δεν βρίσκεται σε κατάσταση που επιτρέπει την ενέργεια.", "The manual journal is not in a state that allows the action."),
         ErrorDefinition.For(ModuleCode.FIN, "UNBALANCED", 422, "Μη ισοσκελισμένη εγγραφή", "Unbalanced journal")
             .Describe("Οι χρεώσεις πρέπει να ισούνται με τις πιστώσεις σε κάθε νόμισμα.", "Debits must equal credits in every currency."),
+        ErrorDefinition.For(ModuleCode.FIN, "GATES-FAILED", 422, "Δεν ολοκληρώθηκαν οι έλεγχοι κλεισίματος", "Close checks not complete")
+            .Describe("Όλες οι εργασίες κλεισίματος πρέπει να έχουν υπογραφεί και να μην εκκρεμεί κάποιος έλεγχος.", "Every close task must be signed off and no check may be pending."),
+        ErrorDefinition.For(ModuleCode.FIN, "APPROVAL-REQUIRED", 422, "Απαιτείται δεύτερο πρόσωπο", "A second person is required")
+            .Describe("Η ενέργεια πρέπει να γίνει ή να εγκριθεί από άλλο πρόσωπο.", "The action must be done or approved by a different person."),
+        ErrorDefinition.For(ModuleCode.FIN, "PERIOD-LOCKED", 409, "Η περίοδος είναι κλειδωμένη", "The period is locked")
+            .Describe("Η λογιστική περίοδος είναι κλειδωμένη.", "The accounting period is locked."),
     ];
 }

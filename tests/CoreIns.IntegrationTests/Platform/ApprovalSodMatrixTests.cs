@@ -27,6 +27,7 @@ public sealed class ApprovalSodMatrixTests(PostgresFixture database) : IClassFix
     [
         new Row("CLM.TRANSACTION_SET", ModuleCode.CLM, "TransactionSet", "CLM.PAYMENT", "6000.00", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.ClaimsManager"),
         new Row("BIL.REFUND", ModuleCode.BIL, "Refund", "BIL.REFUND", "1000.00", "Staff.Billing", "Staff.BillingManager", "Staff.BillingManager"),
+        new Row("RI.ADJUSTMENT_APPROVE", ModuleCode.RI, "Adjustment", "RI.ADJUSTMENT_APPROVE", "6000.00", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.ReinsuranceManager"),
     ];
 
     private ApiHostFactory _factory = null!;

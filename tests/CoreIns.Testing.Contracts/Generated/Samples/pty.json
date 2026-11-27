@@ -1,19 +1,83 @@
 {
   "responses": {
     "pty.Account.addMember": {
-      "key": "value"
+      "account": {
+        "accountId": "01923b10-a876-7552-8761-6fb716ca915d",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "0192189e-a69b-7671-8391-a6ac64f1ff9a",
+        "members": [
+          {
+            "partyId": "01922d24-477d-759b-8b9d-3ddbc78d1f1a",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "pty.Account.create": {
-      "key": "value"
+      "account": {
+        "accountId": "0192e8e2-665f-7f32-8f0c-c0c6e6e4ce1b",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "0192a8c6-4e57-767f-897a-7ebfff93c93b",
+        "members": [
+          {
+            "partyId": "01923541-0156-7dd4-8900-9b07475eaee5",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "pty.Account.get": {
-      "key": "value"
+      "account": {
+        "accountId": "01922737-d794-7ca4-828f-4a6eabdce797",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "0192f6b1-4bee-7f05-8900-63fea27d269d",
+        "members": [
+          {
+            "partyId": "01922c02-9058-769d-8d24-4a2381cf09c8",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "pty.Account.merge": {
       "request": "unspecified"
     },
     "pty.Account.removeMember": {
-      "key": "value"
+      "account": {
+        "accountId": "0192d07e-cfb1-7b6e-8afe-dccc266cbece",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "019271cb-5167-76db-86fa-d417a3b99883",
+        "members": [
+          {
+            "partyId": "0192eab9-fa08-764e-8939-ffd8c1f7c4df",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "pty.Account.requestPolicyMove": {
       "request": "unspecified"
@@ -21,20 +85,58 @@
     "pty.Account.search": {
       "items": [
         {
-          "key": "value"
+          "accountId": "01921d02-0468-795a-8e87-0ef66a1928c6",
+          "accountNumber": "SAMPLE-000001",
+          "accountType": "INDIVIDUAL",
+          "name": "sample",
+          "status": "PENDING",
+          "holderPartyId": "019234d2-ff25-79e8-89a6-8c10dc24adfe",
+          "memberCount": 1
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "pty.Account.setHolder": {
-      "key": "value"
+      "account": {
+        "accountId": "0192e0d9-56d7-7eb6-88ff-dae711a9fa7f",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "01927da0-2aae-742b-874b-914f8e3d54a9",
+        "members": [
+          {
+            "partyId": "01926c59-d11d-7ce0-835c-c00f5b7717d8",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "pty.Account.split": {
       "request": "unspecified"
     },
     "pty.Account.withdraw": {
-      "key": "value"
+      "account": {
+        "accountId": "0192f378-6af4-7e92-8741-757a7a3594ac",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "01921a7d-3912-72a3-8cf7-43a7755d1826",
+        "members": [
+          {
+            "partyId": "019289e9-445e-703d-8e79-3a50a62a7115",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "pty.CommissionAgreement.resolve": {
       "key": "value"
@@ -485,12 +587,36 @@
       ]
     },
     "pty.PartyRole.assign": {
-      "role": "unspecified"
+      "role": {
+        "roleId": "0192b323-650c-7d9d-8a6a-5b73c9a9b89f",
+        "partyId": "019236e5-cd10-7b4d-8307-7c35f688f0c8",
+        "roleType": "SAMPLE_CODE",
+        "contextRef": {
+          "module": "POL",
+          "type": "Policy",
+          "id": "0192c5c9-1e41-79e1-83af-31abf3baa7e1"
+        },
+        "validPeriod": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        }
+      }
     },
     "pty.PartyRole.query": {
       "items": [
         {
-          "role": "unspecified"
+          "roleId": "0192e05b-33c7-700d-8d51-3af5d2f7cb20",
+          "partyId": "01926454-22db-79ce-8bc4-6b6e906c5241",
+          "roleType": "SAMPLE_CODE",
+          "contextRef": {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192a31b-447d-7447-84c6-cb739f6db8ad"
+          },
+          "validPeriod": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          }
         }
       ],
       "nextCursor": "sample",
@@ -553,6 +679,78 @@
     }
   },
   "schemas": {
+    "AccountAddMemberRequest": {
+      "accountId": "019298aa-84c2-7695-87bf-25797a0695c9",
+      "partyId": "01925c7f-5c8f-7d42-8dd2-49a49e12006e",
+      "memberRole": "SAMPLE_CODE"
+    },
+    "AccountAddMemberResponse": {
+      "account": {
+        "accountId": "01925d90-f8fb-7b35-83af-7314d42afde0",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "0192c6df-9be7-7b4a-8e35-deb5d031de6e",
+        "members": [
+          {
+            "partyId": "0192dda6-fd34-7cc5-89b5-2acb751368ab",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
+    },
+    "AccountCreateRequest": {
+      "holderPartyId": "0192d452-2608-7a17-849b-a75676cb754a",
+      "accountType": "INDIVIDUAL",
+      "name": "sample"
+    },
+    "AccountCreateResponse": {
+      "account": {
+        "accountId": "0192e00c-84dd-71d7-8a8a-e76daa6f713d",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "01921c4a-f6a9-70af-8214-f32183ae9203",
+        "members": [
+          {
+            "partyId": "0192b596-8677-7a95-8c57-1bcc24c6d4a7",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
+    },
+    "AccountGetResponse": {
+      "account": {
+        "accountId": "0192cd64-82dc-778d-863f-729ae823038e",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "01928765-c0be-7598-8f42-81420e3643dc",
+        "members": [
+          {
+            "partyId": "01924dca-81c2-70dd-8ecc-ac7a20adfcbb",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
+    },
+    "AccountMemberView": {
+      "partyId": "01929a9c-757d-7785-808f-276308cdeaf0",
+      "memberRole": "SAMPLE_CODE",
+      "addedOn": "2026-10-07"
+    },
     "AccountMergeRequest": {
       "source": "unspecified",
       "target": "unspecified",
@@ -560,6 +758,29 @@
     },
     "AccountMergeResponse": {
       "request": "unspecified"
+    },
+    "AccountRemoveMemberRequest": {
+      "accountId": "0192bee0-e371-79cf-86d6-3dde19ee5894",
+      "partyId": "01922dc5-72c4-7ea0-88e1-2eb9a35b7acd"
+    },
+    "AccountRemoveMemberResponse": {
+      "account": {
+        "accountId": "019298f1-161a-72b4-8107-d6c2d158212e",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "019246cc-e20b-7200-82c9-0684ab4ff40a",
+        "members": [
+          {
+            "partyId": "019230e0-966d-73ce-8ec6-08a7f9587eb4",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "AccountRequestPolicyMoveRequest": {
       "source": "unspecified",
@@ -569,14 +790,52 @@
     "AccountRequestPolicyMoveResponse": {
       "request": "unspecified"
     },
+    "AccountSearchItem": {
+      "accountId": "019272fa-5a4a-7ba8-812a-9894a3c09f78",
+      "accountNumber": "SAMPLE-000001",
+      "accountType": "INDIVIDUAL",
+      "name": "sample",
+      "status": "PENDING",
+      "holderPartyId": "019225b0-3ba7-7250-8b8c-02a3fcd3fa84",
+      "memberCount": 1
+    },
     "AccountSearchPage": {
       "items": [
         {
-          "key": "value"
+          "accountId": "0192f614-99e9-7d04-8849-16f5452c76c6",
+          "accountNumber": "SAMPLE-000001",
+          "accountType": "INDIVIDUAL",
+          "name": "sample",
+          "status": "PENDING",
+          "holderPartyId": "01927039-1dfa-7203-845e-499c06be0aa8",
+          "memberCount": 1
         }
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "AccountSetHolderRequest": {
+      "accountId": "0192484f-ef74-73d1-8ab1-bc2a520b5815",
+      "holderPartyId": "0192ae69-87f6-7cf9-87aa-ac2b4f5e4f3e"
+    },
+    "AccountSetHolderResponse": {
+      "account": {
+        "accountId": "0192087c-f690-76e1-8a58-4fc58237b7df",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "0192aebb-d4c7-77d9-8857-a3a4f4bd5e68",
+        "members": [
+          {
+            "partyId": "0192c2b4-f4e6-7ed3-86f7-d0b8e427ce34",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "AccountSplitRequest": {
       "source": "unspecified",
@@ -585,6 +844,46 @@
     },
     "AccountSplitResponse": {
       "request": "unspecified"
+    },
+    "AccountView": {
+      "accountId": "019284e4-26e4-7472-8a57-f299217006ad",
+      "accountNumber": "SAMPLE-000001",
+      "accountType": "INDIVIDUAL",
+      "name": "sample",
+      "status": "PENDING",
+      "holderPartyId": "01924ac2-6bbc-7580-8249-7ff6debcac49",
+      "members": [
+        {
+          "partyId": "0192cdb7-ed62-7efe-8cdf-d25b54c7b1ab",
+          "memberRole": "SAMPLE_CODE",
+          "addedOn": "2026-10-07"
+        }
+      ],
+      "withdrawnOn": "2026-10-07",
+      "withdrawReason": "sample"
+    },
+    "AccountWithdrawRequest": {
+      "accountId": "01924644-1d4a-755a-8381-267a59526135",
+      "reason": "sample"
+    },
+    "AccountWithdrawResponse": {
+      "account": {
+        "accountId": "01924bf8-9b58-79d8-8aed-51c45c95b0f8",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "0192c894-473a-70ce-84ef-cf883f7e7225",
+        "members": [
+          {
+            "partyId": "0192ec3d-919e-72be-8198-56f0d2262043",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "AddressFields": {
       "street": "sample",
@@ -1347,34 +1646,85 @@
       "sourceDocumentRef": "sample"
     },
     "PartyRoleAssignRequest": {
-      "party": "unspecified",
-      "role": "unspecified",
-      "context": "unspecified",
-      "period": "unspecified"
+      "partyId": "0192c221-ff07-74d2-816f-c3c96348843f",
+      "roleType": "SAMPLE_CODE",
+      "contextRef": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "01926f19-cbf4-7dca-879a-5b43d2bebd20"
+      },
+      "validFrom": "2026-10-07",
+      "validTo": "2026-10-07"
     },
     "PartyRoleAssignResponse": {
-      "role": "unspecified"
+      "role": {
+        "roleId": "0192c6e9-b624-7ce4-82bc-a3518f022a0e",
+        "partyId": "01924705-6487-7a96-8b29-157c3ff09354",
+        "roleType": "SAMPLE_CODE",
+        "contextRef": {
+          "module": "POL",
+          "type": "Policy",
+          "id": "019277e6-c174-7c63-8ad8-69c1ab2c2900"
+        },
+        "validPeriod": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        }
+      }
     },
     "PartyRoleEndRequest": {
-      "party": "unspecified",
-      "role": "unspecified",
-      "context": "unspecified",
-      "period": "unspecified"
+      "roleId": "0192948b-62f2-72f0-85e9-3c5220fd3b32",
+      "validTo": "2026-10-07"
     },
     "PartyRoleEndResponse": {
-      "role": "unspecified"
-    },
-    "PartyRoleQueryItem": {
-      "role": "unspecified"
+      "role": {
+        "roleId": "01927a98-6cc8-7bef-88b5-4d0c567b25bc",
+        "partyId": "019257a3-3a7c-7ac9-87ea-0fbc259609ad",
+        "roleType": "SAMPLE_CODE",
+        "contextRef": {
+          "module": "POL",
+          "type": "Policy",
+          "id": "01927d56-84dc-7c74-80b2-3c317130fee8"
+        },
+        "validPeriod": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        }
+      }
     },
     "PartyRoleQueryPage": {
       "items": [
         {
-          "role": "unspecified"
+          "roleId": "019252cf-8787-7438-8620-7fe617ce6e94",
+          "partyId": "01929ee3-f142-747f-8f0e-38118268feea",
+          "roleType": "SAMPLE_CODE",
+          "contextRef": {
+            "module": "POL",
+            "type": "Policy",
+            "id": "01927575-2124-75cf-8a97-0d79d710a133"
+          },
+          "validPeriod": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "PartyRoleView": {
+      "roleId": "01928943-6615-7281-8490-2bae4a2a343b",
+      "partyId": "0192833e-8aaf-73c8-8f5d-46071a73c8cd",
+      "roleType": "SAMPLE_CODE",
+      "contextRef": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "0192a755-58ce-7413-8eb3-432228e76d7e"
+      },
+      "validPeriod": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      }
     },
     "PartySearchCriteria": {
       "criteria": "sample",
@@ -1869,23 +2219,65 @@
       "poR": "unspecified"
     },
     "RelationshipAddRequest": {
-      "parties": "unspecified",
-      "type": "unspecified",
-      "period": "unspecified"
+      "fromPartyId": "01924b7d-6031-789f-8edd-0abcbc3a2a07",
+      "toPartyId": "01925f91-83cc-75eb-8551-523aaedbae5e",
+      "relationshipType": "SAMPLE_CODE",
+      "validFrom": "2026-10-07",
+      "validTo": "2026-10-07"
+    },
+    "RelationshipAddResponse": {
+      "relationship": {
+        "relationshipId": "0192d16c-2972-79d7-8291-2ac4663ccc9f",
+        "fromPartyId": "019274eb-182b-7ec4-85e2-342b57273709",
+        "toPartyId": "0192772b-9932-7323-89f3-98529c51a1c7",
+        "relationshipType": "SAMPLE_CODE",
+        "validPeriod": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        }
+      }
     },
     "RelationshipEndRequest": {
-      "parties": "unspecified",
-      "type": "unspecified",
-      "period": "unspecified"
+      "relationshipId": "0192235a-e4a8-7f73-8974-ba01fe46588a",
+      "validTo": "2026-10-07"
+    },
+    "RelationshipEndResponse": {
+      "relationship": {
+        "relationshipId": "019215e8-68df-743e-846c-66fdcbc745fa",
+        "fromPartyId": "01927580-c17d-73bf-8eab-aa2d7b55d366",
+        "toPartyId": "01927329-fdd6-7870-8cf1-acd42953bdc6",
+        "relationshipType": "SAMPLE_CODE",
+        "validPeriod": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        }
+      }
     },
     "RelationshipQueryPage": {
       "items": [
         {
-          "key": "value"
+          "relationshipId": "0192960a-3746-79f9-8c7a-42f910755b0a",
+          "fromPartyId": "01920a6b-3f8f-74b3-8e1e-f197998e717e",
+          "toPartyId": "0192f79b-f12a-7a06-86d4-931ebf7fb51f",
+          "relationshipType": "SAMPLE_CODE",
+          "validPeriod": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "RelationshipView": {
+      "relationshipId": "01929ec8-b0a1-73cf-8583-8b76d76eff55",
+      "fromPartyId": "019286ce-c9d0-7bea-818a-11b56f4232ce",
+      "toPartyId": "01924f74-e266-74a5-86c7-1d640e7efb00",
+      "relationshipType": "SAMPLE_CODE",
+      "validPeriod": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      }
     },
     "ScreeningBulkRequest": {
       "list": "unspecified"

@@ -92,6 +92,7 @@ public static class ClaimsModule
         services.AddScoped<ICoverageSource, PolicySnapshotAdapter>();
         services.AddScoped<IMigrationImporter, MigrationImport.ClaimMigrationImporter>();
         services.AddScoped<IMigrationReverser, MigrationImport.ClaimMigrationReverser>();
+        services.AddScoped<IMigrationReconciliationReader, MigrationImport.ClaimMigrationReconciliationReader>();
 
         // Claim financials (SL2-CLM-MONEY): derived balances, the set lifecycle and the close guard over them (REQ-CLM-072/073).
         services.AddScoped<FinancialsReader>();
@@ -183,6 +184,17 @@ public static class ClaimsModule
         services.AddScoped<IValidator<CreateExposure>, CreateExposureValidator>();
         services.AddCommandAuditor<CreateExposure, ExposureCreateResponse, CreateExposureAuditor>();
         services.AddCommand<CreateExposure, ExposureCreateResponse, CreateExposureHandler>(CommandDescriptor.For("clm.Exposure.create") with { SupportsDryRun = true });
+        services.AddScoped<ExposureLifecycleSupport>();
+        services.AddScoped<ExposureClocks>();
+        services.AddScoped<IValidator<UpdateExposure>, UpdateExposureValidator>();
+        services.AddCommandAuditor<UpdateExposure, ExposureUpdateResponse, UpdateExposureAuditor>();
+        services.AddCommand<UpdateExposure, ExposureUpdateResponse, UpdateExposureHandler>(CommandDescriptor.For("clm.Exposure.update") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<CloseExposure>, CloseExposureValidator>();
+        services.AddCommandAuditor<CloseExposure, ExposureCloseResponse, CloseExposureAuditor>();
+        services.AddCommand<CloseExposure, ExposureCloseResponse, CloseExposureHandler>(CommandDescriptor.For("clm.Exposure.close") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ReopenExposure>, ReopenExposureValidator>();
+        services.AddCommandAuditor<ReopenExposure, ExposureReopenResponse, ReopenExposureAuditor>();
+        services.AddCommand<ReopenExposure, ExposureReopenResponse, ReopenExposureHandler>(CommandDescriptor.For("clm.Exposure.reopen") with { SupportsDryRun = true });
 
         // Friendly Settlement case (SL4-CLM-FS-CASE, REQ-CLM-155..158): capability-gated, SPI-backed; the statement WP adds its own commands.
         services.AddScoped<FsGate>();
@@ -297,8 +309,8 @@ public static class ClaimsModule
             .Describe("Δείτε το διάγραμμα καταστάσεων της ανάκτησης (Ανοιχτή, Αξιωθείσα, Αμφισβητούμενη, Συμφωνημένη, Κλειστή).", "See the recovery state model (Open, Demanded, Disputed, Agreed, Closed, Written off)."),
         ErrorDefinition.For(ModuleCode.CLM, "ALLOCATION", 422, "Μη έγκυρη κατανομή ανάκτησης", "The recovery allocation is invalid")
             .Describe("Η κατανομή πρέπει να αθροίζει στο ποσό και να αναφέρεται σε εκθέσεις της ζημίας.", "The allocation must sum to the amount and name exposures of the claim."),
-        ErrorDefinition.For(ModuleCode.CLM, "MTPL-CLOCKS-REQUIRED", 422, "Οι νόμιμες προθεσμίες ΑΠΟ δεν παρακολουθούνται", "MTPL statutory clocks are not tracked")
-            .Describe("Στην παραγωγή δεν δημιουργούνται εκθέσεις αστικής ευθύνης τρίτων μέχρι να υλοποιηθούν οι προθεσμίες.", "Production does not create third-party MTPL exposures until the statutory clocks exist."),
+        ErrorDefinition.For(ModuleCode.CLM, "MTPL-CLOCKS-REQUIRED", 422, "Οι νόμιμες προθεσμίες ΑΠΟ δεν έχουν επιβεβαιωθεί", "MTPL statutory clocks are not confirmed")
+            .Describe("Στην παραγωγή δεν δημιουργούνται εκθέσεις αστικής ευθύνης τρίτων μέχρι να επιβεβαιωθούν νομικά οι τιμές των προθεσμιών.", "Production does not create third-party MTPL exposures until the statutory clock values are Verified or from a secondary source (OQ-008)."),
         ErrorDefinition.For(ModuleCode.CLM, "NOT-STOPPABLE", 422, "Η πληρωμή δεν μπορεί πλέον να σταματήσει", "The payment can no longer be stopped")
             .Describe("Η εντολή έχει ήδη εκτελεστεί ή εκκαθαριστεί στην τράπεζα· δεν ακυρώνεται. Αναμείνατε επιστροφή ή ξεκινήστε ανάκτηση.", "The disbursement has been executed or cleared; it cannot be stopped. Wait for a return or start a recovery."),
         ErrorDefinition.For(ModuleCode.CLM, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")

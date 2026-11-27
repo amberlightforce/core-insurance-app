@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Commission.approve result. PRD outputs: "adjustment"</summary>
+/// <summary>ri.Commission.approve result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CommissionApproveResponse
 {
-    /// <summary>PRD: "adjustment"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("adjustment")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Adjustment { get; init; }
+    /// <summary>Contract member 'commission'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("commission")]
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.CommissionView Commission { get; init; }
 }

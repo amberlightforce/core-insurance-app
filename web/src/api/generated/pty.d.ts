@@ -1812,103 +1812,175 @@ export interface components {
             valid: boolean;
             suggestions: string[];
         };
-        /** @description pty.PartyRole.assign request. PRD inputs: "party, role, context, period" */
+        /** @description pty.PartyRole.assign request (BO-PTY-03, REQ-PTY-002). Gives a party a role, optionally within a context object (a policy, claim, account...). The same party, role type and context cannot hold two overlapping periods (PTY-ERR-ROLE-DUPLICATE). A VENDOR role needs the party to have a verified AFM (vendor master, REQ-PTY-096). */
         PartyRoleAssignRequest: {
-            /** @description PRD: "party" */
-            party?: components["schemas"]["Unspecified"];
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
-            /** @description PRD: "context" */
-            context?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            partyId: components["schemas"]["Uuid"];
+            /** @description Role catalogue code, for example POLICYHOLDER, INSURED, BENEFICIARY, CLAIMANT, PAYEE, VENDOR */
+            roleType: components["schemas"]["Code"];
+            /** @description The business object the role is held in; null for a party-level role */
+            contextRef?: components["schemas"]["ObjectRef"] | null;
+            /** @description First day of the role; default today */
+            validFrom?: components["schemas"]["LocalDate"] | null;
+            /** @description Day the role ends (exclusive); null for open-ended */
+            validTo?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description pty.PartyRole.assign result. PRD outputs: "role" */
+        /** @description A party role as known at the asked time. */
+        PartyRoleView: {
+            roleId: components["schemas"]["Uuid"];
+            partyId: components["schemas"]["Uuid"];
+            roleType: components["schemas"]["Code"];
+            contextRef: components["schemas"]["ObjectRef"] | null;
+            validPeriod: components["schemas"]["DatePeriod"];
+        };
+        /** @description pty.PartyRole.assign result. */
         PartyRoleAssignResponse: {
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
+            role: components["schemas"]["PartyRoleView"];
         };
-        /** @description pty.PartyRole.end request. PRD inputs: "party, role, context, period" */
+        /** @description pty.PartyRole.end request (BO-PTY-03): end-dates a role (bitemporal, the earlier record stays in the history). */
         PartyRoleEndRequest: {
-            /** @description PRD: "party" */
-            party?: components["schemas"]["Unspecified"];
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
-            /** @description PRD: "context" */
-            context?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            roleId: components["schemas"]["Uuid"];
+            /** @description Day the role ends (exclusive); default today. Must be after the role start. */
+            validTo?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description pty.PartyRole.end result. PRD outputs: "role" */
+        /** @description pty.PartyRole.end result. */
         PartyRoleEndResponse: {
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
+            role: components["schemas"]["PartyRoleView"];
         };
-        /** @description pty.PartyRole.query result. PRD outputs: "role" */
-        PartyRoleQueryItem: {
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
-        };
+        PartyRoleQueryItem: components["schemas"]["PartyRoleView"];
         /** @description Page of pty.PartyRole.query results (cursor pagination, contract §3.5.5) */
         PartyRoleQueryPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["PartyRoleQueryItem"][];
         };
-        /** @description pty.Relationship.add request. PRD inputs: "parties, type, period" */
+        /** @description pty.Relationship.add request (BO-PTY-03, REQ-PTY-104). A directed link from one party to another (from SPOUSE_OF to, PARENT_OF, SUBSIDIARY_OF...). Hierarchical types refuse a cycle (PTY-ERR-RELATIONSHIP-CYCLE); the same pair and type cannot overlap in time (PTY-ERR-OVERLAP). */
         RelationshipAddRequest: {
-            /** @description PRD: "parties" */
-            parties?: components["schemas"]["Unspecified"];
-            /** @description PRD: "type" */
-            type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            fromPartyId: components["schemas"]["Uuid"];
+            toPartyId: components["schemas"]["Uuid"];
+            relationshipType: components["schemas"]["Code"];
+            /** @description First day of the relationship; default today */
+            validFrom?: components["schemas"]["LocalDate"] | null;
+            validTo?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description pty.Relationship.add result. PRD outputs: "—" */
-        RelationshipAddResponse: Record<string, never>;
-        /** @description pty.Relationship.end request. PRD inputs: "parties, type, period" */
+        /** @description A party relationship as known at the asked time. */
+        RelationshipView: {
+            relationshipId: components["schemas"]["Uuid"];
+            fromPartyId: components["schemas"]["Uuid"];
+            toPartyId: components["schemas"]["Uuid"];
+            relationshipType: components["schemas"]["Code"];
+            validPeriod: components["schemas"]["DatePeriod"];
+        };
+        /** @description pty.Relationship.add result. */
+        RelationshipAddResponse: {
+            relationship: components["schemas"]["RelationshipView"];
+        };
+        /** @description pty.Relationship.end request (BO-PTY-03): end-dates a relationship. */
         RelationshipEndRequest: {
-            /** @description PRD: "parties" */
-            parties?: components["schemas"]["Unspecified"];
-            /** @description PRD: "type" */
-            type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            relationshipId: components["schemas"]["Uuid"];
+            /** @description Day the relationship ends (exclusive); default today */
+            validTo?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description pty.Relationship.end result. PRD outputs: "—" */
-        RelationshipEndResponse: Record<string, never>;
-        /** @description pty.Relationship.query result. PRD outputs: "—" */
-        RelationshipQueryItem: Record<string, never>;
+        /** @description pty.Relationship.end result. */
+        RelationshipEndResponse: {
+            relationship: components["schemas"]["RelationshipView"];
+        };
+        RelationshipQueryItem: components["schemas"]["RelationshipView"];
         /** @description Page of pty.Relationship.query results (cursor pagination, contract §3.5.5) */
         RelationshipQueryPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["RelationshipQueryItem"][];
         };
-        /** @description pty.Account.create request. PRD inputs: "as named" */
-        AccountCreateRequest: Record<string, never>;
-        /** @description pty.Account.create result. PRD outputs: "—" */
-        AccountCreateResponse: Record<string, never>;
-        /** @description pty.Account.get result. PRD outputs: "—" */
-        AccountGetResponse: Record<string, never>;
-        /** @description pty.Account.search result. PRD outputs: "—" */
-        AccountSearchItem: Record<string, never>;
+        /** @description A PTY account (BO-PTY-04, REQ-PTY-004): the holder, its members and its status. Accounts start PENDING (D-CON-05) and turn ACTIVE once the holder has a verified identifier; WITHDRAWN is terminal. */
+        AccountView: {
+            accountId: components["schemas"]["Uuid"];
+            accountNumber: components["schemas"]["BusinessNumber"];
+            /** @enum {string} */
+            accountType: "INDIVIDUAL" | "HOUSEHOLD" | "BUSINESS";
+            name?: string | null;
+            /** @enum {string} */
+            status: "PENDING" | "ACTIVE" | "WITHDRAWN";
+            /** @description The party holding the POLICYHOLDER role of this account (one at a time) */
+            holderPartyId: components["schemas"]["Uuid"];
+            /** @description Current members (removed members are not listed) */
+            members: components["schemas"]["AccountMemberView"][];
+            /** @description Day the account was withdrawn */
+            withdrawnOn?: components["schemas"]["LocalDate"] | null;
+            /** @description Reason given at withdrawal */
+            withdrawReason?: string | null;
+        };
+        /** @description A party that belongs to an account (household member, employee, dependant) */
+        AccountMemberView: {
+            partyId: components["schemas"]["Uuid"];
+            /** @description SPOUSE, PARTNER, CHILD, DEPENDANT, EMPLOYEE or OTHER */
+            memberRole: components["schemas"]["Code"];
+            addedOn: components["schemas"]["LocalDate"];
+        };
+        /** @description pty.Account.create request (BO-PTY-04). The holder party must exist and be changeable; the account starts PENDING unless the holder already has a verified identifier. Supports dry-run. */
+        AccountCreateRequest: {
+            holderPartyId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            accountType: "INDIVIDUAL" | "HOUSEHOLD" | "BUSINESS";
+            name?: string | null;
+        };
+        /** @description pty.Account.create result */
+        AccountCreateResponse: {
+            account: components["schemas"]["AccountView"];
+        };
+        /** @description pty.Account.get result */
+        AccountGetResponse: {
+            account: components["schemas"]["AccountView"];
+        };
+        /** @description pty.Account.search result row (BO-PTY-04) */
+        AccountSearchItem: {
+            accountId: components["schemas"]["Uuid"];
+            accountNumber: components["schemas"]["BusinessNumber"];
+            /** @enum {string} */
+            accountType: "INDIVIDUAL" | "HOUSEHOLD" | "BUSINESS";
+            name?: string | null;
+            /** @enum {string} */
+            status: "PENDING" | "ACTIVE" | "WITHDRAWN";
+            holderPartyId: components["schemas"]["Uuid"];
+            memberCount: number;
+        };
         /** @description Page of pty.Account.search results (cursor pagination, contract §3.5.5) */
         AccountSearchPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["AccountSearchItem"][];
         };
-        /** @description pty.Account.setHolder request. PRD inputs: "as named" */
-        AccountSetHolderRequest: Record<string, never>;
-        /** @description pty.Account.setHolder result. PRD outputs: "—" */
-        AccountSetHolderResponse: Record<string, never>;
-        /** @description pty.Account.addMember request. PRD inputs: "as named" */
-        AccountAddMemberRequest: Record<string, never>;
-        /** @description pty.Account.addMember result. PRD outputs: "—" */
-        AccountAddMemberResponse: Record<string, never>;
-        /** @description pty.Account.removeMember request. PRD inputs: "as named" */
-        AccountRemoveMemberRequest: Record<string, never>;
-        /** @description pty.Account.removeMember result. PRD outputs: "—" */
-        AccountRemoveMemberResponse: Record<string, never>;
-        /** @description pty.Account.withdraw request. PRD inputs: "as named" */
-        AccountWithdrawRequest: Record<string, never>;
-        /** @description pty.Account.withdraw result. PRD outputs: "—" */
-        AccountWithdrawResponse: Record<string, never>;
+        /** @description pty.Account.setHolder request (BO-PTY-04). Ends the current holder role and starts the new one; an account has one holder at a time. */
+        AccountSetHolderRequest: {
+            accountId: components["schemas"]["Uuid"];
+            holderPartyId: components["schemas"]["Uuid"];
+        };
+        /** @description pty.Account.setHolder result */
+        AccountSetHolderResponse: {
+            account: components["schemas"]["AccountView"];
+        };
+        /** @description pty.Account.addMember request (BO-PTY-04). The member cannot be the holder or already a member; a HOUSEHOLD member can belong to one household only (PTY-ERR-MEMBER-IN-USE); the account member limit applies (PTY-ERR-MEMBER-LIMIT). */
+        AccountAddMemberRequest: {
+            accountId: components["schemas"]["Uuid"];
+            partyId: components["schemas"]["Uuid"];
+            /** @description SPOUSE, PARTNER, CHILD, DEPENDANT, EMPLOYEE or OTHER */
+            memberRole: components["schemas"]["Code"];
+        };
+        /** @description pty.Account.addMember result */
+        AccountAddMemberResponse: {
+            account: components["schemas"]["AccountView"];
+        };
+        /** @description pty.Account.removeMember request (BO-PTY-04) */
+        AccountRemoveMemberRequest: {
+            accountId: components["schemas"]["Uuid"];
+            partyId: components["schemas"]["Uuid"];
+        };
+        /** @description pty.Account.removeMember result */
+        AccountRemoveMemberResponse: {
+            account: components["schemas"]["AccountView"];
+        };
+        /** @description pty.Account.withdraw request (BO-PTY-04). Refused while the holder has a policy in force, scheduled or pending cancellation (PTY-ERR-ACCOUNT-HAS-JOBS). */
+        AccountWithdrawRequest: {
+            accountId: components["schemas"]["Uuid"];
+            reason: string;
+        };
+        /** @description pty.Account.withdraw result */
+        AccountWithdrawResponse: {
+            account: components["schemas"]["AccountView"];
+        };
         /** @description pty.Account.merge request. PRD inputs: "source, target, policies" */
         AccountMergeRequest: {
             /** @description PRD: "source" */
@@ -2607,6 +2679,11 @@ export interface components {
             type: components["schemas"]["Code"];
             id: string;
         };
+        /** @description Date period; `to` is null when open-ended. */
+        DatePeriod: {
+            from: components["schemas"]["LocalDate"];
+            to: components["schemas"]["LocalDate"] | null;
+        };
         /** @description Value inside an open structure. JSON numbers are not allowed at any depth: amounts are Money objects or decimal strings, counts are integers only where a typed field says so. */
         OpenValue: string | boolean | null | components["schemas"]["OpenValue"][] | {
             [key: string]: components["schemas"]["OpenValue"];
@@ -3259,11 +3336,24 @@ export interface operations {
     };
     "pty.PartyRole.query": {
         parameters: {
-            query?: {
+            query: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+                /**
+                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
+                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
+                 */
+                knownAt?: components["parameters"]["KnownAt"];
+                partyId: components["schemas"]["Uuid"];
+                roleType?: components["schemas"]["Code"];
             };
             header?: {
                 /**
@@ -3385,11 +3475,24 @@ export interface operations {
     };
     "pty.Relationship.query": {
         parameters: {
-            query?: {
+            query: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+                /**
+                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
+                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
+                 */
+                knownAt?: components["parameters"]["KnownAt"];
+                partyId: components["schemas"]["Uuid"];
+                relationshipType?: components["schemas"]["Code"];
             };
             header?: {
                 /**
@@ -3516,6 +3619,10 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description Accounts this party holds or belongs to (active membership) */
+                partyId?: components["schemas"]["Uuid"];
+                status?: "PENDING" | "ACTIVE" | "WITHDRAWN";
+                accountNumber?: components["schemas"]["BusinessNumber"];
             };
             header?: {
                 /**
