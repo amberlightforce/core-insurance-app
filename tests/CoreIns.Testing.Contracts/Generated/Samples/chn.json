@@ -359,6 +359,7 @@
       "status": "unspecified"
     },
     "PermissionEvaluateRequest": {
+      "raiseTicket": true,
       "transactionType": "unspecified",
       "channel": "unspecified",
       "actor": "unspecified",
@@ -367,6 +368,7 @@
       "proposedValues": "unspecified"
     },
     "PermissionEvaluateResponse": {
+      "ticketId": "sample",
       "outcome": "unspecified",
       "limits": "unspecified",
       "entry": "unspecified",
@@ -399,6 +401,7 @@
       "diff": "unspecified"
     },
     "PermissionMatrixRunScenariosRequest": {
+      "matrixId": "sample",
       "version": "unspecified",
       "entries": [
         "unspecified"
@@ -413,6 +416,8 @@
       "diff": "unspecified"
     },
     "PermissionMatrixScheduleRequest": {
+      "effectiveFrom": "2026-10-07T09:00:00Z",
+      "matrixId": "sample",
       "version": "unspecified",
       "entries": [
         "unspecified"
@@ -427,6 +432,7 @@
       "diff": "unspecified"
     },
     "PermissionMatrixSubmitRequest": {
+      "matrixId": "sample",
       "version": "unspecified",
       "entries": [
         "unspecified"
@@ -441,6 +447,7 @@
       "diff": "unspecified"
     },
     "PermissionMatrixUpdateEntryRequest": {
+      "matrixId": "sample",
       "version": "unspecified",
       "entries": [
         "unspecified"

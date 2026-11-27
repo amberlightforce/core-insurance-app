@@ -1412,11 +1412,7 @@ paths:
     post:
       operationId: pfc.ProductVersion.submit
       summary: Submit for approval
-      description: |-
-        Submit for approval
-
-        PRD inputs: change set id
-        PRD outputs: version status, check results
+      description: "Submit an open change set: the draft must lint clean and keep its identity (product code, new version number, schema version). Opens a PLT approval (type PFC.Release); the submitter cannot sign it off. Dry run runs the checks only."
       tags:
       - ProductVersion
       x-requirement:
@@ -1434,10 +1430,15 @@ paths:
       - ui
       x-permission: pfc.ProductVersion.submit
       x-error-codes:
+      - code: PFC-ERR-CHANGE-SET-NOT-FOUND
+        status: 404
+      - code: PFC-ERR-CHANGE-SET-STATE
+        status: 409
+      - code: PFC-ERR-STALE
+        status: 409
       - code: PFC-ERR-CHECKS-FAILED
         status: 422
       - code: PFC-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
         status: 409
       x-source:
       - PRD-02 §9.1 l.1472
@@ -1475,11 +1476,7 @@ paths:
     post:
       operationId: pfc.ProductVersion.signOff
       summary: Approve or return
-      description: |-
-        Approve or return
-
-        PRD inputs: version, role, decision, comment, conditions
-        PRD outputs: approval state
+      description: "The checker approves or returns a submitted change set (maker-checker, authority PFC.RELEASE). Return reopens the change set for editing; the author can resubmit."
       tags:
       - ProductVersion
       x-requirement:
@@ -1498,16 +1495,19 @@ paths:
       - ui
       x-permission: pfc.ProductVersion.signOff
       x-authority-types:
-      - PFC.ProductApproval
+      - PFC.RELEASE
       x-authority-source:
       - PRD-02 l.613
       x-error-codes:
-      - code: PFC-ERR-MAKER-IS-CHECKER
+      - code: PFC-ERR-CHANGE-SET-NOT-FOUND
+        status: 404
+      - code: PFC-ERR-CHANGE-SET-STATE
+        status: 409
+      - code: PFC-ERR-SOD
         status: 403
-      - code: PFC-ERR-AUTHORITY
-        status: 403
+      - code: PFC-ERR-RELEASE-STATE
+        status: 409
       - code: PFC-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
         status: 409
       x-source:
       - PRD-02 §9.1 l.1473
@@ -1543,12 +1543,8 @@ paths:
   /api/pfc/v1/product-versions/schedule:
     post:
       operationId: pfc.ProductVersion.schedule
-      summary: Release
-      description: |-
-        Release
-
-        PRD inputs: version, environment, activation time, reason
-        PRD outputs: schedule
+      summary: Schedule a release
+      description: "Sets the windows of an approved change set. The version is locked and published on the activation date (immediately when that is today); a scheduled release can be cancelled until then. Refused when the new-business window overlaps another Locked or scheduled version."
       tags:
       - ProductVersion
       x-requirement:
@@ -1567,12 +1563,17 @@ paths:
       - ui
       x-permission: pfc.ProductVersion.schedule
       x-error-codes:
-      - code: PFC-ERR-SOD
-        status: 403
-      - code: PFC-ERR-NO-RATING
+      - code: PFC-ERR-CHANGE-SET-NOT-FOUND
+        status: 404
+      - code: PFC-ERR-CHANGE-SET-STATE
+        status: 409
+      - code: PFC-ERR-RELEASE-STATE
+        status: 409
+      - code: PFC-ERR-WINDOW-OVERLAP
+        status: 409
+      - code: PFC-ERR-INVALID-WINDOW
         status: 422
       - code: PFC-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
         status: 409
       x-source:
       - PRD-02 §9.1 l.1474
@@ -1609,12 +1610,8 @@ paths:
   /api/pfc/v1/product-versions/cancel-schedule:
     post:
       operationId: pfc.ProductVersion.cancelSchedule
-      summary: Release
-      description: |-
-        Release
-
-        PRD inputs: version, environment, activation time, reason
-        PRD outputs: schedule
+      summary: Cancel a scheduled release
+      description: "Cancels a release that is scheduled and not yet published; the change set stays approved and can be scheduled again."
       tags:
       - ProductVersion
       x-requirement:
@@ -1627,18 +1624,16 @@ paths:
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates'
+      x-dry-run: false
       x-exposure:
       - ui
       x-permission: pfc.ProductVersion.cancelSchedule
       x-error-codes:
-      - code: PFC-ERR-SOD
-        status: 403
-      - code: PFC-ERR-NO-RATING
-        status: 422
+      - code: PFC-ERR-CHANGE-SET-NOT-FOUND
+        status: 404
+      - code: PFC-ERR-RELEASE-STATE
+        status: 409
       - code: PFC-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
         status: 409
       x-source:
       - PRD-02 §9.1 l.1474
@@ -1660,72 +1655,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductVersionCancelScheduleResponse'
-        '400':
-          $ref: common.yaml#/components/responses/BadRequest
-        '401':
-          $ref: common.yaml#/components/responses/Unauthorized
-        '403':
-          $ref: common.yaml#/components/responses/Forbidden
-        '409':
-          $ref: common.yaml#/components/responses/Conflict
-        '422':
-          $ref: common.yaml#/components/responses/UnprocessableContent
-        '500':
-          $ref: common.yaml#/components/responses/InternalError
-  /api/pfc/v1/product-versions/fall-back:
-    post:
-      operationId: pfc.ProductVersion.fallBack
-      summary: Release
-      description: |-
-        Release
-
-        PRD inputs: version, environment, activation time, reason
-        PRD outputs: schedule
-      tags:
-      - ProductVersion
-      x-requirement:
-      - REQ-PFC-211..REQ-PFC-213
-      x-wave: W2
-      x-work-packages:
-      - W2-PFC-05
-      x-status: full
-      x-maturity: pre-release
-      x-io-shared: 3
-      x-operation-kind: command
-      x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Idempotency-Key; dry-run validates'
-      x-exposure:
-      - ui
-      x-permission: pfc.ProductVersion.fallBack
-      x-error-codes:
-      - code: PFC-ERR-SOD
-        status: 403
-      - code: PFC-ERR-NO-RATING
-        status: 422
-      - code: PFC-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
-        status: 409
-      x-source:
-      - PRD-02 §9.1 l.1474
-      parameters:
-      - $ref: common.yaml#/components/parameters/IdempotencyKey
-      - $ref: common.yaml#/components/parameters/Traceparent
-      - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/DryRun
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProductVersionFallBackRequest'
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProductVersionFallBackResponse'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -3921,116 +3850,192 @@ components:
       - validation
     ProductVersionSubmitRequest:
       type: object
-      description: 'pfc.ProductVersion.submit request. PRD inputs: "change set id"'
+      description: pfc.ProductVersion.submit request (BO-PFC-04). Submits an open change set for sign-off.
       properties:
         changeSetId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "change set id"'
+        recordVersion:
+          type: integer
+          minimum: 1
+          description: The change-set record version the submitter saw (optimistic concurrency)
+      required:
+      - changeSetId
+      - recordVersion
     ProductVersionSubmitResponse:
       type: object
-      description: 'pfc.ProductVersion.submit result. PRD outputs: "version status, check results"'
+      description: 'pfc.ProductVersion.submit result: the change set (SUBMITTED on a real call), the lint result and the release request. On a dry run only the checks run and nothing is stored.'
       properties:
-        versionStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version status"'
-        checkResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "check results"'
+        dryRun:
+          type: boolean
+        changeSetState:
+          $ref: '#/components/schemas/ChangeSetState'
+        validation:
+          $ref: '#/components/schemas/ChangeSetValidation'
+        version:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+          description: The version number the draft will carry when released
+        releaseId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Null on a dry run
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: In-process PLT approval request (type PFC.Release, authority PFC.RELEASE); null on a dry run
+      required:
+      - dryRun
+      - changeSetState
+      - validation
+      - version
+      - releaseId
+      - approvalRequestId
     ProductVersionSignOffRequest:
       type: object
-      description: 'pfc.ProductVersion.signOff request. PRD inputs: "version, role, decision, comment, conditions"'
+      description: pfc.ProductVersion.signOff request (BO-PFC-04). The checker approves or returns a submitted change set.
       properties:
-        version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
-        role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
+        changeSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+          type: string
+          enum:
+          - APPROVE
+          - RETURN
         comment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "comment"'
-        conditions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "conditions"'
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Why (required for both decisions; a returned draft shows it to the author)
+      required:
+      - changeSetId
+      - decision
+      - comment
     ProductVersionSignOffResponse:
       type: object
-      description: 'pfc.ProductVersion.signOff result. PRD outputs: "approval state"'
+      description: 'pfc.ProductVersion.signOff result: the approval state and the change set (SUBMITTED when approved, OPEN again when returned)'
       properties:
         approvalState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval state"'
+          type: string
+          enum:
+          - APPROVED
+          - RETURNED
+        changeSetState:
+          $ref: '#/components/schemas/ChangeSetState'
+        releaseId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        version:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+      required:
+      - approvalState
+      - changeSetState
+      - releaseId
+      - version
     ProductVersionScheduleRequest:
       type: object
-      description: 'pfc.ProductVersion.schedule request. PRD inputs: "version, environment, activation time, reason"'
+      description: pfc.ProductVersion.schedule request (BO-PFC-04). Sets the windows of an approved change set; the version is locked and published on the activation date.
       properties:
-        version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
-        environment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "environment"'
-        activationTime:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "activation time"'
+        changeSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        activationDate:
+          type: string
+          format: date
+          description: Start of the new-business window (Athens business date). Today releases at once; a later date is scheduled.
+        newBusinessTo:
+          type: [string, 'null']
+          format: date
+          description: End of the new-business window; null or absent for open
+        renewalFrom:
+          type: [string, 'null']
+          format: date
+          description: Start of the renewal window; defaults to the activation date
+        renewalTo:
+          type: [string, 'null']
+          format: date
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - changeSetId
+      - activationDate
+      - reason
     ProductVersionScheduleResponse:
       type: object
-      description: 'pfc.ProductVersion.schedule result. PRD outputs: "schedule"'
+      description: 'pfc.ProductVersion.schedule result. On a dry run the windows are validated and nothing is stored.'
       properties:
+        dryRun:
+          type: boolean
         schedule:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "schedule"'
+          $ref: '#/components/schemas/ReleaseSchedule'
+      required:
+      - dryRun
+      - schedule
+    ReleaseSchedule:
+      type: object
+      description: The release of a version and its windows
+      properties:
+        releaseId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Null on a dry run
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        status:
+          type: string
+          enum:
+          - SCHEDULED
+          - PUBLISHED
+          - CANCELLED
+        activationDate:
+          type: string
+          format: date
+        newBusinessFrom:
+          type: string
+          format: date
+        newBusinessTo:
+          type: [string, 'null']
+          format: date
+        renewalFrom:
+          type: string
+          format: date
+        renewalTo:
+          type: [string, 'null']
+          format: date
+      required:
+      - releaseId
+      - productCode
+      - version
+      - status
+      - activationDate
+      - newBusinessFrom
+      - newBusinessTo
+      - renewalFrom
+      - renewalTo
     ProductVersionCancelScheduleRequest:
       type: object
-      description: 'pfc.ProductVersion.cancelSchedule request. PRD inputs: "version, environment, activation time, reason"'
+      description: pfc.ProductVersion.cancelSchedule request (BO-PFC-04). Cancels a scheduled release that has not yet been published.
       properties:
-        version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
-        environment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "environment"'
-        activationTime:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "activation time"'
+        changeSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - changeSetId
+      - reason
     ProductVersionCancelScheduleResponse:
       type: object
-      description: 'pfc.ProductVersion.cancelSchedule result. PRD outputs: "schedule"'
+      description: 'pfc.ProductVersion.cancelSchedule result: the cancelled schedule; the approved change set can be scheduled again'
       properties:
         schedule:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "schedule"'
-    ProductVersionFallBackRequest:
-      type: object
-      description: 'pfc.ProductVersion.fallBack request. PRD inputs: "version, environment, activation time, reason"'
-      properties:
-        version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
-        environment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "environment"'
-        activationTime:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "activation time"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-    ProductVersionFallBackResponse:
-      type: object
-      description: 'pfc.ProductVersion.fallBack result. PRD outputs: "schedule"'
-      properties:
-        schedule:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "schedule"'
+          $ref: '#/components/schemas/ReleaseSchedule'
+      required:
+      - schedule
     ProductVersionDiffResponse:
       type: object
       description: 'pfc.ProductVersion.diff result. PRD outputs: "grouped entries with classes"'

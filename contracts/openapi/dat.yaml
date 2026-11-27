@@ -424,6 +424,8 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       - $ref: common.yaml#/components/parameters/ValidAt
       - $ref: common.yaml#/components/parameters/KnownAt
       - name: view
@@ -561,6 +563,10 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
       - name: productSlot
         in: query
         required: false
@@ -637,6 +643,8 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
       - name: kpiCode
         in: query
         required: false
@@ -3237,6 +3245,9 @@ components:
       type: object
       description: 'dat.Query.asOf result. PRD outputs: "rows, as-of metadata, hash"'
       properties:
+        nextCursor:
+          type: [string, 'null']
+          description: Cursor of the next page, or null on the last page (BO-DAT-02 contract addition).
         rows:
           type: array
           items:
@@ -3278,6 +3289,9 @@ components:
       type: object
       description: 'dat.Population.aggregate result. PRD outputs: "rows or aggregates, snapshot hash"'
       properties:
+        nextCursor:
+          type: [string, 'null']
+          description: Cursor of the next page, or null on the last page (BO-DAT-02 contract addition).
         rowsOrAggregates:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "rows or aggregates"'

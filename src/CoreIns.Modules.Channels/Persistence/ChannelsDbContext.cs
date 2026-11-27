@@ -15,6 +15,10 @@ internal sealed class ChannelsDbContext(DbContextOptions<ChannelsDbContext> opti
 
     public DbSet<TicketRow> Tickets => Set<TicketRow>();
 
+    public DbSet<PermissionMatrixRow> PermissionMatrices => Set<PermissionMatrixRow>();
+
+    public DbSet<PermissionMatrixEntryRow> PermissionMatrixEntries => Set<PermissionMatrixEntryRow>();
+
     protected override string Schema => ChannelsModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -84,6 +88,55 @@ internal sealed class ChannelsDbContext(DbContextOptions<ChannelsDbContext> opti
             entity.Property(e => e.ExecutedCommandRef).HasColumnName("executed_command_ref");
             entity.HasIndex(e => new { e.LegalEntityId, e.Status }).HasDatabaseName("ix_ticket_status");
         });
+
+        modelBuilder.Entity<PermissionMatrixRow>(entity =>
+        {
+            entity.ToTable("permission_matrix", table =>
+            {
+                var states = string.Join(", ", MatrixStatuses.All.Select(s => $"'{s}'"));
+                table.HasCheckConstraint("ck_permission_matrix_status", $"status IN ({states})");
+            });
+            entity.HasKey(e => e.MatrixId).HasName("pk_permission_matrix");
+            entity.Property(e => e.MatrixId).HasColumnName("matrix_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.VersionNo).HasColumnName("version_no");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.Scenarios).HasColumnName("scenarios").HasColumnType("jsonb");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.LastEditedBy).HasColumnName("last_edited_by");
+            entity.Property(e => e.SubmittedBy).HasColumnName("submitted_by");
+            entity.Property(e => e.SubmittedAt).HasColumnName("submitted_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ApprovedBy).HasColumnName("approved_by");
+            entity.Property(e => e.ApprovedAt).HasColumnName("approved_at").HasColumnType("timestamptz");
+            entity.Property(e => e.EffectiveFrom).HasColumnName("effective_from").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.LegalEntityId, e.VersionNo }).IsUnique().HasDatabaseName("ux_permission_matrix_version");
+            entity.HasIndex(e => new { e.LegalEntityId, e.Status, e.EffectiveFrom }).HasDatabaseName("ix_permission_matrix_effective");
+        });
+
+        modelBuilder.Entity<PermissionMatrixEntryRow>(entity =>
+        {
+            entity.ToTable("permission_matrix_entry", table =>
+            {
+                var outcomes = string.Join(", ", MatrixOutcomes.All.Select(s => $"'{s}'"));
+                table.HasCheckConstraint("ck_permission_matrix_entry_outcome", $"outcome IN ({outcomes})");
+                table.HasCheckConstraint("ck_permission_matrix_entry_level", "level IN ('EU', 'COUNTRY', 'LE')");
+                table.HasCheckConstraint("ck_permission_matrix_entry_max", "max_amount IS NULL OR max_amount >= 0");
+            });
+            entity.HasKey(e => e.EntryId).HasName("pk_permission_matrix_entry");
+            entity.Property(e => e.EntryId).HasColumnName("entry_id");
+            entity.Property(e => e.MatrixId).HasColumnName("matrix_id");
+            entity.Property(e => e.TransactionType).HasColumnName("transaction_type");
+            entity.Property(e => e.Channel).HasColumnName("channel");
+            entity.Property(e => e.ActorType).HasColumnName("actor_type");
+            entity.Property(e => e.ProductLine).HasColumnName("product_line");
+            entity.Property(e => e.Outcome).HasColumnName("outcome");
+            entity.Property(e => e.MaxAmount).HasColumnName("max_amount").HasColumnType("numeric(18,2)");
+            entity.Property(e => e.Level).HasColumnName("level");
+            entity.Property(e => e.Removed).HasColumnName("removed");
+            entity.HasOne<PermissionMatrixRow>().WithMany().HasForeignKey(e => e.MatrixId).HasConstraintName("fk_permission_matrix_entry_matrix");
+            entity.HasIndex(e => new { e.MatrixId, e.TransactionType, e.Channel, e.ActorType, e.ProductLine }).IsUnique().HasDatabaseName("ux_permission_matrix_entry_key");
+        });
     }
 }
 
@@ -149,4 +202,62 @@ internal sealed class ChannelsDbContextDesignTimeFactory : IDesignTimeDbContextF
 {
     public ChannelsDbContext CreateDbContext(string[] args) =>
         new(ModuleDbContextRegistration.MigrationOptions<ChannelsDbContext>("Host=localhost;Database=coreins_design;Username=design", ChannelsModule.Schema));
+}
+
+/// <summary>A version of the transaction-permission matrix of a legal entity (REQ-CHN-047..052). Maker-checker, effective-dated.</summary>
+internal sealed class PermissionMatrixRow
+{
+    public Guid MatrixId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    /// <summary>1, 2, 3, ... per legal entity.</summary>
+    public int VersionNo { get; set; }
+
+    public string Status { get; set; } = MatrixStatuses.Draft;
+
+    /// <summary>The scenario list the matrix is tested with (jsonb array).</summary>
+    public string Scenarios { get; set; } = "[]";
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public Instant CreatedAt { get; set; }
+
+    public string LastEditedBy { get; set; } = string.Empty;
+
+    public string? SubmittedBy { get; set; }
+
+    public Instant? SubmittedAt { get; set; }
+
+    public string? ApprovedBy { get; set; }
+
+    public Instant? ApprovedAt { get; set; }
+
+    /// <summary>When the matrix takes over; set by the checker. The newest SCHEDULED matrix whose time has come is in force.</summary>
+    public Instant? EffectiveFrom { get; set; }
+}
+
+/// <summary>One entry of a matrix version. A dimension of <c>*</c> is the wildcard; EU and COUNTRY levels are final.</summary>
+internal sealed class PermissionMatrixEntryRow
+{
+    public Guid EntryId { get; set; }
+
+    public Guid MatrixId { get; set; }
+
+    public string TransactionType { get; set; } = string.Empty;
+
+    public string Channel { get; set; } = MatrixDims.Any;
+
+    public string ActorType { get; set; } = MatrixDims.Any;
+
+    public string ProductLine { get; set; } = MatrixDims.Any;
+
+    public string Outcome { get; set; } = MatrixOutcomes.Deny;
+
+    public decimal? MaxAmount { get; set; }
+
+    public string Level { get; set; } = MatrixLevels.LegalEntity;
+
+    /// <summary>A removed entry stays as a row (the app role has no DELETE); readers skip it.</summary>
+    public bool Removed { get; set; }
 }

@@ -71,6 +71,15 @@ internal sealed class TemplateCatalogue(DocumentsDbContext db)
         return await db.Clauses.AsNoTracking().SingleOrDefaultAsync(c => c.Code == idOrCode, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <summary>One template version by id, in any status (used to preview a DRAFT).</summary>
+    public Task<TemplateRow?> GetTemplateAsync(Guid templateId, CancellationToken cancellationToken) =>
+        db.Templates.AsNoTracking().SingleOrDefaultAsync(t => t.TemplateId == templateId, cancellationToken);
+
+    /// <summary>The APPROVED clauses by code, for composing.</summary>
+    public async Task<IReadOnlyDictionary<string, Rendering.ComposerClause>> ApprovedClausesAsync(CancellationToken cancellationToken) =>
+        (await db.Clauses.AsNoTracking().Where(c => c.Status == "APPROVED").ToListAsync(cancellationToken).ConfigureAwait(false))
+        .ToDictionary(c => c.Code, c => new Rendering.ComposerClause(c.Code, c.TitleEl, c.TextEl, c.TitleEn, c.TextEn), StringComparer.Ordinal);
+
     private static bool Matches(string? templateValue, string? requested) => templateValue is null || string.Equals(templateValue, requested, StringComparison.Ordinal);
 
     private static int Specificity(TemplateRow t) => (t.ProductCode is null ? 0 : 1) + (t.LineOfBusiness is null ? 0 : 1) + (t.Jurisdiction is null ? 0 : 1);

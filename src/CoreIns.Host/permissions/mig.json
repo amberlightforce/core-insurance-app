@@ -23,7 +23,10 @@
         "mig.Archive.rectificationNote": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
         "mig.Archive.restrict": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
         "mig.Archive.erase": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
-        "mig.ImportContract.conformance": [ "Staff.MigrationManager", "Platform.Admin" ]
+        "mig.ImportContract.conformance": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Recon.loadControlTotals": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Recon.run": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Recon.results": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ]
       }
     },
     "Authority": {

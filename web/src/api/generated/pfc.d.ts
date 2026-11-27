@@ -476,10 +476,7 @@ export interface paths {
         put?: never;
         /**
          * Submit for approval
-         * @description Submit for approval
-         *
-         *     PRD inputs: change set id
-         *     PRD outputs: version status, check results
+         * @description Submit an open change set: the draft must lint clean and keep its identity (product code, new version number, schema version). Opens a PLT approval (type PFC.Release); the submitter cannot sign it off. Dry run runs the checks only.
          */
         post: operations["pfc.ProductVersion.submit"];
         delete?: never;
@@ -499,10 +496,7 @@ export interface paths {
         put?: never;
         /**
          * Approve or return
-         * @description Approve or return
-         *
-         *     PRD inputs: version, role, decision, comment, conditions
-         *     PRD outputs: approval state
+         * @description The checker approves or returns a submitted change set (maker-checker, authority PFC.RELEASE). Return reopens the change set for editing; the author can resubmit.
          */
         post: operations["pfc.ProductVersion.signOff"];
         delete?: never;
@@ -521,11 +515,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Release
-         * @description Release
-         *
-         *     PRD inputs: version, environment, activation time, reason
-         *     PRD outputs: schedule
+         * Schedule a release
+         * @description Sets the windows of an approved change set. The version is locked and published on the activation date (immediately when that is today); a scheduled release can be cancelled until then. Refused when the new-business window overlaps another Locked or scheduled version.
          */
         post: operations["pfc.ProductVersion.schedule"];
         delete?: never;
@@ -544,36 +535,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Release
-         * @description Release
-         *
-         *     PRD inputs: version, environment, activation time, reason
-         *     PRD outputs: schedule
+         * Cancel a scheduled release
+         * @description Cancels a release that is scheduled and not yet published; the change set stays approved and can be scheduled again.
          */
         post: operations["pfc.ProductVersion.cancelSchedule"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/pfc/v1/product-versions/fall-back": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Release
-         * @description Release
-         *
-         *     PRD inputs: version, environment, activation time, reason
-         *     PRD outputs: schedule
-         */
-        post: operations["pfc.ProductVersion.fallBack"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1518,83 +1483,94 @@ export interface components {
             changeSetState: components["schemas"]["ChangeSetState"];
             validation: components["schemas"]["ChangeSetValidation"];
         };
-        /** @description pfc.ProductVersion.submit request. PRD inputs: "change set id" */
+        /** @description pfc.ProductVersion.submit request (BO-PFC-04). Submits an open change set for sign-off. */
         ProductVersionSubmitRequest: {
-            /** @description PRD: "change set id" */
-            changeSetId?: components["schemas"]["Uuid"];
+            changeSetId: components["schemas"]["Uuid"];
+            /** @description The change-set record version the submitter saw (optimistic concurrency) */
+            recordVersion: number;
         };
-        /** @description pfc.ProductVersion.submit result. PRD outputs: "version status, check results" */
+        /** @description pfc.ProductVersion.submit result: the change set (SUBMITTED on a real call), the lint result and the release request. On a dry run only the checks run and nothing is stored. */
         ProductVersionSubmitResponse: {
-            /** @description PRD: "version status" */
-            versionStatus?: components["schemas"]["Unspecified"];
-            /** @description PRD: "check results" */
-            checkResults?: components["schemas"]["Unspecified"];
+            dryRun: boolean;
+            changeSetState: components["schemas"]["ChangeSetState"];
+            validation: components["schemas"]["ChangeSetValidation"];
+            /** @description The version number the draft will carry when released */
+            version: components["schemas"]["ProductVersionNumber"];
+            /** @description Null on a dry run */
+            releaseId: components["schemas"]["Uuid"] | null;
+            /** @description In-process PLT approval request (type PFC.Release, authority PFC.RELEASE); null on a dry run */
+            approvalRequestId: components["schemas"]["Uuid"] | null;
         };
-        /** @description pfc.ProductVersion.signOff request. PRD inputs: "version, role, decision, comment, conditions" */
+        /** @description pfc.ProductVersion.signOff request (BO-PFC-04). The checker approves or returns a submitted change set. */
         ProductVersionSignOffRequest: {
-            /** @description PRD: "version" */
-            version?: components["schemas"]["Unspecified"];
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
-            /** @description PRD: "comment" */
-            comment?: components["schemas"]["Unspecified"];
-            /** @description PRD: "conditions" */
-            conditions?: components["schemas"]["Unspecified"];
+            changeSetId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "APPROVE" | "RETURN";
+            /** @description Why (required for both decisions; a returned draft shows it to the author) */
+            comment: string;
         };
-        /** @description pfc.ProductVersion.signOff result. PRD outputs: "approval state" */
+        /** @description pfc.ProductVersion.signOff result: the approval state and the change set (SUBMITTED when approved, OPEN again when returned) */
         ProductVersionSignOffResponse: {
-            /** @description PRD: "approval state" */
-            approvalState?: components["schemas"]["Unspecified"];
+            /** @enum {string} */
+            approvalState: "APPROVED" | "RETURNED";
+            changeSetState: components["schemas"]["ChangeSetState"];
+            releaseId: components["schemas"]["Uuid"];
+            version: components["schemas"]["ProductVersionNumber"];
         };
-        /** @description pfc.ProductVersion.schedule request. PRD inputs: "version, environment, activation time, reason" */
+        /** @description pfc.ProductVersion.schedule request (BO-PFC-04). Sets the windows of an approved change set; the version is locked and published on the activation date. */
         ProductVersionScheduleRequest: {
-            /** @description PRD: "version" */
-            version?: components["schemas"]["Unspecified"];
-            /** @description PRD: "environment" */
-            environment?: components["schemas"]["Unspecified"];
-            /** @description PRD: "activation time" */
-            activationTime?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            changeSetId: components["schemas"]["Uuid"];
+            /**
+             * Format: date
+             * @description Start of the new-business window (Athens business date). Today releases at once; a later date is scheduled.
+             */
+            activationDate: string;
+            /**
+             * Format: date
+             * @description End of the new-business window; null or absent for open
+             */
+            newBusinessTo?: string | null;
+            /**
+             * Format: date
+             * @description Start of the renewal window; defaults to the activation date
+             */
+            renewalFrom?: string | null;
+            /** Format: date */
+            renewalTo?: string | null;
+            reason: string;
         };
-        /** @description pfc.ProductVersion.schedule result. PRD outputs: "schedule" */
+        /** @description pfc.ProductVersion.schedule result. On a dry run the windows are validated and nothing is stored. */
         ProductVersionScheduleResponse: {
-            /** @description PRD: "schedule" */
-            schedule?: components["schemas"]["Unspecified"];
+            dryRun: boolean;
+            schedule: components["schemas"]["ReleaseSchedule"];
         };
-        /** @description pfc.ProductVersion.cancelSchedule request. PRD inputs: "version, environment, activation time, reason" */
+        /** @description The release of a version and its windows */
+        ReleaseSchedule: {
+            /** @description Null on a dry run */
+            releaseId: components["schemas"]["Uuid"] | null;
+            productCode: components["schemas"]["Code"];
+            version: components["schemas"]["ProductVersionNumber"];
+            /** @enum {string} */
+            status: "SCHEDULED" | "PUBLISHED" | "CANCELLED";
+            /** Format: date */
+            activationDate: string;
+            /** Format: date */
+            newBusinessFrom: string;
+            /** Format: date */
+            newBusinessTo: string | null;
+            /** Format: date */
+            renewalFrom: string;
+            /** Format: date */
+            renewalTo: string | null;
+        };
+        /** @description pfc.ProductVersion.cancelSchedule request (BO-PFC-04). Cancels a scheduled release that has not yet been published. */
         ProductVersionCancelScheduleRequest: {
-            /** @description PRD: "version" */
-            version?: components["schemas"]["Unspecified"];
-            /** @description PRD: "environment" */
-            environment?: components["schemas"]["Unspecified"];
-            /** @description PRD: "activation time" */
-            activationTime?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            changeSetId: components["schemas"]["Uuid"];
+            reason: string;
         };
-        /** @description pfc.ProductVersion.cancelSchedule result. PRD outputs: "schedule" */
+        /** @description pfc.ProductVersion.cancelSchedule result: the cancelled schedule; the approved change set can be scheduled again */
         ProductVersionCancelScheduleResponse: {
-            /** @description PRD: "schedule" */
-            schedule?: components["schemas"]["Unspecified"];
-        };
-        /** @description pfc.ProductVersion.fallBack request. PRD inputs: "version, environment, activation time, reason" */
-        ProductVersionFallBackRequest: {
-            /** @description PRD: "version" */
-            version?: components["schemas"]["Unspecified"];
-            /** @description PRD: "environment" */
-            environment?: components["schemas"]["Unspecified"];
-            /** @description PRD: "activation time" */
-            activationTime?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-        };
-        /** @description pfc.ProductVersion.fallBack result. PRD outputs: "schedule" */
-        ProductVersionFallBackResponse: {
-            /** @description PRD: "schedule" */
-            schedule?: components["schemas"]["Unspecified"];
+            schedule: components["schemas"]["ReleaseSchedule"];
         };
         /** @description pfc.ProductVersion.diff result. PRD outputs: "grouped entries with classes" */
         ProductVersionDiffResponse: {
@@ -2965,57 +2941,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProductVersionCancelScheduleResponse"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["UnprocessableContent"];
-            500: components["responses"]["InternalError"];
-        };
-    };
-    "pfc.ProductVersion.fallBack": {
-        parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-                /**
-                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
-                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
-                 */
-                traceparent?: components["parameters"]["Traceparent"];
-                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
-                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProductVersionFallBackRequest"];
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProductVersionFallBackResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];

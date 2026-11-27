@@ -6,6 +6,7 @@ using CoreIns.Modules.Migration.Contracts;
 using CoreIns.Modules.Migration.Domain;
 using CoreIns.Modules.Migration.Persistence;
 using CoreIns.Modules.Migration.Services;
+using CoreIns.Modules.Migration.Services.Reconciliation;
 using CoreIns.Platform;
 using CoreIns.Platform.Approvals;
 using CoreIns.Platform.Commands;
@@ -75,6 +76,10 @@ public static class MigrationModule
         services.AddCommand<ArchiveRectificationNoteCommand, ArchiveDsarResponse, ArchiveDsarHandler>(CommandDescriptor.For("mig.Archive.rectificationNote"));
         services.AddCommand<ArchiveRestrictCommand, ArchiveDsarResponse, ArchiveDsarHandler>(CommandDescriptor.For("mig.Archive.restrict"));
         services.AddCommand<ArchiveEraseCommand, ArchiveDsarResponse, ArchiveDsarHandler>(CommandDescriptor.For("mig.Archive.erase") with { SupportsDryRun = true });
+
+        services.AddScoped<ReconciliationService>();
+        services.AddCommand<LoadControlTotals, ReconLoadView, LoadControlTotalsHandler>(CommandDescriptor.For("mig.Recon.loadControlTotals"));
+        services.AddCommand<RunReconciliation, ReconReportView, RunReconciliationHandler>(CommandDescriptor.For("mig.Recon.run"));
 
         services.AddScoped<IMigrationXrefService, MigrationXrefService>();
         services.AddScoped<IMigrationRoutingService, MigrationRoutingService>();
