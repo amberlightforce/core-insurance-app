@@ -283,6 +283,12 @@ paths:
         description: Document number or request number prefix
         schema:
           type: string
+      - name: includeHidden
+        in: query
+        required: false
+        description: Include documents hidden from the library (default false)
+        schema:
+          type: boolean
       responses:
         '200':
           description: Success
@@ -3473,6 +3479,18 @@ components:
           format: date-time
         latestDeliveryStatus:
           type: [string, 'null']
+        customerVisible:
+          type: boolean
+          description: The document type may be shown to the customer (portal); false for internal types.
+        hidden:
+          type: boolean
+          description: Hidden from the default library lists (BO-DOC-02); the document itself is kept.
+        supersededByDocumentId:
+          anyOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        withdrawnReason:
+          type: [string, 'null']
         deliveries:
           type: array
           items:
@@ -3524,27 +3542,27 @@ components:
           description: 'PRD: "link"'
     DocumentResendRequest:
       type: object
-      description: 'doc.Document.resend request. PRD inputs: "document id, recipient, channel, reason"'
+      description: 'doc.Document.resend request (BO-DOC-02): a new delivery of the same archived document. A reason is required.'
       properties:
         documentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "document id"'
         recipient:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "recipient"'
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Recipient party; defaults to the document's recipient.
         channel:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "channel"'
+          type: string
+          description: Delivery medium (EMAIL, REGISTERED_POST); defaults to the document's medium. A statutory notice is always registered post.
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
     DocumentResendResponse:
       type: object
-      description: 'doc.Document.resend result. PRD outputs: "delivery id"'
+      description: 'doc.Document.resend result.'
       properties:
         deliveryId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "delivery id"'
+        medium:
+          type: string
+      required: [deliveryId, medium]
     DocumentRenderAsOfRequest:
       type: object
       description: 'doc.Document.renderAsOf request. PRD inputs: "subject, type, validAt, knownAt, wording mode"'
@@ -3567,38 +3585,38 @@ components:
           description: 'PRD: "document id"'
     DocumentHideRequest:
       type: object
-      description: 'doc.Document.hide request. PRD inputs: "document id, reason"'
+      description: 'doc.Document.hide request (BO-DOC-02): list hygiene only; the document, archive and deliveries are kept. A reason is required.'
       properties:
         documentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "document id"'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
     DocumentHideResponse:
       type: object
-      description: 'doc.Document.hide result. PRD outputs: "status"'
+      description: 'doc.Document.hide result.'
       properties:
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+        hidden:
+          type: boolean
+      required: [status, hidden]
     DocumentUnhideRequest:
       type: object
-      description: 'doc.Document.unhide request. PRD inputs: "document id, reason"'
+      description: 'doc.Document.unhide request (BO-DOC-02): list hygiene only; the document, archive and deliveries are kept. A reason is required.'
       properties:
         documentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "document id"'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
     DocumentUnhideResponse:
       type: object
-      description: 'doc.Document.unhide result. PRD outputs: "status"'
+      description: 'doc.Document.unhide result.'
       properties:
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+        hidden:
+          type: boolean
+      required: [status, hidden]
     DocumentDeleteDraftRequest:
       type: object
       description: 'doc.Document.deleteDraft request. PRD inputs: "document id, reason"'
@@ -3618,44 +3636,41 @@ components:
           description: 'PRD: "status"'
     DocumentSupersedeRequest:
       type: object
-      description: 'doc.Document.supersede request. PRD inputs: "document id, replacement, reason"'
+      description: 'doc.Document.supersede request (BO-DOC-02): link the document to the one that replaces it. The old document becomes Superseded; nothing is edited or deleted. A reason is required.'
       properties:
         documentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "document id"'
-        replacement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "replacement"'
+        replacementDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: An existing Rendered document about the same subject.
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
     DocumentSupersedeResponse:
       type: object
-      description: 'doc.Document.supersede result. PRD outputs: "status"'
+      description: 'doc.Document.supersede result.'
       properties:
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+        supersededByDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required: [status, supersededByDocumentId]
     DocumentWithdrawRequest:
       type: object
-      description: 'doc.Document.withdraw request. PRD inputs: "document id, replacement, reason"'
+      description: 'doc.Document.withdraw request (BO-DOC-02): the document becomes Superseded with no replacement; archive and delivery evidence are kept. A reason is required; a statutory notice also needs the admin role.'
       properties:
         documentId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "document id"'
-        replacement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "replacement"'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
     DocumentWithdrawResponse:
       type: object
-      description: 'doc.Document.withdraw result. PRD outputs: "status"'
+      description: 'doc.Document.withdraw result.'
       properties:
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+        withdrawnReason:
+          type: string
+      required: [status, withdrawnReason]
     DocumentTypeListItem:
       type: object
       description: 'doc.DocumentType.list result: one document type of the catalogue (BO-DOC-05).'
@@ -3672,8 +3687,12 @@ components:
           type: array
           items:
             type: string
+        customerVisible:
+          type: boolean
+          description: Letters of this type may be shown to the customer in the portal; false for internal types.
       required:
       - documentType
+      - customerVisible
       - defaultMedium
       - titleEl
       - titleEn

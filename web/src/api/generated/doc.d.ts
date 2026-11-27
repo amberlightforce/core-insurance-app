@@ -1194,6 +1194,12 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
             latestDeliveryStatus?: string | null;
+            /** @description The document type may be shown to the customer (portal); false for internal types. */
+            customerVisible?: boolean;
+            /** @description Hidden from the default library lists (BO-DOC-02); the document itself is kept. */
+            hidden?: boolean;
+            supersededByDocumentId?: components["schemas"]["Uuid"] | null;
+            withdrawnReason?: string | null;
             deliveries: components["schemas"]["DocumentDeliverySummary"][];
         };
         /** @description Page of doc.Document.search results (cursor pagination, contract §3.5.5) */
@@ -1221,21 +1227,19 @@ export interface components {
             /** @description PRD: "link" */
             link?: components["schemas"]["Unspecified"];
         };
-        /** @description doc.Document.resend request. PRD inputs: "document id, recipient, channel, reason" */
+        /** @description doc.Document.resend request (BO-DOC-02): a new delivery of the same archived document. A reason is required. */
         DocumentResendRequest: {
-            /** @description PRD: "document id" */
             documentId?: components["schemas"]["Uuid"];
-            /** @description PRD: "recipient" */
-            recipient?: components["schemas"]["Unspecified"];
-            /** @description PRD: "channel" */
-            channel?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Recipient party; defaults to the document's recipient. */
+            recipient?: components["schemas"]["Uuid"];
+            /** @description Delivery medium (EMAIL, REGISTERED_POST); defaults to the document's medium. A statutory notice is always registered post. */
+            channel?: string;
+            reason?: string;
         };
-        /** @description doc.Document.resend result. PRD outputs: "delivery id" */
+        /** @description doc.Document.resend result. */
         DocumentResendResponse: {
-            /** @description PRD: "delivery id" */
-            deliveryId?: components["schemas"]["Uuid"];
+            deliveryId: components["schemas"]["Uuid"];
+            medium: string;
         };
         /** @description doc.Document.renderAsOf request. PRD inputs: "subject, type, validAt, knownAt, wording mode" */
         DocumentRenderAsOfRequest: {
@@ -1251,29 +1255,25 @@ export interface components {
             /** @description PRD: "document id" */
             documentId?: components["schemas"]["Uuid"];
         };
-        /** @description doc.Document.hide request. PRD inputs: "document id, reason" */
+        /** @description doc.Document.hide request (BO-DOC-02): list hygiene only; the document, archive and deliveries are kept. A reason is required. */
         DocumentHideRequest: {
-            /** @description PRD: "document id" */
             documentId?: components["schemas"]["Uuid"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            reason?: string;
         };
-        /** @description doc.Document.hide result. PRD outputs: "status" */
+        /** @description doc.Document.hide result. */
         DocumentHideResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            status: string;
+            hidden: boolean;
         };
-        /** @description doc.Document.unhide request. PRD inputs: "document id, reason" */
+        /** @description doc.Document.unhide request (BO-DOC-02): list hygiene only; the document, archive and deliveries are kept. A reason is required. */
         DocumentUnhideRequest: {
-            /** @description PRD: "document id" */
             documentId?: components["schemas"]["Uuid"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            reason?: string;
         };
-        /** @description doc.Document.unhide result. PRD outputs: "status" */
+        /** @description doc.Document.unhide result. */
         DocumentUnhideResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            status: string;
+            hidden: boolean;
         };
         /** @description doc.Document.deleteDraft request. PRD inputs: "document id, reason" */
         DocumentDeleteDraftRequest: {
@@ -1287,33 +1287,27 @@ export interface components {
             /** @description PRD: "status" */
             status?: components["schemas"]["Unspecified"];
         };
-        /** @description doc.Document.supersede request. PRD inputs: "document id, replacement, reason" */
+        /** @description doc.Document.supersede request (BO-DOC-02): link the document to the one that replaces it. The old document becomes Superseded; nothing is edited or deleted. A reason is required. */
         DocumentSupersedeRequest: {
-            /** @description PRD: "document id" */
             documentId?: components["schemas"]["Uuid"];
-            /** @description PRD: "replacement" */
-            replacement?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description An existing Rendered document about the same subject. */
+            replacementDocumentId?: components["schemas"]["Uuid"];
+            reason?: string;
         };
-        /** @description doc.Document.supersede result. PRD outputs: "status" */
+        /** @description doc.Document.supersede result. */
         DocumentSupersedeResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            status: string;
+            supersededByDocumentId: components["schemas"]["Uuid"];
         };
-        /** @description doc.Document.withdraw request. PRD inputs: "document id, replacement, reason" */
+        /** @description doc.Document.withdraw request (BO-DOC-02): the document becomes Superseded with no replacement; archive and delivery evidence are kept. A reason is required; a statutory notice also needs the admin role. */
         DocumentWithdrawRequest: {
-            /** @description PRD: "document id" */
             documentId?: components["schemas"]["Uuid"];
-            /** @description PRD: "replacement" */
-            replacement?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            reason?: string;
         };
-        /** @description doc.Document.withdraw result. PRD outputs: "status" */
+        /** @description doc.Document.withdraw result. */
         DocumentWithdrawResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            status: string;
+            withdrawnReason: string;
         };
         /** @description doc.DocumentType.list result: one document type of the catalogue (BO-DOC-05). */
         DocumentTypeListItem: {
@@ -1322,6 +1316,8 @@ export interface components {
             titleEl: string;
             titleEn: string;
             requiredFields: string[];
+            /** @description Letters of this type may be shown to the customer in the portal; false for internal types. */
+            customerVisible: boolean;
         };
         /** @description Page of doc.DocumentType.list results (cursor pagination, contract §3.5.5) */
         DocumentTypeListPage: components["schemas"]["PageEnvelope"] & {
@@ -2063,6 +2059,8 @@ export interface operations {
                 createdTo?: string;
                 /** @description Document number or request number prefix */
                 q?: string;
+                /** @description Include documents hidden from the library (default false) */
+                includeHidden?: boolean;
             };
             header?: {
                 /**
