@@ -28,6 +28,12 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
 
     public DbSet<IntermediaryRow> Intermediaries => Set<IntermediaryRow>();
 
+    public DbSet<IntermediaryCpdRow> IntermediaryCpd => Set<IntermediaryCpdRow>();
+
+    public DbSet<IntermediaryAppointmentRow> IntermediaryAppointments => Set<IntermediaryAppointmentRow>();
+
+    public DbSet<IntermediaryConflictRow> IntermediaryConflicts => Set<IntermediaryConflictRow>();
+
     public DbSet<ProducerCodeRow> ProducerCodes => Set<ProducerCodeRow>();
 
     public DbSet<DsarRestrictionRow> DsarRestrictions => Set<DsarRestrictionRow>();
@@ -262,8 +268,53 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ParentIntermediaryId).HasColumnName("parent_intermediary_id");
             entity.HasIndex(e => new { e.LegalEntityId, e.PartyId }).IsUnique().HasDatabaseName("ux_intermediary_party");
+            entity.HasIndex(e => new { e.LegalEntityId, e.RegisterNumber }).HasDatabaseName("ix_intermediary_register_number");
             entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.PartyId).HasConstraintName("fk_intermediary_party").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<IntermediaryCpdRow>(entity =>
+        {
+            entity.ToTable("intermediary_cpd");
+            entity.HasKey(e => new { e.IntermediaryId, e.Year }).HasName("pk_intermediary_cpd");
+            entity.Property(e => e.IntermediaryId).HasColumnName("intermediary_id");
+            entity.Property(e => e.Year).HasColumnName("year");
+            entity.Property(e => e.Hours).HasColumnName("hours").HasColumnType("numeric(6,2)");
+            entity.Property(e => e.RequiredHours).HasColumnName("required_hours").HasColumnType("numeric(6,2)");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.HasOne<IntermediaryRow>().WithMany().HasForeignKey(e => e.IntermediaryId)
+                .HasConstraintName("fk_intermediary_cpd_intermediary").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<IntermediaryAppointmentRow>(entity =>
+        {
+            entity.ToTable("intermediary_appointment");
+            entity.HasKey(e => e.AppointmentId).HasName("pk_intermediary_appointment");
+            entity.Property(e => e.AppointmentId).HasColumnName("appointment_id");
+            entity.Property(e => e.IntermediaryId).HasColumnName("intermediary_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.ProductCode).HasColumnName("product_code");
+            entity.Property(e => e.ValidFrom).HasColumnName("valid_from");
+            entity.Property(e => e.ValidTo).HasColumnName("valid_to");
+            entity.HasIndex(e => e.IntermediaryId).HasDatabaseName("ix_intermediary_appointment_intermediary");
+            entity.HasOne<IntermediaryRow>().WithMany().HasForeignKey(e => e.IntermediaryId)
+                .HasConstraintName("fk_intermediary_appointment_intermediary").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<IntermediaryConflictRow>(entity =>
+        {
+            entity.ToTable("intermediary_conflict_of_interest");
+            entity.HasKey(e => e.ConflictId).HasName("pk_intermediary_conflict_of_interest");
+            entity.Property(e => e.ConflictId).HasColumnName("conflict_id");
+            entity.Property(e => e.IntermediaryId).HasColumnName("intermediary_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.DeclaredOn).HasColumnName("declared_on");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.HasIndex(e => e.IntermediaryId).HasDatabaseName("ix_intermediary_coi_intermediary");
+            entity.HasOne<IntermediaryRow>().WithMany().HasForeignKey(e => e.IntermediaryId)
+                .HasConstraintName("fk_intermediary_coi_intermediary").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<ProducerCodeRow>(entity =>
