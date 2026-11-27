@@ -58,6 +58,11 @@ internal sealed class RenewalBoundHandler(FinanceDbContext db, PolicyBoundHandle
                 ProductCode = payload.ProductCode,
                 ProductVersion = payload.ProductVersion,
                 ArtefactHash = payload.ArtefactHash,
+
+                // RenewalBound carries no term window: the renewal starts where its predecessor ends and runs one year.
+                // TODO(hardening): take the real term end from RenewalBound once the event carries the window.
+                TermStart = predecessor.TermEnd,
+                TermEnd = predecessor.TermEnd is { } start ? new CoreIns.SharedKernel.BusinessDate(start.Value.AddYears(1)) : null,
             },
             cancellationToken).ConfigureAwait(false);
     }

@@ -20,6 +20,12 @@ public static class MigrationErrorCodes
     /// </remarks>
     public const string ApprovalRequired = "MIG-ERR-APPROVAL-REQUIRED";
 
+    /// <summary>MIG-ERR-BATCH-STATE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): mig.Signoff.approve, mig.Signoff.reject, mig.Signoff.request.</para>
+    /// </remarks>
+    public const string BatchState = "MIG-ERR-BATCH-STATE";
+
     /// <summary>MIG-ERR-DEPENDENCY (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 9 operation(s): mig.Batch.approve, mig.Batch.create, mig.Batch.get, mig.Batch.outcomes, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start.</para>
@@ -34,7 +40,7 @@ public static class MigrationErrorCodes
 
     /// <summary>MIG-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 16 operation(s): mig.Archive.erase, mig.Archive.rectificationNote, mig.Archive.restrict, mig.Archive.subjectExport, mig.Batch.approve, mig.Batch.create, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start, mig.ImportContract.conformance, ….</para>
+    /// <para>Declared by 20 operation(s): mig.Archive.erase, mig.Archive.rectificationNote, mig.Archive.restrict, mig.Archive.subjectExport, mig.Batch.approve, mig.Batch.create, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start, mig.ImportContract.conformance, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "MIG-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -52,7 +58,7 @@ public static class MigrationErrorCodes
 
     /// <summary>MIG-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): mig.Xref.resolve.</para>
+    /// <para>Declared by 5 operation(s): mig.Signoff.approve, mig.Signoff.reject, mig.Signoff.request, mig.Signoff.waive, mig.Xref.resolve.</para>
     /// </remarks>
     public const string NotFound = "MIG-ERR-NOT-FOUND";
 
@@ -62,9 +68,21 @@ public static class MigrationErrorCodes
     /// </remarks>
     public const string Permission = "MIG-ERR-PERMISSION";
 
+    /// <summary>MIG-ERR-SIGNOFF-SOD (HTTP 403).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): mig.Signoff.approve, mig.Signoff.reject, mig.Signoff.waive.</para>
+    /// </remarks>
+    public const string SignoffSod = "MIG-ERR-SIGNOFF-SOD";
+
+    /// <summary>MIG-ERR-SIGNOFF-STALE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): mig.Signoff.approve, mig.Signoff.reject.</para>
+    /// </remarks>
+    public const string SignoffStale = "MIG-ERR-SIGNOFF-STALE";
+
     /// <summary>MIG-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): mig.Recon.loadControlTotals, mig.Recon.results, mig.Recon.run.</para>
+    /// <para>Declared by 8 operation(s): mig.Recon.loadControlTotals, mig.Recon.results, mig.Recon.run, mig.Signoff.approve, mig.Signoff.reject, mig.Signoff.request, mig.Signoff.status, mig.Signoff.waive.</para>
     /// </remarks>
     public const string Validation = "MIG-ERR-VALIDATION";
 
@@ -78,13 +96,14 @@ public static class MigrationErrorCodes
     public const string Prefix = "MIG-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AmbiguousKey, ApprovalRequired, Dependency, DryrunRequired, IdempotencyMismatch, LegacyUnavailable, LegalHold, NotFound, Permission, Validation, XrefConflict];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AmbiguousKey, ApprovalRequired, BatchState, Dependency, DryrunRequired, IdempotencyMismatch, LegacyUnavailable, LegalHold, NotFound, Permission, SignoffSod, SignoffStale, Validation, XrefConflict];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
     {
         [AmbiguousKey] = 422,
         [ApprovalRequired] = 422,
+        [BatchState] = 409,
         [Dependency] = 422,
         [DryrunRequired] = 422,
         [IdempotencyMismatch] = 409,
@@ -92,6 +111,8 @@ public static class MigrationErrorCodes
         [LegalHold] = 422,
         [NotFound] = 404,
         [Permission] = 403,
+        [SignoffSod] = 403,
+        [SignoffStale] = 409,
         [Validation] = 422,
         [XrefConflict] = 409,
     };

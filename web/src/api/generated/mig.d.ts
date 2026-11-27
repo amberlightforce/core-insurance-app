@@ -576,6 +576,116 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/mig/v1/signoff/waive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Waive reconciliation variances
+         * @description Waive reconciliation variances
+         *
+         *     Inputs: run id, variance keys, reason. Outputs: the waived keys. A waiver binds to the run; a newer run needs its own. The person who ran the reconciliation or loaded the control totals cannot waive.
+         */
+        post: operations["mig.Signoff.waive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/signoff/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Request wave sign-off
+         * @description Request wave sign-off
+         *
+         *     Inputs: scope. Outputs: the sign-off with one open approval per named signatory (finance controller, compliance officer, migration lead), bound to the latest reconciliation run of the scope and a hash of its result rows.
+         */
+        post: operations["mig.Signoff.request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/signoff/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve as a signatory
+         * @description Approve as a signatory
+         *
+         *     Inputs: sign-off id, signatory, comment. Outputs: the sign-off status. Refused when the run or its results changed since the request, and for the person who ran the reconciliation or loaded the control totals.
+         */
+        post: operations["mig.Signoff.approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/signoff/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reject as a signatory
+         * @description Reject as a signatory
+         *
+         *     Inputs: sign-off id, signatory, comment. Outputs: the sign-off status. A rejection blocks the wave close until a new sign-off is requested.
+         */
+        post: operations["mig.Signoff.reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/signoff/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Wave sign-off status
+         * @description Wave sign-off status
+         *
+         *     Inputs: scope. Outputs: whether the wave may close (ready) and the blockers: no sign-off, a newer reconciliation run, changed results, unwaived variances, missing or rejected signatories.
+         */
+        get: operations["mig.Signoff.status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -923,6 +1033,54 @@ export interface components {
             /** @description Keys (module/objectType/key/currency) of the figures that did not match. */
             variances: string[];
             results: components["schemas"]["ReconResult"][];
+        };
+        SignoffWaiveRequest: {
+            runId: components["schemas"]["Uuid"];
+            /** @description Variance keys (module/objectType/key/currency) of that run. */
+            varianceKeys: string[];
+            reason: string;
+        };
+        SignoffWaiveResponse: {
+            runId: components["schemas"]["Uuid"];
+            waived: string[];
+        };
+        SignoffRequestRequest: {
+            scope?: string | null;
+        };
+        SignoffDecisionRequest: {
+            signoffId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            signatory: "FINANCE_CONTROLLER" | "COMPLIANCE_OFFICER" | "MIGRATION_LEAD";
+            comment?: string | null;
+        };
+        SignoffSignatory: {
+            /** @enum {string} */
+            signatory: "FINANCE_CONTROLLER" | "COMPLIANCE_OFFICER" | "MIGRATION_LEAD";
+            /** @enum {string} */
+            status: "PENDING" | "APPROVED" | "REJECTED";
+            decidedBy?: string | null;
+            /** Format: date-time */
+            decidedAt?: string | null;
+            comment?: string | null;
+        };
+        /** @description The sign-off of a scope. ready is true when the wave may close; blockers lists why it may not. */
+        SignoffStatus: {
+            /** @description The current sign-off, when one was requested. */
+            signoffId?: components["schemas"]["Uuid"];
+            scope: string;
+            /** @description The reconciliation run the sign-off is bound to. */
+            runId?: components["schemas"]["Uuid"];
+            /** @description The latest reconciliation run of the scope. */
+            latestRunId?: components["schemas"]["Uuid"];
+            resultsHash?: string | null;
+            green: boolean;
+            variances: string[];
+            waivedVariances: string[];
+            requestedBy?: string | null;
+            ready: boolean;
+            /** @description NO_SIGNOFF, NO_RUN, NEWER_RUN, RESULTS_CHANGED, UNWAIVED_VARIANCES, SIGNATORY_PENDING:<role>, SIGNATORY_REJECTED:<role> */
+            blockers: string[];
+            signatories: components["schemas"]["SignoffSignatory"][];
         };
         /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
         Uuid: string;
@@ -2191,6 +2349,219 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReconReport"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Signoff.waive": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignoffWaiveRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignoffWaiveResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Signoff.request": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignoffRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignoffStatus"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Signoff.approve": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignoffDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignoffStatus"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Signoff.reject": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignoffDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignoffStatus"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Signoff.status": {
+        parameters: {
+            query?: {
+                /** @description Control-total scope (default 'default'). */
+                scope?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignoffStatus"];
                 };
             };
             400: components["responses"]["BadRequest"];

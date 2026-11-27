@@ -934,7 +934,7 @@
 
 .cardFact {
   display: grid;
-  grid-template-columns: minmax(120px, 40%) 1fr;
+  grid-template-columns: minmax(120px, 40%) minmax(0, 1fr);
   gap: var(--space-2);
 }
 
@@ -945,7 +945,14 @@
 
 .cardFact dd {
   min-inline-size: 0;
+  overflow-wrap: anywhere;
   margin: var(--space-0);
+}
+
+/* In a card the value wraps instead of truncating (a long coverage name must stay inside the card). */
+.cardFact dd .truncate {
+  display: block;
+  white-space: normal;
 }
 
 @media (forced-colors: active) {

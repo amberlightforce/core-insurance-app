@@ -76,7 +76,7 @@ public static class FinanceErrorCodes
 
     /// <summary>FIN-ERR-PERIOD-LOCKED (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): fin.Fx.revalue, fin.Fx.runs, fin.Fx.translate, fin.Import.reverseBatch, fin.Journal.reverse.</para>
+    /// <para>Declared by 6 operation(s): fin.Earning.run, fin.Fx.revalue, fin.Fx.runs, fin.Fx.translate, fin.Import.reverseBatch, fin.Journal.reverse.</para>
     /// </remarks>
     public const string PeriodLocked = "FIN-ERR-PERIOD-LOCKED";
 
