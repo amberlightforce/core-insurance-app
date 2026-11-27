@@ -53,9 +53,12 @@ internal static class ContractSupport
         return rows.Count == 0 ? null : rows[0];
     }
 
-    /// <summary>The contract's current (known) version, tracked.</summary>
+    /// <summary>
+    /// The contract's base version (version 1, the one that goes through create, submit and approve), tracked. Endorsements
+    /// (version 2 and up) are resolved with <see cref="ContractVersions"/>.
+    /// </summary>
     public static Task<ContractVersionRow> CurrentVersionAsync(ReinsuranceDbContext db, RiContractId contractId, CancellationToken cancellationToken) =>
-        db.Versions.SingleAsync(v => v.ContractId == contractId && v.KnownTo == null, cancellationToken);
+        db.Versions.SingleAsync(v => v.ContractId == contractId && v.VersionNo == 1, cancellationToken);
 
     /// <summary>The business content of <paramref name="version"/> as stored (the current revision of its child rows).</summary>
     public static async Task<ContractContent> ReadContentAsync(ReinsuranceDbContext db, ContractRow contract, ContractVersionRow version, CancellationToken cancellationToken)
@@ -173,8 +176,8 @@ internal static class ContractSupport
             VersionNo = version.VersionNo,
             ValidFrom = StartOf(version.ValidFrom, zone),
             RecordVersion = contract.RecordVersion,
-            Maker = contract.CreatedBy,
-            ApprovalRequestId = contract.ApprovalRequestId is { } request ? new ApprovalRequestId(request) : null,
+            Maker = version.VersionNo > 1 ? version.CreatedBy : contract.CreatedBy,
+            ApprovalRequestId = (version.VersionNo > 1 ? version.ApprovalRequestId : contract.ApprovalRequestId) is { } request ? new ApprovalRequestId(request) : null,
             CreatedAt = contract.CreatedAt,
             ActivatedAt = contract.ActivatedAt,
         };

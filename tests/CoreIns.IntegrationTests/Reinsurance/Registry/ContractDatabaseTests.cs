@@ -195,23 +195,27 @@ public sealed class ContractDatabaseTests(PostgresFixture database) : IClassFixt
     }
 
     [Fact]
-    public async Task REQ_RI_057_The_valid_period_per_contract_cannot_overlap_among_current_versions()
+    public async Task BO_RI_03_A_version_beyond_the_first_is_a_pending_endorsement_and_the_version_number_is_unique()
     {
         var (slice, id, app) = await ActiveContractAsync();
         await using var _ = slice;
         await using var __ = app;
-        string Version(string from, string to, int no, string knownTo) =>
+        string Version(int no, string status) =>
             $"""
-            INSERT INTO ri.contract_version (version_id, contract_id, version_no, valid_from, valid_to, known_from, known_to, content_rev, placed_pct, content_hash, created_at, created_by)
-            VALUES (gen_random_uuid(), '{id}', {no}, '{from}', '{to}', now() - interval '1 hour', {knownTo}, 1, 100, repeat('a', 64), now(), 'USER:test')
+            INSERT INTO ri.contract_version (version_id, contract_id, version_no, valid_from, valid_to, known_from, content_rev, placed_pct, content_hash, created_at, created_by, endorsement_status)
+            VALUES (gen_random_uuid(), '{id}', {no}, '2026-06-01', '2027-01-01', now(), 1, 100, repeat('a', 64), now(), 'USER:test', {status})
             """;
 
-        var overlap = await Should.ThrowAsync<PostgresException>(() => slice.ExecuteAsync(Version("2026-06-01", "2026-12-01", 2, "NULL")));
-        overlap.SqlState.ShouldBe(PostgresErrorCodes.ExclusionViolation);
-        overlap.ConstraintName.ShouldBe("ex_contract_version_period");
+        // Only an endorsement (version 2 and up) carries an endorsement status, and it starts PENDING.
+        var noStatus = await Should.ThrowAsync<PostgresException>(() => slice.ExecuteAsync(Version(2, "NULL")));
+        noStatus.SqlState.ShouldBe(PostgresErrorCodes.InsufficientPrivilege);
+        var approvedAtBirth = await Should.ThrowAsync<PostgresException>(() => slice.ExecuteAsync(Version(2, "'APPROVED'")));
+        approvedAtBirth.SqlState.ShouldBe(PostgresErrorCodes.InsufficientPrivilege);
+        var firstWithStatus = await Should.ThrowAsync<PostgresException>(() => slice.ExecuteAsync(Version(1, "'PENDING'")));
+        firstWithStatus.SqlState.ShouldBe(PostgresErrorCodes.CheckViolation);
 
-        // A superseded (known_to set) version may overlap, and an adjacent current period is fine: [2027-01-01, …) meets [2026-01-01, 2027-01-01).
-        await slice.ExecuteAsync(Version("2026-06-01", "2026-12-01", 3, "now() - interval '30 minutes'"));
-        await slice.ExecuteAsync(Version("2027-01-01", "2028-01-01", 4, "NULL"));
+        await slice.ExecuteAsync(Version(2, "'PENDING'"));
+        var repeated = await Should.ThrowAsync<PostgresException>(() => slice.ExecuteAsync(Version(2, "'PENDING'")));
+        repeated.ConstraintName.ShouldBe("ux_contract_version_no");
     }
 }

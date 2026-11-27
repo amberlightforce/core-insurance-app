@@ -1,6 +1,6 @@
 import { CalendarDate, CalendarDateTime, getDayOfWeek } from '@internationalized/date';
 import { screen, within } from '@testing-library/react';
-import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 
 import i18n from '../../../i18n';
 import { expectNoA11yViolations } from '../../../test/axe';
@@ -10,6 +10,14 @@ import { DateField, DatePicker, DateTimePicker } from './DatePicker';
 import { DateRangePicker } from './DateRangePicker';
 
 // Wednesday 7 October 2026.
+// Pin the clock for every test: the calendar opens on the real current month otherwise.
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-07T09:00:00Z') });
+});
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 const today = new CalendarDate(2026, 10, 7);
 
 function segments(group: HTMLElement) {

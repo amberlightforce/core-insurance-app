@@ -36,7 +36,15 @@ internal sealed class RecoveryBooker(ReinsuranceDbContext db, IClock clock, IEve
     private static readonly JsonSerializerOptions TraceJson = new(JsonSerializerDefaults.Web);
 
     /// <summary>Recalculates <paramref name="contractId"/>; returns the number of delta rows booked (0 when nothing changed).</summary>
-    public async Task<int> RecalculateAsync(Guid contractId, Guid triggerClaimId, Guid sourceEventId, CancellationToken cancellationToken)
+    public async Task<int> RecalculateAsync(Guid contractId, Guid triggerClaimId, Guid sourceEventId, CancellationToken cancellationToken) =>
+        (await RecalculateBatchAsync(contractId, triggerClaimId, sourceEventId, forceBatch: false, cancellationToken).ConfigureAwait(false)).Rows;
+
+    /// <summary>
+    /// The full restatement of the contract year (BO-RI-08, D-SL4-19). Same as <see cref="RecalculateAsync"/>, but returns the batch;
+    /// <paramref name="forceBatch"/> writes the (sealed, possibly row-less) batch with its trace even when nothing changed, so an
+    /// explicit recalculation always has a batch id to cite. Claims linked into an occurrence count as one occurrence.
+    /// </summary>
+    public async Task<RecalculationResult> RecalculateBatchAsync(Guid contractId, Guid triggerClaimId, Guid sourceEventId, bool forceBatch, CancellationToken cancellationToken)
     {
         await db.Database.ExecuteSqlRawAsync(
             "SELECT pg_advisory_xact_lock(hashtextextended(@k, 0))", [new NpgsqlParameter("k", "ri:recovery:" + contractId.ToString("D"))], cancellationToken)
@@ -46,10 +54,10 @@ internal sealed class RecoveryBooker(ReinsuranceDbContext db, IClock clock, IEve
         var contract = await db.Contracts.AsNoTracking().SingleOrDefaultAsync(c => c.ContractId == id, cancellationToken).ConfigureAwait(false);
         if (contract is null)
         {
-            return 0;
+            return new RecalculationResult(null, 0, "CONTRACT_NOT_FOUND");
         }
 
-        var version = await db.Versions.AsNoTracking().SingleAsync(v => v.ContractId == id && v.KnownTo == null, cancellationToken).ConfigureAwait(false);
+        var version = await db.Versions.AsNoTracking().SingleAsync(v => v.ContractId == id && v.VersionNo == 1, cancellationToken).ConfigureAwait(false);
         var content = await ContractSupport.ReadContentAsync(db, contract, version, cancellationToken).ConfigureAwait(false);
         var layerRows = await db.Layers.AsNoTracking().Where(l => l.VersionId == version.VersionId && l.Rev == version.ContentRev)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -59,8 +67,7 @@ internal sealed class RecoveryBooker(ReinsuranceDbContext db, IClock clock, IEve
         var views = await db.ClaimViews.AsNoTracking().Where(v => claimIds.Contains(v.ClaimId)).ToDictionaryAsync(v => v.ClaimId, cancellationToken).ConfigureAwait(false);
         var amounts = await db.ClaimAmounts.AsNoTracking().Where(a => claimIds.Contains(a.ClaimId)).ToListAsync(cancellationToken).ConfigureAwait(false);
 
-        var occurrences = new List<RecoveryOccurrence>();
-        var lobByClaim = new Dictionary<Guid, string>();
+        var perClaim = new List<(Guid ClaimId, DateOnly LossDate, ClaimAmounts Amounts, string Lob)>();
         foreach (var group in exposures.GroupBy(e => e.ClaimId))
         {
             if (!views.TryGetValue(group.Key, out var view) || view.LossDate is not { } lossDate)
@@ -70,8 +77,23 @@ internal sealed class RecoveryBooker(ReinsuranceDbContext db, IClock clock, IEve
 
             var exposureIds = group.Select(e => e.ExposureId).ToHashSet();
             var lines = amounts.Where(a => a.ClaimId == group.Key && exposureIds.Contains(a.ExposureId)).ToList();
-            occurrences.Add(new RecoveryOccurrence(group.Key.ToString("D"), lossDate.Value, ClaimAmountsOf(lines, view.Closed)));
-            lobByClaim[group.Key] = group.Select(e => e.SiiLob).FirstOrDefault(l => !string.IsNullOrEmpty(l)) ?? UnmappedLob;
+            perClaim.Add((group.Key, lossDate.Value, ClaimAmountsOf(lines, view.Closed), group.Select(e => e.SiiLob).FirstOrDefault(l => !string.IsNullOrEmpty(l)) ?? UnmappedLob));
+        }
+
+        // Claims linked into one occurrence (ri.occurrence) are one occurrence for the layers: amounts add up, the earliest loss date
+        // counts, and the rows are booked on the occurrence's representative claim (the smallest claim id). Unlinking moves the
+        // claims apart again and the next restatement books the difference.
+        var active = await db.OccurrenceClaims.AsNoTracking().Where(l => claimIds.Contains(l.ClaimId) && l.UnlinkedAt == null)
+            .ToDictionaryAsync(l => l.ClaimId, l => l.OccurrenceId, cancellationToken).ConfigureAwait(false);
+        var occurrences = new List<RecoveryOccurrence>();
+        var lobByClaim = new Dictionary<Guid, string>();
+        foreach (var group in perClaim.GroupBy(c => active.TryGetValue(c.ClaimId, out var occurrenceId) ? occurrenceId : c.ClaimId))
+        {
+            var members = group.OrderBy(m => m.ClaimId).ToList();
+            var representative = members[0];
+            occurrences.Add(new RecoveryOccurrence(
+                representative.ClaimId.ToString("D"), members.Min(m => m.LossDate), members.Count == 1 ? representative.Amounts : Merge(members.Select(m => m.Amounts))));
+            lobByClaim[representative.ClaimId] = representative.Lob;
         }
 
         var terms = new ContractTerms(
@@ -101,13 +123,13 @@ internal sealed class RecoveryBooker(ReinsuranceDbContext db, IClock clock, IEve
                 SourceEventId = sourceEventId, RecordedAt = clock.Now,
             });
             await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            return 0;
+            return new RecalculationResult(null, 0, "ENGINE_REFUSED:" + string.Join("; ", outcome.Errors.Select(e => e.Code + ": " + e.Message)));
         }
 
         var result = outcome.Result!;
-        if (result.Deltas.Count == 0)
+        if (result.Deltas.Count == 0 && !forceBatch)
         {
-            return 0;
+            return new RecalculationResult(null, 0, null);
         }
 
         var layerById = layerRows.ToDictionary(l => l.LayerId.ToString("D"), l => l);
@@ -135,8 +157,21 @@ internal sealed class RecoveryBooker(ReinsuranceDbContext db, IClock clock, IEve
 
         db.Recoveries.AddRange(rows);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        Publish(contract, batchId, rows, sourceEventId);
-        return rows.Count;
+        if (rows.Count > 0)
+        {
+            Publish(contract, batchId, rows, sourceEventId);
+        }
+
+        return new RecalculationResult(batchId, rows.Count, null);
+    }
+
+    private static ClaimAmounts Merge(IEnumerable<ClaimAmounts> parts)
+    {
+        var list = parts.ToList();
+        return new ClaimAmounts(
+            list.Sum(a => a.IndemnityPaid), list.Sum(a => a.IndemnityOpen), list.Sum(a => a.AlaePaid), list.Sum(a => a.AlaeOpen),
+            list.Sum(a => a.InterestPaid), list.Sum(a => a.InterestOpen), list.Sum(a => a.RealisedRecoveries), list.Sum(a => a.OpenRecoveryReserve),
+            list.All(a => a.Closed));
     }
 
     private static ClaimAmounts ClaimAmountsOf(List<ClaimAmountRow> lines, bool closed)
@@ -151,7 +186,7 @@ internal sealed class RecoveryBooker(ReinsuranceDbContext db, IClock clock, IEve
     }
 
     /// <summary>Signed lines are percentages of the whole market, like the placed percentage; the engine wants fractions of the placed cover that sum to exactly 1 (the lead takes the residue).</summary>
-    private static List<Participation> Participations(ContractContent content)
+    internal static List<Participation> Participations(ContractContent content)
     {
         var placed = content.PlacedPct;
         var follow = content.Lines.Where(l => !l.Lead).Select(l => (l.ReinsurerPartyId, Share: decimal.Round(l.SignedLinePct / placed, 12, MidpointRounding.ToZero))).ToList();
@@ -231,3 +266,6 @@ internal sealed class RecoveryBooker(ReinsuranceDbContext db, IClock clock, IEve
         }
     }
 }
+
+/// <summary>Outcome of one restatement: the batch (null when nothing was booked and none was forced), the delta rows booked and a refusal reason (null = fine).</summary>
+internal sealed record RecalculationResult(Guid? BatchId, int Rows, string? Refusal);

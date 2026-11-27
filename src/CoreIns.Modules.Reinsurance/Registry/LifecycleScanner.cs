@@ -147,7 +147,7 @@ internal sealed partial class LifecycleScanner(
             due = await (
                     from c in db.Contracts.AsNoTracking()
                     join v in db.Versions.AsNoTracking() on c.ContractId equals v.ContractId
-                    where c.LegalEntityId == legalEntityId && v.KnownTo == null
+                    where c.LegalEntityId == legalEntityId && v.VersionNo == 1
                         && ((c.Status == "APPROVED" && v.ValidFrom <= today) || (c.Status == "ACTIVE" && v.ValidTo <= today))
                     orderby v.ValidFrom, c.ContractNumber
                     select c.ContractId)
