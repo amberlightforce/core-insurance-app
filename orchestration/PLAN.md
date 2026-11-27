@@ -1,3 +1,5 @@
+> **REFERENCE — not the active plan.** The original master plan (W1–W9). Execution moved to thin slices, then `NEXT-STEPS.md` (waves 1–5) and `build-out/` (waves 6–27). Current plans and the document map: [`README.md`](README.md).
+
 # PLAN — Greek-market P&C core insurance system
 
 **Status:** Phase 0 complete. **Awaiting approval before Phase 1.**

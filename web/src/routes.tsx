@@ -12,6 +12,7 @@ import {
   financeRoles,
   migrationRoles,
   packRoles,
+  productRoles,
   packRollbackReviewerRoles,
   reinsuranceRoles,
   underwritingRoles,
@@ -362,6 +363,24 @@ moduleRoutes.push(
   },
 );
 moduleRoutes.push({
+  path: 'products',
+  element: <RequireRole roles={productRoles} />,
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/products/ProductCataloguePage')).ProductCataloguePage,
+      }),
+    },
+    {
+      path: ':code',
+      lazy: async () => ({
+        Component: (await import('./modules/products/ProductDetailPage')).ProductDetailPage,
+      }),
+    },
+  ],
+});
+moduleRoutes.push({
   path: 'reinsurance',
   element: <RequireRole roles={reinsuranceRoles} />,
   children: [
@@ -490,6 +509,7 @@ const implemented = new Set([
   '/compliance/dsar',
   '/channels/withdrawals',
   '/policies/pack-rollback',
+  '/products',
   '/parties',
   '/policies',
   '/billing',

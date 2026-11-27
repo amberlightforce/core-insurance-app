@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # SL4-RI-REGISTRY recovery validation — 9 October 2026
 
 Recovered branch: `worktree-agent-a1fd0c774fb4c3051`, latest main `cbd1e68` merged after the integration fixes.
