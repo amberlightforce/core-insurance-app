@@ -17,6 +17,14 @@
           "Staff.Billing",
           "Platform.Admin"
         ],
+        "mkt.ConfigChangeRequest.create": ["Platform.ReleaseManager"],
+        "mkt.ConfigChangeRequest.update": ["Platform.ReleaseManager"],
+        "mkt.ConfigChangeRequest.submit": ["Platform.ReleaseManager"],
+        "mkt.ConfigChangeRequest.withdraw": ["Platform.ReleaseManager"],
+        "mkt.ConfigChangeRequest.approve": ["Platform.DesignAuthority"],
+        "mkt.ConfigChangeRequest.reject": ["Platform.DesignAuthority"],
+        "mkt.ConfigChangeRequest.list": ["Platform.ReleaseManager", "Platform.DesignAuthority", "Platform.Admin"],
+        "mkt.ConfigChangeRequest.get": ["Platform.ReleaseManager", "Platform.DesignAuthority", "Platform.Admin"],
         "mkt.Pack.list": [
           "Platform.ReleaseManager",
           "Platform.DesignAuthority",
@@ -54,6 +62,12 @@
           "Id": "mkt-pack-activation-illustrative",
           "Role": "Platform.DesignAuthority",
           "Type": "MKT_PACK_ACTIVATION",
+          "Illustrative": true
+        },
+        {
+          "Id": "mkt-config-change-illustrative",
+          "Role": "Platform.DesignAuthority",
+          "Type": "MKT_CONFIG_CHANGE",
           "Illustrative": true
         }
       ]

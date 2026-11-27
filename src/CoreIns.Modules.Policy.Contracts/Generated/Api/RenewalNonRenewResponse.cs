@@ -4,15 +4,83 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Renewal.nonRenew result. PRD outputs: "job"</summary>
+/// <summary>pol.Renewal.nonRenew result. PSR_REVIEW when the policyholder is vulnerable or unknown: nothing is sent until a person decides.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RenewalNonRenewResponse
 {
-    /// <summary>PRD: "job"</summary>
+    /// <summary>Contract member 'nonRenewalId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'nonRenewalId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("job")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("nonRenewalId")]
+    public required global::System.Guid NonRenewalId { get; init; }
+
+    /// <summary>Contract member 'termId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("termId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyTermId TermId { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Contract member 'reasonCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
+    public required string ReasonCode { get; init; }
+
+    /// <summary>The term end, when the non-renewal takes effect</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveAt")]
+    public required global::CoreIns.SharedKernel.Instant EffectiveAt { get; init; }
+
+    /// <summary>The latest moment the notice could be given (term end minus the notice period)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("noticeDeadline")]
+    public required global::CoreIns.SharedKernel.Instant NoticeDeadline { get; init; }
+
+    /// <summary>Contract member 'noticeDays'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("noticeDays")]
+    public required int NoticeDays { get; init; }
+
+    /// <summary>Legal status of the notice period value; Unverified and PendingOpinion are refused in Production (D-USR-19)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+    public required LegalStatusValue LegalStatus { get; init; }
+
+    /// <summary>The notice letter requested from DOC; absent while in PSR review or when DOC is not wired</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("noticeDocumentId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Job { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.DocumentId? NoticeDocumentId { get; init; }
+
+    /// <summary>Contract member 'recordedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordedAt")]
+    public required global::CoreIns.SharedKernel.Instant RecordedAt { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>NOTICE_REQUESTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NOTICE_REQUESTED")]
+        NoticeRequested,
+
+        /// <summary><c>PSR_REVIEW</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PSR_REVIEW")]
+        PsrReview,
+    }
+
+    /// <summary>Legal status of the notice period value; Unverified and PendingOpinion are refused in Production (D-USR-19)</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<LegalStatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum LegalStatusValue
+    {
+        /// <summary><c>Settled</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Settled")]
+        Settled,
+
+        /// <summary><c>Unverified</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Unverified")]
+        Unverified,
+
+        /// <summary><c>PendingOpinion</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PendingOpinion")]
+        PendingOpinion,
+    }
 }

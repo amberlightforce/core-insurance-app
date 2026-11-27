@@ -1606,20 +1606,66 @@ export interface components {
         /** @description rat.RatingArtifact.get result. PRD outputs: "manifest, status, compatibility records" */
         RatingArtifactGetResponse: {
             /** @description PRD: "manifest" */
-            manifest?: components["schemas"]["Unspecified"];
+            manifest?: components["schemas"]["RatingArtifactManifest"];
             /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            status?: components["schemas"]["RatingArtifactStatus"];
             /** @description PRD: "compatibility records" */
-            compatibilityRecords?: components["schemas"]["Unspecified"];
+            compatibilityRecords?: components["schemas"]["RatingArtifactCompatibilityRecord"][];
+        };
+        /** @description Contract addition (BO-RAT-04): the artefact manifest (REQ-RAT-061), pinning table hashes to a product version. */
+        RatingArtifactManifest: {
+            /** @description SHA-256 content hash of the artefact. */
+            artefactHash: string;
+            artefactCode: string;
+            label: string;
+            productCode: string;
+            productVersion: string;
+            engineVersion: string;
+            /** @description ILLUSTRATIVE_TEST_DATA or APPROVED (D-SLC-04). */
+            dataStatus: string;
+            stepCount: number;
+            tables: {
+                slot: string;
+                hash: string;
+            }[];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        /** @description Contract addition (BO-RAT-04): lifecycle status derived from the activation rows. DRAFT = no activation yet (hidden from roles that may only see released artefacts). */
+        RatingArtifactStatus: {
+            /** @enum {string} */
+            lifecycle: "DRAFT" | "SCHEDULED" | "ACTIVE" | "SUPERSEDED" | "WITHDRAWN";
+            /** Format: date */
+            effectiveFrom: string | null;
+            /** Format: date */
+            effectiveTo: string | null;
+            activations: {
+                activationId: string;
+                productVersion: string;
+                status: string;
+                /** Format: date */
+                effectiveFrom: string;
+                /** Format: date */
+                effectiveTo: string | null;
+            }[];
+        };
+        /** @description Contract addition (BO-RAT-04): whether the artefact is pinned to or activated for a product version. */
+        RatingArtifactCompatibilityRecord: {
+            productCode: string;
+            productVersion: string;
+            /** @enum {string} */
+            relation: "PINNED" | "ACTIVATED";
+            compatible: boolean;
+            reason: string | null;
         };
         /** @description rat.RatingArtifact.list result. PRD outputs: "manifest, status, compatibility records" */
         RatingArtifactListItem: {
             /** @description PRD: "manifest" */
-            manifest?: components["schemas"]["Unspecified"];
+            manifest?: components["schemas"]["RatingArtifactManifest"];
             /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            status?: components["schemas"]["RatingArtifactStatus"];
             /** @description PRD: "compatibility records" */
-            compatibilityRecords?: components["schemas"]["Unspecified"];
+            compatibilityRecords?: components["schemas"]["RatingArtifactCompatibilityRecord"][];
         };
         /** @description Page of rat.RatingArtifact.list results (cursor pagination, contract §3.5.5) */
         RatingArtifactListPage: components["schemas"]["PageEnvelope"] & {
@@ -1628,11 +1674,11 @@ export interface components {
         /** @description rat.RatingArtifact.compatibility result. PRD outputs: "manifest, status, compatibility records" */
         RatingArtifactCompatibilityResponse: {
             /** @description PRD: "manifest" */
-            manifest?: components["schemas"]["Unspecified"];
+            manifest?: components["schemas"]["RatingArtifactManifest"];
             /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            status?: components["schemas"]["RatingArtifactStatus"];
             /** @description PRD: "compatibility records" */
-            compatibilityRecords?: components["schemas"]["Unspecified"];
+            compatibilityRecords?: components["schemas"]["RatingArtifactCompatibilityRecord"][];
         };
         /** @description rat.RatingChangeSet.create request. PRD inputs: "file or rows, mapping, change set" */
         RatingChangeSetCreateRequest: {
@@ -3147,6 +3193,12 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description Contract addition (BO-RAT-04): filter by product code */
+                productCode?: string;
+                /** @description Contract addition (BO-RAT-04): filter by lifecycle status (DRAFT, SCHEDULED, ACTIVE, SUPERSEDED, WITHDRAWN) */
+                status?: string;
+                /** @description Contract addition (BO-RAT-04): ILLUSTRATIVE_TEST_DATA or APPROVED */
+                dataStatus?: string;
             };
             header?: {
                 /**
@@ -3179,7 +3231,12 @@ export interface operations {
     };
     "rat.RatingArtifact.compatibility": {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Contract addition (BO-RAT-04): hash of the artefact */
+                artefactHash: string;
+                /** @description Contract addition (BO-RAT-04): product version to check against (default: the pinned one) */
+                productVersion?: string;
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key

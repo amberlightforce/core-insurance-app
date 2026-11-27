@@ -59,6 +59,11 @@ internal sealed class DocumentsDbContext(DbContextOptions<DocumentsDbContext> op
             entity.HasIndex(e => new { e.LegalEntityId, e.TemplateKey, e.RequestNo }).IsUnique().HasDatabaseName("ux_document_request");
             entity.HasIndex(e => new { e.LegalEntityId, e.DocumentNumber }).IsUnique().HasDatabaseName("ux_document_number");
             entity.HasIndex(e => new { e.SubjectModule, e.SubjectType, e.SubjectId }).HasDatabaseName("ix_document_subject");
+
+            // Library search (BO-DOC-01): newest first within the legal entity, optionally narrowed by type or status.
+            entity.HasIndex(e => new { e.LegalEntityId, e.CreatedAt, e.DocumentNumber }).IsDescending(false, true, true).HasDatabaseName("ix_document_library");
+            entity.HasIndex(e => new { e.LegalEntityId, e.TemplateKey, e.CreatedAt }).HasDatabaseName("ix_document_library_type");
+            entity.HasIndex(e => new { e.LegalEntityId, e.Status, e.CreatedAt }).HasDatabaseName("ix_document_library_status");
         });
 
         modelBuilder.Entity<DeliveryRow>(entity =>

@@ -8,6 +8,16 @@ namespace CoreIns.Modules.Channels.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PermissionMatrixScheduleRequest
 {
+    /// <summary>Contract addition (BO-CHN-05): activation instant; omitted = now.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveFrom")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? EffectiveFrom { get; init; }
+
+    /// <summary>Contract addition (BO-CHN-05): the matrix draft acted on.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("matrixId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? MatrixId { get; init; }
+
     /// <summary>PRD: "version"</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>

@@ -19,7 +19,7 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("uw")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -270,6 +270,67 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.IssueTypeRow", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean")
+                        .HasColumnName("active");
+
+                    b.Property<string>("BlockingPoint")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("blocking_point");
+
+                    b.Property<string>("DefaultLane")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("default_lane");
+
+                    b.Property<string>("NameEl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name_el");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name_en");
+
+                    b.Property<int>("RecordVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("severity");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Code")
+                        .HasName("pk_issue_type");
+
+                    b.ToTable("issue_type", "uw", t =>
+                        {
+                            t.HasCheckConstraint("ck_issue_type_blocking", "blocking_point IN ('PRE_QUOTE', 'PRE_BIND', 'PRE_ISSUE', 'NON_BLOCKING')");
+
+                            t.HasCheckConstraint("ck_issue_type_lane", "default_lane IN ('STRAIGHT_THROUGH', 'ASSISTED', 'EXPERT')");
+
+                            t.HasCheckConstraint("ck_issue_type_severity", "severity IN ('REFER', 'DECLINE')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.RuleSetVersionRow", b =>
                 {
                     b.Property<string>("RuleSetCode")
@@ -279,6 +340,10 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                     b.Property<string>("VersionNo")
                         .HasColumnType("text")
                         .HasColumnName("version_no");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
 
                     b.Property<string>("Checkpoint")
                         .IsRequired()
@@ -304,6 +369,18 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("data_status");
 
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionReason")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_reason");
+
                     b.Property<string>("Definition")
                         .IsRequired()
                         .HasColumnType("jsonb")
@@ -318,10 +395,24 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("product_code");
 
+                    b.Property<int>("RecordVersion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("record_version");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("status");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
 
                     b.HasKey("RuleSetCode", "VersionNo")
                         .HasName("pk_rule_set_version");

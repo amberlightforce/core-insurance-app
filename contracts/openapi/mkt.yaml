@@ -342,6 +342,64 @@ paths:
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/mkt/v1/config-change-requests:
+    get:
+      operationId: mkt.ConfigChangeRequest.list
+      summary: Configuration change requests
+      description: |-
+        Configuration change requests
+
+        Lists change requests, newest first. Filter: status.
+      tags:
+      - ConfigChangeRequest
+      x-requirement:
+      - REQ-MKT-052..REQ-MKT-061
+      x-wave: W1
+      x-work-packages:
+      - BO-MKT-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.ConfigChangeRequest.list
+      x-error-codes:
+      - code: MKT-ERR-CFG-VALIDATION
+        note: 'unknown filter value'
+        status: 400
+      x-source:
+      - PRD-17 §9.1 l.1504
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: status
+        in: query
+        required: false
+        description: Status filter
+        schema:
+          type: string
+          enum: [DRAFT, PENDING_APPROVAL, APPLIED, REJECTED, WITHDRAWN]
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeRequestListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
     post:
       operationId: mkt.ConfigChangeRequest.create
       summary: Change workflow
@@ -404,6 +462,61 @@ paths:
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/mkt/v1/config-change-requests/{id}:
+    get:
+      operationId: mkt.ConfigChangeRequest.get
+      summary: Configuration change request
+      description: |-
+        Configuration change request
+
+        One configuration change request with its items.
+      tags:
+      - ConfigChangeRequest
+      x-requirement:
+      - REQ-MKT-052..REQ-MKT-061
+      x-wave: W1
+      x-work-packages:
+      - BO-MKT-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: mkt.ConfigChangeRequest.get
+      x-error-codes:
+      - code: MKT-ERR-CFG-VALIDATION
+        note: 'unknown filter value'
+        status: 400
+      x-source:
+      - PRD-17 §9.1 l.1504
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the ConfigChangeRequest
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigChangeRequestView'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
     patch:
       operationId: mkt.ConfigChangeRequest.update
       summary: Change workflow
@@ -3597,59 +3710,117 @@ components:
           description: 'PRD: "signed canonical JSON"'
     ConfigChangeRequestCreateRequest:
       type: object
-      description: 'mkt.ConfigChangeRequest.create request. PRD inputs: "request body / decision"'
-      x-status: minimal
+      description: 'mkt.ConfigChangeRequest.create request (BO-MKT-01). A DRAFT change of country-layer configuration values; only keys of the key registry are accepted.'
+      properties:
+        reason:
+          type: string
+          minLength: 10
+          maxLength: 128
+          description: Why the change is made (maker). No personal data.
+        items:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/ConfigChangeItemInput'
+      required:
+      - reason
+      - items
     ConfigChangeRequestCreateResponse:
       type: object
-      description: 'mkt.ConfigChangeRequest.create result. PRD outputs: "request"'
+      description: 'mkt.ConfigChangeRequest.create result: the request after the operation'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/ConfigChangeRequestView'
+      required:
+      - request
     ConfigChangeRequestUpdateRequest:
       type: object
-      description: 'mkt.ConfigChangeRequest.update request. PRD inputs: "request body / decision"'
-      x-status: minimal
+      description: 'mkt.ConfigChangeRequest.update request: replaces reason and/or items of a DRAFT request (maker only).'
+      properties:
+        reason:
+          type: string
+          minLength: 10
+          maxLength: 128
+        items:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/ConfigChangeItemInput'
     ConfigChangeRequestUpdateResponse:
       type: object
-      description: 'mkt.ConfigChangeRequest.update result. PRD outputs: "request"'
+      description: 'mkt.ConfigChangeRequest.update result: the request after the operation'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/ConfigChangeRequestView'
+      required:
+      - request
     ConfigChangeRequestSubmitRequest:
       type: object
-      description: 'mkt.ConfigChangeRequest.submit request. PRD inputs: "request body / decision"'
-      x-status: minimal
+      description: 'mkt.ConfigChangeRequest.submit request: freezes the DRAFT and asks for approval (maker only).'
+      properties:
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Reason of the maker or checker. No personal data.
+      required:
+      - requestId
     ConfigChangeRequestSubmitResponse:
       type: object
-      description: 'mkt.ConfigChangeRequest.submit result. PRD outputs: "request"'
+      description: 'mkt.ConfigChangeRequest.submit result: the request after the operation'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/ConfigChangeRequestView'
+      required:
+      - request
     ConfigChangeRequestApproveRequest:
       type: object
-      description: 'mkt.ConfigChangeRequest.approve request. PRD inputs: "request body / decision"'
-      x-status: minimal
+      description: 'mkt.ConfigChangeRequest.approve request: a checker other than the maker approves; the change is applied in the same transaction.'
+      properties:
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Reason of the maker or checker. No personal data.
+      required:
+      - requestId
+      - reason
     ConfigChangeRequestApproveResponse:
       type: object
-      description: 'mkt.ConfigChangeRequest.approve result. PRD outputs: "request"'
+      description: 'mkt.ConfigChangeRequest.approve result: the request after the operation'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/ConfigChangeRequestView'
+      required:
+      - request
     ConfigChangeRequestRejectRequest:
       type: object
-      description: 'mkt.ConfigChangeRequest.reject request. PRD inputs: "request body / decision"'
-      x-status: minimal
+      description: 'mkt.ConfigChangeRequest.reject request (checker).'
+      properties:
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Reason of the maker or checker. No personal data.
+      required:
+      - requestId
+      - reason
     ConfigChangeRequestRejectResponse:
       type: object
-      description: 'mkt.ConfigChangeRequest.reject result. PRD outputs: "request"'
+      description: 'mkt.ConfigChangeRequest.reject result: the request after the operation'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/ConfigChangeRequestView'
+      required:
+      - request
     ConfigChangeRequestScheduleRequest:
       type: object
       description: 'mkt.ConfigChangeRequest.schedule request. PRD inputs: "request body / decision"'
@@ -3663,15 +3834,26 @@ components:
           description: 'PRD: "request"'
     ConfigChangeRequestWithdrawRequest:
       type: object
-      description: 'mkt.ConfigChangeRequest.withdraw request. PRD inputs: "request body / decision"'
-      x-status: minimal
+      description: 'mkt.ConfigChangeRequest.withdraw request (maker only, DRAFT or PENDING_APPROVAL).'
+      properties:
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Reason of the maker or checker. No personal data.
+      required:
+      - requestId
+      - reason
     ConfigChangeRequestWithdrawResponse:
       type: object
-      description: 'mkt.ConfigChangeRequest.withdraw result. PRD outputs: "request"'
+      description: 'mkt.ConfigChangeRequest.withdraw result: the request after the operation'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/ConfigChangeRequestView'
+      required:
+      - request
     ConfigChangeRequestRebaseRequest:
       type: object
       description: 'mkt.ConfigChangeRequest.rebase request. PRD inputs: "request body / decision"'
@@ -4580,6 +4762,154 @@ components:
       - approvalRequestId
       - activatedAt
       - resultingHash
+    ConfigChangeItemInput:
+      type: object
+      description: One configuration value to set at the country layer of the legal entity's pack.
+      properties:
+        key:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: A key of the configuration key registry
+        value:
+          type: string
+          description: The value as text (decimals as strings, JSON as its text)
+        legalStatus:
+          type: string
+          enum: [NotRegulatory, Settled, PendingOpinion, Verify, Unverified, Uncertain, MarketPractice, Draft]
+          description: Legal status (D-REG-01). Anything but Settled or NotRegulatory is refused when the environment is Production (D-REG-02).
+        sourceRef:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Source of the value (required, D-REG-01)
+        motorPath:
+          type: boolean
+        validFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: First day the value no longer applies; null when open
+        note:
+          type:
+          - string
+          - 'null'
+          maxLength: 512
+      required:
+      - key
+      - value
+      - legalStatus
+      - sourceRef
+    ConfigChangeItemView:
+      type: object
+      properties:
+        key:
+          $ref: ../events/common.schema.json#/$defs/Code
+        value:
+          type: string
+        legalStatus:
+          type: string
+        sourceRef:
+          type: string
+        motorPath:
+          type: boolean
+        validFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+        note:
+          type:
+          - string
+          - 'null'
+      required:
+      - key
+      - value
+      - legalStatus
+      - sourceRef
+      - motorPath
+      - validFrom
+      - validTo
+      - note
+    ConfigChangeRequestView:
+      type: object
+      description: One configuration change request (BO-MKT-01).
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+          enum: [DRAFT, PENDING_APPROVAL, APPLIED, REJECTED, WITHDRAWN]
+        reason:
+          type: string
+        country:
+          type: string
+          description: Country layer the items apply to (from the legal entity's pack)
+        baseHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: Configuration state the request was written against
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigChangeItemView'
+        createdBy:
+          type: string
+          description: Maker, as an opaque principal reference
+        decidedBy:
+          type:
+          - string
+          - 'null'
+        decisionReason:
+          type:
+          - string
+          - 'null'
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        resultingHash:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Sha256
+          - type: 'null'
+          description: Configuration hash of the state the applied change produced; null until applied
+        appliedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordVersion:
+          type: integer
+      required:
+      - id
+      - status
+      - reason
+      - country
+      - baseHash
+      - items
+      - createdBy
+      - decidedBy
+      - decisionReason
+      - approvalRequestId
+      - resultingHash
+      - appliedAt
+      - createdAt
+      - recordVersion
+    ConfigChangeRequestListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ConfigChangeRequestView'
+      description: Page of mkt.ConfigChangeRequest.list results (cursor pagination, contract §3.5.5)
     PackActivationListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope

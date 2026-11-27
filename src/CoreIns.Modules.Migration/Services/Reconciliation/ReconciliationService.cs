@@ -80,7 +80,7 @@ internal sealed class ReconciliationService(
                 return DomainError.Of(ModuleCode.MIG, MigrationErrors.Validation, $"Control total {t.Module}/{t.ObjectType}: module, objectType, key, currency or count is not valid.");
             }
 
-            if (!decimal.TryParse(t.Amount, NumberStyles.Number, CultureInfo.InvariantCulture, out var amount) || decimal.Round(amount, 2) != amount)
+            if (!decimal.TryParse(t.Amount, NumberStyles.Number, CultureInfo.InvariantCulture, out var amount) || amount * 100m % 1m != 0m)
             {
                 return DomainError.Of(ModuleCode.MIG, MigrationErrors.Validation, $"Control total {module}/{t.ObjectType}/{currency}: amount must be a decimal with at most two decimals.");
             }

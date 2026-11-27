@@ -15,7 +15,9 @@
         "doc.DocumentType.list": [ "Staff.Billing", "Platform.Admin" ],
         "doc.Template.list": [ "Staff.Billing", "Platform.Admin" ],
         "doc.Clause.get": [ "Staff.Billing", "Platform.Admin" ],
-        "doc.Binding.resolve": [ "Staff.Billing", "Platform.Admin" ]
+        "doc.Binding.resolve": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.Document.preview": [ "Staff.Billing", "Platform.Admin" ],
+        "doc.Document.search": [ "Staff.Billing", "Platform.Admin" ]
       }
     }
   }

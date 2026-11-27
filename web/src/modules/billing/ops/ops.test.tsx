@@ -29,19 +29,16 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-const receipt = {
+const item = {
+  suspenseItemId: 's0000000-1111-4222-8333-000000000001',
   receiptId,
   receiptNumber: 'RC-0001',
   billingAccountId: account,
-  state: 'SUSPENSE',
-  channel: 'BANK',
-  method: 'BANK_TRANSFER',
+  state: 'OPEN',
   amount: { amount: '120.00', currency: 'EUR' },
-  allocated: { amount: '0.00', currency: 'EUR' },
-  unallocated: { amount: '120.00', currency: 'EUR' },
+  reason: 'AMOUNT_MISMATCH',
+  bankReference: 'BANK-REF-1',
   valueDate: '2026-10-05',
-  accountingDate: '2026-10-05',
-  suspenseReason: 'AMOUNT_MISMATCH',
   recordedAt: '2026-10-05T09:00:00Z',
 };
 
@@ -51,8 +48,8 @@ describe('suspense workbench', () => {
     mockApi([
       {
         method: 'GET',
-        path: '/api/bil/v1/billing-ops/suspense',
-        respond: () => ({ body: { items: [receipt], nextCursor: null, limit: 100 } }),
+        path: '/api/bil/v1/suspense',
+        respond: () => ({ body: { items: [item], nextCursor: null, limit: 100 } }),
       },
       {
         method: 'GET',
@@ -84,7 +81,7 @@ describe('suspense workbench', () => {
         path: '/api/bil/v1/allocations/allocate',
         respond: (request) => {
           posts.push({ body: request.body, key: request.headers.get('Idempotency-Key') });
-          return { body: { allocations: [], receipt } };
+          return { body: { allocations: [], receipt: item } };
         },
       },
     ]);
@@ -115,7 +112,7 @@ describe('suspense workbench', () => {
     mockApi([
       {
         method: 'GET',
-        path: '/api/bil/v1/billing-ops/suspense',
+        path: '/api/bil/v1/suspense',
         respond: () => ({ body: { items: [], nextCursor: null, limit: 100 } }),
       },
     ]);

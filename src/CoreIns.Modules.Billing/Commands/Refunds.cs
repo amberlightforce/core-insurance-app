@@ -414,48 +414,63 @@ internal sealed partial class RefundWorkflow(
 
         await SettleItemsAsync(netting, lines, now, cancellationToken).ConfigureAwait(false);
 
-        // REFUND_APPROVED (LA-02 → LA-12), one leg per refund line; FIN nets the refunds payable per refund id (rule set v3).
-        var sourceId = refund.RefundId.Value.ToString("D");
-        var rule = await ledger.RuleAsync(ledger.Key(EntryTypes.RefundApproved, RuleQualifiers.Any, RuleQualifiers.Any), cancellationToken).ConfigureAwait(false);
-        if (rule.IsFailure)
+        // BO-BIL-08: a refund to the sender of unapplied cash has no credit lines; it moves LA-11 → LA-12 instead.
+        var suspenseItem = await db.SuspenseItems.SingleOrDefaultAsync(
+            s => s.RefundId == refund.RefundId && s.State == SuspenseStates.RefundPending, cancellationToken).ConfigureAwait(false);
+        if (suspenseItem is not null)
         {
-            return rule.Error!;
+            var moved = await ApproveSuspenseRefundAsync(refund, suspenseItem, now, cancellationToken).ConfigureAwait(false);
+            if (moved.IsFailure)
+            {
+                return moved.Error!;
+            }
         }
 
-        var legs = lines.Select(l => new PostingLeg(
-            rule.Value,
-            new Money(l.Amount, currency),
-            new LineDimensions
-            {
-                BillingAccountId = refund.BillingAccountId,
-                PolicyId = l.PolicyId,
-                PolicyTermId = l.TermId,
-                TransactionId = l.TransactionId,
-                ChargeType = l.ChargeType,
-                ChargeCategory = l.ChargeCategory,
-                InvoiceId = l.CreditNoteId,
-                InvoiceItemId = l.CreditItemId,
-                SourceType = DisbursementCodes.RefundPayment,
-                SourceId = sourceId,
-                TransactionKind = TransactionKinds.Refund,
-            })).ToList();
-        var lineage = BusinessKeys.Empty.With("billingAccountId", refund.BillingAccountId.Value.ToString()).With("refundId", sourceId);
-        refund.ApprovedEntryId = ledger.Post(new EntrySpec(EntryTypes.RefundApproved, refund.BillingAccountId, legs, lineage, "bil.Refund.approve"));
-
+        var sourceId = refund.RefundId.Value.ToString("D");
         var keys = BusinessKeys.Empty.With("billingAccountId", refund.BillingAccountId.Value.ToString()).With("refundId", sourceId);
         var policyIds = lines.Select(l => l.PolicyId).Distinct().ToList();
-        events.Publish(new OutgoingEvent(
-            EventDescriptor.From(RefundApprovedV1.Descriptor), "BillingAccount", refund.BillingAccountId.Value.ToString(),
-            new RefundApprovedV1
+        if (suspenseItem is null)
+        {
+            // REFUND_APPROVED (LA-02 → LA-12), one leg per refund line; FIN nets the refunds payable per refund id (rule set v3).
+            var rule = await ledger.RuleAsync(ledger.Key(EntryTypes.RefundApproved, RuleQualifiers.Any, RuleQualifiers.Any), cancellationToken).ConfigureAwait(false);
+            if (rule.IsFailure)
             {
-                RefundId = refund.RefundId,
-                Amount = new Money(refund.Amount, currency),
-                PayeePartyId = refund.PayeePartyId,
-                PayoutMethod = refund.PayoutMethod,
-                SourceRefs = [.. lines.Select(l => ObjectRef.For(ModuleCode.BIL, "Invoice", l.CreditNoteId)).Distinct()],
-                DecisionMaker = RefundContent.ActorGuid(decidedBy ?? "SERVICE:bil-refund-rule"),
-            },
-            keys) { OccurredAt = now });
+                return rule.Error!;
+            }
+
+            var legs = lines.Select(l => new PostingLeg(
+                rule.Value,
+                new Money(l.Amount, currency),
+                new LineDimensions
+                {
+                    BillingAccountId = refund.BillingAccountId,
+                    PolicyId = l.PolicyId,
+                    PolicyTermId = l.TermId,
+                    TransactionId = l.TransactionId,
+                    ChargeType = l.ChargeType,
+                    ChargeCategory = l.ChargeCategory,
+                    InvoiceId = l.CreditNoteId,
+                    InvoiceItemId = l.CreditItemId,
+                    SourceType = DisbursementCodes.RefundPayment,
+                    SourceId = sourceId,
+                    TransactionKind = TransactionKinds.Refund,
+                })).ToList();
+            var lineage = BusinessKeys.Empty.With("billingAccountId", refund.BillingAccountId.Value.ToString()).With("refundId", sourceId);
+            refund.ApprovedEntryId = ledger.Post(new EntrySpec(EntryTypes.RefundApproved, refund.BillingAccountId, legs, lineage, "bil.Refund.approve"));
+
+            events.Publish(new OutgoingEvent(
+                EventDescriptor.From(RefundApprovedV1.Descriptor), "BillingAccount", refund.BillingAccountId.Value.ToString(),
+                new RefundApprovedV1
+                {
+                    RefundId = refund.RefundId,
+                    Amount = new Money(refund.Amount, currency),
+                    PayeePartyId = refund.PayeePartyId,
+                    PayoutMethod = refund.PayoutMethod,
+                    SourceRefs = [.. lines.Select(l => ObjectRef.For(ModuleCode.BIL, "Invoice", l.CreditNoteId)).Distinct()],
+                    DecisionMaker = RefundContent.ActorGuid(decidedBy ?? "SERVICE:bil-refund-rule"),
+                },
+                keys) { OccurredAt = now });
+        }
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         if (context.DryRun)
@@ -504,17 +519,20 @@ internal sealed partial class RefundWorkflow(
             // Paid at ISSUED, the date the money leaves (REQ-BIL-190, D-SL3-09).
             refund.State = Codes.Of(machine.FireOrThrow(Codes.Parse<StoredRefundState>(refund.State), RefundTrigger.Pay));
             refund.PaidAt = now;
-            events.Publish(new OutgoingEvent(
-                EventDescriptor.From(RefundDisbursedV1.Descriptor), "BillingAccount", refund.BillingAccountId.Value.ToString(),
-                new RefundDisbursedV1
-                {
-                    RefundId = refund.RefundId,
-                    DisbursementId = disbursement.DisbursementId,
-                    Amount = new Money(refund.Amount, currency),
-                    ValueDate = disbursement.ValueDate ?? ledger.Today,
-                    SourcePolicyIds = policyIds,
-                },
-                keys.With("disbursementId", disbursement.DisbursementId.Value.ToString())) { OccurredAt = now });
+            if (suspenseItem is null)
+            {
+                events.Publish(new OutgoingEvent(
+                    EventDescriptor.From(RefundDisbursedV1.Descriptor), "BillingAccount", refund.BillingAccountId.Value.ToString(),
+                    new RefundDisbursedV1
+                    {
+                        RefundId = refund.RefundId,
+                        DisbursementId = disbursement.DisbursementId,
+                        Amount = new Money(refund.Amount, currency),
+                        ValueDate = disbursement.ValueDate ?? ledger.Today,
+                        SourcePolicyIds = policyIds,
+                    },
+                    keys.With("disbursementId", disbursement.DisbursementId.Value.ToString())) { OccurredAt = now });
+            }
         }
 
         refund.RecordVersion++;
@@ -538,6 +556,13 @@ internal sealed partial class RefundWorkflow(
         refund.DecidedAt = now;
         refund.DecisionComment = comment;
         refund.RecordVersion++;
+        if (await db.SuspenseItems.SingleOrDefaultAsync(s => s.RefundId == refund.RefundId && s.State == SuspenseStates.RefundPending, cancellationToken).ConfigureAwait(false) is { } pending)
+        {
+            // BO-BIL-08: a rejected refund to the sender returns the unapplied cash to the workbench (the item stays linked to the rejected refund until a new request).
+            pending.State = SuspenseStates.Open;
+            pending.RecordVersion++;
+        }
+
         events.Publish(new OutgoingEvent(
             EventDescriptor.From(RefundRejectedV1.Descriptor), "BillingAccount", refund.BillingAccountId.Value.ToString(),
             new RefundRejectedV1 { RefundId = refund.RefundId, Reason = "APPROVER_REJECTED" },

@@ -2565,7 +2565,7 @@ export interface components {
             /** @description ISO 8601 period */
             duration: string;
             jurisdiction?: string;
-            /** @description VERIFIED, SECONDARY_SOURCE or ILLUSTRATIVE */
+            /** @description VERIFIED, SECONDARY_SOURCE, ILLUSTRATIVE or UNVERIFIED */
             legalStatus: string;
             /** @description Legal or PRD source */
             source?: string;
@@ -2586,7 +2586,7 @@ export interface components {
             /** @description ISO 8601 period */
             duration: string;
             jurisdiction?: string;
-            /** @description VERIFIED, SECONDARY_SOURCE or ILLUSTRATIVE */
+            /** @description VERIFIED, SECONDARY_SOURCE, ILLUSTRATIVE or UNVERIFIED */
             legalStatus: string;
             /** @description Legal or PRD source */
             source?: string;

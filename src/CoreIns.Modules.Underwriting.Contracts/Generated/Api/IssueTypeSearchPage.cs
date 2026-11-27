@@ -4,13 +4,13 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>Page of uw.IssueType.search results (cursor pagination, contract §3.5.5)</summary>
+/// <summary>Page of uw.IssueType.search results (cursor pagination, contract §3.5.5), ordered by code.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record IssueTypeSearchPage
 {
     /// <summary>Contract member 'items'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("items")]
-    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueTypeSearchItem> Items { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueTypeItem> Items { get; init; }
 
     /// <summary>Cursor of the next page, or null on the last page.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("nextCursor")]

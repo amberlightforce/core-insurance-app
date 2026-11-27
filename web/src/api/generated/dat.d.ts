@@ -1122,6 +1122,8 @@ export interface components {
         };
         /** @description dat.Query.asOf result. PRD outputs: "rows, as-of metadata, hash" */
         QueryAsOfResponse: {
+            /** @description Cursor of the next page, or null on the last page (BO-DAT-02 contract addition). */
+            nextCursor?: string | null;
             /** @description PRD: "rows" */
             rows?: components["schemas"]["Unspecified"][];
             /** @description PRD: "as-of metadata" */
@@ -1149,6 +1151,8 @@ export interface components {
         };
         /** @description dat.Population.aggregate result. PRD outputs: "rows or aggregates, snapshot hash" */
         PopulationAggregateResponse: {
+            /** @description Cursor of the next page, or null on the last page (BO-DAT-02 contract addition). */
+            nextCursor?: string | null;
             /** @description PRD: "rows or aggregates" */
             rowsOrAggregates?: components["schemas"]["Unspecified"];
             /** @description PRD: "snapshot hash" */
@@ -2114,6 +2118,10 @@ export interface operations {
     "dat.Query.asOf": {
         parameters: {
             query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
                 /**
                  * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
                  *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
@@ -2200,6 +2208,21 @@ export interface operations {
     "dat.Population.aggregate": {
         parameters: {
             query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+                /**
+                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
+                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
+                 */
+                knownAt?: components["parameters"]["KnownAt"];
                 /** @description PRD: "product/slot" */
                 productSlot?: string;
                 /** @description PRD: "as-of" */
@@ -2242,6 +2265,17 @@ export interface operations {
     "dat.Kpi.get": {
         parameters: {
             query?: {
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+                /**
+                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
+                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
+                 */
+                knownAt?: components["parameters"]["KnownAt"];
                 /** @description PRD: "KPI code" */
                 kpiCode?: string;
                 /** @description PRD: "filters" */

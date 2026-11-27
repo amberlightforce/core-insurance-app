@@ -1,7 +1,6 @@
 {
   "builder": { "kinds": { "RECOVERY_RESERVE": "Εφεδρεία ανάκτησης" } },
   "close": { "guard": { "open": "Άνοιγμα {number}" } },
-  "exposure": { "clocksNotTracked": "Νόμιμες προθεσμίες: δεν παρακολουθούνται (προσωρινό)" },
   "moneyx": {
     "recoveries": "Ανακτήσεις",
     "received": "Ανάκτηση · {type}",
