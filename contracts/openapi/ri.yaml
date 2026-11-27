@@ -5161,12 +5161,9 @@ paths:
   /api/ri/v1/statements/generate:
     post:
       operationId: ri.Statement.generate
-      summary: Statements
+      summary: Generate a reinsurer statement
       description: |-
-        Statements
-
-        PRD inputs: contract/counterparty, period, currency
-        PRD outputs: statement
+        Generate a reinsurer statement (BO-RI-14)
       tags:
       - Statement
       x-requirement:
@@ -5174,14 +5171,16 @@ paths:
       - REQ-RI-176..REQ-RI-179
       x-anchor:
       - REQ-RI-006
-      x-wave: unscheduled
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
       x-status: full
       x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Statement lifecycle writes; content is sealed at generation'
       x-exposure:
       - ui
       x-permission: ri.Statement.generate
@@ -5199,7 +5198,6 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -5228,12 +5226,9 @@ paths:
   /api/ri/v1/statements/submit:
     post:
       operationId: ri.Statement.submit
-      summary: Statements
+      summary: Submit a statement for approval
       description: |-
-        Statements
-
-        PRD inputs: contract/counterparty, period, currency
-        PRD outputs: statement
+        Submit a statement for approval (BO-RI-14)
       tags:
       - Statement
       x-requirement:
@@ -5241,14 +5236,16 @@ paths:
       - REQ-RI-176..REQ-RI-179
       x-anchor:
       - REQ-RI-006
-      x-wave: unscheduled
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
       x-status: full
       x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Statement lifecycle writes; content is sealed at generation'
       x-exposure:
       - ui
       x-permission: ri.Statement.submit
@@ -5266,7 +5263,6 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -5295,12 +5291,9 @@ paths:
   /api/ri/v1/statements/approve:
     post:
       operationId: ri.Statement.approve
-      summary: Statements
+      summary: Approve a statement
       description: |-
-        Statements
-
-        PRD inputs: contract/counterparty, period, currency
-        PRD outputs: statement
+        Approve a statement (BO-RI-14)
       tags:
       - Statement
       x-requirement:
@@ -5308,14 +5301,16 @@ paths:
       - REQ-RI-176..REQ-RI-179
       x-anchor:
       - REQ-RI-006
-      x-wave: unscheduled
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
       x-status: full
       x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Statement lifecycle writes; content is sealed at generation'
       x-exposure:
       - ui
       x-permission: ri.Statement.approve
@@ -5333,7 +5328,6 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -5362,12 +5356,9 @@ paths:
   /api/ri/v1/statements/issue:
     post:
       operationId: ri.Statement.issue
-      summary: Statements
+      summary: Issue a statement
       description: |-
-        Statements
-
-        PRD inputs: contract/counterparty, period, currency
-        PRD outputs: statement
+        Issue a statement (BO-RI-14)
       tags:
       - Statement
       x-requirement:
@@ -5375,14 +5366,16 @@ paths:
       - REQ-RI-176..REQ-RI-179
       x-anchor:
       - REQ-RI-006
-      x-wave: unscheduled
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
       x-status: full
       x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Statement lifecycle writes; content is sealed at generation'
       x-exposure:
       - ui
       x-permission: ri.Statement.issue
@@ -5400,7 +5393,6 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -5429,12 +5421,9 @@ paths:
   /api/ri/v1/statements/record-response:
     post:
       operationId: ri.Statement.recordResponse
-      summary: Statements
+      summary: Record the reinsurer response
       description: |-
-        Statements
-
-        PRD inputs: contract/counterparty, period, currency
-        PRD outputs: statement
+        Record the reinsurer response (BO-RI-14)
       tags:
       - Statement
       x-requirement:
@@ -5442,14 +5431,16 @@ paths:
       - REQ-RI-176..REQ-RI-179
       x-anchor:
       - REQ-RI-006
-      x-wave: unscheduled
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
       x-status: full
       x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Statement lifecycle writes; content is sealed at generation'
       x-exposure:
       - ui
       x-permission: ri.Statement.recordResponse
@@ -5467,7 +5458,6 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -5496,12 +5486,9 @@ paths:
   /api/ri/v1/statements/reissue:
     post:
       operationId: ri.Statement.reissue
-      summary: Statements
+      summary: Reissue a statement as a new version
       description: |-
-        Statements
-
-        PRD inputs: contract/counterparty, period, currency
-        PRD outputs: statement
+        Reissue a statement as a new version (BO-RI-14)
       tags:
       - Statement
       x-requirement:
@@ -5509,14 +5496,16 @@ paths:
       - REQ-RI-176..REQ-RI-179
       x-anchor:
       - REQ-RI-006
-      x-wave: unscheduled
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
       x-status: full
       x-maturity: pre-release
       x-io-shared: 6
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Statement lifecycle writes; content is sealed at generation'
       x-exposure:
       - ui
       x-permission: ri.Statement.reissue
@@ -5534,7 +5523,6 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -10367,126 +10355,278 @@ components:
         bordereau:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "bordereau"'
+    StatementLine:
+      type: object
+      description: One account item on a statement, copied at generation (BO-RI-14). Positive is payable to the reinsurer.
+      properties:
+        itemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          type: string
+          enum:
+          - CEDED_PREMIUM
+          - DEPOSIT_INSTALMENT
+          - PREMIUM_ADJUSTMENT
+          - COMMISSION
+          - RECOVERY
+        sourceKind:
+          $ref: ../events/common.schema.json#/$defs/Text
+        sourceId:
+          $ref: ../events/common.schema.json#/$defs/Text
+        itemDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - itemId
+      - contractId
+      - kind
+      - sourceKind
+      - sourceId
+      - itemDate
+      - amount
+    StatementView:
+      type: object
+      description: >-
+        Account statement of one reinsurer for one period and currency (BO-RI-14), built from the technical account items. Its lines, totals and content hash
+        are sealed at generation; only the workflow fields change. A correction is a reversal or adjustment item followed by a reissue, which creates the next
+        version and supersedes this one.
+      properties:
+        statementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        period:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Accounting period, yyyy-MM
+        currency:
+          $ref: ../events/common.schema.json#/$defs/Text
+        version:
+          type: integer
+        previousStatementId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - SUBMITTED
+          - APPROVED
+          - ISSUED
+          - AGREED
+          - DISPUTED
+          - SUPERSEDED
+        opening:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Balance of the earlier periods
+        premium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        commission:
+          $ref: ../events/common.schema.json#/$defs/Money
+        recoveries:
+          $ref: ../events/common.schema.json#/$defs/Money
+        movement:
+          $ref: ../events/common.schema.json#/$defs/Money
+        closing:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Opening plus movement; equals the closing of ri.Balance.report for the period
+        contentHash:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: SHA-256 of the sealed content (hex)
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatementLine'
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        createdBy:
+          $ref: ../events/common.schema.json#/$defs/Text
+        submittedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        submittedBy:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        approvedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        approvedBy:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        issuedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        issuedBy:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        response:
+          oneOf:
+          - type: string
+            enum:
+            - AGREED
+            - DISPUTED
+          - type: 'null'
+        responseReason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        respondedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        respondedBy:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        supersededBy:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+      required:
+      - statementId
+      - reinsurerPartyId
+      - period
+      - currency
+      - version
+      - status
+      - opening
+      - premium
+      - commission
+      - recoveries
+      - movement
+      - closing
+      - contentHash
+      - lines
+      - createdAt
+      - createdBy
     StatementGenerateRequest:
       type: object
-      description: 'ri.Statement.generate request. PRD inputs: "contract/counterparty, period, currency"'
+      description: ri.Statement.generate request. One statement per reinsurer, period and currency; an existing one is replaced only by a reissue.
       properties:
-        contractCounterparty:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract/counterparty"'
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: yyyy-MM
         currency:
-          $ref: ../events/common.schema.json#/$defs/CurrencyCode
-          description: 'PRD: "currency"'
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/CurrencyCode
+          - type: 'null'
+          description: EUR when omitted
+      required:
+      - reinsurerPartyId
+      - period
     StatementGenerateResponse:
       type: object
-      description: 'ri.Statement.generate result. PRD outputs: "statement"'
+      description: ri.Statement.generate result
       properties:
         statement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statement"'
+          $ref: '#/components/schemas/StatementView'
+      required:
+      - statement
     StatementSubmitRequest:
       type: object
-      description: 'ri.Statement.submit request. PRD inputs: "contract/counterparty, period, currency"'
+      description: ri.Statement.submit request. A DRAFT statement goes to the checker.
       properties:
-        contractCounterparty:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract/counterparty"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        currency:
-          $ref: ../events/common.schema.json#/$defs/CurrencyCode
-          description: 'PRD: "currency"'
+        statementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - statementId
     StatementSubmitResponse:
       type: object
-      description: 'ri.Statement.submit result. PRD outputs: "statement"'
+      description: ri.Statement.submit result
       properties:
         statement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statement"'
+          $ref: '#/components/schemas/StatementView'
+      required:
+      - statement
     StatementApproveRequest:
       type: object
-      description: 'ri.Statement.approve request. PRD inputs: "contract/counterparty, period, currency"'
+      description: ri.Statement.approve request. The checker is not the person who generated or submitted it (RI-ERR-SOD).
       properties:
-        contractCounterparty:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract/counterparty"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        currency:
-          $ref: ../events/common.schema.json#/$defs/CurrencyCode
-          description: 'PRD: "currency"'
+        statementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - statementId
     StatementApproveResponse:
       type: object
-      description: 'ri.Statement.approve result. PRD outputs: "statement"'
+      description: ri.Statement.approve result
       properties:
         statement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statement"'
+          $ref: '#/components/schemas/StatementView'
+      required:
+      - statement
     StatementIssueRequest:
       type: object
-      description: 'ri.Statement.issue request. PRD inputs: "contract/counterparty, period, currency"'
+      description: ri.Statement.issue request. An APPROVED statement is issued once; the content stays sealed.
       properties:
-        contractCounterparty:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract/counterparty"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        currency:
-          $ref: ../events/common.schema.json#/$defs/CurrencyCode
-          description: 'PRD: "currency"'
+        statementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - statementId
     StatementIssueResponse:
       type: object
-      description: 'ri.Statement.issue result. PRD outputs: "statement"'
+      description: ri.Statement.issue result
       properties:
         statement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statement"'
+          $ref: '#/components/schemas/StatementView'
+      required:
+      - statement
     StatementRecordResponseRequest:
       type: object
-      description: 'ri.Statement.recordResponse request. PRD inputs: "contract/counterparty, period, currency"'
+      description: ri.Statement.recordResponse request. The reinsurer agrees or disputes an ISSUED statement; both are audited with the reason.
       properties:
-        contractCounterparty:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract/counterparty"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        currency:
-          $ref: ../events/common.schema.json#/$defs/CurrencyCode
-          description: 'PRD: "currency"'
+        statementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        response:
+          type: string
+          enum:
+          - AGREED
+          - DISPUTED
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - statementId
+      - response
+      - reason
     StatementRecordResponseResponse:
       type: object
-      description: 'ri.Statement.recordResponse result. PRD outputs: "statement"'
+      description: ri.Statement.recordResponse result
       properties:
         statement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statement"'
+          $ref: '#/components/schemas/StatementView'
+      required:
+      - statement
     StatementReissueRequest:
       type: object
-      description: 'ri.Statement.reissue request. PRD inputs: "contract/counterparty, period, currency"'
+      description: >-
+        ri.Statement.reissue request. After a reversal or adjustment item, builds the next version from the current items, supersedes the issued or
+        disputed one and links back to it. Refused when nothing changed.
       properties:
-        contractCounterparty:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract/counterparty"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        currency:
-          $ref: ../events/common.schema.json#/$defs/CurrencyCode
-          description: 'PRD: "currency"'
+        statementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - statementId
+      - reason
     StatementReissueResponse:
       type: object
-      description: 'ri.Statement.reissue result. PRD outputs: "statement"'
+      description: ri.Statement.reissue result
       properties:
         statement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statement"'
+          $ref: '#/components/schemas/StatementView'
+      required:
+      - statement
     CashCallRaiseRequest:
       type: object
       description: 'ri.CashCall.raise request. PRD inputs: "occurrence, amounts"'

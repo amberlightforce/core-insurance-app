@@ -75,6 +75,9 @@ public static class ReinsuranceModule
                 $"GRANT SELECT, INSERT ON {Schema}.recovery_adjustment TO {appRole}",
                 // BO-RI-11: the technical account is append-only (SELECT, INSERT only).
                 $"GRANT SELECT, INSERT ON {Schema}.account_item TO {appRole}",
+                // BO-RI-14: statements move through their workflow (UPDATE; the content is sealed by a trigger), their lines are append-only.
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.statement TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.statement_line TO {appRole}",
             ]),
     ];
 
@@ -155,6 +158,26 @@ public static class ReinsuranceModule
         services.AddScoped<IValidator<ReverseItem>, ReverseItemValidator>();
         services.AddCommandAuditor<ReverseItem, ItemReverseResponse, ReverseItemAuditor>();
         services.AddCommand<ReverseItem, ItemReverseResponse, ReverseItemHandler>(CommandDescriptor.For("ri.Item.reverse"));
+
+        // BO-RI-14: reinsurer statements (sealed content, maker-checker, answer, reissue as a new version).
+        services.AddScoped<IValidator<GenerateStatement>, GenerateStatementValidator>();
+        services.AddCommandAuditor<GenerateStatement, StatementGenerateResponse, GenerateStatementAuditor>();
+        services.AddCommand<GenerateStatement, StatementGenerateResponse, GenerateStatementHandler>(CommandDescriptor.For("ri.Statement.generate"));
+        services.AddScoped<IValidator<SubmitStatement>, SubmitStatementValidator>();
+        services.AddCommandAuditor<SubmitStatement, StatementSubmitResponse, SubmitStatementAuditor>();
+        services.AddCommand<SubmitStatement, StatementSubmitResponse, SubmitStatementHandler>(CommandDescriptor.For("ri.Statement.submit"));
+        services.AddScoped<IValidator<ApproveStatement>, ApproveStatementValidator>();
+        services.AddCommandAuditor<ApproveStatement, StatementApproveResponse, ApproveStatementAuditor>();
+        services.AddCommand<ApproveStatement, StatementApproveResponse, ApproveStatementHandler>(CommandDescriptor.For("ri.Statement.approve"));
+        services.AddScoped<IValidator<IssueStatement>, IssueStatementValidator>();
+        services.AddCommandAuditor<IssueStatement, StatementIssueResponse, IssueStatementAuditor>();
+        services.AddCommand<IssueStatement, StatementIssueResponse, IssueStatementHandler>(CommandDescriptor.For("ri.Statement.issue"));
+        services.AddScoped<IValidator<RecordStatementResponse>, RecordStatementResponseValidator>();
+        services.AddCommandAuditor<RecordStatementResponse, StatementRecordResponseResponse, RecordStatementResponseAuditor>();
+        services.AddCommand<RecordStatementResponse, StatementRecordResponseResponse, RecordStatementResponseHandler>(CommandDescriptor.For("ri.Statement.recordResponse"));
+        services.AddScoped<IValidator<ReissueStatement>, ReissueStatementValidator>();
+        services.AddCommandAuditor<ReissueStatement, StatementReissueResponse, ReissueStatementAuditor>();
+        services.AddCommand<ReissueStatement, StatementReissueResponse, ReissueStatementHandler>(CommandDescriptor.For("ri.Statement.reissue"));
 
         // The scanner's per-contract command (internal, no HTTP; exactly-once by the row lock and the state it finds).
         services.AddCommandAuditor<ApplyDueLifecycle, string, ApplyDueLifecycleAuditor>();
