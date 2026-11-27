@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Suspense.refundToSender result. PRD outputs: "items, suggestions"</summary>
+/// <summary>bil.Suspense.refundToSender result: the item (REFUND_PENDING) and the refund waiting for approval</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SuspenseRefundToSenderResponse
 {
-    /// <summary>PRD: "items"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Items { get; init; }
+    /// <summary>Contract member 'item'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("item")]
+    public required global::CoreIns.Modules.Billing.Contracts.Api.SuspenseListItem Item { get; init; }
 
-    /// <summary>PRD: "suggestions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("suggestions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Suggestions { get; init; }
+    /// <summary>Contract member 'refund'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("refund")]
+    public required global::CoreIns.Modules.Billing.Contracts.Api.RefundView Refund { get; init; }
 }

@@ -69,8 +69,12 @@ internal sealed class FinanceOpsReader(DbSession session)
         var offset = Offset(cursor);
         var rows = (await connection.QueryAsync<PeriodRecord>(new CommandDefinition(
             """
-            SELECT period_code AS Period, status AS State FROM fin.financial_period
-             WHERE legal_entity_id = @le ORDER BY period_code DESC OFFSET @offset LIMIT @take
+            SELECT period AS Period, state AS State FROM (
+                SELECT period_code AS period, status AS state FROM fin.financial_period WHERE legal_entity_id = @le
+                UNION ALL
+                SELECT to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM'), 'OPEN'
+                 WHERE NOT EXISTS (SELECT 1 FROM fin.financial_period WHERE legal_entity_id = @le AND period_code = to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM'))
+            ) p ORDER BY period DESC OFFSET @offset LIMIT @take
             """, new { le = legalEntity.Value, offset, take = limit + 1 }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false))
             .Select(r => new PeriodRow(r.Period, r.State, r.State == "LOCKED")).ToList();
         return Page(rows, offset, limit);

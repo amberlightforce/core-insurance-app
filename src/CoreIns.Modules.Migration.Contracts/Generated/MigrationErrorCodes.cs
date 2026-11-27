@@ -34,7 +34,7 @@ public static class MigrationErrorCodes
 
     /// <summary>MIG-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 14 operation(s): mig.Archive.erase, mig.Archive.rectificationNote, mig.Archive.restrict, mig.Archive.subjectExport, mig.Batch.approve, mig.Batch.create, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start, mig.ImportContract.conformance, ….</para>
+    /// <para>Declared by 16 operation(s): mig.Archive.erase, mig.Archive.rectificationNote, mig.Archive.restrict, mig.Archive.subjectExport, mig.Batch.approve, mig.Batch.create, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start, mig.ImportContract.conformance, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "MIG-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -62,6 +62,12 @@ public static class MigrationErrorCodes
     /// </remarks>
     public const string Permission = "MIG-ERR-PERMISSION";
 
+    /// <summary>MIG-ERR-VALIDATION (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): mig.Recon.loadControlTotals, mig.Recon.results, mig.Recon.run.</para>
+    /// </remarks>
+    public const string Validation = "MIG-ERR-VALIDATION";
+
     /// <summary>MIG-ERR-XREF-CONFLICT (HTTP 409).</summary>
     /// <remarks>
     /// <para>Declared by 1 operation(s): mig.Xref.register.</para>
@@ -72,7 +78,7 @@ public static class MigrationErrorCodes
     public const string Prefix = "MIG-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AmbiguousKey, ApprovalRequired, Dependency, DryrunRequired, IdempotencyMismatch, LegacyUnavailable, LegalHold, NotFound, Permission, XrefConflict];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AmbiguousKey, ApprovalRequired, Dependency, DryrunRequired, IdempotencyMismatch, LegacyUnavailable, LegalHold, NotFound, Permission, Validation, XrefConflict];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -86,6 +92,7 @@ public static class MigrationErrorCodes
         [LegalHold] = 422,
         [NotFound] = 404,
         [Permission] = 403,
+        [Validation] = 422,
         [XrefConflict] = 409,
     };
 }

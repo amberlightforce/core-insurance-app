@@ -13,6 +13,9 @@ internal sealed class PartyOptions
     /// Greece pack "30"). Pack data: configured per stamp, never assumed in core. Empty = only E.164 input is accepted.
     /// </summary>
     public string DefaultCallingCode { get; set; } = string.Empty;
+
+    /// <summary>Most current members one account can have (BO-PTY-04).</summary>
+    public int AccountMemberLimit { get; set; } = 25;
 }
 
 /// <summary>Contact point normalisation (REQ-PTY-082 E.164, REQ-PTY-083 email syntax).</summary>

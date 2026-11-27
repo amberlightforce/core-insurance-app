@@ -4,39 +4,34 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.ProductVersion.schedule request. PRD inputs: "version, environment, activation time, reason"</summary>
+/// <summary>pfc.ProductVersion.schedule request (BO-PFC-04). Sets the windows of an approved change set; the version is locked and published on the activation date.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProductVersionScheduleRequest
 {
-    /// <summary>PRD: "version"</summary>
+    /// <summary>Contract member 'changeSetId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'changeSetId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Version { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("changeSetId")]
+    public required global::System.Guid ChangeSetId { get; init; }
 
-    /// <summary>PRD: "environment"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("environment")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Environment { get; init; }
+    /// <summary>Start of the new-business window (Athens business date). Today releases at once; a later date is scheduled.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("activationDate")]
+    public required string ActivationDate { get; init; }
 
-    /// <summary>PRD: "activation time"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("activationTime")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ActivationTime { get; init; }
+    /// <summary>End of the new-business window; null or absent for open</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("newBusinessTo")]
+    public string? NewBusinessTo { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Start of the renewal window; defaults to the activation date</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("renewalFrom")]
+    public string? RenewalFrom { get; init; }
+
+    /// <summary>Contract member 'renewalTo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("renewalTo")]
+    public string? RenewalTo { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public required string Reason { get; init; }
 }

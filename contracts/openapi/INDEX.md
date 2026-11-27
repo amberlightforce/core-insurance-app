@@ -23,9 +23,9 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [WRK](#wrk) | 58 | 23 | 35 | 40 | 18 | 9 | 3 | 14 |
 | [PLT](#plt) | 101 | 67 | 34 | 63 | 38 | 25 | 0 | 10 |
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
-| [MIG](#mig) | 22 | 22 | 0 | 14 | 8 | 5 | 0 | 13 |
+| [MIG](#mig) | 25 | 25 | 0 | 16 | 9 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 36 | 12 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1152 | 940 | 212 | 749 | 403 | 128 | 69 | 65 |
+| **Total** | 1155 | 943 | 212 | 751 | 404 | 128 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -1331,6 +1331,9 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `mig.Batch.start` | POST `/api/mig/v1/batches/start` | C |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
 | `mig.Enquiry.get` | GET `/api/mig/v1/enquiries/get` | Q |  | ui |  | W9 | full | REQ-MIG-152 |
 | `mig.ImportContract.conformance` | POST `/api/mig/v1/import-contracts/conformance` | C |  | ui |  | W9 | full | REQ-MIG-001 |
+| `mig.Recon.loadControlTotals` | POST `/api/mig/v1/reconciliation/control-totals/load` | C |  | ui |  | W9 | full | REQ-MIG-171..REQ-MIG-177 |
+| `mig.Recon.results` | GET `/api/mig/v1/reconciliation/results` | Q |  | ui |  | W9 | full | REQ-MIG-171..REQ-MIG-177 |
+| `mig.Recon.run` | POST `/api/mig/v1/reconciliation/run` | C |  | ui |  | W9 | full | REQ-MIG-171..REQ-MIG-177 |
 | `mig.Routing.override` | POST `/api/mig/v1/routing/override` | C | yes | ui |  | W9 | full | REQ-MIG-148 |
 | `mig.Routing.resolve` | POST `/api/mig/v1/routing/resolve` | Q |  | ui | BIL, CHN, CLM, CMP, DOC | W9 | full | REQ-MIG-004, REQ-MIG-149 |
 | `mig.Xref.list` | GET `/api/mig/v1/xrefs` | Q |  | ui |  | W9 | full | REQ-MIG-002 |

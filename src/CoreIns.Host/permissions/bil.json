@@ -42,6 +42,10 @@
         "bil.MigratedRecord.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
         // NX-UI-14c: suspense workbench list and plan instances for the billing operations screens.
         "bil.Suspense.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        // BO-BIL-08: suggest/transfer by billing staff; refund-to-sender only proposes a refund (a second person decides it with bil.Refund.decide).
+        "bil.Suspense.suggest": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.Suspense.transfer": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Suspense.refundToSender": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.PlanInstance.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ]
       }
     },

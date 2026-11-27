@@ -24,6 +24,7 @@ tags:
 - name: Batch
 - name: Archive
 - name: ImportContract
+- name: Recon
 paths:
   /api/mig/v1/xrefs/register:
     post:
@@ -1440,6 +1441,192 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/reconciliation/control-totals/load:
+    post:
+      operationId: mig.Recon.loadControlTotals
+      summary: Load legacy control totals
+      description: |-
+        Load legacy control totals
+
+        Inputs: scope, control totals per module, object type, currency. Outputs: loaded count. Reloading a scope replaces its figures.
+      tags:
+      - Recon
+      x-requirement:
+      - REQ-MIG-171..REQ-MIG-177
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-10: reconciliation is read-only on the modules and never supports dry run'
+      x-exposure:
+      - ui
+      x-permission: mig.Recon.loadControlTotals
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      x-source:
+      - BO-MIG-10
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReconLoadControlTotalsRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconLoadControlTotalsResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/reconciliation/run:
+    post:
+      operationId: mig.Recon.run
+      summary: Run reconciliation
+      description: |-
+        Run reconciliation
+
+        Inputs: scope, optional batch id. Outputs: run id, green flag, variance report. Reads the modules through their reconciliation readers; writes only the result rows.
+      tags:
+      - Recon
+      x-requirement:
+      - REQ-MIG-171..REQ-MIG-177
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-10: reconciliation is read-only on the modules and never supports dry run'
+      x-exposure:
+      - ui
+      x-permission: mig.Recon.run
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      x-source:
+      - BO-MIG-10
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReconRunRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconReport'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/reconciliation/results:
+    get:
+      operationId: mig.Recon.results
+      summary: Reconciliation results
+      description: |-
+        Reconciliation results
+
+        Inputs: run id or scope. Outputs: the run report with every compared figure and the variance keys.
+      tags:
+      - Recon
+      x-requirement:
+      - REQ-MIG-171..REQ-MIG-177
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-maturity: pre-release
+      x-bounded: 'A run holds one row per control-total figure of the scope (tens), not an open-ended list'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-10: reconciliation is read-only on the modules and never supports dry run'
+      x-exposure:
+      - ui
+      x-permission: mig.Recon.results
+      x-error-codes:
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      x-source:
+      - BO-MIG-10
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: runId
+        in: query
+        required: false
+        description: A reconciliation run; the latest run of the scope when omitted.
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: scope
+        in: query
+        required: false
+        description: Control-total scope (default 'default').
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconReport'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
 x-operation-families:
 - family: mig.Wave.*
   summary: Plan and run waves and cohorts
@@ -2096,3 +2283,114 @@ components:
         passFailPerContractElement:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "pass/fail per contract element"'
+    ReconControlTotal:
+      type: object
+      description: One legacy control total. Amount is exact to the minor unit of the currency.
+      properties:
+        module:
+          type: string
+          description: Module code of the importer, e.g. BIL, FIN, CLM, RI.
+        objectType:
+          type: string
+        key:
+          type: [string, 'null']
+          description: Optional sub-dimension (a ledger account code for FIN); empty for the whole object type.
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        count:
+          type: integer
+          format: int64
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+      required: [module, objectType, currency, count, amount]
+    ReconLoadControlTotalsRequest:
+      type: object
+      properties:
+        scope:
+          type: [string, 'null']
+          description: Names the wave or cut-over the totals belong to (default 'default').
+        totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReconControlTotal'
+      required: [totals]
+    ReconLoadControlTotalsResponse:
+      type: object
+      properties:
+        scope:
+          type: string
+        loaded:
+          type: integer
+          format: int32
+      required: [scope, loaded]
+    ReconRunRequest:
+      type: object
+      properties:
+        scope:
+          type: [string, 'null']
+        batchId:
+          description: Restrict the core side to one batch; omit to compare everything migrated.
+          $ref: ../events/common.schema.json#/$defs/Uuid
+    ReconResult:
+      type: object
+      description: One compared figure.
+      properties:
+        module:
+          type: string
+        objectType:
+          type: string
+        key:
+          type: string
+        currency:
+          type: string
+        legacyCount:
+          type: integer
+          format: int64
+        coreCount:
+          type: integer
+          format: int64
+        legacyAmount:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        coreAmount:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        countVariance:
+          type: integer
+          format: int64
+        amountVariance:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        status:
+          type: string
+          enum: [MATCH, VARIANCE, MISSING_CORE, MISSING_LEGACY]
+      required: [module, objectType, key, currency, legacyCount, coreCount, legacyAmount, coreAmount, countVariance, amountVariance, status]
+    ReconReport:
+      type: object
+      description: A reconciliation run. green is true when every figure matched; variances lists the keys that did not.
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        scope:
+          type: string
+        batchId:
+          description: Batch the core side was restricted to, when any.
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        runAt:
+          type: string
+          format: date-time
+        green:
+          type: boolean
+        matched:
+          type: integer
+          format: int32
+        varianceCount:
+          type: integer
+          format: int32
+        variances:
+          type: array
+          items:
+            type: string
+          description: Keys (module/objectType/key/currency) of the figures that did not match.
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReconResult'
+      required: [runId, scope, runAt, green, matched, varianceCount, variances, results]

@@ -214,6 +214,75 @@
     "ImportContractConformanceResponse": {
       "passFailPerContractElement": "unspecified"
     },
+    "ReconControlTotal": {
+      "module": "sample",
+      "objectType": "sample",
+      "key": "sample",
+      "currency": "EUR",
+      "count": 1,
+      "amount": "12.50"
+    },
+    "ReconLoadControlTotalsRequest": {
+      "scope": "sample",
+      "totals": [
+        {
+          "module": "sample",
+          "objectType": "sample",
+          "key": "sample",
+          "currency": "EUR",
+          "count": 1,
+          "amount": "12.50"
+        }
+      ]
+    },
+    "ReconLoadControlTotalsResponse": {
+      "scope": "sample",
+      "loaded": 1
+    },
+    "ReconReport": {
+      "runId": "01923657-95a4-7154-8208-ebe1fb6dcdea",
+      "scope": "sample",
+      "batchId": "0192aea1-3b57-7522-8bba-dc7e61dec1cf",
+      "runAt": "2026-10-07T09:00:00Z",
+      "green": true,
+      "matched": 1,
+      "varianceCount": 1,
+      "variances": [
+        "sample"
+      ],
+      "results": [
+        {
+          "module": "sample",
+          "objectType": "sample",
+          "key": "sample",
+          "currency": "sample",
+          "legacyCount": 1,
+          "coreCount": 1,
+          "legacyAmount": "12.50",
+          "coreAmount": "12.50",
+          "countVariance": 1,
+          "amountVariance": "12.50",
+          "status": "MATCH"
+        }
+      ]
+    },
+    "ReconResult": {
+      "module": "sample",
+      "objectType": "sample",
+      "key": "sample",
+      "currency": "sample",
+      "legacyCount": 1,
+      "coreCount": 1,
+      "legacyAmount": "12.50",
+      "coreAmount": "12.50",
+      "countVariance": 1,
+      "amountVariance": "12.50",
+      "status": "MATCH"
+    },
+    "ReconRunRequest": {
+      "scope": "sample",
+      "batchId": "0192c879-485f-7a4e-81c6-0e3f03b39469"
+    },
     "RoutingOverrideRequest": {
       "objectType": "sample",
       "key": "sample",

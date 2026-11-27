@@ -14,32 +14,32 @@ public sealed class FakePartyAccountService : global::CoreIns.Testing.Contracts.
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> AddMemberAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::System.Text.Json.JsonElement>("pty.Account.addMember", [request, options], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountAddMemberResponse> AddMemberAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountAddMemberRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.AccountAddMemberResponse>("pty.Account.addMember", [request, options], cancellationToken);
 
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> CreateAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::System.Text.Json.JsonElement>("pty.Account.create", [request, options], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountCreateResponse> CreateAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountCreateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.AccountCreateResponse>("pty.Account.create", [request, options], cancellationToken);
 
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::System.Text.Json.JsonElement>("pty.Account.get", [id], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.AccountGetResponse>("pty.Account.get", [id], cancellationToken);
 
     /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountMergeResponse> MergeAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountMergeRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.AccountMergeResponse>("pty.Account.merge", [request, options], cancellationToken);
 
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> RemoveMemberAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::System.Text.Json.JsonElement>("pty.Account.removeMember", [request, options], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountRemoveMemberResponse> RemoveMemberAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountRemoveMemberRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.AccountRemoveMemberResponse>("pty.Account.removeMember", [request, options], cancellationToken);
 
     /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountRequestPolicyMoveResponse> RequestPolicyMoveAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountRequestPolicyMoveRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.AccountRequestPolicyMoveResponse>("pty.Account.requestPolicyMove", [request, options], cancellationToken);
 
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountSearchPage> SearchAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.AccountSearchPage>("pty.Account.search", [cursor, limit], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountSearchPage> SearchAsync(string? cursor = null, int? limit = null, global::CoreIns.SharedKernel.Identifiers.PartyId? partyId = null, global::CoreIns.Modules.Party.Contracts.Api.AccountSearchStatus? status = null, global::CoreIns.SharedKernel.Identifiers.AccountNumber? accountNumber = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.AccountSearchPage>("pty.Account.search", [cursor, limit, partyId, status, accountNumber], cancellationToken);
 
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> SetHolderAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::System.Text.Json.JsonElement>("pty.Account.setHolder", [request, options], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountSetHolderResponse> SetHolderAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountSetHolderRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.AccountSetHolderResponse>("pty.Account.setHolder", [request, options], cancellationToken);
 
     /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountSplitResponse> SplitAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountSplitRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.AccountSplitResponse>("pty.Account.split", [request, options], cancellationToken);
 
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> WithdrawAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::System.Text.Json.JsonElement>("pty.Account.withdraw", [request, options], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountWithdrawResponse> WithdrawAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountWithdrawRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.AccountWithdrawResponse>("pty.Account.withdraw", [request, options], cancellationToken);
 }

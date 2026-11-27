@@ -4,23 +4,30 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Suspense.refundToSender request. PRD inputs: "filters, item"</summary>
+/// <summary>bil.Suspense.refundToSender request: pay the unapplied cash of an OPEN item back to the sender. The refund path applies: the payee is a verified REFUND payee account (VoP), sanctions screening, BIL.REFUND authority and a second approver (decided with bil.Refund.decide), then the disbursement. The IBAN never travels here.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SuspenseRefundToSenderRequest
 {
-    /// <summary>PRD: "filters"</summary>
+    /// <summary>Contract member 'suspenseItemId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'suspenseItemId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("filters")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Filters { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("suspenseItemId")]
+    public required global::System.Guid SuspenseItemId { get; init; }
 
-    /// <summary>PRD: "item"</summary>
+    /// <summary>Verified payee account with purpose REFUND of the sender</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'payeeAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("item")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("payeeAccountId")]
+    public required global::System.Guid PayeeAccountId { get; init; }
+
+    /// <summary>Contract member 'reasonCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
+    public required string ReasonCode { get; init; }
+
+    /// <summary>Contract member 'comment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Item { get; init; }
+    public string? Comment { get; init; }
 }
