@@ -49,6 +49,11 @@ migrations snapshots) WILL conflict with parallel builders — merge additively;
 migrations collide on the model snapshot, regenerate yours after merging.
 Push working increments early (e.g. backend first, then extras) rather than one giant push at the end.
 Never force-push. Never push a red build to main.
+Never move the shared local `main` branch ref from your worktree (no `git pull ... HEAD:main`, `git fetch origin main:main`,
+`git branch -f main`, `git checkout main`): it is checked out in the orchestrator worktree and moving it desyncs that checkout.
+Push only with `git push origin HEAD:main`.
+Never `.gitignore`-match source files: before committing, run `git status --ignored -- src tests web/src` and make sure every
+file you created is tracked (a bare `coverage/` rule once silently dropped `src/.../Services/Coverage/`).
 
 ## Final report (keep it short, <30 lines)
 What works, commit SHA(s) pushed to main, tests added, known gaps / TODO(hardening) list, anything the next WP needs.
