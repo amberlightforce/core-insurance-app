@@ -493,8 +493,6 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/suspensions
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/request-policy-move
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/split
-CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/resolve
-CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/simulate
 CONTRACT_NOT_SERVED POST /api/pty/v1/communication-preferences/resolve
 CONTRACT_NOT_SERVED POST /api/pty/v1/communication-preferences/set
 CONTRACT_NOT_SERVED POST /api/pty/v1/consents/record
