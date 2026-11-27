@@ -977,6 +977,159 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.ManualJournalLineRow", b =>
+                {
+                    b.Property<Guid>("LineId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("line_id");
+
+                    b.Property<string>("AccountCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("account_code");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<int>("LineNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("line_no");
+
+                    b.Property<Guid>("ManualJournalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("manual_journal_id");
+
+                    b.Property<string>("Side")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("side");
+
+                    b.HasKey("LineId")
+                        .HasName("pk_manual_journal_line");
+
+                    b.HasIndex("ManualJournalId", "LineNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_manual_journal_line_no");
+
+                    b.ToTable("manual_journal_line", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_manual_journal_line_amount", "amount > 0");
+
+                            t.HasCheckConstraint("ck_manual_journal_line_no", "line_no >= 1");
+
+                            t.HasCheckConstraint("ck_manual_journal_line_side", "side IN ('DEBIT', 'CREDIT')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.ManualJournalRow", b =>
+                {
+                    b.Property<Guid>("ManualJournalId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("manual_journal_id");
+
+                    b.Property<DateOnly>("AccountingDate")
+                        .HasColumnType("date")
+                        .HasColumnName("accounting_date");
+
+                    b.Property<string>("Book")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("book");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionReason")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_reason");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("EvidenceRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_ref");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<long>("NumberSeq")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("number_seq");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("NumberSeq"));
+
+                    b.PrimitiveCollection<Guid[]>("PostedJournalIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("posted_journal_ids");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
+
+                    b.HasKey("ManualJournalId")
+                        .HasName("pk_manual_journal");
+
+                    b.HasIndex("LegalEntityId", "NumberSeq")
+                        .IsUnique()
+                        .HasDatabaseName("ux_manual_journal_number");
+
+                    b.ToTable("manual_journal", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_manual_journal_currency", "currency ~ '^[A-Z]{3}$'");
+
+                            t.HasCheckConstraint("ck_manual_journal_evidence", "length(btrim(evidence_ref)) > 0");
+
+                            t.HasCheckConstraint("ck_manual_journal_posted", "status <> 'POSTED' OR cardinality(posted_journal_ids) >= 1");
+
+                            t.HasCheckConstraint("ck_manual_journal_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_manual_journal_status", "status IN ('DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'WITHDRAWN', 'POSTED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.PolicyContextRow", b =>
                 {
                     b.Property<Guid>("PolicyTermId")
@@ -1239,6 +1392,16 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_journal_line_entry");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.ManualJournalLineRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Finance.Persistence.ManualJournalRow", null)
+                        .WithMany()
+                        .HasForeignKey("ManualJournalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_manual_journal_line_journal");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.PostingRuleRow", b =>

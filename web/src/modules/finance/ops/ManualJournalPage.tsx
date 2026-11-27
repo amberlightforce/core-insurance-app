@@ -130,6 +130,40 @@ function Decision({ journal, onDone }: { journal: ManualJournal; onDone: () => v
   );
 }
 
+function DraftActions({ journal, onDone }: { journal: ManualJournal; onDone: () => void }) {
+  const { t } = useTranslation('finance');
+  const { keyFor, release } = useIdempotencyKey();
+  const withdraw = useWithdrawManualJournal(() => {
+    release();
+    announce(t('ops.manual.decision.withdrawn'));
+    onDone();
+  });
+  // Only the maker can withdraw; the server answers 403 FIN-ERR-SOD otherwise. Submit for approval arrives with BO-FIN-01b.
+  const maker = isMaker(journal.createdBy);
+  return (
+    <div className={styles.stack}>
+      <Banner variant="info" live="none" title={t('ops.manual.form.draftNote')} />
+      {withdraw.isError ? (
+        <ProblemBanner error={withdraw.error} title={t('ops.manual.decision.withdrawFailed')} />
+      ) : null}
+      {maker ? (
+        <div className={styles.actions}>
+          <Button
+            variant="secondary"
+            isLoading={withdraw.isPending}
+            onPress={() => {
+              const request = { id: journal.id };
+              withdraw.mutate({ id: journal.id, key: keyFor(request) });
+            }}
+          >
+            {t('ops.manual.decision.withdraw')}
+          </Button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function Details({
   journal,
   postedIds,
@@ -235,6 +269,11 @@ function Details({
           </p>
         </Section>
       </div>
+      {journal.status === 'DRAFT' ? (
+        <Section title={t('ops.manual.statusLabel')}>
+          <DraftActions journal={journal} onDone={reload} />
+        </Section>
+      ) : null}
       {journal.status === 'SUBMITTED' ? (
         <Section title={t('ops.manual.decision.title')} family="plum">
           <Decision journal={journal} onDone={reload} />

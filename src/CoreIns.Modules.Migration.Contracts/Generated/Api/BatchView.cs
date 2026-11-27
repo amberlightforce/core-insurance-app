@@ -52,6 +52,16 @@ public sealed record BatchView
     [global::System.Text.Json.Serialization.JsonPropertyName("counts")]
     public required global::System.Collections.Generic.IReadOnlyDictionary<string, int> Counts { get; init; }
 
+    /// <summary>Items with an outcome other than PENDING (progress of a background run, BO-MIG-01).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("processedCount")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? ProcessedCount { get; init; }
+
+    /// <summary>Contract member 'failedCount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("failedCount")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? FailedCount { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

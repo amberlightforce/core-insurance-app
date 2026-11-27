@@ -2937,59 +2937,184 @@ export interface components {
         DisclosureFindingListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["DisclosureFindingListItem"][];
         };
-        /** @description uw.RuleSet.create request. PRD inputs: "per operation" */
-        RuleSetCreateRequest: Record<string, never>;
-        /** @description uw.RuleSet.create result. PRD outputs: "versions, reports" */
-        RuleSetCreateResponse: {
-            /** @description PRD: "versions" */
-            versions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reports" */
-            reports?: components["schemas"]["Unspecified"];
+        /** @description A decision-table variable or input column (BO-UW-01). type is string, int, decimal, date or bool. */
+        RuleSetColumn: {
+            name: string;
+            type: string;
+            expression: string;
         };
-        /** @description uw.RuleSet.draft request. PRD inputs: "per operation" */
-        RuleSetDraftRequest: Record<string, never>;
-        /** @description uw.RuleSet.draft result. PRD outputs: "versions, reports" */
-        RuleSetDraftResponse: {
-            /** @description PRD: "versions" */
-            versions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reports" */
-            reports?: components["schemas"]["Unspecified"];
+        /** @description A decision-table output column. */
+        RuleSetOutputColumn: {
+            name: string;
+            type: string;
         };
-        /** @description uw.RuleSet.edit request. PRD inputs: "per operation" */
-        RuleSetEditRequest: Record<string, never>;
-        /** @description uw.RuleSet.edit result. PRD outputs: "versions, reports" */
-        RuleSetEditResponse: {
-            /** @description PRD: "versions" */
-            versions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reports" */
-            reports?: components["schemas"]["Unspecified"];
+        /** @description The derived fact a referral rule reads and its declared threshold (workbench explain, D-SL5). */
+        RuleSetExplain: {
+            fact: string;
+            limit: string;
         };
-        /** @description uw.RuleSet.validate request. PRD inputs: "per operation" */
-        RuleSetValidateRequest: Record<string, never>;
-        /** @description uw.RuleSet.validate result. PRD outputs: "versions, reports" */
-        RuleSetValidateResponse: {
-            /** @description PRD: "versions" */
-            versions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reports" */
-            reports?: components["schemas"]["Unspecified"];
+        /** @description One rule row. conditions has one entry per input column (dash = any); outputs has one expression per output column. */
+        RuleSetRule: {
+            id: string;
+            conditions: string[];
+            outputs: string[];
+            explain?: components["schemas"]["RuleSetExplain"] | null;
         };
-        /** @description uw.RuleSet.test request. PRD inputs: "per operation" */
-        RuleSetTestRequest: Record<string, never>;
-        /** @description uw.RuleSet.test result. PRD outputs: "versions, reports" */
-        RuleSetTestResponse: {
-            /** @description PRD: "versions" */
-            versions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reports" */
-            reports?: components["schemas"]["Unspecified"];
+        /** @description A test case of a rule-set version (REQ-UW-038, -040), a risk and the rule ids that must hit. */
+        RuleSetTestCase: {
+            name: string;
+            firstRegistrationYear: string;
+            vehicleValue: string;
+            engineCc: number;
+            usage: string;
+            driverBirthDates: string[];
+            claimsLast5Years: number;
+            effectiveDate: string;
+            expectedRuleIds: string[];
         };
-        /** @description uw.RuleSet.simulate request. PRD inputs: "per operation" */
-        RuleSetSimulateRequest: Record<string, never>;
-        /** @description uw.RuleSet.simulate result. PRD outputs: "versions, reports" */
+        /** @description A rule-set version as authored, a decision table (hit policy, variables, input and output columns, rules) with its metadata and test cases. */
+        RuleSetDefinition: {
+            code: string;
+            version: string;
+            productCode: string;
+            /** @description PRE_QUOTE or PRE_BIND */
+            checkpoint: string;
+            /** @description yyyy-MM-dd */
+            effectiveFrom: string;
+            /** @description ILLUSTRATIVE_TEST_DATA or APPROVED */
+            dataStatus: string;
+            note: string;
+            hitPolicy: string;
+            variables: components["schemas"]["RuleSetColumn"][];
+            inputs: components["schemas"]["RuleSetColumn"][];
+            outputs: components["schemas"]["RuleSetOutputColumn"][];
+            rules: components["schemas"]["RuleSetRule"][];
+            testCases: components["schemas"]["RuleSetTestCase"][];
+        };
+        /** @description A stored rule-set version with its status and the definition. */
+        RuleSetVersionDetail: {
+            ruleSetCode: string;
+            version: string;
+            productCode?: string;
+            checkpoint?: string;
+            /** @enum {string} */
+            status: "Draft" | "Submitted" | "Approved" | "Active" | "Superseded" | "Retired";
+            effectiveFrom?: string;
+            dataStatus?: string;
+            /** @description Compiled-table hash once the version compiles with its test cases, otherwise the definition hash of the draft. */
+            contentHash?: string;
+            /** @description SHA-256 of the canonical definition without its version number; stable over export and import. */
+            definitionHash?: string;
+            ruleCount?: number;
+            testCaseCount?: number;
+            createdAt?: string;
+            createdBy?: string;
+            definition: components["schemas"]["RuleSetDefinition"];
+        };
+        /** @description One validation finding. code is UW-ERR-VALIDATION, UW-ERR-RULE-UNTESTED, UW-ERR-TRANSLATION-MISSING or UW-ERR-RULESET-COMPILE. */
+        RuleSetValidationIssue: {
+            code: string;
+            message: string;
+            ruleId?: string | null;
+            testCase?: string | null;
+        };
+        RuleSetTestOutcome: {
+            name: string;
+            passed: boolean;
+            failure?: string | null;
+            matchedRuleIds?: string[];
+        };
+        /** @description Result of validate and test, every finding at once. */
+        RuleSetValidationReport: {
+            ruleSetCode: string;
+            version: string;
+            /** @description True when the version compiles, every rule is covered by a passing test case and the texts are translated; it can be submitted. */
+            valid: boolean;
+            compiles: boolean;
+            issues: components["schemas"]["RuleSetValidationIssue"][];
+            testResults: components["schemas"]["RuleSetTestOutcome"][];
+            uncoveredRuleIds: string[];
+            contentHash?: string | null;
+        };
+        /** @description Identifies a rule-set version. */
+        RuleSetRef: {
+            ruleSetCode: string;
+            version: string;
+        };
+        /** @description The version after an authoring command, with its validation report. */
+        RuleSetAuthoringResponse: {
+            version: components["schemas"]["RuleSetVersionDetail"];
+            validation: components["schemas"]["RuleSetValidationReport"];
+        };
+        /** @description uw.RuleSet.create request, a new rule set with a first Draft version (an empty table on the standard motor columns unless a definition is given). */
+        RuleSetCreateRequest: {
+            ruleSetCode: string;
+            productCode: string;
+            checkpoint: string;
+            effectiveFrom?: string | null;
+            note?: string | null;
+            definition?: components["schemas"]["RuleSetDefinition"] | null;
+        };
+        RuleSetCreateResponse: components["schemas"]["RuleSetAuthoringResponse"];
+        /** @description uw.RuleSet.draft request, a new Draft version copied from fromVersion (default the latest version). */
+        RuleSetDraftRequest: {
+            ruleSetCode: string;
+            fromVersion?: string | null;
+            effectiveFrom?: string | null;
+        };
+        RuleSetDraftResponse: components["schemas"]["RuleSetAuthoringResponse"];
+        /** @description One edit of a Draft version. op is SET_CELL (ruleId, column, value), ADD_RULE (rule), REMOVE_RULE (ruleId), ADD_TEST_CASE (testCase), REMOVE_TEST_CASE (testCaseName) or SET_META (effectiveFrom, note). */
+        RuleSetEditPatch: {
+            /** @enum {string} */
+            op: "SET_CELL" | "ADD_RULE" | "REMOVE_RULE" | "ADD_TEST_CASE" | "REMOVE_TEST_CASE" | "SET_META";
+            ruleId?: string | null;
+            /** @description An input or output column name. */
+            column?: string | null;
+            value?: string | null;
+            rule?: components["schemas"]["RuleSetRule"] | null;
+            testCase?: components["schemas"]["RuleSetTestCase"] | null;
+            testCaseName?: string | null;
+            effectiveFrom?: string | null;
+            note?: string | null;
+        };
+        /** @description uw.RuleSet.edit request, patches applied in order to a Draft version, all or nothing. */
+        RuleSetEditRequest: {
+            ruleSetCode: string;
+            version: string;
+            patches: components["schemas"]["RuleSetEditPatch"][];
+        };
+        RuleSetEditResponse: components["schemas"]["RuleSetAuthoringResponse"];
+        RuleSetValidateRequest: components["schemas"]["RuleSetRef"];
+        RuleSetValidateResponse: components["schemas"]["RuleSetValidationReport"];
+        RuleSetTestRequest: components["schemas"]["RuleSetRef"];
+        RuleSetTestResponse: components["schemas"]["RuleSetValidationReport"];
+        /** @description uw.RuleSet.simulate request, run the version against the facts of the last stored evaluations of its product and checkpoint; nothing is written. */
+        RuleSetSimulateRequest: {
+            ruleSetCode: string;
+            version: string;
+            limit?: number | null;
+        };
+        RuleSetSimulateItem: {
+            evaluationId: string;
+            recordedRuleIds: string[];
+            simulatedRuleIds: string[];
+            addedRuleIds: string[];
+            removedRuleIds: string[];
+            recordedOutcome: string;
+            simulatedOutcome: string;
+            error?: string | null;
+        };
+        /** @description Hit changes of the simulated version against what was recorded. youngestDriverAge is rebuilt from the stored age band, so it is approximate (see warnings). */
         RuleSetSimulateResponse: {
-            /** @description PRD: "versions" */
-            versions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reports" */
-            reports?: components["schemas"]["Unspecified"];
+            ruleSetCode: string;
+            version: string;
+            evaluated: number;
+            changed: number;
+            /** @description Evaluations that gain a REFER outcome they did not have. */
+            newReferrals: number;
+            newDeclines: number;
+            items: components["schemas"]["RuleSetSimulateItem"][];
+            warnings: string[];
         };
         /** @description uw.RuleSet.submit request. PRD inputs: "per operation" */
         RuleSetSubmitRequest: Record<string, never>;
@@ -3018,24 +3143,21 @@ export interface components {
             /** @description PRD: "reports" */
             reports?: components["schemas"]["Unspecified"];
         };
-        /** @description uw.RuleSet.export request. PRD inputs: "per operation" */
-        RuleSetExportRequest: Record<string, never>;
-        /** @description uw.RuleSet.export result. PRD outputs: "versions, reports" */
+        /** @description The portable rule-set document (format coreins.uw.rule-set/1). definitionHash is stable over export and import. */
+        RuleSetExportDocument: {
+            format: string;
+            definitionHash: string;
+            definition: components["schemas"]["RuleSetDefinition"];
+        };
+        RuleSetExportRequest: components["schemas"]["RuleSetRef"];
         RuleSetExportResponse: {
-            /** @description PRD: "versions" */
-            versions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reports" */
-            reports?: components["schemas"]["Unspecified"];
+            document: components["schemas"]["RuleSetExportDocument"];
         };
-        /** @description uw.RuleSet.import request. PRD inputs: "per operation" */
-        RuleSetImportRequest: Record<string, never>;
-        /** @description uw.RuleSet.import result. PRD outputs: "versions, reports" */
-        RuleSetImportResponse: {
-            /** @description PRD: "versions" */
-            versions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reports" */
-            reports?: components["schemas"]["Unspecified"];
+        /** @description uw.RuleSet.import request, creates a Draft version from a document (the next version number when the code exists). */
+        RuleSetImportRequest: {
+            document: components["schemas"]["RuleSetExportDocument"];
         };
+        RuleSetImportResponse: components["schemas"]["RuleSetAuthoringResponse"];
         /** @description uw.IssueType.search result. PRD outputs: "types" */
         IssueTypeSearchItem: {
             /** @description PRD: "types" */
