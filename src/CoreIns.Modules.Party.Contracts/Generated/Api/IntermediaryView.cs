@@ -60,6 +60,18 @@ public sealed record IntermediaryView
     [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
     public required int RecordVersion { get; init; }
 
+    /// <summary>Hierarchy parent (REQ-PTY-193)</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'parentIntermediaryId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("parentIntermediaryId")]
+    public global::System.Guid? ParentIntermediaryId { get; init; }
+
+    /// <summary>Computed from the CPD hours table (REQ-PTY-191)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("cpdStatus")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public CpdStatusValue? CpdStatus { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ProducerCodeStatusValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
@@ -76,5 +88,23 @@ public sealed record IntermediaryView
         /// <summary><c>TERMINATED</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("TERMINATED")]
         Terminated,
+    }
+
+    /// <summary>Computed from the CPD hours table (REQ-PTY-191)</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<CpdStatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum CpdStatusValue
+    {
+        /// <summary><c>COMPLIANT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("COMPLIANT")]
+        Compliant,
+
+        /// <summary><c>AT_RISK</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("AT_RISK")]
+        AtRisk,
+
+        /// <summary><c>NON_COMPLIANT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NON_COMPLIANT")]
+        NonCompliant,
     }
 }
