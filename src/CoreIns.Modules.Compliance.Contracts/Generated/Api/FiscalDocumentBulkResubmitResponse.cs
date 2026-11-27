@@ -4,15 +4,82 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.FiscalDocument.bulkResubmit result. PRD outputs: "status"</summary>
+/// <summary>cmp.FiscalDocument.bulkResubmit result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FiscalDocumentBulkResubmitResponse
 {
-    /// <summary>PRD: "status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Status { get; init; }
+    /// <summary>Contract member 'requested'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("requested")]
+    public required int Requested { get; init; }
+
+    /// <summary>Contract member 'resubmitted'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("resubmitted")]
+    public required int Resubmitted { get; init; }
+
+    /// <summary>Contract member 'skipped'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("skipped")]
+    public required int Skipped { get; init; }
+
+    /// <summary>Contract member 'results'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("results")]
+    public required global::System.Collections.Generic.IReadOnlyList<ResultItem> Results { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ResultItem
+    {
+        /// <summary>Contract member 'fiscalDocumentId'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("fiscalDocumentId")]
+        public required global::CoreIns.SharedKernel.Identifiers.FiscalDocumentId FiscalDocumentId { get; init; }
+
+        /// <summary>Contract member 'outcome'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+        public required OutcomeValue Outcome { get; init; }
+
+        /// <summary>Contract member 'status'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public StatusValue? Status { get; init; }
+
+        /// <summary>CMP-ERR code when SKIPPED (the document was not eligible)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("errorCode")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? ErrorCode { get; init; }
+
+        /// <summary>Generated contract member.</summary>
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public enum OutcomeValue
+        {
+            /// <summary><c>RESUBMITTED</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RESUBMITTED")]
+            Resubmitted,
+
+            /// <summary><c>SKIPPED</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SKIPPED")]
+            Skipped,
+        }
+
+        /// <summary>Generated contract member.</summary>
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public enum StatusValue
+        {
+            /// <summary><c>PENDING</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PENDING")]
+            Pending,
+
+            /// <summary><c>REGISTERED</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REGISTERED")]
+            Registered,
+
+            /// <summary><c>REJECTED</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REJECTED")]
+            Rejected,
+
+            /// <summary><c>CANCELLED</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CANCELLED")]
+            Cancelled,
+        }
+    }
 }

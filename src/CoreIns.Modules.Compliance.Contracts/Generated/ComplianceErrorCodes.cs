@@ -22,7 +22,7 @@ public static class ComplianceErrorCodes
 
     /// <summary>CMP-ERR-APPROVAL-REQUIRED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): cmp.FiscalDocument.bulkResubmit, cmp.FiscalDocument.cancel, cmp.FiscalDocument.correct, cmp.FiscalDocument.resubmit, cmp.Submission.recordFiling, cmp.Taxonomy.activate, cmp.Taxonomy.import, cmp.Taxonomy.list.</para>
+    /// <para>Declared by 4 operation(s): cmp.Submission.recordFiling, cmp.Taxonomy.activate, cmp.Taxonomy.import, cmp.Taxonomy.list.</para>
     /// </remarks>
     public const string ApprovalRequired = "CMP-ERR-APPROVAL-REQUIRED";
 
@@ -31,6 +31,12 @@ public static class ComplianceErrorCodes
     /// <para>Declared by 7 operation(s): cmp.Submission.approve, cmp.Submission.attachContent, cmp.Submission.comment, cmp.Submission.create, cmp.Submission.evidencePack, cmp.Submission.recordFiling, cmp.Submission.recordResponse.</para>
     /// </remarks>
     public const string ApprovalSameUser = "CMP-ERR-APPROVAL-SAME-USER";
+
+    /// <summary>CMP-ERR-BULK-LIMIT (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): cmp.FiscalDocument.bulkResubmit.</para>
+    /// </remarks>
+    public const string BulkLimit = "CMP-ERR-BULK-LIMIT";
 
     /// <summary>CMP-ERR-CLOCK-CANCEL-REASON (HTTP 422).</summary>
     /// <remarks>
@@ -82,7 +88,7 @@ public static class ComplianceErrorCodes
 
     /// <summary>CMP-ERR-FISCAL-TOTAL (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): cmp.FiscalDocument.request.</para>
+    /// <para>Declared by 2 operation(s): cmp.FiscalDocument.correct, cmp.FiscalDocument.request.</para>
     /// </remarks>
     public const string FiscalTotal = "CMP-ERR-FISCAL-TOTAL";
 
@@ -110,15 +116,27 @@ public static class ComplianceErrorCodes
     /// </remarks>
     public const string NotAComplaint = "CMP-ERR-NOT-A-COMPLAINT";
 
+    /// <summary>CMP-ERR-NOT-CANCELLABLE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): cmp.FiscalDocument.cancel.</para>
+    /// </remarks>
+    public const string NotCancellable = "CMP-ERR-NOT-CANCELLABLE";
+
+    /// <summary>CMP-ERR-NOT-CORRECTABLE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): cmp.FiscalDocument.correct.</para>
+    /// </remarks>
+    public const string NotCorrectable = "CMP-ERR-NOT-CORRECTABLE";
+
     /// <summary>CMP-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 16 operation(s): cmp.Bureau.status, cmp.Complaint.acknowledge, cmp.Complaint.addAction, cmp.Complaint.approveReply, cmp.Complaint.classify, cmp.Complaint.close, cmp.Complaint.create, cmp.Complaint.escalate, cmp.Complaint.get, cmp.Complaint.link, cmp.Complaint.query, cmp.Complaint.submitReply, ….</para>
+    /// <para>Declared by 19 operation(s): cmp.Bureau.status, cmp.Complaint.acknowledge, cmp.Complaint.addAction, cmp.Complaint.approveReply, cmp.Complaint.classify, cmp.Complaint.close, cmp.Complaint.create, cmp.Complaint.escalate, cmp.Complaint.get, cmp.Complaint.link, cmp.Complaint.query, cmp.Complaint.submitReply, ….</para>
     /// </remarks>
     public const string NotFound = "CMP-ERR-NOT-FOUND";
 
     /// <summary>CMP-ERR-NOT-REJECTED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): cmp.FiscalDocument.bulkResubmit, cmp.FiscalDocument.cancel, cmp.FiscalDocument.correct, cmp.FiscalDocument.resubmit.</para>
+    /// <para>Declared by 1 operation(s): cmp.FiscalDocument.resubmit.</para>
     /// </remarks>
     public const string NotRejected = "CMP-ERR-NOT-REJECTED";
 
@@ -160,13 +178,13 @@ public static class ComplianceErrorCodes
 
     /// <summary>CMP-ERR-TRANSPORT-UNAVAILABLE (HTTP 503).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): cmp.Bureau.reconcile, cmp.Bureau.retransmit, cmp.BureauManualFile.generate, cmp.BureauManualFile.recordResponse, cmp.FiscalDocument.request.</para>
+    /// <para>Declared by 9 operation(s): cmp.Bureau.reconcile, cmp.Bureau.retransmit, cmp.BureauManualFile.generate, cmp.BureauManualFile.recordResponse, cmp.FiscalDocument.bulkResubmit, cmp.FiscalDocument.cancel, cmp.FiscalDocument.correct, cmp.FiscalDocument.request, cmp.FiscalDocument.resubmit.</para>
     /// </remarks>
     public const string TransportUnavailable = "CMP-ERR-TRANSPORT-UNAVAILABLE";
 
     /// <summary>CMP-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): cmp.FiscalDocument.request.</para>
+    /// <para>Declared by 5 operation(s): cmp.FiscalDocument.bulkResubmit, cmp.FiscalDocument.cancel, cmp.FiscalDocument.correct, cmp.FiscalDocument.request, cmp.FiscalDocument.resubmit.</para>
     /// </remarks>
     public const string Validation = "CMP-ERR-VALIDATION";
 
@@ -180,7 +198,7 @@ public static class ComplianceErrorCodes
     public const string Prefix = "CMP-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AiChecklistIncomplete, AiProhibited, ApprovalRequired, ApprovalSameUser, ClockCancelReason, ClockNoValue, ClockState, ClockUnknown, ComplaintState, CorrelatedNotFound, DatapointUnmapped, ExtensionNotAllowed, FiscalTotal, Held, IdempotencyMismatch, IdentityNotVerified, NotAComplaint, NotFound, NotRejected, ReqUnknown, RootCauseRequired, RulesMissing, Sod, SourceUnknown, TaxonomyUnknown, TransportUnavailable, Validation, ValidationBlocking];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AiChecklistIncomplete, AiProhibited, ApprovalRequired, ApprovalSameUser, BulkLimit, ClockCancelReason, ClockNoValue, ClockState, ClockUnknown, ComplaintState, CorrelatedNotFound, DatapointUnmapped, ExtensionNotAllowed, FiscalTotal, Held, IdempotencyMismatch, IdentityNotVerified, NotAComplaint, NotCancellable, NotCorrectable, NotFound, NotRejected, ReqUnknown, RootCauseRequired, RulesMissing, Sod, SourceUnknown, TaxonomyUnknown, TransportUnavailable, Validation, ValidationBlocking];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -189,6 +207,7 @@ public static class ComplianceErrorCodes
         [AiProhibited] = 422,
         [ApprovalRequired] = 422,
         [ApprovalSameUser] = 403,
+        [BulkLimit] = 422,
         [ClockCancelReason] = 422,
         [ClockNoValue] = 422,
         [ClockState] = 422,
@@ -202,6 +221,8 @@ public static class ComplianceErrorCodes
         [IdempotencyMismatch] = 409,
         [IdentityNotVerified] = 422,
         [NotAComplaint] = 422,
+        [NotCancellable] = 422,
+        [NotCorrectable] = 422,
         [NotFound] = 404,
         [NotRejected] = 422,
         [ReqUnknown] = 422,

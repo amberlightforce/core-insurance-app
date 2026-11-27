@@ -42,7 +42,6 @@ CONTRACT_NOT_SERVED GET /api/clm/v1/claim-trackings/{}
 CONTRACT_NOT_SERVED GET /api/clm/v1/conversations
 CONTRACT_NOT_SERVED GET /api/clm/v1/financials/daily-totals
 CONTRACT_NOT_SERVED GET /api/cmp/v1/bureaus/status
-CONTRACT_NOT_SERVED GET /api/cmp/v1/fiscal-documents/qr-payload
 CONTRACT_NOT_SERVED GET /api/cmp/v1/taxonomies
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/footprint
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/snapshot
@@ -50,9 +49,6 @@ CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/trend
 CONTRACT_NOT_SERVED GET /api/dat/v1/coverage/status
 CONTRACT_NOT_SERVED GET /api/dat/v1/feature-store/get-online
 CONTRACT_NOT_SERVED GET /api/dat/v1/lineage/trace
-CONTRACT_NOT_SERVED GET /api/dat/v1/marts/compare
-CONTRACT_NOT_SERVED GET /api/dat/v1/marts/figure
-CONTRACT_NOT_SERVED GET /api/dat/v1/marts/{}
 CONTRACT_NOT_SERVED GET /api/dat/v1/scr-results/{}
 CONTRACT_NOT_SERVED GET /api/doc/v1/archives/list-for-object
 CONTRACT_NOT_SERVED GET /api/doc/v1/forms/{}
@@ -328,11 +324,7 @@ CONTRACT_NOT_SERVED POST /api/cmp/v1/enfia-confirmations/import
 CONTRACT_NOT_SERVED POST /api/cmp/v1/enfia-confirmations/propose
 CONTRACT_NOT_SERVED POST /api/cmp/v1/enfia-confirmations/transmit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/evidence/submit
-CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/bulk-resubmit
-CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/cancel
-CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/correct
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/import
-CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/resubmit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-reconciliation/run
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-rules/certify
 CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions
@@ -355,7 +347,6 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/analytics/ask
 CONTRACT_NOT_SERVED POST /api/dat/v1/feature-store/build-training-set
 CONTRACT_NOT_SERVED POST /api/dat/v1/marts/adjust
 CONTRACT_NOT_SERVED POST /api/dat/v1/marts/export
-CONTRACT_NOT_SERVED POST /api/dat/v1/marts/run
 CONTRACT_NOT_SERVED POST /api/dat/v1/marts/sign-off
 CONTRACT_NOT_SERVED POST /api/dat/v1/models/approve
 CONTRACT_NOT_SERVED POST /api/dat/v1/models/record-validation
@@ -603,13 +594,6 @@ CONTRACT_NOT_SERVED POST /api/rat/v1/pricing-modifications/propose
 CONTRACT_NOT_SERVED POST /api/rat/v1/pricing-modifications/withdraw
 CONTRACT_NOT_SERVED POST /api/rat/v1/rates/cancel-batch
 CONTRACT_NOT_SERVED POST /api/rat/v1/rates/rate-batch
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/build
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/cancel-schedule
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/return
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/rollback
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/schedule
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/submit
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-change-sets
 CONTRACT_NOT_SERVED POST /api/rat/v1/shadow-runs/start
 CONTRACT_NOT_SERVED POST /api/rat/v1/shadow-runs/stop
 CONTRACT_NOT_SERVED POST /api/rat/v1/worksheets/attach

@@ -4,23 +4,56 @@
 
 namespace CoreIns.Modules.Rating.Contracts.Api;
 
-/// <summary>rat.RatingArtifact.return result. PRD outputs: "artefact status, governance bundle id"</summary>
+/// <summary>Contract addition (BO-RAT-06): rat.RatingArtifact.return result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RatingArtifactReturnResponse
 {
-    /// <summary>PRD: "artefact status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("artefactStatus")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ArtefactStatus { get; init; }
+    /// <summary>Contract member 'artefactHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("artefactHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash ArtefactHash { get; init; }
 
-    /// <summary>PRD: "governance bundle id"</summary>
+    /// <summary>Contract member 'artefactStatus'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("artefactStatus")]
+    public required ArtefactStatusValue ArtefactStatus { get; init; }
+
+    /// <summary>The release record (maker-checker bundle) of the artefact.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'governanceBundleId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("governanceBundleId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? GovernanceBundleId { get; init; }
+    public required global::System.Guid GovernanceBundleId { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ArtefactStatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ArtefactStatusValue
+    {
+        /// <summary><c>DRAFT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DRAFT")]
+        Draft,
+
+        /// <summary><c>SUBMITTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUBMITTED")]
+        Submitted,
+
+        /// <summary><c>APPROVED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVED")]
+        Approved,
+
+        /// <summary><c>SCHEDULED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SCHEDULED")]
+        Scheduled,
+
+        /// <summary><c>ACTIVE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ACTIVE")]
+        Active,
+
+        /// <summary><c>SUPERSEDED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUPERSEDED")]
+        Superseded,
+
+        /// <summary><c>WITHDRAWN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("WITHDRAWN")]
+        Withdrawn,
+    }
 }

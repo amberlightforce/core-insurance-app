@@ -17,6 +17,10 @@ internal sealed class RatingDbContext(DbContextOptions<RatingDbContext> options)
 
     public DbSet<RateActivationRow> RateActivations => Set<RateActivationRow>();
 
+    public DbSet<RatingChangeSetRow> ChangeSets => Set<RatingChangeSetRow>();
+
+    public DbSet<ArtifactReleaseRow> Releases => Set<ArtifactReleaseRow>();
+
     public DbSet<WorksheetRow> Worksheets => Set<WorksheetRow>();
 
     public DbSet<WorksheetIndexRow> WorksheetIndex => Set<WorksheetIndexRow>();
@@ -91,6 +95,61 @@ internal sealed class RatingDbContext(DbContextOptions<RatingDbContext> options)
             entity.HasIndex(e => new { e.ProductCode, e.ProductVersion, e.EffectiveFrom }).IsUnique().HasDatabaseName("ux_rate_activation_product_from");
             entity.HasOne<RatingArtifactRow>().WithMany().HasForeignKey(e => e.ArtefactHash)
                 .HasConstraintName("fk_rate_activation_artifact").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RatingChangeSetRow>(entity =>
+        {
+            entity.ToTable("change_set", table => table.HasCheckConstraint("ck_change_set_status", "status IN ('OPEN', 'BUILT')"));
+            entity.HasKey(e => e.ChangeSetId).HasName("pk_change_set");
+            entity.Property(e => e.ChangeSetId).HasColumnName("change_set_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Jurisdiction).HasColumnName("jurisdiction").HasColumnType("char(2)");
+            entity.Property(e => e.ProductCode).HasColumnName("product_code");
+            entity.Property(e => e.ProductVersion).HasColumnName("product_version");
+            entity.Property(e => e.BaseArtefactHash).HasColumnName("base_artefact_hash").HasColumnType("char(64)");
+            entity.Property(e => e.Tables).HasColumnName("tables").HasColumnType("jsonb");
+            entity.Property(e => e.Reason).HasColumnName("reason");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+            entity.HasIndex(e => new { e.ProductCode, e.ProductVersion }).HasDatabaseName("ix_change_set_product");
+        });
+
+        modelBuilder.Entity<ArtifactReleaseRow>(entity =>
+        {
+            entity.ToTable("artifact_release", table =>
+                table.HasCheckConstraint("ck_artifact_release_status", "status IN ('BUILT', 'SUBMITTED', 'APPROVED', 'RETURNED', 'SCHEDULED', 'ROLLED_BACK')"));
+            entity.HasKey(e => e.ReleaseId).HasName("pk_artifact_release");
+            entity.Property(e => e.ReleaseId).HasColumnName("release_id");
+            entity.Property(e => e.ChangeSetId).HasColumnName("change_set_id");
+            entity.Property(e => e.ArtefactHash).HasColumnName("artefact_hash").HasColumnType("char(64)");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Jurisdiction).HasColumnName("jurisdiction").HasColumnType("char(2)");
+            entity.Property(e => e.ProductCode).HasColumnName("product_code");
+            entity.Property(e => e.ProductVersion).HasColumnName("product_version");
+            entity.Property(e => e.DataStatus).HasColumnName("data_status");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.PayloadHash).HasColumnName("payload_hash").HasColumnType("char(64)");
+            entity.Property(e => e.ApprovalRequestId).HasColumnName("approval_request_id");
+            entity.Property(e => e.BuiltBy).HasColumnName("built_by");
+            entity.Property(e => e.BuiltAt).HasColumnName("built_at").HasColumnType("timestamptz");
+            entity.Property(e => e.SubmittedBy).HasColumnName("submitted_by");
+            entity.Property(e => e.SubmittedByPrincipal).HasColumnName("submitted_by_principal");
+            entity.Property(e => e.SubmittedAt).HasColumnName("submitted_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecidedBy).HasColumnName("decided_by");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecisionComment).HasColumnName("decision_comment");
+            entity.Property(e => e.ActivationId).HasColumnName("activation_id");
+            entity.Property(e => e.EffectiveFrom).HasColumnName("effective_from");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version");
+            entity.HasIndex(e => e.ArtefactHash).IsUnique().HasDatabaseName("ux_artifact_release_artifact");
+            entity.HasOne<RatingArtifactRow>().WithMany().HasForeignKey(e => e.ArtefactHash)
+                .HasConstraintName("fk_artifact_release_artifact").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<RatingChangeSetRow>().WithMany().HasForeignKey(e => e.ChangeSetId)
+                .HasConstraintName("fk_artifact_release_change_set").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<WorksheetRow>(entity =>

@@ -441,6 +441,151 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                     b.ToTable("fact_premium", "rpt_conformed");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.MartFigureRow", b =>
+                {
+                    b.Property<Guid>("FigureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("figure_id");
+
+                    b.Property<string>("Dimension")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("dimension");
+
+                    b.Property<string>("FigureKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("figure_key");
+
+                    b.Property<string>("Metric")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("metric");
+
+                    b.Property<string>("PeriodMonth")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("period_month");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("product_code");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<long>("SourceCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("source_count");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("unit");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("numeric(20,4)")
+                        .HasColumnName("value");
+
+                    b.HasKey("FigureId")
+                        .HasName("pk_mart_figure");
+
+                    b.HasIndex("RunId", "FigureKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_mart_figure_run_key");
+
+                    b.ToTable("mart_figure", "rpt_mart");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.MartRunRow", b =>
+                {
+                    b.Property<Guid>("RunId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DefinitionVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("definition_version");
+
+                    b.Property<int>("FigureCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("figure_count");
+
+                    b.Property<DateTime>("KnownAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("known_at");
+
+                    b.Property<string>("LegalEntity")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_entity");
+
+                    b.Property<string>("LegalStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_status");
+
+                    b.Property<string>("MartCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mart_code");
+
+                    b.Property<string>("Period")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("period");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("product_code");
+
+                    b.Property<string>("SnapshotHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("snapshot_hash");
+
+                    b.Property<string>("SnapshotKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("snapshot_key");
+
+                    b.Property<long>("SourceRowCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("source_row_count");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("ValidAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("valid_at");
+
+                    b.HasKey("RunId")
+                        .HasName("pk_mart_run");
+
+                    b.HasIndex("LegalEntity", "MartCode", "CreatedAt")
+                        .HasDatabaseName("ix_mart_run_entity_mart");
+
+                    b.ToTable("mart_run", "rpt_mart");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Data.Persistence.ModelRow", b =>
                 {
                     b.Property<Guid>("ModelId")
@@ -637,6 +782,16 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_subject_key_destroyed", "destroyed_at IS NULL OR key_material IS NULL");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.MartFigureRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Data.Persistence.MartRunRow", null)
+                        .WithMany()
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_mart_figure_run");
                 });
 #pragma warning restore 612, 618
         }
