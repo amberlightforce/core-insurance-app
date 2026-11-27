@@ -4,15 +4,15 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>chn.Notification.markRead result. PRD outputs: "items"</summary>
+/// <summary>chn.Notification.markRead result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record NotificationMarkReadResponse
 {
-    /// <summary>PRD: "items"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Items { get; init; }
+    /// <summary>Contract member 'updated'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("updated")]
+    public required int Updated { get; init; }
+
+    /// <summary>Contract member 'unreadCount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("unreadCount")]
+    public required int UnreadCount { get; init; }
 }

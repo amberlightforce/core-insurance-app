@@ -18,7 +18,7 @@ namespace CoreIns.IntegrationTests.Platform;
 /// </summary>
 public sealed class ApprovalSodMatrixTests(PostgresFixture database) : IClassFixture<PostgresFixture>, IAsyncLifetime
 {
-    public sealed record Row(string ApprovalType, ModuleCode Module, string SubjectType, string AuthorityType, string Amount, string LowRole, string HighRole, string ReferralRole)
+    public sealed record Row(string ApprovalType, ModuleCode Module, string SubjectType, string AuthorityType, string Amount, string LowRole, string HighRole, string ReferralRole, IReadOnlyDictionary<string, string>? Codes = null)
     {
         public override string ToString() => ApprovalType;
     }
@@ -29,6 +29,9 @@ public sealed class ApprovalSodMatrixTests(PostgresFixture database) : IClassFix
         new Row("BIL.REFUND", ModuleCode.BIL, "Refund", "BIL.REFUND", "1000.00", "Staff.Billing", "Staff.BillingManager", "Staff.BillingManager"),
         new Row("FIN.MANUAL_JOURNAL", ModuleCode.FIN, "ManualJournal", "FIN.MANUAL_JOURNAL", "50000.00", "Staff.Finance", "Platform.Admin", "Staff.Finance"),
         new Row("RI.ADJUSTMENT_APPROVE", ModuleCode.RI, "Adjustment", "RI.ADJUSTMENT_APPROVE", "6000.00", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.ReinsuranceManager"),
+        new Row(
+            "PTY.COMMISSION_AGREEMENT", ModuleCode.PTY, "CommissionAgreementVersion", "PTY.COMMISSION_AGREEMENT", "300000.00", "Staff.Underwriter", "Staff.UnderwritingManager",
+            "Staff.UnderwritingManager", new Dictionary<string, string> { ["rateBand"] = "STANDARD" }),
     ];
 
     private ApiHostFactory _factory = null!;
@@ -64,7 +67,7 @@ public sealed class ApprovalSodMatrixTests(PostgresFixture database) : IClassFix
         Type = row.ApprovalType,
         ObjectRef = new ObjectRef(row.Module, row.SubjectType, subject),
         PayloadHash = Sha256Hash.Parse(hash),
-        Authority = new ApprovalAuthority { Type = row.AuthorityType, Amount = Money.Of(decimal.Parse(row.Amount, System.Globalization.CultureInfo.InvariantCulture), "EUR") },
+        Authority = new ApprovalAuthority { Type = row.AuthorityType, Amount = Money.Of(decimal.Parse(row.Amount, System.Globalization.CultureInfo.InvariantCulture), "EUR"), Codes = row.Codes },
         ReferralRole = row.ReferralRole,
         Reason = "SoD matrix",
     };

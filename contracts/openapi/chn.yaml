@@ -2243,6 +2243,424 @@ paths:
           $ref: common.yaml#/components/responses/NotFound
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal/billing/summary:
+    get:
+      operationId: chn.PortalBilling.summary
+      summary: Portal billing summary
+      description: |-
+        Balances of the customer billing accounts (billed, overdue, credit) and the open invoice count. Read from BIL for the caller scope only.
+      tags:
+      - PortalBilling
+      x-requirement:
+      - REQ-CHN-305
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalBilling.summary
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-CHN-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalBillingSummary'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal/billing/invoices:
+    get:
+      operationId: chn.PortalBilling.invoices
+      summary: Portal invoices
+      description: |-
+        Invoices of the customer policies, earliest due date first; state=open (default) or all.
+      tags:
+      - PortalBilling
+      x-requirement:
+      - REQ-CHN-305
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalBilling.invoices
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-CHN-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalInvoiceListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal/billing/refunds:
+    get:
+      operationId: chn.PortalBilling.refunds
+      summary: Portal refund status
+      description: |-
+        Status of refunds on the customer billing accounts. Amount and state only; no payee details.
+      tags:
+      - PortalBilling
+      x-requirement:
+      - REQ-CHN-305
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalBilling.refunds
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-CHN-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalRefundListResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal/billing/invoices/{id}/pay-now:
+    post:
+      operationId: chn.PortalBilling.payNow
+      summary: Pay an invoice now
+      description: |-
+        Checks the transaction-permission matrix (payment.pay) and the ownership of the invoice and returns the pay-now link. No money moves here; the hosted payment page does that.
+      tags:
+      - PortalBilling
+      x-requirement:
+      - REQ-CHN-305
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: command
+      x-idempotency: none
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalBilling.payNow
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-CHN-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalPayNowResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal/documents:
+    get:
+      operationId: chn.PortalDocument.list
+      summary: Portal document vault
+      description: |-
+        Documents addressed to the customer about their own policies. Staff-internal documents are never listed.
+      tags:
+      - PortalDocument
+      x-requirement:
+      - REQ-CHN-305
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalDocument.list
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-CHN-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: policyId
+        in: query
+        required: false
+        schema:
+          type: string
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalDocumentListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal/documents/{id}/download:
+    get:
+      operationId: chn.PortalDocument.download
+      summary: Download a document
+      description: |-
+        Streams the archived document after ownership and matrix (document.download) checks; records that the portal opened it.
+      tags:
+      - PortalDocument
+      x-requirement:
+      - REQ-CHN-305
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalDocument.download
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-CHN-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/notification-subscriptions:
+    get:
+      operationId: chn.NotificationSubscription.list
+      summary: Notification preferences
+      description: |-
+        The customer notification classes and whether each is on.
+      tags:
+      - NotificationSubscription
+      x-requirement:
+      - REQ-CHN-305
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.NotificationSubscription.list
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-CHN-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSubscriptionListResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/messages/reply:
+    post:
+      operationId: chn.Message.reply
+      summary: Staff reply to a customer message
+      description: |-
+        A staff member answers a customer thread. The customer is notified in the portal.
+      tags:
+      - Message
+      x-requirement:
+      - REQ-CHN-305
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.Message.reply
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      - code: CHN-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      x-source:
+      - BO-CHN-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageReplyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageReplyResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/chn/v1/notifications:
     get:
       operationId: chn.Notification.list
@@ -2450,6 +2868,8 @@ paths:
       - ui
       x-permission: chn.Message.send
       x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
       - code: CHN-ERR-NOT-PERMITTED
         status: 403
       - code: CHN-ERR-IDEMPOTENCY-MISMATCH
@@ -6973,7 +7393,7 @@ components:
       - overdue
     PortalDashboardResponse:
       type: object
-      description: 'chn.Portal.dashboard result. Open requests are not included yet (TODO(hardening) until BO-CHN-04 messages).'
+      description: 'chn.Portal.dashboard result: work left for the customer, plus open message threads and the unread notification count (BO-CHN-04).'
       properties:
         policyCount:
           type: integer
@@ -6987,11 +7407,39 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PortalUnpaidInvoice'
+        unreadNotificationCount:
+          type: integer
+        openRequests:
+          type: array
+          description: Message threads the customer started that staff have not answered yet
+          items:
+            $ref: '#/components/schemas/PortalOpenRequest'
       required:
       - policyCount
       - activePolicyCount
       - renewalsDue
       - unpaidInvoices
+      - unreadNotificationCount
+      - openRequests
+    PortalOpenRequest:
+      type: object
+      properties:
+        threadId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        topic:
+          type: string
+          enum:
+          - GENERAL
+          - POLICY
+          - BILLING
+          - CLAIM
+          - DOCUMENT
+        lastMessageAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - threadId
+      - topic
+      - lastMessageAt
     JourneyStartRequest:
       type: object
       description: 'chn.Journey.start request. PRD inputs: "journey type, context"'
@@ -7502,13 +7950,40 @@ components:
       description: Page of chn.Withdrawal.list results (cursor pagination, contract §3.5.5)
     NotificationListItem:
       type: object
-      description: 'chn.Notification.list result. PRD outputs: "items"'
+      description: 'chn.Notification.list result (BO-CHN-04): in-app notification of the customer. No personal data in the item; the page renders the text from the kind.'
       properties:
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
+        notificationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          type: string
+          enum:
+          - RENEWAL_OFFERED
+          - INVOICE_ISSUED
+          - CLAIM_UPDATED
+          - DOCUMENT_READY
+          - MESSAGE_REPLY
+        notificationClass:
+          type: string
+          enum:
+          - RENEWAL
+          - BILLING
+          - CLAIM
+          - DOCUMENT
+          - MESSAGE
+        subjectType:
+          type: string
+          description: POLICY, INVOICE, CLAIM, DOCUMENT or MESSAGE_THREAD
+        subjectId:
+          type: string
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        readAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - notificationId
+      - kind
+      - notificationClass
+      - createdAt
     NotificationListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7518,75 +7993,174 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/NotificationListItem'
-      description: Page of chn.Notification.list results (cursor pagination, contract §3.5.5)
+          unreadCount:
+            type: integer
+      description: Page of chn.Notification.list results, newest first, with the unread count
     NotificationMarkReadRequest:
       type: object
-      description: 'chn.Notification.markRead request. PRD inputs: "identity, classes"'
+      description: 'chn.Notification.markRead request. Idempotent: already-read items stay as they are.'
       properties:
-        identity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "identity"'
-        classes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "classes"'
+        notificationIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          maxItems: 200
+        all:
+          type: boolean
+          description: Mark every notification of the caller read
     NotificationMarkReadResponse:
       type: object
-      description: 'chn.Notification.markRead result. PRD outputs: "items"'
+      description: 'chn.Notification.markRead result'
       properties:
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
+        updated:
+          type: integer
+        unreadCount:
+          type: integer
+      required:
+      - updated
+      - unreadCount
+    NotificationSubscriptionItem:
+      type: object
+      properties:
+        notificationClass:
+          type: string
+          enum:
+          - RENEWAL
+          - BILLING
+          - CLAIM
+          - DOCUMENT
+          - MESSAGE
+        enabled:
+          type: boolean
+      required:
+      - notificationClass
+      - enabled
     NotificationSubscriptionSetRequest:
       type: object
-      description: 'chn.NotificationSubscription.set request. PRD inputs: "identity, classes"'
+      description: 'chn.NotificationSubscription.set request'
       properties:
-        identity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "identity"'
-        classes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "classes"'
+        notificationClass:
+          type: string
+          enum:
+          - RENEWAL
+          - BILLING
+          - CLAIM
+          - DOCUMENT
+          - MESSAGE
+        enabled:
+          type: boolean
+      required:
+      - notificationClass
+      - enabled
     NotificationSubscriptionSetResponse:
       type: object
-      description: 'chn.NotificationSubscription.set result. PRD outputs: "items"'
+      description: 'chn.NotificationSubscription.set result: every class with its current setting'
       properties:
-        items:
+        subscriptions:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
+            $ref: '#/components/schemas/NotificationSubscriptionItem'
+      required:
+      - subscriptions
+    NotificationSubscriptionListResponse:
+      type: object
+      description: 'chn.NotificationSubscription.list result'
+      properties:
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationSubscriptionItem'
+      required:
+      - subscriptions
     MessageSendRequest:
       type: object
-      description: 'chn.Message.send request. PRD inputs: "topic, object, text, files"'
+      description: 'chn.Message.send request (BO-CHN-04). A new thread needs a topic; a policy reference must be one of the customer policies; threadId continues an existing thread.'
       properties:
         topic:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "topic"'
-        object:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "object"'
+          type: string
+          enum:
+          - GENERAL
+          - POLICY
+          - BILLING
+          - CLAIM
+          - DOCUMENT
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        threadId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         text:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "text"'
-        files:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "files"'
+          type: string
+          minLength: 1
+          maxLength: 4000
+      required:
+      - text
+    MessageItem:
+      type: object
+      properties:
+        messageId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        direction:
+          type: string
+          enum:
+          - CUSTOMER
+          - STAFF
+        text:
+          type: string
+        sentAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - messageId
+      - direction
+      - text
+      - sentAt
+    MessageThread:
+      type: object
+      description: 'A message thread. partyId is set for staff only; awaitingStaff is true while the last message is the customer.'
+      properties:
+        threadId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        topic:
+          type: string
+          enum:
+          - GENERAL
+          - POLICY
+          - BILLING
+          - CLAIM
+          - DOCUMENT
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        lastMessageAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        awaitingStaff:
+          type: boolean
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageItem'
+      required:
+      - threadId
+      - topic
+      - lastMessageAt
+      - awaitingStaff
+      - messages
     MessageSendResponse:
       type: object
-      description: 'chn.Message.send result. PRD outputs: "thread"'
+      description: 'chn.Message.send result: the whole thread'
       properties:
         thread:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "thread"'
+          $ref: '#/components/schemas/MessageThread'
+      required:
+      - thread
     MessageListItem:
       type: object
-      description: 'chn.Message.list result. PRD outputs: "thread"'
+      description: 'chn.Message.list item'
       properties:
         thread:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "thread"'
+          $ref: '#/components/schemas/MessageThread'
+      required:
+      - thread
     MessageListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7596,7 +8170,208 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/MessageListItem'
-      description: Page of chn.Message.list results (cursor pagination, contract §3.5.5)
+      description: Threads, latest activity first; messages inside a thread oldest first. A customer sees only their own threads; staff see all.
+    MessageReplyRequest:
+      type: object
+      description: 'chn.Message.reply request'
+      properties:
+        threadId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        text:
+          type: string
+          minLength: 1
+          maxLength: 4000
+      required:
+      - threadId
+      - text
+    MessageReplyResponse:
+      type: object
+      description: 'chn.Message.reply result'
+      properties:
+        thread:
+          $ref: '#/components/schemas/MessageThread'
+      required:
+      - thread
+    PortalBillingAccountBalance:
+      type: object
+      properties:
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        accountNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        currency:
+          type: string
+        billed:
+          $ref: ../events/common.schema.json#/$defs/Money
+        overdue:
+          $ref: ../events/common.schema.json#/$defs/Money
+        unapplied:
+          $ref: ../events/common.schema.json#/$defs/Money
+        credit:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - billingAccountId
+      - accountNumber
+      - currency
+      - billed
+      - overdue
+      - unapplied
+      - credit
+    PortalBillingSummary:
+      type: object
+      description: 'chn.PortalBilling.summary result'
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortalBillingAccountBalance'
+        openInvoiceCount:
+          type: integer
+        overdueInvoiceCount:
+          type: integer
+      required:
+      - accounts
+      - openInvoiceCount
+      - overdueInvoiceCount
+    PortalInvoice:
+      type: object
+      properties:
+        invoiceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        invoiceNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        issueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        dueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        state:
+          type: string
+        total:
+          $ref: ../events/common.schema.json#/$defs/Money
+        paid:
+          $ref: ../events/common.schema.json#/$defs/Money
+        open:
+          $ref: ../events/common.schema.json#/$defs/Money
+        overdue:
+          type: boolean
+        payable:
+          type: boolean
+          description: Open amount above zero and the invoice is in a payable state
+      required:
+      - invoiceId
+      - invoiceNumber
+      - policyId
+      - issueDate
+      - dueDate
+      - state
+      - total
+      - paid
+      - open
+      - overdue
+      - payable
+    PortalInvoiceListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PortalInvoice'
+      description: Page of chn.PortalBilling.invoices results (cursor is an offset)
+    PortalRefund:
+      type: object
+      properties:
+        refundId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        state:
+          type: string
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        proposedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - refundId
+      - state
+      - amount
+      - proposedAt
+    PortalRefundListResponse:
+      type: object
+      description: 'chn.PortalBilling.refunds result'
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortalRefund'
+      required:
+      - items
+    PortalPayNowResponse:
+      type: object
+      description: 'chn.PortalBilling.payNow result'
+      properties:
+        invoiceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - ALLOW
+          - REFER
+          - DENY
+        payable:
+          type: boolean
+        payUrl:
+          type: string
+          description: Relative link of the hosted payment page; present only when payable
+        reasons:
+          type: array
+          items:
+            type: string
+      required:
+      - invoiceId
+      - decision
+      - payable
+      - reasons
+    PortalDocument:
+      type: object
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        documentNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        documentType:
+          type: string
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        language:
+          type: string
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        firstOpenedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        openCount:
+          type: integer
+      required:
+      - documentId
+      - documentNumber
+      - documentType
+      - createdAt
+      - openCount
+    PortalDocumentListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PortalDocument'
+      description: Page of chn.PortalDocument.list results (cursor is an offset)
     ApiProductCreateRequest:
       type: object
       description: 'chn.ApiProduct.create request. PRD inputs: "product definition"'

@@ -40,7 +40,7 @@ public static class ChannelsErrorCodes
 
     /// <summary>CHN-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 60 operation(s): chn.Agent.mcp, chn.Aggregator.quote, chn.ApiProduct.create, chn.ApiProduct.deprecate, chn.ApiProduct.publish, chn.ApiProduct.retire, chn.Change.confirm, chn.Change.refer, chn.Client.approve, chn.Client.request, chn.Client.revoke, chn.Client.suspend, ….</para>
+    /// <para>Declared by 61 operation(s): chn.Agent.mcp, chn.Aggregator.quote, chn.ApiProduct.create, chn.ApiProduct.deprecate, chn.ApiProduct.publish, chn.ApiProduct.retire, chn.Change.confirm, chn.Change.refer, chn.Client.approve, chn.Client.request, chn.Client.revoke, chn.Client.suspend, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "CHN-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -70,7 +70,7 @@ public static class ChannelsErrorCodes
 
     /// <summary>CHN-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 15 operation(s): chn.Dsar.erase, chn.Dsar.export, chn.Dsar.restrict, chn.Portal.dashboard, chn.Portal.me, chn.Portal.policies, chn.Portal.policy, chn.PortalIdentity.get, chn.PortalIdentity.link, chn.PortalIdentity.unlink, chn.Withdrawal.close, chn.Withdrawal.confirm, ….</para>
+    /// <para>Declared by 24 operation(s): chn.Dsar.erase, chn.Dsar.export, chn.Dsar.restrict, chn.Message.reply, chn.Message.send, chn.NotificationSubscription.list, chn.Portal.dashboard, chn.Portal.me, chn.Portal.policies, chn.Portal.policy, chn.PortalBilling.invoices, chn.PortalBilling.payNow, ….</para>
     /// </remarks>
     public const string NotFound = "CHN-ERR-NOT-FOUND";
 

@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>chn.NotificationSubscription.set result. PRD outputs: "items"</summary>
+/// <summary>chn.NotificationSubscription.set result: every class with its current setting</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record NotificationSubscriptionSetResponse
 {
-    /// <summary>PRD: "items"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Items { get; init; }
+    /// <summary>Contract member 'subscriptions'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("subscriptions")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Channels.Contracts.Api.NotificationSubscriptionItem> Subscriptions { get; init; }
 }

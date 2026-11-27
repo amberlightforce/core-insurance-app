@@ -4,39 +4,55 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>chn.Message.send request. PRD inputs: "topic, object, text, files"</summary>
+/// <summary>chn.Message.send request (BO-CHN-04). A new thread needs a topic; a policy reference must be one of the customer policies; threadId continues an existing thread.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MessageSendRequest
 {
-    /// <summary>PRD: "topic"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'topic'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("topic")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Topic { get; init; }
+    public TopicValue? Topic { get; init; }
 
-    /// <summary>PRD: "object"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("object")]
+    /// <summary>Contract member 'policyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Object { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.PolicyId? PolicyId { get; init; }
 
-    /// <summary>PRD: "text"</summary>
+    /// <summary>Contract member 'threadId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'threadId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("threadId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? ThreadId { get; init; }
+
+    /// <summary>Contract member 'text'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("text")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Text { get; init; }
+    public required string Text { get; init; }
 
-    /// <summary>PRD: "files"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("files")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Files { get; init; }
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<TopicValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum TopicValue
+    {
+        /// <summary><c>GENERAL</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("GENERAL")]
+        General,
+
+        /// <summary><c>POLICY</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("POLICY")]
+        Policy,
+
+        /// <summary><c>BILLING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("BILLING")]
+        Billing,
+
+        /// <summary><c>CLAIM</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CLAIM")]
+        Claim,
+
+        /// <summary><c>DOCUMENT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DOCUMENT")]
+        Document,
+    }
 }

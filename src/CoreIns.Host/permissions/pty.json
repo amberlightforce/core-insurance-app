@@ -33,8 +33,37 @@
         "pty.ProducerCode.search": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pty.Vulnerability.query": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "pty.Vulnerability.record": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsManager", "Platform.Admin" ],
-        "pty.Vulnerability.remove": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsManager", "Platform.Admin" ]
+        "pty.Vulnerability.remove": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsManager", "Platform.Admin" ],
+        // Commission agreements (BO-PTY-10): the underwriter makes and submits, a different person decides (PLT PTY.COMMISSION_AGREEMENT).
+        "pty.CommissionAgreement.get": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ],
+        "pty.CommissionAgreement.compare": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ],
+        "pty.CommissionAgreement.createVersion": [ "Staff.Underwriter", "Staff.UnderwritingManager" ],
+        "pty.CommissionAgreement.submit": [ "Staff.Underwriter", "Staff.UnderwritingManager" ],
+        "pty.CommissionAgreement.approve": [ "Staff.Underwriter", "Staff.UnderwritingManager" ],
+        "pty.CommissionAgreement.resolve": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin", "Service.RenewalRun" ],
+        "pty.CommissionAgreement.simulate": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ]
       }
+    },
+    "Authority": {
+      // ILLUSTRATIVE TEST DATA (BO-PTY-10; no approved commission authority matrix): approval by expected annual volume (EUR) and rate band.
+      // The underwriter may approve a standard-rate agreement up to EUR 250,000; the underwriting manager up to EUR 5,000,000 and elevated
+      // rates. Ignored in Production (fail closed: DENY). Maker, editors and submitter can never approve their own version.
+      "Grants": [
+        {
+          "Id": "pty-underwriter-commission-illustrative", "Role": "Staff.Underwriter", "Type": "PTY.COMMISSION_AGREEMENT", "Illustrative": true,
+          "Limits": [
+            { "Dimension": "amount", "Comparison": "AtMost", "Amount": "250000.00", "Currency": "EUR" },
+            { "Dimension": "rateBand", "Comparison": "InSet", "Codes": [ "STANDARD" ] }
+          ]
+        },
+        {
+          "Id": "pty-uwmanager-commission-illustrative", "Role": "Staff.UnderwritingManager", "Type": "PTY.COMMISSION_AGREEMENT", "Illustrative": true,
+          "Limits": [
+            { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000000.00", "Currency": "EUR" },
+            { "Dimension": "rateBand", "Comparison": "InSet", "Codes": [ "STANDARD", "ELEVATED" ] }
+          ]
+        }
+      ]
     }
   }
 }

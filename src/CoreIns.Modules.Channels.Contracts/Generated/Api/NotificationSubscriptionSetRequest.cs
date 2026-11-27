@@ -4,23 +4,41 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>chn.NotificationSubscription.set request. PRD inputs: "identity, classes"</summary>
+/// <summary>chn.NotificationSubscription.set request</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record NotificationSubscriptionSetRequest
 {
-    /// <summary>PRD: "identity"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("identity")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Identity { get; init; }
+    /// <summary>Contract member 'notificationClass'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("notificationClass")]
+    public required NotificationClassValue NotificationClass { get; init; }
 
-    /// <summary>PRD: "classes"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("classes")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Classes { get; init; }
+    /// <summary>Contract member 'enabled'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("enabled")]
+    public required bool Enabled { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<NotificationClassValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum NotificationClassValue
+    {
+        /// <summary><c>RENEWAL</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RENEWAL")]
+        Renewal,
+
+        /// <summary><c>BILLING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("BILLING")]
+        Billing,
+
+        /// <summary><c>CLAIM</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CLAIM")]
+        Claim,
+
+        /// <summary><c>DOCUMENT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DOCUMENT")]
+        Document,
+
+        /// <summary><c>MESSAGE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MESSAGE")]
+        Message,
+    }
 }

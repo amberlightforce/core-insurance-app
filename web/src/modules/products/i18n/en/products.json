@@ -4,7 +4,10 @@
   "subtitle": "Products with their versions, effective windows and emergency fall-backs.",
   "emptyTitle": "No products yet",
   "emptyBody": "Products appear here once a product version has been imported.",
-  "links": { "packs": "Market packs", "rollback": "Pack rollback exceptions" },
+  "links": {
+    "packs": "Market packs",
+    "rollback": "Pack rollback exceptions"
+  },
   "open": "Open {product}",
   "back": "All products",
   "notFound": "This product was not found.",
@@ -24,7 +27,11 @@
     "renewalTo": "Renewal to",
     "fallback": "Fall-back"
   },
-  "status": { "LOCKED": "Locked", "DRAFT": "Draft", "RETIRED": "Retired" },
+  "status": {
+    "LOCKED": "Locked",
+    "DRAFT": "Draft",
+    "RETIRED": "Retired"
+  },
   "coverage": {
     "title": "Coverages",
     "label": "Coverages",
@@ -45,5 +52,74 @@
     "handling": "Handling",
     "coverage": "Coverage",
     "empty": "This version has no charge types."
+  },
+  "yes": "Yes",
+  "no": "No",
+  "illustrative": "Illustrative data",
+  "tabs": {
+    "label": "Product sections",
+    "overview": "Overview",
+    "versions": "Versions",
+    "coverages": "Coverages and terms",
+    "questions": "Questions",
+    "rating": "Rating"
+  },
+  "versions": {
+    "title": "Version timeline",
+    "now": "Today",
+    "inForce": "In force",
+    "selected": "Selected",
+    "channels": "Channels"
+  },
+  "overview": {
+    "terms": "Terms and windows",
+    "currency": "Contract currency",
+    "allowedTerms": "Allowed terms",
+    "defaultTerm": "Default term",
+    "newBusiness": "New business window",
+    "renewal": "Renewal window",
+    "openEnded": "open",
+    "channels": "Channels",
+    "languages": "Languages",
+    "paymentPlans": "Payment plans",
+    "none": "None declared",
+    "artefact": "Artefact",
+    "hash": "Artefact hash",
+    "abstract": "Abstract version",
+    "steps": "Journey steps",
+    "noSteps": "No steps declared.",
+    "elements": "Risk elements",
+    "noElements": "No risk elements declared.",
+    "step": {
+      "code": "Step",
+      "name": "Name",
+      "kind": "Kind"
+    },
+    "element": {
+      "code": "Element",
+      "name": "Name",
+      "parent": "Parent",
+      "occurs": "Occurrences",
+      "fields": "Fields"
+    }
+  },
+  "term": {
+    "title": "Coverage terms and options",
+    "code": "Term",
+    "name": "Name",
+    "kind": "Kind",
+    "valueType": "Value type",
+    "required": "Required",
+    "values": "Options or range",
+    "empty": "No coverage terms."
+  },
+  "question": {
+    "empty": "This version has no question sets.",
+    "code": "Question",
+    "text": "Text",
+    "type": "Answer type",
+    "required": "Required",
+    "maps": "Feeds field",
+    "illustrative": "Data"
   }
 }

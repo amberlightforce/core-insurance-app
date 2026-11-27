@@ -2507,22 +2507,117 @@ export interface components {
         CommissionAgreementResolveRequest: Record<string, never>;
         /** @description pty.CommissionAgreement.resolve result. PRD outputs: "—" */
         CommissionAgreementResolveResponse: Record<string, never>;
-        /** @description pty.CommissionAgreement.get result. PRD outputs: "—" */
-        CommissionAgreementGetResponse: Record<string, never>;
-        /** @description pty.CommissionAgreement.createVersion request. PRD inputs: "as named" */
-        CommissionAgreementCreateVersionRequest: Record<string, never>;
-        /** @description pty.CommissionAgreement.createVersion result. PRD outputs: "—" */
-        CommissionAgreementCreateVersionResponse: Record<string, never>;
-        /** @description pty.CommissionAgreement.submit request. PRD inputs: "as named" */
-        CommissionAgreementSubmitRequest: Record<string, never>;
-        /** @description pty.CommissionAgreement.submit result. PRD outputs: "—" */
-        CommissionAgreementSubmitResponse: Record<string, never>;
-        /** @description pty.CommissionAgreement.approve request. PRD inputs: "as named" */
-        CommissionAgreementApproveRequest: Record<string, never>;
-        /** @description pty.CommissionAgreement.approve result. PRD outputs: "—" */
-        CommissionAgreementApproveResponse: Record<string, never>;
-        /** @description pty.CommissionAgreement.compare result. PRD outputs: "—" */
-        CommissionAgreementCompareResponse: Record<string, never>;
+        /** @description One commission rate of a version, for a kind of business, optionally a line of business, on a premium basis */
+        CommissionRateLine: {
+            /** @enum {string} */
+            businessType: "NEW_BUSINESS" | "RENEWAL" | "ANY";
+            /** @description Null = every line */
+            lineOfBusiness?: components["schemas"]["Code"] | null;
+            /** @enum {string} */
+            basis: "NET_PREMIUM" | "GROSS_PREMIUM";
+            /** @description Commission rate in percent, 0 to the maximum, at most 4 decimals (decimal string) */
+            ratePct: components["schemas"]["Decimal"];
+        };
+        /** @description A version of a commission agreement. Once ACTIVE it is never edited; a change is a new version. */
+        CommissionAgreementVersionView: {
+            versionId: components["schemas"]["Uuid"];
+            agreementId: components["schemas"]["Uuid"];
+            versionNo: number;
+            /** @enum {string} */
+            status: "DRAFT" | "PENDING_APPROVAL" | "ACTIVE" | "REJECTED";
+            effectiveFrom: components["schemas"]["LocalDate"];
+            /** @description Last day in force, derived from the next ACTIVE version; null while it is the latest */
+            effectiveTo?: components["schemas"]["LocalDate"] | null;
+            expectedAnnualVolume: components["schemas"]["Money"];
+            maxRatePct: components["schemas"]["Decimal"];
+            rateLines: components["schemas"]["CommissionRateLine"][];
+            contentHash: components["schemas"]["Sha256"];
+            approvalRequestId?: components["schemas"]["Uuid"] | null;
+            notes?: string | null;
+            createdBy: string;
+            createdAt: components["schemas"]["Instant"];
+            submittedBy?: string | null;
+            decidedBy?: string | null;
+            decidedAt?: components["schemas"]["Instant"] | null;
+            decisionComment?: string | null;
+        };
+        /** @description A commission agreement (BO-PTY-10, REQ-PTY-010) of one intermediary for one scope, with its versions */
+        CommissionAgreementView: {
+            agreementId: components["schemas"]["Uuid"];
+            intermediaryId: components["schemas"]["Uuid"];
+            productCode?: components["schemas"]["Code"] | null;
+            lineOfBusiness?: components["schemas"]["Code"] | null;
+            versions: components["schemas"]["CommissionAgreementVersionView"][];
+        };
+        /** @description A scalar field that differs between two versions */
+        CommissionFieldChange: {
+            field: string;
+            from?: string | null;
+            to?: string | null;
+        };
+        /** @description A rate line added, removed or changed between two versions (lines match on business type, line of business and basis) */
+        CommissionRateLineChange: {
+            /** @enum {string} */
+            kind: "ADDED" | "REMOVED" | "CHANGED";
+            businessType: string;
+            lineOfBusiness?: components["schemas"]["Code"] | null;
+            basis: string;
+            fromRatePct?: components["schemas"]["Decimal"] | null;
+            toRatePct?: components["schemas"]["Decimal"] | null;
+        };
+        /** @description pty.CommissionAgreement.get result (BO-PTY-10): the agreement with all its versions, oldest first */
+        CommissionAgreementGetResponse: {
+            agreement: components["schemas"]["CommissionAgreementView"];
+        };
+        /** @description pty.CommissionAgreement.createVersion request (BO-PTY-10). Creates the agreement for the scope (intermediary, optional product and line) when it does not exist and adds a DRAFT version. Refused for an intermediary that is not ACTIVE, for a rate above the maximum, for an effective date at or before the settled date and for an effective date not after the latest version. */
+        CommissionAgreementCreateVersionRequest: {
+            intermediaryId: components["schemas"]["Uuid"];
+            /** @description Product the agreement is limited to; null = every product */
+            productCode?: components["schemas"]["Code"] | null;
+            /** @description Line of business the agreement is limited to; null = every line */
+            lineOfBusiness?: components["schemas"]["Code"] | null;
+            effectiveFrom: components["schemas"]["LocalDate"];
+            /** @description Expected annual premium volume (EUR); with the highest rate it decides who may approve */
+            expectedAnnualVolume: components["schemas"]["Money"];
+            rateLines: components["schemas"]["CommissionRateLine"][];
+            notes?: string | null;
+        };
+        /** @description pty.CommissionAgreement.createVersion result */
+        CommissionAgreementCreateVersionResponse: {
+            agreement: components["schemas"]["CommissionAgreementView"];
+            version: components["schemas"]["CommissionAgreementVersionView"];
+        };
+        /** @description pty.CommissionAgreement.submit request (BO-PTY-10): DRAFT to PENDING_APPROVAL; the submitter becomes the maker of the PLT approval request. */
+        CommissionAgreementSubmitRequest: {
+            versionId: components["schemas"]["Uuid"];
+            reason?: string | null;
+        };
+        /** @description pty.CommissionAgreement.submit result */
+        CommissionAgreementSubmitResponse: {
+            version: components["schemas"]["CommissionAgreementVersionView"];
+        };
+        /** @description pty.CommissionAgreement.approve request (BO-PTY-10): the checker approves or rejects a PENDING_APPROVAL version. The maker and anyone who edited it cannot decide (PLT-ERR-SELF-APPROVAL, PLT-ERR-EDITOR-CANNOT-APPROVE); the checker needs commission authority for the expected volume and the highest rate. Supports dry-run. */
+        CommissionAgreementApproveRequest: {
+            versionId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            comment?: string | null;
+            /** @description Hash of the content the checker reviewed; when given it must match the stored version */
+            contentHash?: components["schemas"]["Sha256"] | null;
+        };
+        /** @description pty.CommissionAgreement.approve result */
+        CommissionAgreementApproveResponse: {
+            version: components["schemas"]["CommissionAgreementVersionView"];
+        };
+        /** @description pty.CommissionAgreement.compare result (BO-PTY-10): what differs between two versions of one agreement */
+        CommissionAgreementCompareResponse: {
+            agreementId: components["schemas"]["Uuid"];
+            fromVersionId: components["schemas"]["Uuid"];
+            toVersionId: components["schemas"]["Uuid"];
+            identical: boolean;
+            fieldChanges: components["schemas"]["CommissionFieldChange"][];
+            rateLineChanges: components["schemas"]["CommissionRateLineChange"][];
+        };
         /** @description pty.CommissionAgreement.simulate request. PRD inputs: "as named" */
         CommissionAgreementSimulateRequest: Record<string, never>;
         /** @description pty.CommissionAgreement.simulate result. PRD outputs: "—" */
@@ -2692,6 +2787,15 @@ export interface components {
         OpenObject: {
             [key: string]: components["schemas"]["OpenValue"];
         };
+        /** @description ISO 4217 alphabetic code. */
+        CurrencyCode: string;
+        /** @description Amount as a decimal string plus ISO 4217 currency. */
+        Money: {
+            amount: components["schemas"]["Decimal"];
+            currency: components["schemas"]["CurrencyCode"];
+        };
+        /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
+        Sha256: string;
     };
     responses: {
         /** @description Malformed request or failed schema validation. */
@@ -5548,7 +5652,12 @@ export interface operations {
     };
     "pty.CommissionAgreement.compare": {
         parameters: {
-            query?: never;
+            query: {
+                /** @description The older version */
+                fromVersionId: components["schemas"]["Uuid"];
+                /** @description The version to compare with; must belong to the same agreement */
+                toVersionId: components["schemas"]["Uuid"];
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
