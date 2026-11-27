@@ -126,9 +126,14 @@
       "reject": "Reject",
       "rejectTitle": "Reject this event?",
       "rejectBody": "A rejected event is never posted. This cannot be undone.",
+      "actionReason": "Reason",
+      "actionReasonHelp": "Required to mark as duplicate or reject; optional when running again. Recorded in the audit trail with your name.",
+      "actionReasonRequired": "Give a reason.",
       "failed": "The action was not applied",
       "done": {
-        "rerun": "The event was queued to run again.",
+        "rerun": "The event was run again and posted.",
+        "STILL_SUSPENDED": "The event is still suspended: the cause is not fixed yet.",
+        "NO_OP": "Nothing to do: the event is no longer in the queue.",
         "mark-duplicate": "The event was marked as a duplicate.",
         "reject": "The event was rejected."
       },

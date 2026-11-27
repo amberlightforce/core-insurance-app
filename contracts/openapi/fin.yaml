@@ -6662,52 +6662,112 @@ components:
       description: Page of fin.IntakeException.list results (cursor pagination, contract §3.5.5)
     IntakeExceptionRerunRequest:
       type: object
-      description: 'fin.IntakeException.rerun request. PRD inputs: "filters, item ids"'
+      description: 'fin.IntakeException.rerun request: the suspended business events to act on; an optional reason is audited.'
+      required:
+      - itemIds
       properties:
-        filters:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "filters"'
         itemIds:
           type: array
+          minItems: 1
+          maxItems: 200
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "item ids"'
+          description: Business event ids from the intake exception queue.
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why the events are re-run.
     IntakeExceptionRerunResponse:
       type: object
-      description: 'fin.IntakeException.rerun result. PRD outputs: "outcomes"'
-      x-status: minimal
+      description: 'fin.IntakeException.rerun result: one outcome per requested event.'
+      required:
+      - outcomes
+      properties:
+        outcomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntakeExceptionOutcome'
+    IntakeExceptionOutcome:
+      type: object
+      required:
+      - eventId
+      - outcome
+      properties:
+        eventId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        outcome:
+          type: string
+          enum:
+          - POSTED
+          - WAITING
+          - STILL_SUSPENDED
+          - NO_OP
+          - NOT_FOUND
+          - MARKED_DUPLICATE
+          - REJECTED
+          description: NO_OP when the event is not in the exception queue any more (already posted, duplicate or rejected).
+        detail:
+          type: string
+          description: Why the event is still suspended, when it is.
     IntakeExceptionMarkDuplicateRequest:
       type: object
-      description: 'fin.IntakeException.markDuplicate request. PRD inputs: "filters, item ids"'
+      description: 'fin.IntakeException.markDuplicate request: the suspended business events to act on; a reason is required and audited.'
+      required:
+      - itemIds
+      - reason
       properties:
-        filters:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "filters"'
         itemIds:
           type: array
+          minItems: 1
+          maxItems: 200
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "item ids"'
+          description: Business event ids from the intake exception queue.
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why the events are duplicates.
     IntakeExceptionMarkDuplicateResponse:
       type: object
-      description: 'fin.IntakeException.markDuplicate result. PRD outputs: "outcomes"'
-      x-status: minimal
-    IntakeExceptionRejectRequest:
-      type: object
-      description: 'fin.IntakeException.reject request. PRD inputs: "filters, item ids"'
+      description: 'fin.IntakeException.markDuplicate result: one outcome per requested event.'
+      required:
+      - outcomes
       properties:
-        filters:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "filters"'
-        itemIds:
+        outcomes:
           type: array
           items:
+            $ref: '#/components/schemas/IntakeExceptionOutcome'
+    IntakeExceptionRejectRequest:
+      type: object
+      description: 'fin.IntakeException.reject request: the suspended business events to act on; a reason is required and audited.'
+      required:
+      - itemIds
+      - reason
+      properties:
+        itemIds:
+          type: array
+          minItems: 1
+          maxItems: 200
+          items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "item ids"'
+          description: Business event ids from the intake exception queue.
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why the events are rejected.
     IntakeExceptionRejectResponse:
       type: object
-      description: 'fin.IntakeException.reject result. PRD outputs: "outcomes"'
-      x-status: minimal
+      description: 'fin.IntakeException.reject result: one outcome per requested event.'
+      required:
+      - outcomes
+      properties:
+        outcomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntakeExceptionOutcome'
     ManualJournalCreateRequest:
       type: object
       description: 'fin.ManualJournal.create request. PRD inputs: "template, lines, evidence"'

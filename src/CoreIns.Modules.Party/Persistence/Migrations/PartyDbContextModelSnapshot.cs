@@ -73,6 +73,109 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                     b.ToTable("dsar_restriction", "pty");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryAppointmentRow", b =>
+                {
+                    b.Property<Guid>("AppointmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("appointment_id");
+
+                    b.Property<Guid>("IntermediaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("intermediary_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("product_code");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateOnly?>("ValidTo")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_to");
+
+                    b.HasKey("AppointmentId")
+                        .HasName("pk_intermediary_appointment");
+
+                    b.HasIndex("IntermediaryId")
+                        .HasDatabaseName("ix_intermediary_appointment_intermediary");
+
+                    b.ToTable("intermediary_appointment", "pty");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryConflictRow", b =>
+                {
+                    b.Property<Guid>("ConflictId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("conflict_id");
+
+                    b.Property<DateOnly>("DeclaredOn")
+                        .HasColumnType("date")
+                        .HasColumnName("declared_on");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("IntermediaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("intermediary_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("ConflictId")
+                        .HasName("pk_intermediary_conflict_of_interest");
+
+                    b.HasIndex("IntermediaryId")
+                        .HasDatabaseName("ix_intermediary_coi_intermediary");
+
+                    b.ToTable("intermediary_conflict_of_interest", "pty");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryCpdRow", b =>
+                {
+                    b.Property<Guid>("IntermediaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("intermediary_id");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer")
+                        .HasColumnName("year");
+
+                    b.Property<decimal>("Hours")
+                        .HasColumnType("numeric(6,2)")
+                        .HasColumnName("hours");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<decimal>("RequiredHours")
+                        .HasColumnType("numeric(6,2)")
+                        .HasColumnName("required_hours");
+
+                    b.HasKey("IntermediaryId", "Year")
+                        .HasName("pk_intermediary_cpd");
+
+                    b.ToTable("intermediary_cpd", "pty");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryRow", b =>
                 {
                     b.Property<Guid>("IntermediaryId")
@@ -105,6 +208,10 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                     b.Property<Guid>("LegalEntityId")
                         .HasColumnType("uuid")
                         .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid?>("ParentIntermediaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_intermediary_id");
 
                     b.Property<Guid>("PartyId")
                         .HasColumnType("uuid")
@@ -168,6 +275,9 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                     b.HasIndex("LegalEntityId", "PartyId")
                         .IsUnique()
                         .HasDatabaseName("ux_intermediary_party");
+
+                    b.HasIndex("LegalEntityId", "RegisterNumber")
+                        .HasDatabaseName("ix_intermediary_register_number");
 
                     b.ToTable("intermediary", "pty", t =>
                         {
@@ -887,6 +997,36 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         .HasName("pk_vulnerability");
 
                     b.ToTable("vulnerability", "pty");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryAppointmentRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.IntermediaryRow", null)
+                        .WithMany()
+                        .HasForeignKey("IntermediaryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_intermediary_appointment_intermediary");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryConflictRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.IntermediaryRow", null)
+                        .WithMany()
+                        .HasForeignKey("IntermediaryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_intermediary_coi_intermediary");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryCpdRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.IntermediaryRow", null)
+                        .WithMany()
+                        .HasForeignKey("IntermediaryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_intermediary_cpd_intermediary");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryRow", b =>

@@ -19,7 +19,13 @@ internal static class BusinessEventStatus
     public const string NoPosting = "NO_POSTING";
     public const string Suspended = "SUSPENDED";
 
-    public static readonly string[] All = [Received, Waiting, Posted, NoPosting, Suspended];
+    /// <summary>Closed from the exception queue by finance: the same fact was already posted (BO-FIN-03).</summary>
+    public const string Duplicate = "DUPLICATE";
+
+    /// <summary>Closed from the exception queue by finance: the fact is not to be posted (BO-FIN-03).</summary>
+    public const string Rejected = "REJECTED";
+
+    public static readonly string[] All = [Received, Waiting, Posted, NoPosting, Suspended, Duplicate, Rejected];
 }
 
 /// <summary>

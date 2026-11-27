@@ -20,6 +20,18 @@ public static class ProductErrorCodes
     /// </remarks>
     public const string Authority = "PFC-ERR-AUTHORITY";
 
+    /// <summary>PFC-ERR-CHANGE-SET-NOT-FOUND (HTTP 404).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.edit.</para>
+    /// </remarks>
+    public const string ChangeSetNotFound = "PFC-ERR-CHANGE-SET-NOT-FOUND";
+
+    /// <summary>PFC-ERR-CHANGE-SET-STATE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.edit.</para>
+    /// </remarks>
+    public const string ChangeSetState = "PFC-ERR-CHANGE-SET-STATE";
+
     /// <summary>PFC-ERR-CHECKS-FAILED (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 1 operation(s): pfc.ProductVersion.submit.</para>
@@ -74,6 +86,12 @@ public static class ProductErrorCodes
     /// </remarks>
     public const string InvalidDefinition = "PFC-ERR-INVALID-DEFINITION";
 
+    /// <summary>PFC-ERR-INVALID-EDIT (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): pfc.ChangeSet.edit.</para>
+    /// </remarks>
+    public const string InvalidEdit = "PFC-ERR-INVALID-EDIT";
+
     /// <summary>PFC-ERR-MAKER-IS-CHECKER (HTTP 403).</summary>
     /// <remarks>
     /// <para>Declared by 1 operation(s): pfc.ProductVersion.signOff.</para>
@@ -94,7 +112,7 @@ public static class ProductErrorCodes
 
     /// <summary>PFC-ERR-NO-VERSION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): pfc.Product.describe, pfc.ProductVersion.fallback, pfc.ProductVersion.resolve.</para>
+    /// <para>Declared by 4 operation(s): pfc.ChangeSet.create, pfc.Product.describe, pfc.ProductVersion.fallback, pfc.ProductVersion.resolve.</para>
     /// </remarks>
     public const string NoVersion = "PFC-ERR-NO-VERSION";
 
@@ -103,6 +121,12 @@ public static class ProductErrorCodes
     /// <para>Declared by 4 operation(s): pfc.ProductVersion.cancelSchedule, pfc.ProductVersion.decideFallback, pfc.ProductVersion.fallBack, pfc.ProductVersion.schedule.</para>
     /// </remarks>
     public const string Sod = "PFC-ERR-SOD";
+
+    /// <summary>PFC-ERR-STALE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.edit.</para>
+    /// </remarks>
+    public const string Stale = "PFC-ERR-STALE";
 
     /// <summary>PFC-ERR-UNKNOWN-HASH (HTTP 404).</summary>
     /// <remarks>
@@ -118,7 +142,7 @@ public static class ProductErrorCodes
 
     /// <summary>PFC-ERR-UNKNOWN-PRODUCT (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): pfc.ProductVersion.fallback, pfc.ProductVersion.resolve.</para>
+    /// <para>Declared by 3 operation(s): pfc.ChangeSet.create, pfc.ProductVersion.fallback, pfc.ProductVersion.resolve.</para>
     /// </remarks>
     public const string UnknownProduct = "PFC-ERR-UNKNOWN-PRODUCT";
 
@@ -138,13 +162,15 @@ public static class ProductErrorCodes
     public const string Prefix = "PFC-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Abstract, Authority, ChecksFailed, Conflict, DataUnavailable, FallbackSource, FallbackState, Forbidden, IdempotencyMismatch, ImportInvalid, InvalidDefinition, MakerIsChecker, NoConversionRules, NoRating, NoVersion, Sod, UnknownHash, UnknownItem, UnknownProduct, VersionExists, WindowOverlap];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Abstract, Authority, ChangeSetNotFound, ChangeSetState, ChecksFailed, Conflict, DataUnavailable, FallbackSource, FallbackState, Forbidden, IdempotencyMismatch, ImportInvalid, InvalidDefinition, InvalidEdit, MakerIsChecker, NoConversionRules, NoRating, NoVersion, Sod, Stale, UnknownHash, UnknownItem, UnknownProduct, VersionExists, WindowOverlap];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
     {
         [Abstract] = 422,
         [Authority] = 403,
+        [ChangeSetNotFound] = 404,
+        [ChangeSetState] = 409,
         [ChecksFailed] = 422,
         [Conflict] = 409,
         [DataUnavailable] = 503,
@@ -154,11 +180,13 @@ public static class ProductErrorCodes
         [IdempotencyMismatch] = 409,
         [ImportInvalid] = 422,
         [InvalidDefinition] = 422,
+        [InvalidEdit] = 422,
         [MakerIsChecker] = 403,
         [NoConversionRules] = 422,
         [NoRating] = 422,
         [NoVersion] = 422,
         [Sod] = 403,
+        [Stale] = 409,
         [UnknownHash] = 404,
         [UnknownItem] = 422,
         [UnknownProduct] = 422,
