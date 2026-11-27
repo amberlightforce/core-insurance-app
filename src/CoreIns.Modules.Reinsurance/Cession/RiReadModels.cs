@@ -14,7 +14,7 @@ namespace CoreIns.Modules.Reinsurance.Cession;
 
 /// <summary>
 /// Read side of cessions, cession exceptions, programmes and participations (<c>ri.Cession.*</c>, <c>ri.CessionException.list</c>,
-/// <c>ri.Programme.list/get</c>, <c>ri.Participation.list</c>; contracts/openapi/ri.yaml). Everything is scoped to the caller's legal
+/// <c>ri.Participation.list</c> (the programme reads moved to ProgrammeReader, BO-RI-01); contracts/openapi/ri.yaml). Everything is scoped to the caller's legal
 /// entity (another entity's row is "not found"). Pages are keyset pages: the cursor is the last key of the previous page, the
 /// sort is the key (stable under inserts), the page size is capped.
 /// </summary>
@@ -156,67 +156,6 @@ internal sealed class RiReadModels(ReinsuranceDbContext db, RequestContext conte
             Checks = Json(new { signedLinesSumPct = Pct(sums[x.v.VersionId]), placedPct = Pct(x.v.PlacedPct), signedLinesMatchPlaced = sums[x.v.VersionId] == x.v.PlacedPct }),
         }).ToList();
         return (items, rows.Count > size ? rows[size - 1].p.ParticipationId.ToString("D") : null, size);
-    }
-
-    /// <summary>
-    /// <c>ri.Programme.list</c>: a programme is the set of a legal entity's contracts of one contract year, newest year first.
-    /// TODO(hardening): there is no programme aggregate yet (create/update/renew are not built); this is a read projection.
-    /// </summary>
-    public async Task<Result<(IReadOnlyList<ProgrammeListItem> Items, string? Next, int Limit)>> ListProgrammesAsync(
-        string? cursor, int? limit, CancellationToken cancellationToken)
-    {
-        var size = limit ?? DefaultLimit;
-        if (size is < 1 or > MaxLimit)
-        {
-            return RiErrors.Validation("limit", "LIMIT_RANGE", $"The limit is between 1 and {MaxLimit}.");
-        }
-
-        var before = int.MaxValue;
-        if (cursor is not null && !int.TryParse(cursor, NumberStyles.None, CultureInfo.InvariantCulture, out before))
-        {
-            return RiErrors.Validation("cursor", "CURSOR", "The cursor is not valid.");
-        }
-
-        var legalEntity = LegalEntityKey;
-        var years = await db.Contracts.AsNoTracking().Where(c => c.LegalEntityId == legalEntity && c.ContractYear < before)
-            .Select(c => c.ContractYear).Distinct().OrderByDescending(y => y).Take(size + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var page = years.Take(size).ToList();
-        var items = new List<ProgrammeListItem>();
-        foreach (var year in page)
-        {
-            items.Add(new ProgrammeListItem { Programmes = await ProgrammeAsync(legalEntity, year, cancellationToken).ConfigureAwait(false) });
-        }
-
-        return (items, years.Count > size ? page[^1].ToString(CultureInfo.InvariantCulture) : null, size);
-    }
-
-    /// <summary><c>ri.Programme.get</c>: the programme of one contract year; null when the entity has no contract of that year.</summary>
-    public async Task<ProgrammeGetResponse?> GetProgrammeAsync(string id, CancellationToken cancellationToken)
-    {
-        if (!int.TryParse(id, NumberStyles.None, CultureInfo.InvariantCulture, out var year))
-        {
-            return null;
-        }
-
-        var element = await ProgrammeAsync(LegalEntityKey, year, cancellationToken).ConfigureAwait(false);
-        return element is null ? null : new ProgrammeGetResponse { Programmes = element };
-    }
-
-    private async Task<JsonElement?> ProgrammeAsync(LegalEntityId legalEntity, int year, CancellationToken cancellationToken)
-    {
-        var contracts = await db.Contracts.AsNoTracking().Where(c => c.LegalEntityId == legalEntity && c.ContractYear == year)
-            .OrderBy(c => c.ContractNumber).ToListAsync(cancellationToken).ConfigureAwait(false);
-        if (contracts.Count == 0)
-        {
-            return null;
-        }
-
-        return Json(new
-        {
-            programmeId = year.ToString(CultureInfo.InvariantCulture),
-            contractYear = year,
-            contracts = contracts.Select(c => new { contractId = c.ContractId.Value, contractNumber = c.ContractNumber, contractType = c.ContractType, status = c.Status, currency = c.Currency.Trim() }),
-        });
     }
 
     private DomainError? Paging(Instant? knownAt, string? cursor, int? limit, out Guid? after, out int size)
