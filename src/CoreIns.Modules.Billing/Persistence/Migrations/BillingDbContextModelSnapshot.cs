@@ -1815,6 +1815,102 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.LevyPayableRow", b =>
+                {
+                    b.Property<Guid>("LevyPayableId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("levy_payable_id");
+
+                    b.Property<decimal>("CollectedAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("collected_amount");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<Guid>("DisbursementId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("disbursement_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("LegalStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_status");
+
+                    b.Property<string>("LevyAuthority")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("levy_authority");
+
+                    b.Property<decimal>("PayableAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("payable_amount");
+
+                    b.Property<Guid>("PayeeAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payee_account_id");
+
+                    b.Property<Guid>("PayeePartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payee_party_id");
+
+                    b.Property<string>("Period")
+                        .IsRequired()
+                        .HasColumnType("char(7)")
+                        .HasColumnName("period");
+
+                    b.Property<bool>("Provisional")
+                        .HasColumnType("boolean")
+                        .HasColumnName("provisional");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("requested_at");
+
+                    b.Property<string>("RequestedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("requested_by");
+
+                    b.Property<string>("SourceId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_id");
+
+                    b.HasKey("LevyPayableId")
+                        .HasName("pk_levy_payable");
+
+                    b.HasIndex("DisbursementId")
+                        .HasDatabaseName("ix_levy_payable_disbursement");
+
+                    b.HasIndex("LegalEntityId", "LevyAuthority", "Period")
+                        .IsUnique()
+                        .HasDatabaseName("ux_levy_payable_authority_period");
+
+                    b.ToTable("levy_payable", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_levy_payable_amount", "payable_amount > 0 AND collected_amount >= payable_amount");
+
+                            t.HasCheckConstraint("ck_levy_payable_currency", "currency ~ '^[A-Z]{3}$'");
+
+                            t.HasCheckConstraint("ck_levy_payable_period", "period ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'");
+
+                            t.HasCheckConstraint("ck_levy_payable_record_version", "record_version >= 1");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.PayeeAccountRow", b =>
                 {
                     b.Property<Guid>("PayeeAccountId")
@@ -2968,6 +3064,16 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_ledger_rule_debit");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.LevyPayableRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.DisbursementRow", null)
+                        .WithMany()
+                        .HasForeignKey("DisbursementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_levy_payable_disbursement");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.PlanInstanceRow", b =>

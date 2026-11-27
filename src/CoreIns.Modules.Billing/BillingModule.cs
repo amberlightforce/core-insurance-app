@@ -61,6 +61,7 @@ public static class BillingModule
                 $"GRANT SELECT, INSERT ON {Schema}.receivable, {Schema}.receivable_allocation, {Schema}.allocation, {Schema}.credit_application, {Schema}.ledger_entry, {Schema}.ledger_line TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.migration_receivable, {Schema}.migration_mandate TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.suspense_item TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.levy_payable TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
@@ -122,6 +123,9 @@ public static class BillingModule
         services.AddScoped<PayeeProtection>();
         services.AddScoped<DisbursementReader>();
         services.AddScoped<TaxLevyReader>();
+        services.AddScoped<IValidator<RequestLevyPayment>, RequestLevyPaymentValidator>();
+        services.AddCommandAuditor<RequestLevyPayment, TaxLevyRequestLevyPaymentResponse, RequestLevyPaymentAuditor>();
+        services.AddCommand<RequestLevyPayment, TaxLevyRequestLevyPaymentResponse, RequestLevyPaymentHandler>(CommandDescriptor.For("bil.TaxLevy.requestLevyPayment") with { SupportsDryRun = true });
         services.AddScoped<MigratedRecordsReader>();
         services.AddScoped<BillingOpsReader>();
         services.AddScoped<SuspenseReader>();
@@ -309,6 +313,10 @@ public static class BillingModule
             .Describe("Η πληρωμή δεν περιμένει έγκριση αποδέσμευσης.", "The disbursement is not awaiting a release approval."),
         ErrorDefinition.For(ModuleCode.BIL, "DUPLICATE", 409, "Πιθανή διπλή πληρωμή", "Possible duplicate payment")
             .Describe("Υπάρχει ήδη πληρωμή για την ίδια πηγή ή με τον ίδιο λογαριασμό, ποσό και αναφορά.", "A payment already exists for the same source or with the same account, amount and reference."),
+        ErrorDefinition.For(ModuleCode.BIL, "LEVY-UNSETTLED", 422, "Η εισφορά δεν έχει διευθετηθεί νομικά", "The levy is not legally settled")
+            .Describe("Εισφορά που στηρίζεται σε γραμμές χωρίς διευθετημένο νομικό καθεστώς δεν πληρώνεται σε παραγωγή.", "A levy that rests on rows that are not legally settled is not paid in Production."),
+        ErrorDefinition.For(ModuleCode.BIL, "NOTHING-PAYABLE", 422, "Δεν υπάρχει πληρωτέα εισφορά", "There is no levy to pay")
+            .Describe("Δεν υπάρχει θετικό καθαρό ποσό εισφοράς για την περίοδο και το νόμισμα.", "There is no positive net levy for the period and currency."),
     ];
 }
 
