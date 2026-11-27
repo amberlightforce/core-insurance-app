@@ -224,7 +224,7 @@ internal sealed partial class Intake(
 
         // G5 (REQ-POL-108): nothing posts into a locked period. A correction posts on the first day of the first open period, with its
         // reference; any other journal for a locked month is an intake exception (never a silent re-dating).
-        // TODO(hardening): a correction entry that overtakes its ChargeDeltaEmitted is suspended as PERIOD_LOCKED (re-run after the delta arrives); wait for the delta context instead.
+        // A correction entry that overtakes its ChargeDeltaEmitted is suspended as PERIOD_LOCKED here and re-run when the delta arrives (RetryPeriodLockedAsync, BO-FIN-03).
         var correction = await corrections.FindAsync(entry, cancellationToken).ConfigureAwait(false);
         if (await periods.IsLockedAsync(legalEntity.Value, entry.AccountingDate, cancellationToken).ConfigureAwait(false))
         {
@@ -402,6 +402,67 @@ internal sealed partial class Intake(
                 row.Attempts++;
                 await SuspendAsync(row, ExceptionReasons.PostingError, $"{ex.GetType().Name}: {ex.GetBaseException().Message}", TryNormalise(row.Payload), cancellationToken).ConfigureAwait(false);
             }
+        }
+    }
+
+    /// <summary>
+    /// Re-dispatches a suspended business event (BO-FIN-03, REQ-FIN-080): the stored event is posted again against the rules, accounts and
+    /// periods as they are now. Isolated by a savepoint like <see cref="ReleaseAsync"/>: a failure leaves the event suspended with
+    /// POSTING_ERROR. Returns the event as it stands afterwards (Posted, Waiting or Suspended again); a no-op for an event that is not suspended.
+    /// </summary>
+    public async Task<BusinessEventRow> RerunAsync(Guid businessEventId, string? reason, CancellationToken cancellationToken)
+    {
+        var transaction = session.Transaction ?? throw new InvalidOperationException("Rerun runs inside the command's transaction.");
+        var savepoint = "fin_rerun_" + businessEventId.ToString("N");
+        await transaction.SaveAsync(savepoint, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var row = await db.BusinessEvents.SingleAsync(b => b.BusinessEventId == businessEventId, cancellationToken).ConfigureAwait(false);
+            if (row.Status != BusinessEventStatus.Suspended)
+            {
+                await transaction.ReleaseAsync(savepoint, cancellationToken).ConfigureAwait(false);
+                return row;
+            }
+
+            row.Status = BusinessEventStatus.Received;
+            row.ExceptionReason = null;
+            row.ExceptionDetail = null;
+            row.WaitingOn = null;
+            row.Attempts++;
+            row.ResolutionReason = reason;
+            row.ResolvedBy = null;
+            row.ResolvedAt = null;
+            await PostAsync(row, cancellationToken).ConfigureAwait(false);
+            await transaction.ReleaseAsync(savepoint, cancellationToken).ConfigureAwait(false);
+            return row;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            await transaction.RollbackAsync(savepoint, cancellationToken).ConfigureAwait(false);
+            db.ChangeTracker.Clear();
+            var row = await db.BusinessEvents.SingleAsync(b => b.BusinessEventId == businessEventId, cancellationToken).ConfigureAwait(false);
+            row.Attempts++;
+            await SuspendAsync(row, ExceptionReasons.PostingError, $"{ex.GetType().Name}: {ex.GetBaseException().Message}", TryNormalise(row.Payload), cancellationToken).ConfigureAwait(false);
+            return row;
+        }
+    }
+
+    /// <summary>
+    /// A POL <c>ChargeDeltaEmitted</c> for a policy has arrived: re-runs that policy's entries suspended as PERIOD_LOCKED, because a correction entry
+    /// that overtook its delta could not be recognised as a correction until now (REQ-POL-108). Entries that are still not corrections are suspended again.
+    /// </summary>
+    public async Task RetryPeriodLockedAsync(Guid policyId, CancellationToken cancellationToken)
+    {
+        // The queue of PERIOD_LOCKED exceptions is small; the policy is matched on the stored entry's line dimensions.
+        var policyText = policyId.ToString("D");
+        var candidates = await db.BusinessEvents.AsNoTracking()
+            .Where(b => b.Status == BusinessEventStatus.Suspended && b.ExceptionReason == ExceptionReasons.PeriodLocked)
+            .OrderBy(b => b.ReceivedAt).Select(b => new { b.BusinessEventId, b.Payload })
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        var ids = candidates.Where(c => c.Payload.Contains(policyText, StringComparison.OrdinalIgnoreCase)).Select(c => c.BusinessEventId).ToList();
+        foreach (var id in ids)
+        {
+            await RerunAsync(id, null, cancellationToken).ConfigureAwait(false);
         }
     }
 
