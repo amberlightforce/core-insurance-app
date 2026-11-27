@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CoreIns.Modules.Billing.Persistence.Migrations
 {
     [DbContext(typeof(BillingDbContext))]
-    [Migration("20261127084237_InstalmentInvoices")]
+    [Migration("20261127091757_InstalmentInvoices")]
     partial class InstalmentInvoices
     {
         /// <inheritdoc />
@@ -257,6 +257,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                     b.HasKey("AllocationId")
                         .HasName("pk_allocation");
+
+                    b.HasIndex("InvoiceId")
+                        .HasDatabaseName("ix_allocation_invoice");
 
                     b.HasIndex("InvoiceItemId")
                         .HasDatabaseName("ix_allocation_item");
@@ -508,6 +511,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.HasKey("ChargeId")
                         .HasName("pk_charge");
 
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_charge_policy");
+
                     b.HasIndex("TermId")
                         .HasDatabaseName("ix_charge_term");
 
@@ -598,6 +604,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                     b.HasIndex("RefundId")
                         .HasDatabaseName("ix_credit_application_refund");
+
+                    b.HasIndex("TargetInvoiceId")
+                        .HasDatabaseName("ix_credit_application_target_invoice");
 
                     b.HasIndex("TargetInvoiceItemId")
                         .HasDatabaseName("ix_credit_application_target_item");
@@ -727,6 +736,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                     b.HasIndex("NoticeDocumentId")
                         .HasDatabaseName("ix_delinquency_case_document");
+
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_delinquency_case_policy");
 
                     b.HasIndex("TermId")
                         .IsUnique()
@@ -973,6 +985,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                     b.HasIndex("PayeeAccountId");
 
+                    b.HasIndex("PayeePartyId")
+                        .HasDatabaseName("ix_disbursement_payee_party");
+
                     b.HasIndex("LegalEntityId", "DisbursementNumber")
                         .IsUnique()
                         .HasDatabaseName("ux_disbursement_number");
@@ -1217,21 +1232,24 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.HasKey("InvoiceItemId")
                         .HasName("pk_invoice_item");
 
-                    b.HasIndex("ChargeId")
-                        .IsUnique()
-                        .HasDatabaseName("ux_invoice_item_charge")
-                        .HasFilter("credits_item_id IS NULL");
-
                     b.HasIndex("CreditsItemId")
                         .HasDatabaseName("ix_invoice_item_credits");
 
                     b.HasIndex("InvoiceId")
                         .HasDatabaseName("ix_invoice_item_invoice");
 
+                    b.HasIndex("TermId")
+                        .HasDatabaseName("ix_invoice_item_term");
+
                     b.HasIndex("ChargeId", "CreditsItemId")
                         .IsUnique()
                         .HasDatabaseName("ux_credit_item_charge")
                         .HasFilter("credits_item_id IS NOT NULL");
+
+                    b.HasIndex("ChargeId", "InvoiceId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_invoice_item_charge")
+                        .HasFilter("credits_item_id IS NULL");
 
                     b.ToTable("invoice_item", "bil", t =>
                         {
@@ -1397,6 +1415,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                     b.HasIndex("PolicyId")
                         .HasDatabaseName("ix_invoice_policy");
+
+                    b.HasIndex("TermId")
+                        .HasDatabaseName("ix_invoice_term");
 
                     b.HasIndex("LegalEntityId", "InvoiceNumber")
                         .IsUnique()
@@ -1694,6 +1715,15 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasName("pk_ledger_line");
 
                     b.HasIndex("AccountCode");
+
+                    b.HasIndex("ClaimId")
+                        .HasDatabaseName("ix_ledger_line_claim");
+
+                    b.HasIndex("InvoiceId")
+                        .HasDatabaseName("ix_ledger_line_invoice");
+
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_ledger_line_policy");
 
                     b.HasIndex("BillingAccountId", "AccountCode")
                         .HasDatabaseName("ix_ledger_line_account");
@@ -2291,6 +2321,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                     b.HasIndex("BillingAccountId");
 
+                    b.HasIndex("ClaimId")
+                        .HasDatabaseName("ix_receivable_claim");
+
                     b.HasIndex("PaymentReference")
                         .IsUnique();
 
@@ -2366,6 +2399,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                     b.HasIndex("CreditItemId")
                         .HasDatabaseName("ix_refund_credit_item");
+
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_refund_credit_policy");
 
                     b.HasIndex("RefundId", "CreditItemId")
                         .IsUnique()
@@ -2589,6 +2625,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                     b.HasIndex("PayeeAccountId");
 
+                    b.HasIndex("PayeePartyId")
+                        .HasDatabaseName("ix_refund_payee_party");
+
                     b.HasIndex("LegalEntityId", "BillingAccountId")
                         .HasDatabaseName("ix_refund_account");
 
@@ -2672,6 +2711,9 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                     b.HasKey("SetId")
                         .HasName("pk_respread");
+
+                    b.HasIndex("BillingAccountId")
+                        .HasDatabaseName("ix_respread_billing_account");
 
                     b.HasIndex("OosSetId")
                         .HasDatabaseName("ix_respread_oos_set");

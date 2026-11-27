@@ -1229,11 +1229,6 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.HasKey("InvoiceItemId")
                         .HasName("pk_invoice_item");
 
-                    b.HasIndex("ChargeId")
-                        .IsUnique()
-                        .HasDatabaseName("ux_invoice_item_charge")
-                        .HasFilter("credits_item_id IS NULL");
-
                     b.HasIndex("CreditsItemId")
                         .HasDatabaseName("ix_invoice_item_credits");
 
@@ -1247,6 +1242,11 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_credit_item_charge")
                         .HasFilter("credits_item_id IS NOT NULL");
+
+                    b.HasIndex("ChargeId", "InvoiceId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_invoice_item_charge")
+                        .HasFilter("credits_item_id IS NULL");
 
                     b.ToTable("invoice_item", "bil", t =>
                         {
@@ -1323,6 +1323,18 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.Property<string>("FiscalUid")
                         .HasColumnType("text")
                         .HasColumnName("fiscal_uid");
+
+                    b.Property<int>("InstalmentCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("instalment_count");
+
+                    b.Property<int>("InstalmentNo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("instalment_no");
 
                     b.Property<string>("InvoiceNumber")
                         .IsRequired()
@@ -1408,15 +1420,15 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_invoice_number");
 
-                    b.HasIndex("TransactionId", "Kind")
-                        .IsUnique()
-                        .HasDatabaseName("ux_invoice_transaction")
-                        .HasFilter("kind = 'INVOICE'");
-
                     b.HasIndex("TransactionId", "OriginalInvoiceId")
                         .IsUnique()
                         .HasDatabaseName("ux_credit_note_reference")
                         .HasFilter("kind = 'CREDIT_NOTE'");
+
+                    b.HasIndex("TransactionId", "Kind", "InstalmentNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_invoice_transaction")
+                        .HasFilter("kind = 'INVOICE'");
 
                     b.ToTable("invoice", "bil", t =>
                         {

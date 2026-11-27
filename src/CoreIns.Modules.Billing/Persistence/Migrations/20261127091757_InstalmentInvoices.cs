@@ -11,6 +11,11 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
+                name: "ux_invoice_item_charge",
+                schema: "bil",
+                table: "invoice_item");
+
+            migrationBuilder.DropIndex(
                 name: "ux_invoice_transaction",
                 schema: "bil",
                 table: "invoice");
@@ -32,6 +37,14 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                 defaultValue: 1);
 
             migrationBuilder.CreateIndex(
+                name: "ux_invoice_item_charge",
+                schema: "bil",
+                table: "invoice_item",
+                columns: new[] { "charge_id", "invoice_id" },
+                unique: true,
+                filter: "credits_item_id IS NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "ux_invoice_transaction",
                 schema: "bil",
                 table: "invoice",
@@ -43,6 +56,11 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropIndex(
+                name: "ux_invoice_item_charge",
+                schema: "bil",
+                table: "invoice_item");
+
             migrationBuilder.DropIndex(
                 name: "ux_invoice_transaction",
                 schema: "bil",
@@ -57,6 +75,14 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                 name: "instalment_no",
                 schema: "bil",
                 table: "invoice");
+
+            migrationBuilder.CreateIndex(
+                name: "ux_invoice_item_charge",
+                schema: "bil",
+                table: "invoice_item",
+                column: "charge_id",
+                unique: true,
+                filter: "credits_item_id IS NULL");
 
             migrationBuilder.CreateIndex(
                 name: "ux_invoice_transaction",

@@ -316,7 +316,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
             // A charge is billed exactly once (REQ-BIL-002: one set of scheduled items). A credit charge is split over the
             // original items it credits, once per original item.
-            entity.HasIndex(e => e.ChargeId).IsUnique().HasFilter("credits_item_id IS NULL").HasDatabaseName("ux_invoice_item_charge");
+            entity.HasIndex(e => new { e.ChargeId, e.InvoiceId }).IsUnique().HasFilter("credits_item_id IS NULL").HasDatabaseName("ux_invoice_item_charge");
             entity.HasIndex(e => new { e.ChargeId, e.CreditsItemId }).IsUnique().HasFilter("credits_item_id IS NOT NULL")
                 .HasDatabaseName("ux_credit_item_charge");
             entity.HasIndex(e => e.CreditsItemId).HasDatabaseName("ix_invoice_item_credits");
