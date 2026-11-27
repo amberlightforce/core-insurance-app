@@ -408,7 +408,6 @@ CONTRACT_NOT_SERVED POST /api/doc/v1/archives/verify
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/delete-draft
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/hide
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/import
-CONTRACT_NOT_SERVED POST /api/doc/v1/documents/preview
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/render-as-of
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/request-batch
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/resend
