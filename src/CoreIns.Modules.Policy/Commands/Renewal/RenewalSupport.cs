@@ -58,6 +58,10 @@ internal static class RenewalErrors
             .Describe(
                 "Μετά τη δημιουργία της ανανέωσης δεσμεύτηκε αλλαγή στον τρέχοντα όρο. Κάντε νέα προσφορά· ξαναχτίζεται πάνω στην τελευταία κατάσταση.",
                 "A change was bound on the expiring term after the renewal was created. Offer the renewal again; it is rebuilt on the latest state."),
+        ErrorDefinition.For(ModuleCode.POL, "RUN-ACTIVE", 409, "Υπάρχει ήδη ενεργή μαζική ανανέωση", "A renewal run is already active")
+            .Describe(
+                "Μία μαζική ανανέωση της νομικής οντότητας τρέχει ή είναι σε παύση. Ολοκληρώστε την ή συνεχίστε την πρώτα.",
+                "A renewal run of this legal entity is running or paused. Finish or resume it first."),
         ErrorDefinition.For(ModuleCode.POL, "NOTICE-TOO-LATE", 422, "Η ειδοποίηση μη ανανέωσης έχει καθυστερήσει", "The non-renewal notice is too late")
             .Describe(
                 "Η ειδοποίηση πρέπει να δοθεί πριν από το νόμιμο όριο προ της λήξης του όρου.",
