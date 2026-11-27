@@ -271,8 +271,7 @@ export interface paths {
          * Availability of any item
          * @description Availability of any item
          *
-         *     PRD inputs: hash, item, context (region, channel, transaction type, producer, element data, date)
-         *     PRD outputs: available, reason, winning rule id
+         *     BO-PFC-05: the sellable offerings for a channel and transaction type on a date (published, non-abstract versions only).
          */
         post: operations["pfc.Availability.check"];
         delete?: never;
@@ -1276,7 +1275,7 @@ export interface components {
             customerType: string;
             versions: components["schemas"]["ProductListVersion"][];
         };
-        /** @description Page of pfc.Product.list results (the whole catalogue of the legal entity, one page) */
+        /** @description Page of pfc.Product.list results (cursor pagination, contract §3.5.5; ordered by product code) */
         ProductListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["ProductListItem"][];
         };
@@ -1326,65 +1325,133 @@ export interface components {
             /** @description PRD: "non-renew decision" */
             nonRenewDecision?: components["schemas"]["Unspecified"];
         };
-        /** @description pfc.Availability.check request. PRD inputs: "hash, item, context (region, channel, transaction type, producer, element data, date)" */
+        /** @description pfc.Availability.check request (BO-PFC-05): which products can be sold on a channel for a transaction type. The decision date is the validAt query parameter (default today, Athens). */
         AvailabilityCheckRequest: {
-            /** @description PRD: "hash" */
-            hash?: components["schemas"]["Sha256"];
-            /** @description PRD: "item" */
-            item?: components["schemas"]["Unspecified"];
-            /** @description PRD: "context (region, channel, transaction type, producer, element data, date)" */
-            context?: components["schemas"]["Unspecified"];
+            channel: components["schemas"]["Code"];
+            /**
+             * @description Which window of a version applies. Defaults to NewBusiness.
+             * @enum {string}
+             */
+            transactionType?: "NewBusiness" | "Renewal";
+            /** @description Optional filter, for example PERSON or COMPANY. */
+            customerType?: string;
+            /** @description Optional, only this product code. */
+            product?: components["schemas"]["Code"];
         };
-        /** @description pfc.Availability.check result. PRD outputs: "available, reason, winning rule id" */
+        /** @description One sellable product with the Locked version that would be used. */
+        AvailabilityOffering: {
+            product: components["schemas"]["Code"];
+            name: components["schemas"]["LocalizedText"];
+            productType: string;
+            customerType: string;
+            version: components["schemas"]["ProductVersionNumber"];
+            artefactHash: components["schemas"]["Sha256"];
+            contractCurrency: components["schemas"]["CurrencyCode"];
+        };
+        /** @description pfc.Availability.check result: the sellable offerings (only published, non-abstract versions whose window covers the date). */
         AvailabilityCheckResponse: {
-            /** @description PRD: "available" */
-            available?: boolean;
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-            /** @description PRD: "winning rule id" */
-            winningRuleId?: components["schemas"]["Uuid"];
+            /** @description True when at least one offering is sellable. */
+            available: boolean;
+            /** @description When nothing is available, a code (NO-VERSION-IN-WINDOW); otherwise null. */
+            reason: string | null;
+            offerings: components["schemas"]["AvailabilityOffering"][];
         };
-        /** @description pfc.Product.describe request. PRD inputs: "product or hash, channel, transactionType, language, date" */
+        /** @description pfc.Product.describe request: a product code (resolved to the published version in force on validAt for the channel and transaction type) or an artefact hash. */
         ProductDescribeRequest: {
-            /** @description PRD: "product or hash" (optional) */
-            product?: components["schemas"]["Unspecified"];
-            /** @description PRD: "product or hash" (optional) */
+            product?: components["schemas"]["Code"];
             hash?: components["schemas"]["Sha256"];
-            /** @description PRD: "channel" */
-            channel?: components["schemas"]["Unspecified"];
-            /** @description PRD: "transactionType" */
-            transactionType?: components["schemas"]["Unspecified"];
-            /** @description PRD: "language" */
+            /** @description Required with product. */
+            channel?: components["schemas"]["Code"];
+            /**
+             * @description Defaults to NewBusiness.
+             * @enum {string}
+             */
+            transactionType?: "NewBusiness" | "Renewal";
+            /** @description Echoed; both languages are always returned. */
             language?: components["schemas"]["LanguageCode"];
         } & (unknown | unknown);
-        /** @description pfc.Product.describe result. PRD outputs: "ordered steps, fields, rules, offerings, coverages, payment plans" */
+        DescribeStep: {
+            code: string;
+            name: components["schemas"]["LocalizedText"];
+            questionSet?: string | null;
+            /** @description ELEMENTS, QUESTIONS or COVERAGES. */
+            kind: string;
+        };
+        /** @description pfc.Product.describe result: names, terms, windows, risk structure, coverages, questions, payment plans and the artefact hash. */
         ProductDescribeResponse: {
-            /** @description PRD: "ordered steps" */
-            orderedSteps?: components["schemas"]["Unspecified"];
-            /** @description PRD: "fields" */
-            fields?: components["schemas"]["Unspecified"];
-            /** @description PRD: "rules" */
-            rules?: components["schemas"]["Unspecified"];
-            /** @description PRD: "offerings" */
-            offerings?: components["schemas"]["Unspecified"];
-            /** @description PRD: "coverages" */
-            coverages?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payment plans" */
-            paymentPlans?: components["schemas"]["Unspecified"];
+            product: components["schemas"]["Code"];
+            name: components["schemas"]["LocalizedText"];
+            productType: string;
+            customerType: string;
+            version: components["schemas"]["ProductVersionNumber"];
+            artefactHash: components["schemas"]["Sha256"];
+            isAbstract: boolean;
+            channels: components["schemas"]["Code"][];
+            languages: components["schemas"]["LanguageCode"][];
+            contractCurrency: components["schemas"]["CurrencyCode"];
+            terms: components["schemas"]["ProductTerms"];
+            windows: components["schemas"]["ProductWindows"];
+            /** @description True when the version carries illustrative (not settled) commercial data, so UIs show the illustrative pill. */
+            illustrative: boolean;
+            orderedSteps: components["schemas"]["DescribeStep"][];
+            elements: components["schemas"]["CatalogueElement"][];
+            coverages: components["schemas"]["CatalogueCoverage"][];
+            questionSets: components["schemas"]["QuestionSetDef"][];
+            /** @description Payment plan codes for the channel (empty when the version declares none). */
+            paymentPlans: string[];
         };
-        /** @description pfc.PolicyDraft.validate request. PRD inputs: "hash, checkpoint, draft" */
+        /** @description One risk element instance of the draft (for example one vehicle). Field values are text. */
+        PolicyDraftElement: {
+            element: components["schemas"]["Code"];
+            /** @description Caller-chosen id so children and coverages can point at this instance. */
+            id?: string;
+            /** @description Id of the parent instance (for example the vehicle of a driver). */
+            parent?: string;
+            fields: {
+                [key: string]: string;
+            };
+        };
+        PolicyDraftCoverage: {
+            coverage: components["schemas"]["Code"];
+            /** @description Id of the element instance covered; omit for a single instance. */
+            element?: string;
+            /** @description Chosen term values by term code (an option code, or a number for a range term). */
+            terms: {
+                [key: string]: string;
+            };
+        };
+        /** @description A risk and coverage selection to validate. */
+        PolicyDraft: {
+            elements: components["schemas"]["PolicyDraftElement"][];
+            coverages: components["schemas"]["PolicyDraftCoverage"][];
+            /** @description Question set code the answers belong to. */
+            questionSet?: string;
+            answers?: {
+                [key: string]: string;
+            };
+        };
+        /** @description pfc.PolicyDraft.validate request: an artefact hash, an optional checkpoint (a stage name; a field is required only when it applies at that stage) and the draft. */
         PolicyDraftValidateRequest: {
-            /** @description PRD: "hash" */
-            hash?: components["schemas"]["Sha256"];
-            /** @description PRD: "checkpoint" */
+            hash: components["schemas"]["Sha256"];
+            /** @description A stage name as a JSON string (for example QUOTE). */
             checkpoint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "draft" */
-            draft?: components["schemas"]["Unspecified"];
+            /** @description A JSON object of the PolicyDraft shape (see the PolicyDraft schema). Free-form on the wire so a caller with its own tree can map it before calling. */
+            draft: components["schemas"]["Unspecified"];
         };
-        /** @description pfc.PolicyDraft.validate result. PRD outputs: "errors[] (level, rule, path, message key, GR/EN message, severity)" */
+        PolicyDraftIssue: {
+            /** @description ELEMENT, FIELD, COVERAGE, TERM or QUESTION. */
+            level: string;
+            rule: string;
+            path: string;
+            messageKey: string;
+            message: components["schemas"]["LocalizedText"];
+            /** @enum {string} */
+            severity: "ERROR" | "WARNING";
+        };
+        /** @description pfc.PolicyDraft.validate result: valid is true when no ERROR issues were found. */
         PolicyDraftValidateResponse: {
-            /** @description PRD: "errors[] (level, rule, path, message key, GR/EN message, severity)" */
-            errors?: components["schemas"]["Unspecified"][];
+            valid: boolean;
+            errors: components["schemas"]["PolicyDraftIssue"][];
         };
         /** @description pfc.ChangeSet.create request (BO-PFC-01). Copies the named Locked version into a new draft. */
         ChangeSetCreateRequest: {
@@ -2387,7 +2454,14 @@ export interface operations {
     };
     "pfc.Availability.check": {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
@@ -2423,7 +2497,12 @@ export interface operations {
     };
     "pfc.Product.list": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key

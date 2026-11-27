@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>Page of pfc.Product.list results (the whole catalogue of the legal entity, one page)</summary>
+/// <summary>Page of pfc.Product.list results (cursor pagination, contract §3.5.5; ordered by product code)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProductListPage
 {

@@ -8,29 +8,35 @@ namespace CoreIns.Modules.Data.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MartRunRequest
 {
-    /// <summary>PRD: "mart"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Mart code (BO-DAT-03). All three are management marts: legalStatus NotRegulatory.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("mart")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Mart { get; init; }
+    public MartValue? Mart { get; init; }
 
-    /// <summary>PRD: "entity"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Legal entity; must equal the caller scope when given (BO-DAT-03).</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("entity")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Entity { get; init; }
+    public string? Entity { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Period YYYY, YYYY-MM or from..to (half-open on valid time); omitted = all.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("period")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    public string? Period { get; init; }
+
+    /// <summary>Optional product filter (not applied to RI_CESSION_SUMMARY).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productCode")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ProductCode { get; init; }
+
+    /// <summary>Valid-time instant or date (default now).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ValidAt { get; init; }
+
+    /// <summary>Record-time instant or date (default now).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("knownAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? KnownAt { get; init; }
 
     /// <summary>PRD: "regime"</summary>
     /// <remarks>
@@ -47,4 +53,22 @@ public sealed record MartRunRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("taxonomyVersion")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? TaxonomyVersion { get; init; }
+
+    /// <summary>Mart code (BO-DAT-03). All three are management marts: legalStatus NotRegulatory.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<MartValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum MartValue
+    {
+        /// <summary><c>PORTFOLIO_PREMIUM</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PORTFOLIO_PREMIUM")]
+        PortfolioPremium,
+
+        /// <summary><c>CLAIMS_EXPERIENCE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CLAIMS_EXPERIENCE")]
+        ClaimsExperience,
+
+        /// <summary><c>RI_CESSION_SUMMARY</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RI_CESSION_SUMMARY")]
+        RiCessionSummary,
+    }
 }

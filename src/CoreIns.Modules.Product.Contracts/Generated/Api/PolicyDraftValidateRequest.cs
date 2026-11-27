@@ -4,16 +4,15 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.PolicyDraft.validate request. PRD inputs: "hash, checkpoint, draft"</summary>
+/// <summary>pfc.PolicyDraft.validate request: an artefact hash, an optional checkpoint (a stage name; a field is required only when it applies at that stage) and the draft.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PolicyDraftValidateRequest
 {
-    /// <summary>PRD: "hash"</summary>
+    /// <summary>Contract member 'hash'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? Hash { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash Hash { get; init; }
 
-    /// <summary>PRD: "checkpoint"</summary>
+    /// <summary>A stage name as a JSON string (for example QUOTE).</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>
@@ -21,11 +20,10 @@ public sealed record PolicyDraftValidateRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? Checkpoint { get; init; }
 
-    /// <summary>PRD: "draft"</summary>
+    /// <summary>A JSON object of the PolicyDraft shape (see the PolicyDraft schema). Free-form on the wire so a caller with its own tree can map it before calling.</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("draft")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Draft { get; init; }
+    public required global::System.Text.Json.JsonElement Draft { get; init; }
 }

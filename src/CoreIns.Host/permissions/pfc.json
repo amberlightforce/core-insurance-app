@@ -4,6 +4,10 @@
       "Grants": {
         "pfc.ProductVersion.resolve": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pfc.Product.list": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        // BO-PFC-05 runtime services (roles illustrative): availability, describe and draft validation for staff, quote and admin screens.
+        "pfc.Availability.check": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        "pfc.Product.describe": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        "pfc.PolicyDraft.validate": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pfc.ProductVersion.import": [ "Platform.Admin" ],
         // BO-PFC-01 authoring (roles are illustrative): drafting product changes.
         "pfc.ChangeSet.create": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],

@@ -49,9 +49,6 @@ CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/trend
 CONTRACT_NOT_SERVED GET /api/dat/v1/coverage/status
 CONTRACT_NOT_SERVED GET /api/dat/v1/feature-store/get-online
 CONTRACT_NOT_SERVED GET /api/dat/v1/lineage/trace
-CONTRACT_NOT_SERVED GET /api/dat/v1/marts/compare
-CONTRACT_NOT_SERVED GET /api/dat/v1/marts/figure
-CONTRACT_NOT_SERVED GET /api/dat/v1/marts/{}
 CONTRACT_NOT_SERVED GET /api/dat/v1/scr-results/{}
 CONTRACT_NOT_SERVED GET /api/doc/v1/archives/list-for-object
 CONTRACT_NOT_SERVED GET /api/doc/v1/forms/{}
@@ -350,7 +347,6 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/analytics/ask
 CONTRACT_NOT_SERVED POST /api/dat/v1/feature-store/build-training-set
 CONTRACT_NOT_SERVED POST /api/dat/v1/marts/adjust
 CONTRACT_NOT_SERVED POST /api/dat/v1/marts/export
-CONTRACT_NOT_SERVED POST /api/dat/v1/marts/run
 CONTRACT_NOT_SERVED POST /api/dat/v1/marts/sign-off
 CONTRACT_NOT_SERVED POST /api/dat/v1/models/approve
 CONTRACT_NOT_SERVED POST /api/dat/v1/models/record-validation
@@ -455,15 +451,12 @@ CONTRACT_NOT_SERVED POST /api/mkt/v1/spis/suspend
 CONTRACT_NOT_SERVED POST /api/mkt/v1/terminology/approve
 CONTRACT_NOT_SERVED POST /api/mkt/v1/terminology/propose
 CONTRACT_NOT_SERVED POST /api/mkt/v1/translations/gate
-CONTRACT_NOT_SERVED POST /api/pfc/v1/availability/check
 CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/rebase
 CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/revert
 CONTRACT_NOT_SERVED POST /api/pfc/v1/impact-analysises/run
 CONTRACT_NOT_SERVED POST /api/pfc/v1/pogs/record-review
 CONTRACT_NOT_SERVED POST /api/pfc/v1/pogs/record-test
-CONTRACT_NOT_SERVED POST /api/pfc/v1/policy-drafts/validate
 CONTRACT_NOT_SERVED POST /api/pfc/v1/product-imports/import
-CONTRACT_NOT_SERVED POST /api/pfc/v1/products/describe
 CONTRACT_NOT_SERVED POST /api/pfc/v1/renewal-conversions/convert
 CONTRACT_NOT_SERVED POST /api/plt/v1/adapters/invoke
 CONTRACT_NOT_SERVED POST /api/plt/v1/approval/request

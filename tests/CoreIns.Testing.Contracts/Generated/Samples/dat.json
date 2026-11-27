@@ -253,19 +253,28 @@
       "diff": "unspecified"
     },
     "MartGetResponse": {
+      "run": "unspecified",
       "figures": "unspecified",
       "lineagePointer": "unspecified",
       "diff": "unspecified"
     },
     "MartRunRequest": {
-      "mart": "unspecified",
-      "entity": "unspecified",
-      "period": "unspecified",
+      "mart": "PORTFOLIO_PREMIUM",
+      "entity": "sample",
+      "period": "sample",
+      "productCode": "sample",
+      "validAt": "sample",
+      "knownAt": "sample",
       "regime": "unspecified",
       "taxonomyVersion": "unspecified"
     },
     "MartRunResponse": {
-      "runId": "01926bab-0e2e-7041-8a12-b384108ba828"
+      "runId": "01926bab-0e2e-7041-8a12-b384108ba828",
+      "status": "sample",
+      "snapshotKey": "sample",
+      "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "figureCount": 1,
+      "legalStatus": "sample"
     },
     "MartSignOffRequest": {
       "runId": "019250b1-eb11-7ebe-8614-1dac8d5b92a5",
