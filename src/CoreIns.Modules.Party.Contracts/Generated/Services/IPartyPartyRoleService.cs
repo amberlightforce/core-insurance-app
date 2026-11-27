@@ -18,7 +18,7 @@ public interface IPartyPartyRoleService
     /// <para>Status: full. Wave W2.</para>
     /// <para>Exposure: ui; consumers: CHN, POL.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
-    /// <para>Errors: PTY-ERR-ROLE-DATA-MISSING (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PTY-ERR-ROLE-DATA-MISSING (422), PTY-ERR-ROLE-DUPLICATE (409), PTY-ERR-ROLE-TYPE (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyRoleAssignResponse> AssignAsync(global::CoreIns.Modules.Party.Contracts.Api.PartyRoleAssignRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -32,5 +32,9 @@ public interface IPartyPartyRoleService
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyRoleQueryPage> QueryAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
+    /// <param name="knownAt">Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including</param>
+    /// <param name="partyId">query parameter 'partyId'</param>
+    /// <param name="roleType">query parameter 'roleType'</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyRoleQueryPage> QueryAsync(global::CoreIns.SharedKernel.Identifiers.PartyId partyId, string? cursor = null, int? limit = null, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, string? roleType = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

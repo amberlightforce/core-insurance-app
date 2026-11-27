@@ -4,39 +4,18 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.PartyRole.end request. PRD inputs: "party, role, context, period"</summary>
+/// <summary>pty.PartyRole.end request (BO-PTY-03): end-dates a role (bitemporal, the earlier record stays in the history).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PartyRoleEndRequest
 {
-    /// <summary>PRD: "party"</summary>
+    /// <summary>Contract member 'roleId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'roleId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("party")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Party { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("roleId")]
+    public required global::System.Guid RoleId { get; init; }
 
-    /// <summary>PRD: "role"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("role")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Role { get; init; }
-
-    /// <summary>PRD: "context"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("context")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Context { get; init; }
-
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    /// <summary>Day the role ends (exclusive); default today. Must be after the role start.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validTo")]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidTo { get; init; }
 }

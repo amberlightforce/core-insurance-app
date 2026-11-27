@@ -25,7 +25,13 @@
         "ri.CessionException.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Programme.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Programme.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
-        "ri.Participation.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ]
+        "ri.Participation.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        // BO-RI-08: restatement, occurrences, adjustments and the aggregate tracker. The adjustment's real gate is the RI.RECOVERY_ADJUSTMENT authority.
+        "ri.Recovery.recalculate": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.Occurrence.link": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.Occurrence.unlink": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.Recovery.adjust": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
+        "ri.AggregateTracker.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ]
       }
     },
     "Authority": {
@@ -37,6 +43,16 @@
         {
           "Id": "ri-manager-contract-approve-illustrative", "Role": "Staff.ReinsuranceManager", "Type": "RI.CONTRACT_APPROVE", "Illustrative": true,
           "Limits": [ { "Dimension": "contractType", "Comparison": "InSet", "Codes": [ "XOL_PER_RISK" ] } ]
+        },
+        // BO-RI-08 (ILLUSTRATIVE, ignored in Production): a manual recovery adjustment by amount. The manager may adjust up to EUR 100,000;
+        // the accountant up to EUR 5,000. Above the actor's limit the adjustment is refused.
+        {
+          "Id": "ri-manager-recovery-adjust-illustrative", "Role": "Staff.ReinsuranceManager", "Type": "RI.RECOVERY_ADJUSTMENT", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "100000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "ri-accountant-recovery-adjust-illustrative", "Role": "Staff.ReinsuranceAccountant", "Type": "RI.RECOVERY_ADJUSTMENT", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ]
         }
       ]
     }
