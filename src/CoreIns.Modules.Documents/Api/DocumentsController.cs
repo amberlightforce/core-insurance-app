@@ -6,6 +6,8 @@ using CoreIns.Modules.Documents.Queries;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
+using CoreIns.Platform.Time;
+using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
 using Microsoft.AspNetCore.Authorization;
@@ -28,6 +30,10 @@ internal static class DocumentsPermissions
     public const string ArchiveStore = "doc.Archive.store";
     public const string ArchiveGet = "doc.Archive.get";
     public const string ProviderEventReceive = "doc.ProviderEvent.receive";
+    public const string DocumentTypeList = "doc.DocumentType.list";
+    public const string TemplateList = "doc.Template.list";
+    public const string ClauseGet = "doc.Clause.get";
+    public const string BindingResolve = "doc.Binding.resolve";
 }
 
 /// <summary>REST facade of the SL6-DOC-CORE operations (contracts/openapi/doc.yaml).</summary>
@@ -194,6 +200,68 @@ internal sealed class DocumentsController : ControllerBase
     {
         var result = await handler.HandleAsync(new ReceiveProviderEvent(provider, body), cancellationToken).ConfigureAwait(false);
         return result.IsFailure ? Problem(result.Error!) : Results.Json(result.Value, statusCode: StatusCodes.Status202Accepted);
+    }
+
+    /// <summary>doc.DocumentType.list: the document type catalogue (BO-DOC-05).</summary>
+    [HttpGet("document-types")]
+    [Authorize(Policy = DocumentsPermissions.DocumentTypeList)]
+    public async Task<IResult> ListTypesAsync([FromServices] TemplateCatalogue catalogue)
+    {
+        var types = await catalogue.ListTypesAsync(HttpContext.RequestAborted).ConfigureAwait(false);
+        var items = types.Select(t => new DocumentTypeListItem
+        {
+            DocumentType = t.DocumentType, DefaultMedium = t.DefaultMedium, TitleEl = t.TitleEl, TitleEn = t.TitleEn, RequiredFields = t.RequiredFields,
+        }).ToList();
+        return Results.Ok(new DocumentTypeListPage { Items = items, NextCursor = null });
+    }
+
+    /// <summary>doc.Template.list: template versions; <c>filters</c> is <c>documentType</c> or <c>documentType:status</c> (e.g. <c>DT-REFUND-ADVICE:APPROVED</c>).</summary>
+    [HttpGet("templates")]
+    [Authorize(Policy = DocumentsPermissions.TemplateList)]
+    public async Task<IResult> ListTemplatesAsync([FromQuery] string? filters, [FromServices] TemplateCatalogue catalogue)
+    {
+        var parts = filters?.Split(':', 2);
+        var templates = await catalogue.ListTemplatesAsync(parts is { Length: > 0 } ? parts[0] : null, parts is { Length: 2 } ? parts[1] : null, HttpContext.RequestAborted).ConfigureAwait(false);
+        var items = templates.Select(t => new TemplateListItem
+        {
+            TemplateId = new TemplateId(t.TemplateId), DocumentType = t.DocumentType, Version = t.Version, Status = t.Status,
+            ValidFrom = new BusinessDate(t.ValidFrom),
+            ValidTo = t.ValidTo is { } to ? new BusinessDate(to) : null,
+            ProductCode = t.ProductCode, LineOfBusiness = t.LineOfBusiness, Jurisdiction = t.Jurisdiction, TitleEl = t.TitleEl, TitleEn = t.TitleEn,
+        }).ToList();
+        return Results.Ok(new TemplateListPage { Items = items, NextCursor = null });
+    }
+
+    /// <summary>doc.Clause.get (by clause id or code).</summary>
+    [HttpGet("clauses/{id}")]
+    [Authorize(Policy = DocumentsPermissions.ClauseGet)]
+    public async Task<IResult> GetClauseAsync(string id, [FromServices] TemplateCatalogue catalogue, CancellationToken cancellationToken)
+    {
+        var clause = await catalogue.GetClauseAsync(id, cancellationToken).ConfigureAwait(false);
+        return clause is null
+            ? NotFoundProblem("The clause does not exist.")
+            : Results.Ok(new ClauseGetResponse
+            {
+                ClauseId = new ClauseId(clause.ClauseId), Code = clause.Code, TitleEl = clause.TitleEl, TextEl = clause.TextEl, TitleEn = clause.TitleEn, TextEn = clause.TextEn, Status = clause.Status,
+            });
+    }
+
+    /// <summary>doc.Binding.resolve: the approved template version in force at <c>validAt</c> (default today, UTC).</summary>
+    [HttpPost("bindings/resolve")]
+    [Authorize(Policy = DocumentsPermissions.BindingResolve)]
+    public async Task<IResult> ResolveBindingAsync(
+        [FromBody] BindingResolveRequest request, [FromQuery] string? validAt, [FromServices] TemplateCatalogue catalogue, [FromServices] IClock clock, [FromServices] RequestContext context, CancellationToken cancellationToken)
+    {
+        var at = clock.Now.ToBusinessDate(TimeZoneInfo.Utc).Value;
+        if (validAt is { Length: > 0 } && !DateOnly.TryParse(validAt.Length >= 10 ? validAt[..10] : validAt, System.Globalization.CultureInfo.InvariantCulture, out at))
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "validAt must be a date."));
+        }
+
+        var template = await catalogue.ResolveAsync(new TemplateScope(request.DocumentType, at, request.ProductCode, request.LineOfBusiness, request.Jurisdiction), cancellationToken).ConfigureAwait(false);
+        return template is null
+            ? Problem(DomainError.Of(ModuleCode.DOC, "BINDING-MISSING", "No approved template version is in force for this document type and scope."))
+            : Results.Ok(new BindingResolveResponse { TemplateId = new TemplateId(template.TemplateId), DocumentType = template.DocumentType, Version = template.Version, Language = request.Language });
     }
 
     internal static bool TryParseObjectRef(string? text, out ObjectRef subject)

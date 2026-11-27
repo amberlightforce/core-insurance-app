@@ -134,6 +134,9 @@ public static class PlatformModule
         services.AddScoped<IValidator<WithdrawApproval>, WithdrawApprovalValidator>();
         services.AddCommandAuditor<WithdrawApproval, ApprovalWithdrawResponse, WithdrawApprovalAuditor>();
         services.AddCommand<WithdrawApproval, ApprovalWithdrawResponse, WithdrawApprovalHandler>(CommandDescriptor.For("plt.Approval.withdraw"));
+        services.AddScoped<IValidator<RegisterApprovalType>, RegisterApprovalTypeValidator>();
+        services.AddCommandAuditor<RegisterApprovalType, ApprovalTypeRegisterResponse, RegisterApprovalTypeAuditor>();
+        services.AddCommand<RegisterApprovalType, ApprovalTypeRegisterResponse, RegisterApprovalTypeHandler>(CommandDescriptor.For("plt.ApprovalType.register"));
         services.TryAddScoped<ApprovalQueries>();
         services.TryAddSingleton<OwnerDecidedApprovalTypes>();
         services.TryAddScoped<IPlatformApprovalService, PlatformApprovalService>();
@@ -218,6 +221,8 @@ public static class PlatformModule
 
         // Approval requests: no DELETE; a decided request is frozen by trigger (decided once, REQ-PLT-114).
         $"GRANT SELECT, INSERT, UPDATE ON {Schema}.approval_request TO {appRole}",
+        // Approval type catalogue (BO-PLT-02): administrator-registered, never deleted.
+        $"GRANT SELECT, INSERT, UPDATE ON {Schema}.approval_type TO {appRole}",
         // Dev clock offset (D-SL3-12): never deleted (trigger); only read/advanced when the Development dev clock is registered.
         $"GRANT SELECT, UPDATE ON {Schema}.dev_clock TO {appRole}",
         $"GRANT SELECT, INSERT ON {Schema}.audit_event TO {appRole}",

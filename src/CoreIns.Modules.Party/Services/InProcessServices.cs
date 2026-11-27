@@ -95,7 +95,7 @@ internal sealed class PartyPartyService(
         throw NotAvailable("pty.Party.unmerge");
 
     public Task<PartyUpdateResponse> UpdateAsync(string id, PartyUpdateRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw NotAvailable("pty.Party.update");
+        throw NotAvailable("pty.Party.update"); // TODO(hardening): in-process Update (REST route is built, BO-PTY-01)
 
     internal static DomainException NotAvailable(string operation) =>
         new(DomainError.Of(ModuleCode.PTY, "NOT-AVAILABLE", $"{operation} is not built yet (SL-0 implements create, get and search)."));

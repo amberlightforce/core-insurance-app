@@ -4,15 +4,35 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Clause.get result. PRD outputs: "objects"</summary>
+/// <summary>doc.Clause.get result: one library clause (BO-DOC-05).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClauseGetResponse
 {
-    /// <summary>PRD: "objects"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("objects")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Objects { get; init; }
+    /// <summary>Contract member 'clauseId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("clauseId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ClauseId ClauseId { get; init; }
+
+    /// <summary>Contract member 'code'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("code")]
+    public required string Code { get; init; }
+
+    /// <summary>Contract member 'titleEl'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("titleEl")]
+    public required string TitleEl { get; init; }
+
+    /// <summary>Contract member 'textEl'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("textEl")]
+    public required string TextEl { get; init; }
+
+    /// <summary>Contract member 'titleEn'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("titleEn")]
+    public required string TitleEn { get; init; }
+
+    /// <summary>Contract member 'textEn'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("textEn")]
+    public required string TextEn { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required string Status { get; init; }
 }

@@ -523,6 +523,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatchResponse'
+        '202':
+          description: Accepted. The batch is too large for the request and runs on the worker (status RUNNING); poll the batch.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResponse'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -1835,6 +1841,13 @@ components:
           additionalProperties:
             type: integer
             format: int32
+        processedCount:
+          type: integer
+          format: int32
+          description: Items with an outcome other than PENDING (progress of a background run, BO-MIG-01).
+        failedCount:
+          type: integer
+          format: int32
       required: [batchId, name, status, contentHash, dryRunDone, itemCount, counts]
     BatchResponse:
       type: object

@@ -61,12 +61,9 @@ CONTRACT_NOT_SERVED GET /api/dat/v1/populations/aggregate
 CONTRACT_NOT_SERVED GET /api/dat/v1/queries/as-of
 CONTRACT_NOT_SERVED GET /api/dat/v1/scr-results/{}
 CONTRACT_NOT_SERVED GET /api/doc/v1/archives/list-for-object
-CONTRACT_NOT_SERVED GET /api/doc/v1/clauses/{}
-CONTRACT_NOT_SERVED GET /api/doc/v1/document-types
 CONTRACT_NOT_SERVED GET /api/doc/v1/forms/{}
 CONTRACT_NOT_SERVED GET /api/doc/v1/ipids/get
 CONTRACT_NOT_SERVED GET /api/doc/v1/signatures/{}
-CONTRACT_NOT_SERVED GET /api/doc/v1/templates
 CONTRACT_NOT_SERVED GET /api/fin/v1/actuarial-results/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/balances/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/close/tasks
@@ -131,11 +128,7 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/user-profile/get-preferences
 CONTRACT_NOT_SERVED GET /api/plt/v1/users/search
 CONTRACT_NOT_SERVED GET /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
-CONTRACT_NOT_SERVED GET /api/pol/v1/effective-date/limits
 CONTRACT_NOT_SERVED GET /api/pol/v1/jobs
-CONTRACT_NOT_SERVED GET /api/pol/v1/policies/get-many
-CONTRACT_NOT_SERVED GET /api/pol/v1/segments/changes
-CONTRACT_NOT_SERVED GET /api/pol/v1/status-model/get
 CONTRACT_NOT_SERVED GET /api/pty/v1/accounts/search
 CONTRACT_NOT_SERVED GET /api/pty/v1/accounts/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/commission-agreements/compare
@@ -211,7 +204,6 @@ CONTRACT_NOT_SERVED PATCH /api/mkt/v1/config-change-requests/{}
 CONTRACT_NOT_SERVED PATCH /api/pfc/v1/pogs/{}
 CONTRACT_NOT_SERVED PATCH /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED PATCH /api/pty/v1/locations/{}
-CONTRACT_NOT_SERVED PATCH /api/pty/v1/parties/{}
 CONTRACT_NOT_SERVED PATCH /api/ri/v1/programmes/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/contingencies/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
@@ -413,7 +405,6 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/synthetic/generate
 CONTRACT_NOT_SERVED POST /api/doc/v1/archives/add-rendition
 CONTRACT_NOT_SERVED POST /api/doc/v1/archives/set-retention-class
 CONTRACT_NOT_SERVED POST /api/doc/v1/archives/verify
-CONTRACT_NOT_SERVED POST /api/doc/v1/bindings/resolve
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/delete-draft
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/hide
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/import
@@ -531,10 +522,7 @@ CONTRACT_NOT_SERVED POST /api/pfc/v1/product-versions/submit
 CONTRACT_NOT_SERVED POST /api/pfc/v1/products/describe
 CONTRACT_NOT_SERVED POST /api/pfc/v1/renewal-conversions/convert
 CONTRACT_NOT_SERVED POST /api/plt/v1/adapters/invoke
-CONTRACT_NOT_SERVED POST /api/plt/v1/approval-types/register
 CONTRACT_NOT_SERVED POST /api/plt/v1/approval/request
-CONTRACT_NOT_SERVED POST /api/plt/v1/approval/verify-for-execution
-CONTRACT_NOT_SERVED POST /api/plt/v1/approval/withdraw
 CONTRACT_NOT_SERVED POST /api/plt/v1/audit/append
 CONTRACT_NOT_SERVED POST /api/plt/v1/audit/export
 CONTRACT_NOT_SERVED POST /api/plt/v1/audit/verify
@@ -646,7 +634,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/evaluate-erasure
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/lift-restriction
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/restrict
-CONTRACT_NOT_SERVED POST /api/pty/v1/identifiers/verify
 CONTRACT_NOT_SERVED POST /api/pty/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/intermediaries/import-register
 CONTRACT_NOT_SERVED POST /api/pty/v1/intermediaries/suspend
@@ -658,7 +645,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/locations/add
 CONTRACT_NOT_SERVED POST /api/pty/v1/locations/remove
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/unmerge
-CONTRACT_NOT_SERVED POST /api/pty/v1/parties/validate
 CONTRACT_NOT_SERVED POST /api/pty/v1/party-roles/assign
 CONTRACT_NOT_SERVED POST /api/pty/v1/party-roles/end
 CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/bulk-transfer

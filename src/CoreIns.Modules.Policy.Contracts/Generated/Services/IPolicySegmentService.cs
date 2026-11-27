@@ -20,5 +20,7 @@ public interface IPolicySegmentService
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.SegmentChangesPage> ChangesAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="since">Only segment versions that changed at or after this instant (ignored when a cursor is given)</param>
+    /// <param name="sinceTransactionId">Only segment versions that changed at or after the recording of this transaction (ignored when a cursor is given)</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.SegmentChangesPage> ChangesAsync(string? cursor = null, int? limit = null, global::CoreIns.SharedKernel.Instant? since = null, global::System.Guid? sinceTransactionId = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

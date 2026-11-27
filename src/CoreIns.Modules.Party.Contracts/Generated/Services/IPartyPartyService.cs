@@ -87,14 +87,14 @@ public interface IPartyPartyService
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyUnmergeResponse> UnmergeAsync(global::CoreIns.Modules.Party.Contracts.Api.PartyUnmergeRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
-    /// <summary>Create or update party</summary>
+    /// <summary>Update party</summary>
     /// <remarks>
     /// <para>Operation pty.Party.update (command; HTTP PATCH /api/pty/v1/parties/{id}).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W2.</para>
     /// <para>Exposure: ui; consumers: CHN, MIG.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: PTY-ERR-NOT-AVAILABLE (501), PTY-ERR-ID-CHECKDIGIT (422), PTY-ERR-STALE (409), PTY-ERR-DUPLICATE-IDENTIFIER (409), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PTY-ERR-NOT-AVAILABLE (501), PTY-ERR-ID-CHECKDIGIT (422), PTY-ERR-STALE (409), PTY-ERR-DUPLICATE-IDENTIFIER (409), PTY-ERR-RESTRICTED (409), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     /// <param name="id">Identifier of the Party</param>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyUpdateResponse> UpdateAsync(string id, global::CoreIns.Modules.Party.Contracts.Api.PartyUpdateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
