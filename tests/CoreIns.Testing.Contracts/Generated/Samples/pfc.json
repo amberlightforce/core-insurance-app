@@ -1335,6 +1335,88 @@
         "en": "Sample text"
       }
     },
+    "ProductListItem": {
+      "code": "SAMPLE_CODE",
+      "jurisdiction": "GR",
+      "lineCode": "SAMPLE_CODE",
+      "lineFamily": "SAMPLE_CODE",
+      "name": {
+        "el": "Sample text",
+        "en": "Sample text"
+      },
+      "productType": "sample",
+      "customerType": "sample",
+      "versions": [
+        {
+          "version": "1.0",
+          "status": "sample",
+          "isAbstract": true,
+          "channels": [
+            "SAMPLE_CODE"
+          ],
+          "contractCurrency": "EUR",
+          "newBusinessFrom": "2026-10-07",
+          "newBusinessTo": "2026-10-07",
+          "renewalFrom": "2026-10-07",
+          "renewalTo": "2026-10-07",
+          "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "fallbackOfVersion": "1.0",
+          "replacesVersion": "1.0"
+        }
+      ]
+    },
+    "ProductListPage": {
+      "items": [
+        {
+          "code": "SAMPLE_CODE",
+          "jurisdiction": "GR",
+          "lineCode": "SAMPLE_CODE",
+          "lineFamily": "SAMPLE_CODE",
+          "name": {
+            "el": "Sample text",
+            "en": "Sample text"
+          },
+          "productType": "sample",
+          "customerType": "sample",
+          "versions": [
+            {
+              "version": "1.0",
+              "status": "sample",
+              "isAbstract": true,
+              "channels": [
+                "SAMPLE_CODE"
+              ],
+              "contractCurrency": "EUR",
+              "newBusinessFrom": "2026-10-07",
+              "newBusinessTo": "2026-10-07",
+              "renewalFrom": "2026-10-07",
+              "renewalTo": "2026-10-07",
+              "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              "fallbackOfVersion": "1.0",
+              "replacesVersion": "1.0"
+            }
+          ]
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ProductListVersion": {
+      "version": "1.0",
+      "status": "sample",
+      "isAbstract": true,
+      "channels": [
+        "SAMPLE_CODE"
+      ],
+      "contractCurrency": "EUR",
+      "newBusinessFrom": "2026-10-07",
+      "newBusinessTo": "2026-10-07",
+      "renewalFrom": "2026-10-07",
+      "renewalTo": "2026-10-07",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "fallbackOfVersion": "1.0",
+      "replacesVersion": "1.0"
+    },
     "ProductReferences": {
       "rating": {
         "algorithmCode": "SAMPLE_CODE",

@@ -57,8 +57,11 @@ internal sealed class PolicyContractWithdrawalPort(IServiceProvider services) : 
         try
         {
             var response = await policies.GetAsync(policyId.Value.ToString("D"), cancellationToken: cancellationToken).ConfigureAwait(false);
-            // TODO(hardening): use the bind/issue date of the contract when POL exposes it; RecordedAt is when POL recorded the policy.
-            return new WithdrawalPolicyFacts(response.Policy.RecordedAt, response.Policy.PolicyholderPartyId, response.Policy.PolicyNumber.ToString());
+            // The window starts on the bind date of the term (term.WrittenDate, the same date POL checks the right against); RecordedAt is only
+            // the fallback when the response carries no term.
+            var zone = (services.GetService<Microsoft.Extensions.Options.IOptions<ChannelsOptions>>()?.Value ?? new ChannelsOptions()).Zone;
+            var concludedAt = response.Term is { } term ? term.WrittenDate.StartOfDayIn(zone) : response.Policy.RecordedAt;
+            return new WithdrawalPolicyFacts(concludedAt, response.Policy.PolicyholderPartyId, response.Policy.PolicyNumber.ToString());
         }
         catch (DomainException)
         {

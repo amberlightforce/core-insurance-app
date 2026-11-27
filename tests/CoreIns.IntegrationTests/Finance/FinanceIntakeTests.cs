@@ -337,6 +337,33 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
     }
 
     [Fact]
+    public async Task Finance_operations_reads_serve_exceptions_periods_and_a_balanced_trial_balance()
+    {
+        var account = Guid.CreateVersion7();
+        var entry = await _slice.EntryAsync(account, "COMMISSION", Day,
+            Line("LA-15", "DEBIT", "40.00", billingAccount: account),
+            Line("LA-14", "CREDIT", "40.00", billingAccount: account));
+        await _slice.DrainAsync();
+
+        var (listed, exceptions) = await PartyApi.SendAsync(_client, HttpMethod.Get, "/api/fin/v1/intake-exceptions?limit=200", roles: FinanceRole);
+        listed.StatusCode.ShouldBe(HttpStatusCode.OK, exceptions?.ToJsonString());
+        exceptions!["items"]!.AsArray().Any(i => i!["reason"]!.GetValue<string>() == "NO_RULE").ShouldBeTrue();
+        exceptions["items"]!.AsArray()[0]!["receivedAt"]!.GetValue<string>().ShouldEndWith("Z");
+
+        var (periodsResponse, periods) = await PartyApi.SendAsync(_client, HttpMethod.Get, "/api/fin/v1/periods", roles: FinanceRole);
+        periodsResponse.StatusCode.ShouldBe(HttpStatusCode.OK, periods?.ToJsonString());
+        periods!["items"]!.AsArray().ShouldNotBeNull();
+
+        var (balanceResponse, balance) = await PartyApi.SendAsync(_client, HttpMethod.Get, "/api/fin/v1/balances/trial-balance?period=2026-11", roles: FinanceRole);
+        balanceResponse.StatusCode.ShouldBe(HttpStatusCode.OK, balance?.ToJsonString());
+        balance!["totalDebit"]!.GetValue<string>().ShouldBe(balance["totalCredit"]!.GetValue<string>());
+
+        (await PartyApi.SendAsync(_client, HttpMethod.Get, "/api/fin/v1/balances/trial-balance?period=nope", roles: FinanceRole)).Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        (await PartyApi.SendAsync(_client, HttpMethod.Get, "/api/fin/v1/intake-exceptions", roles: PartyApi.Underwriter)).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        entry.ShouldNotBeNull();
+    }
+
+    [Fact]
     public async Task REQ_FIN_030_036_POL_and_BIL_context_events_are_recorded_and_never_journalised()
     {
         var policy = NewPolicy();

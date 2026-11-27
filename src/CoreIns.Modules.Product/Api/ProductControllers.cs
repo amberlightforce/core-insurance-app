@@ -19,7 +19,8 @@ namespace CoreIns.Modules.Product.Api;
 /// <summary>Permissions of the PFC operations (the operations' <c>x-permission</c>), mapped to roles in <c>Platform:Permissions:Grants</c>.</summary>
 internal static class ProductPermissions
 {
-    public const string Resolve = "pfc.ProductVersion.resolve";
+    public const string ProductList = "pfc.Product.list";
+    public const string Resolve ="pfc.ProductVersion.resolve";
     public const string Import = "pfc.ProductVersion.import";
     public const string Fallback = "pfc.ProductVersion.fallback";
     public const string DecideFallback = "pfc.ProductVersion.decideFallback";
@@ -163,6 +164,17 @@ internal sealed class CatalogueController : ControllerBase
     public async Task<IResult> GetItemAsync(
         [FromQuery] string? hash, [FromQuery] string? scope, [FromQuery] string? code, [FromServices] CatalogueQueries queries, CancellationToken cancellationToken) =>
         this.Respond(await queries.GetItemAsync(hash ?? string.Empty, scope, code, cancellationToken).ConfigureAwait(false));
+}
+
+/// <summary>REST facade of <c>pfc.Product.list</c> (NX-UI-14b): the product catalogue with versions.</summary>
+[ApiController]
+[Route("api/pfc/v1/products")]
+internal sealed class ProductsController : ControllerBase
+{
+    [HttpGet]
+    [Authorize(Policy = ProductPermissions.ProductList)]
+    public async Task<IResult> ListAsync([FromServices] ProductListQueries queries, CancellationToken cancellationToken) =>
+        this.Respond<ProductListPage>(await queries.ListAsync(cancellationToken).ConfigureAwait(false));
 }
 
 /// <summary>REST facade of <c>pfc.ChargeType.list</c>.</summary>

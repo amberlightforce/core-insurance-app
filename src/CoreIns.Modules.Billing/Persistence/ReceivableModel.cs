@@ -24,6 +24,7 @@ internal static class ReceivableModel
             e.Property(r => r.RegisteredAt).HasColumnType("timestamptz");
             e.HasIndex(r => new { r.LegalEntityId, r.SourceType, r.SourceId, r.Purpose, r.CounterpartyPartyId, r.Amount }).IsUnique();
             e.HasIndex(r => r.PaymentReference).IsUnique();
+            e.HasIndex(r => r.ClaimId).HasDatabaseName("ix_receivable_claim");
             e.HasOne<BillingAccountRow>().WithMany().HasForeignKey(r => r.BillingAccountId).OnDelete(DeleteBehavior.Restrict);
         });
         model.Entity<ReceivableAllocationRow>(e =>

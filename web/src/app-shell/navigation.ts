@@ -5,6 +5,7 @@ import {
   dsarRoles,
   migrationRoles,
   packRoles,
+  productRoles,
   reinsuranceRoles,
   underwritingRoles,
   withdrawalRoles,
@@ -81,7 +82,7 @@ export const defaultNavItems: NavItem[] = [
     roles: dsarRoles,
   },
   { id: 'reports', to: '/reports' },
-  { id: 'products', to: '/products' },
+  { id: 'products', to: '/products', roles: productRoles },
   { id: 'admin', to: '/admin/packs', label: 'packs', icon: 'packs', roles: packRoles },
   {
     id: 'admin',

@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # SL4-BIL-RECV source checkpoint — 9 October 2026
 
 Branch `codex/sl4-billing-receivables`, worktree `agent-a5f811b9f42a2e657`.
