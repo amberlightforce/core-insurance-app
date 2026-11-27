@@ -78,8 +78,8 @@ public sealed class DataIngestionTests(PostgresFixture database) : IClassFixture
     {
         var id = Guid.CreateVersion7();
         var payload = new JsonObject { ["policyId"] = "p-1" };
-        (await IngestAsync(Envelope("PolicyIssued", payload, id))).ShouldBe(IngestOutcome.Ingested);
-        (await IngestAsync(Envelope("PolicyIssued", payload, id))).ShouldBe(IngestOutcome.Duplicate);
+        (await IngestAsync(Envelope("PolicyBound", payload, id))).ShouldBe(IngestOutcome.Ingested);
+        (await IngestAsync(Envelope("PolicyBound", payload, id))).ShouldBe(IngestOutcome.Duplicate);
         (await CountAsync($"SELECT count(*) FROM rpt_raw.event_ledger WHERE event_id = '{id}'")).ShouldBe(1);
         (await CountAsync($"SELECT count(*) FROM rpt_raw.quarantine WHERE event_id = '{id}'")).ShouldBe(0);
     }

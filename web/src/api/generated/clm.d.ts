@@ -2013,35 +2013,45 @@ export interface components {
             exposure: components["schemas"]["ExposureView"];
             claim: components["schemas"]["ClaimSummary"];
         };
-        /** @description clm.Exposure.update request. PRD inputs: "exposure data" */
+        /** @description clm.Exposure.update request (BO-CLM-01). Moves the exposure to another incident of the claim (REQ-CLM-063); coverage and claimant never change (open a new exposure instead). A handler action. */
         ExposureUpdateRequest: {
-            /** @description PRD: "exposure data" */
-            exposureData?: components["schemas"]["Unspecified"];
+            /** @description The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE */
+            expectedRecordVersion: number;
+            /** @description Incident of the same claim, or null to detach */
+            incidentId: components["schemas"]["Uuid"] | null;
         };
         /** @description clm.Exposure.update result. PRD outputs: "exposure" */
         ExposureUpdateResponse: {
-            /** @description PRD: "exposure" */
-            exposure?: components["schemas"]["Unspecified"];
+            exposure: components["schemas"]["ExposureView"];
+            claim: components["schemas"]["ClaimSummary"];
         };
-        /** @description clm.Exposure.close request. PRD inputs: "exposure data" */
+        /** @description clm.Exposure.close request (BO-CLM-01, D-CON-04). The close guard needs zero open reserve, no payment pending and every statutory clock Met, Cancelled or Breached-and-acknowledged. */
         ExposureCloseRequest: {
-            /** @description PRD: "exposure data" */
-            exposureData?: components["schemas"]["Unspecified"];
+            exposureId: components["schemas"]["Uuid"];
+            /** @description The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE */
+            expectedRecordVersion: number;
+            /**
+             * @description Closure outcome of the exposure
+             * @enum {string}
+             */
+            outcome: "COMPLETED" | "WITHDRAWN" | "DUPLICATE" | "NO_PAYMENT";
         };
         /** @description clm.Exposure.close result. PRD outputs: "exposure" */
         ExposureCloseResponse: {
-            /** @description PRD: "exposure" */
-            exposure?: components["schemas"]["Unspecified"];
+            exposure: components["schemas"]["ExposureView"];
+            claim: components["schemas"]["ClaimSummary"];
         };
-        /** @description clm.Exposure.reopen request. PRD inputs: "exposure data" */
+        /** @description clm.Exposure.reopen request (BO-CLM-01). Needs a reason code; the claim must be open. */
         ExposureReopenRequest: {
-            /** @description PRD: "exposure data" */
-            exposureData?: components["schemas"]["Unspecified"];
+            exposureId: components["schemas"]["Uuid"];
+            /** @description The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE */
+            expectedRecordVersion: number;
+            reasonCode: components["schemas"]["Code"];
         };
         /** @description clm.Exposure.reopen result. PRD outputs: "exposure" */
         ExposureReopenResponse: {
-            /** @description PRD: "exposure" */
-            exposure?: components["schemas"]["Unspecified"];
+            exposure: components["schemas"]["ExposureView"];
+            claim: components["schemas"]["ClaimSummary"];
         };
         /** @description clm.Coverage.decide request. PRD inputs: "decision, reasons; adopt or keep" */
         CoverageDecideRequest: {
@@ -2555,7 +2565,7 @@ export interface components {
                  * @description What the amount is (D-SL2-13, REQ-CLM-108)
                  * @enum {string}
                  */
-                basis?: "EXPOSURE_TOTAL_RESERVE" | "RESERVE_DECREASE" | "PAYMENT" | "CLAIM_CUMULATIVE_PAID";
+                basis?: "EXPOSURE_TOTAL_RESERVE" | "EXPOSURE_TOTAL_RECOVERY_RESERVE" | "RESERVE_DECREASE" | "PAYMENT" | "CLAIM_CUMULATIVE_PAID";
                 amount?: components["schemas"]["Money"];
                 referralRole?: string;
             }[];

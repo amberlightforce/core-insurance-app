@@ -5881,6 +5881,70 @@
       ]
     },
     {
+      "name": "ExposureClosed",
+      "version": "1.0",
+      "producer": "CLM",
+      "topic": "clm.events.v1",
+      "registryName": "clm.ExposureClosed",
+      "schema": "clm/ExposureClosed.v1.schema.json",
+      "orderingKey": "claim_id",
+      "aggregateType": [
+        "Claim"
+      ],
+      "trigger": "exposure closed",
+      "source": [
+        "PRD-07 §8.1",
+        "PRD-18 §8.2"
+      ],
+      "status": "full",
+      "dataClassification": "P0",
+      "personalDataFields": [],
+      "x-business-keys": [
+        "claimId",
+        "exposureId"
+      ],
+      "setCompleteness": false,
+      "consumers": [
+        {
+          "module": "DAT",
+          "handler": "PRD-15 §8.2",
+          "reaction": "Ingest into report store (REQ-DAT-001; rpt_raw per D-ARC-06)"
+        }
+      ]
+    },
+    {
+      "name": "ExposureReopened",
+      "version": "1.0",
+      "producer": "CLM",
+      "topic": "clm.events.v1",
+      "registryName": "clm.ExposureReopened",
+      "schema": "clm/ExposureReopened.v1.schema.json",
+      "orderingKey": "claim_id",
+      "aggregateType": [
+        "Claim"
+      ],
+      "trigger": "exposure reopened",
+      "source": [
+        "PRD-07 §8.1",
+        "PRD-18 §8.2"
+      ],
+      "status": "full",
+      "dataClassification": "P0",
+      "personalDataFields": [],
+      "x-business-keys": [
+        "claimId",
+        "exposureId"
+      ],
+      "setCompleteness": false,
+      "consumers": [
+        {
+          "module": "DAT",
+          "handler": "PRD-15 §8.2",
+          "reaction": "Ingest into report store (REQ-DAT-001; rpt_raw per D-ARC-06)"
+        }
+      ]
+    },
+    {
       "name": "ReserveChanged",
       "version": "1.0",
       "producer": "CLM",

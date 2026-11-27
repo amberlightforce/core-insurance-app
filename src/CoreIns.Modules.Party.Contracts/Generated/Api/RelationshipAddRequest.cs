@@ -4,31 +4,27 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Relationship.add request. PRD inputs: "parties, type, period"</summary>
+/// <summary>pty.Relationship.add request (BO-PTY-03, REQ-PTY-104). A directed link from one party to another (from SPOUSE_OF to, PARENT_OF, SUBSIDIARY_OF...). Hierarchical types refuse a cycle (PTY-ERR-RELATIONSHIP-CYCLE); the same pair and type cannot overlap in time (PTY-ERR-OVERLAP).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RelationshipAddRequest
 {
-    /// <summary>PRD: "parties"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("parties")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Parties { get; init; }
+    /// <summary>Contract member 'fromPartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fromPartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId FromPartyId { get; init; }
 
-    /// <summary>PRD: "type"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("type")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Type { get; init; }
+    /// <summary>Contract member 'toPartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("toPartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId ToPartyId { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    /// <summary>Contract member 'relationshipType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("relationshipType")]
+    public required string RelationshipType { get; init; }
+
+    /// <summary>First day of the relationship; default today</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validFrom")]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidFrom { get; init; }
+
+    /// <summary>Contract member 'validTo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validTo")]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidTo { get; init; }
 }

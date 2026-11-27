@@ -67,7 +67,9 @@ public static class DataModule
         services.AddCommand<RunBiasTest, BiasTestRunResponse, RunBiasTestHandler>(CommandDescriptor.For("dat.BiasTest.run") with { SupportsDryRun = true });
 
         // BO-DAT-01: data-contract registry and raw-layer ingestion (rpt_raw.event_ledger / quarantine).
+        services.AddScoped<ConformedProjector>();
         services.AddScoped<EventIngestion>();
+        services.AddScoped<AnalyticsReader>();
         services.AddScoped<DataContractReader>();
         services.AddCommand<RegisterDataContract, DataContractRegisterResponse, RegisterDataContractHandler>(CommandDescriptor.For("dat.DataContract.register") with { SupportsDryRun = true });
         services.AddCommand<ReplayIngestion, IngestionReplayResponse, ReplayIngestionHandler>(CommandDescriptor.For("dat.Ingestion.replay") with { SupportsDryRun = true });
@@ -101,6 +103,8 @@ public static class DataModule
             .Describe("Η αλλαγή αφαιρεί ή αλλάζει πεδίο ή το καθιστά υποχρεωτικό χωρίς νέα κύρια έκδοση.", "The change removes or retypes a field, or makes one required, without a new major version."),
         ErrorDefinition.For(ModuleCode.DAT, "002", 422, "Η εμβέλεια επανάληψης είναι πολύ μεγάλη", "The replay scope is too broad")
             .Describe("Περιορίστε το χρονικό διάστημα.", "Narrow the time window."),
+        ErrorDefinition.For(ModuleCode.DAT, "010", 422, "Η προβολή δεν επιτρέπεται", "View not permitted")
+            .Describe("Επιλέξτε μία από τις προβολές fact_policy_term, fact_premium, fact_claim_movement.", "Choose one of fact_policy_term, fact_premium, fact_claim_movement."),
         ErrorDefinition.For(ModuleCode.DAT, "IDEMPOTENCY-MISMATCH", 409, "Το αναγνωριστικό αιτήματος χρησιμοποιήθηκε ήδη", "The request id was already used")
             .Describe("Το αναγνωριστικό αιτήματος αφορά άλλο υποκείμενο.", "The request id belongs to another subject."),
     ];
