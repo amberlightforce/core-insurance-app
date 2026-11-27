@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { EmptyState, statusColumn, textColumn, type DataColumn } from '../../design-system';
 import { useReceivables } from '../billing/receivables/api';
 import { useDelinquencies } from '../billing/delinquency/api';
-import { LinkButton } from '../staff/LinkButton';
+import { NavList } from '../staff/NavList';
 import { PageHeader, Section } from '../staff/PageHeader';
 import { QueryView } from '../staff/QueryView';
 import { SimpleTable } from '../staff/SimpleTable';
@@ -155,15 +155,11 @@ export function ReportsPage() {
           <DelinquencySummary />
         </Section>
       </div>
-      <Section title={t('views.title')}>
-        <ul className={styles.linkList}>
-          {views.map((v) => (
-            <li key={v.id}>
-              <span>{t(`views.${v.id}.name`)}</span>
-              <LinkButton to={v.to}>{t('views.open')}</LinkButton>
-            </li>
-          ))}
-        </ul>
+      <Section title={t('views.title')} family="brand">
+        <NavList
+          aria-label={t('views.title')}
+          items={views.map((v) => ({ id: v.id, label: t(`views.${v.id}.name`), to: v.to }))}
+        />
         <p className={styles.muted}>{t('views.gap')}</p>
       </Section>
     </div>

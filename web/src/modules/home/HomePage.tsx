@@ -654,16 +654,7 @@ export function HomePage() {
       {seesRi && ri.data ? (
         <section className={styles.kpis} aria-label={t('home:kpi.riLabel')}>
           <KpiTile label={t('home:kpi.treaties')} value={riItems.length} format="number" />
-          <KpiTile
-            label={t('home:kpi.riActive')}
-            value={riByStatus('ACTIVE').length}
-            format="number"
-          />
-          <KpiTile
-            label={t('home:kpi.riPending')}
-            value={riByStatus('PENDING_APPROVAL').length}
-            format="number"
-          />
+          {/* Active and awaiting-approval counts already lead the dot cards above; the tiles show the rest. */}
           <KpiTile
             label={t('home:kpi.riDraft')}
             value={riByStatus('DRAFT').length}

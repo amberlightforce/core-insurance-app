@@ -552,3 +552,58 @@
 .ruledList > li:last-child {
   border-block-end: 0;
 }
+
+/* Navigation rows inside a card (finance operations, detailed views): whole-row ghost buttons with a chevron. */
+.navList {
+  display: grid;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.navList > li {
+  border-block-end: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.navList > li:last-child {
+  border-block-end: 0;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-block-size: var(--size-row-table);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font: var(--type-body-compact);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.navLink[data-hovered] {
+  background-color: var(--color-surface-sunken);
+}
+
+.navLink[data-focus-visible] {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+.navLabel {
+  display: grid;
+  min-inline-size: 0;
+  text-align: start;
+}
+
+.navHint {
+  color: var(--color-text-secondary);
+  font: var(--type-body-compact);
+}
+
+/* A card list inside a section card needs no second inset: the section already pads it. */
+.section ul[class*='cards'] {
+  padding-inline: var(--space-0);
+}
