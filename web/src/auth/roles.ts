@@ -73,3 +73,21 @@ export const productRoles = [
 
 /** Roles that work the finance operations screens: trial balance, manual journals, intake exceptions, period close, earning (fin.* grants). */
 export const financeRoles = ['Staff.Finance', 'Platform.Admin'] as const;
+
+/** The customer portal role (BO-CHN-01; dev user `customer`). Portal screens live under `/portal/*` (BO-CHN-12). */
+export const portalRoles = ['Customer.Portal'] as const;
+
+/** Anyone who holds a role other than the portal role works in the staff app. */
+export function hasStaffAccess(userRoles: readonly string[]): boolean {
+  return userRoles.some((role) => !(portalRoles as readonly string[]).includes(role));
+}
+
+/** A customer who is only a customer: sent to the portal, refused by the staff shell. */
+export function isPortalCustomerOnly(userRoles: readonly string[]): boolean {
+  return hasAnyRole(userRoles, portalRoles) && !hasStaffAccess(userRoles);
+}
+
+/** Where a freshly signed-in user lands: the portal for a customer, the staff home for everyone else. */
+export function landingPathFor(userRoles: readonly string[]): string {
+  return isPortalCustomerOnly(userRoles) ? '/portal' : '/';
+}

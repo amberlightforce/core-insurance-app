@@ -96,6 +96,7 @@
     "finance": "Finance",
     "claimsHandler": "Claims handler",
     "claimsManager": "Claims manager",
-    "admin": "Platform administration"
+    "admin": "Platform administration",
+    "customerPortal": "Customer"
   }
 }
