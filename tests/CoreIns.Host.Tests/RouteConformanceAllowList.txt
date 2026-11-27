@@ -330,14 +330,9 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/scr-results/accept
 CONTRACT_NOT_SERVED POST /api/dat/v1/scr-results/submit
 CONTRACT_NOT_SERVED POST /api/dat/v1/synthetic/generate
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/delete-draft
-CONTRACT_NOT_SERVED POST /api/doc/v1/documents/hide
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/import
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/render-as-of
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/request-batch
-CONTRACT_NOT_SERVED POST /api/doc/v1/documents/resend
-CONTRACT_NOT_SERVED POST /api/doc/v1/documents/supersede
-CONTRACT_NOT_SERVED POST /api/doc/v1/documents/unhide
-CONTRACT_NOT_SERVED POST /api/doc/v1/documents/withdraw
 CONTRACT_NOT_SERVED POST /api/doc/v1/form-patterns/validate-references
 CONTRACT_NOT_SERVED POST /api/doc/v1/forms/add-manual
 CONTRACT_NOT_SERVED POST /api/doc/v1/forms/infer
