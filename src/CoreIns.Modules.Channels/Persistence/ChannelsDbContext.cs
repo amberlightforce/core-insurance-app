@@ -21,6 +21,14 @@ internal sealed class ChannelsDbContext(DbContextOptions<ChannelsDbContext> opti
 
     public DbSet<PortalIdentityRow> PortalIdentities => Set<PortalIdentityRow>();
 
+    public DbSet<NotificationRow> Notifications => Set<NotificationRow>();
+
+    public DbSet<NotificationSubscriptionRow> NotificationSubscriptions => Set<NotificationSubscriptionRow>();
+
+    public DbSet<MessageRow> Messages => Set<MessageRow>();
+
+    public DbSet<DocumentOpenRow> DocumentOpens => Set<DocumentOpenRow>();
+
     protected override string Schema => ChannelsModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -140,6 +148,85 @@ internal sealed class ChannelsDbContext(DbContextOptions<ChannelsDbContext> opti
             entity.Property(e => e.EffectiveFrom).HasColumnName("effective_from").HasColumnType("timestamptz");
             entity.HasIndex(e => new { e.LegalEntityId, e.VersionNo }).IsUnique().HasDatabaseName("ux_permission_matrix_version");
             entity.HasIndex(e => new { e.LegalEntityId, e.Status, e.EffectiveFrom }).HasDatabaseName("ix_permission_matrix_effective");
+        });
+
+        modelBuilder.Entity<NotificationRow>(entity =>
+        {
+            entity.ToTable("notification", table =>
+            {
+                var kinds = string.Join(", ", NotificationKinds.Kinds.Select(s => $"'{s}'"));
+                var classes = string.Join(", ", NotificationKinds.Classes.Select(s => $"'{s}'"));
+                table.HasCheckConstraint("ck_notification_kind", $"kind IN ({kinds})");
+                table.HasCheckConstraint("ck_notification_class", $"notification_class IN ({classes})");
+            });
+            entity.HasKey(e => e.NotificationId).HasName("pk_notification");
+            entity.Property(e => e.NotificationId).HasColumnName("notification_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.Kind).HasColumnName("kind");
+            entity.Property(e => e.NotificationClass).HasColumnName("notification_class");
+            entity.Property(e => e.SubjectType).HasColumnName("subject_type");
+            entity.Property(e => e.SubjectId).HasColumnName("subject_id");
+            entity.Property(e => e.SourceKey).HasColumnName("source_key");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ReadAt).HasColumnName("read_at").HasColumnType("timestamptz");
+            // A redelivered event never creates a second notification.
+            entity.HasIndex(e => new { e.LegalEntityId, e.PartyId, e.Kind, e.SourceKey }).IsUnique().HasDatabaseName("ux_notification_source");
+            entity.HasIndex(e => new { e.LegalEntityId, e.PartyId, e.CreatedAt }).HasDatabaseName("ix_notification_party");
+        });
+
+        modelBuilder.Entity<NotificationSubscriptionRow>(entity =>
+        {
+            entity.ToTable("notification_subscription", table =>
+            {
+                var classes = string.Join(", ", NotificationKinds.Classes.Select(s => $"'{s}'"));
+                table.HasCheckConstraint("ck_notification_subscription_class", $"notification_class IN ({classes})");
+            });
+            entity.HasKey(e => e.SubscriptionId).HasName("pk_notification_subscription");
+            entity.Property(e => e.SubscriptionId).HasColumnName("subscription_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.NotificationClass).HasColumnName("notification_class");
+            entity.Property(e => e.Enabled).HasColumnName("enabled");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.LegalEntityId, e.PartyId, e.NotificationClass }).IsUnique().HasDatabaseName("ux_notification_subscription_class");
+        });
+
+        modelBuilder.Entity<MessageRow>(entity =>
+        {
+            entity.ToTable("message", table =>
+            {
+                var topics = string.Join(", ", MessageValues.Topics.Select(s => $"'{s}'"));
+                table.HasCheckConstraint("ck_message_direction", "direction IN ('CUSTOMER', 'STAFF')");
+                table.HasCheckConstraint("ck_message_topic", $"topic IN ({topics})");
+            });
+            entity.HasKey(e => e.MessageId).HasName("pk_message");
+            entity.Property(e => e.MessageId).HasColumnName("message_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.ThreadId).HasColumnName("thread_id");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.Direction).HasColumnName("direction");
+            entity.Property(e => e.Topic).HasColumnName("topic");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.Text).HasColumnName("text");
+            entity.Property(e => e.SentAt).HasColumnName("sent_at").HasColumnType("timestamptz");
+            entity.Property(e => e.SentBy).HasColumnName("sent_by");
+            entity.HasIndex(e => new { e.LegalEntityId, e.ThreadId, e.SentAt }).HasDatabaseName("ix_message_thread");
+            entity.HasIndex(e => new { e.LegalEntityId, e.PartyId, e.SentAt }).HasDatabaseName("ix_message_party");
+        });
+
+        modelBuilder.Entity<DocumentOpenRow>(entity =>
+        {
+            entity.ToTable("document_open", table => table.HasCheckConstraint("ck_document_open_count", "open_count >= 1"));
+            entity.HasKey(e => e.DocumentOpenId).HasName("pk_document_open");
+            entity.Property(e => e.DocumentOpenId).HasColumnName("document_open_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.DocumentId).HasColumnName("document_id");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.FirstOpenedAt).HasColumnName("first_opened_at").HasColumnType("timestamptz");
+            entity.Property(e => e.LastOpenedAt).HasColumnName("last_opened_at").HasColumnType("timestamptz");
+            entity.Property(e => e.OpenCount).HasColumnName("open_count");
+            entity.HasIndex(e => new { e.LegalEntityId, e.PartyId, e.DocumentId }).IsUnique().HasDatabaseName("ux_document_open_party_document");
         });
 
         modelBuilder.Entity<PermissionMatrixEntryRow>(entity =>

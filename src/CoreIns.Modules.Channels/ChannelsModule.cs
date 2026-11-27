@@ -1,4 +1,10 @@
+using CoreIns.Modules.Billing.Contracts.Events;
+using CoreIns.Modules.Channels.Events;
 using CoreIns.Modules.Channels.Services.Dsar;
+using CoreIns.Modules.Claims.Contracts.Events;
+using CoreIns.Modules.Policy.Contracts.Events;
+using CoreIns.Platform.Contracts.Events;
+using CoreIns.Platform.Events;
 using CoreIns.SharedKernel.Dsar;
 using CoreIns.Modules.Channels.Commands;
 using CoreIns.Modules.Channels.Contracts.Api;
@@ -66,6 +72,27 @@ public static class ChannelsModule
 
         services.AddScoped<PortalScope>();
         services.AddScoped<PortalReader>();
+        services.AddScoped<PortalBillingScope>();
+        services.AddScoped<PortalBillingReader>();
+        services.AddScoped<PortalDocumentReader>();
+        services.AddScoped<PortalInbox>();
+        services.AddScoped<PortalNotifier>();
+        services.AddScoped<IValidator<MarkNotificationsRead>, MarkNotificationsReadValidator>();
+        services.AddCommandAuditor<MarkNotificationsRead, NotificationMarkReadResponse, MarkNotificationsReadAuditor>();
+        services.AddCommand<MarkNotificationsRead, NotificationMarkReadResponse, MarkNotificationsReadHandler>(CommandDescriptor.For("chn.Notification.markRead"));
+        services.AddCommandAuditor<SetNotificationSubscription, NotificationSubscriptionSetResponse, SetNotificationSubscriptionAuditor>();
+        services.AddCommand<SetNotificationSubscription, NotificationSubscriptionSetResponse, SetNotificationSubscriptionHandler>(CommandDescriptor.For("chn.NotificationSubscription.set"));
+        services.AddScoped<IValidator<SendMessage>, SendMessageValidator>();
+        services.AddCommandAuditor<SendMessage, MessageSendResponse, SendMessageAuditor>();
+        services.AddCommand<SendMessage, MessageSendResponse, SendMessageHandler>(CommandDescriptor.For("chn.Message.send"));
+        services.AddScoped<IValidator<ReplyToMessage>, ReplyToMessageValidator>();
+        services.AddCommandAuditor<ReplyToMessage, MessageReplyResponse, ReplyToMessageAuditor>();
+        services.AddCommand<ReplyToMessage, MessageReplyResponse, ReplyToMessageHandler>(CommandDescriptor.For("chn.Message.reply"));
+
+        // Owner events -> in-app notifications (worker). The party to tell is resolved through the owner in-process contract.
+        services.AddEventHandler<RenewalOfferedV1, RenewalOfferedNotificationHandler>(EventDescriptor.From(RenewalOfferedV1.Descriptor), RenewalOfferedNotificationHandler.Name, ModuleCode.CHN);
+        services.AddEventHandler<InvoiceIssuedV1, InvoiceIssuedNotificationHandler>(EventDescriptor.From(InvoiceIssuedV1.Descriptor), InvoiceIssuedNotificationHandler.Name, ModuleCode.CHN);
+        services.AddEventHandler<ClaimUpdatedV1, ClaimUpdatedNotificationHandler>(EventDescriptor.From(ClaimUpdatedV1.Descriptor), ClaimUpdatedNotificationHandler.Name, ModuleCode.CHN);
         services.AddScoped<IValidator<LinkPortalIdentity>, LinkPortalIdentityValidator>();
         services.AddCommandAuditor<LinkPortalIdentity, PortalIdentityLinkResponse, LinkPortalIdentityAuditor>();
         services.AddCommand<LinkPortalIdentity, PortalIdentityLinkResponse, LinkPortalIdentityHandler>(CommandDescriptor.For("chn.PortalIdentity.link"));
@@ -108,6 +135,8 @@ public static class ChannelsModule
             .Describe("Η ταυτότητα ή ο πελάτης έχει ήδη ενεργό σύνδεσμο. Αποσυνδέστε τον πρώτα.", "The identity or the party already has a live link; unlink it first."),
         ErrorDefinition.For(ModuleCode.CHN, "SELF-LINK", 403, "Δεν επιτρέπεται αυτοσύνδεση", "You cannot link your own identity")
             .Describe("Δεν μπορείτε να συνδέσετε τη δική σας ταυτότητα με πελάτη.", "You cannot link your own sign-in identity to a party."),
+        ErrorDefinition.For(ModuleCode.CHN, "NOT-PERMITTED", 403, "Δεν επιτρέπεται", "Not permitted")
+            .Describe("Δεν έχετε δικαίωμα να κάνετε αυτή την ενέργεια.", "You are not permitted to do this."),
         ErrorDefinition.For(ModuleCode.CHN, "HUMAN-REQUIRED", 403, "Απαιτείται άνθρωπος", "A person is required")
             .Describe("Μόνο φυσικό πρόσωπο μπορεί να κάνει αυτή την ενέργεια.", "Only a person can do this."),
     ];

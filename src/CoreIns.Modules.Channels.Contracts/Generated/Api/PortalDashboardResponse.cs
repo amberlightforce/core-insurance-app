@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>chn.Portal.dashboard result. Open requests are not included yet (TODO(hardening) until BO-CHN-04 messages).</summary>
+/// <summary>chn.Portal.dashboard result: work left for the customer, plus open message threads and the unread notification count (BO-CHN-04).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PortalDashboardResponse
 {
@@ -23,4 +23,12 @@ public sealed record PortalDashboardResponse
     /// <summary>Contract member 'unpaidInvoices'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("unpaidInvoices")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Channels.Contracts.Api.PortalUnpaidInvoice> UnpaidInvoices { get; init; }
+
+    /// <summary>Contract member 'unreadNotificationCount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("unreadNotificationCount")]
+    public required int UnreadNotificationCount { get; init; }
+
+    /// <summary>Message threads the customer started that staff have not answered yet</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("openRequests")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Channels.Contracts.Api.PortalOpenRequest> OpenRequests { get; init; }
 }
