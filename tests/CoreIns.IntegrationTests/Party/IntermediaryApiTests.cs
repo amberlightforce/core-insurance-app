@@ -131,6 +131,6 @@ public sealed class IntermediaryApiTests(PostgresFixture database) : IClassFixtu
         var found = await parties.SearchByCriteriaAsync(new PartySearchCriteria { Name = "Bakogiannis" }, cancellationToken: TestContext.Current.CancellationToken);
         found.Items.Select(i => i.PartyId).ShouldContain(created.Party.PartyId);
         await Should.ThrowAsync<CoreIns.Platform.Errors.DomainException>(() =>
-            parties.UpdateAsync(created.Party.PartyId.Value.ToString(), new PartyUpdateRequest(), CommandOptions.New(), TestContext.Current.CancellationToken));
+            parties.UpdateAsync(created.Party.PartyId.Value.ToString(), new PartyUpdateRequest { ExpectedRecordVersion = 1 }, CommandOptions.New(), TestContext.Current.CancellationToken));
     }
 }

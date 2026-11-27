@@ -33,7 +33,7 @@ public interface IPolicyPolicyService
     /// </remarks>
     /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
     /// <param name="knownAt">Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including</param>
-    /// <param name="ids">PRD: "ids (≤ 200)"</param>
+    /// <param name="ids">Policy ids (at most 50, comma-separated or repeated); a malformed id or more than 50 is a 400</param>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.PolicyGetManyResponse> GetManyAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, global::System.Collections.Generic.IReadOnlyList<string>? ids = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Policy search</summary>

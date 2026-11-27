@@ -4,15 +4,51 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Segment.changes result. PRD outputs: "segment versions"</summary>
+/// <summary>pol.Segment.changes result: one segment version, ordered by the instant it last changed (recordedTo when closed, else recordedFrom)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SegmentChangesItem
 {
-    /// <summary>PRD: "segment versions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("segmentVersions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SegmentVersions { get; init; }
+    /// <summary>Contract member 'segmentId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("segmentId")]
+    public required global::CoreIns.SharedKernel.Identifiers.SegmentId SegmentId { get; init; }
+
+    /// <summary>Contract member 'termId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("termId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyTermId TermId { get; init; }
+
+    /// <summary>Contract member 'policyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyId PolicyId { get; init; }
+
+    /// <summary>Contract member 'transactionId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("transactionId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyTransactionId TransactionId { get; init; }
+
+    /// <summary>Contract member 'validFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validFrom")]
+    public required global::CoreIns.SharedKernel.Instant ValidFrom { get; init; }
+
+    /// <summary>Contract member 'validTo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validTo")]
+    public required global::CoreIns.SharedKernel.Instant ValidTo { get; init; }
+
+    /// <summary>Contract member 'recordedFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordedFrom")]
+    public required global::CoreIns.SharedKernel.Instant RecordedFrom { get; init; }
+
+    /// <summary>Set once the version was superseded or reversed</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordedTo")]
+    public required global::CoreIns.SharedKernel.Instant? RecordedTo { get; init; }
+
+    /// <summary>recordedTo when closed, else recordedFrom</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("changedAt")]
+    public required global::CoreIns.SharedKernel.Instant ChangedAt { get; init; }
+
+    /// <summary>Contract member 'snapshotHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("snapshotHash")]
+    public required string SnapshotHash { get; init; }
+
+    /// <summary>Contract member 'worksheetId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("worksheetId")]
+    public string? WorksheetId { get; init; }
 }
