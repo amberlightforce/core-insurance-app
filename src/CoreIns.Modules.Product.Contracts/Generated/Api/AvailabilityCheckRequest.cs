@@ -4,28 +4,40 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.Availability.check request. PRD inputs: "hash, item, context (region, channel, transaction type, producer, element data, date)"</summary>
+/// <summary>pfc.Availability.check request (BO-PFC-05): which products can be sold on a channel for a transaction type. The decision date is the validAt query parameter (default today, Athens).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AvailabilityCheckRequest
 {
-    /// <summary>PRD: "hash"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? Hash { get; init; }
+    /// <summary>Contract member 'channel'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
+    public required string Channel { get; init; }
 
-    /// <summary>PRD: "item"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("item")]
+    /// <summary>Which window of a version applies. Defaults to NewBusiness.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("transactionType")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Item { get; init; }
+    public TransactionTypeValue? TransactionType { get; init; }
 
-    /// <summary>PRD: "context (region, channel, transaction type, producer, element data, date)"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("context")]
+    /// <summary>Optional filter, for example PERSON or COMPANY.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("customerType")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Context { get; init; }
+    public string? CustomerType { get; init; }
+
+    /// <summary>Optional, only this product code.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("product")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Product { get; init; }
+
+    /// <summary>Which window of a version applies. Defaults to NewBusiness.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<TransactionTypeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum TransactionTypeValue
+    {
+        /// <summary><c>NewBusiness</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NewBusiness")]
+        NewBusiness,
+
+        /// <summary><c>Renewal</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Renewal")]
+        Renewal,
+    }
 }

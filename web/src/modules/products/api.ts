@@ -9,7 +9,21 @@ const pfc = '/api/pfc/v1';
 export function useProducts() {
   return useQuery({
     queryKey: ['pfc', 'products'],
-    queryFn: ({ signal }) => apiRequest<ProductListPage>(`${pfc}/products`, { signal }),
+    queryFn: async ({ signal }) => {
+      // Keyset paging (nextCursor): the catalogue screen shows every product, so follow the cursor to the end.
+      const items: NonNullable<ProductListPage['items']> = [];
+      let cursor: string | null | undefined;
+      let last: ProductListPage | undefined;
+      do {
+        last = await apiRequest<ProductListPage>(`${pfc}/products`, {
+          signal,
+          query: { limit: 200, ...(cursor ? { cursor } : {}) },
+        });
+        items.push(...(last.items ?? []));
+        cursor = last.nextCursor;
+      } while (cursor);
+      return { ...last, items };
+    },
   });
 }
 

@@ -168,7 +168,7 @@ internal sealed partial class RenewalPricing(
             },
             cancellationToken).ConfigureAwait(false);
         return validated.Errors is { Count: > 0 } errors
-            ? Invalid("The product rejects the renewal.", errors.Select((e, i) => new FieldError($"riskTree[{i}]", "PRODUCT_RULE", "pol.product_rule", e.GetRawText())))
+            ? Invalid("The product rejects the renewal.", errors.Select((e, i) => new FieldError($"riskTree[{i}]", "PRODUCT_RULE", "pol.product_rule", e.Rule + ": " + e.Message.En)))
             : null;
     }
 

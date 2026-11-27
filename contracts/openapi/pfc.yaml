@@ -840,8 +840,7 @@ paths:
       description: |-
         Availability of any item
 
-        PRD inputs: hash, item, context (region, channel, transaction type, producer, element data, date)
-        PRD outputs: available, reason, winning rule id
+        BO-PFC-05: the sellable offerings for a channel and transaction type on a date (published, non-abstract versions only).
       tags:
       - Availability
       x-requirement:
@@ -869,6 +868,7 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
       requestBody:
         required: true
         content:
@@ -925,6 +925,8 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       responses:
         '200':
           description: Success
@@ -3469,7 +3471,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/ProductListItem'
-      description: Page of pfc.Product.list results (the whole catalogue of the legal entity, one page)
+      description: Page of pfc.Product.list results (cursor pagination, contract §3.5.5; ordered by product code)
     ChargeTypeListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -3550,101 +3552,290 @@ components:
           description: 'PRD: "non-renew decision"'
     AvailabilityCheckRequest:
       type: object
-      description: 'pfc.Availability.check request. PRD inputs: "hash, item, context (region, channel, transaction type, producer,
-        element data, date)"'
+      description: 'pfc.Availability.check request (BO-PFC-05): which products can be sold on a channel for a transaction type. The decision date is the validAt query parameter (default today, Athens).'
       properties:
-        hash:
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
+        transactionType:
+          type: string
+          enum: [NewBusiness, Renewal]
+          description: Which window of a version applies. Defaults to NewBusiness.
+        customerType:
+          type: string
+          description: Optional filter, for example PERSON or COMPANY.
+        product:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Optional, only this product code.
+      required:
+      - channel
+    AvailabilityOffering:
+      type: object
+      description: One sellable product with the Locked version that would be used.
+      properties:
+        product:
+          $ref: ../events/common.schema.json#/$defs/Code
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        productType:
+          type: string
+        customerType:
+          type: string
+        version:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        artefactHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "hash"'
-        item:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "item"'
-        context:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "context (region, channel, transaction type, producer, element data, date)"'
+        contractCurrency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+      required:
+      - product
+      - name
+      - productType
+      - customerType
+      - version
+      - artefactHash
+      - contractCurrency
     AvailabilityCheckResponse:
       type: object
-      description: 'pfc.Availability.check result. PRD outputs: "available, reason, winning rule id"'
+      description: 'pfc.Availability.check result: the sellable offerings (only published, non-abstract versions whose window covers the date).'
       properties:
         available:
           type: boolean
-          description: 'PRD: "available"'
+          description: True when at least one offering is sellable.
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-        winningRuleId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "winning rule id"'
+          type: [string, 'null']
+          description: When nothing is available, a code (NO-VERSION-IN-WINDOW); otherwise null.
+        offerings:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailabilityOffering'
+      required:
+      - available
+      - reason
+      - offerings
     ProductDescribeRequest:
       type: object
-      description: 'pfc.Product.describe request. PRD inputs: "product or hash, channel, transactionType, language, date"'
+      description: 'pfc.Product.describe request: a product code (resolved to the published version in force on validAt for the channel and transaction type) or an artefact hash.'
       properties:
         product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product or hash" (optional)'
+          $ref: ../events/common.schema.json#/$defs/Code
         hash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "product or hash" (optional)'
         channel:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "channel"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Required with product.
         transactionType:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transactionType"'
+          type: string
+          enum: [NewBusiness, Renewal]
+          description: Defaults to NewBusiness.
         language:
           $ref: ../events/common.schema.json#/$defs/LanguageCode
-          description: 'PRD: "language"'
+          description: Echoed; both languages are always returned.
       oneOf:
       - required:
         - product
+        - channel
       - required:
         - hash
+    DescribeStep:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        questionSet:
+          type: [string, 'null']
+        kind:
+          type: string
+          description: ELEMENTS, QUESTIONS or COVERAGES.
+      required:
+      - code
+      - name
+      - kind
     ProductDescribeResponse:
       type: object
-      description: 'pfc.Product.describe result. PRD outputs: "ordered steps, fields, rules, offerings, coverages, payment
-        plans"'
+      description: 'pfc.Product.describe result: names, terms, windows, risk structure, coverages, questions, payment plans and the artefact hash.'
       properties:
+        product:
+          $ref: ../events/common.schema.json#/$defs/Code
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        productType:
+          type: string
+        customerType:
+          type: string
+        version:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        isAbstract:
+          type: boolean
+        channels:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        languages:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/LanguageCode
+        contractCurrency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        terms:
+          $ref: '#/components/schemas/ProductTerms'
+        windows:
+          $ref: '#/components/schemas/ProductWindows'
+        illustrative:
+          type: boolean
+          description: True when the version carries illustrative (not settled) commercial data, so UIs show the illustrative pill.
         orderedSteps:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "ordered steps"'
-        fields:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "fields"'
-        rules:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rules"'
-        offerings:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "offerings"'
+          type: array
+          items:
+            $ref: '#/components/schemas/DescribeStep'
+        elements:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogueElement'
         coverages:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "coverages"'
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogueCoverage'
+        questionSets:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionSetDef'
         paymentPlans:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payment plans"'
+          type: array
+          items:
+            type: string
+          description: Payment plan codes for the channel (empty when the version declares none).
+      required:
+      - product
+      - name
+      - productType
+      - customerType
+      - version
+      - artefactHash
+      - isAbstract
+      - channels
+      - languages
+      - contractCurrency
+      - terms
+      - windows
+      - illustrative
+      - orderedSteps
+      - elements
+      - coverages
+      - questionSets
+      - paymentPlans
+    PolicyDraftElement:
+      type: object
+      description: One risk element instance of the draft (for example one vehicle). Field values are text.
+      properties:
+        element:
+          $ref: ../events/common.schema.json#/$defs/Code
+        id:
+          type: string
+          description: Caller-chosen id so children and coverages can point at this instance.
+        parent:
+          type: string
+          description: Id of the parent instance (for example the vehicle of a driver).
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+      - element
+      - fields
+    PolicyDraftCoverage:
+      type: object
+      properties:
+        coverage:
+          $ref: ../events/common.schema.json#/$defs/Code
+        element:
+          type: string
+          description: Id of the element instance covered; omit for a single instance.
+        terms:
+          type: object
+          description: Chosen term values by term code (an option code, or a number for a range term).
+          additionalProperties:
+            type: string
+      required:
+      - coverage
+      - terms
+    PolicyDraft:
+      type: object
+      description: A risk and coverage selection to validate.
+      properties:
+        elements:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyDraftElement'
+        coverages:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyDraftCoverage'
+        questionSet:
+          type: string
+          description: Question set code the answers belong to.
+        answers:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+      - elements
+      - coverages
     PolicyDraftValidateRequest:
       type: object
-      description: 'pfc.PolicyDraft.validate request. PRD inputs: "hash, checkpoint, draft"'
+      description: 'pfc.PolicyDraft.validate request: an artefact hash, an optional checkpoint (a stage name; a field is required only when it applies at that stage) and the draft.'
       properties:
         hash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "hash"'
         checkpoint:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checkpoint"'
+          description: A stage name as a JSON string (for example QUOTE).
         draft:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "draft"'
+          description: A JSON object of the PolicyDraft shape (see the PolicyDraft schema). Free-form on the wire so a caller with its own tree can map it before calling.
+      required:
+      - hash
+      - draft
+    PolicyDraftIssue:
+      type: object
+      properties:
+        level:
+          type: string
+          description: ELEMENT, FIELD, COVERAGE, TERM or QUESTION.
+        rule:
+          type: string
+        path:
+          type: string
+        messageKey:
+          type: string
+        message:
+          $ref: '#/components/schemas/LocalizedText'
+        severity:
+          type: string
+          enum: [ERROR, WARNING]
+      required:
+      - level
+      - rule
+      - path
+      - messageKey
+      - message
+      - severity
     PolicyDraftValidateResponse:
       type: object
-      description: 'pfc.PolicyDraft.validate result. PRD outputs: "errors[] (level, rule, path, message key, GR/EN message,
-        severity)"'
+      description: 'pfc.PolicyDraft.validate result: valid is true when no ERROR issues were found.'
       properties:
+        valid:
+          type: boolean
         errors:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "errors[] (level, rule, path, message key, GR/EN message, severity)"'
+            $ref: '#/components/schemas/PolicyDraftIssue'
+      required:
+      - valid
+      - errors
     ChangeSetCreateRequest:
       type: object
       description: pfc.ChangeSet.create request (BO-PFC-01). Copies the named Locked version into a new draft.

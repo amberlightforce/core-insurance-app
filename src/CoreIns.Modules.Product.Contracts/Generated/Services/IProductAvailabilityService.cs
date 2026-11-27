@@ -18,5 +18,6 @@ public interface IProductAvailabilityService
     /// <para>Status: full. Wave W2.</para>
     /// <para>Exposure: ui; consumers: CHN, POL.</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Product.Contracts.Api.AvailabilityCheckResponse> CheckAsync(global::CoreIns.Modules.Product.Contracts.Api.AvailabilityCheckRequest request, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Product.Contracts.Api.AvailabilityCheckResponse> CheckAsync(global::CoreIns.Modules.Product.Contracts.Api.AvailabilityCheckRequest request, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::System.Threading.CancellationToken cancellationToken = default);
 }
