@@ -306,6 +306,97 @@ namespace CoreIns.Modules.Channels.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Channels.Domain.PortalChangeRow", b =>
+                {
+                    b.Property<Guid>("ChangeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("change_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateTime>("EffectiveAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("effective_at");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("job_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<string>("PaymentPlanOption")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payment_plan_option");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid?>("TicketId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ticket_id");
+
+                    b.Property<Guid?>("TransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("VersionNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("version_no");
+
+                    b.HasKey("ChangeId")
+                        .HasName("pk_portal_change");
+
+                    b.HasIndex("LegalEntityId", "JobId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_portal_change_job");
+
+                    b.HasIndex("LegalEntityId", "PartyId", "CreatedAt")
+                        .HasDatabaseName("ix_portal_change_party");
+
+                    b.ToTable("portal_change", "chn", t =>
+                        {
+                            t.HasCheckConstraint("ck_portal_change_amount", "amount >= 0");
+
+                            t.HasCheckConstraint("ck_portal_change_status", "status IN ('PREVIEWED', 'CONFIRMED', 'REFERRED')");
+
+                            t.HasCheckConstraint("ck_portal_change_version", "version_no >= 1");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Channels.Domain.PortalIdentityRow", b =>
                 {
                     b.Property<Guid>("PortalIdentityId")

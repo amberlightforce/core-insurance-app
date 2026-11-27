@@ -213,9 +213,6 @@ CONTRACT_NOT_SERVED POST /api/chn/v1/api-products
 CONTRACT_NOT_SERVED POST /api/chn/v1/api-products/deprecate
 CONTRACT_NOT_SERVED POST /api/chn/v1/api-products/publish
 CONTRACT_NOT_SERVED POST /api/chn/v1/api-products/retire
-CONTRACT_NOT_SERVED POST /api/chn/v1/changes/confirm
-CONTRACT_NOT_SERVED POST /api/chn/v1/changes/preview
-CONTRACT_NOT_SERVED POST /api/chn/v1/changes/refer
 CONTRACT_NOT_SERVED POST /api/chn/v1/claims
 CONTRACT_NOT_SERVED POST /api/chn/v1/clients/approve
 CONTRACT_NOT_SERVED POST /api/chn/v1/clients/request

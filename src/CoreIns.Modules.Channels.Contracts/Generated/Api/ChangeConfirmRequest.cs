@@ -4,36 +4,18 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>chn.Change.confirm request. PRD inputs: "policy, intent, values, effective date"</summary>
+/// <summary>chn.Change.confirm request: the previewed change and the customers explicit acknowledgement.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ChangeConfirmRequest
 {
-    /// <summary>PRD: "policy"</summary>
+    /// <summary>Contract member 'changeId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'changeId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("policy")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Policy { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("changeId")]
+    public required global::System.Guid ChangeId { get; init; }
 
-    /// <summary>PRD: "intent"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("intent")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Intent { get; init; }
-
-    /// <summary>PRD: "values"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("values")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Values { get; init; }
-
-    /// <summary>PRD: "effective date"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveDate")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? EffectiveDate { get; init; }
+    /// <summary>Must be true (the customer saw the preview).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("acknowledged")]
+    public required bool Acknowledged { get; init; }
 }

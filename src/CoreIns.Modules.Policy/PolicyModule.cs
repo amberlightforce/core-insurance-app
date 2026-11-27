@@ -160,6 +160,9 @@ public static class PolicyModule
         services.AddCommandAuditor<SubmitWithdrawal, WithdrawalSubmitResponse, SubmitWithdrawalAuditor>();
         services.AddCommand<SubmitWithdrawal, WithdrawalSubmitResponse, SubmitWithdrawalHandler>(CommandDescriptor.For("pol.Withdrawal.submit") with { SupportsDryRun = true });
         services.AddScoped<IPolicyWithdrawalService, PolicyWithdrawalService>();
+        // BO-CHN-03: portal self-service change and renewal decision, in-process (the caller checks the permission matrix and ownership).
+        services.AddScoped<IPolicyPolicyChangeService, PolicyPolicyChangeService>();
+        services.AddScoped<IPolicyRenewalService, PolicyRenewalService>();
 
         // SL6-POL-NONPAY: CancellationForNonPaymentRequested / DelinquencyResolved consumers, the PSR queue (pol.Psr.*) and the scheduled-cancellation sweep.
         services.AddNonPaymentCancellation(configuration);
