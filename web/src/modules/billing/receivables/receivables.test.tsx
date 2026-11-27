@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as fx from '../../../test/fixtures';
+import { expectNoA11yViolations } from '../../../test/axe';
 import { mockApi, renderScreen, type MockRoute } from '../../../test/mockApi';
 import type { DisbursementView, ReceivableView } from './api';
 import { ReceivableDetailPage } from './ReceivableDetailPage';
@@ -87,6 +88,7 @@ describe('receivables list', () => {
       url: '/billing/receivables',
     });
     const grid = await screen.findByRole('grid', { name: 'Απαιτήσεις' });
+    await expectNoA11yViolations();
     expect(within(grid).getAllByText('RCV-0001').length).toBeGreaterThan(0);
     expect(within(grid).getByText('Ανάκτηση ζημίας')).toBeInTheDocument();
     expect(within(grid).getByText('Φιλικός Διακανονισμός')).toBeInTheDocument();

@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { Button } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { useRegionFormat } from '../../../design-system';
@@ -33,12 +34,11 @@ export function ViewsRail({ active, counts, onSelect }: ViewsRailProps) {
       {referralQueues.map((queue) => {
         const count = countOf(counts, queue);
         return (
-          <button
+          <Button
             key={queue}
-            type="button"
             className={styles.view}
             aria-current={queue === active ? 'true' : undefined}
-            onClick={() => {
+            onPress={() => {
               onSelect(queue);
             }}
           >
@@ -49,7 +49,7 @@ export function ViewsRail({ active, counts, onSelect }: ViewsRailProps) {
             >
               {count === undefined || count === null ? '–' : formatInteger(count, region)}
             </span>
-          </button>
+          </Button>
         );
       })}
       <div className={styles.spacer} />

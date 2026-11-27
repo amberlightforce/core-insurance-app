@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { expectNoA11yViolations } from '../../../test/axe';
 import { mockApi, problem, renderScreen } from '../../../test/mockApi';
 import { earliestDeadline, scalar } from './api';
 import { ComplianceHomePage } from './ComplianceHomePage';
@@ -61,6 +62,7 @@ describe('Compliance landing', () => {
     expect(screen.getByText('Παραβιάστηκε')).toBeInTheDocument();
     expect(screen.getByText('Σε εξέλιξη')).toBeInTheDocument();
     expect(await screen.findByText('OPEN')).toBeInTheDocument();
+    await expectNoA11yViolations();
     expect(screen.getByRole('button', { name: 'Άνοιγμα κονσόλας DSAR' })).toBeInTheDocument();
   });
 

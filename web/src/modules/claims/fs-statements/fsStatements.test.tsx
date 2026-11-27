@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { expectNoA11yViolations } from '../../../test/axe';
 import { mockApi, problem, renderScreen } from '../../../test/mockApi';
 import type { FsStatementView } from './api';
 import { monthPeriod } from './api';
@@ -95,6 +96,7 @@ describe('fs statements screen', () => {
     ]);
     view();
     expect(await screen.findByText('L2', {}, slow)).toBeTruthy();
+    await expectNoA11yViolations();
     expect(screen.getAllByText('Δεν υπάρχει αντίστοιχη υπόθεση').length).toBeGreaterThan(0);
     expect(screen.getByText(/Διαφορά ποσού/)).toBeTruthy();
     expect(screen.getAllByRole('button', { name: 'Έγκριση καθαρού' })).toHaveLength(1);

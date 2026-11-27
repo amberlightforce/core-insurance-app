@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { expectNoA11yViolations } from '../../test/axe';
 import { mockApi, problem, renderScreen } from '../../test/mockApi';
 import { WorkPage } from './WorkPage';
 
@@ -67,6 +68,7 @@ describe('WorkPage', () => {
     renderScreen(<WorkPage />, { path: '/work', url: '/work' });
 
     const section = await screen.findByRole('region', { name: 'Εγκρίσεις αποζημιώσεων' });
+    await expectNoA11yViolations();
     expect(await within(section).findAllByRole('link')).not.toHaveLength(0);
     expect(within(section).getByRole('link', { name: /Πληρωμή|CLM\.PAYMENT/ })).toHaveAttribute(
       'href',
