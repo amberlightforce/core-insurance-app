@@ -1,12 +1,13 @@
 using CoreIns.Platform.Ai;
 using CoreIns.Platform.Approvals;
+using CoreIns.Platform.Contracts.Api;
+using CoreIns.Platform.DeadLetters;
 using CoreIns.Platform.Audit;
 using CoreIns.Platform.Authorization;
 using CoreIns.Platform.Authority;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Configuration;
 using CoreIns.Platform.Contracts;
-using CoreIns.Platform.Contracts.Api;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
@@ -110,6 +111,7 @@ public static class PlatformModule
             ErrorDefinition.For(ModuleCode.PLT, NumberingErrors.UnknownScheme, 500, "Δεν έχει οριστεί σειρά αρίθμησης", "No numbering series is defined")
                 .Describe("Ο τύπος αναγνωριστικού δεν έχει ορισμό σειράς στις ρυθμίσεις της πλατφόρμας.", "The identifier type has no series definition in the platform settings."));
         services.AddApprovals();
+        services.AddDeadLetters();
         services.AddAiControlPlane();
         services.AddSupportAuthorityTypes();
         return services;
@@ -152,6 +154,18 @@ public static class PlatformModule
                 .Describe("Αυτός ο τύπος αιτήματος εγκρίνεται ή απορρίπτεται μόνο από την οθόνη του τομέα που τον κατέχει (π.χ. επιστροφές χρημάτων από τη χρέωση), όχι από τα εισερχόμενα εγκρίσεων.", "This request type is approved or rejected only in the screen of the module that owns it (for example refunds in billing), not in the approvals inbox."),
             ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.SubjectMismatch, 422, "Η έγκριση αφορά άλλο αντικείμενο", "The approval is for another subject")
                 .Describe("Το αίτημα έγκρισης είναι άλλου τύπου ή αφορά άλλο αντικείμενο από αυτό που εκτελείται.", "The approval request is of another type or for another subject than the one being executed."));
+        return services;
+    }
+
+    /// <summary>The dead-letter API (NX-OT-14): list, get and replay of parked outbox messages.</summary>
+    private static IServiceCollection AddDeadLetters(this IServiceCollection services)
+    {
+        services.TryAddSingleton<DeadLetterQueries>();
+        services.AddScoped<IValidator<ReplayDeadLetters>, ReplayDeadLettersValidator>();
+        services.AddCommandAuditor<ReplayDeadLetters, DeadLetterReplayResponse, ReplayDeadLettersAuditor>();
+        services.AddCommand<ReplayDeadLetters, DeadLetterReplayResponse, ReplayDeadLettersHandler>(CommandDescriptor.For("plt.DeadLetter.replay") with { SupportsDryRun = true });
+        services.AddErrorDefinitions(ErrorDefinition.For(ModuleCode.PLT, DeadLetterErrors.Resolved, 409, "Το μήνυμα έχει ήδη επιλυθεί", "The dead letter is already resolved")
+            .Describe("Όλα τα μηνύματα που ζητήθηκαν έχουν ήδη επαναληφθεί ή απορριφθεί· δεν γίνεται καμία ενέργεια.", "Every requested dead letter was already replayed or discarded; nothing was done."));
         return services;
     }
 
