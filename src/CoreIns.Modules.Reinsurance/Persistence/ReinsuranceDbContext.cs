@@ -63,6 +63,12 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
 
     public DbSet<StatementLineRow> StatementLines => Set<StatementLineRow>();
 
+    public DbSet<CashCallRow> CashCalls => Set<CashCallRow>();
+
+    public DbSet<CashCallLineRow> CashCallLines => Set<CashCallLineRow>();
+
+    public DbSet<CashCallReceiptRow> CashCallReceipts => Set<CashCallReceiptRow>();
+
     public DbSet<OccurrenceRow> Occurrences => Set<OccurrenceRow>();
 
     public DbSet<OccurrenceClaimRow> OccurrenceClaims => Set<OccurrenceClaimRow>();
@@ -80,6 +86,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
         AccountingModel.Configure(modelBuilder);
         AccountItemModel.Configure(modelBuilder);
         StatementModel.Configure(modelBuilder);
+        CashCallModel.Configure(modelBuilder);
         ConfigureOccurrences(modelBuilder);
 
         modelBuilder.Entity<ContractRow>(entity =>

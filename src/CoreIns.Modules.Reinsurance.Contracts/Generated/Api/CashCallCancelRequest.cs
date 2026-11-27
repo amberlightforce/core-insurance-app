@@ -4,20 +4,18 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.CashCall.cancel request. PRD inputs: "occurrence, amounts"</summary>
+/// <summary>ri.CashCall.cancel request. Maker-checker (the person who raised the call cannot cancel it); refused once cash was received.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CashCallCancelRequest
 {
-    /// <summary>PRD: "occurrence"</summary>
+    /// <summary>Contract member 'cashCallId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'cashCallId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("occurrence")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Occurrence { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("cashCallId")]
+    public required global::System.Guid CashCallId { get; init; }
 
-    /// <summary>PRD: "amounts"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("amounts")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Money>? Amounts { get; init; }
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
 }
