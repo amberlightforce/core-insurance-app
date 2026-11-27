@@ -44,6 +44,7 @@ public static class DocumentsModule
         services.AddSingleton<IDsarParticipant, DocumentsDsarParticipant>();
         services.AddScoped<DocumentReader>();
         services.AddScoped<TemplateCatalogue>();
+        services.AddScoped<ArchiveCompleteness>();
 
         // The request is idempotent on (template key, request number) by itself; callers inside a unit of work pass no HTTP key.
         services.AddScoped<IValidator<RequestDocument>, RequestDocumentValidator>();
@@ -54,6 +55,10 @@ public static class DocumentsModule
             CommandDescriptor.For("doc.ProviderEvent.receive") with { RequiresIdempotencyKey = false });
         services.AddCommand<ReprintDocument, ReprintResult, ReprintDocumentHandler>(CommandDescriptor.For("doc.Document.reprint"));
         services.AddCommand<StoreArchive, ArchiveStoreResponse, StoreArchiveHandler>(CommandDescriptor.For("doc.Archive.store"));
+        services.AddCommand<VerifyArchive, ArchiveVerifyResponse, VerifyArchiveHandler>(CommandDescriptor.For("doc.Archive.verify"));
+        services.AddCommand<AddRendition, ArchiveAddRenditionResponse, AddRenditionHandler>(CommandDescriptor.For("doc.Archive.addRendition"));
+        services.AddCommand<SetRetentionClass, ArchiveSetRetentionClassResponse, SetRetentionClassHandler>(CommandDescriptor.For("doc.Archive.setRetentionClass"));
+        services.AddCommand<ExportEvidencePack, EvidencePackExportResponse, ExportEvidencePackHandler>(CommandDescriptor.For("doc.EvidencePack.export"));
 
         services.AddScoped<IDocumentRequestService, DocumentRequestService>();
 
@@ -74,6 +79,10 @@ public static class DocumentsModule
             .Describe("Το μέσο ή ο πάροχος δεν είναι διαθέσιμος για αυτή την παράδοση.", "The medium or provider is not available for this delivery."),
         ErrorDefinition.For(ModuleCode.DOC, "BINDING-MISSING", 422, "Δεν βρέθηκε πρότυπο", "No template binding")
             .Describe("Δεν υπάρχει εγκεκριμένη έκδοση προτύπου σε ισχύ για τον τύπο και το πεδίο.", "No approved template version is in force for the document type and scope."),
+        ErrorDefinition.For(ModuleCode.DOC, "RETENTION-CLASS-UNKNOWN", 422, "Άγνωστη κλάση διατήρησης", "Unknown retention class")
+            .Describe("Η κλάση διατήρησης δεν υπάρχει στη λίστα του πακέτου αγοράς.", "The retention class is not in the market pack list."),
+        ErrorDefinition.For(ModuleCode.DOC, "PACK-TOO-LARGE", 422, "Πολύ μεγάλο πακέτο τεκμηρίων", "The evidence pack is too large")
+            .Describe("Το εύρος περιέχει περισσότερα έγγραφα από το όριο· περιορίστε το.", "The scope holds more documents than the limit; narrow it."),
         ErrorDefinition.For(ModuleCode.DOC, "HASH-MISMATCH", 422, "Το αποτύπωμα δεν ταιριάζει", "The hash does not match")
             .Describe("Το δηλωμένο αποτύπωμα SHA-256 διαφέρει από το περιεχόμενο.", "The declared SHA-256 differs from the content."),
     ];

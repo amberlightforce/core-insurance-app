@@ -2783,6 +2783,12 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: objectRef
+        in: query
+        required: true
+        description: MODULE/Type/id of the object the documents are about
+        schema:
+          type: string
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
       responses:
@@ -2800,6 +2806,121 @@ paths:
           $ref: common.yaml#/components/responses/Forbidden
         '422':
           $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/archives/completeness:
+    get:
+      operationId: doc.Archive.completeness
+      summary: Archive completeness report
+      description: |-
+        Read-only (BO-DOC-04). For every issued document (status Rendered or Superseded) created in the range, checks that the
+        archived artefact exists and that its recomputed SHA-256 equals both the stored archive hash and the document's hash.
+        Reports gaps per UTC month plus orphan archive entries; changes nothing. Capped at 2000 documents per call.
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-DOC-004
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: none'
+      x-exposure:
+      - ui
+      x-permission: doc.Archive.completeness
+      x-error-codes:
+      - code: DOC-ERR-PAYLOAD-INVALID
+        status: 422
+      x-source:
+      - BO-DOC-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: from
+        in: query
+        required: true
+        description: First creation date (UTC date, inclusive)
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        required: true
+        description: Last creation date (UTC date, inclusive)
+        schema:
+          type: string
+          format: date
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveCompletenessResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/archives/{id}/content:
+    get:
+      operationId: doc.Archive.download
+      summary: Download archived bytes
+      description: |-
+        Streams the stored bytes of an archive entry (a letter, a rendition or an evidence-pack zip) with its media type and
+        `X-Content-SHA256`. Scoped to the caller's legal entity.
+      tags:
+      - Archive
+      x-requirement:
+      - REQ-DOC-004
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: none'
+      x-exposure:
+      - ui
+      x-permission: doc.Archive.download
+      x-error-codes:
+      - code: DOC-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-DOC-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The bytes
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/doc/v1/subject/export:
@@ -3818,21 +3939,45 @@ components:
           description: 'PRD: "sealed archive"'
     EvidencePackExportRequest:
       type: object
-      description: 'doc.EvidencePack.export request. PRD inputs: "pack id / filters"'
+      description: |-
+        doc.EvidencePack.export request (BO-DOC-04). Scope: `packId` (one document id) or any of `subject` (MODULE/Type/id),
+        `partyId` (recipient), `createdFrom`/`createdTo` (UTC dates, inclusive); at least one selector is required.
       properties:
         packId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "pack id"'
-        filters:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "filters"'
+          description: One document id
+        subject:
+          type: string
+          description: MODULE/Type/id
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Recipient party
+        createdFrom:
+          type: string
+          format: date
+        createdTo:
+          type: string
+          format: date
+        legalClaimReason:
+          type: string
+          description: Needed to include documents of recipients under a DSAR restriction (GDPR Art. 18(2), legal claims); without it they are listed in the manifest as excluded.
     EvidencePackExportResponse:
       type: object
-      description: 'doc.EvidencePack.export result. PRD outputs: "sealed archive"'
+      description: 'doc.EvidencePack.export result: the sealed zip, stored as an archive entry (download with doc.Archive.download).'
       properties:
-        sealedArchive:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "sealed archive"'
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        documentCount:
+          type: integer
+        excludedCount:
+          type: integer
+          description: Documents listed in the manifest but not included (DSAR restriction without a legal-claim reason).
+        entryCount:
+          type: integer
+          description: Files in the zip, manifest included.
+      required: [archiveId, hash, documentCount, excludedCount, entryCount]
     SignatureCreateEnvelopeRequest:
       type: object
       description: 'doc.Signature.createEnvelope request. PRD inputs: "documents, signatories, level, deadline"'
@@ -3983,83 +4128,95 @@ components:
           description: 'PRD: "hash"'
     ArchiveVerifyRequest:
       type: object
-      description: 'doc.Archive.verify request. PRD inputs: "binary stream + declared hash, metadata"'
+      description: 'doc.Archive.verify request: recompute the SHA-256 of the stored bytes and compare it with the stored hash.'
       properties:
-        binaryStream:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "binary stream + declared hash"'
-        declaredHash:
-          $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "binary stream + declared hash"'
-        metadata:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "metadata"'
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required: [archiveId]
     ArchiveVerifyResponse:
       type: object
-      description: 'doc.Archive.verify result. PRD outputs: "archive id, hash"'
+      description: 'doc.Archive.verify result: OK when the recomputed hash equals the stored hash, otherwise TAMPERED.'
       properties:
         archiveId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "archive id"'
         hash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "hash"'
+          description: Stored hash
+        computedHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        result:
+          type: string
+          enum: [OK, TAMPERED]
+      required: [archiveId, hash, computedHash, result]
     ArchiveAddRenditionRequest:
       type: object
-      description: 'doc.Archive.addRendition request. PRD inputs: "binary stream + declared hash, metadata"'
+      description: 'doc.Archive.addRendition request: another artefact of the same archive entry (e.g. the PDF next to the HTML).'
       properties:
+        parentArchiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         binaryStream:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "binary stream + declared hash"'
+          type: string
+          description: Base64 bytes (at most 5 MB)
         declaredHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "binary stream + declared hash"'
+        contentType:
+          type: string
+          description: Media type, e.g. application/pdf
+        renditionKind:
+          type: string
+          description: Free label such as PDF or PDFA3
         metadata:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "metadata"'
+      required: [parentArchiveId, binaryStream, contentType, renditionKind]
     ArchiveAddRenditionResponse:
       type: object
-      description: 'doc.Archive.addRendition result. PRD outputs: "archive id, hash"'
+      description: 'doc.Archive.addRendition result.'
       properties:
         archiveId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "archive id"'
         hash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "hash"'
+      required: [archiveId, hash]
     ArchiveSetRetentionClassRequest:
       type: object
-      description: 'doc.Archive.setRetentionClass request. PRD inputs: "binary stream + declared hash, metadata"'
+      description: 'doc.Archive.setRetentionClass request. The class must be in the market pack list (Documents:RetentionClasses); that list is empty until the market pack supplies it (D-REG-07), so every class is refused until then.'
       properties:
-        binaryStream:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "binary stream + declared hash"'
-        declaredHash:
-          $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "binary stream + declared hash"'
-        metadata:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "metadata"'
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        retentionClass:
+          type: string
+      required: [archiveId, retentionClass]
     ArchiveSetRetentionClassResponse:
       type: object
-      description: 'doc.Archive.setRetentionClass result. PRD outputs: "archive id, hash"'
+      description: 'doc.Archive.setRetentionClass result.'
       properties:
         archiveId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "archive id"'
-        hash:
-          $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "hash"'
+        retentionClass:
+          type: string
+      required: [archiveId, retentionClass]
     ArchiveListForObjectItem:
       type: object
-      description: 'doc.Archive.listForObject result. PRD outputs: "archive id, hash"'
+      description: 'doc.Archive.listForObject result: the archived artefacts (documents and their renditions) about one object.'
       properties:
         archiveId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "archive id"'
         hash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "hash"'
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contentType:
+          type: string
+        parentArchiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        renditionKind:
+          type: string
+        retentionClass:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [archiveId, hash, documentId, contentType, createdAt]
     ArchiveListForObjectPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -4070,6 +4227,56 @@ components:
             items:
               $ref: '#/components/schemas/ArchiveListForObjectItem'
       description: Page of doc.Archive.listForObject results (cursor pagination, contract §3.5.5)
+    ArchiveCompletenessGap:
+      type: object
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        documentNumber:
+          type: string
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          type: string
+          enum: [MISSING_ARCHIVE, HASH_MISMATCH, DOCUMENT_HASH_DIFFERS]
+      required: [documentId, documentNumber, archiveId, kind]
+    ArchiveCompletenessPeriod:
+      type: object
+      properties:
+        period:
+          type: string
+          description: yyyy-MM (UTC creation month)
+        issued:
+          type: integer
+        ok:
+          type: integer
+        gaps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArchiveCompletenessGap'
+        orphanArchiveIds:
+          type: array
+          description: Archive entries created in the period that no document and no rendition refers to (informational; other modules store through doc.Archive.store).
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+      required: [period, issued, ok, gaps, orphanArchiveIds]
+    ArchiveCompletenessResponse:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+        periods:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArchiveCompletenessPeriod'
+        truncated:
+          type: boolean
+          description: True when the cap on checked documents was reached; narrow the range.
+      required: [from, to, periods, truncated]
     SubjectExportRequest:
       type: object
       description: 'doc.Subject.export request. PRD inputs: "party id, scope"'

@@ -58,8 +58,26 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("metadata");
 
+                    b.Property<Guid?>("ParentArchiveId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_archive_id");
+
+                    b.Property<string>("RenditionKind")
+                        .HasColumnType("text")
+                        .HasColumnName("rendition_kind");
+
+                    b.Property<string>("RetentionClass")
+                        .HasColumnType("text")
+                        .HasColumnName("retention_class");
+
                     b.HasKey("ArchiveId")
                         .HasName("pk_archive");
+
+                    b.HasIndex("ParentArchiveId")
+                        .HasDatabaseName("ix_archive_parent");
+
+                    b.HasIndex("LegalEntityId", "CreatedAt")
+                        .HasDatabaseName("ix_archive_created");
 
                     b.ToTable("archive", "doc", t =>
                         {
@@ -290,10 +308,6 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_document_number");
 
-                    b.HasIndex("LegalEntityId", "TemplateKey", "RequestNo")
-                        .IsUnique()
-                        .HasDatabaseName("ux_document_request");
-
                     b.HasIndex("LegalEntityId", "CreatedAt", "DocumentNumber")
                         .IsDescending(false, true, true)
                         .HasDatabaseName("ix_document_library");
@@ -303,6 +317,10 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
 
                     b.HasIndex("LegalEntityId", "TemplateKey", "CreatedAt")
                         .HasDatabaseName("ix_document_library_type");
+
+                    b.HasIndex("LegalEntityId", "TemplateKey", "RequestNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_document_request");
 
                     b.HasIndex("SubjectModule", "SubjectType", "SubjectId")
                         .HasDatabaseName("ix_document_subject");

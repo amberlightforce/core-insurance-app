@@ -50,7 +50,6 @@ CONTRACT_NOT_SERVED GET /api/dat/v1/coverage/status
 CONTRACT_NOT_SERVED GET /api/dat/v1/feature-store/get-online
 CONTRACT_NOT_SERVED GET /api/dat/v1/lineage/trace
 CONTRACT_NOT_SERVED GET /api/dat/v1/scr-results/{}
-CONTRACT_NOT_SERVED GET /api/doc/v1/archives/list-for-object
 CONTRACT_NOT_SERVED GET /api/doc/v1/forms/{}
 CONTRACT_NOT_SERVED GET /api/doc/v1/ipids/get
 CONTRACT_NOT_SERVED GET /api/doc/v1/signatures/{}
@@ -356,9 +355,6 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/purpose-grants/revoke
 CONTRACT_NOT_SERVED POST /api/dat/v1/scr-results/accept
 CONTRACT_NOT_SERVED POST /api/dat/v1/scr-results/submit
 CONTRACT_NOT_SERVED POST /api/dat/v1/synthetic/generate
-CONTRACT_NOT_SERVED POST /api/doc/v1/archives/add-rendition
-CONTRACT_NOT_SERVED POST /api/doc/v1/archives/set-retention-class
-CONTRACT_NOT_SERVED POST /api/doc/v1/archives/verify
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/delete-draft
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/hide
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/import
@@ -368,7 +364,6 @@ CONTRACT_NOT_SERVED POST /api/doc/v1/documents/resend
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/supersede
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/unhide
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/withdraw
-CONTRACT_NOT_SERVED POST /api/doc/v1/evidence-packs/export
 CONTRACT_NOT_SERVED POST /api/doc/v1/form-patterns/validate-references
 CONTRACT_NOT_SERVED POST /api/doc/v1/forms/add-manual
 CONTRACT_NOT_SERVED POST /api/doc/v1/forms/infer
