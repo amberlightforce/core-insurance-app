@@ -32,7 +32,7 @@ internal static class AiPermissions
 }
 
 /// <summary>Reads of the control plane: the effective state of a feature and feature flags.</summary>
-internal sealed class AiQueries(NpgsqlDataSource dataSource, DbAiGate gate, IConfiguration configuration)
+internal sealed class AiQueries(NpgsqlDataSource dataSource, DbAiGate gate, IConfiguration configuration, Context.RequestContext requestContext)
 {
     public async Task<AiToggleResolveResponse> ResolveAsync(AiToggleResolveRequest request, CancellationToken cancellationToken)
     {
@@ -79,8 +79,14 @@ internal sealed class AiQueries(NpgsqlDataSource dataSource, DbAiGate gate, ICon
             return new FeatureFlagEvaluateResponse { State = decision.IsAllowed, Reason = decision.Reason };
         }
 
-        // TODO(hardening): flags by tenant / legal entity / role (plt.feature_flag table); only a global configured boolean for now.
-        var configured = configuration.GetSection("Platform:FeatureFlags")[request.Flag];
+        // Most specific first: legal entity (Platform:FeatureFlagScopes:<flag>:LegalEntity:<code>), then role from the request context
+        // (Platform:FeatureFlagScopes:<flag>:Role:<role>), then the global Platform:FeatureFlags:<flag>. (Configuration-backed; a table is a later step.)
+        var scoped = configuration.GetSection($"Platform:FeatureFlagScopes:{request.Flag}");
+        var entity = requestContext.LegalEntity?.ToString();
+        var role = request.Context is { ValueKind: System.Text.Json.JsonValueKind.Object } ctx && ctx.TryGetProperty("role", out var r) && r.ValueKind == System.Text.Json.JsonValueKind.String ? r.GetString() : null;
+        var configured = (entity is null ? null : scoped[$"LegalEntity:{entity}"])
+            ?? (role is null ? null : scoped[$"Role:{role}"])
+            ?? configuration.GetSection("Platform:FeatureFlags")[request.Flag];
         return bool.TryParse(configured, out var state)
             ? new FeatureFlagEvaluateResponse { State = state }
             : new FeatureFlagEvaluateResponse { State = false, Reason = "NOT_CONFIGURED" };

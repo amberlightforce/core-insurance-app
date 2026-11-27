@@ -62,17 +62,10 @@ public sealed class AiFeaturesTests(PostgresFixture database) : IClassFixture<Po
     }
 
     private static readonly object FnolCall = new { text = "Rear-end collision on 2026-10-03, plate ΥΝΖ 4821, no injuries." };
-    private static readonly object PtyCall = new
-    {
-        a = new { name = "Maria Papadopoulou", identifier = "123456789", birthDate = "1980-05-17" },
-        b = new { name = "maria papadopoulou", identifier = "123456789", birthDate = "1980-05-17" },
-    };
-    private static readonly object BilCall = new
-    {
-        payment = new { amount = 120.50m, reference = "INV-0042", payerName = "Maria" },
-        candidates = new[] { new { invoiceNo = "INV-0041", openAmount = 99m }, new { invoiceNo = "INV-0042", openAmount = 120.50m } },
-    };
-    private static readonly object UwCall = new { referralId = "R-1", reasons = new[] { "Sum insured above authority" }, sumInsured = 750000m, product = "PROPERTY" };
+    // Facts are loaded server-side by id (NX-HD-14): the request carries ids only.
+    private static readonly object PtyCall = new { partyIdA = Guid.NewGuid().ToString(), partyIdB = Guid.NewGuid().ToString() };
+    private static readonly object BilCall = new { receiptId = Guid.NewGuid().ToString() };
+    private static readonly object UwCall = new { referralId = Guid.NewGuid().ToString() };
 
     private static object ToolsCall(string tool) => new { jsonrpc = "2.0", id = 7, method = "tools/call", @params = new { name = tool, arguments = new { policyId = Guid.NewGuid() } } };
 
@@ -113,18 +106,15 @@ public sealed class AiFeaturesTests(PostgresFixture database) : IClassFixture<Po
         fnol.Text("suggestion.lossDate").ShouldBe("2026-10-03");
         Guid.TryParse(fnol.Text("interactionId"), out _).ShouldBeTrue();
 
+        // The gate is open; the ids are unknown, so the server-side load answers 404 (and a caller-supplied fact can no longer stand in).
         var (r2, pty) = await PostAsync("/api/pty/v1/parties/explain-duplicate", PtyCall);
-        r2.StatusCode.ShouldBe(HttpStatusCode.OK, pty?.ToJsonString());
-        pty.Text("suggestion.likelihood").ShouldBe("LIKELY_DUPLICATE");
-        Guid.TryParse(pty.Text("interactionId"), out _).ShouldBeTrue();
+        r2.StatusCode.ShouldBe(HttpStatusCode.NotFound, pty?.ToJsonString());
 
         var (r3, bil) = await PostAsync("/api/bil/v1/suspense/suggest-match", BilCall);
-        r3.StatusCode.ShouldBe(HttpStatusCode.OK, bil?.ToJsonString());
-        bil.Text("suggestion.matches.0.invoiceNo").ShouldBe("INV-0042");
+        r3.StatusCode.ShouldBe(HttpStatusCode.NotFound, bil?.ToJsonString());
 
         var (r4, uw) = await PostAsync("/api/uw/v1/referrals/summarize", UwCall);
-        r4.StatusCode.ShouldBe(HttpStatusCode.OK, uw?.ToJsonString());
-        uw.Text("suggestion.summary").ShouldContain("Sum insured above authority");
+        r4.StatusCode.ShouldBe(HttpStatusCode.NotFound, uw?.ToJsonString());
 
         var (r5, list) = await PostAsync("/api/chn/v1/agent/mcp", new { jsonrpc = "2.0", id = 1, method = "tools/list" });
         r5.StatusCode.ShouldBe(HttpStatusCode.OK, list?.ToJsonString());

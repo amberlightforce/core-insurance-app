@@ -64,6 +64,7 @@ public static class FinanceModule
         services.AddScoped<JournalReader>();
         services.AddScoped<ClearingInvariants>();
         services.AddScoped<PostingRuleReader>();
+        services.AddScoped<FinanceOpsReader>();
 
         // Intake (worker): the posting source, the policy context and the context-only events (REQ-FIN-001, -036).
         services.AddEventHandler<JsonElement, BillingEntryPostedHandler>(Descriptor(BillingEntryPostedV1.Descriptor), "FIN.Intake.BillingEntryPosted", ModuleCode.FIN);

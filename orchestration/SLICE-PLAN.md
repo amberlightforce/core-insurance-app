@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # SLICE PLAN — thin end-to-end slice (E2E-01 happy path)
 
 **Approved approach:** D-USR-04..06, D-USR-08 (Docker), D-USR-09 (deep review first round only; Sonnet by default). **Started:** 2026-10-07.

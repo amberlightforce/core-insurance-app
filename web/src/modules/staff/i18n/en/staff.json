@@ -62,7 +62,12 @@
       "PLT-ERR-SELF-APPROVAL": "You cannot approve a request you submitted yourself. A second user is required.",
       "PLT-ERR-EDITOR-CANNOT-APPROVE": "Someone who edited the request cannot approve it.",
       "PLT-ERR-AUTHORITY-DENIED": "Your authority limit does not cover this amount.",
-      "PLT-ERR-AUTHORITY-REFERRAL-REQUIRED": "The amount is above your limit and must be referred to a higher approver."
+      "PLT-ERR-AUTHORITY-REFERRAL-REQUIRED": "The amount is above your limit and must be referred to a higher approver.",
+      "PLT-ERR-SOD": "Separation of duties: the person who prepared this cannot also approve it. A second user is required.",
+      "FIN-ERR-UNBALANCED": "The journal does not balance: debits must equal credits.",
+      "FIN-ERR-EVIDENCE-REQUIRED": "A manual journal needs an evidence reference.",
+      "FIN-ERR-TEMPLATE-ACCOUNT": "An account is not allowed for this journal template.",
+      "FIN-ERR-PERIOD-LOCKED": "The accounting period is locked and refuses postings."
     }
   },
   "noPermission": {

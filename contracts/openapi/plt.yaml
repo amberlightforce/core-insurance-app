@@ -2726,6 +2726,7 @@ paths:
       - REQ-PLT-005
       - REQ-PLT-144
       - REQ-PLT-145
+      x-typed: NX-OT-14
       x-anchor:
       - REQ-PLT-005
       x-anchor-mapped:
@@ -2733,7 +2734,7 @@ paths:
       x-wave: W1
       x-work-packages:
       - W1-PLT-03
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: query
@@ -2744,8 +2745,8 @@ paths:
       - ui
       x-permission: plt.DeadLetter.list
       x-error-codes:
-      - code: PLT-ERR-REPLAY-IN-PROGRESS
-        status: 409
+      - code: PLT-ERR-VALIDATION
+        status: 400
       x-source:
       - PRD-14 §9.1 l.1971
       parameters:
@@ -2753,6 +2754,44 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: eventType
+        in: query
+        required: false
+        description: Only dead letters of this event type
+        schema:
+          type: string
+      - name: module
+        in: query
+        required: false
+        description: Only dead letters of handlers of this module (the handler-name prefix, e.g. CLM)
+        schema:
+          type: string
+      - name: handler
+        in: query
+        required: false
+        description: Only dead letters of this handler
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        description: Only dead letters in this status (default all)
+        schema:
+          $ref: '#/components/schemas/DeadLetterStatus'
+      - name: parkedFrom
+        in: query
+        required: false
+        description: Parked at or after (UTC instant)
+        schema:
+          type: string
+          format: date-time
+      - name: parkedTo
+        in: query
+        required: false
+        description: Parked before (UTC instant)
+        schema:
+          type: string
+          format: date-time
       responses:
         '200':
           description: Success
@@ -2766,8 +2805,6 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
-        '409':
-          $ref: common.yaml#/components/responses/Conflict
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/plt/v1/dead-letters/replay:
@@ -2785,6 +2822,7 @@ paths:
       - REQ-PLT-005
       - REQ-PLT-144
       - REQ-PLT-145
+      x-typed: NX-OT-14
       x-anchor:
       - REQ-PLT-005
       x-anchor-mapped:
@@ -2792,7 +2830,7 @@ paths:
       x-wave: W1
       x-work-packages:
       - W1-PLT-03
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
@@ -2803,8 +2841,11 @@ paths:
       - ui
       x-permission: plt.DeadLetter.replay
       x-error-codes:
-      - code: PLT-ERR-REPLAY-IN-PROGRESS
+      - code: PLT-ERR-DEAD-LETTER-RESOLVED
+        note: every named dead letter was already replayed or discarded (replaying again is a no-op)
         status: 409
+      - code: PLT-ERR-NOT-FOUND
+        status: 404
       - code: PLT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -2836,10 +2877,76 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
           $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/plt/v1/dead-letters/{id}:
+    get:
+      operationId: plt.DeadLetter.get
+      summary: Replay and DLQ
+      description: |-
+        Replay and DLQ
+
+        PRD inputs: consumer, from position; dead-letter ids
+        PRD outputs: —
+      tags:
+      - DeadLetter
+      x-requirement:
+      - REQ-PLT-005
+      - REQ-PLT-144
+      - REQ-PLT-145
+      x-typed: NX-OT-14
+      x-anchor:
+      - REQ-PLT-005
+      x-anchor-mapped:
+      - REQ-PLT-005
+      x-wave: W1
+      x-work-packages:
+      - W1-PLT-03
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: Yes (counts); PRD idempotency: Yes'
+      x-exposure:
+      - ui
+      x-permission: plt.DeadLetter.get
+      x-error-codes:
+      - code: PLT-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-14 §9.1 l.1971
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the dead letter
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeadLetterListItem'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/plt/v1/dead-letters/discard:
@@ -7811,10 +7918,67 @@ components:
       type: object
       description: 'plt.Consumer.replay result. PRD outputs: "—"'
       x-status: minimal
+    DeadLetterStatus:
+      type: string
+      enum:
+      - Parked
+      - Replayed
+      - DiscardPending
+      - Discarded
     DeadLetterListItem:
       type: object
-      description: 'plt.DeadLetter.list result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'A parked (or resolved) outbox message: metadata and the last error only, never the event payload (it may hold
+        personal data; the archived event stays in plt.event_archive).'
+      properties:
+        deadLetterId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        handler:
+          type: string
+          description: Event handler that kept failing, e.g. CLM.ClaimOpened.Reserve
+        module:
+          type: string
+          description: Module of the handler (its name prefix)
+        eventId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        eventType:
+          type: string
+        aggregateType:
+          type: string
+        aggregateId:
+          type: string
+        errorClass:
+          type: string
+        errorMessage:
+          type: string
+          description: Last failure, truncated to 500 characters
+        attempts:
+          type: integer
+          minimum: 1
+        parkedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        status:
+          $ref: '#/components/schemas/DeadLetterStatus'
+        resolvedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        resolutionReason:
+          type:
+          - string
+          - 'null'
+      required:
+      - deadLetterId
+      - handler
+      - module
+      - eventId
+      - eventType
+      - aggregateType
+      - aggregateId
+      - errorClass
+      - errorMessage
+      - attempts
+      - parkedAt
+      - status
     DeadLetterListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7827,23 +7991,78 @@ components:
       description: Page of plt.DeadLetter.list results (cursor pagination, contract §3.5.5)
     DeadLetterReplayRequest:
       type: object
-      description: 'plt.DeadLetter.replay request. PRD inputs: "consumer, from position; dead-letter ids"'
+      description: 'plt.DeadLetter.replay request (NX-OT-14). Name the dead letters (deadLetterIds) or select the Parked ones by
+        filter (handler, module, eventType, parkedFrom, parkedTo); at least one of them is required. At most 100 are replayed per call.'
       properties:
-        consumer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "consumer"'
-        fromPosition:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "from position"'
         deadLetterIds:
           type: array
+          maxItems: 100
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "dead-letter ids"'
+          description: Dead letters to replay
+        handler:
+          type: string
+        module:
+          type: string
+        eventType:
+          type: string
+        parkedFrom:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        parkedTo:
+          $ref: ../events/common.schema.json#/$defs/Instant
+    DeadLetterReplayOutcome:
+      type: object
+      description: What happened to one dead letter in a replay.
+      properties:
+        deadLetterId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        outcome:
+          type: string
+          enum:
+          - Replayed
+          - StillFailing
+          - AlreadyResolved
+          - NotFound
+          - HandlerMissing
+          - WouldReplay
+        errorMessage:
+          type:
+          - string
+          - 'null'
+          description: The new failure when the handler still fails
+      required:
+      - deadLetterId
+      - outcome
     DeadLetterReplayResponse:
       type: object
-      description: 'plt.DeadLetter.replay result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'plt.DeadLetter.replay result: per-letter outcomes and counts. A dry run replays nothing and reports
+        WouldReplay for every Parked match.'
+      properties:
+        dryRun:
+          type: boolean
+        matched:
+          type: integer
+          minimum: 0
+        replayed:
+          type: integer
+          minimum: 0
+        stillFailing:
+          type: integer
+          minimum: 0
+        skipped:
+          type: integer
+          minimum: 0
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeadLetterReplayOutcome'
+      required:
+      - dryRun
+      - matched
+      - replayed
+      - stillFailing
+      - skipped
+      - results
     DeadLetterDiscardRequest:
       type: object
       description: 'plt.DeadLetter.discard request. PRD inputs: "consumer, from position; dead-letter ids"'

@@ -46,6 +46,7 @@ public static class ProductModule
         services.AddSingleton<ArtifactCache>();
         services.AddScoped<ProductReader>();
         services.AddScoped<CatalogueQueries>();
+        services.AddScoped<ProductListQueries>();
 
         // The one state-changing path: import a product source document (the seed and, later, the authoring workflow).
         services.AddScoped<IValidator<ImportProductVersion>, ImportProductVersionValidator>();

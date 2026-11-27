@@ -1,0 +1,47 @@
+{
+  "overline": "Reports",
+  "title": "Reports",
+  "lead": "Live summaries from the operational reads, and the way into the detailed views. Figures come straight from the system, nothing is precomputed.",
+  "emptyTitle": "Nothing to report",
+  "emptyBody": "There are no records yet.",
+  "partial": "Summary of the first {count} records only; open the full list for the rest.",
+  "columns": { "status": "Status", "count": "Count" },
+  "receivables": {
+    "title": "Receivables",
+    "source": "Billing",
+    "open": "Open amount",
+    "status": {
+      "OPEN": "Open",
+      "PARTIALLY_PAID": "Partially paid",
+      "PAID": "Paid",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "delinquency": {
+    "title": "Delinquency cases",
+    "source": "Billing",
+    "overdue": "Overdue amount",
+    "state": {
+      "NOTICE_REQUESTED": "Notice requested",
+      "CLOCK_RUNNING": "Waiting period running",
+      "NOTICE_RETURNED": "Notice returned",
+      "ON_HOLD": "On hold",
+      "ARRANGED": "Payment arranged",
+      "CANCELLATION_REQUESTED": "Cancellation requested",
+      "RESOLVED": "Resolved"
+    }
+  },
+  "views": {
+    "title": "Detailed views",
+    "open": "Open",
+    "gap": "Trial balance, reinsurance and regulatory reports are not available through the API yet.",
+    "journals": { "name": "Finance journals by policy" },
+    "receivables": { "name": "Receivables register" },
+    "delinquency": { "name": "Delinquency cases" },
+    "releases": { "name": "Friendly settlement releases" },
+    "refunds": { "name": "Refunds" },
+    "approvals": { "name": "Claims approvals" },
+    "fsStatements": { "name": "Friendly settlement statements" },
+    "compliance": { "name": "Complaints and compliance" }
+  }
+}

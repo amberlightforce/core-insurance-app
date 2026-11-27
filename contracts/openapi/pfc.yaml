@@ -890,6 +890,56 @@ paths:
           $ref: common.yaml#/components/responses/Forbidden
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/products:
+    get:
+      operationId: pfc.Product.list
+      summary: Product catalogue with versions
+      description: |-
+        Product catalogue with versions
+
+        NX-UI-14b: a read for the product catalogue screen. Lists the products of the caller's legal entity with every
+        version (status, new-business and renewal windows, artefact hash, fall-back links). Read only, no artefact content.
+      tags:
+      - Product
+      x-requirement:
+      - REQ-PFC-031
+      - REQ-PFC-032
+      x-anchor:
+      - REQ-PFC-031
+      x-wave: W2
+      x-work-packages:
+      - NX-UI-14b
+      x-status: full
+      x-maturity: pre-release
+      x-typed: NX-UI-14b
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'Query'
+      x-exposure:
+      - ui
+      x-permission: pfc.Product.list
+      x-error-codes: []
+      x-source:
+      - PRD-02 §3.1
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/pfc/v1/products/describe:
     post:
       operationId: pfc.Product.describe
@@ -3378,6 +3428,101 @@ components:
       - artefactHash
       - status
       - created
+    ProductListVersion:
+      type: object
+      description: One version of a product in the catalogue list (windows are business dates; null means open-ended).
+      properties:
+        version:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        status:
+          type: string
+          description: Version status (for example LOCKED).
+        isAbstract:
+          type: boolean
+        channels:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        contractCurrency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        newBusinessFrom:
+          type: string
+          format: date
+        newBusinessTo:
+          type: [string, 'null']
+          format: date
+        renewalFrom:
+          type: string
+          format: date
+        renewalTo:
+          type: [string, 'null']
+          format: date
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        fallbackOfVersion:
+          description: The earlier version whose content this fall-back version copies; null for an ordinary version.
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+          - type: 'null'
+        replacesVersion:
+          description: The defective version this fall-back version replaces for new business; null for an ordinary version.
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+          - type: 'null'
+      required:
+      - version
+      - status
+      - isAbstract
+      - channels
+      - contractCurrency
+      - newBusinessFrom
+      - newBusinessTo
+      - renewalFrom
+      - renewalTo
+      - artefactHash
+      - fallbackOfVersion
+      - replacesVersion
+    ProductListItem:
+      type: object
+      description: A product of the caller's legal entity with its versions, newest first.
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        jurisdiction:
+          $ref: ../events/common.schema.json#/$defs/CountryCode
+        lineCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        lineFamily:
+          $ref: ../events/common.schema.json#/$defs/Code
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        productType:
+          type: string
+        customerType:
+          type: string
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductListVersion'
+      required:
+      - code
+      - jurisdiction
+      - lineCode
+      - lineFamily
+      - name
+      - productType
+      - customerType
+      - versions
+    ProductListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ProductListItem'
+      description: Page of pfc.Product.list results (the whole catalogue of the legal entity, one page)
     ChargeTypeListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope

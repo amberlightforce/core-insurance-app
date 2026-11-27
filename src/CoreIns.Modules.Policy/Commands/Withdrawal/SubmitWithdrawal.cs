@@ -137,7 +137,8 @@ internal sealed class SubmitWithdrawalHandler(
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
         {
-            // TODO(hardening): a concurrent submit of the same channelRef lost the race after the policy lock; the caller retries and gets the first result.
+            // A concurrent submit of the same channelRef lost the race: the unique index aborted this transaction (nothing of it is kept), so the
+            // caller gets 409 and its retry finds the first result and replays it. TODO(hardening): replay the first result in this response.
             return JobSupport.Stale();
         }
 

@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # Independent RI UI review
 
 Reviewed PR47 original 3e9f8abf1756146a8581ee5ccb477ae0ff8577f6 and corrected 99d1c6f8d3a3acb42eee46ecf4685174fa434546 against main c85a424, SL4-UI-RI brief, REQ-RI-001/037/046/047/057, SCR-RI-02/03/04 and PITFALLS25-28/19. All inspection was read-only in the UI builder tree. Exact snapshots were git-archived to separate temporary review directories; own logs are in this registry worktree.

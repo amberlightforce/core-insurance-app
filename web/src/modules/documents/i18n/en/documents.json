@@ -1,0 +1,95 @@
+{
+  "overline": "Documents",
+  "another": "Another lookup",
+  "home": {
+    "title": "Documents",
+    "lead": "Letters, notices and certificates issued by the system, with their delivery status and proof. Find them by the object they are about, or open one by its id.",
+    "bySubject": "Find by object",
+    "byId": "Open by document id",
+    "module": "Module",
+    "type": "Object type",
+    "typeHelp": "As in the object reference, for example Policy or Claim.",
+    "typeInvalid": "Enter the object type (letters and digits).",
+    "subjectId": "Object id",
+    "subjectIdHelp": "The id of the policy, claim or other object.",
+    "subjectIdInvalid": "Enter the object id.",
+    "list": "Show documents",
+    "documentId": "Document id",
+    "documentIdHelp": "The identifier (UUID) of the document.",
+    "documentIdInvalid": "Enter a valid document id.",
+    "open": "Open document"
+  },
+  "modules": {
+    "POL": "Policy",
+    "CLM": "Claims",
+    "BIL": "Billing",
+    "PTY": "Party",
+    "UW": "Underwriting",
+    "RI": "Reinsurance",
+    "FIN": "Finance",
+    "CHN": "Channels",
+    "CMP": "Compliance"
+  },
+  "subject": {
+    "title": "Documents of the object",
+    "documents": "Documents",
+    "notFound": "The object was not found in your legal entity.",
+    "emptyTitle": "No documents",
+    "emptyBody": "No document has been issued for this object yet."
+  },
+  "columns": {
+    "number": "Number",
+    "type": "Document type",
+    "status": "Status",
+    "medium": "Medium",
+    "language": "Language",
+    "created": "Created"
+  },
+  "detail": {
+    "title": "{type}",
+    "notFound": "The document was not found in your legal entity.",
+    "created": "Created",
+    "medium": "Medium",
+    "language": "Language",
+    "allForSubject": "All documents of the object",
+    "record": "Record",
+    "subject": "About",
+    "request": "Request",
+    "archive": "Archive",
+    "hash": "Content hash (SHA-256)",
+    "noDownload": "The archived letter is sealed; the hash above proves its content. The API offers no file download yet."
+  },
+  "deliveries": {
+    "title": "Deliveries",
+    "channel": "Channel",
+    "medium": "Medium",
+    "status": "Status",
+    "proof": "Proof",
+    "notified": "Notified",
+    "failure": "Failure",
+    "reprint": "reprint",
+    "emptyTitle": "No deliveries",
+    "emptyBody": "The document has not been sent yet."
+  },
+  "evidence": {
+    "title": "Provider evidence",
+    "provider": "Provider",
+    "event": "Event",
+    "outcome": "Outcome",
+    "reference": "Reference",
+    "proofDate": "Proof date",
+    "received": "Received",
+    "emptyTitle": "No evidence yet",
+    "emptyBody": "Proof of delivery arrives from the postal or email provider."
+  },
+  "reprint": {
+    "title": "Reprint",
+    "lead": "Issues a marked reprint copy of this document. The reason is kept in the audit trail.",
+    "reason": "Reason",
+    "reasonInvalid": "Give a reason (at least 3 characters).",
+    "submit": "Request reprint",
+    "failed": "The reprint failed",
+    "done": "Reprint requested",
+    "doneBody": "The copy appears among the deliveries as a reprint."
+  }
+}

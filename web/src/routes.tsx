@@ -10,8 +10,10 @@ import {
   complianceRoles,
   fiscalRoles,
   dsarRoles,
+  financeRoles,
   migrationRoles,
   packRoles,
+  productRoles,
   packRollbackReviewerRoles,
   reinsuranceRoles,
   underwritingRoles,
@@ -247,8 +249,82 @@ const moduleRoutes: RouteObject[] = [
     }),
   },
   {
+    path: 'documents',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/DocumentsHomePage')).DocumentsHomePage,
+    }),
+  },
+  {
+    path: 'documents/subject/:module/:type/:id',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/SubjectDocumentsPage')).SubjectDocumentsPage,
+    }),
+  },
+  {
+    path: 'documents/:documentId',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/DocumentDetailPage')).DocumentDetailPage,
+    }),
+  },
+  {
+    path: 'reports',
+    lazy: async () => ({
+      Component: (await import('./modules/reports/ReportsPage')).ReportsPage,
+    }),
+  },
+  {
     path: 'finance/journals/policy/:policyNumber',
     lazy: async () => ({ Component: (await import('./modules/finance/JournalPage')).JournalPage }),
+  },
+  {
+    path: 'finance',
+    element: <RequireRole roles={financeRoles} />,
+    children: [
+      {
+        path: 'trial-balance',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/TrialBalancePage')).TrialBalancePage,
+        }),
+      },
+      {
+        path: 'manual-journals',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/ManualJournalsPage')).ManualJournalsPage,
+        }),
+      },
+      {
+        path: 'manual-journals/new',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/ManualJournalFormPage'))
+            .ManualJournalFormPage,
+        }),
+      },
+      {
+        path: 'manual-journals/:id',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/ManualJournalPage')).ManualJournalPage,
+        }),
+      },
+      {
+        path: 'intake-exceptions',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/IntakeExceptionsPage'))
+            .IntakeExceptionsPage,
+        }),
+      },
+      {
+        path: 'period-close',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/PeriodClosePage')).PeriodClosePage,
+        }),
+      },
+      {
+        path: 'earning',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/EarningRunPage')).EarningRunPage,
+        }),
+      },
+    ],
   },
 ];
 
@@ -311,6 +387,24 @@ moduleRoutes.push(
     ],
   },
 );
+moduleRoutes.push({
+  path: 'products',
+  element: <RequireRole roles={productRoles} />,
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/products/ProductCataloguePage')).ProductCataloguePage,
+      }),
+    },
+    {
+      path: ':code',
+      lazy: async () => ({
+        Component: (await import('./modules/products/ProductDetailPage')).ProductDetailPage,
+      }),
+    },
+  ],
+});
 moduleRoutes.push({
   path: 'reinsurance',
   element: <RequireRole roles={reinsuranceRoles} />,
@@ -476,10 +570,13 @@ const implemented = new Set([
   '/compliance/ai-systems',
   '/channels/withdrawals',
   '/policies/pack-rollback',
+  '/products',
   '/parties',
   '/policies',
   '/billing',
   '/finance',
+  '/documents',
+  '/reports',
   '/claims',
   '/underwriting',
   '/reinsurance',

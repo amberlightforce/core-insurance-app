@@ -28,6 +28,7 @@
     <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
     <!-- Migration SPI (IMigrationImporter / IMigrationReverser): contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Migration.Contracts\CoreIns.Modules.Migration.Contracts.csproj" />
+    <ProjectReference Include="..\CoreIns.Modules.Work.Contracts\CoreIns.Modules.Work.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
     <ProjectReference Include="..\CoreIns.Rules\CoreIns.Rules.csproj" />
