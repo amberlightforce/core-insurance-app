@@ -7496,90 +7496,563 @@ components:
             items:
               $ref: '#/components/schemas/DisclosureFindingListItem'
       description: Page of uw.DisclosureFinding.list results (cursor pagination, contract §3.5.5)
+    RuleSetColumn:
+      type: object
+      description: A decision-table variable or input column (BO-UW-01). type is string, int, decimal, date or bool.
+      properties:
+        name:
+          type: string
+          maxLength: 64
+        type:
+          type: string
+          maxLength: 16
+        expression:
+          type: string
+          maxLength: 1000
+      required:
+      - name
+      - type
+      - expression
+    RuleSetOutputColumn:
+      type: object
+      description: A decision-table output column.
+      properties:
+        name:
+          type: string
+          maxLength: 64
+        type:
+          type: string
+          maxLength: 16
+      required:
+      - name
+      - type
+    RuleSetExplain:
+      type: object
+      description: The derived fact a referral rule reads and its declared threshold (workbench explain, D-SL5).
+      properties:
+        fact:
+          type: string
+          maxLength: 64
+        limit:
+          type: string
+          maxLength: 64
+      required:
+      - fact
+      - limit
+    RuleSetRule:
+      type: object
+      description: One rule row. conditions has one entry per input column (dash = any); outputs has one expression per output column.
+      properties:
+        id:
+          type: string
+          maxLength: 64
+        conditions:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+            maxLength: 500
+        outputs:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+            maxLength: 2000
+        explain:
+          oneOf:
+          - $ref: '#/components/schemas/RuleSetExplain'
+          - type: 'null'
+      required:
+      - id
+      - conditions
+      - outputs
+    RuleSetTestCase:
+      type: object
+      description: A test case of a rule-set version (REQ-UW-038, -040), a risk and the rule ids that must hit.
+      properties:
+        name:
+          type: string
+          maxLength: 128
+        firstRegistrationYear:
+          type: string
+          maxLength: 4
+        vehicleValue:
+          type: string
+          maxLength: 16
+        engineCc:
+          type: integer
+        usage:
+          type: string
+          maxLength: 32
+        driverBirthDates:
+          type: array
+          maxItems: 10
+          items:
+            type: string
+            maxLength: 10
+        claimsLast5Years:
+          type: integer
+        effectiveDate:
+          type: string
+          maxLength: 10
+        expectedRuleIds:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+            maxLength: 64
+      required:
+      - name
+      - firstRegistrationYear
+      - vehicleValue
+      - engineCc
+      - usage
+      - driverBirthDates
+      - claimsLast5Years
+      - effectiveDate
+      - expectedRuleIds
+    RuleSetDefinition:
+      type: object
+      description: A rule-set version as authored, a decision table (hit policy, variables, input and output columns, rules) with its metadata and test cases.
+      properties:
+        code:
+          type: string
+          maxLength: 64
+        version:
+          type: string
+          maxLength: 16
+        productCode:
+          type: string
+          maxLength: 64
+        checkpoint:
+          type: string
+          maxLength: 16
+          description: PRE_QUOTE or PRE_BIND
+        effectiveFrom:
+          type: string
+          maxLength: 10
+          description: yyyy-MM-dd
+        dataStatus:
+          type: string
+          maxLength: 32
+          description: ILLUSTRATIVE_TEST_DATA or APPROVED
+        note:
+          type: string
+          maxLength: 1000
+        hitPolicy:
+          type: string
+          maxLength: 16
+        variables:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/RuleSetColumn'
+        inputs:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/RuleSetColumn'
+        outputs:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/RuleSetOutputColumn'
+        rules:
+          type: array
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/RuleSetRule'
+        testCases:
+          type: array
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/RuleSetTestCase'
+      required:
+      - code
+      - version
+      - productCode
+      - checkpoint
+      - effectiveFrom
+      - dataStatus
+      - note
+      - hitPolicy
+      - variables
+      - inputs
+      - outputs
+      - rules
+      - testCases
+    RuleSetVersionDetail:
+      type: object
+      description: A stored rule-set version with its status and the definition.
+      properties:
+        ruleSetCode:
+          type: string
+        version:
+          type: string
+        productCode:
+          type: string
+        checkpoint:
+          type: string
+        status:
+          type: string
+          enum:
+          - Draft
+          - Submitted
+          - Approved
+          - Active
+          - Superseded
+          - Retired
+        effectiveFrom:
+          type: string
+        dataStatus:
+          type: string
+        contentHash:
+          type: string
+          description: Compiled-table hash once the version compiles with its test cases, otherwise the definition hash of the draft.
+        definitionHash:
+          type: string
+          description: SHA-256 of the canonical definition without its version number; stable over export and import.
+        ruleCount:
+          type: integer
+        testCaseCount:
+          type: integer
+        createdAt:
+          type: string
+        createdBy:
+          type: string
+        definition:
+          $ref: '#/components/schemas/RuleSetDefinition'
+      required:
+      - ruleSetCode
+      - version
+      - status
+      - definition
+    RuleSetValidationIssue:
+      type: object
+      description: One validation finding. code is UW-ERR-VALIDATION, UW-ERR-RULE-UNTESTED, UW-ERR-TRANSLATION-MISSING or UW-ERR-RULESET-COMPILE.
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        ruleId:
+          type:
+          - string
+          - 'null'
+        testCase:
+          type:
+          - string
+          - 'null'
+      required:
+      - code
+      - message
+    RuleSetTestOutcome:
+      type: object
+      properties:
+        name:
+          type: string
+        passed:
+          type: boolean
+        failure:
+          type:
+          - string
+          - 'null'
+        matchedRuleIds:
+          type: array
+          items:
+            type: string
+      required:
+      - name
+      - passed
+    RuleSetValidationReport:
+      type: object
+      description: Result of validate and test, every finding at once.
+      properties:
+        ruleSetCode:
+          type: string
+        version:
+          type: string
+        valid:
+          type: boolean
+          description: True when the version compiles, every rule is covered by a passing test case and the texts are translated; it can be submitted.
+        compiles:
+          type: boolean
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleSetValidationIssue'
+        testResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleSetTestOutcome'
+        uncoveredRuleIds:
+          type: array
+          items:
+            type: string
+        contentHash:
+          type:
+          - string
+          - 'null'
+      required:
+      - ruleSetCode
+      - version
+      - valid
+      - compiles
+      - issues
+      - testResults
+      - uncoveredRuleIds
+    RuleSetRef:
+      type: object
+      description: Identifies a rule-set version.
+      properties:
+        ruleSetCode:
+          type: string
+          maxLength: 64
+        version:
+          type: string
+          maxLength: 16
+      required:
+      - ruleSetCode
+      - version
+    RuleSetAuthoringResponse:
+      type: object
+      description: The version after an authoring command, with its validation report.
+      properties:
+        version:
+          $ref: '#/components/schemas/RuleSetVersionDetail'
+        validation:
+          $ref: '#/components/schemas/RuleSetValidationReport'
+      required:
+      - version
+      - validation
     RuleSetCreateRequest:
       type: object
-      description: 'uw.RuleSet.create request. PRD inputs: "per operation"'
-      x-status: minimal
-    RuleSetCreateResponse:
-      type: object
-      description: 'uw.RuleSet.create result. PRD outputs: "versions, reports"'
+      description: uw.RuleSet.create request, a new rule set with a first Draft version (an empty table on the standard motor columns unless a definition is given).
       properties:
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
-        reports:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reports"'
+        ruleSetCode:
+          type: string
+          maxLength: 64
+        productCode:
+          type: string
+          maxLength: 64
+        checkpoint:
+          type: string
+          maxLength: 16
+        effectiveFrom:
+          type:
+          - string
+          - 'null'
+          maxLength: 10
+        note:
+          type:
+          - string
+          - 'null'
+          maxLength: 1000
+        definition:
+          oneOf:
+          - $ref: '#/components/schemas/RuleSetDefinition'
+          - type: 'null'
+      required:
+      - ruleSetCode
+      - productCode
+      - checkpoint
+    RuleSetCreateResponse:
+      $ref: '#/components/schemas/RuleSetAuthoringResponse'
     RuleSetDraftRequest:
       type: object
-      description: 'uw.RuleSet.draft request. PRD inputs: "per operation"'
-      x-status: minimal
-    RuleSetDraftResponse:
-      type: object
-      description: 'uw.RuleSet.draft result. PRD outputs: "versions, reports"'
+      description: uw.RuleSet.draft request, a new Draft version copied from fromVersion (default the latest version).
       properties:
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
-        reports:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reports"'
+        ruleSetCode:
+          type: string
+          maxLength: 64
+        fromVersion:
+          type:
+          - string
+          - 'null'
+          maxLength: 16
+        effectiveFrom:
+          type:
+          - string
+          - 'null'
+          maxLength: 10
+      required:
+      - ruleSetCode
+    RuleSetDraftResponse:
+      $ref: '#/components/schemas/RuleSetAuthoringResponse'
+    RuleSetEditPatch:
+      type: object
+      description: One edit of a Draft version. op is SET_CELL (ruleId, column, value), ADD_RULE (rule), REMOVE_RULE (ruleId), ADD_TEST_CASE (testCase), REMOVE_TEST_CASE (testCaseName) or SET_META (effectiveFrom, note).
+      properties:
+        op:
+          type: string
+          enum:
+          - SET_CELL
+          - ADD_RULE
+          - REMOVE_RULE
+          - ADD_TEST_CASE
+          - REMOVE_TEST_CASE
+          - SET_META
+        ruleId:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+        column:
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+          description: An input or output column name.
+        value:
+          type:
+          - string
+          - 'null'
+          maxLength: 2000
+        rule:
+          oneOf:
+          - $ref: '#/components/schemas/RuleSetRule'
+          - type: 'null'
+        testCase:
+          oneOf:
+          - $ref: '#/components/schemas/RuleSetTestCase'
+          - type: 'null'
+        testCaseName:
+          type:
+          - string
+          - 'null'
+          maxLength: 128
+        effectiveFrom:
+          type:
+          - string
+          - 'null'
+          maxLength: 10
+        note:
+          type:
+          - string
+          - 'null'
+          maxLength: 1000
+      required:
+      - op
     RuleSetEditRequest:
       type: object
-      description: 'uw.RuleSet.edit request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: uw.RuleSet.edit request, patches applied in order to a Draft version, all or nothing.
+      properties:
+        ruleSetCode:
+          type: string
+          maxLength: 64
+        version:
+          type: string
+          maxLength: 16
+        patches:
+          type: array
+          minItems: 1
+          maxItems: 200
+          items:
+            $ref: '#/components/schemas/RuleSetEditPatch'
+      required:
+      - ruleSetCode
+      - version
+      - patches
     RuleSetEditResponse:
-      type: object
-      description: 'uw.RuleSet.edit result. PRD outputs: "versions, reports"'
-      properties:
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
-        reports:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reports"'
+      $ref: '#/components/schemas/RuleSetAuthoringResponse'
     RuleSetValidateRequest:
-      type: object
-      description: 'uw.RuleSet.validate request. PRD inputs: "per operation"'
-      x-status: minimal
+      $ref: '#/components/schemas/RuleSetRef'
     RuleSetValidateResponse:
-      type: object
-      description: 'uw.RuleSet.validate result. PRD outputs: "versions, reports"'
-      properties:
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
-        reports:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reports"'
+      $ref: '#/components/schemas/RuleSetValidationReport'
     RuleSetTestRequest:
-      type: object
-      description: 'uw.RuleSet.test request. PRD inputs: "per operation"'
-      x-status: minimal
+      $ref: '#/components/schemas/RuleSetRef'
     RuleSetTestResponse:
-      type: object
-      description: 'uw.RuleSet.test result. PRD outputs: "versions, reports"'
-      properties:
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
-        reports:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reports"'
+      $ref: '#/components/schemas/RuleSetValidationReport'
     RuleSetSimulateRequest:
       type: object
-      description: 'uw.RuleSet.simulate request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: uw.RuleSet.simulate request, run the version against the facts of the last stored evaluations of its product and checkpoint; nothing is written.
+      properties:
+        ruleSetCode:
+          type: string
+          maxLength: 64
+        version:
+          type: string
+          maxLength: 16
+        limit:
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+          maximum: 1000
+      required:
+      - ruleSetCode
+      - version
+    RuleSetSimulateItem:
+      type: object
+      properties:
+        evaluationId:
+          type: string
+        recordedRuleIds:
+          type: array
+          items:
+            type: string
+        simulatedRuleIds:
+          type: array
+          items:
+            type: string
+        addedRuleIds:
+          type: array
+          items:
+            type: string
+        removedRuleIds:
+          type: array
+          items:
+            type: string
+        recordedOutcome:
+          type: string
+        simulatedOutcome:
+          type: string
+        error:
+          type:
+          - string
+          - 'null'
+      required:
+      - evaluationId
+      - recordedRuleIds
+      - simulatedRuleIds
+      - addedRuleIds
+      - removedRuleIds
+      - recordedOutcome
+      - simulatedOutcome
     RuleSetSimulateResponse:
       type: object
-      description: 'uw.RuleSet.simulate result. PRD outputs: "versions, reports"'
+      description: Hit changes of the simulated version against what was recorded. youngestDriverAge is rebuilt from the stored age band, so it is approximate (see warnings).
       properties:
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
-        reports:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reports"'
+        ruleSetCode:
+          type: string
+        version:
+          type: string
+        evaluated:
+          type: integer
+        changed:
+          type: integer
+        newReferrals:
+          type: integer
+          description: Evaluations that gain a REFER outcome they did not have.
+        newDeclines:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RuleSetSimulateItem'
+        warnings:
+          type: array
+          items:
+            type: string
+      required:
+      - ruleSetCode
+      - version
+      - evaluated
+      - changed
+      - newReferrals
+      - newDeclines
+      - items
+      - warnings
     RuleSetSubmitRequest:
       type: object
       description: 'uw.RuleSet.submit request. PRD inputs: "per operation"'
@@ -7622,34 +8095,39 @@ components:
         reports:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "reports"'
-    RuleSetExportRequest:
+    RuleSetExportDocument:
       type: object
-      description: 'uw.RuleSet.export request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: The portable rule-set document (format coreins.uw.rule-set/1). definitionHash is stable over export and import.
+      properties:
+        format:
+          type: string
+        definitionHash:
+          type: string
+        definition:
+          $ref: '#/components/schemas/RuleSetDefinition'
+      required:
+      - format
+      - definitionHash
+      - definition
+    RuleSetExportRequest:
+      $ref: '#/components/schemas/RuleSetRef'
     RuleSetExportResponse:
       type: object
-      description: 'uw.RuleSet.export result. PRD outputs: "versions, reports"'
       properties:
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
-        reports:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reports"'
+        document:
+          $ref: '#/components/schemas/RuleSetExportDocument'
+      required:
+      - document
     RuleSetImportRequest:
       type: object
-      description: 'uw.RuleSet.import request. PRD inputs: "per operation"'
-      x-status: minimal
-    RuleSetImportResponse:
-      type: object
-      description: 'uw.RuleSet.import result. PRD outputs: "versions, reports"'
+      description: uw.RuleSet.import request, creates a Draft version from a document (the next version number when the code exists).
       properties:
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
-        reports:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reports"'
+        document:
+          $ref: '#/components/schemas/RuleSetExportDocument'
+      required:
+      - document
+    RuleSetImportResponse:
+      $ref: '#/components/schemas/RuleSetAuthoringResponse'
     IssueTypeSearchItem:
       type: object
       description: 'uw.IssueType.search result. PRD outputs: "types"'

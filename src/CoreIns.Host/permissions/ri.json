@@ -7,6 +7,10 @@
         "ri.Contract.update": [ "Staff.ReinsuranceAccountant" ],
         "ri.Contract.submit": [ "Staff.ReinsuranceAccountant" ],
         "ri.Contract.approve": [ "Staff.ReinsuranceManager" ],
+        // Endorsement (BO-RI-03): the accountant endorses (maker), the manager decides (checker); versionAt is a read.
+        "ri.Contract.endorse": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Contract.approveEndorsement": [ "Staff.ReinsuranceManager" ],
+        "ri.Contract.versionAt": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         // Reads: the reinsurance roles and, for get / applicable, the claims roles (SL4-RI-RECOVERY looks up the treaty for a loss).
         "ri.Contract.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "ri.Contract.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist", "Platform.Admin" ],
