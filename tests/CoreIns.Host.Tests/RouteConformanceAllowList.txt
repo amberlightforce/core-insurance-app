@@ -127,7 +127,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/calendars/is-business-day
 CONTRACT_NOT_SERVED GET /api/plt/v1/calendars/next-business-day
 CONTRACT_NOT_SERVED GET /api/plt/v1/calendars/previous-business-day
 CONTRACT_NOT_SERVED GET /api/plt/v1/currencies/{}
-CONTRACT_NOT_SERVED GET /api/plt/v1/dead-letters
 CONTRACT_NOT_SERVED GET /api/plt/v1/decision-tables/explain
 CONTRACT_NOT_SERVED GET /api/plt/v1/exchanges/search
 CONTRACT_NOT_SERVED GET /api/plt/v1/fx/get-rate
@@ -567,7 +566,6 @@ CONTRACT_NOT_SERVED POST /api/plt/v1/calendars/generate
 CONTRACT_NOT_SERVED POST /api/plt/v1/calendars/publish
 CONTRACT_NOT_SERVED POST /api/plt/v1/consumers/replay
 CONTRACT_NOT_SERVED POST /api/plt/v1/dead-letters/discard
-CONTRACT_NOT_SERVED POST /api/plt/v1/dead-letters/replay
 CONTRACT_NOT_SERVED POST /api/plt/v1/decision-tables/activate
 CONTRACT_NOT_SERVED POST /api/plt/v1/decision-tables/evaluate
 CONTRACT_NOT_SERVED POST /api/plt/v1/decision-tables/test

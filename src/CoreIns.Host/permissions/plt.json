@@ -13,6 +13,10 @@
         "plt.Ai.recordOutcome": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "plt.FeatureFlag.evaluate": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         // SL3-PLT-SUPPORT (D-SL3-12): the Development dev clock; the routes exist only in Development with Platform:Time:Mode=Shiftable.
+        // NX-OT-14: dead-letter triage and replay is privileged (no ops role exists yet).
+        "plt.DeadLetter.list": [ "Platform.Admin" ],
+        "plt.DeadLetter.get": [ "Platform.Admin" ],
+        "plt.DeadLetter.replay": [ "Platform.Admin" ],
         "plt.DevClock.advance": [ "Platform.Admin" ],
         "plt.DevClock.get": [ "Platform.Admin" ]
       }
