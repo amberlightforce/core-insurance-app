@@ -686,6 +686,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/mig/v1/staging/load": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Load a legacy extract into staging
+         * @description Load a legacy extract into staging
+         *
+         *     Inputs: source system, snapshot label, format (JSON or CSV) and the extract text. Outputs: the snapshot with its content hash and record counts. Staging is append-only and separate from batches: nothing is imported until a batch is created from it. Reloading the same source and snapshot label with identical content changes nothing; with different content it adds a new version and supersedes the earlier one (earlier records are kept for provenance).
+         */
+        post: operations["mig.Staging.load"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/staging/snapshots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List staged snapshots
+         * @description List staged snapshots
+         *
+         *     Inputs: optional source system. Outputs: the staged snapshots, newest first, with status (ACTIVE or SUPERSEDED), content hash, provenance and record counts per object type.
+         */
+        get: operations["mig.Staging.snapshots"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1043,6 +1087,44 @@ export interface components {
         SignoffWaiveResponse: {
             runId: components["schemas"]["Uuid"];
             waived: string[];
+        };
+        StagingLoadRequest: {
+            /** @description Legacy source system code (e.g. GR1). */
+            source: string;
+            /** @description Snapshot label of the extract (e.g. the extract date). Reloading the same source and label replaces the snapshot. */
+            snapshot: string;
+            /** @enum {string} */
+            format: "JSON" | "CSV";
+            /** @description The extract text. JSON is {"records":[{"objectType","legacyKey","data":{}}]} (or such an array, or one record object with id); CSV has a header row with objectType and legacyKey, every other column is a data field. */
+            content: string;
+        };
+        StagingSnapshot: {
+            snapshotId: components["schemas"]["Uuid"];
+            source: string;
+            snapshot: string;
+            /** @description 1 for the first load of the source and label, then 2, 3 ... for each changed reload. */
+            version: number;
+            /** @enum {string} */
+            status: "ACTIVE" | "SUPERSEDED";
+            /** @enum {string} */
+            format: "JSON" | "CSV";
+            /** @description SHA-256 of the extract text as received. */
+            contentHash: string;
+            recordCount: number;
+            /** @description Records per object type. */
+            counts: {
+                [key: string]: number;
+            };
+            loadedBy: string;
+            /** Format: date-time */
+            loadedAt: string;
+            /** @description True when the load repeated the active snapshot's content and nothing was written. */
+            unchanged?: boolean;
+            /** @description The snapshot this load superseded, when it did. */
+            supersededSnapshotId?: components["schemas"]["Uuid"];
+        };
+        StagingSnapshotList: {
+            items: components["schemas"]["StagingSnapshot"][];
         };
         SignoffRequestRequest: {
             scope?: string | null;
@@ -2568,6 +2650,85 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Staging.load": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StagingLoadRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StagingSnapshot"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Staging.snapshots": {
+        parameters: {
+            query?: {
+                /** @description Source system code. */
+                source?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StagingSnapshotList"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
