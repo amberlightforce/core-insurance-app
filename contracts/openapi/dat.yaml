@@ -1149,6 +1149,9 @@ paths:
       - code: DAT-ERR-024
         note: not signed off
         status: 422
+      - code: DAT-ERR-LAYOUT-UNVERIFIED
+        note: regulatory layout unverified in production
+        status: 422
       - code: DAT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -3466,61 +3469,110 @@ components:
           description: 'PRD: "diff"'
     MartAdjustRequest:
       type: object
-      description: 'dat.Mart.adjust request. PRD inputs: "figure, amount, reason, evidence"'
+      description: 'dat.Mart.adjust request (BO-DAT-04). Adds a manual adjustment line to a run; the stored figures never change (adjusted value = figure + sum of the lines).'
       properties:
-        figure:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "figure"'
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Mart run the adjustment belongs to.'
+        figureKey:
+          type: string
+          description: 'Figure key within the run (metric|product|month|dimension); the figure must be a money (EUR) figure.'
         amount:
           $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amount"'
+          description: 'Signed EUR amount added to the figure.'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          description: 'Why the adjustment is made (required, up to 1000 characters).'
         evidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence"'
+          type: string
+          description: 'Reference to the evidence (document or ticket id; required, up to 500 characters).'
     MartAdjustResponse:
       type: object
-      description: 'dat.Mart.adjust result. PRD outputs: "approval request"'
+      description: 'dat.Mart.adjust result (BO-DAT-04).'
       properties:
-        approvalRequest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval request"'
+        adjustmentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'The new adjustment line.'
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'The run.'
+        figureKey:
+          type: string
+          description: 'The adjusted figure.'
+        adjustedValue:
+          type: string
+          description: 'Stored figure plus all adjustment lines of the figure, 4 decimals.'
+        adjustmentsHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'SHA-256 over the ordered adjustment lines of the run.'
+        signOffInvalidated:
+          type: boolean
+          description: 'True when a valid sign-off existed and this adjustment invalidated it.'
     MartSignOffRequest:
       type: object
-      description: 'dat.Mart.signOff request. PRD inputs: "run id, comment"'
+      description: 'dat.Mart.signOff request (BO-DAT-04). The signer must be a different person from everyone who ran or adjusted the run.'
       properties:
         runId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "run id"'
+          description: 'The run to sign off.'
         comment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "comment"'
+          type: string
+          description: 'Optional comment, up to 1000 characters.'
     MartSignOffResponse:
       type: object
-      description: 'dat.Mart.signOff result. PRD outputs: "status"'
+      description: 'dat.Mart.signOff result (BO-DAT-04).'
       properties:
+        signOffId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'The sign-off record.'
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'The run.'
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          description: 'SIGNED_OFF.'
+        boundHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'SHA-256 over the snapshot hash and the adjustments hash the sign-off is bound to.'
+        signedBy:
+          type: string
+          description: 'The signer (actor kind:id).'
     MartExportRequest:
       type: object
-      description: 'dat.Mart.export request. PRD inputs: "run id"'
+      description: 'dat.Mart.export request (BO-DAT-04). Only a run whose current sign-off is valid can be exported.'
       properties:
         runId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "run id"'
+          description: 'The signed-off run.'
+        format:
+          type: string
+          enum: [CSV, JSON]
+          description: 'File format (default CSV).'
     MartExportResponse:
       type: object
-      description: 'dat.Mart.export result. PRD outputs: "package ref (DOC archive), manifest hash"'
+      description: 'dat.Mart.export result (BO-DAT-04): a deterministic file with the snapshot hash in its header.'
       properties:
+        fileName:
+          type: string
+          description: 'Suggested file name.'
+        contentType:
+          type: string
+          description: 'text/csv or application/json.'
+        content:
+          type: string
+          description: 'The file content (UTF-8, LF line endings).'
         packageRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "package ref (DOC archive)"'
+          type: string
+          description: 'Reference of the export: mart-run/<runId>/<format>.'
         manifestHash:
           $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "manifest hash"'
+          description: 'SHA-256 of the content.'
+        snapshotHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'The run snapshot hash carried in the header.'
+        legalStatus:
+          type: string
+          description: 'The mart legal status; Unverified layouts are refused in Production.'
     ScrResultsSubmitRequest:
       type: object
       description: 'dat.ScrResults.submit request. PRD inputs: "entity, period, result file, preparer attestation"'

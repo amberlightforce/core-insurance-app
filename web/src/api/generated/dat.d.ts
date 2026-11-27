@@ -1233,45 +1233,80 @@ export interface components {
             /** @description PRD: "diff" */
             diff?: components["schemas"]["Unspecified"];
         };
-        /** @description dat.Mart.adjust request. PRD inputs: "figure, amount, reason, evidence" */
+        /** @description dat.Mart.adjust request (BO-DAT-04). Adds a manual adjustment line to a run; the stored figures never change (adjusted value = figure + sum of the lines). */
         MartAdjustRequest: {
-            /** @description PRD: "figure" */
-            figure?: components["schemas"]["Unspecified"];
-            /** @description PRD: "amount" */
+            /** @description Mart run the adjustment belongs to. */
+            runId?: components["schemas"]["Uuid"];
+            /** @description Figure key within the run (metric|product|month|dimension); the figure must be a money (EUR) figure. */
+            figureKey?: string;
+            /** @description Signed EUR amount added to the figure. */
             amount?: components["schemas"]["Money"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-            /** @description PRD: "evidence" */
-            evidence?: components["schemas"]["Unspecified"];
+            /** @description Why the adjustment is made (required, up to 1000 characters). */
+            reason?: string;
+            /** @description Reference to the evidence (document or ticket id; required, up to 500 characters). */
+            evidence?: string;
         };
-        /** @description dat.Mart.adjust result. PRD outputs: "approval request" */
+        /** @description dat.Mart.adjust result (BO-DAT-04). */
         MartAdjustResponse: {
-            /** @description PRD: "approval request" */
-            approvalRequest?: components["schemas"]["Unspecified"];
+            /** @description The new adjustment line. */
+            adjustmentId?: components["schemas"]["Uuid"];
+            /** @description The run. */
+            runId?: components["schemas"]["Uuid"];
+            /** @description The adjusted figure. */
+            figureKey?: string;
+            /** @description Stored figure plus all adjustment lines of the figure, 4 decimals. */
+            adjustedValue?: string;
+            /** @description SHA-256 over the ordered adjustment lines of the run. */
+            adjustmentsHash?: components["schemas"]["Sha256"];
+            /** @description True when a valid sign-off existed and this adjustment invalidated it. */
+            signOffInvalidated?: boolean;
         };
-        /** @description dat.Mart.signOff request. PRD inputs: "run id, comment" */
+        /** @description dat.Mart.signOff request (BO-DAT-04). The signer must be a different person from everyone who ran or adjusted the run. */
         MartSignOffRequest: {
-            /** @description PRD: "run id" */
+            /** @description The run to sign off. */
             runId?: components["schemas"]["Uuid"];
-            /** @description PRD: "comment" */
-            comment?: components["schemas"]["Unspecified"];
+            /** @description Optional comment, up to 1000 characters. */
+            comment?: string;
         };
-        /** @description dat.Mart.signOff result. PRD outputs: "status" */
+        /** @description dat.Mart.signOff result (BO-DAT-04). */
         MartSignOffResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
-        };
-        /** @description dat.Mart.export request. PRD inputs: "run id" */
-        MartExportRequest: {
-            /** @description PRD: "run id" */
+            /** @description The sign-off record. */
+            signOffId?: components["schemas"]["Uuid"];
+            /** @description The run. */
             runId?: components["schemas"]["Uuid"];
+            /** @description SIGNED_OFF. */
+            status?: string;
+            /** @description SHA-256 over the snapshot hash and the adjustments hash the sign-off is bound to. */
+            boundHash?: components["schemas"]["Sha256"];
+            /** @description The signer (actor kind:id). */
+            signedBy?: string;
         };
-        /** @description dat.Mart.export result. PRD outputs: "package ref (DOC archive), manifest hash" */
+        /** @description dat.Mart.export request (BO-DAT-04). Only a run whose current sign-off is valid can be exported. */
+        MartExportRequest: {
+            /** @description The signed-off run. */
+            runId?: components["schemas"]["Uuid"];
+            /**
+             * @description File format (default CSV).
+             * @enum {string}
+             */
+            format?: "CSV" | "JSON";
+        };
+        /** @description dat.Mart.export result (BO-DAT-04): a deterministic file with the snapshot hash in its header. */
         MartExportResponse: {
-            /** @description PRD: "package ref (DOC archive)" */
-            packageRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "manifest hash" */
+            /** @description Suggested file name. */
+            fileName?: string;
+            /** @description text/csv or application/json. */
+            contentType?: string;
+            /** @description The file content (UTF-8, LF line endings). */
+            content?: string;
+            /** @description Reference of the export: mart-run/<runId>/<format>. */
+            packageRef?: string;
+            /** @description SHA-256 of the content. */
             manifestHash?: components["schemas"]["Sha256"];
+            /** @description The run snapshot hash carried in the header. */
+            snapshotHash?: components["schemas"]["Sha256"];
+            /** @description The mart legal status; Unverified layouts are refused in Production. */
+            legalStatus?: string;
         };
         /** @description dat.ScrResults.submit request. PRD inputs: "entity, period, result file, preparer attestation" */
         ScrResultsSubmitRequest: {

@@ -141,10 +141,11 @@ internal sealed class MartEngine(DataDbContext db, IClock clock, AnalyticsReader
             return NotFound();
         }
 
+        var state = await MartGovernance.StateAsync(db, loaded.Run, ct).ConfigureAwait(false);
         return new MartGetResponse
         {
-            Run = Ser(RunJson(loaded.Run)),
-            Figures = Ser(loaded.Figures.Select(FigureJson)),
+            Run = Ser(RunJson(loaded.Run, state)),
+            Figures = Ser(loaded.Figures.Select(f => FigureJson(f, state))),
             LineagePointer = Ser(Lineage(loaded.Run)),
             Diff = Ser(Array.Empty<object>()),
         };
@@ -167,7 +168,8 @@ internal sealed class MartEngine(DataDbContext db, IClock clock, AnalyticsReader
             return DomainError.Of(ModuleCode.DAT, "NOT-FOUND", "The figure does not exist in this run.");
         }
 
-        return new MartFigureResponse { Figures = Ser(new[] { FigureJson(figure) }), LineagePointer = Ser(Lineage(loaded.Run, figure)), Diff = Ser(Array.Empty<object>()) };
+        var state = await MartGovernance.StateAsync(db, loaded.Run, ct).ConfigureAwait(false);
+        return new MartFigureResponse { Figures = Ser(new[] { FigureJson(figure, state) }), LineagePointer = Ser(Lineage(loaded.Run, figure)), Diff = Ser(Array.Empty<object>()) };
     }
 
     // ---- Mart.compare ------------------------------------------------------------------------------------------------------
@@ -249,7 +251,7 @@ internal sealed class MartEngine(DataDbContext db, IClock clock, AnalyticsReader
 
     private static JsonElement Ser<T>(T value) => JsonSerializer.SerializeToElement(value, Json);
 
-    private static object RunJson(MartRunRow r) => new
+    private static object RunJson(MartRunRow r, MartState? state = null) => new
     {
         runId = r.RunId,
         mart = r.MartCode,
@@ -258,7 +260,7 @@ internal sealed class MartEngine(DataDbContext db, IClock clock, AnalyticsReader
         productCode = r.ProductCode,
         validAt = AnalyticsReader.Iso(r.ValidAt.ToUtcDateTime()),
         knownAt = AnalyticsReader.Iso(r.KnownAt.ToUtcDateTime()),
-        status = r.Status,
+        status = state?.SignedOff == true ? "SIGNED_OFF" : r.Status,
         snapshotHash = r.SnapshotHash,
         snapshotKey = r.SnapshotKey,
         legalStatus = r.LegalStatus,
@@ -266,9 +268,19 @@ internal sealed class MartEngine(DataDbContext db, IClock clock, AnalyticsReader
         figureCount = r.FigureCount,
         createdAt = AnalyticsReader.Iso(r.CreatedAt.ToUtcDateTime()),
         createdBy = r.CreatedBy,
+        adjustmentsHash = state?.AdjustmentsHash,
+        boundHash = state?.BoundHash,
+        signOff = state?.SignOff is { } so
+            ? new { signOffId = so.SignOffId, signedBy = so.SignedBy, signedAt = AnalyticsReader.Iso(so.SignedAt.ToUtcDateTime()), comment = so.Comment, boundHash = so.BoundHash, valid = state.SignedOff }
+            : null,
+        adjustments = state?.Adjustments.Select(a => new
+        {
+            adjustmentId = a.AdjustmentId, figureKey = a.FigureKey, amount = a.Amount, currency = a.Currency, reason = a.Reason, evidence = a.EvidenceRef,
+            createdBy = a.CreatedBy, createdAt = AnalyticsReader.Iso(a.CreatedAt.ToUtcDateTime()),
+        }).ToList(),
     };
 
-    private static object FigureJson(MartFigureRow f) => new
+    private static object FigureJson(MartFigureRow f, MartState? state = null) => new
     {
         key = f.FigureKey,
         metric = f.Metric,
@@ -276,6 +288,8 @@ internal sealed class MartEngine(DataDbContext db, IClock clock, AnalyticsReader
         month = f.PeriodMonth,
         dimension = f.Dimension,
         value = f.Value,
+        adjustment = state?.Sums.GetValueOrDefault(f.FigureKey) ?? 0m,
+        adjustedValue = f.Value + (state?.Sums.GetValueOrDefault(f.FigureKey) ?? 0m),
         unit = f.Unit,
         sourceCount = f.SourceCount,
     };

@@ -4,36 +4,35 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Mart.adjust request. PRD inputs: "figure, amount, reason, evidence"</summary>
+/// <summary>dat.Mart.adjust request (BO-DAT-04). Adds a manual adjustment line to a run; the stored figures never change (adjusted value = figure + sum of the lines).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MartAdjustRequest
 {
-    /// <summary>PRD: "figure"</summary>
+    /// <summary>Mart run the adjustment belongs to.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'runId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("figure")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("runId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Figure { get; init; }
+    public global::System.Guid? RunId { get; init; }
 
-    /// <summary>PRD: "amount"</summary>
+    /// <summary>Figure key within the run (metric|product|month|dimension); the figure must be a money (EUR) figure.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("figureKey")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? FigureKey { get; init; }
+
+    /// <summary>Signed EUR amount added to the figure.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Money? Amount { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Why the adjustment is made (required, up to 1000 characters).</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
 
-    /// <summary>PRD: "evidence"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Reference to the evidence (document or ticket id; required, up to 500 characters).</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("evidence")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Evidence { get; init; }
+    public string? Evidence { get; init; }
 }
