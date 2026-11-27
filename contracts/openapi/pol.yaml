@@ -2988,7 +2988,7 @@ paths:
       x-wave: unscheduled
       x-status: full
       x-maturity: pre-release
-      x-bounded: ids <= 200 per call (REQ-POL-351)
+      x-bounded: ids <= 50 per call (REQ-POL-351, BO-POL-02)
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3009,9 +3009,12 @@ paths:
       - name: ids
         in: query
         required: false
-        description: 'PRD: "ids (≤ 200)"'
+        description: 'Policy ids (at most 50, comma-separated or repeated); a malformed id or more than 50 is a 400'
+        style: form
+        explode: false
         schema:
           type: array
+          maxItems: 50
           items:
             type: string
       responses:
@@ -3323,6 +3326,18 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: since
+        in: query
+        required: false
+        description: 'Only segment versions that changed at or after this instant (ignored when a cursor is given)'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      - name: sinceTransactionId
+        in: query
+        required: false
+        description: 'Only segment versions that changed at or after the recording of this transaction (ignored when a cursor is given)'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -3431,7 +3446,7 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - name: policyId
         in: query
-        required: false
+        required: true
         description: 'PRD: "policyId"'
         schema:
           $ref: ../events/common.schema.json#/$defs/Uuid
@@ -6351,11 +6366,16 @@ components:
       - coverages
     PolicyGetManyResponse:
       type: object
-      description: 'pol.Policy.getMany result. PRD outputs: "policies"'
+      description: 'pol.Policy.getMany result. Policies are answered as pol.Policy.get does (same legal-entity scoping); an id that did not exist in the caller''s legal entity is listed in notFound, never distinguished from an out-of-scope one'
       properties:
         policies:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "policies"'
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyGetResponse'
+        notFound:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
     PolicySearchItem:
       type: object
       description: 'pol.Policy.search result row (REQ-POL-014 subset: policy number and insured party)'
@@ -6436,11 +6456,35 @@ components:
           description: 'PRD: "differences"'
     SegmentChangesItem:
       type: object
-      description: 'pol.Segment.changes result. PRD outputs: "segment versions"'
+      description: 'pol.Segment.changes result: one segment version, ordered by the instant it last changed (recordedTo when closed, else recordedFrom)'
       properties:
-        segmentVersions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "segment versions"'
+        segmentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        transactionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        validFrom:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        validTo:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordedFrom:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordedTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+          description: Set once the version was superseded or reversed
+        changedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: recordedTo when closed, else recordedFrom
+        snapshotHash:
+          type: string
+        worksheetId:
+          type: [string, 'null']
+      required: [segmentId, termId, policyId, transactionId, validFrom, validTo, recordedFrom, recordedTo, changedAt, snapshotHash]
     SegmentChangesPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -6453,24 +6497,59 @@ components:
       description: Page of pol.Segment.changes results (cursor pagination, contract §3.5.5)
     StatusModelGetResponse:
       type: object
-      description: 'pol.StatusModel.get result. PRD outputs: "table"'
+      description: 'pol.StatusModel.get result: the canonical state tables (job, quote, term) as built into the module'
       properties:
         table:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "table"'
+          type: array
+          items:
+            $ref: '#/components/schemas/StatusModelTable'
+    StatusModelTable:
+      type: object
+      description: One state machine
+      properties:
+        entity:
+          type: string
+          description: Job, Quote or PolicyTerm
+        states:
+          type: array
+          items:
+            type: string
+        initialStates:
+          type: array
+          items:
+            type: string
+        terminalStates:
+          type: array
+          items:
+            type: string
+        transitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatusModelTransition'
+    StatusModelTransition:
+      type: object
+      properties:
+        from:
+          type: string
+        trigger:
+          type: string
+        to:
+          type: string
     EffectiveDateLimitsResponse:
       type: object
-      description: 'pol.EffectiveDate.limits result. PRD outputs: "earliest, latest, override available"'
+      description: 'pol.EffectiveDate.limits result: the range an effective date may take for the policy''s term at the effective time of the call'
       properties:
         earliest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "earliest"'
+          $ref: ../events/common.schema.json#/$defs/Instant
         latest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "latest"'
+          $ref: ../events/common.schema.json#/$defs/Instant
+        backdateDays:
+          type: integer
+          description: Days back the role (the most permissive of the caller's, or the role query) may change
         overrideAvailable:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "override available"'
+          type: boolean
+          description: Always false until a limit-override permission exists
+      required: [earliest, latest, backdateDays, overrideAvailable]
     ImportPolicyRequest:
       type: object
       description: 'pol.Import.policy request. PRD inputs: "legacy payload, sourceKey"'
