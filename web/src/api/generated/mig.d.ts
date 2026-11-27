@@ -890,6 +890,116 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/mig/v1/waves/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Plan a renewal-conversion wave
+         * @description Plan a renewal-conversion wave
+         *
+         *     Inputs: wave name, staged source and snapshot, the object type of the policy records (default Policy), the field holding the legacy term end (default endDate) and the renewal window (windowFrom to windowTo, both inclusive). Outputs: the wave with one PLANNED term per staged policy whose legacy term ends inside the window. Idempotent by name: planning the same wave again adds only the terms not yet in it. A policy already planned, offered or converted in any wave is never selected again.
+         */
+        post: operations["mig.Wave.plan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/waves/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a wave with its term states
+         * @description Get a wave with its term states
+         *
+         *     Inputs: wave id, optional term state filter and limit. Outputs: the wave, counts per term state, the count equation, its mapping batches, the sign-off status and a page of terms.
+         */
+        get: operations["mig.Wave.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/waves/convert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create the conversion batch of a wave from an approved mapping
+         * @description Create the conversion batch of a wave from an approved mapping
+         *
+         *     Inputs: wave id and the id of an APPROVED mapping spec whose source object type is the wave object type. Outputs: the wave. Every PLANNED term is mapped; a term with an open data quality error or a mapping issue is held (stays PLANNED with the reason); the others become OFFERED and a DRAFT batch is created that goes through the normal dry run and maker-checker approval. When the batch imports a term, the policy routes to CORE from its renewal date in the same save.
+         */
+        post: operations["mig.Wave.convert"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/waves/adjust": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Exclude or withdraw a wave term
+         * @description Exclude or withdraw a wave term
+         *
+         *     Inputs: wave id, the policy legacy key, an action EXCLUDE (a PLANNED term leaves the wave) or WITHDRAW (a PLANNED or OFFERED term is withdrawn, for example by the policyholder), and a reason. Outputs: the wave. The policy keeps legacy routing and can be planned again in a later wave.
+         */
+        post: operations["mig.Wave.adjust"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/waves/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Close a wave
+         * @description Close a wave
+         *
+         *     Inputs: wave id. Outputs: the closed wave. Refused unless the count equation holds (every selected term is in exactly one state), no term is OFFERED, every batch of the wave has finished and the wave sign-off (scope of the wave) is ready. Terms still PLANNED become NOT_CONVERTED and are left for a later wave.
+         */
+        post: operations["mig.Wave.close"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1533,6 +1643,84 @@ export interface components {
             /** @description NO_SIGNOFF, NO_RUN, NEWER_RUN, RESULTS_CHANGED, UNWAIVED_VARIANCES, SIGNATORY_PENDING:<role>, SIGNATORY_REJECTED:<role> */
             blockers: string[];
             signatories: components["schemas"]["SignoffSignatory"][];
+        };
+        WavePlanRequest: {
+            name: string;
+            source: string;
+            snapshot: string;
+            /** @description Object type of the policy records in staging (default Policy). */
+            objectType?: string | null;
+            /** @description Field of the staged payload holding the legacy term end, yyyy-MM-dd (default endDate). */
+            termEndField?: string | null;
+            /** @description First renewal date of the window (yyyy-MM-dd, inclusive). */
+            windowFrom: string;
+            /** @description Last renewal date of the window (yyyy-MM-dd, inclusive). */
+            windowTo: string;
+            /** @description Reconciliation and sign-off scope of the wave (default the wave name). */
+            scope?: string | null;
+        };
+        WaveConvertRequest: {
+            waveId: components["schemas"]["Uuid"];
+            specId: components["schemas"]["Uuid"];
+            batchName?: string | null;
+        };
+        WaveAdjustRequest: {
+            waveId: components["schemas"]["Uuid"];
+            legacyKey: string;
+            /** @description EXCLUDE or WITHDRAW. */
+            action: string;
+            reason: string;
+        };
+        WaveCloseRequest: {
+            waveId: components["schemas"]["Uuid"];
+        };
+        WaveTerm: {
+            legacyKey: string;
+            /** @description Legacy term end (yyyy-MM-dd); the policy routes to CORE from this date. */
+            termEnd: string;
+            /** @description PLANNED, OFFERED, CONVERTED, EXCLUDED, WITHDRAWN or NOT_CONVERTED. */
+            state: string;
+            reason?: string | null;
+            batchId?: components["schemas"]["Uuid"];
+            coreId?: components["schemas"]["Uuid"];
+        };
+        WaveBatch: {
+            batchId: components["schemas"]["Uuid"];
+            specId?: components["schemas"]["Uuid"];
+            status: string;
+            itemCount: number;
+        };
+        Wave: {
+            waveId: components["schemas"]["Uuid"];
+            name: string;
+            /** @description PLANNED, IN_PROGRESS or CLOSED. */
+            status: string;
+            source: string;
+            snapshot: string;
+            objectType: string;
+            termEndField: string;
+            windowFrom: string;
+            windowTo: string;
+            scope: string;
+            /** @description Terms selected from staging so far. */
+            selectedCount: number;
+            /** @description Terms per state. */
+            counts: {
+                [key: string]: number;
+            };
+            /** @description True when the terms in all states add up to the selected count. */
+            equationHolds: boolean;
+            batches: components["schemas"]["WaveBatch"][];
+            signoff?: components["schemas"]["SignoffStatus"];
+            terms: components["schemas"]["WaveTerm"][];
+            createdBy: string;
+            closedBy?: string | null;
+            /** Format: date-time */
+            closedAt?: string | null;
+            /** @description Terms added by this plan call. */
+            added?: number | null;
+            /** @description Terms held back by this convert call. */
+            held?: number | null;
         };
         /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
         Uuid: string;
@@ -3434,6 +3622,224 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MappingPreview"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Wave.plan": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WavePlanRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Wave"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Wave.get": {
+        parameters: {
+            query?: {
+                /** @description Only terms in this state. */
+                state?: string;
+                /** @description Terms to return (default 200, at most 1000). */
+                limit?: number;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the wave. */
+                id: components["schemas"]["Uuid"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Wave"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Wave.convert": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WaveConvertRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Wave"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Wave.adjust": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WaveAdjustRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Wave"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Wave.close": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WaveCloseRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Wave"];
                 };
             };
             400: components["responses"]["BadRequest"];

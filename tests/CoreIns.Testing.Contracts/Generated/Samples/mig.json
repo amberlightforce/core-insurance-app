@@ -776,6 +776,112 @@
         }
       ]
     },
+    "Wave": {
+      "waveId": "0192529d-e169-73cb-8df0-742cc65cda57",
+      "name": "sample",
+      "status": "sample",
+      "source": "sample",
+      "snapshot": "sample",
+      "objectType": "sample",
+      "termEndField": "sample",
+      "windowFrom": "sample",
+      "windowTo": "sample",
+      "scope": "sample",
+      "selectedCount": 1,
+      "counts": {
+        "sample": 1
+      },
+      "equationHolds": true,
+      "batches": [
+        {
+          "batchId": "019225d3-6930-7553-8478-bf219a464679",
+          "specId": "0192a7c6-dfec-762b-89a9-20fcf854304b",
+          "status": "sample",
+          "itemCount": 1
+        }
+      ],
+      "signoff": {
+        "signoffId": "019293f2-4d94-7c4b-8167-193eab5b546b",
+        "scope": "sample",
+        "runId": "019280b2-d0fc-7492-82c4-f0dfe8a164ac",
+        "latestRunId": "019214f0-7800-790a-831a-5f3f4fc69df7",
+        "resultsHash": "sample",
+        "green": true,
+        "variances": [
+          "sample"
+        ],
+        "waivedVariances": [
+          "sample"
+        ],
+        "requestedBy": "sample",
+        "ready": true,
+        "blockers": [
+          "sample"
+        ],
+        "signatories": [
+          {
+            "signatory": "FINANCE_CONTROLLER",
+            "status": "PENDING",
+            "decidedBy": "sample",
+            "decidedAt": "2026-10-07T09:00:00Z",
+            "comment": "sample"
+          }
+        ]
+      },
+      "terms": [
+        {
+          "legacyKey": "sample",
+          "termEnd": "sample",
+          "state": "sample",
+          "reason": "sample",
+          "batchId": "0192132d-2d8d-7243-876f-8463710a7359",
+          "coreId": "0192e1ad-7923-798b-8fbb-9dd602b52e24"
+        }
+      ],
+      "createdBy": "sample",
+      "closedBy": "sample",
+      "closedAt": "2026-10-07T09:00:00Z",
+      "added": 1,
+      "held": 1
+    },
+    "WaveAdjustRequest": {
+      "waveId": "0192c644-d74a-7275-8bd4-af3d3dcb98f4",
+      "legacyKey": "sample",
+      "action": "sample",
+      "reason": "sample"
+    },
+    "WaveBatch": {
+      "batchId": "0192a07e-60e2-7cfb-879c-8d469c2dae82",
+      "specId": "0192fe2b-bd85-7dff-83f8-cda60dc1245c",
+      "status": "sample",
+      "itemCount": 1
+    },
+    "WaveCloseRequest": {
+      "waveId": "0192b13c-9afb-7d62-8654-ab5bb669895e"
+    },
+    "WaveConvertRequest": {
+      "waveId": "01923a50-a15d-70e1-8492-63e5b2099933",
+      "specId": "0192d99c-b86c-79e1-8675-33cbb370b757",
+      "batchName": "sample"
+    },
+    "WavePlanRequest": {
+      "name": "sample",
+      "source": "sample",
+      "snapshot": "sample",
+      "objectType": "sample",
+      "termEndField": "sample",
+      "windowFrom": "sample",
+      "windowTo": "sample",
+      "scope": "sample"
+    },
+    "WaveTerm": {
+      "legacyKey": "sample",
+      "termEnd": "sample",
+      "state": "sample",
+      "reason": "sample",
+      "batchId": "01926fac-2187-730e-8200-280ba067d374",
+      "coreId": "0192f834-216a-768a-8a9e-213826f4aa2f"
+    },
     "XrefListItem": {
       "xrefId": "0192b4e4-42aa-77e2-82e3-a37def07dfd2",
       "source": "sample",
