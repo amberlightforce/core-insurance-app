@@ -137,6 +137,56 @@ const moduleRoutes: RouteObject[] = [
       },
     ],
   },
+  // NX-UI-14c: billing operations screens (billing roles).
+  {
+    path: 'billing/suspense',
+    element: <RequireRole roles={billingRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/ops/SuspensePage')).SuspensePage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'billing/plans',
+    element: <RequireRole roles={billingRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/ops/PlansPage')).PlansPage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'billing/mandates',
+    element: <RequireRole roles={billingRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/ops/MandatesPage')).MandatesPage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'billing/account-currents',
+    element: <RequireRole roles={billingRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/ops/AccountCurrentsPage'))
+            .AccountCurrentsPage,
+        }),
+      },
+    ],
+  },
   {
     // SL6-UI-BIL-DELINQ: delinquency cases (billing roles; guard shared with refunds).
     path: 'billing/delinquency',

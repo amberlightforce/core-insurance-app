@@ -21,15 +21,16 @@
       "CONCURRENT_ALLOCATION": "Concurrent allocation"
     },
     "match": {
-      "title": "Match receipt {{number}}",
+      "title": "Match receipt {number}",
       "facts": "Receipt facts",
+      "amount": "Receipt amount",
       "unallocated": "Unapplied amount",
       "hint": "Pick whole open invoices of the same account; each is settled in full.",
-      "invoice": "{{number}} - open {{open}}, due {{due}}",
+      "invoice": "{number} - open {open}, due {due}",
       "noneTitle": "No open invoices on this account",
       "noneBody": "There is nothing to match this receipt to yet.",
       "over": "The selected invoices exceed the unapplied amount",
-      "submit": "Allocate {{total}}",
+      "submit": "Allocate {total}",
       "done": "Receipt allocated",
       "failed": "The allocation failed"
     }

@@ -2,10 +2,12 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useIdempotencyKey } from '../../../api/idempotency';
+import type { InvoiceView } from '../../../api/types';
 import {
   Banner,
   Button,
   Checkbox,
+  DataTable,
   EmptyState,
   KeyValueList,
   announce,
@@ -20,7 +22,6 @@ import { LinkButton } from '../../staff/LinkButton';
 import { PageHeader, Section } from '../../staff/PageHeader';
 import { ProblemBanner } from '../../staff/ProblemBanner';
 import { QueryView } from '../../staff/QueryView';
-import { SimpleTable } from '../../staff/SimpleTable';
 import styles from '../../staff/staff.module.css';
 import { useFormat } from '../../staff/useFormat';
 import {
@@ -32,6 +33,10 @@ import {
   type ReceiptView,
 } from './api';
 import { canWorkBillingOps } from './roles';
+
+interface Candidate {
+  invoice: InvoiceView;
+}
 
 function MatchPanel({ receipt }: { receipt: ReceiptView }) {
   const { t } = useTranslation('billing');
@@ -46,7 +51,7 @@ function MatchPanel({ receipt }: { receipt: ReceiptView }) {
   });
   const allowed = canWorkBillingOps();
 
-  const candidates = (invoices.data?.items ?? []).filter(
+  const candidates = ((invoices.data?.items ?? []) as Candidate[]).filter(
     (i) => i.invoice.kind === 'INVOICE' && toCents(i.invoice.open.amount) > 0,
   );
   const chosen = candidates.filter((i) => picked[i.invoice.invoiceId]);
@@ -59,9 +64,14 @@ function MatchPanel({ receipt }: { receipt: ReceiptView }) {
       <KeyValueList
         aria-label={t('suspense.match.facts')}
         items={[
-          { label: t('suspense.columns.amount'), value: fmt.money(receipt.amount) },
-          { label: t('suspense.match.unallocated'), value: fmt.money(receipt.unallocated) },
+          { id: 'amount', label: t('suspense.match.amount'), value: fmt.money(receipt.amount) },
           {
+            id: 'unallocated',
+            label: t('suspense.match.unallocated'),
+            value: fmt.money(receipt.unallocated),
+          },
+          {
+            id: 'reason',
             label: t('suspense.columns.reason'),
             value: receipt.suspenseReason
               ? t(`suspense.reasons.${receipt.suspenseReason}`, {
@@ -69,7 +79,11 @@ function MatchPanel({ receipt }: { receipt: ReceiptView }) {
                 })
               : '—',
           },
-          { label: t('suspense.columns.valueDate'), value: fmt.date(receipt.valueDate) },
+          {
+            id: 'valueDate',
+            label: t('suspense.columns.valueDate'),
+            value: fmt.date(receipt.valueDate),
+          },
         ]}
       />
       <p className={styles.muted}>{t('suspense.match.hint')}</p>
@@ -121,7 +135,10 @@ function MatchPanel({ receipt }: { receipt: ReceiptView }) {
                 }}
               >
                 {t('suspense.match.submit', {
-                  total: fmt.money({ amount: fromCents(chosenCents), currency: receipt.amount.currency }),
+                  total: fmt.money({
+                    amount: fromCents(chosenCents),
+                    currency: receipt.amount.currency,
+                  }),
                 })}
               </Button>
               {!allowed ? (
@@ -140,13 +157,19 @@ export function SuspensePage() {
   const { t } = useTranslation('billing');
   const query = useSuspense();
   const [selected, setSelected] = useState<string | null>(null);
+  const current = query.data?.items.find((r) => r.receiptId === selected);
 
   const columns = useMemo<DataColumn<ReceiptView>[]>(
     () => [
       identifierColumn<ReceiptView>('number', t('suspense.columns.number'), (r) => r.receiptNumber),
-      moneyColumn<ReceiptView>('amount', t('suspense.columns.amount'), (r) => r.unallocated.amount, {
-        currency: 'EUR',
-      }),
+      moneyColumn<ReceiptView>(
+        'amount',
+        t('suspense.columns.amount'),
+        (r) => r.unallocated.amount,
+        {
+          currency: 'EUR',
+        },
+      ),
       textColumn<ReceiptView>('reason', t('suspense.columns.reason'), (r) =>
         r.suspenseReason
           ? t(`suspense.reasons.${r.suspenseReason}`, { defaultValue: r.suspenseReason })
@@ -174,7 +197,11 @@ export function SuspensePage() {
       <Section title={t('suspense.listTitle')} family="ochre" count={query.data?.items.length}>
         <QueryView query={query}>
           {(page) => (
-            <SimpleTable<ReceiptView>
+            <DataTable<ReceiptView>
+              searchable={false}
+              showDensityToggle={false}
+              showColumnSettings={false}
+              openOnClick
               aria-label={t('suspense.listTitle')}
               columns={columns}
               data={page.items}
@@ -194,9 +221,7 @@ export function SuspensePage() {
           )}
         </QueryView>
       </Section>
-      {selected && query.data?.items.find((r) => r.receiptId === selected) ? (
-        <MatchPanel receipt={query.data.items.find((r) => r.receiptId === selected) as ReceiptView} />
-      ) : null}
+      {current ? <MatchPanel receipt={current} /> : null}
     </div>
   );
 }
