@@ -123,7 +123,7 @@ internal sealed class CalculateAdjustmentHandler(
         AccountingApprovals.HashOf(
             AccountingApprovals.AdjustmentSubject, id,
             contractId.ToString("D"), layer.ToString(CultureInfo.InvariantCulture), scheduleId.ToString("D"), AccountingViews.Fixed(subject),
-            rate.ToString(CultureInfo.InvariantCulture), AccountingViews.Fixed(calculated), AccountingViews.Fixed(adjustment));
+            AccountingViews.Rate(rate), AccountingViews.Fixed(calculated), AccountingViews.Fixed(adjustment));
 }
 
 /// <summary>Audit facts of <c>ri.Adjustment.calculate</c>.</summary>

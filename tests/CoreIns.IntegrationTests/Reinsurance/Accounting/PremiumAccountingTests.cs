@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Text.Json.Nodes;
+using CoreIns.IntegrationTests.Reinsurance.Registry;
 using Npgsql;
 using static CoreIns.IntegrationTests.Party.PartyApi;
 using static CoreIns.IntegrationTests.Reinsurance.Registry.RegistrySlice;

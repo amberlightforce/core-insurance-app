@@ -110,7 +110,7 @@ internal sealed class AdjustCommissionHandler(
                 new
                 {
                     contractNumber = contract.ContractNumber, contractYear = year, cededPremium = AccountingViews.Fixed(request.CededPremium.Amount),
-                    incurredLoss = AccountingViews.Fixed(request.IncurredLoss.Amount), lossRatioPct = lossRatio.ToString(CultureInfo.InvariantCulture),
+                    incurredLoss = AccountingViews.Fixed(request.IncurredLoss.Amount), lossRatioPct = AccountingViews.Rate(lossRatio),
                     provisionalRatePct = request.ProvisionalRatePct.ToString(CultureInfo.InvariantCulture), earnedRatePct = earnedRate.ToString(CultureInfo.InvariantCulture),
                     adjustmentAmount = AccountingViews.Fixed(adjustment),
                 },
@@ -137,8 +137,8 @@ internal sealed class AdjustCommissionHandler(
     public static Sha256Hash HashOf(Guid id, Guid contractId, decimal ceded, decimal incurred, decimal lossRatio, decimal provisionalRate, decimal earnedRate, decimal adjustment) =>
         AccountingApprovals.HashOf(
             AccountingApprovals.CommissionSubject, id,
-            contractId.ToString("D"), AccountingViews.Fixed(ceded), AccountingViews.Fixed(incurred), lossRatio.ToString(CultureInfo.InvariantCulture),
-            provisionalRate.ToString(CultureInfo.InvariantCulture), earnedRate.ToString(CultureInfo.InvariantCulture), AccountingViews.Fixed(adjustment));
+            contractId.ToString("D"), AccountingViews.Fixed(ceded), AccountingViews.Fixed(incurred), AccountingViews.Rate(lossRatio),
+            AccountingViews.Rate(provisionalRate), AccountingViews.Rate(earnedRate), AccountingViews.Fixed(adjustment));
 }
 
 /// <summary>Audit facts of <c>ri.Commission.adjust</c>.</summary>
@@ -288,7 +288,7 @@ internal sealed class CommissionHistoryReader(ReinsuranceDbContext db, RequestCo
             query = query.Where(c => c.ContractId == typed);
         }
 
-        var rows = await query.OrderByDescending(c => c.CreatedAt).ThenBy(c => c.CommissionId).Skip(offset).Take(size + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var rows = await query.OrderByDescending(c => c.CreatedAt).ThenByDescending(c => c.CommissionId).Skip(offset).Take(size + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
         var page = rows.Take(size).ToList();
         var ids = page.Select(r => r.CommissionId).ToList();
         var decisions = (await db.AccountingDecisions.AsNoTracking().Where(d => d.Kind == "COMMISSION" && ids.Contains(d.SubjectId)).ToListAsync(cancellationToken).ConfigureAwait(false))

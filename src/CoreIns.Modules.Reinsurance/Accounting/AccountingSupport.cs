@@ -67,6 +67,9 @@ internal static class AccountingViews
 {
     public static string Fixed(decimal value) => value.ToString("0.00##", CultureInfo.InvariantCulture);
 
+    /// <summary>A rate in percent, the same text whether it has just been calculated or read back from numeric(.,6).</summary>
+    public static string Rate(decimal value) => value.ToString("0.0#####", CultureInfo.InvariantCulture);
+
     public static Money Eur(decimal amount, string currency) => new(ContractSupport.Amount(amount), Currency.FromCode(currency.Trim()));
 
     public static string ToJson(IReadOnlyList<(int Seq, BusinessDate DueDate, decimal Amount)> instalments) =>

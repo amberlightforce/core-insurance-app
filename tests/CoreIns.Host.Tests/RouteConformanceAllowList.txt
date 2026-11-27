@@ -156,10 +156,7 @@ CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/query
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/zone
 CONTRACT_NOT_SERVED GET /api/ri/v1/close/status
 CONTRACT_NOT_SERVED GET /api/ri/v1/collaterals
-CONTRACT_NOT_SERVED GET /api/ri/v1/commission/history
-CONTRACT_NOT_SERVED GET /api/ri/v1/contracts/version-at
 CONTRACT_NOT_SERVED GET /api/ri/v1/data-products/{}
-CONTRACT_NOT_SERVED GET /api/ri/v1/deposit-schedules/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/ifrs17-links/query
@@ -681,8 +678,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/estimate
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/export-oed
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/import-model-results
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/set-capacity
-CONTRACT_NOT_SERVED POST /api/ri/v1/adjustments/approve
-CONTRACT_NOT_SERVED POST /api/ri/v1/adjustments/calculate
 CONTRACT_NOT_SERVED POST /api/ri/v1/balances/report
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/approve
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/generate
@@ -705,14 +700,10 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/close/run
 CONTRACT_NOT_SERVED POST /api/ri/v1/collaterals
 CONTRACT_NOT_SERVED POST /api/ri/v1/collaterals/draw
 CONTRACT_NOT_SERVED POST /api/ri/v1/collaterals/release
-CONTRACT_NOT_SERVED POST /api/ri/v1/commission/adjust
-CONTRACT_NOT_SERVED POST /api/ri/v1/commission/approve
 CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/close
 CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/commute
-CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/endorse
 CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/expire
 CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/simulate
-CONTRACT_NOT_SERVED POST /api/ri/v1/deposit-schedules/reschedule
 CONTRACT_NOT_SERVED POST /api/ri/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/ri/v1/dsar/restrict
 CONTRACT_NOT_SERVED POST /api/ri/v1/exchanges/receive
