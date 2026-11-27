@@ -5,6 +5,7 @@ Short, practical procedures for operating a stamp. Each is based on the real scr
 | Runbook | Use when |
 | --- | --- |
 | [deploy-rollback.md](deploy-rollback.md) | Shipping a build to `dev` or `prod`, or backing one out |
+| [migration-policy.md](migration-policy.md) | Writing or reviewing a schema migration (expand/contract) |
 | [migration-failure.md](migration-failure.md) | The `bootstrap` or `migrate` job fails during a deploy |
 | [secret-rotation.md](secret-rotation.md) | Rotating database role passwords or the Entra client secret |
 | [dead-letter-replay.md](dead-letter-replay.md) | An event handler parked a message in `plt.outbox_dead_letter` |
