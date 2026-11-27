@@ -137,11 +137,7 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/user-profile/get-preferences
 CONTRACT_NOT_SERVED GET /api/plt/v1/users/search
 CONTRACT_NOT_SERVED GET /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
-CONTRACT_NOT_SERVED GET /api/pol/v1/effective-date/limits
 CONTRACT_NOT_SERVED GET /api/pol/v1/jobs
-CONTRACT_NOT_SERVED GET /api/pol/v1/policies/get-many
-CONTRACT_NOT_SERVED GET /api/pol/v1/segments/changes
-CONTRACT_NOT_SERVED GET /api/pol/v1/status-model/get
 CONTRACT_NOT_SERVED GET /api/pty/v1/accounts/search
 CONTRACT_NOT_SERVED GET /api/pty/v1/accounts/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/commission-agreements/compare
