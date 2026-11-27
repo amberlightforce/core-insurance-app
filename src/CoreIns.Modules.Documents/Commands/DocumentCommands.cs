@@ -32,6 +32,18 @@ public sealed class DocumentsOptions
     /// <summary>IANA zone id of the legal entity (a stamp setting, not a regulatory value).</summary>
     public string TimeZone { get; set; } = "Europe/Athens";
 
+    /// <summary>
+    /// Retention classes the market pack defines for archived documents (BO-DOC-04). Empty until the pack supplies them (D-REG-07):
+    /// <c>doc.Archive.setRetentionClass</c> rejects any class not listed and no duration is invented here.
+    /// </summary>
+    public string[] RetentionClasses { get; set; } = [];
+
+    /// <summary>Most documents one evidence pack may hold; a larger scope is refused so the zip stays small (BO-DOC-04).</summary>
+    public int EvidencePackMaxDocuments { get; set; } = 200;
+
+    /// <summary>Most issued documents one completeness check inspects; the report says when it was cut off.</summary>
+    public int CompletenessMaxDocuments { get; set; } = 2000;
+
     internal TimeZoneInfo Zone => TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
 }
 
@@ -412,7 +424,7 @@ internal sealed class StoreArchiveHandler(DocumentsDbContext db, RequestContext 
         return new ArchiveStoreResponse { ArchiveId = archive.ArchiveId, Hash = hash };
     }
 
-    private static bool TryDecode(string? text, out byte[] bytes)
+    internal static bool TryDecode(string? text, out byte[] bytes)
     {
         bytes = [];
         if (string.IsNullOrEmpty(text) || text.Length > MaxBytes * 4 / 3 + 4)

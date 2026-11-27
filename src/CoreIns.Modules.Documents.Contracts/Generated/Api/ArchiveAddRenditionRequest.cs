@@ -4,24 +4,35 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Archive.addRendition request. PRD inputs: "binary stream + declared hash, metadata"</summary>
+/// <summary>doc.Archive.addRendition request: another artefact of the same archive entry (e.g. the PDF next to the HTML).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ArchiveAddRenditionRequest
 {
-    /// <summary>PRD: "binary stream + declared hash"</summary>
+    /// <summary>Contract member 'parentArchiveId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'parentArchiveId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("binaryStream")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? BinaryStream { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("parentArchiveId")]
+    public required global::System.Guid ParentArchiveId { get; init; }
 
-    /// <summary>PRD: "binary stream + declared hash"</summary>
+    /// <summary>Base64 bytes (at most 5 MB)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("binaryStream")]
+    public required string BinaryStream { get; init; }
+
+    /// <summary>Contract member 'declaredHash'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("declaredHash")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? DeclaredHash { get; init; }
 
-    /// <summary>PRD: "metadata"</summary>
+    /// <summary>Media type, e.g. application/pdf</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contentType")]
+    public required string ContentType { get; init; }
+
+    /// <summary>Free label such as PDF or PDFA3</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("renditionKind")]
+    public required string RenditionKind { get; init; }
+
+    /// <summary>Contract member 'metadata'.</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>

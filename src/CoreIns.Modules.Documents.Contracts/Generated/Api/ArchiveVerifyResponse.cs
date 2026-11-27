@@ -4,20 +4,40 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Archive.verify result. PRD outputs: "archive id, hash"</summary>
+/// <summary>doc.Archive.verify result: OK when the recomputed hash equals the stored hash, otherwise TAMPERED.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ArchiveVerifyResponse
 {
-    /// <summary>PRD: "archive id"</summary>
+    /// <summary>Contract member 'archiveId'.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'archiveId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("archiveId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? ArchiveId { get; init; }
+    public required global::System.Guid ArchiveId { get; init; }
 
-    /// <summary>PRD: "hash"</summary>
+    /// <summary>Stored hash</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? Hash { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash Hash { get; init; }
+
+    /// <summary>Contract member 'computedHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("computedHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash ComputedHash { get; init; }
+
+    /// <summary>Contract member 'result'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("result")]
+    public required ResultValue Result { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ResultValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ResultValue
+    {
+        /// <summary><c>OK</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("OK")]
+        Ok,
+
+        /// <summary><c>TAMPERED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("TAMPERED")]
+        Tampered,
+    }
 }
