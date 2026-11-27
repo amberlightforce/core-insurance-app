@@ -73,6 +73,8 @@ public static class ReinsuranceModule
                 // BO-RI-08: occurrences (a link is stamped when unlinked) and the sealed manual adjustments.
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.occurrence, {Schema}.occurrence_claim TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.recovery_adjustment TO {appRole}",
+                // BO-RI-11: the technical account is append-only (SELECT, INSERT only).
+                $"GRANT SELECT, INSERT ON {Schema}.account_item TO {appRole}",
             ]),
     ];
 
@@ -144,6 +146,15 @@ public static class ReinsuranceModule
         services.AddCommandAuditor<ApproveCommission, CommissionApproveResponse, ApproveCommissionAuditor>();
         services.AddCommand<ApproveCommission, CommissionApproveResponse, ApproveCommissionHandler>(
             CommandDescriptor.For("ri.Commission.approve") with { SupportsDryRun = true });
+
+        // BO-RI-11: the technical account (items, balances; append-only, reversals instead of edits).
+        services.AddScoped<AccountItemReader>();
+        services.AddScoped<IValidator<GenerateItems>, GenerateItemsValidator>();
+        services.AddCommandAuditor<GenerateItems, ItemGenerateResponse, GenerateItemsAuditor>();
+        services.AddCommand<GenerateItems, ItemGenerateResponse, GenerateItemsHandler>(CommandDescriptor.For("ri.Item.generate"));
+        services.AddScoped<IValidator<ReverseItem>, ReverseItemValidator>();
+        services.AddCommandAuditor<ReverseItem, ItemReverseResponse, ReverseItemAuditor>();
+        services.AddCommand<ReverseItem, ItemReverseResponse, ReverseItemHandler>(CommandDescriptor.For("ri.Item.reverse"));
 
         // The scanner's per-contract command (internal, no HTTP; exactly-once by the row lock and the state it finds).
         services.AddCommandAuditor<ApplyDueLifecycle, string, ApplyDueLifecycleAuditor>();

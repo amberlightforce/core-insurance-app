@@ -103,8 +103,10 @@ export function ManualJournalFormPage() {
   return (
     <div className={styles.page}>
       <PageHeader
+        variant="landing"
         title={t('ops.manual.form.title')}
         overline={t('overline')}
+        description={t('ops.manual.form.lead')}
         actions={
           <LinkButton variant="secondary" to="/finance/manual-journals">
             {t('ops.manual.backToList')}
@@ -127,7 +129,7 @@ export function ManualJournalFormPage() {
           errors={summary.length > 0 && submitted > 0 ? summary : []}
           focusKey={submitted}
         />
-        <Section title={t('ops.manual.form.header')}>
+        <Section title={t('ops.manual.form.header')} family="brand">
           <div className={styles.grid}>
             <TextField
               id="mj-description"
@@ -170,6 +172,7 @@ export function ManualJournalFormPage() {
         </Section>
         <Section
           title={t('ops.manual.form.lines')}
+          family="teal"
           actions={
             <Button
               variant="secondary"

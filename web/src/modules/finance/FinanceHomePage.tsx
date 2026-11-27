@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router';
 import { hasAnyRole, financeRoles } from '../../auth/roles';
 import { readSession } from '../../dev-auth/devAuth';
 import { Button, EmptyState, TextField } from '../../design-system';
-import { LinkButton } from '../staff/LinkButton';
+import { NavList } from '../staff/NavList';
 import { PageHeader, Section } from '../staff/PageHeader';
 import { QueryView } from '../staff/QueryView';
 import styles from '../staff/staff.module.css';
@@ -70,19 +70,16 @@ export function FinanceHomePage() {
       />
       {ops ? (
         <div className={styles.grid}>
-          <Section title={t('ops.home.screens')}>
-            <ul className={styles.linkList}>
-              {screens.map(([key, to]) => (
-                <li key={key}>
-                  <LinkButton to={to}>{t(`ops.home.${key}`)}</LinkButton>
-                </li>
-              ))}
-            </ul>
+          <Section title={t('ops.home.screens')} family="brand">
+            <NavList
+              aria-label={t('ops.home.screens')}
+              items={screens.map(([key, to]) => ({ id: key, label: t(`ops.home.${key}`), to }))}
+            />
           </Section>
           <PeriodsSection />
         </div>
       ) : null}
-      <Section title={t('home.byPolicy')}>
+      <Section title={t('home.byPolicy')} family="info">
         <form
           noValidate
           className={styles.row}

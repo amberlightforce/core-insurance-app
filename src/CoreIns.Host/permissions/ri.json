@@ -34,6 +34,11 @@
         "ri.Commission.adjust": [ "Staff.ReinsuranceAccountant" ],
         "ri.Commission.approve": [ "Staff.ReinsuranceManager" ],
         "ri.Commission.history": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        // Technical account (BO-RI-11): the accountant generates and reverses items; the reinsurance roles read.
+        "ri.Item.generate": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Item.reverse": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Item.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.Balance.report": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         // BO-RI-08: restatement, occurrences, adjustments and the aggregate tracker. The adjustment's real gate is the RI.RECOVERY_ADJUSTMENT authority.
         "ri.Recovery.recalculate": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Occurrence.link": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],

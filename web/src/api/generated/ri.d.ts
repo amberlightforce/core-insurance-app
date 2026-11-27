@@ -1574,6 +1574,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ri/v1/items/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate technical account items
+         * @description Generate technical account items (BO-RI-11)
+         */
+        post: operations["ri.Item.generate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ri/v1/items/reverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reverse a technical account item
+         * @description Reverse a technical account item (BO-RI-11)
+         */
+        post: operations["ri.Item.reverse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ri/v1/balances/report": {
         parameters: {
             query?: never;
@@ -3792,28 +3832,85 @@ export interface components {
             /** @description PRD: "notice" */
             notice?: components["schemas"]["Unspecified"];
         };
-        /** @description ri.Item.list result. PRD outputs: "items, balances" */
+        /** @description One technical account item of a reinsurer on a contract (BO-RI-11), append-only. Positive is payable by the cedant to the reinsurer, negative payable to the cedant. A reversal is a new item with the opposite sign. */
+        AccountItemView: {
+            itemId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            contractYear: number;
+            layerNo?: number | null;
+            reinsurerPartyId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            kind: "CEDED_PREMIUM" | "DEPOSIT_INSTALMENT" | "PREMIUM_ADJUSTMENT" | "COMMISSION" | "RECOVERY";
+            sourceKind: components["schemas"]["Text"];
+            sourceId: components["schemas"]["Text"];
+            amount: components["schemas"]["Money"];
+            /** @description Accounting period, yyyy-MM */
+            period: components["schemas"]["Text"];
+            itemDate: components["schemas"]["LocalDate"];
+            reversalOf?: components["schemas"]["Uuid"] | null;
+            reason?: components["schemas"]["Text"] | null;
+            createdAt: components["schemas"]["Instant"];
+            createdBy: components["schemas"]["Text"];
+        };
+        /** @description One ri.Item.list result */
         ItemListItem: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "balances" */
-            balances?: components["schemas"]["Unspecified"];
+            item: components["schemas"]["AccountItemView"];
         };
         /** @description Page of ri.Item.list results (cursor pagination, contract §3.5.5) */
         ItemListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["ItemListItem"][];
         };
-        /** @description ri.Balance.report request. PRD inputs: "filters" */
-        BalanceReportRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
+        /** @description ri.Item.generate request. Produces the items not yet produced from the booked recoveries, cession premium deltas, instalments due, and approved adjustments and commission, up to the as-of date. Idempotent on the source id. */
+        ItemGenerateRequest: {
+            /** @description Only this contract (all when omitted) */
+            contractId?: components["schemas"]["Uuid"] | null;
+            /** @description Instalments due up to this date are produced (today when omitted) */
+            asOf?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description ri.Balance.report result. PRD outputs: "items, balances" */
+        /** @description ri.Item.generate result */
+        ItemGenerateResponse: {
+            created: number;
+            byKind: {
+                [key: string]: number;
+            };
+            /** @description Sources that could not be produced yet (no matching contract, or no participant) */
+            skipped: number;
+        };
+        /** @description ri.Item.reverse request. Appends the opposite item; an item is reversed once and a reversal is not reversed. */
+        ItemReverseRequest: {
+            itemId: components["schemas"]["Uuid"];
+            reason: components["schemas"]["Text"];
+        };
+        /** @description ri.Item.reverse result */
+        ItemReverseResponse: {
+            reversal: components["schemas"]["AccountItemView"];
+        };
+        /** @description ri.Balance.report request. Balances per reinsurer, currency and period from the items. */
+        BalanceReportRequest: {
+            contractId?: components["schemas"]["Uuid"] | null;
+            reinsurerPartyId?: components["schemas"]["Uuid"] | null;
+            /** @description yyyy-MM */
+            periodFrom?: components["schemas"]["Text"] | null;
+            /** @description yyyy-MM */
+            periodTo?: components["schemas"]["Text"] | null;
+        };
+        /** @description The movement and the running balance of one reinsurer in one currency and period. Positive is payable to the reinsurer. */
+        BalanceLine: {
+            reinsurerPartyId: components["schemas"]["Uuid"];
+            currency: components["schemas"]["Text"];
+            period: components["schemas"]["Text"];
+            /** @description Ceded, deposit and adjustment premium of the period */
+            premium: components["schemas"]["Money"];
+            commission: components["schemas"]["Money"];
+            recoveries: components["schemas"]["Money"];
+            movement: components["schemas"]["Money"];
+            /** @description Running balance at the end of the period */
+            closing: components["schemas"]["Money"];
+            itemCount: number;
+        };
+        /** @description ri.Balance.report result */
         BalanceReportResponse: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "balances" */
-            balances?: components["schemas"]["Unspecified"];
+            balances: components["schemas"]["BalanceLine"][];
         };
         /** @description ri.Bordereau.generate request. PRD inputs: "type, contract, counterparty, period, format" */
         BordereauGenerateRequest: {
@@ -7855,8 +7952,12 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
-                /** @description PRD: "filters" */
-                filters?: string;
+                contractId?: string;
+                reinsurerPartyId?: string;
+                /** @description CEDED_PREMIUM, DEPOSIT_INSTALMENT, PREMIUM_ADJUSTMENT, COMMISSION or RECOVERY */
+                kind?: string;
+                /** @description Accounting period, yyyy-MM */
+                period?: string;
             };
             header?: {
                 /**
@@ -7884,6 +7985,94 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "ri.Item.generate": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ItemGenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemGenerateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "ri.Item.reverse": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ItemReverseRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemReverseResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
