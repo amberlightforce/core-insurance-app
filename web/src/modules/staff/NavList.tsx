@@ -2,6 +2,7 @@ import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-aria-components';
 
 import { Icon } from '../../design-system';
+import { cx } from '../../design-system/utils/cx';
 import styles from './staff.module.css';
 
 export interface NavListItem {
@@ -24,7 +25,7 @@ export function NavList({
     <ul className={styles.navList} aria-label={ariaLabel}>
       {items.map((item) => (
         <li key={item.id}>
-          <Link href={item.to} className={styles.navLink}>
+          <Link href={item.to} className={cx(styles.navLink)}>
             <span className={styles.navLabel}>
               <span>{item.label}</span>
               {item.hint ? <span className={styles.navHint}>{item.hint}</span> : null}
