@@ -15,10 +15,10 @@ public interface IUnderwritingReferralService
     /// <remarks>
     /// <para>Operation uw.Referral.request (command; HTTP POST /api/uw/v1/referrals/request).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W3.</para>
+    /// <para>Status: full; fully typed from REQ-UW-004, REQ-UW-082, REQ-UW-085, REQ-UW-086 (BO-UW-05 referral commands and review lock). Wave W3.</para>
     /// <para>Exposure: ui, partner; consumers: CHN, POL.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
-    /// <para>Errors: UW-ERR-NOT-REFERRABLE (422), UW-ERR-LICENCE-INVALID (422), UW-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: UW-ERR-NOT-REFERRABLE (422), UW-ERR-LICENCE-INVALID (422), UW-ERR-STALE (409), UW-ERR-LOCKED-BY-OTHER (409), UW-ERR-HUMAN-DECISION-REQUIRED (422), UW-ERR-REASON-REQUIRED (422), UW-ERR-AUTHORITY-DENIED (403), UW-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Underwriting.Contracts.Api.ReferralRequestResponse> RequestAsync(global::CoreIns.Modules.Underwriting.Contracts.Api.ReferralRequestRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

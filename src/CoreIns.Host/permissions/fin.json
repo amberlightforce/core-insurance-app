@@ -25,6 +25,14 @@
         "fin.Reconciliation.breaks": [ "Staff.Finance", "Platform.Admin" ],
         "fin.Reconciliation.match": [ "Staff.Finance", "Platform.Admin" ],
         "fin.Reconciliation.exchange": [ "Staff.Finance", "Staff.Billing", "Platform.Admin" ],
+        "fin.TaxReturn.list": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.TaxReturn.get": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.TaxReturn.recalculate": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.TaxReturn.addAdjustment": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.TaxReturn.generateFile": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.TaxReturn.transition": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.TaxReturn.recordFiling": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.TaxReturn.requestPayment": [ "Staff.Finance", "Staff.Billing", "Platform.Admin" ],
         "fin.Period.devLock": [ "Staff.Finance", "Platform.Admin" ],
         "fin.ManualJournal.create": [ "Staff.Finance", "Platform.Admin" ],
         "fin.ManualJournal.list": [ "Staff.Finance", "Platform.Admin" ],
@@ -45,6 +53,14 @@
         {
           "Id": "fin-admin-manualjournal-illustrative", "Role": "Platform.Admin", "Type": "FIN.MANUAL_JOURNAL", "Illustrative": true,
           "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "fin-finance-taxreturn-illustrative", "Role": "Staff.Finance", "Type": "FIN.TAX_RETURN", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "10000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "fin-admin-taxreturn-illustrative", "Role": "Platform.Admin", "Type": "FIN.TAX_RETURN", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "10000000.00", "Currency": "EUR" } ]
         }
       ]
     }

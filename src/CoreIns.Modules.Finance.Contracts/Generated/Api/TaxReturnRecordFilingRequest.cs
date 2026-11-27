@@ -4,31 +4,22 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.TaxReturn.recordFiling request. PRD inputs: "tax, period, data"</summary>
+/// <summary>fin.TaxReturn.recordFiling request.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TaxReturnRecordFilingRequest
 {
-    /// <summary>PRD: "tax"</summary>
+    /// <summary>Contract member 'returnId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'returnId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("tax")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Tax { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("returnId")]
+    public required global::System.Guid ReturnId { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    /// <summary>Contract member 'filingReference'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("filingReference")]
+    public required string FilingReference { get; init; }
 
-    /// <summary>PRD: "data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("data")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Data { get; init; }
+    /// <summary>Contract member 'filedOn'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("filedOn")]
+    public required global::CoreIns.SharedKernel.BusinessDate FiledOn { get; init; }
 }

@@ -87,7 +87,24 @@
       "issueType": "SAMPLE_CODE"
     },
     "uw.Referral.request": {
-      "referral": "unspecified"
+      "referral": {
+        "jobRef": "019264e2-6e12-7744-8da7-9b8dfc400037",
+        "lifecycle": "Active",
+        "awaitingInformation": true,
+        "requiredRole": "sample",
+        "referredBy": "sample",
+        "priority": "NORMAL",
+        "slaDue": "2026-10-07T09:00:00Z",
+        "requestedBy": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "lock": {
+          "owner": "sample",
+          "acquiredAt": "2026-10-07T09:00:00Z",
+          "expiresAt": "2026-10-07T09:00:00Z",
+          "heldByMe": true
+        },
+        "recordVersion": 1
+      }
     },
     "uw.RenewalDirection.get": {
       "direction": "unspecified"
@@ -925,37 +942,83 @@
       "limitUnavailableReason": "sample"
     },
     "ReferralReferUpRequest": {
-      "jobRef": "unspecified",
-      "issueIds": [
-        "0192d8d0-8799-77f7-8232-2eca0963f4af"
-      ],
-      "comment": "unspecified",
-      "attachments": "unspecified"
+      "jobRef": "019207c8-aa97-78b2-8ee5-6e08935f36d9",
+      "targetRole": "sample",
+      "comment": "sample",
+      "expectedRecordVersion": 1
     },
     "ReferralReferUpResponse": {
-      "referral": "unspecified"
+      "referral": {
+        "jobRef": "01928c78-f584-7c75-868c-660802ed682d",
+        "lifecycle": "Active",
+        "awaitingInformation": true,
+        "requiredRole": "sample",
+        "referredBy": "sample",
+        "priority": "NORMAL",
+        "slaDue": "2026-10-07T09:00:00Z",
+        "requestedBy": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "lock": {
+          "owner": "sample",
+          "acquiredAt": "2026-10-07T09:00:00Z",
+          "expiresAt": "2026-10-07T09:00:00Z",
+          "heldByMe": true
+        },
+        "recordVersion": 1
+      }
     },
     "ReferralRequestInformationRequest": {
-      "jobRef": "unspecified",
-      "issueIds": [
-        "0192290d-9baf-7746-855c-1dce63a2b452"
-      ],
-      "comment": "unspecified",
-      "attachments": "unspecified"
+      "jobRef": "01922c94-c070-754c-81d8-e9695b0553a9",
+      "comment": "sample",
+      "expectedRecordVersion": 1
     },
     "ReferralRequestInformationResponse": {
-      "referral": "unspecified"
+      "referral": {
+        "jobRef": "01923abd-93e6-7f71-8a48-39031118b4b0",
+        "lifecycle": "Active",
+        "awaitingInformation": true,
+        "requiredRole": "sample",
+        "referredBy": "sample",
+        "priority": "NORMAL",
+        "slaDue": "2026-10-07T09:00:00Z",
+        "requestedBy": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "lock": {
+          "owner": "sample",
+          "acquiredAt": "2026-10-07T09:00:00Z",
+          "expiresAt": "2026-10-07T09:00:00Z",
+          "heldByMe": true
+        },
+        "recordVersion": 1
+      }
     },
     "ReferralRequestRequest": {
-      "jobRef": "unspecified",
+      "jobRef": "019238fb-0c47-70e9-8f3d-fece63d3f8bb",
       "issueIds": [
         "019299af-567b-70dd-8d90-b920363f388d"
       ],
-      "comment": "unspecified",
-      "attachments": "unspecified"
+      "comment": "sample",
+      "expectedRecordVersion": 1
     },
     "ReferralRequestResponse": {
-      "referral": "unspecified"
+      "referral": {
+        "jobRef": "01920c4a-77c1-79b9-82c5-1471f3242439",
+        "lifecycle": "Active",
+        "awaitingInformation": true,
+        "requiredRole": "sample",
+        "referredBy": "sample",
+        "priority": "NORMAL",
+        "slaDue": "2026-10-07T09:00:00Z",
+        "requestedBy": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "lock": {
+          "owner": "sample",
+          "acquiredAt": "2026-10-07T09:00:00Z",
+          "expiresAt": "2026-10-07T09:00:00Z",
+          "heldByMe": true
+        },
+        "recordVersion": 1
+      }
     },
     "ReferralRiskFacts": {
       "evaluatedAt": "2026-10-07T09:00:00Z",
@@ -979,6 +1042,24 @@
         "youngestAgeBand": "UNDER_18",
         "claimsLast5Years": 1
       }
+    },
+    "ReferralState": {
+      "jobRef": "0192a2e7-7454-7d9f-8010-fd29a3fb0647",
+      "lifecycle": "Active",
+      "awaitingInformation": true,
+      "requiredRole": "sample",
+      "referredBy": "sample",
+      "priority": "NORMAL",
+      "slaDue": "2026-10-07T09:00:00Z",
+      "requestedBy": "sample",
+      "requestedAt": "2026-10-07T09:00:00Z",
+      "lock": {
+        "owner": "sample",
+        "acquiredAt": "2026-10-07T09:00:00Z",
+        "expiresAt": "2026-10-07T09:00:00Z",
+        "heldByMe": true
+      },
+      "recordVersion": 1
     },
     "ReferralVehicleFacts": {
       "make": "sample",
@@ -1109,15 +1190,29 @@
       }
     },
     "ReferralWithdrawRequest": {
-      "jobRef": "unspecified",
-      "issueIds": [
-        "01928233-4183-7fe7-888b-92bb57f2d648"
-      ],
-      "comment": "unspecified",
-      "attachments": "unspecified"
+      "jobRef": "01921025-c8f7-70fb-8fea-8b7f24eaeec3",
+      "comment": "sample",
+      "expectedRecordVersion": 1
     },
     "ReferralWithdrawResponse": {
-      "referral": "unspecified"
+      "referral": {
+        "jobRef": "01925c0d-394d-738d-82aa-83a550abf793",
+        "lifecycle": "Active",
+        "awaitingInformation": true,
+        "requiredRole": "sample",
+        "referredBy": "sample",
+        "priority": "NORMAL",
+        "slaDue": "2026-10-07T09:00:00Z",
+        "requestedBy": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "lock": {
+          "owner": "sample",
+          "acquiredAt": "2026-10-07T09:00:00Z",
+          "expiresAt": "2026-10-07T09:00:00Z",
+          "heldByMe": true
+        },
+        "recordVersion": 1
+      }
     },
     "RefusalRegisterExportRequest": {
       "afm": "unspecified",
@@ -1174,17 +1269,61 @@
     "RenewalDirectionSetResponse": {
       "direction": "unspecified"
     },
+    "ReviewLock": {
+      "owner": "sample",
+      "acquiredAt": "2026-10-07T09:00:00Z",
+      "expiresAt": "2026-10-07T09:00:00Z",
+      "heldByMe": true
+    },
     "ReviewLockRequest": {
-      "jobRef": "unspecified"
+      "jobRef": "01927b0b-655e-7c30-8a24-0f88322017ab",
+      "expectedRecordVersion": 1
     },
     "ReviewLockResponse": {
-      "lock": "unspecified"
+      "referral": {
+        "jobRef": "019265d5-0810-7b9b-82c4-3aa0d7c89498",
+        "lifecycle": "Active",
+        "awaitingInformation": true,
+        "requiredRole": "sample",
+        "referredBy": "sample",
+        "priority": "NORMAL",
+        "slaDue": "2026-10-07T09:00:00Z",
+        "requestedBy": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "lock": {
+          "owner": "sample",
+          "acquiredAt": "2026-10-07T09:00:00Z",
+          "expiresAt": "2026-10-07T09:00:00Z",
+          "heldByMe": true
+        },
+        "recordVersion": 1
+      }
     },
     "ReviewReleaseRequest": {
-      "jobRef": "unspecified"
+      "jobRef": "01922924-a2cf-72aa-8ba1-21a3c5235d86",
+      "breakLock": true,
+      "reason": "sample",
+      "expectedRecordVersion": 1
     },
     "ReviewReleaseResponse": {
-      "lock": "unspecified"
+      "referral": {
+        "jobRef": "01922a3f-b3b2-7623-8b2a-4ca5a22e4465",
+        "lifecycle": "Active",
+        "awaitingInformation": true,
+        "requiredRole": "sample",
+        "referredBy": "sample",
+        "priority": "NORMAL",
+        "slaDue": "2026-10-07T09:00:00Z",
+        "requestedBy": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "lock": {
+          "owner": "sample",
+          "acquiredAt": "2026-10-07T09:00:00Z",
+          "expiresAt": "2026-10-07T09:00:00Z",
+          "heldByMe": true
+        },
+        "recordVersion": 1
+      }
     },
     "RuleSetApproveRequest": {
       "ruleSetCode": "sample",

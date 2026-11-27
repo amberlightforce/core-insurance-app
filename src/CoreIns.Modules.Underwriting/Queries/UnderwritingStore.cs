@@ -16,6 +16,12 @@ internal sealed class UnderwritingOptions
 
     /// <summary>Product codes for which the illustrative motor rule set is published (stands in for rule-set authoring and approval).</summary>
     public List<string> SeedProductCodes { get; set; } = ["MOTOR-GR"];
+
+    /// <summary>How long a review lock holds before it expires (a lease; BO-UW-05). Taking the lock again renews it.</summary>
+    public int ReviewLockMinutes { get; set; } = 15;
+
+    /// <summary>Hours from a referral request to its SLA due time until BO-UW-06 derives it from rule-set metadata and the working calendar.</summary>
+    public int ReferralSlaHours { get; set; } = 48;
 }
 
 /// <summary>A stored rule set version as read.</summary>

@@ -2157,37 +2157,33 @@ export interface components {
         ApprovalHistoryPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["ApprovalHistoryItem"][];
         };
-        /** @description uw.Referral.request request. PRD inputs: "job ref, issue ids, comment, attachments" */
+        /** @description uw.Referral.request request: put a job in front of the underwriters, or resume it after information was supplied (BO-UW-05). */
         ReferralRequestRequest: {
-            /** @description PRD: "job ref" */
-            jobRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "issue ids" */
+            /** @description POL job id of the referred job */
+            jobRef: components["schemas"]["Uuid"];
+            /** @description The Open issues the request is about; omit for every Open issue of the job */
             issueIds?: components["schemas"]["Uuid"][];
-            /** @description PRD: "comment" */
-            comment?: components["schemas"]["Unspecified"];
-            /** @description PRD: "attachments" */
-            attachments?: components["schemas"]["Unspecified"];
+            /** @description Why the job is referred */
+            comment: string;
+            /** @description Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check. */
+            expectedRecordVersion?: number;
         };
-        /** @description uw.Referral.request result. PRD outputs: "referral" */
+        /** @description uw.Referral.request result. */
         ReferralRequestResponse: {
-            /** @description PRD: "referral" */
-            referral?: components["schemas"]["Unspecified"];
+            referral: components["schemas"]["ReferralState"];
         };
-        /** @description uw.Referral.withdraw request. PRD inputs: "job ref, issue ids, comment, attachments" */
+        /** @description uw.Referral.withdraw request: take the referral back (the requester or a manager; refused while another underwriter holds the review lock). */
         ReferralWithdrawRequest: {
-            /** @description PRD: "job ref" */
-            jobRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "issue ids" */
-            issueIds?: components["schemas"]["Uuid"][];
-            /** @description PRD: "comment" */
-            comment?: components["schemas"]["Unspecified"];
-            /** @description PRD: "attachments" */
-            attachments?: components["schemas"]["Unspecified"];
+            /** @description POL job id of the referred job */
+            jobRef: components["schemas"]["Uuid"];
+            /** @description Why the referral is withdrawn */
+            comment: string;
+            /** @description Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check. */
+            expectedRecordVersion?: number;
         };
-        /** @description uw.Referral.withdraw result. PRD outputs: "referral" */
+        /** @description uw.Referral.withdraw result. */
         ReferralWithdrawResponse: {
-            /** @description PRD: "referral" */
-            referral?: components["schemas"]["Unspecified"];
+            referral: components["schemas"]["ReferralState"];
         };
         /** @description uw.Referral.get result. PRD outputs: "referral" */
         ReferralGetResponse: {
@@ -2199,6 +2195,38 @@ export interface components {
          * @enum {string}
          */
         ReferralQueueCode: "OPEN" | "APPROVED_TODAY" | "REJECTED" | "DECIDED_BY_ME_TODAY" | "MINE";
+        /** @description The soft review lock of a referred job. It expires at expiresAt (a lease); an expired lock holds nobody. */
+        ReviewLock: {
+            /** @description Actor id of the underwriter holding the review */
+            owner: string;
+            acquiredAt: components["schemas"]["Instant"];
+            expiresAt: components["schemas"]["Instant"];
+            heldByMe: boolean;
+        };
+        /** @enum {string} */
+        ReferralPriorityCode: "NORMAL" | "HIGH";
+        /**
+         * @description Active while the referral is with the underwriters, Withdrawn after uw.Referral.withdraw.
+         * @enum {string}
+         */
+        ReferralLifecycleCode: "Active" | "Withdrawn";
+        /** @description The handling state of a referred job (uw.referral_state, BO-UW-05); decisions stay on the issues. */
+        ReferralState: {
+            jobRef: components["schemas"]["Uuid"];
+            lifecycle: components["schemas"]["ReferralLifecycleCode"];
+            /** @description Information was requested; the SLA clock is paused */
+            awaitingInformation: boolean;
+            /** @description After refer-up, the role whose holders may decide; null means the normal UW.ISSUE_APPROVAL authority applies */
+            requiredRole?: string | null;
+            referredBy?: string | null;
+            priority: components["schemas"]["ReferralPriorityCode"];
+            slaDue?: components["schemas"]["Instant"] | null;
+            requestedBy: string;
+            requestedAt: components["schemas"]["Instant"];
+            /** @description The live review lock; null when nobody holds it or it expired */
+            lock?: components["schemas"]["ReviewLock"] | null;
+            recordVersion: number;
+        };
         /**
          * @description Status of the referred job derived from its issues - Open while an issue waits, else Rejected while a rejection stands, else Approved.
          * @enum {string}
@@ -2310,10 +2338,10 @@ export interface components {
             decidability: components["schemas"]["ReferralDecidability"];
         };
         /**
-         * @description Why the caller cannot decide now. SOD_CREATOR - created the job; SOD_PARTICIPANT - edited or otherwise worked on the job; SOD_PRODUCER - is the job's producer; SOD_EVALUATOR - ran or bound an evaluation of the job; NOT_HUMAN - the actor is not a person (REQ-UW-115); NO_AUTHORITY - UW.ISSUE_APPROVAL for the issue type is refused or refers up; NOT_OPEN - the issue is not Open; NEEDS_REEVALUATION - the issue was raised before decisions recorded the risk facts, so the job must be re-evaluated (run the bind again) before it can be decided (uw.Issue.decide answers UW-ERR-STALE). SOD-UW-02, BR-UW-013.
+         * @description Why the caller cannot decide now. SOD_CREATOR - created the job; SOD_PARTICIPANT - edited or otherwise worked on the job; SOD_PRODUCER - is the job's producer; SOD_EVALUATOR - ran or bound an evaluation of the job; NOT_HUMAN - the actor is not a person (REQ-UW-115); NO_AUTHORITY - UW.ISSUE_APPROVAL for the issue type is refused or refers up; NOT_OPEN - the issue is not Open; NEEDS_REEVALUATION - the issue was raised before decisions recorded the risk facts, so the job must be re-evaluated (run the bind again) before it can be decided (uw.Issue.decide answers UW-ERR-STALE); LOCKED_BY_OTHER - another underwriter holds the review lock; REFERRED_UP - the referral went to a role the caller does not hold. SOD-UW-02, BR-UW-013.
          * @enum {string}
          */
-        DecidabilityReason: "SOD_CREATOR" | "SOD_PARTICIPANT" | "SOD_PRODUCER" | "SOD_EVALUATOR" | "NOT_HUMAN" | "NO_AUTHORITY" | "NOT_OPEN" | "NEEDS_REEVALUATION";
+        DecidabilityReason: "SOD_CREATOR" | "SOD_PARTICIPANT" | "SOD_PRODUCER" | "SOD_EVALUATOR" | "NOT_HUMAN" | "NO_AUTHORITY" | "NOT_OPEN" | "NEEDS_REEVALUATION" | "LOCKED_BY_OTHER" | "REFERRED_UP";
         /** @description The dry UW.ISSUE_APPROVAL check for the issue type (no check record, approval request or audit event is written). A preview, never an authorisation; uw.Issue.decide re-runs the check. */
         AuthorityPreview: {
             /** @description Authority type code (UW.ISSUE_APPROVAL) */
@@ -2341,57 +2369,59 @@ export interface components {
             issue: components["schemas"]["IssueListItem"];
             decidability: components["schemas"]["IssueDecidability"];
         };
-        /** @description uw.Referral.referUp request. PRD inputs: "job ref, issue ids, comment, attachments" */
+        /** @description uw.Referral.referUp request: send the referral to a higher authority (BO-UW-05); only holders of that role may decide it afterwards. */
         ReferralReferUpRequest: {
-            /** @description PRD: "job ref" */
-            jobRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "issue ids" */
-            issueIds?: components["schemas"]["Uuid"][];
-            /** @description PRD: "comment" */
-            comment?: components["schemas"]["Unspecified"];
-            /** @description PRD: "attachments" */
-            attachments?: components["schemas"]["Unspecified"];
+            /** @description POL job id of the referred job */
+            jobRef: components["schemas"]["Uuid"];
+            /** @description The role that may decide from now on; omit to use the referral target the UW.ISSUE_APPROVAL check names for the job's first Open issue */
+            targetRole?: string;
+            /** @description Why the referral goes up */
+            comment: string;
+            /** @description Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check. */
+            expectedRecordVersion?: number;
         };
-        /** @description uw.Referral.referUp result. PRD outputs: "referral" */
+        /** @description uw.Referral.referUp result. */
         ReferralReferUpResponse: {
-            /** @description PRD: "referral" */
-            referral?: components["schemas"]["Unspecified"];
+            referral: components["schemas"]["ReferralState"];
         };
-        /** @description uw.Referral.requestInformation request. PRD inputs: "job ref, issue ids, comment, attachments" */
+        /** @description uw.Referral.requestInformation request: ask the producer or customer for more information; the SLA clock pauses and a Work task is raised (BO-UW-05). */
         ReferralRequestInformationRequest: {
-            /** @description PRD: "job ref" */
-            jobRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "issue ids" */
-            issueIds?: components["schemas"]["Uuid"][];
-            /** @description PRD: "comment" */
-            comment?: components["schemas"]["Unspecified"];
-            /** @description PRD: "attachments" */
-            attachments?: components["schemas"]["Unspecified"];
+            /** @description POL job id of the referred job */
+            jobRef: components["schemas"]["Uuid"];
+            /** @description What information is needed */
+            comment: string;
+            /** @description Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check. */
+            expectedRecordVersion?: number;
         };
-        /** @description uw.Referral.requestInformation result. PRD outputs: "referral" */
+        /** @description uw.Referral.requestInformation result. */
         ReferralRequestInformationResponse: {
-            /** @description PRD: "referral" */
-            referral?: components["schemas"]["Unspecified"];
+            referral: components["schemas"]["ReferralState"];
         };
-        /** @description uw.Review.lock request. PRD inputs: "job ref" */
+        /** @description uw.Review.lock request: take (or renew) the soft review lock of a referred job. */
         ReviewLockRequest: {
-            /** @description PRD: "job ref" */
-            jobRef?: components["schemas"]["Unspecified"];
+            /** @description POL job id of the referred job */
+            jobRef: components["schemas"]["Uuid"];
+            /** @description Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check. */
+            expectedRecordVersion?: number;
         };
-        /** @description uw.Review.lock result. PRD outputs: "lock" */
+        /** @description uw.Review.lock result. */
         ReviewLockResponse: {
-            /** @description PRD: "lock" */
-            lock?: components["schemas"]["Unspecified"];
+            referral: components["schemas"]["ReferralState"];
         };
-        /** @description uw.Review.release request. PRD inputs: "job ref" */
+        /** @description uw.Review.release request: give the lock back, or break it (manager, with a reason). */
         ReviewReleaseRequest: {
-            /** @description PRD: "job ref" */
-            jobRef?: components["schemas"]["Unspecified"];
+            /** @description POL job id of the referred job */
+            jobRef: components["schemas"]["Uuid"];
+            /** @description A manager breaks another underwriter's lock; reason is then mandatory and the break is audited */
+            breakLock?: boolean;
+            /** @description Mandatory with breakLock */
+            reason?: string;
+            /** @description Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check. */
+            expectedRecordVersion?: number;
         };
-        /** @description uw.Review.release result. PRD outputs: "lock" */
+        /** @description uw.Review.release result. */
         ReviewReleaseResponse: {
-            /** @description PRD: "lock" */
-            lock?: components["schemas"]["Unspecified"];
+            referral: components["schemas"]["ReferralState"];
         };
         /** @description uw.Decline.create request. PRD inputs: "job or intake ref, scope, reasons, pairs, wording" */
         DeclineCreateRequest: {

@@ -4,31 +4,21 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.TaxReturn.addAdjustment result. PRD outputs: "return, file, payment status"</summary>
+/// <summary>fin.TaxReturn.addAdjustment result: the return, its file and its payment status.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TaxReturnAddAdjustmentResponse
 {
-    /// <summary>PRD: "return"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'return'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("return")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Return { get; init; }
+    public required global::CoreIns.Modules.Finance.Contracts.Api.TaxReturnView Return { get; init; }
 
-    /// <summary>PRD: "file"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'file'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("file")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? File { get; init; }
+    public global::CoreIns.Modules.Finance.Contracts.Api.TaxReturnFileView? File { get; init; }
 
-    /// <summary>PRD: "payment status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'paymentStatus'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("paymentStatus")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PaymentStatus { get; init; }
+    public string? PaymentStatus { get; init; }
 }

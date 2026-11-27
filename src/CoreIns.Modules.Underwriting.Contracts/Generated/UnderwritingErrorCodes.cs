@@ -10,7 +10,7 @@ public static class UnderwritingErrorCodes
 {
     /// <summary>UW-ERR-AUTHORITY-DENIED (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 25 operation(s): uw.Contingency.applyConsequence, uw.Contingency.create, uw.Contingency.extend, uw.Contingency.list, uw.Contingency.satisfy, uw.Contingency.update, uw.Contingency.waive, uw.Decline.create, uw.Decline.decideReview, uw.Decline.get, uw.Decline.requestReview, uw.DisclosureFinding.decide, ….</para>
+    /// <para>Declared by 30 operation(s): uw.Contingency.applyConsequence, uw.Contingency.create, uw.Contingency.extend, uw.Contingency.list, uw.Contingency.satisfy, uw.Contingency.update, uw.Contingency.waive, uw.Decline.create, uw.Decline.decideReview, uw.Decline.get, uw.Decline.requestReview, uw.DisclosureFinding.decide, ….</para>
     /// </remarks>
     public const string AuthorityDenied = "UW-ERR-AUTHORITY-DENIED";
 
@@ -46,7 +46,7 @@ public static class UnderwritingErrorCodes
 
     /// <summary>UW-ERR-HUMAN-DECISION-REQUIRED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): uw.Issue.decide.</para>
+    /// <para>Declared by 6 operation(s): uw.Issue.decide, uw.Referral.referUp, uw.Referral.request, uw.Referral.requestInformation, uw.Referral.withdraw, uw.Review.lock.</para>
     /// </remarks>
     public const string HumanDecisionRequired = "UW-ERR-HUMAN-DECISION-REQUIRED";
 
@@ -76,7 +76,7 @@ public static class UnderwritingErrorCodes
 
     /// <summary>UW-ERR-LOCKED-BY-OTHER (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): uw.Review.lock, uw.Review.release.</para>
+    /// <para>Declared by 7 operation(s): uw.Issue.decide, uw.Referral.referUp, uw.Referral.request, uw.Referral.requestInformation, uw.Referral.withdraw, uw.Review.lock, uw.Review.release.</para>
     /// </remarks>
     public const string LockedByOther = "UW-ERR-LOCKED-BY-OTHER";
 
@@ -94,7 +94,7 @@ public static class UnderwritingErrorCodes
 
     /// <summary>UW-ERR-NOT-REFERRABLE (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): uw.Referral.get, uw.Referral.list, uw.Referral.referUp, uw.Referral.request, uw.Referral.requestInformation, uw.Referral.withdraw.</para>
+    /// <para>Declared by 8 operation(s): uw.Referral.get, uw.Referral.list, uw.Referral.referUp, uw.Referral.request, uw.Referral.requestInformation, uw.Referral.withdraw, uw.Review.lock, uw.Review.release.</para>
     /// </remarks>
     public const string NotReferrable = "UW-ERR-NOT-REFERRABLE";
 
@@ -130,7 +130,7 @@ public static class UnderwritingErrorCodes
 
     /// <summary>UW-ERR-REASON-REQUIRED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): uw.Decline.create, uw.Decline.decideReview, uw.Decline.get, uw.Decline.requestReview.</para>
+    /// <para>Declared by 9 operation(s): uw.Decline.create, uw.Decline.decideReview, uw.Decline.get, uw.Decline.requestReview, uw.Referral.referUp, uw.Referral.request, uw.Referral.requestInformation, uw.Referral.withdraw, uw.Review.release.</para>
     /// </remarks>
     public const string ReasonRequired = "UW-ERR-REASON-REQUIRED";
 
@@ -172,7 +172,7 @@ public static class UnderwritingErrorCodes
 
     /// <summary>UW-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): uw.Issue.decide.</para>
+    /// <para>Declared by 7 operation(s): uw.Issue.decide, uw.Referral.referUp, uw.Referral.request, uw.Referral.requestInformation, uw.Referral.withdraw, uw.Review.lock, uw.Review.release.</para>
     /// </remarks>
     public const string Stale = "UW-ERR-STALE";
 
