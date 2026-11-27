@@ -1967,6 +1967,8 @@ paths:
       - ui
       x-permission: fin.Earning.run
       x-error-codes:
+      - code: FIN-ERR-PERIOD-LOCKED
+        status: 422
       - code: FIN-ERR-RUN-IN-PROGRESS
         status: 409
       - code: FIN-ERR-IDEMPOTENCY-MISMATCH
@@ -2103,7 +2105,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EarningSimulateRequest'
+              $ref: '#/components/schemas/EarningRunRequest'
       responses:
         '200':
           description: Success
@@ -6939,54 +6941,144 @@ components:
           description: 'PRD: "reversal journal"'
     EarningRunRequest:
       type: object
-      description: 'fin.Earning.run request. PRD inputs: "entity, as-of"'
+      description: 'fin.Earning.run / fin.Earning.simulate request: earn premium up to and including this date (its calendar month is the accounting period the movement is posted in; the legal entity comes from the caller).'
+      required:
+      - asOf
       properties:
-        entity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entity"'
-        as:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "as-of"'
+        asOf:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Earn up to and including this Europe/Athens calendar date; the period of this date must be open.
+    EarningTermResult:
+      type: object
+      description: The earning of one policy term in one book (pro rata temporis by day, TERM_RATIO).
+      required:
+      - policyTermId
+      - book
+      - writtenPremium
+      - earnedToDate
+      - previouslyEarned
+      - delta
+      - daysEarned
+      - termDays
+      properties:
+        policyTermId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumber:
+          type: string
+        book:
+          type: string
+        termStart:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        termEnd:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Exclusive end of the term.
+        writtenPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Net written premium of the term (written less credits) posted so far.
+        earnedToDate:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Premium earned up to the as-of date after this run.
+        previouslyEarned:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Premium already earned before this run.
+        delta:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Earned in this run (negative when a credit made the term over-earned).
+        daysEarned:
+          type: integer
+        termDays:
+          type: integer
+    EarningRunView:
+      type: object
+      description: One earning run (or a simulation of one) for an accounting period.
+      required:
+      - period
+      - asOf
+      - state
+      - simulated
+      - policiesProcessed
+      - termsSkipped
+      - journalIds
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Run id; absent for a simulation.
+        period:
+          type: string
+          description: Accounting period, yyyy-MM.
+        asOf:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        state:
+          type: string
+          enum:
+          - DONE
+          - SIMULATED
+        simulated:
+          type: boolean
+        startedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        finishedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        policiesProcessed:
+          type: integer
+          description: Policy terms earned (with written premium and known term dates).
+        termsSkipped:
+          type: integer
+          description: Terms with written premium but no term dates, or not in the functional currency; not earned.
+        earnedToDate:
+          type: array
+          description: Total premium earned to date per currency after this run.
+          items:
+            $ref: ../events/common.schema.json#/$defs/Money
+        postedDelta:
+          type: array
+          description: Net movement posted (or that would be posted) by this run per currency.
+          items:
+            $ref: ../events/common.schema.json#/$defs/Money
+        journalIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
     EarningRunResponse:
       type: object
-      description: 'fin.Earning.run result. PRD outputs: "run, results"'
+      description: 'fin.Earning.run result: the run and its per-term results (at most 200; fin.Earning.result pages them).'
+      required:
+      - run
+      - results
+      - resultsTruncated
       properties:
         run:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "run"'
+          $ref: '#/components/schemas/EarningRunView'
         results:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "results"'
+          type: array
+          items:
+            $ref: '#/components/schemas/EarningTermResult'
+        resultsTruncated:
+          type: boolean
     EarningStatusResponse:
       type: object
-      description: 'fin.Earning.status result. PRD outputs: "run, results"'
+      description: 'fin.Earning.status result: the latest completed earning run of the legal entity; absent until a first run.'
       properties:
         run:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "run"'
-        results:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "results"'
-    EarningSimulateRequest:
-      type: object
-      description: 'fin.Earning.simulate request. PRD inputs: "entity, as-of"'
-      properties:
-        entity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entity"'
-        as:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "as-of"'
+          oneOf:
+          - $ref: '#/components/schemas/EarningRunView'
+          - type: 'null'
     EarningSimulateResponse:
       type: object
-      description: 'fin.Earning.simulate result. PRD outputs: "run, results"'
+      description: 'fin.Earning.simulate result: what a run would earn and post; nothing is written.'
+      required:
+      - run
+      - results
+      - resultsTruncated
       properties:
         run:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "run"'
+          $ref: '#/components/schemas/EarningRunView'
         results:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "results"'
+          type: array
+          items:
+            $ref: '#/components/schemas/EarningTermResult'
+        resultsTruncated:
+          type: boolean
     EarningResultRequest:
       type: object
       description: 'fin.Earning.result request. PRD inputs: "entity, as-of"'

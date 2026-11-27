@@ -122,17 +122,28 @@ export interface ManualJournalDecideRequest {
   reason?: string;
 }
 
-/** fin.Earning.status: every member is optional until the backend defines the run record. */
-export interface EarningRun {
-  id?: string;
-  state?: string;
-  asOf?: string;
-  startedAt?: string;
-  finishedAt?: string;
-  policiesProcessed?: number;
+export interface EarningMoney {
+  amount: string;
+  currency: string;
 }
 
+/** An earning run (fin.Earning.status, fin.Earning.run): amounts are per currency. */
+export interface EarningRun {
+  id?: string;
+  period: string;
+  asOf: string;
+  state: 'DONE' | 'SIMULATED';
+  simulated: boolean;
+  startedAt?: string;
+  finishedAt?: string;
+  policiesProcessed: number;
+  termsSkipped: number;
+  earnedToDate?: EarningMoney[];
+  postedDelta?: EarningMoney[];
+  journalIds: string[];
+}
+
+/** fin.Earning.status: `run` is absent until the first run. */
 export interface EarningStatus {
   run?: EarningRun | null;
-  results?: unknown;
 }

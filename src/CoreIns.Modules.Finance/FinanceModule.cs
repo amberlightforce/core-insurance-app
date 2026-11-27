@@ -121,6 +121,11 @@ public static class FinanceModule
 
         Commands.PeriodCloseRegistration.AddPeriodClose(services);
 
+        // BO-FIN-06a: the earning engine; its run gates the EARNING_RUN close task.
+        services.AddScoped<Services.EarningEngine>();
+        services.AddScoped<Domain.ICloseTaskGate, Commands.EarningRunGate>();
+        services.AddCommand<Commands.RunEarning, CoreIns.Modules.Finance.Contracts.Api.EarningRunResponse, Commands.RunEarningHandler>(CommandDescriptor.For("fin.Earning.run"));
+
         services.AddOptions<FinanceOptions>().Bind(configuration.GetSection(FinanceOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddErrorDefinitions(Errors);

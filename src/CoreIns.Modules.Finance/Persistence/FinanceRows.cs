@@ -166,6 +166,11 @@ internal sealed class PolicyContextRow
 
     public bool ChargeTypesLoaded { get; set; }
 
+    /// <summary>Term dates (Europe/Athens calendar, end exclusive) from POL PolicyBound; null until known. The earning engine needs them (BO-FIN-06a).</summary>
+    public BusinessDate? TermStart { get; set; }
+
+    public BusinessDate? TermEnd { get; set; }
+
     public Guid SourceEventId { get; set; }
 
     public long AggregateSequence { get; set; }

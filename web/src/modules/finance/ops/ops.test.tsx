@@ -444,6 +444,54 @@ describe('EarningRunPage', () => {
   });
 });
 
+describe('EarningRunPage with a run', () => {
+  it('shows the latest run and posts the as-of date as asOf', async () => {
+    let posted: unknown;
+    mockApi([
+      {
+        method: 'GET',
+        path: '/api/fin/v1/earning/status',
+        respond: () => ({
+          body: {
+            run: {
+              id: '0192f3a0-0000-7000-8000-000000000001',
+              period: '2026-11',
+              asOf: '2026-11-30',
+              state: 'DONE',
+              simulated: false,
+              policiesProcessed: 12,
+              termsSkipped: 1,
+              earnedToDate: [{ amount: '1234.50', currency: 'EUR' }],
+              postedDelta: [{ amount: '100.00', currency: 'EUR' }],
+              journalIds: [],
+            },
+          },
+        }),
+      },
+      {
+        method: 'POST',
+        path: '/api/fin/v1/earning/run',
+        respond: ({ body }) => {
+          posted = body;
+          return { body: { run: {}, results: [], resultsTruncated: false } };
+        },
+      },
+    ]);
+    const { user } = renderScreen(<EarningRunPage />, {
+      path: '/finance/earning',
+      url: '/finance/earning',
+    });
+    expect(await screen.findByText('2026-11')).toBeInTheDocument();
+    expect(screen.getByText('12')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Εκτέλεση κατάκτησης' }));
+    const dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Εκτέλεση κατάκτησης' }));
+    await waitFor(() => {
+      expect(posted).toMatchObject({ asOf: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) });
+    });
+  });
+});
+
 describe('FinanceHomePage', () => {
   it('shows the operations screens and the periods to finance roles', async () => {
     mockApi([
