@@ -63,8 +63,6 @@ CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17/movements
 CONTRACT_NOT_SERVED GET /api/fin/v1/levy-returns
 CONTRACT_NOT_SERVED GET /api/fin/v1/levy-returns/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/periods/status
-CONTRACT_NOT_SERVED GET /api/fin/v1/tax-returns
-CONTRACT_NOT_SERVED GET /api/fin/v1/tax-returns/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/written-premium/query
 CONTRACT_NOT_SERVED GET /api/mkt/v1/capabilities/get
 CONTRACT_NOT_SERVED GET /api/mkt/v1/changeover/configuration
@@ -397,12 +395,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/draft
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/preview-impact
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/submit
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/test
-CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/add-adjustment
-CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/generate-file
-CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/recalculate
-CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/record-filing
-CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/request-payment
-CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/transition
 CONTRACT_NOT_SERVED POST /api/mkt/v1/configuration/export
 CONTRACT_NOT_SERVED POST /api/mkt/v1/cross-borders/check
 CONTRACT_NOT_SERVED POST /api/mkt/v1/currencies/convert-fixed

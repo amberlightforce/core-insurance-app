@@ -1725,85 +1725,526 @@
       ]
     },
     "TaxReturnAddAdjustmentRequest": {
-      "tax": "unspecified",
-      "period": "unspecified",
-      "data": "unspecified"
+      "returnId": "019297cd-6093-77b9-86c0-4a88a5f08f27",
+      "amount": "sample",
+      "reason": "sample",
+      "evidenceRef": "sample",
+      "explainsReconciliation": true
     },
     "TaxReturnAddAdjustmentResponse": {
-      "return": "unspecified",
-      "file": "unspecified",
-      "paymentStatus": "unspecified"
+      "return": {
+        "returnId": "01924f81-bfda-788b-8673-ea13c93cf645",
+        "period": "sample",
+        "taxCode": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "0192ac5b-9d2f-7b31-838b-277ed66e69ee",
+        "supersededByReturnId": "0192926e-192c-781b-8bea-7a510080b5ce",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "0192bdea-c701-7937-8720-7439d592b762",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "019209f4-87e5-788f-88f1-80b5739c5253",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
+    },
+    "TaxReturnAdjustmentView": {
+      "adjustmentId": "0192d3f3-096a-725b-8f76-b4f84c1d0b77",
+      "amount": "sample",
+      "reason": "sample",
+      "evidenceRef": "sample",
+      "explainsReconciliation": true,
+      "createdBy": "sample",
+      "createdAt": "2026-10-07T09:00:00Z"
+    },
+    "TaxReturnFileView": {
+      "fileName": "sample",
+      "fileHash": "sample",
+      "contentType": "sample",
+      "content": "sample"
     },
     "TaxReturnGenerateFileRequest": {
-      "tax": "unspecified",
-      "period": "unspecified",
-      "data": "unspecified"
+      "returnId": "0192a179-9e0b-7b83-8781-184505f9dc8d"
     },
     "TaxReturnGenerateFileResponse": {
-      "return": "unspecified",
-      "file": "unspecified",
-      "paymentStatus": "unspecified"
+      "return": {
+        "returnId": "0192c744-cf95-7782-8300-4fd3bdab9d0a",
+        "period": "sample",
+        "taxCode": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "0192183f-6a13-77f5-874a-a48119398e5c",
+        "supersededByReturnId": "0192dbb8-7fcc-7bd6-843f-e9b397e0c82e",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "0192cffe-3343-7863-8bfd-ea5f2bff0c10",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "0192172d-dcc8-777e-89e0-c5512a03b85e",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
     },
     "TaxReturnGetResponse": {
-      "return": "unspecified",
-      "file": "unspecified",
-      "paymentStatus": "unspecified"
+      "return": {
+        "returnId": "0192e742-2851-7930-81f4-a83ec2df9fff",
+        "period": "sample",
+        "taxCode": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "01925237-27f7-7bfb-8573-1173595e45fc",
+        "supersededByReturnId": "0192ee41-ee95-7147-8d25-c7781e52a328",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "01924e51-dbad-7994-8697-4ecf9aeca28c",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "0192d6da-6860-7c2d-8580-3c30714ed964",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
     },
     "TaxReturnListItem": {
-      "return": "unspecified",
-      "file": "unspecified",
-      "paymentStatus": "unspecified"
+      "returnId": "01920d74-7fb0-7a2f-82a7-d3aed229c457",
+      "period": "sample",
+      "taxCode": "sample",
+      "versionNo": 1,
+      "status": "DRAFT",
+      "currency": "sample",
+      "netPayable": "sample",
+      "reconciliation": "MATCHED",
+      "provisional": true,
+      "supersededByReturnId": "019255af-6d4c-7124-8683-d338e85434c7",
+      "fileName": "sample",
+      "filingReference": "sample",
+      "filedAt": "2026-10-07T09:00:00Z",
+      "paymentStatus": "sample"
     },
     "TaxReturnListPage": {
       "items": [
         {
-          "return": "unspecified",
-          "file": "unspecified",
-          "paymentStatus": "unspecified"
+          "returnId": "019281fd-e912-7660-875b-9667755d437e",
+          "period": "sample",
+          "taxCode": "sample",
+          "versionNo": 1,
+          "status": "DRAFT",
+          "currency": "sample",
+          "netPayable": "sample",
+          "reconciliation": "MATCHED",
+          "provisional": true,
+          "supersededByReturnId": "0192e05c-ce20-720c-841e-98eed85ea9d5",
+          "fileName": "sample",
+          "filingReference": "sample",
+          "filedAt": "2026-10-07T09:00:00Z",
+          "paymentStatus": "sample"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "TaxReturnRecalculateRequest": {
-      "tax": "unspecified",
-      "period": "unspecified",
-      "data": "unspecified"
+      "period": "sample",
+      "taxCode": "sample"
     },
     "TaxReturnRecalculateResponse": {
-      "return": "unspecified",
-      "file": "unspecified",
-      "paymentStatus": "unspecified"
+      "return": {
+        "returnId": "0192b227-6db2-7dee-83f5-173cfde0ab34",
+        "period": "sample",
+        "taxCode": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "01926477-0303-7391-8e21-9f900258fc59",
+        "supersededByReturnId": "019265c4-5faf-73d8-82c2-a999080050b4",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "01927663-fa20-74ed-85c4-d21ee56f8c1a",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "01926219-6213-779f-8e6c-2cbf12b2636e",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
     },
     "TaxReturnRecordFilingRequest": {
-      "tax": "unspecified",
-      "period": "unspecified",
-      "data": "unspecified"
+      "returnId": "0192e06c-9ec3-76c4-84e0-854594849a2d",
+      "filingReference": "sample",
+      "filedOn": "2026-10-07"
     },
     "TaxReturnRecordFilingResponse": {
-      "return": "unspecified",
-      "file": "unspecified",
-      "paymentStatus": "unspecified"
+      "return": {
+        "returnId": "01927389-4b58-7c67-8d4e-78dea79e07ee",
+        "period": "sample",
+        "taxCode": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "0192b336-579f-7b58-8f3f-a008db342f98",
+        "supersededByReturnId": "0192bd7f-4465-7266-86be-4a221451d8ad",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "0192caec-22e8-7e6f-886e-3a6b0de305e4",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "0192e1fe-d1d0-7ea9-88aa-a8b3f6c1cbd6",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
     },
     "TaxReturnRequestPaymentRequest": {
-      "tax": "unspecified",
-      "period": "unspecified",
-      "data": "unspecified"
+      "returnId": "01923841-ac19-734a-8c6a-a04f9d824682",
+      "payeePartyId": "01920436-0894-782b-8cf3-f5220f49890b",
+      "payeeAccountId": "01924c2a-f39c-7271-87f8-44c1801b9793",
+      "requestedValueDate": "2026-10-07"
     },
     "TaxReturnRequestPaymentResponse": {
-      "return": "unspecified",
-      "file": "unspecified",
-      "paymentStatus": "unspecified"
+      "return": {
+        "returnId": "019206be-00d5-7c22-8c77-e7ff076bbfc9",
+        "period": "sample",
+        "taxCode": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "01922d22-e444-7dcd-880d-19a04d54ec49",
+        "supersededByReturnId": "0192916e-576b-7841-8cfa-319fb29eb636",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "01920c34-16b9-777f-8d2b-083f23d5fe2d",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "0192c65a-8db9-794e-8fc6-ba373d2b0eff",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
     },
     "TaxReturnTransitionRequest": {
-      "tax": "unspecified",
-      "period": "unspecified",
-      "data": "unspecified"
+      "returnId": "01928911-0c57-7487-8870-01429cbc241b",
+      "action": "SUBMIT",
+      "comment": "sample"
     },
     "TaxReturnTransitionResponse": {
-      "return": "unspecified",
-      "file": "unspecified",
-      "paymentStatus": "unspecified"
+      "return": {
+        "returnId": "019226b3-a916-7377-850d-452499572de0",
+        "period": "sample",
+        "taxCode": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "019271c3-bbd8-7913-8862-d2f15a9d2199",
+        "supersededByReturnId": "01927522-fc4c-7596-83fa-10a58680649e",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "0192263f-b9c5-7a6c-80c1-36f1eab58f6e",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "01925e8f-3994-72ef-8e78-190b45fea34b",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
+    },
+    "TaxReturnView": {
+      "returnId": "01924e9f-6e97-70cb-86d2-993d12bb0564",
+      "period": "sample",
+      "taxCode": "sample",
+      "versionNo": 1,
+      "supersedesReturnId": "01920fc8-909a-7b35-84fb-a936e524a464",
+      "supersededByReturnId": "01921867-bb4d-7a8b-8cad-ccfcd4d6989d",
+      "status": "DRAFT",
+      "currency": "sample",
+      "ledgerAmount": "sample",
+      "bilAmount": "sample",
+      "adjustmentsTotal": "sample",
+      "netPayable": "sample",
+      "entryCount": 1,
+      "reconciliation": "MATCHED",
+      "reconDifference": "sample",
+      "reconExplanation": "sample",
+      "legalStatus": "sample",
+      "provisional": true,
+      "contentHash": "sample",
+      "fileName": "sample",
+      "fileHash": "sample",
+      "approvalRequestId": "019268b0-e3e6-7a7d-871d-4e92f9d8a4d5",
+      "submittedBy": "sample",
+      "submittedAt": "2026-10-07T09:00:00Z",
+      "reviewedBy": "sample",
+      "reviewedAt": "2026-10-07T09:00:00Z",
+      "filedBy": "sample",
+      "filedAt": "2026-10-07T09:00:00Z",
+      "filedOn": "2026-10-07",
+      "filingReference": "sample",
+      "disbursementId": "sample",
+      "paymentStatus": "sample",
+      "createdBy": "sample",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "adjustments": [
+        {
+          "adjustmentId": "0192e0ef-e5c4-7dae-84f6-dd306b5f5526",
+          "amount": "sample",
+          "reason": "sample",
+          "evidenceRef": "sample",
+          "explainsReconciliation": true,
+          "createdBy": "sample",
+          "createdAt": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "WrittenPremiumQueryItem": {
       "totals": "unspecified",
