@@ -34,6 +34,53 @@ internal sealed class FiscalDocumentsController : ControllerBase
         CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new RequestFiscalDocument(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
+    /// <summary>cmp.FiscalDocument.resubmit: send a Rejected or Pending document to the channel again (idempotent).</summary>
+    [HttpPost("resubmit")]
+    [Authorize(Policy = "cmp.FiscalDocument.resubmit")]
+    public async Task<IResult> ResubmitAsync(
+        [FromBody] FiscalDocumentResubmitRequest request,
+        [FromServices] ICommandHandler<ResubmitFiscalDocument, FiscalDocumentResubmitResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ResubmitFiscalDocument(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>cmp.FiscalDocument.bulkResubmit: resubmit up to 50 documents with a per-item result.</summary>
+    [HttpPost("bulk-resubmit")]
+    [Authorize(Policy = "cmp.FiscalDocument.bulkResubmit")]
+    public async Task<IResult> BulkResubmitAsync(
+        [FromBody] FiscalDocumentBulkResubmitRequest request,
+        [FromServices] ICommandHandler<BulkResubmitFiscalDocuments, FiscalDocumentBulkResubmitResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new BulkResubmitFiscalDocuments(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>cmp.FiscalDocument.cancel: cancel a document (a linked CANCELLATION document for a registered one).</summary>
+    [HttpPost("cancel")]
+    [Authorize(Policy = "cmp.FiscalDocument.cancel")]
+    public async Task<IResult> CancelAsync(
+        [FromBody] FiscalDocumentCancelRequest request,
+        [FromServices] ICommandHandler<CancelFiscalDocument, FiscalDocumentCancelResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new CancelFiscalDocument(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>cmp.FiscalDocument.correct: credit a registered document and issue the corrected replacement.</summary>
+    [HttpPost("correct")]
+    [Authorize(Policy = "cmp.FiscalDocument.correct")]
+    public async Task<IResult> CorrectAsync(
+        [FromBody] FiscalDocumentCorrectRequest request,
+        [FromServices] ICommandHandler<CorrectFiscalDocument, FiscalDocumentCorrectResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new CorrectFiscalDocument(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>cmp.FiscalDocument.qrPayload: MARK, UID and the QR text of a document.</summary>
+    [HttpGet("qr-payload")]
+    [Authorize(Policy = "cmp.FiscalDocument.qrPayload")]
+    public async Task<IResult> QrPayloadAsync([FromQuery] Guid id, [FromServices] FiscalDocumentOperations operations, CancellationToken cancellationToken)
+    {
+        var found = await operations.QrPayloadAsync(id, cancellationToken).ConfigureAwait(false);
+        return found is null
+            ? HttpResults.Problem(DomainError.Of(ModuleCode.CMP, "NOT-FOUND", "The fiscal document does not exist in your legal entity."), HttpContext)
+            : Results.Ok(found);
+    }
+
     /// <summary>cmp.FiscalDocument.listBySource: the legal entity's fiscal documents, optionally for one source.</summary>
     [HttpGet("list-by-source")]
     [Authorize(Policy = "cmp.FiscalDocument.listBySource")]

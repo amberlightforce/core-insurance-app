@@ -4807,7 +4807,7 @@ paths:
       x-wave: W3
       x-work-packages:
       - W3-UW-01
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
@@ -4878,7 +4878,7 @@ paths:
       x-wave: W3
       x-work-packages:
       - W3-UW-01
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
@@ -4949,7 +4949,7 @@ paths:
       x-wave: W3
       x-work-packages:
       - W3-UW-01
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 11
       x-operation-kind: command
@@ -5182,6 +5182,19 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: q
+        in: query
+        required: false
+        description: Text in the code or a name (case insensitive).
+        schema:
+          type: string
+          maxLength: 100
+      - name: activeOnly
+        in: query
+        required: false
+        description: Only active issue types.
+        schema:
+          type: boolean
       responses:
         '200':
           description: Success
@@ -7720,6 +7733,34 @@ components:
           type: string
         createdBy:
           type: string
+        recordVersion:
+          type: integer
+          description: Incremented on every change of the stored version; send it back on edit for optimistic concurrency.
+        submittedBy:
+          type:
+          - string
+          - 'null'
+        submittedAt:
+          type:
+          - string
+          - 'null'
+        approvalRequestId:
+          type:
+          - string
+          - 'null'
+          description: The plt.Approval request of the release (UW.RULESET_APPROVAL).
+        decidedBy:
+          type:
+          - string
+          - 'null'
+        decidedAt:
+          type:
+          - string
+          - 'null'
+        decisionReason:
+          type:
+          - string
+          - 'null'
         definition:
           $ref: '#/components/schemas/RuleSetDefinition'
       required:
@@ -7943,6 +7984,9 @@ components:
         version:
           type: string
           maxLength: 16
+        recordVersion:
+          type: integer
+          description: Optimistic concurrency, the recordVersion the editor read; a newer stored version is refused with UW-ERR-STALE (409). Omit to skip the check.
         patches:
           type: array
           minItems: 1
@@ -8055,46 +8099,83 @@ components:
       - warnings
     RuleSetSubmitRequest:
       type: object
-      description: 'uw.RuleSet.submit request. PRD inputs: "per operation"'
-      x-status: minimal
-    RuleSetSubmitResponse:
-      type: object
-      description: 'uw.RuleSet.submit result. PRD outputs: "versions, reports"'
+      description: uw.RuleSet.submit request, a Draft that validates (compiles, every rule covered by a passing test case) goes to maker-checker approval (UW.RULESET_APPROVAL).
       properties:
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
-        reports:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reports"'
+        ruleSetCode:
+          type: string
+          maxLength: 64
+        version:
+          type: string
+          maxLength: 16
+        reason:
+          type: string
+          maxLength: 512
+          description: Why the change is released, shown to the approver.
+      required:
+      - ruleSetCode
+      - version
+    RuleSetReleaseResponse:
+      type: object
+      description: The version after submit, approve or schedule.
+      properties:
+        version:
+          $ref: '#/components/schemas/RuleSetVersionDetail'
+        approvalRequestId:
+          type:
+          - string
+          - 'null'
+        inEffect:
+          type:
+          - boolean
+          - 'null'
+          description: After schedule, true when the version is in effect on the business date, false when it takes effect later.
+      required:
+      - version
+    RuleSetSubmitResponse:
+      $ref: '#/components/schemas/RuleSetReleaseResponse'
     RuleSetApproveRequest:
       type: object
-      description: 'uw.RuleSet.approve request. PRD inputs: "per operation"'
-      x-status: minimal
-    RuleSetApproveResponse:
-      type: object
-      description: 'uw.RuleSet.approve result. PRD outputs: "versions, reports"'
+      description: uw.RuleSet.approve request, the checker decides a Submitted version (a different person from the submitter; needs the UW.RULESET_APPROVAL authority).
       properties:
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
-        reports:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reports"'
+        ruleSetCode:
+          type: string
+          maxLength: 64
+        version:
+          type: string
+          maxLength: 16
+        decision:
+          type: string
+          enum:
+          - Approve
+          - Reject
+          description: Defaults to Approve. A rejected version goes back to Draft.
+        reason:
+          type: string
+          maxLength: 512
+          description: Required on Reject.
+      required:
+      - ruleSetCode
+      - version
+    RuleSetApproveResponse:
+      $ref: '#/components/schemas/RuleSetReleaseResponse'
     RuleSetScheduleRequest:
       type: object
-      description: 'uw.RuleSet.schedule request. PRD inputs: "per operation"'
-      x-status: minimal
-    RuleSetScheduleResponse:
-      type: object
-      description: 'uw.RuleSet.schedule result. PRD outputs: "versions, reports"'
+      description: uw.RuleSet.schedule request, activates an Approved version from a date (never in the past); an active version is never changed, a later date supersedes it from then on.
       properties:
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
-        reports:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reports"'
+        ruleSetCode:
+          type: string
+          maxLength: 64
+        version:
+          type: string
+          maxLength: 16
+        effectiveFrom:
+          type: string
+          description: yyyy-MM-dd, the business date or later; defaults to today.
+      required:
+      - ruleSetCode
+      - version
+    RuleSetScheduleResponse:
+      $ref: '#/components/schemas/RuleSetReleaseResponse'
     RuleSetExportDocument:
       type: object
       description: The portable rule-set document (format coreins.uw.rule-set/1). definitionHash is stable over export and import.
@@ -8128,13 +8209,53 @@ components:
       - document
     RuleSetImportResponse:
       $ref: '#/components/schemas/RuleSetAuthoringResponse'
-    IssueTypeSearchItem:
+    IssueTypeItem:
       type: object
-      description: 'uw.IssueType.search result. PRD outputs: "types"'
+      description: One issue type of the catalogue.
       properties:
-        types:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "types"'
+        code:
+          type: string
+        nameEl:
+          type: string
+        nameEn:
+          type: string
+        severity:
+          type: string
+          enum:
+          - REFER
+          - DECLINE
+        defaultLane:
+          type: string
+          enum:
+          - STRAIGHT_THROUGH
+          - ASSISTED
+          - EXPERT
+        blockingPoint:
+          type: string
+          enum:
+          - PRE_QUOTE
+          - PRE_BIND
+          - PRE_ISSUE
+          - NON_BLOCKING
+        active:
+          type: boolean
+        recordVersion:
+          type: integer
+        updatedAt:
+          type: string
+        updatedBy:
+          type: string
+      required:
+      - code
+      - nameEl
+      - nameEn
+      - severity
+      - defaultLane
+      - blockingPoint
+      - active
+      - recordVersion
+    IssueTypeSearchItem:
+      $ref: '#/components/schemas/IssueTypeItem'
     IssueTypeSearchPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -8144,34 +8265,56 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/IssueTypeSearchItem'
-      description: Page of uw.IssueType.search results (cursor pagination, contract §3.5.5)
+      description: Page of uw.IssueType.search results (cursor pagination, contract §3.5.5), ordered by code.
     IssueTypeGetResponse:
-      type: object
-      description: 'uw.IssueType.get result. PRD outputs: "types"'
-      properties:
-        types:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "types"'
+      $ref: '#/components/schemas/IssueTypeItem'
     IssueTypeUpsertRequest:
       type: object
-      description: 'uw.IssueType.upsert request. PRD inputs: "name, description, code"'
+      description: uw.IssueType.upsert request, creates the issue type or changes it (the code is its identity).
       properties:
-        name:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "name"'
-        description:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "description"'
         code:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "code"'
+          type: string
+          maxLength: 64
+          description: Capitals, digits and underscore (2 to 64 characters).
+        nameEl:
+          type: string
+          maxLength: 200
+        nameEn:
+          type: string
+          maxLength: 200
+        severity:
+          type: string
+          enum:
+          - REFER
+          - DECLINE
+        defaultLane:
+          type: string
+          enum:
+          - STRAIGHT_THROUGH
+          - ASSISTED
+          - EXPERT
+        blockingPoint:
+          type: string
+          enum:
+          - PRE_QUOTE
+          - PRE_BIND
+          - PRE_ISSUE
+          - NON_BLOCKING
+        active:
+          type: boolean
+          description: Defaults to true.
+        recordVersion:
+          type: integer
+          description: When changing an existing type, the recordVersion read (optimistic concurrency, UW-ERR-STALE).
+      required:
+      - code
+      - nameEl
+      - nameEn
+      - severity
+      - defaultLane
+      - blockingPoint
     IssueTypeUpsertResponse:
-      type: object
-      description: 'uw.IssueType.upsert result. PRD outputs: "types"'
-      properties:
-        types:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "types"'
+      $ref: '#/components/schemas/IssueTypeItem'
     DataSubjectExportRequest:
       type: object
       description: 'uw.DataSubject.export request. PRD inputs: "party id, scope"'

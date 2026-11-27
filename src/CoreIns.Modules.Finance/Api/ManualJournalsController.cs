@@ -20,11 +20,13 @@ internal static class ManualJournalPermissions
     public const string List = "fin.ManualJournal.list";
     public const string Get = "fin.ManualJournal.get";
     public const string Withdraw = "fin.ManualJournal.withdraw";
+    public const string Submit = "fin.ManualJournal.submit";
+    public const string Decide = "fin.ManualJournal.decide";
 }
 
 /// <summary>
-/// REST facade of the manual journals (BO-FIN-01a): create a balanced, evidenced DRAFT, list, get and withdraw. Submit and decide
-/// (maker-checker posting) are BO-FIN-01b. A manual journal is a proposal; nothing here writes the ledger.
+/// REST facade of the manual journals (BO-FIN-01a): create a balanced, evidenced DRAFT, list, get, withdraw, submit and decide (BO-FIN-01b: maker-checker
+/// through <c>plt.Approval</c>; an approval posts one sealed MANUAL journal). A manual journal is a proposal until it is POSTED.
 /// </summary>
 [ApiController]
 [Route("api/fin/v1/manual-journals")]
@@ -38,6 +40,18 @@ internal sealed class ManualJournalsController : ControllerBase
         var result = await handler.HandleAsync(new CreateManualJournal(request), cancellationToken).ConfigureAwait(false);
         return result.IsSuccess ? Results.Json(result.Value, statusCode: StatusCodes.Status201Created) : result.ToHttpResult(HttpContext);
     }
+
+    /// <summary>fin.ManualJournal.submit: the maker sends a DRAFT for approval.</summary>
+    [HttpPost("submit")]
+    [Authorize(Policy = ManualJournalPermissions.Submit)]
+    public async Task<IResult> SubmitAsync([FromBody] ManualJournalSubmitInput request, [FromServices] ICommandHandler<SubmitManualJournal, ManualJournalEnvelope> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new SubmitManualJournal(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>fin.ManualJournal.decide: a checker approves (posting the journal) or rejects a SUBMITTED journal.</summary>
+    [HttpPost("decide")]
+    [Authorize(Policy = ManualJournalPermissions.Decide)]
+    public async Task<IResult> DecideAsync([FromBody] ManualJournalDecideInput request, [FromServices] ICommandHandler<DecideManualJournal, ManualJournalEnvelope> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new DecideManualJournal(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
     /// <summary>fin.ManualJournal.withdraw: the maker takes a DRAFT or SUBMITTED journal back.</summary>
     [HttpPost("withdraw")]

@@ -2390,83 +2390,103 @@ export interface components {
         IntakeExceptionRejectResponse: {
             outcomes: components["schemas"]["IntakeExceptionOutcome"][];
         };
-        /** @description fin.ManualJournal.create request. PRD inputs: "template, lines, evidence" */
+        /** @description The evidence of a manual journal, a document or ticket reference (REQ-FIN-216) */
+        ManualJournalEvidence: {
+            reference: string;
+        };
+        ManualJournalLineInput: {
+            account: string;
+            /** @enum {string} */
+            side: "DEBIT" | "CREDIT";
+            /** @description Positive decimal with at most two places (invariant format) */
+            amount: string;
+        };
+        ManualJournalLineView: {
+            account: string;
+            /** @enum {string} */
+            side: "DEBIT" | "CREDIT";
+            amount: string;
+        };
+        /** @description A manual journal (maker-checker workflow record; the ledger changes only when it is approved and POSTED) */
+        ManualJournalView: {
+            id: components["schemas"]["Uuid"];
+            /** @description MJ plus six digits */
+            number: string;
+            /** @enum {string} */
+            status: "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED" | "WITHDRAWN" | "POSTED";
+            description: string;
+            book: string;
+            /** Format: date */
+            accountingDate: string;
+            currency: string;
+            lines: components["schemas"]["ManualJournalLineView"][];
+            evidenceRef: string;
+            createdBy: string;
+            submittedBy?: string | null;
+            submittedAt?: string | null;
+            decidedBy?: string | null;
+            decisionReason?: string | null;
+        };
+        /** @description fin.ManualJournal.create request */
         ManualJournalCreateRequest: {
-            /** @description PRD: "template" */
-            template?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "evidence" */
-            evidence?: components["schemas"]["Unspecified"];
+            description: string;
+            book: string;
+            /** Format: date */
+            accountingDate: string;
+            currency: string;
+            lines: components["schemas"]["ManualJournalLineInput"][];
+            evidence: components["schemas"]["ManualJournalEvidence"];
         };
-        /** @description fin.ManualJournal.create result. PRD outputs: "manual journal, posted ids" */
+        /** @description fin.ManualJournal.create result */
         ManualJournalCreateResponse: {
-            /** @description PRD: "manual journal" */
-            manualJournal?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posted ids" */
-            postedIds?: components["schemas"]["Uuid"][];
+            manualJournal: components["schemas"]["ManualJournalView"];
+            /** @description Ids of the sealed journals the approval posted (empty until POSTED) */
+            postedIds: components["schemas"]["Uuid"][];
         };
-        /** @description fin.ManualJournal.submit request. PRD inputs: "template, lines, evidence" */
+        /** @description fin.ManualJournal.submit request: submit a DRAFT journal of the caller for approval */
         ManualJournalSubmitRequest: {
-            /** @description PRD: "template" */
-            template?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "evidence" */
-            evidence?: components["schemas"]["Unspecified"];
+            id: components["schemas"]["Uuid"];
         };
-        /** @description fin.ManualJournal.submit result. PRD outputs: "manual journal, posted ids" */
+        /** @description fin.ManualJournal.submit result */
         ManualJournalSubmitResponse: {
-            /** @description PRD: "manual journal" */
-            manualJournal?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posted ids" */
-            postedIds?: components["schemas"]["Uuid"][];
+            manualJournal: components["schemas"]["ManualJournalView"];
+            /** @description Ids of the sealed journals the approval posted (empty until POSTED) */
+            postedIds: components["schemas"]["Uuid"][];
         };
-        /** @description fin.ManualJournal.withdraw request. PRD inputs: "template, lines, evidence" */
+        /** @description fin.ManualJournal.withdraw request: the maker takes a DRAFT or SUBMITTED journal back */
         ManualJournalWithdrawRequest: {
-            /** @description PRD: "template" */
-            template?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "evidence" */
-            evidence?: components["schemas"]["Unspecified"];
+            id: components["schemas"]["Uuid"];
         };
-        /** @description fin.ManualJournal.withdraw result. PRD outputs: "manual journal, posted ids" */
+        /** @description fin.ManualJournal.withdraw result */
         ManualJournalWithdrawResponse: {
-            /** @description PRD: "manual journal" */
-            manualJournal?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posted ids" */
-            postedIds?: components["schemas"]["Uuid"][];
+            manualJournal: components["schemas"]["ManualJournalView"];
+            /** @description Ids of the sealed journals the approval posted (empty until POSTED) */
+            postedIds: components["schemas"]["Uuid"][];
         };
-        /** @description fin.ManualJournal.decide request. PRD inputs: "template, lines, evidence" */
+        /** @description fin.ManualJournal.decide request: a checker approves (posting the journal) or rejects a SUBMITTED journal */
         ManualJournalDecideRequest: {
-            /** @description PRD: "template" */
-            template?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "evidence" */
-            evidence?: components["schemas"]["Unspecified"];
+            id: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            /** @description Required for a rejection */
+            comment?: string;
         };
-        /** @description fin.ManualJournal.decide result. PRD outputs: "manual journal, posted ids" */
+        /** @description fin.ManualJournal.decide result (a repeated decision returns the current state) */
         ManualJournalDecideResponse: {
-            /** @description PRD: "manual journal" */
-            manualJournal?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posted ids" */
-            postedIds?: components["schemas"]["Uuid"][];
+            manualJournal: components["schemas"]["ManualJournalView"];
+            /** @description Ids of the sealed journals the approval posted (empty until POSTED) */
+            postedIds: components["schemas"]["Uuid"][];
         };
-        /** @description fin.ManualJournal.get result. PRD outputs: "manual journal, posted ids" */
+        /** @description fin.ManualJournal.get result */
         ManualJournalGetResponse: {
-            /** @description PRD: "manual journal" */
-            manualJournal?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posted ids" */
-            postedIds?: components["schemas"]["Uuid"][];
+            manualJournal: components["schemas"]["ManualJournalView"];
+            /** @description Ids of the sealed journals the approval posted (empty until POSTED) */
+            postedIds: components["schemas"]["Uuid"][];
         };
-        /** @description fin.ManualJournal.list result. PRD outputs: "manual journal, posted ids" */
+        /** @description fin.ManualJournal.list result item */
         ManualJournalListItem: {
-            /** @description PRD: "manual journal" */
-            manualJournal?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posted ids" */
-            postedIds?: components["schemas"]["Uuid"][];
+            manualJournal: components["schemas"]["ManualJournalView"];
+            postedIds: components["schemas"]["Uuid"][];
         };
         /** @description Page of fin.ManualJournal.list results (cursor pagination, contract §3.5.5) */
         ManualJournalListPage: components["schemas"]["PageEnvelope"] & {

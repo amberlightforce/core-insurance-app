@@ -22,7 +22,7 @@ import styles from '../../staff/staff.module.css';
 import { useFormat } from '../../staff/useFormat';
 import { useCreateManualJournal } from './api';
 import { lineTotals } from './journalMath';
-import type { ManualJournalSubmitRequest } from './types';
+import type { ManualJournalCreateRequest } from './types';
 
 interface DraftLine {
   key: number;
@@ -85,7 +85,7 @@ export function ManualJournalFormPage() {
   const submit = () => {
     setSubmitted((n) => n + 1);
     if (Object.keys(errors).length > 0) return;
-    const request: ManualJournalSubmitRequest = {
+    const request: ManualJournalCreateRequest = {
       description: description.trim(),
       book: book.trim(),
       accountingDate: date,

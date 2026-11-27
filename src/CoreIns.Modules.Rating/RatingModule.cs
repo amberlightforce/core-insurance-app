@@ -1,4 +1,10 @@
+using CoreIns.Modules.Rating.Authority;
+using CoreIns.Modules.Rating.Commands;
 using CoreIns.Modules.Rating.Contracts;
+using CoreIns.Modules.Rating.Contracts.Api;
+using CoreIns.Platform.Commands;
+using CoreIns.Platform.Approvals;
+using FluentValidation;
 using CoreIns.Modules.Rating.Contracts.Servicing;
 using CoreIns.Modules.Rating.Persistence;
 using CoreIns.Modules.Rating.Services;
@@ -40,6 +46,32 @@ public static class RatingModule
         services.AddScoped<RatingStore>();
         services.AddScoped<RateTableImportService>();
         services.AddScoped<ArtifactQueries>();
+
+        // BO-RAT-06: artefact lifecycle (change set, build, submit, return, schedule, cancel, rollback) with maker-checker (PLT approval RAT.Release, authority RAT.RELEASE).
+        services.AddRatingAuthorityTypes();
+        services.AddOwnerDecidedApprovalType(RatingAuthorityTypes.ReleaseApprovalType);
+        services.AddScoped<ReleaseDecider>();
+        services.AddScoped<IValidator<CreateRatingChangeSet>, CreateRatingChangeSetValidator>();
+        services.AddCommandAuditor<CreateRatingChangeSet, RatingChangeSetCreateResponse, CreateRatingChangeSetAuditor>();
+        services.AddCommand<CreateRatingChangeSet, RatingChangeSetCreateResponse, CreateRatingChangeSetHandler>(CommandDescriptor.For("rat.RatingChangeSet.create"));
+        services.AddScoped<IValidator<BuildRatingArtifact>, BuildRatingArtifactValidator>();
+        services.AddCommandAuditor<BuildRatingArtifact, RatingArtifactBuildResponse, BuildRatingArtifactAuditor>();
+        services.AddCommand<BuildRatingArtifact, RatingArtifactBuildResponse, BuildRatingArtifactHandler>(CommandDescriptor.For("rat.RatingArtifact.build") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<SubmitRatingArtifact>, SubmitRatingArtifactValidator>();
+        services.AddCommandAuditor<SubmitRatingArtifact, RatingArtifactSubmitResponse, SubmitRatingArtifactAuditor>();
+        services.AddCommand<SubmitRatingArtifact, RatingArtifactSubmitResponse, SubmitRatingArtifactHandler>(CommandDescriptor.For("rat.RatingArtifact.submit") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ReturnRatingArtifact>, ReturnRatingArtifactValidator>();
+        services.AddCommandAuditor<ReturnRatingArtifact, RatingArtifactReturnResponse, ReturnRatingArtifactAuditor>();
+        services.AddCommand<ReturnRatingArtifact, RatingArtifactReturnResponse, ReturnRatingArtifactHandler>(CommandDescriptor.For("rat.RatingArtifact.return"));
+        services.AddScoped<IValidator<ScheduleRatingArtifact>, ScheduleRatingArtifactValidator>();
+        services.AddCommandAuditor<ScheduleRatingArtifact, RatingArtifactScheduleResponse, ScheduleRatingArtifactAuditor>();
+        services.AddCommand<ScheduleRatingArtifact, RatingArtifactScheduleResponse, ScheduleRatingArtifactHandler>(CommandDescriptor.For("rat.RatingArtifact.schedule") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<CancelRatingSchedule>, CancelRatingScheduleValidator>();
+        services.AddCommandAuditor<CancelRatingSchedule, RatingArtifactCancelScheduleResponse, CancelRatingScheduleAuditor>();
+        services.AddCommand<CancelRatingSchedule, RatingArtifactCancelScheduleResponse, CancelRatingScheduleHandler>(CommandDescriptor.For("rat.RatingArtifact.cancelSchedule"));
+        services.AddScoped<IValidator<RollbackRatingArtifact>, RollbackRatingArtifactValidator>();
+        services.AddCommandAuditor<RollbackRatingArtifact, RatingArtifactRollbackResponse, RollbackRatingArtifactAuditor>();
+        services.AddCommand<RollbackRatingArtifact, RatingArtifactRollbackResponse, RollbackRatingArtifactHandler>(CommandDescriptor.For("rat.RatingArtifact.rollback"));
         services.AddEventHandler<ProductVersionPublishedV1, ProductVersionFallbackHandler>(
             EventDescriptor.From(ProductVersionPublishedV1.Descriptor), "RAT.ProductVersionPublished.Fallback", ModuleCode.RAT);
 
@@ -88,6 +120,14 @@ public static class RatingModule
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών ή μια εξάρτηση δεν απάντησε.", "The operation belongs to a later work package or a dependency did not answer."),
         ErrorDefinition.For(ModuleCode.RAT, "IMPORT-INVALID", 422, "Ο πίνακας τιμών δεν είναι έγκυρος", "The rate table is not valid")
             .Describe("Το αρχείο ή οι γραμμές δεν περνούν τον έλεγχο τύπων, κελιών ή ζωνών· το μήνυμα κατονομάζει τα σφάλματα.", "The file or rows fail the type, cell or band checks; the message names the errors."),
+        ErrorDefinition.For(ModuleCode.RAT, "RELEASE-STATE", 409, "Το πακέτο τιμολόγησης δεν είναι σε κατάλληλη κατάσταση", "The rating artefact is not in a valid state")
+            .Describe("Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση κυκλοφορίας του πακέτου.", "The action is not allowed in the artefact's current release state."),
+        ErrorDefinition.For(ModuleCode.RAT, "SOD-VIOLATION", 403, "Παραβίαση διαχωρισμού καθηκόντων στην κυκλοφορία πακέτου", "Segregation of duties violated on the artefact release")
+            .Describe("Η έγκριση δεν δεσμεύεται σε αυτό το πακέτο ή δεν ανήκει στην αρμόδια εξουσιοδότηση.", "The approval is not bound to this artefact or not decided under the release authority."),
+        ErrorDefinition.For(ModuleCode.RAT, "EVIDENCE-INCOMPLETE", 422, "Λείπουν τα στοιχεία για το πακέτο τιμολόγησης", "The evidence for the rating artefact is incomplete")
+            .Describe("Ένας πίνακας ή το βασικό πακέτο δεν υπάρχει ή δεν ταιριάζει.", "A table or the base artefact is missing or does not match."),
+        ErrorDefinition.For(ModuleCode.RAT, "DATA-STATUS", 422, "Τα δεδομένα τιμολόγησης δεν είναι εγκεκριμένα", "The rating data is not approved")
+            .Describe("Εκτός νομικής οντότητας δοκιμών απαιτούνται εγκεκριμένα δεδομένα.", "Approved rating data is required outside a test legal entity."),
         ErrorDefinition.For(ModuleCode.RAT, "WORKSHEET-NOT-FOUND", 404, "Δεν βρέθηκε το φύλλο τιμολόγησης", "Worksheet not found")
             .Describe("Το φύλλο δεν υπάρχει στη νομική σας οντότητα.", "The worksheet does not exist in your legal entity."),
     ];

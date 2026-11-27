@@ -3009,6 +3009,15 @@ export interface components {
             testCaseCount?: number;
             createdAt?: string;
             createdBy?: string;
+            /** @description Incremented on every change of the stored version; send it back on edit for optimistic concurrency. */
+            recordVersion?: number;
+            submittedBy?: string | null;
+            submittedAt?: string | null;
+            /** @description The plt.Approval request of the release (UW.RULESET_APPROVAL). */
+            approvalRequestId?: string | null;
+            decidedBy?: string | null;
+            decidedAt?: string | null;
+            decisionReason?: string | null;
             definition: components["schemas"]["RuleSetDefinition"];
         };
         /** @description One validation finding. code is UW-ERR-VALIDATION, UW-ERR-RULE-UNTESTED, UW-ERR-TRANSLATION-MISSING or UW-ERR-RULESET-COMPILE. */
@@ -3081,6 +3090,8 @@ export interface components {
         RuleSetEditRequest: {
             ruleSetCode: string;
             version: string;
+            /** @description Optimistic concurrency, the recordVersion the editor read; a newer stored version is refused with UW-ERR-STALE (409). Omit to skip the check. */
+            recordVersion?: number;
             patches: components["schemas"]["RuleSetEditPatch"][];
         };
         RuleSetEditResponse: components["schemas"]["RuleSetAuthoringResponse"];
@@ -3116,33 +3127,42 @@ export interface components {
             items: components["schemas"]["RuleSetSimulateItem"][];
             warnings: string[];
         };
-        /** @description uw.RuleSet.submit request. PRD inputs: "per operation" */
-        RuleSetSubmitRequest: Record<string, never>;
-        /** @description uw.RuleSet.submit result. PRD outputs: "versions, reports" */
-        RuleSetSubmitResponse: {
-            /** @description PRD: "versions" */
-            versions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reports" */
-            reports?: components["schemas"]["Unspecified"];
+        /** @description uw.RuleSet.submit request, a Draft that validates (compiles, every rule covered by a passing test case) goes to maker-checker approval (UW.RULESET_APPROVAL). */
+        RuleSetSubmitRequest: {
+            ruleSetCode: string;
+            version: string;
+            /** @description Why the change is released, shown to the approver. */
+            reason?: string;
         };
-        /** @description uw.RuleSet.approve request. PRD inputs: "per operation" */
-        RuleSetApproveRequest: Record<string, never>;
-        /** @description uw.RuleSet.approve result. PRD outputs: "versions, reports" */
-        RuleSetApproveResponse: {
-            /** @description PRD: "versions" */
-            versions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reports" */
-            reports?: components["schemas"]["Unspecified"];
+        /** @description The version after submit, approve or schedule. */
+        RuleSetReleaseResponse: {
+            version: components["schemas"]["RuleSetVersionDetail"];
+            approvalRequestId?: string | null;
+            /** @description After schedule, true when the version is in effect on the business date, false when it takes effect later. */
+            inEffect?: boolean | null;
         };
-        /** @description uw.RuleSet.schedule request. PRD inputs: "per operation" */
-        RuleSetScheduleRequest: Record<string, never>;
-        /** @description uw.RuleSet.schedule result. PRD outputs: "versions, reports" */
-        RuleSetScheduleResponse: {
-            /** @description PRD: "versions" */
-            versions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reports" */
-            reports?: components["schemas"]["Unspecified"];
+        RuleSetSubmitResponse: components["schemas"]["RuleSetReleaseResponse"];
+        /** @description uw.RuleSet.approve request, the checker decides a Submitted version (a different person from the submitter; needs the UW.RULESET_APPROVAL authority). */
+        RuleSetApproveRequest: {
+            ruleSetCode: string;
+            version: string;
+            /**
+             * @description Defaults to Approve. A rejected version goes back to Draft.
+             * @enum {string}
+             */
+            decision?: "Approve" | "Reject";
+            /** @description Required on Reject. */
+            reason?: string;
         };
+        RuleSetApproveResponse: components["schemas"]["RuleSetReleaseResponse"];
+        /** @description uw.RuleSet.schedule request, activates an Approved version from a date (never in the past); an active version is never changed, a later date supersedes it from then on. */
+        RuleSetScheduleRequest: {
+            ruleSetCode: string;
+            version: string;
+            /** @description yyyy-MM-dd, the business date or later; defaults to today. */
+            effectiveFrom?: string;
+        };
+        RuleSetScheduleResponse: components["schemas"]["RuleSetReleaseResponse"];
         /** @description The portable rule-set document (format coreins.uw.rule-set/1). definitionHash is stable over export and import. */
         RuleSetExportDocument: {
             format: string;
@@ -3158,34 +3178,46 @@ export interface components {
             document: components["schemas"]["RuleSetExportDocument"];
         };
         RuleSetImportResponse: components["schemas"]["RuleSetAuthoringResponse"];
-        /** @description uw.IssueType.search result. PRD outputs: "types" */
-        IssueTypeSearchItem: {
-            /** @description PRD: "types" */
-            types?: components["schemas"]["Unspecified"];
+        /** @description One issue type of the catalogue. */
+        IssueTypeItem: {
+            code: string;
+            nameEl: string;
+            nameEn: string;
+            /** @enum {string} */
+            severity: "REFER" | "DECLINE";
+            /** @enum {string} */
+            defaultLane: "STRAIGHT_THROUGH" | "ASSISTED" | "EXPERT";
+            /** @enum {string} */
+            blockingPoint: "PRE_QUOTE" | "PRE_BIND" | "PRE_ISSUE" | "NON_BLOCKING";
+            active: boolean;
+            recordVersion: number;
+            updatedAt?: string;
+            updatedBy?: string;
         };
-        /** @description Page of uw.IssueType.search results (cursor pagination, contract §3.5.5) */
+        IssueTypeSearchItem: components["schemas"]["IssueTypeItem"];
+        /** @description Page of uw.IssueType.search results (cursor pagination, contract §3.5.5), ordered by code. */
         IssueTypeSearchPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["IssueTypeSearchItem"][];
         };
-        /** @description uw.IssueType.get result. PRD outputs: "types" */
-        IssueTypeGetResponse: {
-            /** @description PRD: "types" */
-            types?: components["schemas"]["Unspecified"];
-        };
-        /** @description uw.IssueType.upsert request. PRD inputs: "name, description, code" */
+        IssueTypeGetResponse: components["schemas"]["IssueTypeItem"];
+        /** @description uw.IssueType.upsert request, creates the issue type or changes it (the code is its identity). */
         IssueTypeUpsertRequest: {
-            /** @description PRD: "name" */
-            name?: components["schemas"]["Unspecified"];
-            /** @description PRD: "description" */
-            description?: components["schemas"]["Unspecified"];
-            /** @description PRD: "code" */
-            code?: components["schemas"]["Unspecified"];
+            /** @description Capitals, digits and underscore (2 to 64 characters). */
+            code: string;
+            nameEl: string;
+            nameEn: string;
+            /** @enum {string} */
+            severity: "REFER" | "DECLINE";
+            /** @enum {string} */
+            defaultLane: "STRAIGHT_THROUGH" | "ASSISTED" | "EXPERT";
+            /** @enum {string} */
+            blockingPoint: "PRE_QUOTE" | "PRE_BIND" | "PRE_ISSUE" | "NON_BLOCKING";
+            /** @description Defaults to true. */
+            active?: boolean;
+            /** @description When changing an existing type, the recordVersion read (optimistic concurrency, UW-ERR-STALE). */
+            recordVersion?: number;
         };
-        /** @description uw.IssueType.upsert result. PRD outputs: "types" */
-        IssueTypeUpsertResponse: {
-            /** @description PRD: "types" */
-            types?: components["schemas"]["Unspecified"];
-        };
+        IssueTypeUpsertResponse: components["schemas"]["IssueTypeItem"];
         /** @description uw.DataSubject.export request. PRD inputs: "party id, scope" */
         DataSubjectExportRequest: {
             /** @description PRD: "party id" */
@@ -6778,6 +6810,10 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description Text in the code or a name (case insensitive). */
+                q?: string;
+                /** @description Only active issue types. */
+                activeOnly?: boolean;
             };
             header?: {
                 /**

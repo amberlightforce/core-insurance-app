@@ -6777,138 +6777,251 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/IntakeExceptionOutcome'
+    ManualJournalEvidence:
+      type: object
+      description: The evidence of a manual journal, a document or ticket reference (REQ-FIN-216)
+      required:
+      - reference
+      properties:
+        reference:
+          type: string
+          maxLength: 200
+    ManualJournalLineInput:
+      type: object
+      required:
+      - account
+      - side
+      - amount
+      properties:
+        account:
+          type: string
+          maxLength: 32
+        side:
+          type: string
+          enum:
+          - DEBIT
+          - CREDIT
+        amount:
+          type: string
+          description: Positive decimal with at most two places (invariant format)
+    ManualJournalLineView:
+      type: object
+      required:
+      - account
+      - side
+      - amount
+      properties:
+        account:
+          type: string
+        side:
+          type: string
+          enum:
+          - DEBIT
+          - CREDIT
+        amount:
+          type: string
+    ManualJournalView:
+      type: object
+      description: A manual journal (maker-checker workflow record; the ledger changes only when it is approved and POSTED)
+      required:
+      - id
+      - number
+      - status
+      - description
+      - book
+      - accountingDate
+      - currency
+      - lines
+      - evidenceRef
+      - createdBy
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        number:
+          type: string
+          description: MJ plus six digits
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - SUBMITTED
+          - APPROVED
+          - REJECTED
+          - WITHDRAWN
+          - POSTED
+        description:
+          type: string
+        book:
+          type: string
+        accountingDate:
+          type: string
+          format: date
+        currency:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManualJournalLineView'
+        evidenceRef:
+          type: string
+        createdBy:
+          type: string
+        submittedBy:
+          type: string
+          nullable: true
+        submittedAt:
+          type: string
+          nullable: true
+        decidedBy:
+          type: string
+          nullable: true
+        decisionReason:
+          type: string
+          nullable: true
     ManualJournalCreateRequest:
       type: object
-      description: 'fin.ManualJournal.create request. PRD inputs: "template, lines, evidence"'
+      description: fin.ManualJournal.create request
+      required:
+      - description
+      - book
+      - accountingDate
+      - currency
+      - lines
+      - evidence
       properties:
-        template:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "template"'
+        description:
+          type: string
+          maxLength: 200
+        book:
+          type: string
+        accountingDate:
+          type: string
+          format: date
+        currency:
+          type: string
         lines:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
+            $ref: '#/components/schemas/ManualJournalLineInput'
         evidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence"'
+          $ref: '#/components/schemas/ManualJournalEvidence'
     ManualJournalCreateResponse:
       type: object
-      description: 'fin.ManualJournal.create result. PRD outputs: "manual journal, posted ids"'
+      description: 'fin.ManualJournal.create result'
+      required:
+      - manualJournal
+      - postedIds
       properties:
         manualJournal:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manual journal"'
+          $ref: '#/components/schemas/ManualJournalView'
         postedIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "posted ids"'
+          description: Ids of the sealed journals the approval posted (empty until POSTED)
     ManualJournalSubmitRequest:
       type: object
-      description: 'fin.ManualJournal.submit request. PRD inputs: "template, lines, evidence"'
+      description: 'fin.ManualJournal.submit request: submit a DRAFT journal of the caller for approval'
+      required:
+      - id
       properties:
-        template:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "template"'
-        lines:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
-        evidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence"'
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
     ManualJournalSubmitResponse:
       type: object
-      description: 'fin.ManualJournal.submit result. PRD outputs: "manual journal, posted ids"'
+      description: 'fin.ManualJournal.submit result'
+      required:
+      - manualJournal
+      - postedIds
       properties:
         manualJournal:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manual journal"'
+          $ref: '#/components/schemas/ManualJournalView'
         postedIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "posted ids"'
+          description: Ids of the sealed journals the approval posted (empty until POSTED)
     ManualJournalWithdrawRequest:
       type: object
-      description: 'fin.ManualJournal.withdraw request. PRD inputs: "template, lines, evidence"'
+      description: 'fin.ManualJournal.withdraw request: the maker takes a DRAFT or SUBMITTED journal back'
+      required:
+      - id
       properties:
-        template:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "template"'
-        lines:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
-        evidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence"'
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
     ManualJournalWithdrawResponse:
       type: object
-      description: 'fin.ManualJournal.withdraw result. PRD outputs: "manual journal, posted ids"'
+      description: 'fin.ManualJournal.withdraw result'
+      required:
+      - manualJournal
+      - postedIds
       properties:
         manualJournal:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manual journal"'
+          $ref: '#/components/schemas/ManualJournalView'
         postedIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "posted ids"'
+          description: Ids of the sealed journals the approval posted (empty until POSTED)
     ManualJournalDecideRequest:
       type: object
-      description: 'fin.ManualJournal.decide request. PRD inputs: "template, lines, evidence"'
+      description: 'fin.ManualJournal.decide request: a checker approves (posting the journal) or rejects a SUBMITTED journal'
+      required:
+      - id
+      - decision
       properties:
-        template:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "template"'
-        lines:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
-        evidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidence"'
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        comment:
+          type: string
+          maxLength: 1024
+          description: Required for a rejection
     ManualJournalDecideResponse:
       type: object
-      description: 'fin.ManualJournal.decide result. PRD outputs: "manual journal, posted ids"'
+      description: 'fin.ManualJournal.decide result (a repeated decision returns the current state)'
+      required:
+      - manualJournal
+      - postedIds
       properties:
         manualJournal:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manual journal"'
+          $ref: '#/components/schemas/ManualJournalView'
         postedIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "posted ids"'
+          description: Ids of the sealed journals the approval posted (empty until POSTED)
     ManualJournalGetResponse:
       type: object
-      description: 'fin.ManualJournal.get result. PRD outputs: "manual journal, posted ids"'
+      description: 'fin.ManualJournal.get result'
+      required:
+      - manualJournal
+      - postedIds
       properties:
         manualJournal:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manual journal"'
+          $ref: '#/components/schemas/ManualJournalView'
         postedIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "posted ids"'
+          description: Ids of the sealed journals the approval posted (empty until POSTED)
     ManualJournalListItem:
       type: object
-      description: 'fin.ManualJournal.list result. PRD outputs: "manual journal, posted ids"'
+      description: fin.ManualJournal.list result item
+      required:
+      - manualJournal
+      - postedIds
       properties:
         manualJournal:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "manual journal"'
+          $ref: '#/components/schemas/ManualJournalView'
         postedIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "posted ids"'
     ManualJournalListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope

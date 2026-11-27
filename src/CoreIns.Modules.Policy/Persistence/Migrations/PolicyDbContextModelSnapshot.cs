@@ -599,6 +599,90 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.NonRenewalRow", b =>
+                {
+                    b.Property<Guid>("NonRenewalId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("non_renewal_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("EffectiveAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("effective_at");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("LegalStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_status");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<int>("NoticeDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("notice_days");
+
+                    b.Property<DateTime>("NoticeDeadline")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("notice_deadline");
+
+                    b.Property<Guid?>("NoticeDocumentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("notice_document_id");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason_code");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("RequestedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("requested_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.HasKey("NonRenewalId")
+                        .HasName("pk_non_renewal");
+
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_non_renewal_policy");
+
+                    b.HasIndex("TermId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_non_renewal_term");
+
+                    b.ToTable("non_renewal", "pol", t =>
+                        {
+                            t.HasCheckConstraint("ck_non_renewal_status", "status IN ('NOTICE_REQUESTED', 'PSR_REVIEW')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.OosCorrectionRow", b =>
                 {
                     b.Property<Guid>("SetId")

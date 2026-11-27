@@ -856,7 +856,7 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_fiscal_document_role", "role IN ('ISSUE', 'CREDIT', 'CANCELLATION')");
 
-                            t.HasCheckConstraint("ck_fiscal_document_status", "status IN ('PENDING', 'REGISTERED', 'REJECTED')");
+                            t.HasCheckConstraint("ck_fiscal_document_status", "status IN ('PENDING', 'REGISTERED', 'REJECTED', 'CANCELLED')");
                         });
                 });
 

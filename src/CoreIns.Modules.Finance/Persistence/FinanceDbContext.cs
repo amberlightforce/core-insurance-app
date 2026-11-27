@@ -320,7 +320,7 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
         {
             entity.ToTable("journal_entry", t =>
             {
-                t.HasCheckConstraint("ck_journal_entry_source_type", In("source_type", [SourceTypes.Event, SourceTypes.Reversal]));
+                t.HasCheckConstraint("ck_journal_entry_source_type", In("source_type", [SourceTypes.Event, SourceTypes.Reversal, SourceTypes.Manual]));
                 t.HasCheckConstraint("ck_journal_entry_reversal", "(source_type = 'REVERSAL') = (reverses_journal_id IS NOT NULL)");
                 t.HasCheckConstraint("ck_journal_entry_currency", "functional_currency ~ '^[A-Z]{3}$'");
             });

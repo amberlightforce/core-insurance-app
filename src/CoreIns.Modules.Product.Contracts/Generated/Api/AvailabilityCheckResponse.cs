@@ -4,28 +4,19 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.Availability.check result. PRD outputs: "available, reason, winning rule id"</summary>
+/// <summary>pfc.Availability.check result: the sellable offerings (only published, non-abstract versions whose window covers the date).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AvailabilityCheckResponse
 {
-    /// <summary>PRD: "available"</summary>
+    /// <summary>True when at least one offering is sellable.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("available")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public bool? Available { get; init; }
+    public required bool Available { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>When nothing is available, a code (NO-VERSION-IN-WINDOW); otherwise null.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public required string? Reason { get; init; }
 
-    /// <summary>PRD: "winning rule id"</summary>
-    /// <remarks>
-    /// <para>Untyped id: no SharedKernel id type is mapped for 'winningRuleId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("winningRuleId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? WinningRuleId { get; init; }
+    /// <summary>Contract member 'offerings'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("offerings")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.AvailabilityOffering> Offerings { get; init; }
 }

@@ -4,23 +4,69 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.FiscalDocument.qrPayload result. PRD outputs: "document, identifiers"</summary>
+/// <summary>cmp.FiscalDocument.qrPayload result (REQ-CMP-054)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FiscalDocumentQrPayloadResponse
 {
-    /// <summary>PRD: "document"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("document")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Document { get; init; }
+    /// <summary>Contract member 'fiscalDocumentId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fiscalDocumentId")]
+    public required global::CoreIns.SharedKernel.Identifiers.FiscalDocumentId FiscalDocumentId { get; init; }
 
-    /// <summary>PRD: "identifiers"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("identifiers")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Identifiers { get; init; }
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Contract member 'mark'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("mark")]
+    public string? Mark { get; init; }
+
+    /// <summary>Contract member 'uid'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("uid")]
+    public string? Uid { get; init; }
+
+    /// <summary>Contract member 'series'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("series")]
+    public string? Series { get; init; }
+
+    /// <summary>Contract member 'number'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("number")]
+    public string? Number { get; init; }
+
+    /// <summary>Contract member 'qrPayloadRef'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("qrPayloadRef")]
+    public string? QrPayloadRef { get; init; }
+
+    /// <summary>The text to encode in the QR code; null until the document is Registered. Layout is Unverified (OQ-012); never AADE evidence when stub is true</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("qrPayload")]
+    public string? QrPayload { get; init; }
+
+    /// <summary>Contract member 'stub'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("stub")]
+    public required bool Stub { get; init; }
+
+    /// <summary>False until the myDATA QR layout is verified (open user decision</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("layoutVerified")]
+    public required bool LayoutVerified { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>PENDING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PENDING")]
+        Pending,
+
+        /// <summary><c>REGISTERED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REGISTERED")]
+        Registered,
+
+        /// <summary><c>REJECTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REJECTED")]
+        Rejected,
+
+        /// <summary><c>CANCELLED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CANCELLED")]
+        Cancelled,
+    }
 }

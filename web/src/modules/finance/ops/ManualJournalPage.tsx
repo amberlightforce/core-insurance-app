@@ -20,7 +20,12 @@ import { QueryView } from '../../staff/QueryView';
 import { SimpleTable } from '../../staff/SimpleTable';
 import styles from '../../staff/staff.module.css';
 import { useFormat } from '../../staff/useFormat';
-import { useDecideManualJournal, useManualJournal, useWithdrawManualJournal } from './api';
+import {
+  useDecideManualJournal,
+  useManualJournal,
+  useSubmitManualJournal,
+  useWithdrawManualJournal,
+} from './api';
 import { isMaker, lineTotals } from './journalMath';
 import { ManualJournalStatusPill } from './ManualJournalParts';
 import type { ManualJournal, ManualJournalLine } from './types';
@@ -54,7 +59,7 @@ function Decision({ journal, onDone }: { journal: ManualJournal; onDone: () => v
     const request = {
       id: journal.id,
       decision,
-      ...(reason.trim() ? { reason: reason.trim() } : {}),
+      ...(reason.trim() ? { comment: reason.trim() } : {}),
     };
     decide.mutate({ request, key: keyFor(request) });
   };
@@ -138,7 +143,12 @@ function DraftActions({ journal, onDone }: { journal: ManualJournal; onDone: () 
     announce(t('ops.manual.decision.withdrawn'));
     onDone();
   });
-  // Only the maker can withdraw; the server answers 403 FIN-ERR-SOD otherwise. Submit for approval arrives with BO-FIN-01b.
+  const submit = useSubmitManualJournal(() => {
+    release();
+    announce(t('ops.manual.decision.submitted'));
+    onDone();
+  });
+  // Only the maker can submit or withdraw; the server answers 403 FIN-ERR-SOD otherwise.
   const maker = isMaker(journal.createdBy);
   return (
     <div className={styles.stack}>
@@ -146,11 +156,26 @@ function DraftActions({ journal, onDone }: { journal: ManualJournal; onDone: () 
       {withdraw.isError ? (
         <ProblemBanner error={withdraw.error} title={t('ops.manual.decision.withdrawFailed')} />
       ) : null}
+      {submit.isError ? (
+        <ProblemBanner error={submit.error} title={t('ops.manual.decision.submitFailed')} />
+      ) : null}
       {maker ? (
         <div className={styles.actions}>
           <Button
+            variant="primary"
+            isLoading={submit.isPending}
+            isDisabled={withdraw.isPending}
+            onPress={() => {
+              const request = { id: journal.id };
+              submit.mutate({ request, key: keyFor(request) });
+            }}
+          >
+            {t('ops.manual.decision.submitForApproval')}
+          </Button>
+          <Button
             variant="secondary"
             isLoading={withdraw.isPending}
+            isDisabled={submit.isPending}
             onPress={() => {
               const request = { id: journal.id };
               withdraw.mutate({ id: journal.id, key: keyFor(request) });

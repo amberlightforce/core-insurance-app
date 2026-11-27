@@ -199,7 +199,7 @@ internal sealed class RequestFiscalDocumentHandler(
 
         // CMP is the sole issuer (REQ-CMP-038) and keeps credits in their own gapless series.
         var seriesId = role == FiscalDocumentRole.Credit ? series.SeriesId + FiscalDocuments.CreditSeriesSuffix : series.SeriesId;
-        var number = await NextNumberAsync(legalEntity, seriesId, cancellationToken).ConfigureAwait(false);
+        var number = await NextNumberAsync(db, legalEntity, seriesId, cancellationToken).ConfigureAwait(false);
         var built = await channel.BuildAsync(source, cancellationToken).ConfigureAwait(false);
         var document = built with { Series = seriesId, Number = number.ToString(System.Globalization.CultureInfo.InvariantCulture) };
 
@@ -234,7 +234,7 @@ internal sealed class RequestFiscalDocumentHandler(
         {
             var key = $"{request.SourceType}|{request.SourceId}|{roleCode}|{revision}";
             var result = await channel.SubmitAsync(document, key, cancellationToken).ConfigureAwait(false);
-            Apply(row, result, now, correlatedMark);
+            Apply(events, row, result, now, correlatedMark);
         }
 
         db.FiscalDocuments.Add(row);
@@ -242,7 +242,8 @@ internal sealed class RequestFiscalDocumentHandler(
         return new FiscalDocumentRequestResponse { FiscalDocumentId = row.FiscalDocumentId, Status = row.Status, DocumentType = row.DocumentType };
     }
 
-    private void Apply(FiscalDocumentRow row, FiscalSubmissionResult result, Instant now, string? correlatedMark)
+    /// <summary>Applies the channel's outcome to the row and publishes the matching event (shared with the fiscal operations).</summary>
+    internal static void Apply(IEventPublisher events, FiscalDocumentRow row, FiscalSubmissionResult result, Instant now, string? correlatedMark)
     {
         var keys = BusinessKeys.Empty.With("fiscalDocumentId", row.FiscalDocumentId.Value.ToString());
         switch (result.Status)
@@ -281,7 +282,8 @@ internal sealed class RequestFiscalDocumentHandler(
         }
     }
 
-    private async Task<long> NextNumberAsync(LegalEntityId legalEntity, string seriesId, CancellationToken cancellationToken)
+    /// <summary>Next gapless number of the series, under a row lock in the caller's transaction.</summary>
+    internal static async Task<long> NextNumberAsync(ComplianceDbContext db, LegalEntityId legalEntity, string seriesId, CancellationToken cancellationToken)
     {
         // Gapless: the row lock is held until the caller's transaction ends; a rollback releases the number.
         await db.Database.ExecuteSqlInterpolatedAsync(

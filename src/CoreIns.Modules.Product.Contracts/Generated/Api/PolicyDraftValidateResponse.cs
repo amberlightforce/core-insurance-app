@@ -4,15 +4,15 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.PolicyDraft.validate result. PRD outputs: "errors[] (level, rule, path, message key, GR/EN message, severity)"</summary>
+/// <summary>pfc.PolicyDraft.validate result: valid is true when no ERROR issues were found.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PolicyDraftValidateResponse
 {
-    /// <summary>PRD: "errors[] (level, rule, path, message key, GR/EN message, severity)"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'valid'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("valid")]
+    public required bool Valid { get; init; }
+
+    /// <summary>Contract member 'errors'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("errors")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Errors { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.PolicyDraftIssue> Errors { get; init; }
 }

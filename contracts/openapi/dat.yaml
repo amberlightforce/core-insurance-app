@@ -849,6 +849,18 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: runId
+        in: query
+        required: false
+        description: 'Run id (BO-DAT-03)'
+        schema:
+          type: string
+      - name: figureKey
+        in: query
+        required: false
+        description: 'Figure key within the run, e.g. GWP|MOTOR|2026-10| (BO-DAT-03)'
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -902,6 +914,54 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: runA
+        in: query
+        required: false
+        description: 'Base run id; with runB compares two stored runs (BO-DAT-03)'
+        schema:
+          type: string
+      - name: runB
+        in: query
+        required: false
+        description: 'Other run id'
+        schema:
+          type: string
+      - name: mart
+        in: query
+        required: false
+        description: 'Mart code when comparing two as-of instants without stored runs'
+        schema:
+          type: string
+      - name: period
+        in: query
+        required: false
+        description: 'Period YYYY, YYYY-MM or from..to'
+        schema:
+          type: string
+      - name: productCode
+        in: query
+        required: false
+        description: 'Optional product filter'
+        schema:
+          type: string
+      - name: validAt
+        in: query
+        required: false
+        description: 'Valid-time instant for both sides (default now)'
+        schema:
+          type: string
+      - name: knownAtA
+        in: query
+        required: false
+        description: 'Record-time instant of the base side'
+        schema:
+          type: string
+      - name: knownAtB
+        in: query
+        required: false
+        description: 'Record-time instant of the other side (default now)'
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -3316,14 +3376,24 @@ components:
       description: 'dat.Mart.run request. PRD inputs: "mart, entity, period, regime, taxonomy version"'
       properties:
         mart:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "mart"'
+          type: string
+          enum: [PORTFOLIO_PREMIUM, CLAIMS_EXPERIENCE, RI_CESSION_SUMMARY]
+          description: 'Mart code (BO-DAT-03). All three are management marts: legalStatus NotRegulatory.'
         entity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entity"'
+          type: string
+          description: 'Legal entity; must equal the caller scope when given (BO-DAT-03).'
         period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+          type: string
+          description: 'Period YYYY, YYYY-MM or from..to (half-open on valid time); omitted = all.'
+        productCode:
+          type: string
+          description: 'Optional product filter (not applied to RI_CESSION_SUMMARY).'
+        validAt:
+          type: string
+          description: 'Valid-time instant or date (default now).'
+        knownAt:
+          type: string
+          description: 'Record-time instant or date (default now).'
         regime:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "regime"'
@@ -3337,10 +3407,28 @@ components:
         runId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "run id"'
+        status:
+          type: string
+          description: 'COMPLETED (the run is computed inline); BO-DAT-03 addition.'
+        snapshotKey:
+          type: string
+          description: 'Deterministic snapshot key: mart|entity|period|product|first 16 hex of the hash (BO-DAT-03).'
+        snapshotHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'SHA-256 over the ordered figures; the same inputs give the same hash (BO-DAT-03).'
+        figureCount:
+          type: integer
+          description: 'Number of figures written (BO-DAT-03).'
+        legalStatus:
+          type: string
+          description: 'NotRegulatory for the management marts; regulatory layouts stay Unverified (BO-DAT-03).'
     MartGetResponse:
       type: object
       description: 'dat.Mart.get result. PRD outputs: "figures, lineage pointer, diff"'
       properties:
+        run:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: 'Run header: runId, mart, period, validAt, knownAt, status, snapshotHash, legalStatus, definitionVersion (BO-DAT-03).'
         figures:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "figures"'

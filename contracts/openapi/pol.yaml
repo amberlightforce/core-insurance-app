@@ -2379,6 +2379,9 @@ paths:
       - PRD-05 l.2129
       - PRD-05 l.789
       x-error-codes:
+      - code: POL-ERR-NOTICE-PERIOD-UNSETTLED
+        note: the statutory notice period is not legally settled; refused in Production (D-USR-19)
+        status: 422
       - code: POL-ERR-NOTICE-TOO-LATE
         status: 422
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
@@ -6123,50 +6126,110 @@ components:
       - recordedAt
     RenewalDeclineRequest:
       type: object
-      description: 'pol.Renewal.decline request. PRD inputs: "termId; offer; acceptance evidence; reason"'
+      description: 'pol.Renewal.decline request: the customer (or staff for them) declines an offered renewal (REQ-POL-009, REQ-POL-257). Declining after acceptance is refused.'
       properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The renewal job
         termId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "termId"'
-        offer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "offer"'
-        acceptanceEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "acceptance evidence"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          description: The expiring term
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Why the renewal was declined (required)
+        declinedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: When the customer declined (business time)
+        evidence:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Evidence reference (document or message id); no personal data
+      required:
+      - jobId
+      - termId
+      - reasonCode
+      - declinedAt
     RenewalDeclineResponse:
       type: object
-      description: 'pol.Renewal.decline result. PRD outputs: "job"'
+      description: 'pol.Renewal.decline result. The renewal job is closed (NOT_TAKEN once offered, WITHDRAWN while still a draft); the term simply expires.'
       properties:
-        job:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job"'
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - jobId
+      - termId
+      - state
+      - reasonCode
+      - recordedAt
     RenewalNonRenewRequest:
       type: object
-      description: 'pol.Renewal.nonRenew request. PRD inputs: "termId; offer; acceptance evidence; reason"'
+      description: 'pol.Renewal.nonRenew request: the insurer decides not to renew the term (REQ-POL-009). The reason code is required; the notice must be sent in time (POL-ERR-NOTICE-TOO-LATE).'
       properties:
         termId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "termId"'
-        offer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "offer"'
-        acceptanceEvidence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "acceptance evidence"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          description: The expiring term
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Why the insurer does not renew (required)
+        text:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Free-text note; no personal data
+      required:
+      - termId
+      - reasonCode
     RenewalNonRenewResponse:
       type: object
-      description: 'pol.Renewal.nonRenew result. PRD outputs: "job"'
+      description: 'pol.Renewal.nonRenew result. PSR_REVIEW when the policyholder is vulnerable or unknown: nothing is sent until a person decides.'
       properties:
-        job:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job"'
+        nonRenewalId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+          enum:
+          - NOTICE_REQUESTED
+          - PSR_REVIEW
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: The term end, when the non-renewal takes effect
+        noticeDeadline:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: The latest moment the notice could be given (term end minus the notice period)
+        noticeDays:
+          type: integer
+          minimum: 0
+        legalStatus:
+          type: string
+          enum:
+          - Settled
+          - Unverified
+          - PendingOpinion
+          description: Legal status of the notice period value; Unverified and PendingOpinion are refused in Production (D-USR-19)
+        noticeDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The notice letter requested from DOC; absent while in PSR review or when DOC is not wired
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - nonRenewalId
+      - termId
+      - status
+      - reasonCode
+      - effectiveAt
+      - noticeDeadline
+      - noticeDays
+      - legalStatus
+      - recordedAt
     RenewalRunStartRequest:
       type: object
       description: 'pol.RenewalRun.start request. PRD inputs: "entity, product, window"'

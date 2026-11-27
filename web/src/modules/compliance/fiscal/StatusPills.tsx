@@ -8,6 +8,7 @@ const semantic: Record<string, Semantic> = {
   PENDING: 'pending-approval',
   REGISTERED: 'success',
   REJECTED: 'error',
+  CANCELLED: 'disabled',
 };
 
 export function FiscalStatusPill({ status }: { status: string }) {

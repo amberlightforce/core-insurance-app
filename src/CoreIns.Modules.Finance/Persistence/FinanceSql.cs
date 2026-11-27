@@ -199,6 +199,26 @@ internal static class FinanceSql
         CREATE TRIGGER trg_manual_journal_line_guard BEFORE INSERT OR UPDATE OR DELETE ON fin.manual_journal_line FOR EACH ROW EXECUTE FUNCTION fin.guard_manual_journal_line();
         """;
 
+    /// <summary>
+    /// BO-FIN-01b: lines can be added only while the journal is DRAFT. Once submitted the content is what the checker approves;
+    /// a change needs a withdraw and a new journal (the approval request is bound to the content hash as well).
+    /// </summary>
+    public const string ManualJournalLinesDraftOnly = """
+        CREATE OR REPLACE FUNCTION fin.guard_manual_journal_line() RETURNS trigger LANGUAGE plpgsql AS $$
+        DECLARE
+            current_status text;
+        BEGIN
+            IF TG_OP <> 'INSERT' THEN
+                RAISE EXCEPTION 'fin.manual_journal_line is append-only: % refused', TG_OP USING ERRCODE = '55000';
+            END IF;
+            SELECT status INTO current_status FROM fin.manual_journal WHERE manual_journal_id = NEW.manual_journal_id;
+            IF current_status IS NULL OR current_status <> 'DRAFT' THEN
+                RAISE EXCEPTION 'fin.manual_journal_line: lines can be added only while the journal is DRAFT' USING ERRCODE = '55000';
+            END IF;
+            RETURN NEW;
+        END $$;
+        """;
+
     /// <summary>Privileges of the application role (REQ-FIN-070, -088): reference data read-only, journals insert-only.</summary>
     public static IReadOnlyList<string> Grants(string appRole) =>
     [

@@ -4,15 +4,46 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.FiscalDocument.resubmit result. PRD outputs: "status"</summary>
+/// <summary>cmp.FiscalDocument.resubmit result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FiscalDocumentResubmitResponse
 {
-    /// <summary>PRD: "status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'fiscalDocumentId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fiscalDocumentId")]
+    public required global::CoreIns.SharedKernel.Identifiers.FiscalDocumentId FiscalDocumentId { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Contract member 'rejectionCodes'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("rejectionCodes")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Status { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<string>? RejectionCodes { get; init; }
+
+    /// <summary>False when the document was already registered (replay)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("resubmitted")]
+    public required bool Resubmitted { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>PENDING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PENDING")]
+        Pending,
+
+        /// <summary><c>REGISTERED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REGISTERED")]
+        Registered,
+
+        /// <summary><c>REJECTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REJECTED")]
+        Rejected,
+
+        /// <summary><c>CANCELLED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CANCELLED")]
+        Cancelled,
+    }
 }

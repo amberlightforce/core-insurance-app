@@ -4,55 +4,79 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.Product.describe result. PRD outputs: "ordered steps, fields, rules, offerings, coverages, payment plans"</summary>
+/// <summary>pfc.Product.describe result: names, terms, windows, risk structure, coverages, questions, payment plans and the artefact hash.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProductDescribeResponse
 {
-    /// <summary>PRD: "ordered steps"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'product'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("product")]
+    public required string Product { get; init; }
+
+    /// <summary>Contract member 'name'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("name")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.LocalizedText Name { get; init; }
+
+    /// <summary>Contract member 'productType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productType")]
+    public required string ProductType { get; init; }
+
+    /// <summary>Contract member 'customerType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("customerType")]
+    public required string CustomerType { get; init; }
+
+    /// <summary>Contract member 'version'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    public required global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber Version { get; init; }
+
+    /// <summary>Contract member 'artefactHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("artefactHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash ArtefactHash { get; init; }
+
+    /// <summary>Contract member 'isAbstract'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("isAbstract")]
+    public required bool IsAbstract { get; init; }
+
+    /// <summary>Contract member 'channels'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("channels")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> Channels { get; init; }
+
+    /// <summary>Contract member 'languages'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("languages")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> Languages { get; init; }
+
+    /// <summary>Contract member 'contractCurrency'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractCurrency")]
+    public required global::CoreIns.SharedKernel.Currency ContractCurrency { get; init; }
+
+    /// <summary>Contract member 'terms'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("terms")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.ProductTerms Terms { get; init; }
+
+    /// <summary>Contract member 'windows'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("windows")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.ProductWindows Windows { get; init; }
+
+    /// <summary>True when the version carries illustrative (not settled) commercial data, so UIs show the illustrative pill.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("illustrative")]
+    public required bool Illustrative { get; init; }
+
+    /// <summary>Contract member 'orderedSteps'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("orderedSteps")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? OrderedSteps { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.DescribeStep> OrderedSteps { get; init; }
 
-    /// <summary>PRD: "fields"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("fields")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Fields { get; init; }
+    /// <summary>Contract member 'elements'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("elements")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.CatalogueElement> Elements { get; init; }
 
-    /// <summary>PRD: "rules"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("rules")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Rules { get; init; }
-
-    /// <summary>PRD: "offerings"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("offerings")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Offerings { get; init; }
-
-    /// <summary>PRD: "coverages"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'coverages'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("coverages")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Coverages { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.CatalogueCoverage> Coverages { get; init; }
 
-    /// <summary>PRD: "payment plans"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'questionSets'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("questionSets")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.QuestionSetDef> QuestionSets { get; init; }
+
+    /// <summary>Payment plan codes for the channel (empty when the version declares none).</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("paymentPlans")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PaymentPlans { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<string> PaymentPlans { get; init; }
 }

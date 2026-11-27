@@ -7,6 +7,7 @@ import type {
   EarningStatus,
   FinancePeriod,
   IntakeException,
+  ManualJournalCreateRequest,
   ManualJournalDecideRequest,
   ManualJournalEnvelope,
   ManualJournalSubmitRequest,
@@ -72,11 +73,11 @@ export function useManualJournal(id: string) {
   });
 }
 
-/** fin.ManualJournal.create: stores a balanced, evidenced DRAFT; nothing is posted (submit and decide are BO-FIN-01b). */
+/** fin.ManualJournal.create: stores a balanced, evidenced DRAFT; nothing is posted until it is submitted and approved. */
 export function useCreateManualJournal(onDone: (r: ManualJournalEnvelope) => void) {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: ({ request, key }: { request: ManualJournalSubmitRequest; key: string }) =>
+    mutationFn: ({ request, key }: { request: ManualJournalCreateRequest; key: string }) =>
       apiRequest<ManualJournalEnvelope>(`${base}/manual-journals`, {
         method: 'POST',
         body: request,
@@ -89,7 +90,7 @@ export function useCreateManualJournal(onDone: (r: ManualJournalEnvelope) => voi
   });
 }
 
-/** fin.ManualJournal.submit: the maker proposes the journal; it posts only after another user approves it. */
+/** fin.ManualJournal.submit: the maker sends a DRAFT for approval; it posts only after another user approves it. */
 export function useSubmitManualJournal(onDone: (r: ManualJournalEnvelope) => void) {
   const client = useQueryClient();
   return useMutation({
@@ -101,6 +102,7 @@ export function useSubmitManualJournal(onDone: (r: ManualJournalEnvelope) => voi
       }),
     onSuccess: (response) => {
       void client.invalidateQueries({ queryKey: ['fin', 'manual-journals'] });
+      void client.invalidateQueries({ queryKey: ['fin', 'manual-journal'] });
       onDone(response);
     },
   });

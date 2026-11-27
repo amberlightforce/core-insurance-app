@@ -4,6 +4,8 @@ using CoreIns.Platform.Context;
 using CoreIns.Platform.Persistence;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Paging;
+using CoreIns.SharedKernel.Results;
 using Dapper;
 
 namespace CoreIns.Modules.Product.Queries;
@@ -14,16 +16,24 @@ namespace CoreIns.Modules.Product.Queries;
 /// </summary>
 internal sealed class ProductListQueries(DbSession session, RequestContext context, ILegalEntityDirectory legalEntities)
 {
-    public async Task<ProductListPage> ListAsync(CancellationToken cancellationToken)
+    public async Task<Result<ProductListPage>> ListAsync(string? cursor, int? limit, CancellationToken cancellationToken)
     {
+        if (!KeysetPaging.TryTake(limit, KeysetPaging.DefaultPageSize, out var take)
+            || !KeysetPaging.TryDecode(cursor, 1, out var after))
+        {
+            return DomainError.Of(ModuleCode.PFC, "VALIDATION", "limit must be 1 to 200 and cursor must be one returned by this endpoint.");
+        }
+
         var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         var products = (await connection.QueryAsync<ProductRecord>(new CommandDefinition(
             """
             SELECT product_id AS ProductId, jurisdiction AS Jurisdiction, code AS Code, line_code AS LineCode, line_family AS LineFamily,
                    name_el AS NameEl, name_en AS NameEn, product_type AS ProductType, customer_type AS CustomerType
-              FROM pfc.product WHERE legal_entity_id = @le ORDER BY code
-            """, new { le = legalEntity.Value }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
+              FROM pfc.product WHERE legal_entity_id = @le AND (@after::text IS NULL OR code > @after) ORDER BY code LIMIT @take
+            """, new { le = legalEntity.Value, after = after?[0], take = take + 1 }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
+        var (pageProducts, next) = KeysetPaging.Slice(products, take, p => KeysetPaging.Encode(p.Code));
+        var pageIds = pageProducts.Select(p => p.ProductId).ToArray();
         var versions = (await connection.QueryAsync<VersionRecord>(new CommandDefinition(
             """
             SELECT v.product_id AS ProductId, v.major AS Major, v.minor AS Minor, v.status AS Status, v.is_abstract AS IsAbstract,
@@ -34,11 +44,11 @@ internal sealed class ProductListQueries(DbSession session, RequestContext conte
               FROM pfc.product_version v
               LEFT JOIN pfc.product_version f ON f.product_version_id = v.fallback_of_version_id
               LEFT JOIN pfc.product_version r ON r.product_version_id = v.replaces_version_id
-             WHERE v.legal_entity_id = @le
+             WHERE v.legal_entity_id = @le AND v.product_id = ANY (@ids)
              ORDER BY v.major DESC, v.minor DESC
-            """, new { le = legalEntity.Value }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
+            """, new { le = legalEntity.Value, ids = pageIds }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
 
-        var items = products.Select(p => new ProductListItem
+        var items = pageProducts.Select(p => new ProductListItem
         {
             Code = p.Code,
             Jurisdiction = p.Jurisdiction,
@@ -63,7 +73,7 @@ internal sealed class ProductListQueries(DbSession session, RequestContext conte
                 ReplacesVersion = v.ReplacesMajor is { } rm ? new ProductVersionNumber(rm, v.ReplacesMinor ?? 0) : null,
             }).ToList(),
         }).ToList();
-        return new ProductListPage { Items = items, NextCursor = null };
+        return new ProductListPage { Items = items, NextCursor = next };
     }
 
     private static string Day(DateTime value) => value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
