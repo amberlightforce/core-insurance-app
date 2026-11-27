@@ -22,6 +22,8 @@
     <!-- Long-transaction guard for key retirement (pg_stat_activity, D-ARC-23a). -->
     <PackageReference Include="Npgsql" />
     <PackageReference Include="Azure.Security.KeyVault.Keys" />
+    <!-- PII destructuring policy for logs (NX-OT-13). -->
+    <PackageReference Include="Serilog" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,49 @@
+{
+  "overline": "Products",
+  "title": "Product catalogue",
+  "subtitle": "Products with their versions, effective windows and emergency fall-backs.",
+  "emptyTitle": "No products yet",
+  "emptyBody": "Products appear here once a product version has been imported.",
+  "links": { "packs": "Market packs", "rollback": "Pack rollback exceptions" },
+  "open": "Open {product}",
+  "back": "All products",
+  "notFound": "This product was not found.",
+  "summary": "{jurisdiction} · {type} · {customer}",
+  "inForce": "In force: {version}",
+  "noneInForce": "No version open for new business",
+  "versionsLabel": "Versions of {product}",
+  "versionSelect": "Version",
+  "fallbackOf": "Fall-back copy of {version}",
+  "replaces": "Replaces {version}",
+  "columns": {
+    "version": "Version",
+    "status": "Status",
+    "newBusinessFrom": "New business from",
+    "newBusinessTo": "New business to",
+    "renewalFrom": "Renewal from",
+    "renewalTo": "Renewal to",
+    "fallback": "Fall-back"
+  },
+  "status": { "LOCKED": "Locked", "DRAFT": "Draft", "RETIRED": "Retired" },
+  "coverage": {
+    "title": "Coverages",
+    "label": "Coverages",
+    "code": "Code",
+    "name": "Coverage",
+    "existence": "Existence",
+    "element": "Covered element",
+    "terms": "Terms",
+    "empty": "This version has no coverages."
+  },
+  "rating": {
+    "title": "Rating summary",
+    "label": "Charge types",
+    "summary": "{count} charge types, {premium} premium.",
+    "code": "Code",
+    "name": "Charge",
+    "category": "Category",
+    "handling": "Handling",
+    "coverage": "Coverage",
+    "empty": "This version has no charge types."
+  }
+}

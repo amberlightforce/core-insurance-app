@@ -158,6 +158,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.SetSize).HasColumnName("set_size");
             entity.Property(e => e.SetIndex).HasColumnName("set_index");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_charge_policy");
             entity.Property(e => e.TermId).HasColumnName("term_id");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
             entity.Property(e => e.ElementLocator).HasColumnName("element_locator");
@@ -200,6 +201,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.CorrectionOf).HasColumnName("correction_of");
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.BillingAccountId).HasColumnName("billing_account_id");
+            entity.HasIndex(e => e.BillingAccountId).HasDatabaseName("ix_respread_billing_account");
             entity.Property(e => e.TermId).HasColumnName("term_id");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
             entity.Property(e => e.NetAmount).HasColumnName("net_amount").HasColumnType("numeric(19,4)");
@@ -236,6 +238,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.State).HasColumnName("state");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
             entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.HasIndex(e => e.TermId).HasDatabaseName("ix_invoice_term");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
             entity.Property(e => e.IssueDate).HasColumnName("issue_date");
             entity.Property(e => e.DueDate).HasColumnName("due_date");
@@ -291,6 +294,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.ChargeId).HasColumnName("charge_id");
             entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.HasIndex(e => e.TermId).HasDatabaseName("ix_invoice_item_term");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
             entity.Property(e => e.ElementLocator).HasColumnName("element_locator");
             entity.Property(e => e.CoverageCode).HasColumnName("coverage_code");
@@ -378,6 +382,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.ReceiptId).HasColumnName("receipt_id");
             entity.Property(e => e.InvoiceId).HasColumnName("invoice_id");
+            entity.HasIndex(e => e.InvoiceId).HasDatabaseName("ix_allocation_invoice");
             entity.Property(e => e.InvoiceItemId).HasColumnName("invoice_item_id");
             entity.Property(e => e.TermId).HasColumnName("term_id");
             entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
@@ -481,6 +486,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.BillingAccountId).HasColumnName("billing_account_id");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_ledger_line_policy");
             entity.Property(e => e.TermId).HasColumnName("term_id");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
             entity.Property(e => e.ChargeId).HasColumnName("charge_id");
@@ -490,6 +496,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.ProductCode).HasColumnName("product_code");
             entity.Property(e => e.BillMode).HasColumnName("bill_mode");
             entity.Property(e => e.InvoiceId).HasColumnName("invoice_id");
+            entity.HasIndex(e => e.InvoiceId).HasDatabaseName("ix_ledger_line_invoice");
             entity.Property(e => e.InvoiceItemId).HasColumnName("invoice_item_id");
             entity.Property(e => e.ReceiptId).HasColumnName("receipt_id");
             entity.Property(e => e.AllocationId).HasColumnName("allocation_id");
@@ -497,6 +504,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.SourceType).HasColumnName("source_type");
             entity.Property(e => e.SourceId).HasColumnName("source_id");
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.HasIndex(e => e.ClaimId).HasDatabaseName("ix_ledger_line_claim");
             entity.Property(e => e.RecoveryId).HasColumnName("recovery_id");
             entity.Property(e => e.StatementRef).HasColumnName("statement_ref");
             entity.Property(e => e.CounterpartyPartyId).HasColumnName("counterparty_party_id");
@@ -544,6 +552,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.CreditItemId).HasColumnName("credit_item_id");
             entity.Property(e => e.TargetKind).HasColumnName("target_kind");
             entity.Property(e => e.TargetInvoiceId).HasColumnName("target_invoice_id");
+            entity.HasIndex(e => e.TargetInvoiceId).HasDatabaseName("ix_credit_application_target_invoice");
             entity.Property(e => e.TargetInvoiceItemId).HasColumnName("target_invoice_item_id");
             entity.Property(e => e.RefundId).HasColumnName("refund_id");
             entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
@@ -638,6 +647,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
 
             entity.Property(e => e.PayeePartyId).HasColumnName("payee_party_id");
+            entity.HasIndex(e => e.PayeePartyId).HasDatabaseName("ix_disbursement_payee_party");
             entity.Property(e => e.PayeeAccountId).HasColumnName("payee_account_id");
             entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
             entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
@@ -710,6 +720,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.BillingAccountId).HasColumnName("billing_account_id");
             entity.Property(e => e.TermId).HasColumnName("term_id");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_delinquency_case_policy");
             entity.Property(e => e.ProductCode).HasColumnName("product_code");
             entity.Property(e => e.PlanCode).HasColumnName("plan_code");
             entity.Property(e => e.State).HasColumnName("state");
@@ -787,6 +798,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
             entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
             entity.Property(e => e.PayeePartyId).HasColumnName("payee_party_id");
+            entity.HasIndex(e => e.PayeePartyId).HasDatabaseName("ix_refund_payee_party");
             entity.Property(e => e.PayeeAccountId).HasColumnName("payee_account_id");
             entity.Property(e => e.PayeeChanged).HasColumnName("payee_changed");
             entity.Property(e => e.PayeeAccountChangedBy).HasColumnName("payee_account_changed_by");
@@ -837,6 +849,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.CreditNoteId).HasColumnName("credit_note_id");
             entity.Property(e => e.CreditItemId).HasColumnName("credit_item_id");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_refund_credit_policy");
             entity.Property(e => e.TermId).HasColumnName("term_id");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
             entity.Property(e => e.ChargeType).HasColumnName("charge_type");

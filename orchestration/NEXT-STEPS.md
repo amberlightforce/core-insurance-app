@@ -1,5 +1,7 @@
 # NEXT STEPS — hardening phase (planned 2026-10-20, main @ bb040d8)
 
+> **Scope of this file: hardening waves 1–5 only.** New features and the missing pages (Products, Reports, Documents, Admin, portals) are planned in [`build-out/README.md`](build-out/README.md) as waves 6–27. Document map: [`README.md`](README.md).
+
 Slices 1–6 are on main, and E2E-01..12 have specs and CI jobs. This file lists the next phase: hardening.
 
 **How it runs (D-USR-16/20, `briefs/LIGHT-WORKFLOW.md`)**
@@ -35,10 +37,10 @@ Legend: priority **P0** = fix before anyone relies on the behaviour, P1 = this p
 | NX-UI-08 | Work inbox (`/work`) + notification centre | New `web/src/modules/work/`: my tasks, team queue, task detail. Feed the `NotificationCenter` (`App.tsx` currently passes `notifications={[]}`) and the home dashboard. Replace the `NOT_CREATED_WRK_NOT_BUILT` placeholder on pack-rollback detail. | P1 | L | HD-05, UI-05 | Sonnet 5.5 |
 | NX-UI-09 | Complaints and statutory clocks workbench (`/compliance`) | New `web/src/modules/compliance/complaints/` and `clocks/` on `/api/cmp/v1/complaints/*` (13 endpoints) and `/clocks/*` (9 endpoints). Replace the `/compliance` `ModulePlaceholder`. | P1 | L | — | Sonnet 5.5 |
 | NX-UI-10 | Finance operations screens | `web/src/modules/finance/`: trial balance, manual journal submit/decide, intake exceptions, period close, earning run. Bring `FinanceHomePage` up to the UI-02 state standard. | P1 | L | UI-02 | Sonnet 5.5 |
-| NX-UI-11 | Fiscal documents and regulatory submissions | Screens for `/api/cmp/v1/fiscal-documents/*` and `fiscal-reconciliation/*` (resubmit, cancel, correct, breaks), plus submissions, annual returns and the AI-system register. | P2 | L | UI-09 | Sonnet 5.5 |
+| NX-UI-11 | Fiscal documents and regulatory submissions — **split 2026-11-27 into build-out BO-CMP-06/07/09 (back end) and BO-CMP-14 (UI); build those instead** | Screens for `/api/cmp/v1/fiscal-documents/*` and `fiscal-reconciliation/*` (resubmit, cancel, correct, breaks), plus submissions, annual returns and the AI-system register. | P2 | L | UI-09 | Sonnet 5.5 |
 | NX-UI-12 | Accessibility pass | Run axe in route-level tests for every page (`web/src/test/axe.ts`). Status pills (`InvoiceStatePill`, `ClaimStatusPill`, `StatusPills`) need a text alternative, not colour alone. Check that the notification bell, Ctrl+K palette and shortcut overlay are keyboard-reachable. Fix the `ViewsRail.tsx:41` raw onClick. Focus or announce the no-permission banner. | P2 | M | UI-02 | Sonnet 5.5 |
 | NX-UI-13 | Nav icons and role homes | Give each nav destination its own icon in `app-shell/navigation.ts`; four policy-family entries currently share one. Add role homes for billing, RI, compliance and migration in `modules/home/HomePage.tsx`, or a graceful fallback. | P2 | S | UI-01 | Sonnet 5.5 |
-| NX-UI-14 | Remaining placeholder modules | Replace the `/documents`, `/reports` and `/products` placeholders. Add billing ops screens: suspense, mandates, payment plans, account-currents. Split into one item per module when started. | P2 | L | UI-05 | Sonnet 5.5 |
+| NX-UI-14 | Remaining placeholder modules — **superseded 2026-11-27 by build-out BO-PFC-10..12, BO-DAT-11..13, BO-DOC-12..14, BO-BIL-19..22; do not build** | Replace the `/documents`, `/reports` and `/products` placeholders. Add billing ops screens: suspense, mandates, payment plans, account-currents. Split into one item per module when started. | P2 | L | UI-05 | Sonnet 5.5 |
 
 ## 2. Testing (10)
 

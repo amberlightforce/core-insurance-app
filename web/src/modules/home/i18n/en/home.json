@@ -10,7 +10,13 @@
     "openBalance": "Unpaid invoice balance",
     "openOf": "{open} open of {count, plural, one {# invoice} other {# invoices}}",
     "pendingApprovals": "Approvals waiting",
-    "pendingNote": "Requests waiting for a decision"
+    "pendingNote": "Requests waiting for a decision",
+    "riPending": "Treaties awaiting approval",
+    "riNote": "{active} active of {count, plural, one {# treaty} other {# treaties}}",
+    "clocks": "Statutory clocks running",
+    "clocksNote": "{count, plural, one {# open data request} other {# open data requests}}",
+    "batches": "Migration batches",
+    "batchesNote": "opened in this browser"
   },
   "actions": {
     "title": "Quick actions",
@@ -18,7 +24,12 @@
     "newFnol": "New claim notification",
     "findParty": "Find a customer",
     "newParty": "New customer",
-    "journals": "Journal entries"
+    "journals": "Journal entries",
+    "billing": "Billing",
+    "treaties": "Treaty register",
+    "complaints": "Complaints and clocks",
+    "dsar": "DSAR console",
+    "migration": "Migration batches"
   },
   "signedOut": {
     "title": "Sign in to start",
@@ -32,14 +43,28 @@
     "openInvoices": "Open invoices",
     "overdue": "Overdue balances",
     "paid": "Paid invoices",
-    "recentPolicies": "Recent policies"
+    "recentPolicies": "Recent policies",
+    "riPending": "Awaiting approval",
+    "riActive": "Active treaties",
+    "clocks": "Open clocks",
+    "dsar": "Open data requests",
+    "batches": "Recent batches"
   },
   "kpi": {
     "label": "Billing figures",
     "invoices": "Invoices",
     "billed": "Billed",
     "collected": "Collected",
-    "open": "Unpaid"
+    "open": "Unpaid",
+    "riLabel": "Reinsurance figures",
+    "treaties": "Treaties",
+    "riActive": "Active",
+    "riPending": "Awaiting approval",
+    "riDraft": "Drafts",
+    "cmpLabel": "Compliance figures",
+    "clocks": "Open clocks",
+    "complaints": "Complaints",
+    "dsar": "Open data requests"
   },
   "latestInvoices": "Latest invoices",
   "latestInvoicesMeta": "by issue date",
@@ -54,5 +79,12 @@
       "account": "Billing account",
       "claim": "Claim"
     }
+  },
+  "dsarTypes": {
+    "ACCESS": "Access request",
+    "PORTABILITY": "Portability request",
+    "ERASURE": "Erasure request",
+    "RESTRICTION": "Restriction request",
+    "OBJECTION": "Objection"
   }
 }

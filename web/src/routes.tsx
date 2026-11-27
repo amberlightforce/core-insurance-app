@@ -12,6 +12,7 @@ import {
   financeRoles,
   migrationRoles,
   packRoles,
+  productRoles,
   packRollbackReviewerRoles,
   reinsuranceRoles,
   underwritingRoles,
@@ -247,6 +248,30 @@ const moduleRoutes: RouteObject[] = [
     }),
   },
   {
+    path: 'documents',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/DocumentsHomePage')).DocumentsHomePage,
+    }),
+  },
+  {
+    path: 'documents/subject/:module/:type/:id',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/SubjectDocumentsPage')).SubjectDocumentsPage,
+    }),
+  },
+  {
+    path: 'documents/:documentId',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/DocumentDetailPage')).DocumentDetailPage,
+    }),
+  },
+  {
+    path: 'reports',
+    lazy: async () => ({
+      Component: (await import('./modules/reports/ReportsPage')).ReportsPage,
+    }),
+  },
+  {
     path: 'finance/journals/policy/:policyNumber',
     lazy: async () => ({ Component: (await import('./modules/finance/JournalPage')).JournalPage }),
   },
@@ -361,6 +386,24 @@ moduleRoutes.push(
     ],
   },
 );
+moduleRoutes.push({
+  path: 'products',
+  element: <RequireRole roles={productRoles} />,
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/products/ProductCataloguePage')).ProductCataloguePage,
+      }),
+    },
+    {
+      path: ':code',
+      lazy: async () => ({
+        Component: (await import('./modules/products/ProductDetailPage')).ProductDetailPage,
+      }),
+    },
+  ],
+});
 moduleRoutes.push({
   path: 'reinsurance',
   element: <RequireRole roles={reinsuranceRoles} />,
@@ -490,10 +533,13 @@ const implemented = new Set([
   '/compliance/dsar',
   '/channels/withdrawals',
   '/policies/pack-rollback',
+  '/products',
   '/parties',
   '/policies',
   '/billing',
   '/finance',
+  '/documents',
+  '/reports',
   '/claims',
   '/underwriting',
   '/reinsurance',

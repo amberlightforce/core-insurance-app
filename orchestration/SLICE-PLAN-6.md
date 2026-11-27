@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # Slice plan 6 - remaining E2E journeys (E2E-05, -07, -08, -09, -10, -11)
 
 Planned 2026-10-19 by the slice-6 planner. Process: `briefs/LIGHT-WORKFLOW.md` (D-USR-20): working system first, main-path

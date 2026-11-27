@@ -1,4 +1,15 @@
-import { FilePlus2, FileSearch, LogIn, Search, ShieldAlert, UserPlus } from 'lucide-react';
+import {
+  ArrowRightLeft,
+  FilePlus2,
+  FileSearch,
+  Layers,
+  LogIn,
+  Receipt,
+  Scale,
+  Search,
+  ShieldAlert,
+  UserPlus,
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,7 +46,15 @@ import staff from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
 import { useCanSeeInbox, useTaskDigest } from '../work/api';
 import { useTaskTitle } from '../work/parts';
-import { usePendingApprovals, useAllInvoices } from './api';
+import { migrationRoles, complianceRoles, reinsuranceRoles } from '../../auth/roles';
+import { isOpenClock } from '../compliance/home/api';
+import {
+  useAllInvoices,
+  useComplianceHome,
+  readMigrationRecent,
+  usePendingApprovals,
+  useRiContracts,
+} from './api';
 import styles from './HomePage.module.css';
 import { greetingKey, summariseInvoices } from './summary';
 
@@ -101,7 +120,13 @@ export function HomePage() {
   const fmt = useFormat();
   const session = useDevSession();
   const roles = session?.user.roles ?? [];
-  const seesInvoices = has(roles, 'Staff.Underwriter', 'Staff.Billing');
+  const seesInvoices = has(roles, 'Staff.Underwriter', 'Staff.Billing', 'Staff.BillingManager');
+  const seesRi = has(roles, ...reinsuranceRoles);
+  const seesCmp = has(roles, ...complianceRoles);
+  const seesMig = has(roles, ...migrationRoles);
+  const ri = useRiContracts(seesRi);
+  const cmp = useComplianceHome(seesCmp);
+  const migBatches = useMemo(() => (seesMig ? readMigrationRecent() : []), [seesMig]);
   const seesApprovals = has(roles, 'Staff.ClaimsHandler', 'Staff.ClaimsManager');
   const invoices = useAllInvoices(seesInvoices);
   const approvals = usePendingApprovals(seesApprovals);
@@ -159,7 +184,21 @@ export function HomePage() {
   const roleNames = roles.map((role) =>
     isKnownRole(role) ? t(`shell:${roleKeys[role]}`) : humanizeRole(role),
   );
-  const waiting = seesApprovals ? pending.length : summary ? summary.open.length : null;
+  const riItems = ri.data?.items ?? [];
+  const riByStatus = (status: string) => riItems.filter((c) => c.status === status);
+  const openClocks = (cmp.clocks.data?.items ?? []).filter(isOpenClock);
+  const openDsars = (cmp.dsars.data?.items ?? []).filter(
+    (d) => d.request.status !== 'COMPLETED' && d.request.status !== 'REFUSED',
+  );
+  const waiting = seesApprovals
+    ? pending.length
+    : summary
+      ? summary.open.length
+      : seesRi && ri.data
+        ? riByStatus('PENDING_APPROVAL').length
+        : seesCmp && cmp.clocks.data
+          ? openClocks.length
+          : null;
   const line = [dateLine, waiting !== null ? t('home:waiting', { count: waiting }) : null]
     .filter(Boolean)
     .join(' · ');
@@ -184,6 +223,57 @@ export function HomePage() {
             icon: ShieldAlert,
             to: '/claims/new',
             variant: (has(roles, 'Staff.Underwriter') ? 'secondary' : 'commit') as ButtonVariant,
+          },
+        ]
+      : []),
+    ...(has(roles, 'Staff.Billing', 'Staff.BillingManager')
+      ? [
+          {
+            id: 'billing',
+            label: t('home:actions.billing'),
+            icon: Receipt,
+            to: '/billing',
+            variant: 'commit' as const,
+          },
+        ]
+      : []),
+    ...(seesRi
+      ? [
+          {
+            id: 'ri',
+            label: t('home:actions.treaties'),
+            icon: Layers,
+            to: '/reinsurance',
+            variant: 'commit' as const,
+          },
+        ]
+      : []),
+    ...(seesCmp
+      ? [
+          {
+            id: 'cmp',
+            label: t('home:actions.complaints'),
+            icon: Scale,
+            to: '/compliance',
+            variant: 'commit' as const,
+          },
+          {
+            id: 'dsar',
+            label: t('home:actions.dsar'),
+            icon: FileSearch,
+            to: '/compliance/dsar',
+            variant: 'secondary' as const,
+          },
+        ]
+      : []),
+    ...(seesMig
+      ? [
+          {
+            id: 'mig',
+            label: t('home:actions.migration'),
+            icon: ArrowRightLeft,
+            to: '/admin/migration',
+            variant: 'commit' as const,
           },
         ]
       : []),
@@ -265,6 +355,34 @@ export function HomePage() {
         <div className={styles.metricRow}>
           <span className={styles.metricValue}>{pending.length}</span>
           <span className={styles.metricNote}>{t('home:hero.pendingNote')}</span>
+        </div>
+      </div>
+    ) : seesRi && ri.data ? (
+      <div className={styles.metric}>
+        <span className={styles.metricLabel}>{t('home:hero.riPending')}</span>
+        <div className={styles.metricRow}>
+          <span className={styles.metricValue}>{riByStatus('PENDING_APPROVAL').length}</span>
+          <span className={styles.metricNote}>
+            {t('home:hero.riNote', { active: riByStatus('ACTIVE').length, count: riItems.length })}
+          </span>
+        </div>
+      </div>
+    ) : seesCmp && cmp.clocks.data ? (
+      <div className={styles.metric}>
+        <span className={styles.metricLabel}>{t('home:hero.clocks')}</span>
+        <div className={styles.metricRow}>
+          <span className={styles.metricValue}>{openClocks.length}</span>
+          <span className={styles.metricNote}>
+            {t('home:hero.clocksNote', { count: openDsars.length })}
+          </span>
+        </div>
+      </div>
+    ) : seesMig ? (
+      <div className={styles.metric}>
+        <span className={styles.metricLabel}>{t('home:hero.batches')}</span>
+        <div className={styles.metricRow}>
+          <span className={styles.metricValue}>{migBatches.length}</span>
+          <span className={styles.metricNote}>{t('home:hero.batchesNote')}</span>
         </div>
       </div>
     ) : undefined;
@@ -380,6 +498,89 @@ export function HomePage() {
       },
     );
   }
+  if (seesRi) {
+    const base = {
+      to: '/reinsurance',
+      loading: ri.isPending,
+      error: ri.isError,
+      retry: () => void ri.refetch(),
+    };
+    const rows = (status: string): WorkLeftItem[] =>
+      riByStatus(status)
+        .slice(0, 3)
+        .map((c) => ({
+          id: c.contractId,
+          label: `${c.contractNumber ?? c.contractId.slice(0, 8)} · ${String(c.contractYear)}`,
+        }));
+    cards.push(
+      {
+        ...base,
+        id: 'ri-pending',
+        title: t('home:cards.riPending'),
+        family: 'plum',
+        count: riByStatus('PENDING_APPROVAL').length,
+        items: rows('PENDING_APPROVAL'),
+      },
+      {
+        ...base,
+        id: 'ri-active',
+        title: t('home:cards.riActive'),
+        family: 'success',
+        count: riByStatus('ACTIVE').length,
+        items: rows('ACTIVE'),
+      },
+    );
+  }
+  if (seesCmp) {
+    cards.push(
+      {
+        id: 'cmp-clocks',
+        title: t('home:cards.clocks'),
+        family: openClocks.some((c) => c.status === 'WARNED') ? 'danger' : 'warning',
+        count: openClocks.length,
+        items: openClocks.slice(0, 3).map((c) => ({
+          id: c.instanceId,
+          label: c.clockCode,
+          meta: c.deadline ? (
+            <span className={styles.itemMeta}>{fmt.date(c.deadline)}</span>
+          ) : undefined,
+        })),
+        to: '/compliance',
+        loading: cmp.clocks.isPending,
+        error: cmp.clocks.isError,
+        retry: () => void cmp.clocks.refetch(),
+      },
+      {
+        id: 'cmp-dsar',
+        title: t('home:cards.dsar'),
+        family: 'brand',
+        count: openDsars.length,
+        items: openDsars.slice(0, 3).map((d) => ({
+          id: d.request.dsarId,
+          label: t(`home:dsarTypes.${d.request.requestType}`, {
+            defaultValue: d.request.requestType,
+          }),
+          meta: <span className={styles.itemMeta}>{fmt.date(d.request.deadline)}</span>,
+        })),
+        to: '/compliance/dsar',
+        loading: cmp.dsars.isPending,
+        error: cmp.dsars.isError,
+        retry: () => void cmp.dsars.refetch(),
+      },
+    );
+  }
+  if (seesMig) {
+    cards.push({
+      id: 'mig-batches',
+      title: t('home:cards.batches'),
+      family: 'brand',
+      count: migBatches.length,
+      items: migBatches.slice(0, 3).map((b) => ({ id: b.batchId, label: b.name })),
+      to: '/admin/migration',
+      loading: false,
+      error: false,
+    });
+  }
   const policies = recentPolicies;
   if (cards.length < 4 && has(roles, 'Staff.Underwriter', 'Staff.Billing', 'Staff.Finance')) {
     cards.push({
@@ -447,6 +648,39 @@ export function HomePage() {
           <KpiTile label={t('home:kpi.billed')} value={summary.totalBilled} format="money" />
           <KpiTile label={t('home:kpi.collected')} value={summary.totalPaid} format="money" />
           <KpiTile label={t('home:kpi.open')} value={summary.totalOpen} format="money" />
+        </section>
+      ) : null}
+
+      {seesRi && ri.data ? (
+        <section className={styles.kpis} aria-label={t('home:kpi.riLabel')}>
+          <KpiTile label={t('home:kpi.treaties')} value={riItems.length} format="number" />
+          <KpiTile
+            label={t('home:kpi.riActive')}
+            value={riByStatus('ACTIVE').length}
+            format="number"
+          />
+          <KpiTile
+            label={t('home:kpi.riPending')}
+            value={riByStatus('PENDING_APPROVAL').length}
+            format="number"
+          />
+          <KpiTile
+            label={t('home:kpi.riDraft')}
+            value={riByStatus('DRAFT').length}
+            format="number"
+          />
+        </section>
+      ) : null}
+
+      {seesCmp && cmp.clocks.data ? (
+        <section className={styles.kpis} aria-label={t('home:kpi.cmpLabel')}>
+          <KpiTile label={t('home:kpi.clocks')} value={openClocks.length} format="number" />
+          <KpiTile
+            label={t('home:kpi.complaints')}
+            value={cmp.complaints.data?.items.length ?? 0}
+            format="number"
+          />
+          <KpiTile label={t('home:kpi.dsar')} value={openDsars.length} format="number" />
         </section>
       ) : null}
 

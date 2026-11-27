@@ -74,6 +74,7 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
             entity.Property(e => e.LegacyKey).HasColumnName("legacy_key");
             entity.Property(e => e.CoreId).HasColumnName("core_id");
             entity.Property(e => e.BatchId).HasColumnName("batch_id");
+            entity.HasIndex(e => e.BatchId).HasDatabaseName("ix_xref_batch");
             entity.Property(e => e.Origin).HasColumnName("origin");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");

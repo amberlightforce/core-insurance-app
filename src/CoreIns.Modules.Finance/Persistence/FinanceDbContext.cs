@@ -236,8 +236,10 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
             entity.Property(e => e.ConfigurationHash).HasColumnName("configuration_hash");
             entity.Property(e => e.CorrelationId).HasColumnName("correlation_id");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_business_event_policy");
             entity.Property(e => e.PolicyTermId).HasColumnName("policy_term_id");
             entity.Property(e => e.BillingAccountId).HasColumnName("billing_account_id");
+            entity.HasIndex(e => e.BillingAccountId).HasDatabaseName("ix_business_event_billing_account");
             entity.Property(e => e.JournalIds).HasColumnName("journal_ids");
             entity.Property(e => e.Attempts).HasColumnName("attempts");
             entity.Property(e => e.ReceivedAt).HasColumnName("received_at").HasColumnType("timestamptz");
@@ -348,12 +350,15 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
             entity.Property(e => e.ChargeCategory).HasColumnName("charge_category");
             entity.Property(e => e.GlKey).HasColumnName("gl_key");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_journal_line_policy_id");
             entity.Property(e => e.PolicyNumber).HasColumnName("policy_number");
             entity.Property(e => e.PolicyTermId).HasColumnName("policy_term_id");
             entity.Property(e => e.PolicyTransactionId).HasColumnName("policy_transaction_id");
             entity.Property(e => e.ChargeId).HasColumnName("charge_id");
             entity.Property(e => e.BillingAccountId).HasColumnName("billing_account_id");
+            entity.HasIndex(e => e.BillingAccountId).HasDatabaseName("ix_journal_line_billing_account");
             entity.Property(e => e.InvoiceId).HasColumnName("invoice_id");
+            entity.HasIndex(e => e.InvoiceId).HasDatabaseName("ix_journal_line_invoice");
             entity.Property(e => e.ReceiptId).HasColumnName("receipt_id");
             entity.Property(e => e.ClaimId).HasColumnName("claim_id");
             entity.Property(e => e.ExposureId).HasColumnName("exposure_id");

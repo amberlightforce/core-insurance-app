@@ -64,7 +64,7 @@ inside the container; that path is development-only.
 
 ## Deltas to the infrastructure specification
 
-These are the differences between this repository and `core-insurance-infra` (ARCHITECTURE-DECISIONS.md,
+These are the differences between this repository and `core-insurance-infra` (now folded into `docs/architecture/`: ARCHITECTURE-DECISIONS.md,
 INFRASTRUCTURE.md) found while building the scaffold. The spec files themselves are owned elsewhere and are not
 edited here.
 
