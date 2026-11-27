@@ -19,6 +19,8 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
 
     public DbSet<FnolDraftRow> FnolDrafts => Set<FnolDraftRow>();
 
+    public DbSet<CatEventRow> CatEvents => Set<CatEventRow>();
+
     public DbSet<ClaimantRow> Claimants => Set<ClaimantRow>();
 
     public DbSet<IncidentRow> Incidents => Set<IncidentRow>();
@@ -114,6 +116,9 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
             entity.Property(e => e.DuplicateReasonCode).HasColumnName("duplicate_reason_code");
             entity.Property(e => e.Handler).HasColumnName("handler");
             entity.Property(e => e.ReopenCount).HasColumnName("reopen_count");
+            entity.Property(e => e.CatEventCode).HasColumnName("cat_event_code");
+            entity.Property(e => e.Milestone).HasColumnName("milestone");
+            entity.Property(e => e.MilestoneAt).HasColumnName("milestone_at").HasColumnType("timestamptz");
             entity.Property(e => e.LastExposureSequence).HasColumnName("last_exposure_sequence");
             entity.Property(e => e.LastTransactionSequence).HasColumnName("last_transaction_sequence");
             entity.Property(e => e.ClosedAt).HasColumnName("closed_at").HasColumnType("timestamptz");
@@ -122,6 +127,7 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
             entity.HasIndex(e => new { e.LegalEntityId, e.PolicyId, e.LossDate }).HasDatabaseName("ix_claim_policy_loss_date");
             entity.HasIndex(e => new { e.LegalEntityId, e.PolicyNumber }).HasDatabaseName("ix_claim_policy_number");
             entity.HasIndex(e => new { e.LegalEntityId, e.InsuredPartyId }).HasDatabaseName("ix_claim_insured_party");
+            entity.HasIndex(e => new { e.LegalEntityId, e.CatEventCode }).HasDatabaseName("ix_claim_cat_event").HasFilter("cat_event_code IS NOT NULL");
             entity.HasOne<ClaimRow>().WithMany().HasForeignKey(e => e.DuplicateOfClaimId).HasConstraintName("fk_claim_duplicate_of").OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -157,6 +163,30 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
             entity.HasIndex(e => new { e.LegalEntityId, e.CreatedBy, e.Status }).HasDatabaseName("ix_fnol_draft_owner");
             entity.HasOne<ClaimRow>().WithMany().HasForeignKey(e => e.ClaimId).HasConstraintName("fk_fnol_draft_claim").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<CatEventRow>(entity =>
+        {
+            entity.ToTable("cat_event", table =>
+            {
+                CommonChecks(table, "cat_event");
+                table.HasCheckConstraint("ck_cat_event_status", "status IN ('OPEN', 'CLOSED')");
+                table.HasCheckConstraint("ck_cat_event_window", "window_to IS NULL OR window_to > window_from");
+            });
+            entity.HasKey(e => e.CatEventId).HasName("pk_cat_event");
+            entity.Property(e => e.CatEventId).HasColumnName("cat_event_id");
+            MapCommon(entity);
+            entity.Property(e => e.CatCode).HasColumnName("cat_code");
+            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.Perils).HasColumnName("perils");
+            entity.Property(e => e.Region).HasColumnName("region");
+            entity.Property(e => e.WindowFrom).HasColumnName("window_from").HasColumnType("timestamptz");
+            entity.Property(e => e.WindowTo).HasColumnName("window_to").HasColumnType("timestamptz");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.CloseReason).HasColumnName("close_reason");
+            entity.Property(e => e.ClosedAt).HasColumnName("closed_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.LegalEntityId, e.CatCode }).IsUnique().HasDatabaseName("ux_cat_event_code");
         });
 
         modelBuilder.Entity<ClaimantRow>(entity =>

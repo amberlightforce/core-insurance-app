@@ -939,6 +939,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clm/v1/cat-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List CAT events
+         * @description List CAT events
+         *
+         *     BO-CLM-08 (REQ-CLM-006, REQ-CLM-210..REQ-CLM-215)
+         */
+        get: operations["clm.CatEvent.list"];
+        put?: never;
+        /**
+         * Declare a CAT event
+         * @description Declare a CAT event
+         *
+         *     BO-CLM-08 (REQ-CLM-006, REQ-CLM-210..REQ-CLM-215)
+         */
+        post: operations["clm.CatEvent.declare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clm/v1/cat-events/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Close a CAT event
+         * @description Close a CAT event
+         *
+         *     BO-CLM-08 (REQ-CLM-006, REQ-CLM-210..REQ-CLM-215)
+         */
+        post: operations["clm.CatEvent.close"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clm/v1/services/request": {
         parameters: {
             query?: never;
@@ -1963,6 +2013,12 @@ export interface components {
             changes?: {
                 /** @description Members present replace the stored facts; absent members are unchanged (D-SL4-17) */
                 liabilityFacts?: components["schemas"]["LiabilityFacts"];
+                /** @description Tracking milestone code (BO-CLM-08); published as ClaimUpdated.newMilestone */
+                milestone?: components["schemas"]["Code"];
+                /** @description Tags the claim to this open CAT event; the loss date must lie in the event window (BO-CLM-08) */
+                catEventCode?: components["schemas"]["Code"];
+                /** @description true removes the CAT event tag (BO-CLM-08) */
+                untagCatEvent?: boolean;
             };
             /** @description Reason code (audit) */
             reason?: components["schemas"]["Code"] | null;
@@ -2854,24 +2910,107 @@ export interface components {
             /** @description PRD: "certificate" */
             certificate?: components["schemas"]["Unspecified"];
         };
+        /** @description Claim tracking view (BO-CLM-08, REQ-CLM-009); derived from the claim and its approved financials, no stored state of its own */
+        ClaimTrackingView: {
+            claimId: components["schemas"]["Uuid"];
+            claimNumber: components["schemas"]["BusinessNumber"];
+            policyNumber?: components["schemas"]["BusinessNumber"];
+            insuredPartyId?: components["schemas"]["Uuid"];
+            status: string;
+            subStatus?: components["schemas"]["Code"] | null;
+            milestone?: components["schemas"]["Code"] | null;
+            milestoneAt?: components["schemas"]["Instant"] | null;
+            /** Format: date */
+            lossDate?: string;
+            /** Format: date */
+            noticeOn?: string;
+            openedAt?: components["schemas"]["Instant"];
+            /** @description Whole days since the claim was opened (to the closing instant when closed) */
+            ageDays: number;
+            /** @description Whole days since the last change of the claim (the review proxy until the WRK diary exists) */
+            unreviewedDays?: number;
+            /** @description Incurred at or above Claims:Tracking:LargeLossThreshold */
+            largeLoss: boolean;
+            handler?: string | null;
+            catEventCode?: components["schemas"]["Code"] | null;
+            openReserve?: components["schemas"]["Money"];
+            paid?: components["schemas"]["Money"];
+            incurred?: components["schemas"]["Money"];
+        };
         /** @description clm.ClaimTracking.get result. PRD outputs: "tracking view" */
         ClaimTrackingGetResponse: {
-            /** @description PRD: "tracking view" */
-            trackingView?: components["schemas"]["Unspecified"];
+            trackingView: components["schemas"]["ClaimTrackingView"];
         };
         /** @description clm.ClaimTracking.list result. PRD outputs: "tracking view" */
         ClaimTrackingListItem: {
-            /** @description PRD: "tracking view" */
-            trackingView?: components["schemas"]["Unspecified"];
+            trackingView: components["schemas"]["ClaimTrackingView"];
         };
-        /** @description Page of clm.ClaimTracking.list results (cursor pagination, contract §3.5.5) */
+        /** @description Page of clm.ClaimTracking.list results, oldest claim first (cursor pagination, contract §3.5.5) */
         ClaimTrackingListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["ClaimTrackingListItem"][];
         };
-        /** @description clm.CatEvent.aggregate result. PRD outputs: "totals by line" */
+        /** @description Sums of the approved claim financials of tagged claims in one currency (reads only, no new money logic) */
+        CatEventTotals: {
+            claimCount: number;
+            reserved: components["schemas"]["Money"];
+            paid: components["schemas"]["Money"];
+            openReserve: components["schemas"]["Money"];
+            incurred: components["schemas"]["Money"];
+        };
+        CatEventLineTotals: {
+            lineOfBusiness: string;
+            totals: components["schemas"]["CatEventTotals"][];
+        };
+        CatEventAggregate: {
+            catCode: components["schemas"]["Code"];
+            name: string;
+            /** @enum {string} */
+            status: "OPEN" | "CLOSED";
+            claimCount: number;
+            totalsByCurrency: components["schemas"]["CatEventTotals"][];
+            totalsByLine: components["schemas"]["CatEventLineTotals"][];
+        };
+        /** @description clm.CatEvent.aggregate result. PRD outputs: "totals by line". Balances as of validAt (an instant bounds the approval time), default now. */
         CatEventAggregateResponse: {
-            /** @description PRD: "totals by line" */
-            totalsByLine?: components["schemas"]["Unspecified"];
+            events: components["schemas"]["CatEventAggregate"][];
+        };
+        /** @description A CAT event of the register (BO-CLM-08) */
+        CatEventView: {
+            catEventId: components["schemas"]["Uuid"];
+            catCode: components["schemas"]["Code"];
+            name: string;
+            perils: components["schemas"]["Code"][];
+            region: string;
+            windowFrom: components["schemas"]["Instant"];
+            windowTo?: components["schemas"]["Instant"] | null;
+            /** @enum {string} */
+            status: "OPEN" | "CLOSED";
+            taggedClaimCount: number;
+            recordVersion?: number;
+        };
+        /** @description clm.CatEvent.declare request */
+        CatEventDeclareRequest: {
+            catCode: components["schemas"]["Code"];
+            name: string;
+            perils: components["schemas"]["Code"][];
+            region: string;
+            windowFrom: components["schemas"]["Instant"];
+            windowTo?: components["schemas"]["Instant"] | null;
+        };
+        CatEventDeclareResponse: {
+            catEvent: components["schemas"]["CatEventView"];
+        };
+        /** @description clm.CatEvent.close request: no new claim can be tagged afterwards; existing tags stay */
+        CatEventCloseRequest: {
+            catCode: components["schemas"]["Code"];
+            reason?: components["schemas"]["Code"] | null;
+        };
+        CatEventCloseResponse: {
+            catEvent: components["schemas"]["CatEventView"];
+        };
+        /** @description The CAT event register of the legal entity, newest window first */
+        CatEventListResponse: {
+            events: components["schemas"]["CatEventView"][];
         };
         /** @description clm.Service.request request. PRD inputs: "service data; invoice" */
         ServiceRequestRequest: {
@@ -5382,6 +5521,14 @@ export interface operations {
                 party?: string;
                 /** @description PRD: "party or policy" (optional) */
                 policy?: string;
+                /** @description Claim status filter; the default is Open (the watch list) */
+                status?: string;
+                /** @description Only claims tagged to this CAT event */
+                catCode?: string;
+                /** @description true keeps large losses only */
+                largeLoss?: boolean;
+                /** @description Only claims at least this many days old */
+                minAgeDays?: number;
             };
             header?: {
                 /**
@@ -5450,6 +5597,131 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.CatEvent.list": {
+        parameters: {
+            query?: {
+                /** @description OPEN or CLOSED */
+                status?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatEventListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.CatEvent.declare": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatEventDeclareRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatEventDeclareResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.CatEvent.close": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatEventCloseRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatEventCloseResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };

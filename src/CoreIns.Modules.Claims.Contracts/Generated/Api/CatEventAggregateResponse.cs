@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.CatEvent.aggregate result. PRD outputs: "totals by line"</summary>
+/// <summary>clm.CatEvent.aggregate result. PRD outputs: "totals by line". Balances as of validAt (an instant bounds the approval time), default now.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CatEventAggregateResponse
 {
-    /// <summary>PRD: "totals by line"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("totalsByLine")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? TotalsByLine { get; init; }
+    /// <summary>Contract member 'events'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("events")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.CatEventAggregate> Events { get; init; }
 }

@@ -3076,6 +3076,31 @@ paths:
         description: 'PRD: "party or policy" (optional)'
         schema:
           type: string
+      - name: status
+        in: query
+        required: false
+        description: Claim status filter; the default is Open (the watch list)
+        schema:
+          type: string
+      - name: catCode
+        in: query
+        required: false
+        description: Only claims tagged to this CAT event
+        schema:
+          type: string
+      - name: largeLoss
+        in: query
+        required: false
+        description: true keeps large losses only
+        schema:
+          type: boolean
+      - name: minAgeDays
+        in: query
+        required: false
+        description: Only claims at least this many days old
+        schema:
+          type: integer
+          minimum: 0
       responses:
         '200':
           description: Success
@@ -3146,6 +3171,193 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/cat-events:
+    post:
+      operationId: clm.CatEvent.declare
+      summary: Declare a CAT event
+      description: |-
+        Declare a CAT event
+
+        BO-CLM-08 (REQ-CLM-006, REQ-CLM-210..REQ-CLM-215)
+      tags:
+      - CatEvent
+      x-requirement:
+      - REQ-CLM-006
+      - REQ-CLM-210..REQ-CLM-215
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.CatEvent.declare
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-CAT-EVENT
+        note: duplicate code, bad window or event already closed
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - BO-CLM-08
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CatEventDeclareRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatEventDeclareResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    get:
+      operationId: clm.CatEvent.list
+      summary: List CAT events
+      description: |-
+        List CAT events
+
+        BO-CLM-08 (REQ-CLM-006, REQ-CLM-210..REQ-CLM-215)
+      tags:
+      - CatEvent
+      x-requirement:
+      - REQ-CLM-006
+      - REQ-CLM-210..REQ-CLM-215
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.CatEvent.list
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-CLM-08
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: status
+        in: query
+        required: false
+        description: OPEN or CLOSED
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatEventListResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/cat-events/close:
+    post:
+      operationId: clm.CatEvent.close
+      summary: Close a CAT event
+      description: |-
+        Close a CAT event
+
+        BO-CLM-08 (REQ-CLM-006, REQ-CLM-210..REQ-CLM-215)
+      tags:
+      - CatEvent
+      x-requirement:
+      - REQ-CLM-006
+      - REQ-CLM-210..REQ-CLM-215
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-05
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'n/a'
+      x-exposure:
+      - ui
+      x-permission: clm.CatEvent.close
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-CAT-EVENT
+        note: duplicate code, bad window or event already closed
+        status: 422
+      - code: CLM-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - BO-CLM-08
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CatEventCloseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatEventCloseResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/clm/v1/services/request:
@@ -6240,6 +6452,15 @@ components:
             liabilityFacts:
               $ref: '#/components/schemas/LiabilityFacts'
               description: Members present replace the stored facts; absent members are unchanged (D-SL4-17)
+            milestone:
+              $ref: ../events/common.schema.json#/$defs/Code
+              description: Tracking milestone code (BO-CLM-08); published as ClaimUpdated.newMilestone
+            catEventCode:
+              $ref: ../events/common.schema.json#/$defs/Code
+              description: Tags the claim to this open CAT event; the loss date must lie in the event window (BO-CLM-08)
+            untagCatEvent:
+              type: boolean
+              description: true removes the CAT event tag (BO-CLM-08)
         reason:
           oneOf:
           - $ref: ../events/common.schema.json#/$defs/Code
@@ -8168,20 +8389,85 @@ components:
         certificate:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "certificate"'
+    ClaimTrackingView:
+      type: object
+      description: Claim tracking view (BO-CLM-08, REQ-CLM-009); derived from the claim and its approved financials, no stored state of its own
+      properties:
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        insuredPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+        subStatus:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        milestone:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        milestoneAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        lossDate:
+          type: string
+          format: date
+        noticeOn:
+          type: string
+          format: date
+        openedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        ageDays:
+          type: integer
+          description: Whole days since the claim was opened (to the closing instant when closed)
+        unreviewedDays:
+          type: integer
+          description: Whole days since the last change of the claim (the review proxy until the WRK diary exists)
+        largeLoss:
+          type: boolean
+          description: Incurred at or above Claims:Tracking:LargeLossThreshold
+        handler:
+          oneOf:
+          - type: string
+          - type: 'null'
+        catEventCode:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        openReserve:
+          $ref: ../events/common.schema.json#/$defs/Money
+        paid:
+          $ref: ../events/common.schema.json#/$defs/Money
+        incurred:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - claimId
+      - claimNumber
+      - status
+      - ageDays
+      - largeLoss
     ClaimTrackingGetResponse:
       type: object
       description: 'clm.ClaimTracking.get result. PRD outputs: "tracking view"'
       properties:
         trackingView:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tracking view"'
+          $ref: '#/components/schemas/ClaimTrackingView'
+      required:
+      - trackingView
     ClaimTrackingListItem:
       type: object
       description: 'clm.ClaimTracking.list result. PRD outputs: "tracking view"'
       properties:
         trackingView:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tracking view"'
+          $ref: '#/components/schemas/ClaimTrackingView'
+      required:
+      - trackingView
     ClaimTrackingListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -8191,14 +8477,185 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/ClaimTrackingListItem'
-      description: Page of clm.ClaimTracking.list results (cursor pagination, contract §3.5.5)
+      description: Page of clm.ClaimTracking.list results, oldest claim first (cursor pagination, contract §3.5.5)
+    CatEventTotals:
+      type: object
+      description: Sums of the approved claim financials of tagged claims in one currency (reads only, no new money logic)
+      properties:
+        claimCount:
+          type: integer
+        reserved:
+          $ref: ../events/common.schema.json#/$defs/Money
+        paid:
+          $ref: ../events/common.schema.json#/$defs/Money
+        openReserve:
+          $ref: ../events/common.schema.json#/$defs/Money
+        incurred:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - claimCount
+      - reserved
+      - paid
+      - openReserve
+      - incurred
+    CatEventLineTotals:
+      type: object
+      properties:
+        lineOfBusiness:
+          type: string
+        totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatEventTotals'
+      required:
+      - lineOfBusiness
+      - totals
+    CatEventAggregate:
+      type: object
+      properties:
+        catCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+          - OPEN
+          - CLOSED
+        claimCount:
+          type: integer
+        totalsByCurrency:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatEventTotals'
+        totalsByLine:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatEventLineTotals'
+      required:
+      - catCode
+      - name
+      - status
+      - claimCount
+      - totalsByCurrency
+      - totalsByLine
     CatEventAggregateResponse:
       type: object
-      description: 'clm.CatEvent.aggregate result. PRD outputs: "totals by line"'
+      description: 'clm.CatEvent.aggregate result. PRD outputs: "totals by line". Balances as of validAt (an instant bounds the approval time), default now.'
       properties:
-        totalsByLine:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "totals by line"'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatEventAggregate'
+      required:
+      - events
+    CatEventView:
+      type: object
+      description: A CAT event of the register (BO-CLM-08)
+      properties:
+        catEventId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        catCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        name:
+          type: string
+        perils:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        region:
+          type: string
+        windowFrom:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        windowTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        status:
+          type: string
+          enum:
+          - OPEN
+          - CLOSED
+        taggedClaimCount:
+          type: integer
+        recordVersion:
+          type: integer
+      required:
+      - catEventId
+      - catCode
+      - name
+      - perils
+      - region
+      - windowFrom
+      - status
+      - taggedClaimCount
+    CatEventDeclareRequest:
+      type: object
+      description: 'clm.CatEvent.declare request'
+      properties:
+        catCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        perils:
+          type: array
+          minItems: 1
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        region:
+          type: string
+          minLength: 1
+          maxLength: 200
+        windowFrom:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        windowTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+      required:
+      - catCode
+      - name
+      - perils
+      - region
+      - windowFrom
+    CatEventDeclareResponse:
+      type: object
+      properties:
+        catEvent:
+          $ref: '#/components/schemas/CatEventView'
+      required:
+      - catEvent
+    CatEventCloseRequest:
+      type: object
+      description: 'clm.CatEvent.close request: no new claim can be tagged afterwards; existing tags stay'
+      properties:
+        catCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        reason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+      required:
+      - catCode
+    CatEventCloseResponse:
+      type: object
+      properties:
+        catEvent:
+          $ref: '#/components/schemas/CatEventView'
+      required:
+      - catEvent
+    CatEventListResponse:
+      type: object
+      description: The CAT event register of the legal entity, newest window first
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatEventView'
+      required:
+      - events
     ServiceRequestRequest:
       type: object
       description: 'clm.Service.request request. PRD inputs: "service data; invoice"'

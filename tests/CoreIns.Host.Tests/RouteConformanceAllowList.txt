@@ -33,9 +33,6 @@ CONTRACT_NOT_SERVED GET /api/chn/v1/quotes/{}/issues
 CONTRACT_NOT_SERVED GET /api/chn/v1/wallets/status
 CONTRACT_NOT_SERVED GET /api/chn/v1/webhooks/deliveries
 CONTRACT_NOT_SERVED GET /api/chn/v1/{}/{}/documents
-CONTRACT_NOT_SERVED GET /api/clm/v1/cat-events/aggregate
-CONTRACT_NOT_SERVED GET /api/clm/v1/claim-trackings
-CONTRACT_NOT_SERVED GET /api/clm/v1/claim-trackings/{}
 CONTRACT_NOT_SERVED GET /api/clm/v1/conversations
 CONTRACT_NOT_SERVED GET /api/clm/v1/financials/daily-totals
 CONTRACT_NOT_SERVED GET /api/cmp/v1/bureaus/status

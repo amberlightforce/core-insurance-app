@@ -62,6 +62,7 @@ public static class ClaimsModule
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.migration_import TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.fnol_snapshot TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.fnol_draft TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.cat_event TO {appRole}",
 
                 // Claim financials (SL2-CLM-MONEY, D-ARC-34): the ledger lines are insert-only; the set header, line flags,
                 // payments and the payee read model move.
@@ -195,6 +196,14 @@ public static class ClaimsModule
         services.AddCommandAuditor<SaveFnolDraft, FnolSaveDraftResponse, SaveFnolDraftAuditor>();
         services.AddCommand<SaveFnolDraft, FnolSaveDraftResponse, SaveFnolDraftHandler>(CommandDescriptor.For("clm.Fnol.saveDraft") with { SupportsDryRun = true });
         services.AddScoped<FnolDraftReader>();
+        services.AddScoped<ClaimTrackingReader>();
+        services.AddScoped<CatEventReader>();
+        services.AddScoped<IValidator<DeclareCatEvent>, DeclareCatEventValidator>();
+        services.AddCommandAuditor<DeclareCatEvent, CatEventDeclareResponse, DeclareCatEventAuditor>();
+        services.AddCommand<DeclareCatEvent, CatEventDeclareResponse, DeclareCatEventHandler>(CommandDescriptor.For("clm.CatEvent.declare"));
+        services.AddScoped<IValidator<CloseCatEvent>, CloseCatEventValidator>();
+        services.AddCommandAuditor<CloseCatEvent, CatEventCloseResponse, CloseCatEventAuditor>();
+        services.AddCommand<CloseCatEvent, CatEventCloseResponse, CloseCatEventHandler>(CommandDescriptor.For("clm.CatEvent.close"));
         services.AddScoped<ExposureLifecycleSupport>();
         services.AddScoped<ExposureClocks>();
         services.AddScoped<IValidator<UpdateExposure>, UpdateExposureValidator>();
@@ -292,6 +301,8 @@ public static class ClaimsModule
             .Describe("Η κατάσταση της ζημίας δεν επιτρέπει αυτή την ενέργεια.", "The claim's state does not allow this action."),
         ErrorDefinition.For(ModuleCode.CLM, "CLOSE-GUARD", 422, "Η ζημία δεν μπορεί να κλείσει ακόμη", "The claim cannot close yet")
             .Describe("Υπάρχει ανοιχτό απόθεμα ή εκκρεμής πληρωμή σε έκθεση· αποδεσμεύστε ή τακτοποιήστε πρώτα.", "An exposure has an open reserve or a pending payment; release or settle it first."),
+        ErrorDefinition.For(ModuleCode.CLM, "CAT-EVENT", 422, "Μη έγκυρο συμβάν καταστροφής", "The CAT event request is not valid")
+            .Describe("Το συμβάν υπάρχει ήδη, είναι κλειστό ή η ημερομηνία ζημίας είναι εκτός του παραθύρου του.", "The event exists already, is closed, or the loss date is outside its window."),
         ErrorDefinition.For(ModuleCode.CLM, "MERGE-NOT-DUPLICATE", 422, "Οι ζημίες δεν μπορούν να συγχωνευθούν", "The claims cannot be merged")
             .Describe("Μόνο δύο ανοιχτές ζημίες του ίδιου ασφαλιστηρίου και της ίδιας ημερομηνίας ζημίας συγχωνεύονται.", "Only two open claims of the same policy and loss date can be merged."),
         ErrorDefinition.For(ModuleCode.CLM, "MERGE-FINANCIALS", 422, "Η διπλή ζημία έχει οικονομική κίνηση", "The duplicate claim has financial activity")
