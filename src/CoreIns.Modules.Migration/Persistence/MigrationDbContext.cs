@@ -21,6 +21,12 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
 
     public DbSet<Services.Reconciliation.ReconResultRow> ReconResults => Set<Services.Reconciliation.ReconResultRow>();
 
+    public DbSet<Services.SignOff.SignOffRow> SignOffs => Set<Services.SignOff.SignOffRow>();
+
+    public DbSet<Services.SignOff.SignOffSignatoryRow> SignOffSignatories => Set<Services.SignOff.SignOffSignatoryRow>();
+
+    public DbSet<Services.SignOff.SignOffWaiverRow> SignOffWaivers => Set<Services.SignOff.SignOffWaiverRow>();
+
     protected override string Schema => MigrationModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -28,6 +34,7 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
         base.OnModelCreating(modelBuilder);
         modelBuilder.MapDsarRestrictions();
         Services.Reconciliation.ReconciliationModel.Configure(modelBuilder);
+        Services.SignOff.SignOffModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BatchRow>(entity =>
         {

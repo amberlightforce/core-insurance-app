@@ -315,6 +315,62 @@
       "reason": "sample",
       "deepLink": "https://contracts.invalid/sample"
     },
+    "SignoffDecisionRequest": {
+      "signoffId": "0192f2f9-9595-7a2d-84c1-a204d6a6d327",
+      "signatory": "FINANCE_CONTROLLER",
+      "comment": "sample"
+    },
+    "SignoffRequestRequest": {
+      "scope": "sample"
+    },
+    "SignoffSignatory": {
+      "signatory": "FINANCE_CONTROLLER",
+      "status": "PENDING",
+      "decidedBy": "sample",
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "comment": "sample"
+    },
+    "SignoffStatus": {
+      "signoffId": "01926547-05ba-7794-8697-c63ac05359b7",
+      "scope": "sample",
+      "runId": "0192cb6e-ffe4-7270-89e8-170604a2fe8d",
+      "latestRunId": "01928ec1-b27b-768e-8079-1c9e5ff11c4e",
+      "resultsHash": "sample",
+      "green": true,
+      "variances": [
+        "sample"
+      ],
+      "waivedVariances": [
+        "sample"
+      ],
+      "requestedBy": "sample",
+      "ready": true,
+      "blockers": [
+        "sample"
+      ],
+      "signatories": [
+        {
+          "signatory": "FINANCE_CONTROLLER",
+          "status": "PENDING",
+          "decidedBy": "sample",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "comment": "sample"
+        }
+      ]
+    },
+    "SignoffWaiveRequest": {
+      "runId": "01921038-0bd3-7fab-8b0a-109d3cb765d7",
+      "varianceKeys": [
+        "sample"
+      ],
+      "reason": "sample"
+    },
+    "SignoffWaiveResponse": {
+      "runId": "01922290-36bc-7f8c-895d-fcf9941fc197",
+      "waived": [
+        "sample"
+      ]
+    },
     "XrefListItem": {
       "xrefId": "0192b4e4-42aa-77e2-82e3-a37def07dfd2",
       "source": "sample",

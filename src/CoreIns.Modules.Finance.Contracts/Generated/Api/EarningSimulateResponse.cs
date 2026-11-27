@@ -4,23 +4,19 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.Earning.simulate result. PRD outputs: "run, results"</summary>
+/// <summary>fin.Earning.simulate result: what a run would earn and post; nothing is written.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record EarningSimulateResponse
 {
-    /// <summary>PRD: "run"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'run'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("run")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Run { get; init; }
+    public required global::CoreIns.Modules.Finance.Contracts.Api.EarningRunView Run { get; init; }
 
-    /// <summary>PRD: "results"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'results'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("results")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Results { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Finance.Contracts.Api.EarningTermResult> Results { get; init; }
+
+    /// <summary>Contract member 'resultsTruncated'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("resultsTruncated")]
+    public required bool ResultsTruncated { get; init; }
 }

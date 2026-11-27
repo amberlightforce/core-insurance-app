@@ -91,6 +91,17 @@ internal sealed record PolicyBoundContext
 
     [JsonPropertyName("artefactHash")]
     public string ArtefactHash { get; init; } = string.Empty;
+
+    /// <summary>The term window of the event; its Athens calendar dates become the term dates the earning engine uses.</summary>
+    [JsonPropertyName("effectivePeriod")]
+    public CoreIns.SharedKernel.InstantRange? EffectivePeriod { get; init; }
+
+    /// <summary>Term dates given directly (RenewalBound derives them from the predecessor); not part of the event.</summary>
+    [JsonIgnore]
+    public CoreIns.SharedKernel.BusinessDate? TermStart { get; init; }
+
+    [JsonIgnore]
+    public CoreIns.SharedKernel.BusinessDate? TermEnd { get; init; }
 }
 
 /// <summary>
@@ -98,7 +109,7 @@ internal sealed record PolicyBoundContext
 /// types (GL keys, immutable per hash) from PFC once, then releases the BIL entries waiting for this policy (REQ-FIN-040).
 /// </summary>
 internal sealed class PolicyBoundHandler(
-    Intake intake, FinanceDbContext db, ReferenceData reference, IProductChargeTypeService chargeTypes, IClock clock) : IEventHandler<PolicyBoundContext>
+    Intake intake, FinanceDbContext db, ReferenceData reference, IProductChargeTypeService chargeTypes, IClock clock, Microsoft.Extensions.Options.IOptions<FinanceOptions> options) : IEventHandler<PolicyBoundContext>
 {
     public async Task HandleAsync(EventEnvelope envelope, PolicyBoundContext payload, CancellationToken cancellationToken)
     {
@@ -118,6 +129,8 @@ internal sealed class PolicyBoundHandler(
         var hash = payload.ArtefactHash.ToLowerInvariant();
         var loaded = await LoadChargeTypesAsync(hash, cancellationToken).ConfigureAwait(false);
         var existing = await db.PolicyContexts.SingleOrDefaultAsync(p => p.PolicyTermId == payload.TermId, cancellationToken).ConfigureAwait(false);
+        var termStart = payload.TermStart ?? payload.EffectivePeriod?.Start.ToBusinessDate(options.Value.Zone);
+        var termEnd = payload.TermEnd ?? (payload.EffectivePeriod?.End is { } end ? end.ToBusinessDate(options.Value.Zone) : null);
         if (existing is null)
         {
             db.PolicyContexts.Add(new PolicyContextRow
@@ -131,6 +144,8 @@ internal sealed class PolicyBoundHandler(
                 ProductVersion = payload.ProductVersion,
                 ArtefactHash = hash,
                 ChargeTypesLoaded = loaded,
+                TermStart = termStart,
+                TermEnd = termEnd,
                 SourceEventId = envelope.EventId.Value,
                 AggregateSequence = envelope.AggregateSequence,
                 RecordedAt = clock.Now,
@@ -146,10 +161,17 @@ internal sealed class PolicyBoundHandler(
             existing.ProductVersion = payload.ProductVersion;
             existing.ArtefactHash = hash;
             existing.ChargeTypesLoaded = loaded;
+            existing.TermStart = termStart ?? existing.TermStart;
+            existing.TermEnd = termEnd ?? existing.TermEnd;
             existing.SourceEventId = envelope.EventId.Value;
             existing.AggregateSequence = envelope.AggregateSequence;
             existing.RecordedAt = clock.Now;
             existing.RecordVersion++;
+        }
+        else if (existing.TermStart is null && termStart is not null)
+        {
+            existing.TermStart = termStart;
+            existing.TermEnd = termEnd;
         }
 
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

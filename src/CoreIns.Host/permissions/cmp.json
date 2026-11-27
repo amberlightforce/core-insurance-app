@@ -54,8 +54,8 @@
         "cmp.Clock.stop": [ "Platform.Admin" ],
         "cmp.Clock.cancel": [ "Platform.Admin" ],
         "cmp.Clock.extend": [ "Platform.Admin" ],
-        "cmp.Clock.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
-        "cmp.Clock.query": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "cmp.Clock.get": [ "Staff.Billing", "Staff.ComplianceOfficer", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        "cmp.Clock.query": [ "Staff.Billing", "Staff.ComplianceOfficer", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "cmp.ClockDef.list": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "cmp.ClockDef.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ]
       }

@@ -56,7 +56,6 @@ CONTRACT_NOT_SERVED GET /api/doc/v1/ipids/get
 CONTRACT_NOT_SERVED GET /api/doc/v1/signatures/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/actuarial-results/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/balances/{}
-CONTRACT_NOT_SERVED GET /api/fin/v1/earning/status
 CONTRACT_NOT_SERVED GET /api/fin/v1/fiscal-reconciliation/results
 CONTRACT_NOT_SERVED GET /api/fin/v1/fx/runs
 CONTRACT_NOT_SERVED GET /api/fin/v1/gl-extracts
@@ -393,8 +392,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/close/evidence-pack
 CONTRACT_NOT_SERVED POST /api/fin/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/fin/v1/dsar/restrict
 CONTRACT_NOT_SERVED POST /api/fin/v1/earning/result
-CONTRACT_NOT_SERVED POST /api/fin/v1/earning/run
-CONTRACT_NOT_SERVED POST /api/fin/v1/earning/simulate
 CONTRACT_NOT_SERVED POST /api/fin/v1/fiscal-reconciliation/run
 CONTRACT_NOT_SERVED POST /api/fin/v1/fx/revalue
 CONTRACT_NOT_SERVED POST /api/fin/v1/fx/translate

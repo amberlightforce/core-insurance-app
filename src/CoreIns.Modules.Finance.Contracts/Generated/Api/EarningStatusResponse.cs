@@ -4,23 +4,11 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.Earning.status result. PRD outputs: "run, results"</summary>
+/// <summary>fin.Earning.status result: the latest completed earning run of the legal entity; absent until a first run.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record EarningStatusResponse
 {
-    /// <summary>PRD: "run"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'run'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("run")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Run { get; init; }
-
-    /// <summary>PRD: "results"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("results")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Results { get; init; }
+    public global::CoreIns.Modules.Finance.Contracts.Api.EarningRunView? Run { get; init; }
 }

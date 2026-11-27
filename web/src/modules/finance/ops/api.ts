@@ -262,7 +262,7 @@ export function useRunEarning(onDone: () => void) {
     mutationFn: ({ asOf, key }: { asOf: string; key: string }) =>
       apiRequest<unknown>(`${base}/earning/run`, {
         method: 'POST',
-        body: { as: asOf },
+        body: { asOf },
         idempotencyKey: key,
       }),
     onSuccess: () => {

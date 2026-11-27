@@ -11,6 +11,7 @@
       "earning": "Earning run"
     },
     "trialBalance": {
+      "lead": "Debit, credit and balance per account for one calendar month, in the functional currency.",
       "title": "Trial balance",
       "filters": "Period and book",
       "period": "Period",
@@ -63,6 +64,7 @@
       },
       "form": {
         "title": "New manual journal",
+        "lead": "Propose balanced journal lines with an evidence reference; a second user approves them before posting.",
         "fourEyes": "Four-eyes approval",
         "fourEyesBody": "You propose this journal; a different user must approve it before anything is posted. You cannot approve your own journal.",
         "header": "Header",
@@ -223,6 +225,10 @@
       "startedAt": "Started",
       "finishedAt": "Finished",
       "processed": "Policies processed",
+      "period": "Period",
+      "skipped": "Terms skipped (no term dates)",
+      "earnedToDate": "Earned to date",
+      "postedDelta": "Posted by this run",
       "runTitle": "Run earning",
       "warnTitle": "Posts to the books",
       "warnBody": "The run posts journals. Check the period is open and the date is right before you start.",

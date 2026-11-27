@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 
 import {
+  Banner,
   EmptyState,
   StatusPill,
   dateColumn,
@@ -16,14 +17,46 @@ import { PageHeader, Section } from '../staff/PageHeader';
 import { QueryView } from '../staff/QueryView';
 import { SimpleTable } from '../staff/SimpleTable';
 import styles from '../staff/staff.module.css';
-import { documentSemantic, useSubjectDocuments, type DocumentView } from './api';
+import { documentSemantic, subjectModules, useSubjectDocuments, type DocumentView } from './api';
 
 /** Documents about one object (doc.Document.listForObject). */
 export function SubjectDocumentsPage() {
   const { t } = useTranslation('documents');
-  const navigate = useNavigate();
   const { module = '', type = '', id = '' } = useParams();
   const objectRef = `${module}/${type}/${id}`;
+  // The API wants MODULE/Type/id with the module code in upper case (for example POL/Policy/<id>).
+  const valid =
+    (subjectModules as readonly string[]).includes(module) &&
+    type.trim() !== '' &&
+    id.trim() !== '';
+
+  return (
+    <div className={styles.page}>
+      <PageHeader
+        variant="landing"
+        title={t('subject.title')}
+        overline={t('overline')}
+        description={objectRef}
+        actions={
+          <LinkButton variant="secondary" to="/documents">
+            {t('another')}
+          </LinkButton>
+        }
+      />
+      {valid ? (
+        <SubjectDocumentsList objectRef={objectRef} />
+      ) : (
+        <Banner variant="warning" live="none" title={t('subject.invalidTitle')}>
+          {t('subject.invalidBody', { modules: subjectModules.join(', ') })}
+        </Banner>
+      )}
+    </div>
+  );
+}
+
+function SubjectDocumentsList({ objectRef }: { objectRef: string }) {
+  const { t } = useTranslation('documents');
+  const navigate = useNavigate();
   const query = useSubjectDocuments(objectRef);
 
   const columns = useMemo<DataColumn<DocumentView>[]>(
@@ -50,42 +83,30 @@ export function SubjectDocumentsPage() {
   );
 
   return (
-    <div className={styles.page}>
-      <PageHeader
-        title={t('subject.title')}
-        overline={t('overline')}
-        recordId={objectRef}
-        actions={
-          <LinkButton variant="secondary" to="/documents">
-            {t('another')}
-          </LinkButton>
-        }
-      />
-      <Section title={t('subject.documents')} count={query.data?.items.length}>
-        <QueryView query={query} notFoundMessage={t('subject.notFound')}>
-          {(page) => (
-            <SimpleTable<DocumentView>
-              aria-label={t('subject.documents')}
-              columns={columns}
-              data={page.items}
-              getRowId={(d) => d.documentId}
-              getRowLabel={(d) => d.documentNumber}
-              onOpen={(d) => {
-                void navigate(`/documents/${d.documentId}`);
-              }}
-              emptyState={
-                <EmptyState
-                  kind="first-use"
-                  illustration={<></>}
-                  headingLevel={3}
-                  headline={t('subject.emptyTitle')}
-                  description={t('subject.emptyBody')}
-                />
-              }
-            />
-          )}
-        </QueryView>
-      </Section>
-    </div>
+    <Section title={t('subject.documents')} count={query.data?.items.length}>
+      <QueryView query={query} notFoundMessage={t('subject.notFound')}>
+        {(page) => (
+          <SimpleTable<DocumentView>
+            aria-label={t('subject.documents')}
+            columns={columns}
+            data={page.items}
+            getRowId={(d) => d.documentId}
+            getRowLabel={(d) => d.documentNumber}
+            onOpen={(d) => {
+              void navigate(`/documents/${d.documentId}`);
+            }}
+            emptyState={
+              <EmptyState
+                kind="first-use"
+                illustration={<></>}
+                headingLevel={3}
+                headline={t('subject.emptyTitle')}
+                description={t('subject.emptyBody')}
+              />
+            }
+          />
+        )}
+      </QueryView>
+    </Section>
   );
 }

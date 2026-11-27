@@ -25,6 +25,7 @@ tags:
 - name: Archive
 - name: ImportContract
 - name: Recon
+- name: Signoff
 paths:
   /api/mig/v1/xrefs/register:
     post:
@@ -1627,6 +1628,332 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/signoff/waive:
+    post:
+      operationId: mig.Signoff.waive
+      summary: Waive reconciliation variances
+      description: |-
+        Waive reconciliation variances
+
+        Inputs: run id, variance keys, reason. Outputs: the waived keys. A waiver binds to the run; a newer run needs its own. The person who ran the reconciliation or loaded the control totals cannot waive.
+      tags:
+      - Signoff
+      x-requirement:
+      - REQ-MIG-171..REQ-MIG-177
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-11: a sign-off decision is recorded or refused, never previewed'
+      x-exposure:
+      - ui
+      x-permission: mig.Signoff.waive
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-SIGNOFF-SOD
+        status: 403
+      x-source:
+      - BO-MIG-11
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignoffWaiveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignoffWaiveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/signoff/request:
+    post:
+      operationId: mig.Signoff.request
+      summary: Request wave sign-off
+      description: |-
+        Request wave sign-off
+
+        Inputs: scope. Outputs: the sign-off with one open approval per named signatory (finance controller, compliance officer, migration lead), bound to the latest reconciliation run of the scope and a hash of its result rows.
+      tags:
+      - Signoff
+      x-requirement:
+      - REQ-MIG-171..REQ-MIG-177
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-11: a sign-off decision is recorded or refused, never previewed'
+      x-exposure:
+      - ui
+      x-permission: mig.Signoff.request
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      x-source:
+      - BO-MIG-11
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignoffRequestRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignoffStatus'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/signoff/approve:
+    post:
+      operationId: mig.Signoff.approve
+      summary: Approve as a signatory
+      description: |-
+        Approve as a signatory
+
+        Inputs: sign-off id, signatory, comment. Outputs: the sign-off status. Refused when the run or its results changed since the request, and for the person who ran the reconciliation or loaded the control totals.
+      tags:
+      - Signoff
+      x-requirement:
+      - REQ-MIG-171..REQ-MIG-177
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-11: a sign-off decision is recorded or refused, never previewed'
+      x-exposure:
+      - ui
+      x-permission: mig.Signoff.approve
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-SIGNOFF-SOD
+        status: 403
+      - code: MIG-ERR-SIGNOFF-STALE
+        status: 409
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      x-source:
+      - BO-MIG-11
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignoffDecisionRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignoffStatus'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/signoff/reject:
+    post:
+      operationId: mig.Signoff.reject
+      summary: Reject as a signatory
+      description: |-
+        Reject as a signatory
+
+        Inputs: sign-off id, signatory, comment. Outputs: the sign-off status. A rejection blocks the wave close until a new sign-off is requested.
+      tags:
+      - Signoff
+      x-requirement:
+      - REQ-MIG-171..REQ-MIG-177
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-11: a sign-off decision is recorded or refused, never previewed'
+      x-exposure:
+      - ui
+      x-permission: mig.Signoff.reject
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-SIGNOFF-SOD
+        status: 403
+      - code: MIG-ERR-SIGNOFF-STALE
+        status: 409
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      x-source:
+      - BO-MIG-11
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignoffDecisionRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignoffStatus'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/signoff/status:
+    get:
+      operationId: mig.Signoff.status
+      summary: Wave sign-off status
+      description: |-
+        Wave sign-off status
+
+        Inputs: scope. Outputs: whether the wave may close (ready) and the blockers: no sign-off, a newer reconciliation run, changed results, unwaived variances, missing or rejected signatories.
+      tags:
+      - Signoff
+      x-requirement:
+      - REQ-MIG-171..REQ-MIG-177
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-maturity: pre-release
+      x-bounded: 'One sign-off per scope with three signatories'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-11: sign-off decisions are never previewed'
+      x-exposure:
+      - ui
+      x-permission: mig.Signoff.status
+      x-error-codes:
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      x-source:
+      - BO-MIG-11
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: scope
+        in: query
+        required: false
+        description: Control-total scope (default 'default').
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignoffStatus'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
 x-operation-families:
 - family: mig.Wave.*
   summary: Plan and run waves and cohorts
@@ -2394,3 +2721,101 @@ components:
           items:
             $ref: '#/components/schemas/ReconResult'
       required: [runId, scope, runAt, green, matched, varianceCount, variances, results]
+
+    SignoffWaiveRequest:
+      type: object
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        varianceKeys:
+          type: array
+          items:
+            type: string
+          description: Variance keys (module/objectType/key/currency) of that run.
+        reason:
+          type: string
+      required: [runId, varianceKeys, reason]
+    SignoffWaiveResponse:
+      type: object
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        waived:
+          type: array
+          items:
+            type: string
+      required: [runId, waived]
+    SignoffRequestRequest:
+      type: object
+      properties:
+        scope:
+          type: [string, 'null']
+    SignoffDecisionRequest:
+      type: object
+      properties:
+        signoffId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        signatory:
+          type: string
+          enum: [FINANCE_CONTROLLER, COMPLIANCE_OFFICER, MIGRATION_LEAD]
+        comment:
+          type: [string, 'null']
+      required: [signoffId, signatory]
+    SignoffSignatory:
+      type: object
+      properties:
+        signatory:
+          type: string
+          enum: [FINANCE_CONTROLLER, COMPLIANCE_OFFICER, MIGRATION_LEAD]
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        decidedBy:
+          type: [string, 'null']
+        decidedAt:
+          type: [string, 'null']
+          format: date-time
+        comment:
+          type: [string, 'null']
+      required: [signatory, status]
+    SignoffStatus:
+      type: object
+      description: The sign-off of a scope. ready is true when the wave may close; blockers lists why it may not.
+      properties:
+        signoffId:
+          description: The current sign-off, when one was requested.
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        scope:
+          type: string
+        runId:
+          description: The reconciliation run the sign-off is bound to.
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        latestRunId:
+          description: The latest reconciliation run of the scope.
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        resultsHash:
+          type: [string, 'null']
+        green:
+          type: boolean
+        variances:
+          type: array
+          items:
+            type: string
+        waivedVariances:
+          type: array
+          items:
+            type: string
+        requestedBy:
+          type: [string, 'null']
+        ready:
+          type: boolean
+        blockers:
+          type: array
+          items:
+            type: string
+          description: 'NO_SIGNOFF, NO_RUN, NEWER_RUN, RESULTS_CHANGED, UNWAIVED_VARIANCES, SIGNATORY_PENDING:<role>, SIGNATORY_REJECTED:<role>'
+        signatories:
+          type: array
+          items:
+            $ref: '#/components/schemas/SignoffSignatory'
+      required: [scope, green, variances, waivedVariances, ready, blockers, signatories]

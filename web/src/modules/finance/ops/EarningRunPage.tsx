@@ -22,8 +22,9 @@ function Status({ status }: { status: EarningStatus }) {
     <KeyValueList
       aria-label={t('ops.earning.latest')}
       items={[
-        { id: 'state', label: t('ops.earning.state'), value: run.state ?? null },
-        { id: 'asOf', label: t('ops.earning.asOf'), value: run.asOf ? fmt.date(run.asOf) : null },
+        { id: 'state', label: t('ops.earning.state'), value: run.state },
+        { id: 'period', label: t('ops.earning.period'), value: run.period },
+        { id: 'asOf', label: t('ops.earning.asOf'), value: fmt.date(run.asOf) },
         {
           id: 'started',
           label: t('ops.earning.startedAt'),
@@ -37,7 +38,22 @@ function Status({ status }: { status: EarningStatus }) {
         {
           id: 'processed',
           label: t('ops.earning.processed'),
-          value: run.policiesProcessed !== undefined ? String(run.policiesProcessed) : null,
+          value: String(run.policiesProcessed),
+        },
+        { id: 'skipped', label: t('ops.earning.skipped'), value: String(run.termsSkipped) },
+        {
+          id: 'earned',
+          label: t('ops.earning.earnedToDate'),
+          value: run.earnedToDate?.length
+            ? run.earnedToDate.map((m) => fmt.money(m)).join(', ')
+            : null,
+        },
+        {
+          id: 'posted',
+          label: t('ops.earning.postedDelta'),
+          value: run.postedDelta?.length
+            ? run.postedDelta.map((m) => fmt.money(m)).join(', ')
+            : null,
         },
       ]}
     />

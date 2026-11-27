@@ -126,6 +126,7 @@ public static class PartyModule
         services.AddSingleton<CoreIns.SharedKernel.Dsar.IDsarParticipant, CoreIns.Modules.Party.Services.Dsar.PartyDsarParticipant>();
         services.AddScoped<IPartyProducerCodeService, PartyProducerCodeService>();
         services.AddScoped<IPartyVulnerabilityService, PartyVulnerabilityService>();
+        services.AddScoped<IPartyAccountService, PartyAccountService>();
 
         // BO-MIG-06: migration SPI (importer and reverser of Person, Organisation and Contact).
         services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationImporter, MigrationImport.PartyMigrationImporter>();
