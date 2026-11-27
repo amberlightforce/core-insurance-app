@@ -8,6 +8,7 @@ import {
   billingRoles,
   claimsRoles,
   complianceRoles,
+  fiscalRoles,
   dsarRoles,
   financeRoles,
   migrationRoles,
@@ -248,6 +249,30 @@ const moduleRoutes: RouteObject[] = [
     }),
   },
   {
+    path: 'documents',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/DocumentsHomePage')).DocumentsHomePage,
+    }),
+  },
+  {
+    path: 'documents/subject/:module/:type/:id',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/SubjectDocumentsPage')).SubjectDocumentsPage,
+    }),
+  },
+  {
+    path: 'documents/:documentId',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/DocumentDetailPage')).DocumentDetailPage,
+    }),
+  },
+  {
+    path: 'reports',
+    lazy: async () => ({
+      Component: (await import('./modules/reports/ReportsPage')).ReportsPage,
+    }),
+  },
+  {
     path: 'finance/journals/policy/:policyNumber',
     lazy: async () => ({ Component: (await import('./modules/finance/JournalPage')).JournalPage }),
   },
@@ -452,6 +477,40 @@ moduleRoutes.push({
 });
 
 moduleRoutes.push({
+  // NX-UI-11: fiscal documents, reconciliation breaks and the AI-system register.
+  path: 'compliance/fiscal',
+  element: <RequireRole roles={fiscalRoles} />,
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/compliance/fiscal/FiscalListPage')).FiscalListPage,
+      }),
+    },
+    {
+      path: ':id',
+      lazy: async () => ({
+        Component: (await import('./modules/compliance/fiscal/FiscalDocumentPage'))
+          .FiscalDocumentPage,
+      }),
+    },
+  ],
+});
+
+moduleRoutes.push({
+  path: 'compliance/ai-systems',
+  element: <RequireRole roles={complianceRoles} />,
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/compliance/ai/AiRegisterPage')).AiRegisterPage,
+      }),
+    },
+  ],
+});
+
+moduleRoutes.push({
   path: 'compliance/dsar',
   element: <RequireRole roles={dsarRoles} />,
   children: [
@@ -507,6 +566,8 @@ const implemented = new Set([
   '/admin/migration',
   '/compliance',
   '/compliance/dsar',
+  '/compliance/fiscal',
+  '/compliance/ai-systems',
   '/channels/withdrawals',
   '/policies/pack-rollback',
   '/products',
@@ -514,6 +575,8 @@ const implemented = new Set([
   '/policies',
   '/billing',
   '/finance',
+  '/documents',
+  '/reports',
   '/claims',
   '/underwriting',
   '/reinsurance',
