@@ -137,6 +137,7 @@ public static class ReinsuranceModule
         services.AddScoped<TrackerService>();
         services.AddScoped<IMigrationImporter, MigrationImport.ReinsuranceMigrationImporter>();
         services.AddScoped<IMigrationReverser, MigrationImport.ReinsuranceMigrationReverser>();
+        services.AddScoped<IMigrationReconciliationReader, MigrationImport.ReinsuranceMigrationReconciliationReader>();
         services.AddEventHandler<ChargeDeltaEmittedV1, ChargeDeltaCessionHandler>(EventDescriptor.From(ChargeDeltaEmittedV1.Descriptor), ChargeDeltaCessionHandler.Name, ModuleCode.RI);
 
         services.AddErrorDefinitions(Errors);

@@ -92,6 +92,7 @@ public static class ClaimsModule
         services.AddScoped<ICoverageSource, PolicySnapshotAdapter>();
         services.AddScoped<IMigrationImporter, MigrationImport.ClaimMigrationImporter>();
         services.AddScoped<IMigrationReverser, MigrationImport.ClaimMigrationReverser>();
+        services.AddScoped<IMigrationReconciliationReader, MigrationImport.ClaimMigrationReconciliationReader>();
 
         // Claim financials (SL2-CLM-MONEY): derived balances, the set lifecycle and the close guard over them (REQ-CLM-072/073).
         services.AddScoped<FinancialsReader>();

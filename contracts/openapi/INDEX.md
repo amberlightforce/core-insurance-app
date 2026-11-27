@@ -9,10 +9,10 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | Module | Operations | Full | Minimal | Commands | Queries | In-process only | Partner-facing | Unexpanded families |
 |---|---|---|---|---|---|---|---|---|
 | [PTY](#pty) | 67 | 47 | 20 | 47 | 20 | 5 | 0 | 5 |
-| [PFC](#pfc) | 34 | 31 | 3 | 18 | 16 | 1 | 1 | 0 |
+| [PFC](#pfc) | 35 | 32 | 3 | 18 | 17 | 1 | 1 | 0 |
 | [RAT](#rat) | 47 | 47 | 0 | 24 | 23 | 3 | 2 | 0 |
 | [UW](#uw) | 82 | 55 | 27 | 57 | 25 | 3 | 2 | 4 |
-| [POL](#pol) | 56 | 52 | 4 | 39 | 17 | 8 | 10 | 0 |
+| [POL](#pol) | 58 | 54 | 4 | 40 | 18 | 8 | 10 | 0 |
 | [BIL](#bil) | 90 | 90 | 0 | 56 | 34 | 6 | 5 | 1 |
 | [CLM](#clm) | 73 | 73 | 0 | 53 | 20 | 10 | 9 | 5 |
 | [RI](#ri) | 116 | 110 | 6 | 82 | 34 | 9 | 0 | 0 |
@@ -21,11 +21,11 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [CMP](#cmp) | 90 | 53 | 37 | 69 | 21 | 21 | 0 | 3 |
 | [CHN](#chn) | 86 | 62 | 24 | 58 | 28 | 3 | 25 | 2 |
 | [WRK](#wrk) | 58 | 23 | 35 | 40 | 18 | 9 | 3 | 14 |
-| [PLT](#plt) | 100 | 64 | 36 | 63 | 37 | 26 | 0 | 10 |
+| [PLT](#plt) | 101 | 67 | 34 | 63 | 38 | 26 | 0 | 10 |
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
-| [MIG](#mig) | 22 | 22 | 0 | 14 | 8 | 5 | 0 | 13 |
+| [MIG](#mig) | 25 | 25 | 0 | 16 | 9 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 36 | 12 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1147 | 933 | 214 | 747 | 400 | 129 | 69 | 65 |
+| **Total** | 1154 | 942 | 212 | 750 | 404 | 129 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -137,6 +137,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `pfc.Pog.update` | PATCH `/api/pfc/v1/pogs/{id}` | C |  | ui |  | W2 | minimal | REQ-PFC-148..REQ-PFC-158 |
 | `pfc.PolicyDraft.validate` | POST `/api/pfc/v1/policy-drafts/validate` | Q |  | ui | CHN, POL | W2 | full | REQ-PFC-224, REQ-PFC-225 |
 | `pfc.Product.describe` | POST `/api/pfc/v1/products/describe` | Q |  | ui, partner | BIL, CHN, POL | W2 | full | REQ-PFC-222 |
+| `pfc.Product.list` | GET `/api/pfc/v1/products` | Q |  | ui |  | W2 | full | REQ-PFC-031, REQ-PFC-032 |
 | `pfc.ProductImport.import` | POST `/api/pfc/v1/product-imports/import` | C | yes | internal | MIG | W2 | full | REQ-PFC-240 |
 | `pfc.ProductVersion.cancelSchedule` | POST `/api/pfc/v1/product-versions/cancel-schedule` | C | yes | ui |  | W2 | full | REQ-PFC-211..REQ-PFC-213 |
 | `pfc.ProductVersion.decideFallback` | POST `/api/pfc/v1/product-versions/decide-fallback` | C |  | ui |  | W2 | full | REQ-PFC-213 |
@@ -349,6 +350,8 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `pol.Policy.searchByCriteria` | POST `/api/pol/v1/policies/search` | Q |  | ui | CLM | W4 | full | REQ-POL-014 |
 | `pol.PolicyChange.create` | POST `/api/pol/v1/policy-changes` | C | yes | ui, partner | BIL, CHN | W6 | full | REQ-POL-190 |
 | `pol.PolicyMove.execute` | POST `/api/pol/v1/policy-moves/execute` | C | yes | ui |  | W6 | full | REQ-POL-233 |
+| `pol.Psr.decide` | POST `/api/pol/v1/psr-exceptions/decide` | C |  | ui |  | W6 | full | REQ-POL-210 |
+| `pol.Psr.list` | GET `/api/pol/v1/psr-exceptions` | Q |  | ui |  | W6 | full | REQ-POL-210 |
 | `pol.Reactivation.create` | POST `/api/pol/v1/reactivations` | C | yes | ui |  | W6 | full | REQ-POL-236 |
 | `pol.Reinstatement.create` | POST `/api/pol/v1/reinstatements` | C | yes | ui |  | W6 | full | REQ-POL-225..REQ-POL-229 |
 | `pol.Renewal.accept` | POST `/api/pol/v1/renewals/accept` | C | yes | ui | CHN | W6 | full | REQ-POL-009, REQ-POL-245..REQ-POL-258 |
@@ -1166,8 +1169,9 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `plt.Consumer.replay` | POST `/api/plt/v1/consumers/replay` | C | yes | ui | FIN | W1 | minimal | REQ-PLT-005, REQ-PLT-144, REQ-PLT-145 |
 | `plt.Currency.get` | GET `/api/plt/v1/currencies/{id}` | Q |  | ui | MKT | W1 | full | REQ-PLT-009, REQ-PLT-200..REQ-PLT-203 |
 | `plt.DeadLetter.discard` | POST `/api/plt/v1/dead-letters/discard` | C | yes | ui |  | W1 | minimal | REQ-PLT-005, REQ-PLT-144, REQ-PLT-145 |
-| `plt.DeadLetter.list` | GET `/api/plt/v1/dead-letters` | Q |  | ui |  | W1 | minimal | REQ-PLT-005, REQ-PLT-144, REQ-PLT-145 |
-| `plt.DeadLetter.replay` | POST `/api/plt/v1/dead-letters/replay` | C | yes | ui |  | W1 | minimal | REQ-PLT-005, REQ-PLT-144, REQ-PLT-145 |
+| `plt.DeadLetter.get` | GET `/api/plt/v1/dead-letters/{id}` | Q |  | ui |  | W1 | full | REQ-PLT-005, REQ-PLT-144, REQ-PLT-145 |
+| `plt.DeadLetter.list` | GET `/api/plt/v1/dead-letters` | Q |  | ui |  | W1 | full | REQ-PLT-005, REQ-PLT-144, REQ-PLT-145 |
+| `plt.DeadLetter.replay` | POST `/api/plt/v1/dead-letters/replay` | C | yes | ui |  | W1 | full | REQ-PLT-005, REQ-PLT-144, REQ-PLT-145 |
 | `plt.DecisionTable.activate` | POST `/api/plt/v1/decision-tables/activate` | C | yes | ui | WRK | W1 | full | REQ-PLT-174..REQ-PLT-177 |
 | `plt.DecisionTable.evaluate` | POST `/api/plt/v1/decision-tables/evaluate` | Q |  | ui | FIN, WRK | W1 | full | REQ-PLT-174..REQ-PLT-177 |
 | `plt.DecisionTable.explain` | GET `/api/plt/v1/decision-tables/explain` | Q |  | ui | WRK | W1 | full | REQ-PLT-174..REQ-PLT-177 |
@@ -1326,6 +1330,9 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `mig.Batch.start` | POST `/api/mig/v1/batches/start` | C |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
 | `mig.Enquiry.get` | GET `/api/mig/v1/enquiries/get` | Q |  | ui |  | W9 | full | REQ-MIG-152 |
 | `mig.ImportContract.conformance` | POST `/api/mig/v1/import-contracts/conformance` | C |  | ui |  | W9 | full | REQ-MIG-001 |
+| `mig.Recon.loadControlTotals` | POST `/api/mig/v1/reconciliation/control-totals/load` | C |  | ui |  | W9 | full | REQ-MIG-171..REQ-MIG-177 |
+| `mig.Recon.results` | GET `/api/mig/v1/reconciliation/results` | Q |  | ui |  | W9 | full | REQ-MIG-171..REQ-MIG-177 |
+| `mig.Recon.run` | POST `/api/mig/v1/reconciliation/run` | C |  | ui |  | W9 | full | REQ-MIG-171..REQ-MIG-177 |
 | `mig.Routing.override` | POST `/api/mig/v1/routing/override` | C | yes | ui |  | W9 | full | REQ-MIG-148 |
 | `mig.Routing.resolve` | POST `/api/mig/v1/routing/resolve` | Q |  | ui | BIL, CHN, CLM, CMP, DOC | W9 | full | REQ-MIG-004, REQ-MIG-149 |
 | `mig.Xref.list` | GET `/api/mig/v1/xrefs` | Q |  | ui |  | W9 | full | REQ-MIG-002 |
@@ -1557,7 +1564,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-PLT-002 | `plt.Audit.append` |  |
 | REQ-PLT-003 | `plt.Authority.check` |  |
 | REQ-PLT-004 | `plt.Approval.decide`, `plt.Approval.get`, `plt.Approval.list`, `plt.Approval.request` (+2) |  |
-| REQ-PLT-005 | `plt.Consumer.replay`, `plt.DeadLetter.discard`, `plt.DeadLetter.list`, `plt.DeadLetter.replay` (+3) | mapped by builder |
+| REQ-PLT-005 | `plt.Consumer.replay`, `plt.DeadLetter.discard`, `plt.DeadLetter.get`, `plt.DeadLetter.list` (+4) | mapped by builder |
 | REQ-PLT-006 | `plt.Adapter.invoke` |  |
 | REQ-PLT-007 | `plt.Workflow.cancel`, `plt.Workflow.query`, `plt.Workflow.signal`, `plt.Workflow.start` (+1) |  |
 | REQ-PLT-008 | `plt.FeatureFlag.*`, `plt.FeatureFlag.evaluate`, `plt.RuntimeProperty.*` | mapped by builder |
