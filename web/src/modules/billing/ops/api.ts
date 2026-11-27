@@ -5,7 +5,14 @@ import type { components } from '../../../api/generated/bil';
 
 const base = '/api/bil/v1';
 
-export type ReceiptView = components['schemas']['ReceiptView'];
+export type SuspenseListItem = components['schemas']['SuspenseListItem'];
+
+/** bil.Suspense.list page (the generated allOf envelope leaves `items` untyped, so the item type is stated here). */
+export interface SuspensePage {
+  items: SuspenseListItem[];
+  nextCursor: string | null;
+  limit?: number;
+}
 export type AllocationAllocateRequest = components['schemas']['AllocationAllocateRequest'];
 export type AllocationAllocateResponse = components['schemas']['AllocationAllocateResponse'];
 
@@ -48,12 +55,12 @@ export interface MigratedMandate {
   origin: string;
 }
 
-/** bil suspense workbench: unapplied cash (receipts in SUSPENSE). */
+/** bil.Suspense.list: the OPEN unapplied-cash items of the legal entity (BO-BIL-08). */
 export function useSuspense() {
   return useQuery({
     queryKey: ['bil', 'ops', 'suspense'],
     queryFn: ({ signal }) =>
-      apiRequest<OpsPage<ReceiptView>>(`${base}/billing-ops/suspense`, {
+      apiRequest<SuspensePage>(`${base}/suspense`, {
         query: { limit: 100 },
         signal,
       }),

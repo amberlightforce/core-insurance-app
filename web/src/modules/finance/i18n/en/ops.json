@@ -184,7 +184,8 @@
       "action": {
         "soft-close": "Soft close",
         "lock": "Lock period",
-        "reopen": "Reopen"
+        "reopen": "Reopen",
+        "approveReopen": "Approve reopen"
       },
       "confirm": {
         "lock": {
@@ -195,6 +196,18 @@
           "title": "Reopen period {period}?",
           "body": "Postings into this month become possible again and reports for it may change."
         }
+      },
+      "tasks": "Close checklist",
+      "taskDone": "Signed off",
+      "taskOpen": "Open",
+      "signOff": "Sign off",
+      "signedBy": "by {who}",
+      "reopenPending": "Reopen requested by {who}: {reason}. A different person approves it.",
+      "task": {
+        "INTAKE_EXCEPTIONS": "Intake exceptions cleared",
+        "RECONCILIATIONS": "Reconciliations clean",
+        "EARNING_RUN": "Earning run done",
+        "MANUAL_JOURNALS": "Manual journals decided"
       }
     },
     "earning": {

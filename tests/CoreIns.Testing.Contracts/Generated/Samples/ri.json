@@ -410,20 +410,128 @@
       "timestamp": "unspecified"
     },
     "AdjustmentApproveRequest": {
-      "layer": "unspecified",
-      "year": "unspecified"
+      "adjustmentId": "0192cb9b-c3a9-745c-8120-0647c5601fc1",
+      "decision": "APPROVE",
+      "reason": "Sample text"
     },
     "AdjustmentApproveResponse": {
-      "schedule": "unspecified",
-      "adjustment": "unspecified"
+      "adjustment": {
+        "adjustmentId": "01929fc5-3813-735f-8a9d-90a5abcd9adb",
+        "contractId": "0192d67a-6634-797b-8292-57a22e312a3a",
+        "layerNo": 1,
+        "contractYear": 1,
+        "scheduleId": "019211e3-05eb-7ffe-8172-a571d081e14d",
+        "subjectPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "ratePct": "12.50",
+        "calculatedPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "minimumPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "depositPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "adjustmentAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "status": "PENDING",
+        "approvalRequestId": "0192ac41-ca22-7d3a-89f8-e59bf5b39c2c",
+        "reason": "Sample text",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decidedBy": "sample"
+      }
     },
     "AdjustmentCalculateRequest": {
-      "layer": "unspecified",
-      "year": "unspecified"
+      "contractId": "0192a250-d1bd-7b1e-84f0-6973affc5b86",
+      "layerNo": 1,
+      "subjectPremium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ratePct": "12.50",
+      "reason": "Sample text"
     },
     "AdjustmentCalculateResponse": {
-      "schedule": "unspecified",
-      "adjustment": "unspecified"
+      "adjustment": {
+        "adjustmentId": "01923c07-a322-7d55-8f08-d51981ff1bf5",
+        "contractId": "01927f21-7511-75fd-84cd-22148a0fdb00",
+        "layerNo": 1,
+        "contractYear": 1,
+        "scheduleId": "01929705-828b-7358-8bd1-ff8d5ea63b67",
+        "subjectPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "ratePct": "12.50",
+        "calculatedPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "minimumPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "depositPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "adjustmentAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "status": "PENDING",
+        "approvalRequestId": "01925ecd-c0d1-7231-8ab5-51d495a93d9e",
+        "reason": "Sample text",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decidedBy": "sample"
+      }
+    },
+    "AdjustmentView": {
+      "adjustmentId": "01923cab-6122-7055-8625-e4ab7f840f4e",
+      "contractId": "019230f8-223c-7022-89b3-476150b78094",
+      "layerNo": 1,
+      "contractYear": 1,
+      "scheduleId": "01929774-7e53-7d82-84f5-5c5c4c203db9",
+      "subjectPremium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ratePct": "12.50",
+      "calculatedPremium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "minimumPremium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "depositPremium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "adjustmentAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "status": "PENDING",
+      "approvalRequestId": "01921648-bad2-72ab-88ad-5baaf1036ff3",
+      "reason": "Sample text",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "createdBy": "sample",
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "decidedBy": "sample"
     },
     "AggregateTrackerGetResponse": {
       "schedule": [
@@ -743,30 +851,251 @@
       "coverage": "unspecified"
     },
     "CommissionAdjustRequest": {
-      "section": "unspecified",
-      "year": "unspecified"
+      "contractId": "01926138-0815-7565-8b1b-3b18118a5156",
+      "cededPremium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "incurredLoss": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "provisionalRatePct": "12.50",
+      "scale": [
+        {
+          "lossRatioFromPct": "12.50",
+          "commissionRatePct": "12.50"
+        }
+      ],
+      "reason": "Sample text"
     },
     "CommissionAdjustResponse": {
-      "adjustment": "unspecified"
+      "commission": {
+        "commissionId": "01922dc9-4af1-71ea-8c47-b5636c4bff73",
+        "contractId": "01921bf0-5635-71b6-8ed2-4efbc23215ee",
+        "contractYear": 1,
+        "cededPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "incurredLoss": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "lossRatioPct": "12.50",
+        "provisionalRatePct": "12.50",
+        "earnedRatePct": "12.50",
+        "provisionalCommission": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "earnedCommission": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "adjustmentAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "scale": [
+          {
+            "lossRatioFromPct": "12.50",
+            "commissionRatePct": "12.50"
+          }
+        ],
+        "status": "PENDING",
+        "approvalRequestId": "01928881-7082-76c7-8198-e2d00d71b89d",
+        "reason": "Sample text",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decidedBy": "sample"
+      }
     },
     "CommissionApproveRequest": {
-      "section": "unspecified",
-      "year": "unspecified"
+      "commissionId": "01926408-b78f-7d32-8219-c7e31a3dcc59",
+      "decision": "APPROVE",
+      "reason": "Sample text"
     },
     "CommissionApproveResponse": {
-      "adjustment": "unspecified"
+      "commission": {
+        "commissionId": "0192efd8-62f7-7a7d-8a15-98b24758f035",
+        "contractId": "019211de-928d-74f6-8587-6c1fac95ec6e",
+        "contractYear": 1,
+        "cededPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "incurredLoss": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "lossRatioPct": "12.50",
+        "provisionalRatePct": "12.50",
+        "earnedRatePct": "12.50",
+        "provisionalCommission": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "earnedCommission": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "adjustmentAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "scale": [
+          {
+            "lossRatioFromPct": "12.50",
+            "commissionRatePct": "12.50"
+          }
+        ],
+        "status": "PENDING",
+        "approvalRequestId": "0192e663-389b-7a9e-834a-ab774258f1e6",
+        "reason": "Sample text",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decidedBy": "sample"
+      }
     },
     "CommissionHistoryItem": {
-      "adjustment": "unspecified"
+      "commission": {
+        "commissionId": "0192aefc-a64f-79ae-8c9e-bb3d068e4ccd",
+        "contractId": "01925367-2585-73d8-822b-17d69e4bfcb3",
+        "contractYear": 1,
+        "cededPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "incurredLoss": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "lossRatioPct": "12.50",
+        "provisionalRatePct": "12.50",
+        "earnedRatePct": "12.50",
+        "provisionalCommission": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "earnedCommission": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "adjustmentAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "scale": [
+          {
+            "lossRatioFromPct": "12.50",
+            "commissionRatePct": "12.50"
+          }
+        ],
+        "status": "PENDING",
+        "approvalRequestId": "0192b372-5ba6-79d6-8a3c-7fa60a27db00",
+        "reason": "Sample text",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decidedBy": "sample"
+      }
     },
     "CommissionHistoryPage": {
       "items": [
         {
-          "adjustment": "unspecified"
+          "commission": {
+            "commissionId": "0192ee24-2ea4-79eb-8a8e-895a0606b846",
+            "contractId": "0192fd44-adce-7f89-873e-551d3478faf6",
+            "contractYear": 1,
+            "cededPremium": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "incurredLoss": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "lossRatioPct": "12.50",
+            "provisionalRatePct": "12.50",
+            "earnedRatePct": "12.50",
+            "provisionalCommission": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "earnedCommission": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "adjustmentAmount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "scale": [
+              {
+                "lossRatioFromPct": "12.50",
+                "commissionRatePct": "12.50"
+              }
+            ],
+            "status": "PENDING",
+            "approvalRequestId": "0192f0e1-db56-71f4-88ad-80e5de3a3253",
+            "reason": "Sample text",
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "sample",
+            "decidedAt": "2026-10-07T09:00:00Z",
+            "decidedBy": "sample"
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "CommissionScaleStep": {
+      "lossRatioFromPct": "12.50",
+      "commissionRatePct": "12.50"
+    },
+    "CommissionView": {
+      "commissionId": "019235ad-685d-7a84-8a78-f7d9f92108a4",
+      "contractId": "0192f5cd-dfee-716d-823c-f0642f699ada",
+      "contractYear": 1,
+      "cededPremium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "incurredLoss": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "lossRatioPct": "12.50",
+      "provisionalRatePct": "12.50",
+      "earnedRatePct": "12.50",
+      "provisionalCommission": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "earnedCommission": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "adjustmentAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "scale": [
+        {
+          "lossRatioFromPct": "12.50",
+          "commissionRatePct": "12.50"
+        }
+      ],
+      "status": "PENDING",
+      "approvalRequestId": "01924f65-119c-712e-8c64-a69b73db37f9",
+      "reason": "Sample text",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "createdBy": "sample",
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "decidedBy": "sample"
     },
     "ContractApplicableResponse": {
       "contracts": [
@@ -1661,17 +1990,156 @@
         "unspecified"
       ]
     },
+    "DepositInstalment": {
+      "seq": 1,
+      "dueDate": "2026-10-07",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
     "DepositScheduleGetResponse": {
-      "schedule": "unspecified",
-      "adjustment": "unspecified"
+      "schedule": {
+        "scheduleId": "0192c8f1-46c0-7d74-8471-8940cb274cab",
+        "contractId": "0192951c-49d3-7f03-8295-ba0c5de03b72",
+        "layerNo": 1,
+        "contractYear": 1,
+        "revision": 1,
+        "current": true,
+        "minimumPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "depositPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "instalments": [
+          {
+            "seq": 1,
+            "dueDate": "2026-10-07",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "reason": "Sample text",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "sample"
+      },
+      "adjustment": {
+        "adjustmentId": "019271ea-b37e-75f8-8cc9-722981147c6a",
+        "contractId": "0192f619-e917-7cb9-8fb1-b9a960179244",
+        "layerNo": 1,
+        "contractYear": 1,
+        "scheduleId": "019223d7-e955-7f21-8865-3e291a7a5457",
+        "subjectPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "ratePct": "12.50",
+        "calculatedPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "minimumPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "depositPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "adjustmentAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "status": "PENDING",
+        "approvalRequestId": "0192abb0-0d6c-77f3-83c5-6cd029199dc5",
+        "reason": "Sample text",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decidedBy": "sample"
+      }
     },
     "DepositScheduleRescheduleRequest": {
-      "layer": "unspecified",
-      "year": "unspecified"
+      "contractId": "0192b063-2ae6-71ff-803e-df7e400f76c4",
+      "layerNo": 1,
+      "minimumPremium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "depositPremium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "instalmentCount": 1,
+      "firstDueDate": "2026-10-07",
+      "intervalMonths": 1,
+      "expectedRevision": 1,
+      "reason": "Sample text"
     },
     "DepositScheduleRescheduleResponse": {
-      "schedule": "unspecified",
-      "adjustment": "unspecified"
+      "schedule": {
+        "scheduleId": "0192a188-48f2-7e91-8585-7f3103749471",
+        "contractId": "01926234-a0f2-7b68-8e28-36ddfcd23273",
+        "layerNo": 1,
+        "contractYear": 1,
+        "revision": 1,
+        "current": true,
+        "minimumPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "depositPremium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "instalments": [
+          {
+            "seq": 1,
+            "dueDate": "2026-10-07",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "reason": "Sample text",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "sample"
+      }
+    },
+    "DepositScheduleView": {
+      "scheduleId": "01925ecc-ebd8-7f87-8704-c72feb3debd4",
+      "contractId": "0192a2d0-1109-70c9-812e-a0a57b39c064",
+      "layerNo": 1,
+      "contractYear": 1,
+      "revision": 1,
+      "current": true,
+      "minimumPremium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "depositPremium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "instalments": [
+        {
+          "seq": 1,
+          "dueDate": "2026-10-07",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "reason": "Sample text",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "createdBy": "sample"
     },
     "DsarExportRequest": {
       "partyId": "019259f4-da68-739c-8e39-f0b35586865c"

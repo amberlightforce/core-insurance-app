@@ -9,26 +9,17 @@ namespace CoreIns.Modules.Rating.Contracts.Api;
 public sealed record RatingArtifactCompatibilityResponse
 {
     /// <summary>PRD: "manifest"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("manifest")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Manifest { get; init; }
+    public global::CoreIns.Modules.Rating.Contracts.Api.RatingArtifactManifest? Manifest { get; init; }
 
     /// <summary>PRD: "status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Status { get; init; }
+    public global::CoreIns.Modules.Rating.Contracts.Api.RatingArtifactStatus? Status { get; init; }
 
     /// <summary>PRD: "compatibility records"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("compatibilityRecords")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? CompatibilityRecords { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Rating.Contracts.Api.RatingArtifactCompatibilityRecord>? CompatibilityRecords { get; init; }
 }

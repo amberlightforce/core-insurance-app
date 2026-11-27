@@ -8,7 +8,10 @@
         "rat.Proration.prorate": [ "Staff.Underwriter", "Staff.Billing" ],
         "rat.RateTable.import": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "rat.RateTable.validate": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
-        "rat.RateTable.diff": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ]
+        "rat.RateTable.diff": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "rat.RatingArtifact.get": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ],
+        "rat.RatingArtifact.list": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ],
+        "rat.RatingArtifact.compatibility": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ]
       }
     }
   }

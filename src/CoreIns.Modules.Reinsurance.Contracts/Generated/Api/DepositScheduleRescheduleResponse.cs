@@ -4,23 +4,11 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.DepositSchedule.reschedule result. PRD outputs: "schedule, adjustment"</summary>
+/// <summary>ri.DepositSchedule.reschedule result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DepositScheduleRescheduleResponse
 {
-    /// <summary>PRD: "schedule"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'schedule'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("schedule")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Schedule { get; init; }
-
-    /// <summary>PRD: "adjustment"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("adjustment")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Adjustment { get; init; }
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.DepositScheduleView Schedule { get; init; }
 }

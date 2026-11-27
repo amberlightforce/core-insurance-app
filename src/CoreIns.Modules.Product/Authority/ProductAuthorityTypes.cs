@@ -17,6 +17,9 @@ public static class ProductAuthorityTypes
     /// <summary>Emergency change and fall-back (PRD-02 §12.2: dimensions product line and jurisdiction).</summary>
     public static AuthorityTypeCode EmergencyChange { get; } = AuthorityTypeCode.Parse("PFC.EMERGENCY_CHANGE");
 
+    /// <summary>Release sign-off of a product version (BO-PFC-04; dimensions product line and jurisdiction).</summary>
+    public static AuthorityTypeCode Release { get; } = AuthorityTypeCode.Parse("PFC.RELEASE");
+
     /// <summary>The product line code dimension.</summary>
     public const string ProductLineDimension = "productLine";
 
@@ -25,6 +28,12 @@ public static class ProductAuthorityTypes
 
     /// <summary>The PLT approval type of a fall-back request (D-SL5-09).</summary>
     public const string FallbackApprovalType = "PFC.Fallback";
+
+    /// <summary>The PLT approval type of a release sign-off (BO-PFC-04).</summary>
+    public const string ReleaseApprovalType = "PFC.Release";
+
+    /// <summary>The subject type of a release approval.</summary>
+    public const string ReleaseSubjectType = "ProductRelease";
 
     /// <summary>The role whose inbox receives a fall-back approval (D-SL5-08, illustrative).</summary>
     public const string CheckerRole = "Platform.DesignAuthority";
@@ -37,6 +46,12 @@ public static class ProductAuthorityTypes
     [
         new AuthorityTypeDefinition(
             EmergencyChange, ModuleCode.PFC, new LocalizedText("Επείγουσα αλλαγή προϊόντος και επαναφορά", "Product emergency change and fall-back"),
+            [
+                new AuthorityDimensionDefinition(ProductLineDimension, DimensionKind.Code),
+                new AuthorityDimensionDefinition(JurisdictionDimension, DimensionKind.Code),
+            ]),
+        new AuthorityTypeDefinition(
+            Release, ModuleCode.PFC, new LocalizedText("Έγκριση κυκλοφορίας έκδοσης προϊόντος", "Product version release sign-off"),
             [
                 new AuthorityDimensionDefinition(ProductLineDimension, DimensionKind.Code),
                 new AuthorityDimensionDefinition(JurisdictionDimension, DimensionKind.Code),

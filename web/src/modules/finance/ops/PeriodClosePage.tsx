@@ -19,10 +19,10 @@ import { ProblemBanner } from '../../staff/ProblemBanner';
 import { QueryView } from '../../staff/QueryView';
 import { SimpleTable } from '../../staff/SimpleTable';
 import styles from '../../staff/staff.module.css';
-import { useCloseAction, usePeriods, type CloseAction } from './api';
-import type { FinancePeriod } from './types';
+import { useCloseAction, useCloseTasks, usePeriods, useSignOffTask, type CloseAction } from './api';
+import type { ClosePeriodView, CloseTask, FinancePeriod } from './types';
 
-/** The next close step each period state offers; every other move needs the close workflow. */
+/** The close step each period state offers: soft close, then lock (by a second person), and a reopen that needs a second approver. */
 const stepsOf = (state: string): CloseAction[] =>
   state === 'OPEN' ? ['soft-close'] : state === 'SOFT_CLOSED' ? ['lock', 'reopen'] : ['reopen'];
 
@@ -38,8 +38,73 @@ export function PeriodStatePill({ state }: { state: string }) {
   );
 }
 
+function TaskRow({
+  period,
+  task,
+  editable,
+}: {
+  period: string;
+  task: CloseTask;
+  editable: boolean;
+}) {
+  const { t } = useTranslation('finance');
+  const { keyFor, release } = useIdempotencyKey();
+  const signOff = useSignOffTask();
+  const done = task.status === 'SIGNED_OFF';
+  const body = { period, task: task.task };
+  return (
+    <li className={styles.stack}>
+      <div className={styles.actions}>
+        <strong>{t(`ops.close.task.${task.task}`, { defaultValue: task.task })}</strong>
+        <StatusPill
+          semantic={done ? 'success' : 'warning'}
+          text={t(done ? 'ops.close.taskDone' : 'ops.close.taskOpen')}
+          announceChanges={false}
+        />
+        {done && task.signedOffBy ? (
+          <span>{t('ops.close.signedBy', { who: task.signedOffBy })}</span>
+        ) : null}
+        {editable && !done ? (
+          <Button
+            variant="secondary"
+            isDisabled={signOff.isPending || Boolean(task.blocker)}
+            isLoading={signOff.isPending}
+            onPress={() => {
+              signOff.mutate({ ...body, key: keyFor(body) }, { onSuccess: release });
+            }}
+          >
+            {t('ops.close.signOff')}
+          </Button>
+        ) : null}
+      </div>
+      {!done && task.blocker ? <span>{task.blocker}</span> : null}
+      {signOff.isError ? (
+        <ProblemBanner error={signOff.error} title={t('ops.close.failed')} />
+      ) : null}
+    </li>
+  );
+}
+
+function Checklist({ view }: { view: ClosePeriodView }) {
+  const { t } = useTranslation('finance');
+  return (
+    <ul className={styles.stack} aria-label={t('ops.close.tasks')}>
+      {view.tasks.map((task) => (
+        <TaskRow
+          key={task.task}
+          period={view.period}
+          task={task}
+          editable={view.state === 'OPEN'}
+        />
+      ))}
+    </ul>
+  );
+}
+
 function Actions({ period, onDone }: { period: FinancePeriod; onDone: () => void }) {
   const { t } = useTranslation('finance');
+  const tasks = useCloseTasks(period.period);
+  const view = tasks.data;
   const { keyFor, release } = useIdempotencyKey();
   const [reason, setReason] = useState('');
   const [tried, setTried] = useState(false);
@@ -65,8 +130,19 @@ function Actions({ period, onDone }: { period: FinancePeriod; onDone: () => void
     const body = { action, period: period.period, reason: reason.trim() };
     mutation.mutate({ ...body, key: keyFor(body) });
   };
+  const reopenPending = Boolean(view?.reopenRequestedBy);
   return (
     <div className={styles.stack}>
+      {tasks.isError ? <ProblemBanner error={tasks.error} title={t('ops.close.failed')} /> : null}
+      {view ? <Checklist view={view} /> : null}
+      {reopenPending ? (
+        <p role="status">
+          {t('ops.close.reopenPending', {
+            who: view?.reopenRequestedBy,
+            reason: view?.reopenReason,
+          })}
+        </p>
+      ) : null}
       <TextField
         label={t('ops.close.reason')}
         helperText={t('ops.close.reasonHelp')}
@@ -90,7 +166,9 @@ function Actions({ period, onDone }: { period: FinancePeriod; onDone: () => void
               start(action);
             }}
           >
-            {t(`ops.close.action.${action}`)}
+            {action === 'reopen' && reopenPending
+              ? t('ops.close.action.approveReopen')
+              : t(`ops.close.action.${action}`)}
           </Button>
         ))}
       </div>

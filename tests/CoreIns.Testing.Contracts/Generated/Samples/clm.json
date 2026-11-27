@@ -57,7 +57,15 @@
             "coverageIndication": "COVERED",
             "coverageDecision": "PENDING",
             "duplicateReason": "SAMPLE_CODE",
-            "createdAt": "2026-10-07T09:00:00Z"
+            "createdAt": "2026-10-07T09:00:00Z",
+            "statutoryClocks": [
+              {
+                "instanceId": "0192c05f-cd07-7184-8157-44e549445852",
+                "clockCode": "POL_REFUND_DUE",
+                "status": "sample",
+                "deadline": "2026-10-07T09:00:00Z"
+              }
+            ]
           }
         ],
         "claimants": [
@@ -371,7 +379,15 @@
           "coverageIndication": "COVERED",
           "coverageDecision": "PENDING",
           "duplicateReason": "SAMPLE_CODE",
-          "createdAt": "2026-10-07T09:00:00Z"
+          "createdAt": "2026-10-07T09:00:00Z",
+          "statutoryClocks": [
+            {
+              "instanceId": "0192ba36-bbee-7c64-8b41-46414a3b76fa",
+              "clockCode": "POL_REFUND_DUE",
+              "status": "sample",
+              "deadline": "2026-10-07T09:00:00Z"
+            }
+          ]
         }
       ],
       "coverageIndications": [
@@ -654,7 +670,15 @@
             "coverageIndication": "COVERED",
             "coverageDecision": "PENDING",
             "duplicateReason": "SAMPLE_CODE",
-            "createdAt": "2026-10-07T09:00:00Z"
+            "createdAt": "2026-10-07T09:00:00Z",
+            "statutoryClocks": [
+              {
+                "instanceId": "019240fc-1302-7812-8d9c-4670b71ee2d4",
+                "clockCode": "POL_REFUND_DUE",
+                "status": "sample",
+                "deadline": "2026-10-07T09:00:00Z"
+              }
+            ]
           }
         ],
         "claimants": [
@@ -977,7 +1001,15 @@
           "coverageIndication": "COVERED",
           "coverageDecision": "PENDING",
           "duplicateReason": "SAMPLE_CODE",
-          "createdAt": "2026-10-07T09:00:00Z"
+          "createdAt": "2026-10-07T09:00:00Z",
+          "statutoryClocks": [
+            {
+              "instanceId": "01924d23-8190-7244-8717-d4f969dbfc26",
+              "clockCode": "POL_REFUND_DUE",
+              "status": "sample",
+              "deadline": "2026-10-07T09:00:00Z"
+            }
+          ]
         }
       ],
       "claimants": [
@@ -1119,6 +1151,12 @@
       "linkedClaimId": "0192bc91-81f1-7c0c-8fd1-5abd6aa6ffab",
       "reasonCode": "SAMPLE_CODE"
     },
+    "ExposureClockView": {
+      "instanceId": "01921aeb-aa69-72b8-868f-8143107b2b1c",
+      "clockCode": "POL_REFUND_DUE",
+      "status": "sample",
+      "deadline": "2026-10-07T09:00:00Z"
+    },
     "ExposureCloseRequest": {
       "exposureId": "0192959a-7de0-787d-86cd-40c475b8db31",
       "expectedRecordVersion": 1,
@@ -1138,7 +1176,15 @@
         "coverageIndication": "COVERED",
         "coverageDecision": "PENDING",
         "duplicateReason": "SAMPLE_CODE",
-        "createdAt": "2026-10-07T09:00:00Z"
+        "createdAt": "2026-10-07T09:00:00Z",
+        "statutoryClocks": [
+          {
+            "instanceId": "01926ea5-57af-7cac-8a15-5f8cf9a892e4",
+            "clockCode": "POL_REFUND_DUE",
+            "status": "sample",
+            "deadline": "2026-10-07T09:00:00Z"
+          }
+        ]
       },
       "claim": {
         "claimId": "01928643-7874-75ad-8cf7-9f20ed162f7c",
@@ -1195,7 +1241,15 @@
         "coverageIndication": "COVERED",
         "coverageDecision": "PENDING",
         "duplicateReason": "SAMPLE_CODE",
-        "createdAt": "2026-10-07T09:00:00Z"
+        "createdAt": "2026-10-07T09:00:00Z",
+        "statutoryClocks": [
+          {
+            "instanceId": "0192a434-44ea-78c2-8388-2b6e89a17a34",
+            "clockCode": "POL_REFUND_DUE",
+            "status": "sample",
+            "deadline": "2026-10-07T09:00:00Z"
+          }
+        ]
       },
       "claim": {
         "claimId": "0192b8ce-4d24-72c7-8730-159b2d38e645",
@@ -1248,7 +1302,15 @@
         "coverageIndication": "COVERED",
         "coverageDecision": "PENDING",
         "duplicateReason": "SAMPLE_CODE",
-        "createdAt": "2026-10-07T09:00:00Z"
+        "createdAt": "2026-10-07T09:00:00Z",
+        "statutoryClocks": [
+          {
+            "instanceId": "01926e15-e8f9-7873-8243-83e5125f4dbf",
+            "clockCode": "POL_REFUND_DUE",
+            "status": "sample",
+            "deadline": "2026-10-07T09:00:00Z"
+          }
+        ]
       },
       "claim": {
         "claimId": "0192aeeb-bb54-73f7-8aec-30418b56cb19",
@@ -1300,7 +1362,15 @@
         "coverageIndication": "COVERED",
         "coverageDecision": "PENDING",
         "duplicateReason": "SAMPLE_CODE",
-        "createdAt": "2026-10-07T09:00:00Z"
+        "createdAt": "2026-10-07T09:00:00Z",
+        "statutoryClocks": [
+          {
+            "instanceId": "019282e2-310a-725a-891f-7f7fdc8a6165",
+            "clockCode": "POL_REFUND_DUE",
+            "status": "sample",
+            "deadline": "2026-10-07T09:00:00Z"
+          }
+        ]
       },
       "claim": {
         "claimId": "01926565-0464-71f2-8c96-a8d9417b785c",
@@ -1347,7 +1417,15 @@
       "coverageIndication": "COVERED",
       "coverageDecision": "PENDING",
       "duplicateReason": "SAMPLE_CODE",
-      "createdAt": "2026-10-07T09:00:00Z"
+      "createdAt": "2026-10-07T09:00:00Z",
+      "statutoryClocks": [
+        {
+          "instanceId": "01925269-9311-78f3-821f-55dd04c7cf2e",
+          "clockCode": "POL_REFUND_DUE",
+          "status": "sample",
+          "deadline": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "FinancialBalance": {
       "exposureId": "019263ea-3c60-7a67-8400-e727e84a146a",
@@ -1774,7 +1852,15 @@
           "coverageIndication": "COVERED",
           "coverageDecision": "PENDING",
           "duplicateReason": "SAMPLE_CODE",
-          "createdAt": "2026-10-07T09:00:00Z"
+          "createdAt": "2026-10-07T09:00:00Z",
+          "statutoryClocks": [
+            {
+              "instanceId": "0192e419-64a9-79aa-8d66-4c6380919a8b",
+              "clockCode": "POL_REFUND_DUE",
+              "status": "sample",
+              "deadline": "2026-10-07T09:00:00Z"
+            }
+          ]
         }
       ],
       "coverageIndications": [
