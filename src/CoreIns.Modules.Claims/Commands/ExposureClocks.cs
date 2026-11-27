@@ -117,5 +117,32 @@ internal sealed class ExposureClocks(IComplianceClockService clocks, ICompliance
         return restart;
     }
 
+    /// <summary>
+    /// The clock part of reopening an exposure, shared by exposure reopen and claim reopen (BO-CLM-01/02/05): paused clocks resume;
+    /// clocks cancelled at close are started afresh from <paramref name="restartFrom"/> (key per reopen) once their values are
+    /// usable. Returns the <c>statutory_clocks</c> value to store (unchanged when nothing restarts), or MTPL-CLOCKS-REQUIRED in Production
+    /// when the clock values are not legally confirmed.
+    /// </summary>
+    public async Task<Result<string>> ReopenAsync(
+        ExposureId exposureId, string statutoryClocks, Instant restartFrom, string key, string reason, bool production, CancellationToken cancellationToken)
+    {
+        if (!statutoryClocks.StartsWith(Prefix, StringComparison.Ordinal))
+        {
+            return statutoryClocks;
+        }
+
+        if (!await ResumeAsync(statutoryClocks, reason, cancellationToken).ConfigureAwait(false))
+        {
+            return statutoryClocks;
+        }
+
+        if (production && await HasUnconfirmedValueAsync(cancellationToken).ConfigureAwait(false))
+        {
+            return DomainError.Of(ModuleCode.CLM, "MTPL-CLOCKS-REQUIRED", "Third-party MTPL exposures need statutory clocks whose values are legally confirmed.");
+        }
+
+        return await StartAsync(exposureId, restartFrom, key, cancellationToken).ConfigureAwait(false);
+    }
+
     private static ObjectRef Subject(ExposureId exposureId) => new(ModuleCode.CLM, "Exposure", exposureId.Value.ToString());
 }

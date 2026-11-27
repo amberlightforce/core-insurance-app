@@ -4,15 +4,23 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Location.update request. PRD inputs: "location"</summary>
+/// <summary>pty.Location.update request (BO-PTY-02). Replaces the CURRENT address or contact point named by the path id (the one the party view shows) with new values from validFrom (default today); the old values stay as history. Give the field set matching the location (address or contactPoint). The result carries the id of the new version.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record LocationUpdateRequest
 {
-    /// <summary>PRD: "location"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("location")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Location { get; init; }
+    /// <summary>Contract member 'address'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("address")]
+    public global::CoreIns.Modules.Party.Contracts.Api.AddressInput? Address { get; init; }
+
+    /// <summary>Contract member 'contactPoint'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contactPoint")]
+    public global::CoreIns.Modules.Party.Contracts.Api.ContactPointInput? ContactPoint { get; init; }
+
+    /// <summary>First day the new values apply; default today</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validFrom")]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidFrom { get; init; }
+
+    /// <summary>Optimistic concurrency on the party; when given, a stale value is refused with PTY-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public int? ExpectedRecordVersion { get; init; }
 }

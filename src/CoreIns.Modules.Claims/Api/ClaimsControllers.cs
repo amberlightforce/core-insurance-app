@@ -31,6 +31,10 @@ internal static class ClaimsPermissions
     public const string ExposureReopen = "clm.Exposure.reopen";
     public const string CoverageReverify = "clm.Coverage.reverify";
     public const string ClaimUpdate = "clm.Claim.update";
+    public const string ClaimReopen = "clm.Claim.reopen";
+    public const string ClaimMerge = "clm.Claim.merge";
+    public const string FnolSaveDraft = "clm.Fnol.saveDraft";
+    public const string FnolGetDraft = "clm.Fnol.getDraft";
 }
 
 /// <summary>REST facade of <c>clm.Fnol.*</c> (contracts/openapi/clm.yaml): thin; commands through the pipeline.</summary>

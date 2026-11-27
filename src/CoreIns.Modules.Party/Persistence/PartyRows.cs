@@ -187,6 +187,9 @@ internal sealed class PartyAddressRow : BitemporalRow
     public string? RuleSetId { get; set; }
 
     public string? Description { get; set; }
+
+    /// <summary>A detached copy (arrays shared, never mutated) for a new record version; the caller sets the id and record time.</summary>
+    public PartyAddressRow Copy() => (PartyAddressRow)MemberwiseClone();
 }
 
 /// <summary><c>pty.party_contact_point</c>: phone, email, … (REQ-PTY-081..083).</summary>
@@ -205,6 +208,9 @@ internal sealed class PartyContactPointRow : BitemporalRow
     public string VerificationStatus { get; set; } = string.Empty;
 
     public string Source { get; set; } = string.Empty;
+
+    /// <summary>A detached copy for a new record version; the caller sets the id and record time.</summary>
+    public PartyContactPointRow Copy() => (PartyContactPointRow)MemberwiseClone();
 }
 
 /// <summary><c>pty.intermediary</c>: an intermediary record of a party (REQ-PTY-187, REQ-PTY-188).</summary>

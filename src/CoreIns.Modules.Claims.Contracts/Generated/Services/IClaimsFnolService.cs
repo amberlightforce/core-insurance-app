@@ -18,7 +18,7 @@ public interface IClaimsFnolService
     /// <para>Status: full. Wave W7.</para>
     /// <para>Exposure: ui, partner; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: CLM-ERR-FNOL-001 (422), CLM-ERR-FNOL-CONSENT (422), CLM-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: CLM-ERR-NOT-FOUND (404), CLM-ERR-STALE (409), CLM-ERR-FNOL-001 (422), CLM-ERR-FNOL-CONSENT (422), CLM-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.FnolSaveDraftResponse> SaveDraftAsync(global::CoreIns.Modules.Claims.Contracts.Api.FnolSaveDraftRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 

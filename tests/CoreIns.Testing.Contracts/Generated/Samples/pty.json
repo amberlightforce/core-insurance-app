@@ -186,6 +186,134 @@
     "pty.Import.reverse": {
       "perObjectOutcome": "unspecified"
     },
+    "pty.Location.add": {
+      "locationId": "01922ded-3002-7738-8ca7-29973d4271b5",
+      "kind": "ADDRESS",
+      "address": {
+        "addressId": "0192a238-b0ab-730b-8dd6-5c499cec5531",
+        "types": [
+          "LEGAL"
+        ],
+        "primary": true,
+        "country": "GR",
+        "native": {
+          "street": "sample",
+          "number": "sample",
+          "building": "sample",
+          "floor": "sample",
+          "unit": "sample",
+          "postcode": "sample",
+          "locality": "sample",
+          "municipality": "sample",
+          "regionalUnit": "sample",
+          "region": "sample",
+          "freeLines": [
+            "sample"
+          ]
+        },
+        "latin": {
+          "street": "sample",
+          "number": "sample",
+          "building": "sample",
+          "floor": "sample",
+          "unit": "sample",
+          "postcode": "sample",
+          "locality": "sample",
+          "municipality": "sample",
+          "regionalUnit": "sample",
+          "region": "sample",
+          "freeLines": [
+            "sample"
+          ]
+        },
+        "formattedLines": [
+          "sample"
+        ],
+        "formattedLinesLatin": [
+          "sample"
+        ],
+        "validationState": "VALIDATED",
+        "description": "sample",
+        "validFrom": "2026-10-07",
+        "validTo": "2026-10-07"
+      },
+      "contactPoint": {
+        "contactPointId": "0192f5a7-6d11-721b-8a99-59b3a84a6704",
+        "type": "MOBILE",
+        "value": "sample",
+        "purpose": "PERSONAL",
+        "primary": true,
+        "verificationStatus": "UNVERIFIED"
+      },
+      "recordVersion": 1
+    },
+    "pty.Location.remove": {
+      "locationId": "0192ae15-75c8-7d44-89ff-363a3b51d50b",
+      "kind": "ADDRESS",
+      "validTo": "2026-10-07",
+      "recordVersion": 1
+    },
+    "pty.Location.update": {
+      "locationId": "019245c1-fd22-7613-8d2b-3462a1b375c9",
+      "kind": "ADDRESS",
+      "address": {
+        "addressId": "0192ba02-1aa8-7cdc-8023-665fc63619a5",
+        "types": [
+          "LEGAL"
+        ],
+        "primary": true,
+        "country": "GR",
+        "native": {
+          "street": "sample",
+          "number": "sample",
+          "building": "sample",
+          "floor": "sample",
+          "unit": "sample",
+          "postcode": "sample",
+          "locality": "sample",
+          "municipality": "sample",
+          "regionalUnit": "sample",
+          "region": "sample",
+          "freeLines": [
+            "sample"
+          ]
+        },
+        "latin": {
+          "street": "sample",
+          "number": "sample",
+          "building": "sample",
+          "floor": "sample",
+          "unit": "sample",
+          "postcode": "sample",
+          "locality": "sample",
+          "municipality": "sample",
+          "regionalUnit": "sample",
+          "region": "sample",
+          "freeLines": [
+            "sample"
+          ]
+        },
+        "formattedLines": [
+          "sample"
+        ],
+        "formattedLinesLatin": [
+          "sample"
+        ],
+        "validationState": "VALIDATED",
+        "description": "sample",
+        "validFrom": "2026-10-07",
+        "validTo": "2026-10-07"
+      },
+      "contactPoint": {
+        "contactPointId": "0192100a-5c4f-75bc-8eb5-30e1217c840e",
+        "type": "MOBILE",
+        "value": "sample",
+        "purpose": "PERSONAL",
+        "primary": true,
+        "verificationStatus": "UNVERIFIED"
+      },
+      "recordVersion": 1
+    },
     "pty.Party.create": {
       "party": {
         "partyId": "019257a0-7e61-7f51-824f-5b6485b0eef7",
@@ -1570,22 +1698,200 @@
       "createdActivities": "unspecified"
     },
     "LocationAddRequest": {
-      "location": "unspecified"
+      "partyId": "019277c2-3886-7eea-8885-d11a0213e40f",
+      "address": {
+        "types": [
+          "LEGAL"
+        ],
+        "primary": true,
+        "country": "GR",
+        "street": "sample",
+        "number": "sample",
+        "building": "sample",
+        "floor": "sample",
+        "unit": "sample",
+        "postcode": "sample",
+        "locality": "sample",
+        "municipality": "sample",
+        "regionalUnit": "sample",
+        "region": "sample",
+        "freeLines": [
+          "sample"
+        ],
+        "description": "sample"
+      },
+      "contactPoint": {
+        "type": "MOBILE",
+        "value": "sample",
+        "purpose": "PERSONAL",
+        "primary": true
+      },
+      "validFrom": "2026-10-07",
+      "expectedRecordVersion": 1
     },
     "LocationAddResponse": {
-      "location": "unspecified"
+      "locationId": "01923cdd-7200-7223-8253-edcd0107d75a",
+      "kind": "ADDRESS",
+      "address": {
+        "addressId": "0192ba4e-8248-7d0e-8a78-d0975cabc47c",
+        "types": [
+          "LEGAL"
+        ],
+        "primary": true,
+        "country": "GR",
+        "native": {
+          "street": "sample",
+          "number": "sample",
+          "building": "sample",
+          "floor": "sample",
+          "unit": "sample",
+          "postcode": "sample",
+          "locality": "sample",
+          "municipality": "sample",
+          "regionalUnit": "sample",
+          "region": "sample",
+          "freeLines": [
+            "sample"
+          ]
+        },
+        "latin": {
+          "street": "sample",
+          "number": "sample",
+          "building": "sample",
+          "floor": "sample",
+          "unit": "sample",
+          "postcode": "sample",
+          "locality": "sample",
+          "municipality": "sample",
+          "regionalUnit": "sample",
+          "region": "sample",
+          "freeLines": [
+            "sample"
+          ]
+        },
+        "formattedLines": [
+          "sample"
+        ],
+        "formattedLinesLatin": [
+          "sample"
+        ],
+        "validationState": "VALIDATED",
+        "description": "sample",
+        "validFrom": "2026-10-07",
+        "validTo": "2026-10-07"
+      },
+      "contactPoint": {
+        "contactPointId": "0192cb65-3ed9-726b-8ae3-b0052990cd32",
+        "type": "MOBILE",
+        "value": "sample",
+        "purpose": "PERSONAL",
+        "primary": true,
+        "verificationStatus": "UNVERIFIED"
+      },
+      "recordVersion": 1
     },
     "LocationRemoveRequest": {
-      "location": "unspecified"
+      "locationId": "0192f854-7a62-7075-8cad-25a7c0986b9e",
+      "validTo": "2026-10-07",
+      "expectedRecordVersion": 1
     },
     "LocationRemoveResponse": {
-      "location": "unspecified"
+      "locationId": "019255d4-4998-7ef9-8e91-087b58a3e20e",
+      "kind": "ADDRESS",
+      "validTo": "2026-10-07",
+      "recordVersion": 1
     },
     "LocationUpdateRequest": {
-      "location": "unspecified"
+      "address": {
+        "types": [
+          "LEGAL"
+        ],
+        "primary": true,
+        "country": "GR",
+        "street": "sample",
+        "number": "sample",
+        "building": "sample",
+        "floor": "sample",
+        "unit": "sample",
+        "postcode": "sample",
+        "locality": "sample",
+        "municipality": "sample",
+        "regionalUnit": "sample",
+        "region": "sample",
+        "freeLines": [
+          "sample"
+        ],
+        "description": "sample"
+      },
+      "contactPoint": {
+        "type": "MOBILE",
+        "value": "sample",
+        "purpose": "PERSONAL",
+        "primary": true
+      },
+      "validFrom": "2026-10-07",
+      "expectedRecordVersion": 1
     },
     "LocationUpdateResponse": {
-      "location": "unspecified"
+      "locationId": "0192e7a1-df68-7974-85da-6a842c858f0a",
+      "kind": "ADDRESS",
+      "address": {
+        "addressId": "0192a053-aa3a-7de8-8fc6-f06c07050dca",
+        "types": [
+          "LEGAL"
+        ],
+        "primary": true,
+        "country": "GR",
+        "native": {
+          "street": "sample",
+          "number": "sample",
+          "building": "sample",
+          "floor": "sample",
+          "unit": "sample",
+          "postcode": "sample",
+          "locality": "sample",
+          "municipality": "sample",
+          "regionalUnit": "sample",
+          "region": "sample",
+          "freeLines": [
+            "sample"
+          ]
+        },
+        "latin": {
+          "street": "sample",
+          "number": "sample",
+          "building": "sample",
+          "floor": "sample",
+          "unit": "sample",
+          "postcode": "sample",
+          "locality": "sample",
+          "municipality": "sample",
+          "regionalUnit": "sample",
+          "region": "sample",
+          "freeLines": [
+            "sample"
+          ]
+        },
+        "formattedLines": [
+          "sample"
+        ],
+        "formattedLinesLatin": [
+          "sample"
+        ],
+        "validationState": "VALIDATED",
+        "description": "sample",
+        "validFrom": "2026-10-07",
+        "validTo": "2026-10-07"
+      },
+      "contactPoint": {
+        "contactPointId": "01929054-cddb-72b2-8ba5-2edd71e9e5c2",
+        "type": "MOBILE",
+        "value": "sample",
+        "purpose": "PERSONAL",
+        "primary": true,
+        "verificationStatus": "UNVERIFIED"
+      },
+      "recordVersion": 1
     },
     "MaskedIdentifier": {
       "scheme": "SAMPLE_CODE",
