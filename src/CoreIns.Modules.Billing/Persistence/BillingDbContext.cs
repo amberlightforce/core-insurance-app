@@ -60,6 +60,8 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
     public DbSet<SuspenseItemRow> SuspenseItems => Set<SuspenseItemRow>();
 
+    public DbSet<LevyPayableRow> LevyPayables => Set<LevyPayableRow>();
+
     public DbSet<ReceivableRow> Receivables => Set<ReceivableRow>();
 
     public DbSet<ReceivableAllocationRow> ReceivableAllocations => Set<ReceivableAllocationRow>();
@@ -76,6 +78,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
         DsarRestrictionModel.Configure(modelBuilder);
         ReceivableModel.Configure(modelBuilder);
         SuspenseModel.Configure(modelBuilder);
+        LevyModel.Configure(modelBuilder);
         MigrationImport.BillingMigrationModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BillingAccountRow>(entity =>

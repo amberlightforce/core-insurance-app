@@ -2792,135 +2792,182 @@ export interface components {
         ReconciliationRunResponse: {
             runs: components["schemas"]["ReconRunView"][];
         };
-        /** @description fin.TaxReturn.list result. PRD outputs: "return, file, payment status" */
+        /** @description A manual adjustment of a DRAFT return (BO-FIN-09). Insert-only; the maker, the time and the reason are kept. */
+        TaxReturnAdjustmentView: {
+            adjustmentId: components["schemas"]["Uuid"];
+            /** @description Signed decimal text, 2 places; added to the ledger liability. */
+            amount: string;
+            reason: string;
+            evidenceRef?: string;
+            /** @description True when the reason explains a difference between the ledger and the BIL tax lines. */
+            explainsReconciliation?: boolean;
+            createdBy: string;
+            createdAt: components["schemas"]["Instant"];
+        };
+        /** @description An IPT return of one period and tax code, computed from the IPT payable (GL-2410) postings of the ledger and reconciled to the BIL-sourced tax lines. DRAFT, REVIEWED (maker-checker, content hash frozen), FILED, PAID. An amendment is a new version linked to the original; a version is never edited after review. */
+        TaxReturnView: {
+            returnId: components["schemas"]["Uuid"];
+            /** @description Calendar month, yyyy-MM */
+            period: string;
+            taxCode: string;
+            versionNo: number;
+            /** @description The version this one amends. */
+            supersedesReturnId?: components["schemas"]["Uuid"];
+            /** @description The later version that amends this one. */
+            supersededByReturnId?: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "DRAFT" | "REVIEWED" | "FILED" | "PAID";
+            currency: string;
+            /** @description Credits minus debits of the IPT payable account in the period. */
+            ledgerAmount: string;
+            /** @description The part of it posted from BIL billing entries. */
+            bilAmount: string;
+            adjustmentsTotal: string;
+            /** @description ledgerAmount plus adjustmentsTotal. */
+            netPayable: string;
+            entryCount?: number;
+            /** @enum {string} */
+            reconciliation: "MATCHED" | "EXPLAINED" | "UNEXPLAINED";
+            /** @description ledgerAmount minus bilAmount. */
+            reconDifference?: string;
+            reconExplanation?: string;
+            /** @description Legal status of the IPT pack values the return rests on (Settled, PendingOpinion, Unverified, NotRegulatory). */
+            legalStatus: string;
+            /** @description True when the return rests on values that are not Settled; refused in Production. */
+            provisional: boolean;
+            /** @description SHA-256 of the return content, frozen when it is submitted for review. */
+            contentHash?: string;
+            fileName?: string;
+            fileHash?: string;
+            approvalRequestId?: components["schemas"]["Uuid"];
+            submittedBy?: string;
+            submittedAt?: components["schemas"]["Instant"];
+            reviewedBy?: string;
+            reviewedAt?: components["schemas"]["Instant"];
+            filedBy?: string;
+            filedAt?: components["schemas"]["Instant"];
+            filedOn?: components["schemas"]["LocalDate"];
+            filingReference?: string;
+            disbursementId?: string;
+            paymentStatus?: string;
+            createdBy?: string;
+            createdAt?: components["schemas"]["Instant"];
+            adjustments?: components["schemas"]["TaxReturnAdjustmentView"][];
+        };
+        /** @description The submission file of a return (generateFile). Deterministic from the frozen content; content is present only on generateFile. */
+        TaxReturnFileView: {
+            fileName: string;
+            fileHash: string;
+            contentType: string;
+            content?: string;
+        };
+        /** @description fin.TaxReturn.list result: return, file and payment status in brief. */
         TaxReturnListItem: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file" */
-            file?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payment status" */
-            paymentStatus?: components["schemas"]["Unspecified"];
+            returnId: components["schemas"]["Uuid"];
+            period: string;
+            taxCode: string;
+            versionNo: number;
+            /** @enum {string} */
+            status: "DRAFT" | "REVIEWED" | "FILED" | "PAID";
+            currency: string;
+            netPayable: string;
+            /** @enum {string} */
+            reconciliation: "MATCHED" | "EXPLAINED" | "UNEXPLAINED";
+            provisional?: boolean;
+            supersededByReturnId?: components["schemas"]["Uuid"];
+            fileName?: string;
+            filingReference?: string;
+            filedAt?: components["schemas"]["Instant"];
+            paymentStatus?: string;
         };
         /** @description Page of fin.TaxReturn.list results (cursor pagination, contract §3.5.5) */
         TaxReturnListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["TaxReturnListItem"][];
         };
-        /** @description fin.TaxReturn.get result. PRD outputs: "return, file, payment status" */
+        /** @description fin.TaxReturn.get result: the return, its file and its payment status. */
         TaxReturnGetResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file" */
-            file?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payment status" */
-            paymentStatus?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["TaxReturnView"];
+            file?: components["schemas"]["TaxReturnFileView"];
+            paymentStatus?: string;
         };
-        /** @description fin.TaxReturn.recalculate request. PRD inputs: "tax, period, data" */
-        TaxReturnRecalculateRequest: {
-            /** @description PRD: "tax" */
-            tax?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "data" */
-            data?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.TaxReturn.recalculate result. PRD outputs: "return, file, payment status" */
+        /** @description fin.TaxReturn.recalculate result: the return, its file and its payment status. */
         TaxReturnRecalculateResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file" */
-            file?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payment status" */
-            paymentStatus?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["TaxReturnView"];
+            file?: components["schemas"]["TaxReturnFileView"];
+            paymentStatus?: string;
         };
-        /** @description fin.TaxReturn.addAdjustment request. PRD inputs: "tax, period, data" */
-        TaxReturnAddAdjustmentRequest: {
-            /** @description PRD: "tax" */
-            tax?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "data" */
-            data?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.TaxReturn.addAdjustment result. PRD outputs: "return, file, payment status" */
+        /** @description fin.TaxReturn.addAdjustment result: the return, its file and its payment status. */
         TaxReturnAddAdjustmentResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file" */
-            file?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payment status" */
-            paymentStatus?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["TaxReturnView"];
+            file?: components["schemas"]["TaxReturnFileView"];
+            paymentStatus?: string;
         };
-        /** @description fin.TaxReturn.generateFile request. PRD inputs: "tax, period, data" */
-        TaxReturnGenerateFileRequest: {
-            /** @description PRD: "tax" */
-            tax?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "data" */
-            data?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.TaxReturn.generateFile result. PRD outputs: "return, file, payment status" */
+        /** @description fin.TaxReturn.generateFile result: the return, its file and its payment status. */
         TaxReturnGenerateFileResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file" */
-            file?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payment status" */
-            paymentStatus?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["TaxReturnView"];
+            file?: components["schemas"]["TaxReturnFileView"];
+            paymentStatus?: string;
         };
-        /** @description fin.TaxReturn.transition request. PRD inputs: "tax, period, data" */
-        TaxReturnTransitionRequest: {
-            /** @description PRD: "tax" */
-            tax?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "data" */
-            data?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.TaxReturn.transition result. PRD outputs: "return, file, payment status" */
+        /** @description fin.TaxReturn.transition result: the return, its file and its payment status. */
         TaxReturnTransitionResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file" */
-            file?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payment status" */
-            paymentStatus?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["TaxReturnView"];
+            file?: components["schemas"]["TaxReturnFileView"];
+            paymentStatus?: string;
         };
-        /** @description fin.TaxReturn.recordFiling request. PRD inputs: "tax, period, data" */
-        TaxReturnRecordFilingRequest: {
-            /** @description PRD: "tax" */
-            tax?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "data" */
-            data?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.TaxReturn.recordFiling result. PRD outputs: "return, file, payment status" */
+        /** @description fin.TaxReturn.recordFiling result: the return, its file and its payment status. */
         TaxReturnRecordFilingResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file" */
-            file?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payment status" */
-            paymentStatus?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["TaxReturnView"];
+            file?: components["schemas"]["TaxReturnFileView"];
+            paymentStatus?: string;
         };
-        /** @description fin.TaxReturn.requestPayment request. PRD inputs: "tax, period, data" */
-        TaxReturnRequestPaymentRequest: {
-            /** @description PRD: "tax" */
-            tax?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "data" */
-            data?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.TaxReturn.requestPayment result. PRD outputs: "return, file, payment status" */
+        /** @description fin.TaxReturn.requestPayment result: the return, its file and its payment status. */
         TaxReturnRequestPaymentResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file" */
-            file?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payment status" */
-            paymentStatus?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["TaxReturnView"];
+            file?: components["schemas"]["TaxReturnFileView"];
+            paymentStatus?: string;
+        };
+        /** @description fin.TaxReturn.recalculate request. */
+        TaxReturnRecalculateRequest: {
+            /** @description Calendar month, yyyy-MM */
+            period: string;
+            /** @description Defaults to TAX-IPT. */
+            taxCode?: string;
+        };
+        /** @description fin.TaxReturn.addAdjustment request. */
+        TaxReturnAddAdjustmentRequest: {
+            returnId: components["schemas"]["Uuid"];
+            /** @description Signed decimal text, at most 2 places, not zero. */
+            amount: string;
+            reason: string;
+            evidenceRef?: string;
+            explainsReconciliation?: boolean;
+        };
+        /** @description fin.TaxReturn.generateFile request. */
+        TaxReturnGenerateFileRequest: {
+            returnId: components["schemas"]["Uuid"];
+        };
+        /** @description fin.TaxReturn.transition request. */
+        TaxReturnTransitionRequest: {
+            returnId: components["schemas"]["Uuid"];
+            /**
+             * @description SUBMIT (the preparer freezes the content hash and requests approval), APPROVE or REJECT (a second person).
+             * @enum {string}
+             */
+            action: "SUBMIT" | "APPROVE" | "REJECT";
+            comment?: string;
+        };
+        /** @description fin.TaxReturn.recordFiling request. */
+        TaxReturnRecordFilingRequest: {
+            returnId: components["schemas"]["Uuid"];
+            filingReference: string;
+            filedOn: components["schemas"]["LocalDate"];
+        };
+        /** @description fin.TaxReturn.requestPayment request. */
+        TaxReturnRequestPaymentRequest: {
+            returnId: components["schemas"]["Uuid"];
+            payeePartyId: components["schemas"]["Uuid"];
+            payeeAccountId: components["schemas"]["Uuid"];
+            requestedValueDate?: components["schemas"]["LocalDate"];
         };
         /** @description fin.LevyReturn.list result. PRD outputs: "return" */
         LevyReturnListItem: {
@@ -5521,6 +5568,9 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description Calendar month, yyyy-MM */
+                period?: string;
+                status?: "DRAFT" | "REVIEWED" | "FILED" | "PAID";
             };
             header?: {
                 /**

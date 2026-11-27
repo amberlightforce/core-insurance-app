@@ -3175,6 +3175,19 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: period
+        in: query
+        required: false
+        description: Calendar month, yyyy-MM
+        schema:
+          type: string
+          pattern: ^[0-9]{4}-(0[1-9]|1[0-2])$
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [DRAFT, REVIEWED, FILED, PAID]
       responses:
         '200':
           description: Success
@@ -7685,19 +7698,167 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ReconRunView'
+    TaxReturnAdjustmentView:
+      type: object
+      description: A manual adjustment of a DRAFT return (BO-FIN-09). Insert-only; the maker, the time and the reason are kept.
+      required: [adjustmentId, amount, reason, createdBy, createdAt]
+      properties:
+        adjustmentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          type: string
+          description: Signed decimal text, 2 places; added to the ledger liability.
+        reason:
+          type: string
+        evidenceRef:
+          type: string
+        explainsReconciliation:
+          type: boolean
+          description: True when the reason explains a difference between the ledger and the BIL tax lines.
+        createdBy:
+          type: string
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+    TaxReturnView:
+      type: object
+      description: >-
+        An IPT return of one period and tax code, computed from the IPT payable (GL-2410) postings of the ledger and reconciled to the
+        BIL-sourced tax lines. DRAFT, REVIEWED (maker-checker, content hash frozen), FILED, PAID. An amendment is a new version linked
+        to the original; a version is never edited after review.
+      required: [returnId, period, taxCode, versionNo, status, currency, ledgerAmount, bilAmount, adjustmentsTotal, netPayable, reconciliation, legalStatus, provisional]
+      properties:
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        period:
+          type: string
+          description: Calendar month, yyyy-MM
+        taxCode:
+          type: string
+        versionNo:
+          type: integer
+        supersedesReturnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The version this one amends.
+        supersededByReturnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The later version that amends this one.
+        status:
+          type: string
+          enum: [DRAFT, REVIEWED, FILED, PAID]
+        currency:
+          type: string
+        ledgerAmount:
+          type: string
+          description: Credits minus debits of the IPT payable account in the period.
+        bilAmount:
+          type: string
+          description: The part of it posted from BIL billing entries.
+        adjustmentsTotal:
+          type: string
+        netPayable:
+          type: string
+          description: ledgerAmount plus adjustmentsTotal.
+        entryCount:
+          type: integer
+        reconciliation:
+          type: string
+          enum: [MATCHED, EXPLAINED, UNEXPLAINED]
+        reconDifference:
+          type: string
+          description: ledgerAmount minus bilAmount.
+        reconExplanation:
+          type: string
+        legalStatus:
+          type: string
+          description: Legal status of the IPT pack values the return rests on (Settled, PendingOpinion, Unverified, NotRegulatory).
+        provisional:
+          type: boolean
+          description: True when the return rests on values that are not Settled; refused in Production.
+        contentHash:
+          type: string
+          description: SHA-256 of the return content, frozen when it is submitted for review.
+        fileName:
+          type: string
+        fileHash:
+          type: string
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        submittedBy:
+          type: string
+        submittedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        reviewedBy:
+          type: string
+        reviewedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        filedBy:
+          type: string
+        filedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        filedOn:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        filingReference:
+          type: string
+        disbursementId:
+          type: string
+        paymentStatus:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        adjustments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxReturnAdjustmentView'
+    TaxReturnFileView:
+      type: object
+      description: The submission file of a return (generateFile). Deterministic from the frozen content; content is present only on generateFile.
+      required: [fileName, fileHash, contentType]
+      properties:
+        fileName:
+          type: string
+        fileHash:
+          type: string
+        contentType:
+          type: string
+        content:
+          type: string
     TaxReturnListItem:
       type: object
-      description: 'fin.TaxReturn.list result. PRD outputs: "return, file, payment status"'
+      description: 'fin.TaxReturn.list result: return, file and payment status in brief.'
+      required: [returnId, period, taxCode, versionNo, status, currency, netPayable, reconciliation]
       properties:
-        return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
-        file:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file"'
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        period:
+          type: string
+        taxCode:
+          type: string
+        versionNo:
+          type: integer
+        status:
+          type: string
+          enum: [DRAFT, REVIEWED, FILED, PAID]
+        currency:
+          type: string
+        netPayable:
+          type: string
+        reconciliation:
+          type: string
+          enum: [MATCHED, EXPLAINED, UNEXPLAINED]
+        provisional:
+          type: boolean
+        supersededByReturnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        fileName:
+          type: string
+        filingReference:
+          type: string
+        filedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
         paymentStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payment status"'
+          type: string
     TaxReturnListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7710,173 +7871,158 @@ components:
       description: Page of fin.TaxReturn.list results (cursor pagination, contract §3.5.5)
     TaxReturnGetResponse:
       type: object
-      description: 'fin.TaxReturn.get result. PRD outputs: "return, file, payment status"'
+      description: 'fin.TaxReturn.get result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
+          $ref: '#/components/schemas/TaxReturnView'
         file:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file"'
+          $ref: '#/components/schemas/TaxReturnFileView'
         paymentStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payment status"'
-    TaxReturnRecalculateRequest:
-      type: object
-      description: 'fin.TaxReturn.recalculate request. PRD inputs: "tax, period, data"'
-      properties:
-        tax:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tax"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        data:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "data"'
+          type: string
     TaxReturnRecalculateResponse:
       type: object
-      description: 'fin.TaxReturn.recalculate result. PRD outputs: "return, file, payment status"'
+      description: 'fin.TaxReturn.recalculate result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
+          $ref: '#/components/schemas/TaxReturnView'
         file:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file"'
+          $ref: '#/components/schemas/TaxReturnFileView'
         paymentStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payment status"'
-    TaxReturnAddAdjustmentRequest:
-      type: object
-      description: 'fin.TaxReturn.addAdjustment request. PRD inputs: "tax, period, data"'
-      properties:
-        tax:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tax"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        data:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "data"'
+          type: string
     TaxReturnAddAdjustmentResponse:
       type: object
-      description: 'fin.TaxReturn.addAdjustment result. PRD outputs: "return, file, payment status"'
+      description: 'fin.TaxReturn.addAdjustment result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
+          $ref: '#/components/schemas/TaxReturnView'
         file:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file"'
+          $ref: '#/components/schemas/TaxReturnFileView'
         paymentStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payment status"'
-    TaxReturnGenerateFileRequest:
-      type: object
-      description: 'fin.TaxReturn.generateFile request. PRD inputs: "tax, period, data"'
-      properties:
-        tax:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tax"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        data:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "data"'
+          type: string
     TaxReturnGenerateFileResponse:
       type: object
-      description: 'fin.TaxReturn.generateFile result. PRD outputs: "return, file, payment status"'
+      description: 'fin.TaxReturn.generateFile result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
+          $ref: '#/components/schemas/TaxReturnView'
         file:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file"'
+          $ref: '#/components/schemas/TaxReturnFileView'
         paymentStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payment status"'
-    TaxReturnTransitionRequest:
-      type: object
-      description: 'fin.TaxReturn.transition request. PRD inputs: "tax, period, data"'
-      properties:
-        tax:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tax"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        data:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "data"'
+          type: string
     TaxReturnTransitionResponse:
       type: object
-      description: 'fin.TaxReturn.transition result. PRD outputs: "return, file, payment status"'
+      description: 'fin.TaxReturn.transition result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
+          $ref: '#/components/schemas/TaxReturnView'
         file:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file"'
+          $ref: '#/components/schemas/TaxReturnFileView'
         paymentStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payment status"'
-    TaxReturnRecordFilingRequest:
-      type: object
-      description: 'fin.TaxReturn.recordFiling request. PRD inputs: "tax, period, data"'
-      properties:
-        tax:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tax"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        data:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "data"'
+          type: string
     TaxReturnRecordFilingResponse:
       type: object
-      description: 'fin.TaxReturn.recordFiling result. PRD outputs: "return, file, payment status"'
+      description: 'fin.TaxReturn.recordFiling result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
+          $ref: '#/components/schemas/TaxReturnView'
         file:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file"'
+          $ref: '#/components/schemas/TaxReturnFileView'
         paymentStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payment status"'
-    TaxReturnRequestPaymentRequest:
-      type: object
-      description: 'fin.TaxReturn.requestPayment request. PRD inputs: "tax, period, data"'
-      properties:
-        tax:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "tax"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        data:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "data"'
+          type: string
     TaxReturnRequestPaymentResponse:
       type: object
-      description: 'fin.TaxReturn.requestPayment result. PRD outputs: "return, file, payment status"'
+      description: 'fin.TaxReturn.requestPayment result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
+          $ref: '#/components/schemas/TaxReturnView'
         file:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file"'
+          $ref: '#/components/schemas/TaxReturnFileView'
         paymentStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payment status"'
+          type: string
+    TaxReturnRecalculateRequest:
+      type: object
+      description: 'fin.TaxReturn.recalculate request.'
+      required: [period]
+      properties:
+        period:
+          type: string
+          description: Calendar month, yyyy-MM
+        taxCode:
+          type: string
+          description: Defaults to TAX-IPT.
+    TaxReturnAddAdjustmentRequest:
+      type: object
+      description: 'fin.TaxReturn.addAdjustment request.'
+      required: [returnId, amount, reason]
+      properties:
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          type: string
+          description: Signed decimal text, at most 2 places, not zero.
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        evidenceRef:
+          type: string
+          maxLength: 200
+        explainsReconciliation:
+          type: boolean
+    TaxReturnGenerateFileRequest:
+      type: object
+      description: 'fin.TaxReturn.generateFile request.'
+      required: [returnId]
+      properties:
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+    TaxReturnTransitionRequest:
+      type: object
+      description: 'fin.TaxReturn.transition request.'
+      required: [returnId, action]
+      properties:
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        action:
+          type: string
+          enum: [SUBMIT, APPROVE, REJECT]
+          description: SUBMIT (the preparer freezes the content hash and requests approval), APPROVE or REJECT (a second person).
+        comment:
+          type: string
+          maxLength: 1000
+    TaxReturnRecordFilingRequest:
+      type: object
+      description: 'fin.TaxReturn.recordFiling request.'
+      required: [returnId, filingReference, filedOn]
+      properties:
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        filingReference:
+          type: string
+          minLength: 1
+          maxLength: 200
+        filedOn:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+    TaxReturnRequestPaymentRequest:
+      type: object
+      description: 'fin.TaxReturn.requestPayment request.'
+      required: [returnId, payeePartyId, payeeAccountId]
+      properties:
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        payeePartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        requestedValueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
     LevyReturnListItem:
       type: object
       description: 'fin.LevyReturn.list result. PRD outputs: "return"'

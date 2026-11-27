@@ -140,6 +140,9 @@ public static class FinanceModule
         services.AddCommand<Commands.ExchangeReconciliationTotals, CoreIns.Modules.Finance.Contracts.Api.ReconciliationExchangeResponse, Commands.ExchangeReconciliationTotalsHandler>(CommandDescriptor.For("fin.Reconciliation.exchange"));
         services.AddCommand<Commands.RunEarning, CoreIns.Modules.Finance.Contracts.Api.EarningRunResponse, Commands.RunEarningHandler>(CommandDescriptor.For("fin.Earning.run"));
 
+        // BO-FIN-09: IPT returns from the ledger; payment through BIL TAX_REMITTANCE.
+        Commands.TaxReturnRegistration.AddTaxReturns(services);
+
         services.AddOptions<FinanceOptions>().Bind(configuration.GetSection(FinanceOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddErrorDefinitions(Errors);
@@ -175,6 +178,12 @@ public static class FinanceModule
             .Describe("Η ενέργεια πρέπει να γίνει ή να εγκριθεί από άλλο πρόσωπο.", "The action must be done or approved by a different person."),
         ErrorDefinition.For(ModuleCode.FIN, "TOTALS-SCHEMA", 422, "Μη έγκυρα σύνολα ελέγχου", "Invalid control totals")
             .Describe("Τα σύνολα ελέγχου πρέπει να έχουν νόμισμα, ποσό με έως 2 δεκαδικά και μία γραμμή ανά νόμισμα.", "Control totals need a currency, an amount with at most 2 decimals and one line per currency."),
+        ErrorDefinition.For(ModuleCode.FIN, "RECON-UNEXPLAINED", 422, "Ανεξήγητη διαφορά συμφωνίας", "Unexplained reconciliation difference")
+            .Describe("Το λογιστικό υπόλοιπο και οι φορολογικές γραμμές της τιμολόγησης διαφέρουν και η διαφορά δεν έχει εξηγηθεί.", "The ledger and the BIL tax lines differ and the difference is not explained."),
+        ErrorDefinition.For(ModuleCode.FIN, "RETURN-NOT-APPROVED", 422, "Η δήλωση δεν έχει εγκριθεί", "The return is not approved")
+            .Describe("Η ενέργεια απαιτεί δήλωση που έχει εγκριθεί από δεύτερο πρόσωπο.", "The action needs a return that a second person approved."),
+        ErrorDefinition.For(ModuleCode.FIN, "SPI-UNBOUND", 422, "Οι φορολογικοί κανόνες δεν είναι διαθέσιμοι", "The tax rules are not available")
+            .Describe("Το πακέτο χώρας δεν διαθέτει οριστικοποιημένους κανόνες ΦΠΑ ασφαλίστρων για τη νομική οντότητα (στην παραγωγή απαιτείται νομική οριστικοποίηση).", "The country pack holds no settled IPT rules for the legal entity (Production needs legal settlement)."),
         ErrorDefinition.For(ModuleCode.FIN, "PERIOD-LOCKED", 409, "Η περίοδος είναι κλειδωμένη", "The period is locked")
             .Describe("Η λογιστική περίοδος είναι κλειδωμένη.", "The accounting period is locked."),
     ];

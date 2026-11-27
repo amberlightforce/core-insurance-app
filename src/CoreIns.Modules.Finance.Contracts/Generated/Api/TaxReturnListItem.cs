@@ -4,31 +4,115 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.TaxReturn.list result. PRD outputs: "return, file, payment status"</summary>
+/// <summary>fin.TaxReturn.list result: return, file and payment status in brief.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TaxReturnListItem
 {
-    /// <summary>PRD: "return"</summary>
+    /// <summary>Contract member 'returnId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'returnId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("return")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Return { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("returnId")]
+    public required global::System.Guid ReturnId { get; init; }
 
-    /// <summary>PRD: "file"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("file")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? File { get; init; }
+    /// <summary>Contract member 'period'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
+    public required string Period { get; init; }
 
-    /// <summary>PRD: "payment status"</summary>
+    /// <summary>Contract member 'taxCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("taxCode")]
+    public required string TaxCode { get; init; }
+
+    /// <summary>Contract member 'versionNo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("versionNo")]
+    public required int VersionNo { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Contract member 'currency'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("currency")]
+    public required string Currency { get; init; }
+
+    /// <summary>Contract member 'netPayable'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("netPayable")]
+    public required string NetPayable { get; init; }
+
+    /// <summary>Contract member 'reconciliation'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reconciliation")]
+    public required ReconciliationValue Reconciliation { get; init; }
+
+    /// <summary>Contract member 'provisional'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Provisional { get; init; }
+
+    /// <summary>Contract member 'supersededByReturnId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'supersededByReturnId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("supersededByReturnId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? SupersededByReturnId { get; init; }
+
+    /// <summary>Contract member 'fileName'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fileName")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? FileName { get; init; }
+
+    /// <summary>Contract member 'filingReference'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("filingReference")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? FilingReference { get; init; }
+
+    /// <summary>Contract member 'filedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("filedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? FiledAt { get; init; }
+
+    /// <summary>Contract member 'paymentStatus'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("paymentStatus")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PaymentStatus { get; init; }
+    public string? PaymentStatus { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>DRAFT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DRAFT")]
+        Draft,
+
+        /// <summary><c>REVIEWED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REVIEWED")]
+        Reviewed,
+
+        /// <summary><c>FILED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("FILED")]
+        Filed,
+
+        /// <summary><c>PAID</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PAID")]
+        Paid,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ReconciliationValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ReconciliationValue
+    {
+        /// <summary><c>MATCHED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MATCHED")]
+        Matched,
+
+        /// <summary><c>EXPLAINED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("EXPLAINED")]
+        Explained,
+
+        /// <summary><c>UNEXPLAINED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("UNEXPLAINED")]
+        Unexplained,
+    }
 }
