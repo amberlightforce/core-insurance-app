@@ -9,6 +9,7 @@ using CoreIns.Platform.Contracts.Common;
 using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Paging;
 using CoreIns.SharedKernel.Results;
 
 namespace CoreIns.Modules.Underwriting.Services;
@@ -31,7 +32,7 @@ internal sealed class UnderwritingRulesService(RequestContext context, ICommandH
 }
 
 /// <summary><c>uw.Issue.blockingStatus</c> (REQ-UW-002): the gate POL asks before quote, bind and issue.</summary>
-internal sealed class UnderwritingIssueService(UnderwritingStore store, RequestContext context, ILegalEntityDirectory legalEntities) : IUnderwritingIssueService
+internal sealed class UnderwritingIssueService(UnderwritingStore store, RequestContext context, ILegalEntityDirectory legalEntities, IssueReadQueries reads) : IUnderwritingIssueService
 {
     public async Task<IssueBlockingStatusResponse> BlockingStatusAsync(JobId jobRef, BlockingPoint blockingPoint, CancellationToken cancellationToken = default)
     {
@@ -66,31 +67,38 @@ internal sealed class UnderwritingIssueService(UnderwritingStore store, RequestC
         };
     }
 
-    public Task<IssueListForChannelPage> ListForChannelAsync(string? cursor = null, int? limit = null, CancellationToken cancellationToken = default) =>
-        throw new DomainException(DomainError.Of(ModuleCode.UW, "NOT-AVAILABLE", "uw.Issue.listForChannel belongs to the referral workbench work package."));
+    public async Task<IssueListForChannelPage> ListForChannelAsync(JobId jobRef, string? cursor = null, int? limit = null, CancellationToken cancellationToken = default)
+    {
+        var result = await reads.ListForChannelAsync(jobRef.Value, cursor, limit, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? result.Value : throw new DomainException(result.Error);
+    }
 }
 
 /// <summary><c>uw.Issue.list</c> (REQ-UW-075, -077 subset): the issues of a job, or the legal entity's issues in one status (the referral queue).</summary>
 internal sealed class UnderwritingIssueQueries(UnderwritingStore store, RequestContext context, ILegalEntityDirectory legalEntities)
 {
-    public async Task<Result<IssueListPage>> ListAsync(Guid? jobRef, IssueStatusCode? status, string? cursor, int? limit, CancellationToken cancellationToken)
+    public async Task<Result<IssueListPage>> ListAsync(
+        Guid? jobRef, IssueStatusCode? status, string? cursor, int? limit, CancellationToken cancellationToken, string? issueType = null, BlockingPoint? blockingPoint = null)
     {
-        if (limit is < 1 or > 200 || !TryDecode(cursor, out var after))
+        if (!KeysetPaging.TryTake(limit, 50, out var size) || !TryDecode(cursor, out var after))
         {
             return DomainError.Of(ModuleCode.UW, "VALIDATION", "cursor is malformed or limit is outside 1..200.");
         }
 
         var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity.")).Value;
-        var size = limit ?? 50;
-        var rows = await store.ListIssuesAsync(legalEntity, jobRef, status?.ToString(), after, size + 1, cancellationToken).ConfigureAwait(false);
-        var page = rows.Take(size).ToList();
-        return new IssueListPage
-        {
-            Items = [.. page.Select(Item)],
-            NextCursor = rows.Count > size ? Encode(page[^1]) : null,
-            Limit = size,
-        };
+        var rows = await store.ListIssuesAsync(
+            legalEntity, jobRef, status?.ToString(), after, size + 1, cancellationToken, issueType, blockingPoint is { } point ? PointCode(point) : null).ConfigureAwait(false);
+        var (page, next) = KeysetPaging.Slice(rows, size, Encode);
+        return new IssueListPage { Items = [.. page.Select(Item)], NextCursor = next, Limit = size };
     }
+
+    internal static string PointCode(BlockingPoint point) => point switch
+    {
+        BlockingPoint.PreQuote => "PRE_QUOTE",
+        BlockingPoint.PreBind => "PRE_BIND",
+        BlockingPoint.PreIssue => "PRE_ISSUE",
+        _ => "NON_BLOCKING",
+    };
 
     internal static IssueListItem Item(IssueRecord row) => new()
     {
@@ -122,32 +130,28 @@ internal sealed class UnderwritingIssueQueries(UnderwritingStore store, RequestC
             : null,
     };
 
-    private static string Encode(IssueRecord last) =>
-        Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(
-            $"{DateTime.SpecifyKind(last.CreatedAt, DateTimeKind.Utc).Ticks.ToString(System.Globalization.CultureInfo.InvariantCulture)}_{last.IssueId:N}"));
+    internal static string Encode(IssueRecord last) =>
+        KeysetPaging.Encode(KeysetPaging.Part(DateTime.SpecifyKind(last.CreatedAt, DateTimeKind.Utc).Ticks), KeysetPaging.Part(last.IssueId));
 
-    private static bool TryDecode(string? cursor, out (DateTime CreatedAt, Guid IssueId)? after)
+    internal static bool TryDecode(string? cursor, out (DateTime CreatedAt, Guid IssueId)? after)
     {
         after = null;
-        if (string.IsNullOrEmpty(cursor))
+        if (!KeysetPaging.TryDecode(cursor, 2, out var parts))
+        {
+            return false;
+        }
+
+        if (parts is null)
         {
             return true;
         }
 
-        try
+        if (!KeysetPaging.TryLong(parts[0], out var ticks) || ticks is <= 0 || ticks > DateTime.MaxValue.Ticks || !Guid.TryParseExact(parts[1], "D", out var id))
         {
-            var parts = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(cursor)).Split('_');
-            if (parts.Length == 2 && long.TryParse(parts[0], System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var ticks)
-                && ticks is > 0 && ticks <= DateTime.MaxValue.Ticks && Guid.TryParseExact(parts[1], "N", out var id))
-            {
-                after = (new DateTime(ticks, DateTimeKind.Utc), id);
-                return true;
-            }
-        }
-        catch (FormatException)
-        {
+            return false;
         }
 
-        return false;
+        after = (new DateTime(ticks, DateTimeKind.Utc), id);
+        return true;
     }
 }

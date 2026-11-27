@@ -4,31 +4,69 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Rules.evaluateBatch request. PRD inputs: "selection, checkpoint, rule set"</summary>
+/// <summary>uw.Rules.evaluateBatch request (BO-UW-03): many risk snapshots evaluated against one rule-set version, without any effect on jobs or issues. Pin a version (ruleSetCode + ruleSetVersion) or leave both out to use the version in force on effectiveDate. At most 200 items per request (UW-ERR-LIMIT-EXCEEDED above).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RulesEvaluateBatchRequest
 {
-    /// <summary>PRD: "selection"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("selection")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Selection { get; init; }
+    /// <summary>Contract member 'productCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productCode")]
+    public required string ProductCode { get; init; }
 
-    /// <summary>PRD: "checkpoint"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'checkpoint'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("checkpoint")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Checkpoint { get; init; }
+    public required CheckpointValue Checkpoint { get; init; }
 
-    /// <summary>PRD: "rule set"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSet")]
+    /// <summary>Pins the rule set; needs ruleSetVersion</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetCode")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RuleSet { get; init; }
+    public string? RuleSetCode { get; init; }
+
+    /// <summary>Pins the version (Active or Approved)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? RuleSetVersion { get; init; }
+
+    /// <summary>Default date the version in force is resolved at and the risks are evaluated at (default today)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveDate")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.BusinessDate? EffectiveDate { get; init; }
+
+    /// <summary>At most 200 items; more is UW-ERR-LIMIT-EXCEEDED (422)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
+    public required global::System.Collections.Generic.IReadOnlyList<ItemItem> Items { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<CheckpointValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum CheckpointValue
+    {
+        /// <summary><c>PRE_QUOTE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PRE_QUOTE")]
+        PreQuote,
+
+        /// <summary><c>PRE_BIND</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PRE_BIND")]
+        PreBind,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ItemItem
+    {
+        /// <summary>Caller's reference, echoed in the result</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("itemRef")]
+        public required string ItemRef { get; init; }
+
+        /// <summary>Overrides the request date for this item (the version stays the one resolved)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("effectiveDate")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.BusinessDate? EffectiveDate { get; init; }
+
+        /// <summary>Contract member 'riskSnapshot'.</summary>
+        /// <remarks>
+        /// <para>Open structure (OpenObject): consumers must not rely on its members until the producer defines them in a minor version.</para>
+        /// </remarks>
+        [global::System.Text.Json.Serialization.JsonPropertyName("riskSnapshot")]
+        public required global::System.Text.Json.JsonElement RiskSnapshot { get; init; }
+    }
 }

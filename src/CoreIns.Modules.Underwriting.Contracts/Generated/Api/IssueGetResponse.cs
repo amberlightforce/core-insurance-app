@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Issue.get result. PRD outputs: "issues, explanation"</summary>
+/// <summary>uw.Issue.get result (BO-UW-03): the issue and why it was raised</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record IssueGetResponse
 {
-    /// <summary>PRD: "issues"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("issues")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Issues { get; init; }
+    /// <summary>Contract member 'issue'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issue")]
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.IssueListItem Issue { get; init; }
 
-    /// <summary>PRD: "explanation"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'explanation'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("explanation")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Explanation { get; init; }
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.IssueExplanation Explanation { get; init; }
 }

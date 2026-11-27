@@ -131,7 +131,6 @@ CONTRACT_NOT_SERVED GET /api/ri/v1/facs/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/ifrs17-links/query
 CONTRACT_NOT_SERVED GET /api/ri/v1/line-tables/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/security-rules/{}
-CONTRACT_NOT_SERVED GET /api/uw/v1/approval/history
 CONTRACT_NOT_SERVED GET /api/uw/v1/contingencies
 CONTRACT_NOT_SERVED GET /api/uw/v1/declines/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/disclosure-findings
@@ -140,9 +139,6 @@ CONTRACT_NOT_SERVED GET /api/uw/v1/external-reports
 CONTRACT_NOT_SERVED GET /api/uw/v1/external-reports/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/inspections/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/intakes/{}
-CONTRACT_NOT_SERVED GET /api/uw/v1/issues/explain
-CONTRACT_NOT_SERVED GET /api/uw/v1/issues/list-for-channel
-CONTRACT_NOT_SERVED GET /api/uw/v1/issues/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/refusal-registers/query
 CONTRACT_NOT_SERVED GET /api/uw/v1/renewal-directions/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/desktop/get
@@ -643,7 +639,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/release
 CONTRACT_NOT_SERVED POST /api/uw/v1/refusal-registers/export
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/bulk-set
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/set
-CONTRACT_NOT_SERVED POST /api/uw/v1/rules/evaluate-batch
 CONTRACT_NOT_SERVED POST /api/uw/v1/valuation/compute
 CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/bulk-reassign
 CONTRACT_NOT_SERVED POST /api/wrk/v1/assignments/simulate

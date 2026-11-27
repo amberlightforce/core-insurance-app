@@ -167,8 +167,8 @@ paths:
             schema:
               $ref: '#/components/schemas/RulesEvaluateBatchRequest'
       responses:
-        '202':
-          description: Accepted; result or job reference
+        '200':
+          description: One result per item, against one rule-set version
           content:
             application/json:
               schema:
@@ -300,6 +300,18 @@ paths:
         description: Issue status to list; without a job the default is Open (the referral queue)
         schema:
           $ref: '#/components/schemas/IssueStatusCode'
+      - name: issueType
+        in: query
+        required: false
+        description: Only issues of this issue type
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: blockingPoint
+        in: query
+        required: false
+        description: Only issues at this blocking point
+        schema:
+          $ref: ../events/common.schema.json#/$defs/BlockingPoint
       responses:
         '200':
           description: Success
@@ -357,6 +369,12 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: jobRef
+        in: query
+        required: true
+        description: POL job id (the quote or policy job whose issues the channel shows)
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -467,6 +485,12 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: issueId
+        in: query
+        required: true
+        description: Issue to explain
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -5796,27 +5820,130 @@ components:
       description: 'Typed from REQ-UW-001, REQ-UW-055..058. PRD outputs: "issues, lane, evaluation id"'
     RulesEvaluateBatchRequest:
       type: object
-      description: 'uw.Rules.evaluateBatch request. PRD inputs: "selection, checkpoint, rule set"'
+      description: 'uw.Rules.evaluateBatch request (BO-UW-03): many risk snapshots evaluated against one rule-set version, without
+        any effect on jobs or issues. Pin a version (ruleSetCode + ruleSetVersion) or leave both out to use the version in force on
+        effectiveDate. At most 200 items per request (UW-ERR-LIMIT-EXCEEDED above).'
       properties:
-        selection:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "selection"'
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
         checkpoint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checkpoint"'
-        ruleSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule set"'
+          type: string
+          enum:
+          - PRE_QUOTE
+          - PRE_BIND
+        ruleSetCode:
+          type: string
+          maxLength: 64
+          description: Pins the rule set; needs ruleSetVersion
+        ruleSetVersion:
+          type: string
+          maxLength: 16
+          description: Pins the version (Active or Approved)
+        effectiveDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Default date the version in force is resolved at and the risks are evaluated at (default today)
+        items:
+          type: array
+          minItems: 1
+          description: At most 200 items; more is UW-ERR-LIMIT-EXCEEDED (422)
+          items:
+            type: object
+            properties:
+              itemRef:
+                type: string
+                maxLength: 200
+                description: Caller's reference, echoed in the result
+              effectiveDate:
+                $ref: ../events/common.schema.json#/$defs/LocalDate
+                description: Overrides the request date for this item (the version stays the one resolved)
+              riskSnapshot:
+                $ref: ../events/common.schema.json#/$defs/OpenObject
+            required:
+            - itemRef
+            - riskSnapshot
+      required:
+      - productCode
+      - checkpoint
+      - items
     RulesEvaluateBatchResponse:
       type: object
-      description: 'uw.Rules.evaluateBatch result. PRD outputs: "job id, results"'
+      description: 'uw.Rules.evaluateBatch result: one result per item in request order, all against the same rule-set version
+        (code, version and content hash are echoed, so a result is reproducible). Nothing is recorded.'
       properties:
-        jobId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "job id"'
+        ruleSetCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        ruleSetVersion:
+          type: string
+        ruleSetHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        dataStatus:
+          type: string
+          description: ILLUSTRATIVE_TEST_DATA when the rule set is made-up test data (D-SLC-04)
+        pinned:
+          type: boolean
+          description: True when the caller pinned the version
         results:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "results"'
+          type: array
+          items:
+            type: object
+            properties:
+              itemRef:
+                type: string
+              outcome:
+                type: string
+                enum:
+                - ACCEPT
+                - REFER
+                - DECLINE
+                - ERROR
+                description: ERROR when the item's snapshot is not a valid risk (see error)
+              lane:
+                type:
+                - string
+                - 'null'
+              hits:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ruleId:
+                      type: string
+                    ruleType:
+                      type: string
+                    issueType:
+                      $ref: ../events/common.schema.json#/$defs/Code
+                    blockingPoint:
+                      $ref: ../events/common.schema.json#/$defs/BlockingPoint
+                    messageEn:
+                      type: string
+                    messageEl:
+                      type: string
+                  required:
+                  - ruleId
+                  - ruleType
+                  - issueType
+                  - blockingPoint
+                  - messageEn
+                  - messageEl
+              error:
+                type:
+                - string
+                - 'null'
+                description: Why the item could not be evaluated
+            required:
+            - itemRef
+            - outcome
+            - hits
+        warnings:
+          type: array
+          items:
+            type: string
+      required:
+      - ruleSetCode
+      - ruleSetVersion
+      - ruleSetHash
+      - pinned
+      - results
     IssueBlockingStatusResponse:
       type: object
       properties:
@@ -5979,16 +6106,34 @@ components:
       description: Page of uw.Issue.list results (cursor pagination, contract §3.5.5)
     IssueListForChannelItem:
       type: object
-      description: 'uw.Issue.listForChannel result. PRD outputs: "issues, explanation"'
+      description: 'uw.Issue.listForChannel result (BO-UW-03): what a customer or agent may see of an issue. No rule id, severity,
+        lane, issue key, decider or decision reason, and the message is in the request language.'
       properties:
-        issues:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issues"'
-        explanation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "explanation"'
+        issueId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        issueType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        blockingPoint:
+          $ref: ../events/common.schema.json#/$defs/BlockingPoint
+        channelStatus:
+          type: string
+          enum:
+          - UNDER_REVIEW
+          - CLEARED
+          - NOT_ACCEPTED
+          description: Open is UNDER_REVIEW, Approved(WithConditions) is CLEARED, Rejected is NOT_ACCEPTED. Closed and Invalidated issues are not listed.
+        message:
+          type: string
+          description: Customer-safe wording in the Accept-Language language
+        raisedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - issueId
+      - issueType
+      - blockingPoint
+      - channelStatus
+      - message
+      - raisedAt
     IssueListForChannelPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -5999,30 +6144,78 @@ components:
             items:
               $ref: '#/components/schemas/IssueListForChannelItem'
       description: Page of uw.Issue.listForChannel results (cursor pagination, contract §3.5.5)
+    IssueExplanation:
+      type: object
+      description: 'Why an issue was raised (BO-UW-03): the rule and rule-set version that raised it, the derived fact the rule reads,
+        its value on the evaluated facts and the rules declared threshold (RuleExplainDto). P2 safe: a drivers age is its band.'
+      properties:
+        issueId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        ruleId:
+          type: string
+        ruleSetCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        ruleSetVersion:
+          type: string
+        ruleSetHash:
+          type:
+          - string
+          - 'null'
+        fact:
+          type:
+          - string
+          - 'null'
+          description: The derived fact the rule reads (facts read), null when the rule declares none
+        observed:
+          type:
+          - string
+          - 'null'
+          description: The facts value on the job's latest recorded facts (a driver's age as its band)
+        limit:
+          type:
+          - string
+          - 'null'
+          description: The rules threshold
+        limitUnavailableReason:
+          type:
+          - string
+          - 'null'
+          description: RULE_DECLARES_NO_LIMIT when the rule declares no threshold
+        messageEn:
+          type: string
+        messageEl:
+          type: string
+        explanationKeys:
+          type: array
+          items:
+            type: string
+      required:
+      - issueId
+      - ruleId
+      - ruleSetCode
+      - ruleSetVersion
+      - messageEn
+      - messageEl
+      - explanationKeys
     IssueGetResponse:
       type: object
-      description: 'uw.Issue.get result. PRD outputs: "issues, explanation"'
+      description: 'uw.Issue.get result (BO-UW-03): the issue and why it was raised'
       properties:
-        issues:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issues"'
+        issue:
+          $ref: '#/components/schemas/IssueListItem'
         explanation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "explanation"'
+          $ref: '#/components/schemas/IssueExplanation'
+      required:
+      - issue
+      - explanation
     IssueExplainResponse:
       type: object
-      description: 'uw.Issue.explain result. PRD outputs: "issues, explanation"'
+      description: 'uw.Issue.explain result (BO-UW-03)'
       properties:
-        issues:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issues"'
         explanation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "explanation"'
+          $ref: '#/components/schemas/IssueExplanation'
+      required:
+      - explanation
     IssueDecideRequest:
       type: object
       description: 'uw.Issue.decide request. PRD inputs: "issue ids, decision, scope, validity, tolerance, conditions, reason,
@@ -6162,13 +6355,59 @@ components:
           description: 'PRD: "issue"'
     ApprovalHistoryItem:
       type: object
-      description: 'uw.Approval.history result. PRD outputs: "rows"'
+      description: 'One event of an issues approval history (BO-UW-03): a decision, or the invalidation of an approval when the facts changed.'
       properties:
-        rows:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rows"'
+        issueId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        jobRef:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        issueKey:
+          type: string
+        issueType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        event:
+          type: string
+          enum:
+          - DECIDED
+          - INVALIDATED
+        decision:
+          oneOf:
+          - $ref: '#/components/schemas/IssueDecisionCode'
+          - type: 'null'
+          description: For DECIDED, the decision
+        approver:
+          type:
+          - string
+          - 'null'
+          description: For DECIDED, the actor that decided
+        reason:
+          type:
+          - string
+          - 'null'
+          description: For DECIDED the deciders reason; for INVALIDATED the closing reason (VALUE_CHANGED)
+        fingerprint:
+          type:
+          - string
+          - 'null'
+          description: Hash of the facts the decision was taken on (REQ-UW-091)
+        authorityCheckId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        invalidatedByEvaluationId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: For INVALIDATED, the evaluation whose changed facts invalidated the approval
+        at:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - issueId
+      - jobRef
+      - issueKey
+      - issueType
+      - event
+      - at
     ApprovalHistoryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
