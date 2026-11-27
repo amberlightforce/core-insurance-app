@@ -4,31 +4,40 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.DeadLetter.replay request. PRD inputs: "consumer, from position; dead-letter ids"</summary>
+/// <summary>plt.DeadLetter.replay request (NX-OT-14). Name the dead letters (deadLetterIds) or select the Parked ones by filter (handler, module, eventType, parkedFrom, parkedTo); at least one of them is required. At most 100 are replayed per call.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DeadLetterReplayRequest
 {
-    /// <summary>PRD: "consumer"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("consumer")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Consumer { get; init; }
-
-    /// <summary>PRD: "from position"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("fromPosition")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? FromPosition { get; init; }
-
-    /// <summary>PRD: "dead-letter ids"</summary>
+    /// <summary>Dead letters to replay</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'deadLetterId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("deadLetterIds")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? DeadLetterIds { get; init; }
+
+    /// <summary>Contract member 'handler'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("handler")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Handler { get; init; }
+
+    /// <summary>Contract member 'module'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("module")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Module { get; init; }
+
+    /// <summary>Contract member 'eventType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("eventType")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? EventType { get; init; }
+
+    /// <summary>Contract member 'parkedFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("parkedFrom")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? ParkedFrom { get; init; }
+
+    /// <summary>Contract member 'parkedTo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("parkedTo")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? ParkedTo { get; init; }
 }

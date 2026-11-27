@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # SLICE PLAN 3 — policy servicing thin slice (mid-term change, E2E-03 cancellation with refund, E2E-04 renewal)
 
 **Status:** planned 2026-10-08 (planner, from `SLICE-3-PLANNING-HANDOVER.md`). **Decisions:** D-SL3-01…D-SL3-14.

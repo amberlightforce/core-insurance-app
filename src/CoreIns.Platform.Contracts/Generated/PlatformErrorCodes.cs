@@ -110,6 +110,12 @@ public static class PlatformErrorCodes
     /// </remarks>
     public const string ControlNotFlaggable = "PLT-ERR-CONTROL-NOT-FLAGGABLE";
 
+    /// <summary>PLT-ERR-DEAD-LETTER-RESOLVED (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): plt.DeadLetter.replay.</para>
+    /// </remarks>
+    public const string DeadLetterResolved = "PLT-ERR-DEAD-LETTER-RESOLVED";
+
     /// <summary>PLT-ERR-EDITOR-CANNOT-APPROVE (HTTP 403).</summary>
     /// <remarks>
     /// <para>Declared by 5 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request, plt.ApprovalType.register.</para>
@@ -208,7 +214,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.verifyForExecution, plt.Approval.withdraw.</para>
+    /// <para>Declared by 6 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.verifyForExecution, plt.Approval.withdraw, plt.DeadLetter.get, plt.DeadLetter.replay.</para>
     /// </remarks>
     public const string NotFound = "PLT-ERR-NOT-FOUND";
 
@@ -256,7 +262,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-REPLAY-IN-PROGRESS (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): plt.Consumer.replay, plt.DeadLetter.discard, plt.DeadLetter.list, plt.DeadLetter.replay.</para>
+    /// <para>Declared by 2 operation(s): plt.Consumer.replay, plt.DeadLetter.discard.</para>
     /// </remarks>
     public const string ReplayInProgress = "PLT-ERR-REPLAY-IN-PROGRESS";
 
@@ -334,7 +340,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-VALIDATION (HTTP 400).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): plt.Approval.decide, plt.Approval.request.</para>
+    /// <para>Declared by 3 operation(s): plt.Approval.decide, plt.Approval.request, plt.DeadLetter.list.</para>
     /// </remarks>
     public const string Validation = "PLT-ERR-VALIDATION";
 
@@ -360,7 +366,7 @@ public static class PlatformErrorCodes
     public const string Prefix = "PLT-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiDisabled, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, ApprovalSubjectMismatch, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotOwner, NotRetryable, NotRunnable, OutOfOrgScope, OwnerDecided, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownType, UnsupportedLanguage, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiDisabled, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, ApprovalSubjectMismatch, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, DeadLetterResolved, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotOwner, NotRetryable, NotRunnable, OutOfOrgScope, OwnerDecided, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownType, UnsupportedLanguage, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -382,6 +388,7 @@ public static class PlatformErrorCodes
         [CheckerMustBeHuman] = 422,
         [CircuitOpen] = 503,
         [ControlNotFlaggable] = 422,
+        [DeadLetterResolved] = 409,
         [EditorCannotApprove] = 403,
         [ExpressionCost] = 422,
         [ExpressionType] = 422,

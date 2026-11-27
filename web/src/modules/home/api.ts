@@ -1,6 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { apiRequest } from '../../api/client';
+import type { DsarCase } from '../compliance/dsar/api';
+import type { ClockItem, ComplaintItem } from '../compliance/home/api';
+import { readRecent as readMigrationRecent } from '../migration/api';
+import type { ContractListItem } from '../reinsurance/api';
 import type { ApprovalListPage, InvoiceListPage } from '../../api/types';
 
 /**
@@ -28,4 +32,49 @@ export function usePendingApprovals(enabled: boolean) {
         signal,
       }),
   });
+}
+
+export { readMigrationRecent };
+
+interface Items<T> {
+  items: T[];
+}
+
+/** Reinsurance treaties (ri.Contract.list, first page, all statuses). */
+export function useRiContracts(enabled: boolean) {
+  return useQuery({
+    queryKey: ['ri', 'home', 'contracts'],
+    enabled,
+    queryFn: ({ signal }) =>
+      apiRequest<Items<ContractListItem>>('/api/ri/v1/contracts', {
+        query: { limit: 100 },
+        signal,
+      }),
+  });
+}
+
+/** Compliance: clocks, complaints and DSAR cases; same keys as the compliance screens share their caches. */
+export function useComplianceHome(enabled: boolean) {
+  const clocks = useQuery({
+    queryKey: ['cmp', 'clock', 'query'],
+    enabled,
+    queryFn: ({ signal }) =>
+      apiRequest<Items<ClockItem>>('/api/cmp/v1/clocks/query', { query: { limit: 200 }, signal }),
+  });
+  const complaints = useQuery({
+    queryKey: ['cmp', 'complaint', 'query'],
+    enabled,
+    queryFn: ({ signal }) =>
+      apiRequest<Items<ComplaintItem>>('/api/cmp/v1/complaints/query', {
+        query: { limit: 200 },
+        signal,
+      }),
+  });
+  const dsars = useQuery({
+    queryKey: ['cmp', 'dsar', 'list'],
+    enabled,
+    queryFn: ({ signal }) =>
+      apiRequest<Items<DsarCase>>('/api/cmp/v1/dsar/query', { query: { limit: 200 }, signal }),
+  });
+  return { clocks, complaints, dsars };
 }

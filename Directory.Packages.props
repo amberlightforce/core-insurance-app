@@ -43,6 +43,7 @@
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <!-- Serilog: structured logging configured from appsettings / environment (ADR §1 logging). -->
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageVersion Include="Serilog" Version="4.3.0" />
     <!-- OpenTelemetry: vendor-neutral traces, metrics and logs (ADR §1 monitoring). -->
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />

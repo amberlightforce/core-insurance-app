@@ -26,3 +26,6 @@ Thumbs.db
 # Claude Code agent worktrees
 .claude/worktrees/
 web/storybook-static/
+
+# Scratch logs at the repo root
+/*.log

@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # SL5-MKT-ROLLBACK source checkpoint � 9 October 2026
 
 Status: **partially validated WIP**. Release compilation and two pure proof tests pass; database gates remain blocked by unavailable Docker. Do not merge or count this package completed.

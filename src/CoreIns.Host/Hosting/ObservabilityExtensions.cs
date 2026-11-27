@@ -39,6 +39,7 @@ internal static class ObservabilityExtensions
             (services, logger) => logger
                 .ReadFrom.Configuration(builder.Configuration)
                 .ReadFrom.Services(services)
+                .Destructure.With<CoreIns.Platform.DataProtection.PiiDestructuringPolicy>()
                 .Enrich.FromLogContext()
                 .Enrich.WithProperty("AppRole", role.ToConfigValue()),
             writeToProviders: true);
