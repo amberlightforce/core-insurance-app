@@ -32,7 +32,8 @@
     "status": {
       "PENDING": "Pending",
       "REGISTERED": "Registered",
-      "REJECTED": "Rejected"
+      "REJECTED": "Rejected",
+      "CANCELLED": "Cancelled"
     },
     "role": {
       "ISSUE": "Issue",

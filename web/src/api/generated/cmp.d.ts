@@ -2140,7 +2140,7 @@ export interface components {
         FiscalDocumentView: {
             fiscalDocumentId: components["schemas"]["Uuid"];
             /** @enum {string} */
-            status: "PENDING" | "REGISTERED" | "REJECTED";
+            status: "PENDING" | "REGISTERED" | "REJECTED" | "CANCELLED";
             sourceType: components["schemas"]["Code"];
             sourceId: components["schemas"]["Text"];
             /** @enum {string} */
@@ -2183,68 +2183,97 @@ export interface components {
         FiscalDocumentListBySourcePage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["FiscalDocumentListBySourceItem"][];
         };
-        /** @description cmp.FiscalDocument.qrPayload result. PRD outputs: "document, identifiers" */
+        /** @description cmp.FiscalDocument.qrPayload result (REQ-CMP-054) */
         FiscalDocumentQrPayloadResponse: {
-            /** @description PRD: "document" */
-            document?: components["schemas"]["Unspecified"];
-            /** @description PRD: "identifiers" */
-            identifiers?: components["schemas"]["Unspecified"];
+            fiscalDocumentId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "PENDING" | "REGISTERED" | "REJECTED" | "CANCELLED";
+            mark?: components["schemas"]["Text"] | null;
+            uid?: components["schemas"]["Text"] | null;
+            series?: components["schemas"]["Text"] | null;
+            number?: components["schemas"]["Text"] | null;
+            qrPayloadRef?: components["schemas"]["Text"] | null;
+            /** @description The text to encode in the QR code; null until the document is Registered. Layout is Unverified (OQ-012); never AADE evidence when stub is true */
+            qrPayload?: string | null;
+            stub: boolean;
+            /** @description False until the myDATA QR layout is verified (open user decision */
+            layoutVerified: boolean;
         };
-        /** @description cmp.FiscalDocument.resubmit request. PRD inputs: "ids, corrections, reason" */
+        /** @description cmp.FiscalDocument.resubmit request */
         FiscalDocumentResubmitRequest: {
-            /** @description PRD: "ids" */
-            ids?: components["schemas"]["Uuid"][];
-            /** @description PRD: "corrections" */
-            corrections?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            fiscalDocumentId: components["schemas"]["Uuid"];
+            /** @description Why the action is taken (audited) */
+            reason: string;
         };
-        /** @description cmp.FiscalDocument.resubmit result. PRD outputs: "status" */
+        /** @description cmp.FiscalDocument.resubmit result */
         FiscalDocumentResubmitResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            fiscalDocumentId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "PENDING" | "REGISTERED" | "REJECTED" | "CANCELLED";
+            rejectionCodes?: components["schemas"]["Code"][];
+            /** @description False when the document was already registered (replay) */
+            resubmitted: boolean;
         };
-        /** @description cmp.FiscalDocument.bulkResubmit request. PRD inputs: "ids, corrections, reason" */
+        /** @description cmp.FiscalDocument.bulkResubmit request */
         FiscalDocumentBulkResubmitRequest: {
-            /** @description PRD: "ids" */
-            ids?: components["schemas"]["Uuid"][];
-            /** @description PRD: "corrections" */
-            corrections?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Documents to resubmit (cap 50) */
+            ids: components["schemas"]["Uuid"][];
+            /** @description Why the action is taken (audited) */
+            reason: string;
         };
-        /** @description cmp.FiscalDocument.bulkResubmit result. PRD outputs: "status" */
+        /** @description cmp.FiscalDocument.bulkResubmit result */
         FiscalDocumentBulkResubmitResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            requested: number;
+            resubmitted: number;
+            skipped: number;
+            results: {
+                fiscalDocumentId: components["schemas"]["Uuid"];
+                /** @enum {string} */
+                outcome: "RESUBMITTED" | "SKIPPED";
+                /** @enum {string} */
+                status?: "PENDING" | "REGISTERED" | "REJECTED" | "CANCELLED";
+                /** @description CMP-ERR code when SKIPPED (the document was not eligible) */
+                errorCode?: string;
+            }[];
         };
-        /** @description cmp.FiscalDocument.correct request. PRD inputs: "ids, corrections, reason" */
+        /** @description cmp.FiscalDocument.correct request */
         FiscalDocumentCorrectRequest: {
-            /** @description PRD: "ids" */
-            ids?: components["schemas"]["Uuid"][];
-            /** @description PRD: "corrections" */
-            corrections?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            fiscalDocumentId: components["schemas"]["Uuid"];
+            /** @description The corrected lines of the replacement document */
+            corrections: {
+                fiscalCategoryKey: components["schemas"]["Code"];
+                amount: components["schemas"]["Money"];
+                chargeId?: components["schemas"]["Uuid"];
+                paymentId?: components["schemas"]["Uuid"];
+            }[];
+            /** @description Why the action is taken (audited) */
+            reason: string;
         };
-        /** @description cmp.FiscalDocument.correct result. PRD outputs: "status" */
+        /** @description cmp.FiscalDocument.correct result */
         FiscalDocumentCorrectResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            originalFiscalDocumentId: components["schemas"]["Uuid"];
+            /** @description The new CREDIT document that reverses the original */
+            creditFiscalDocumentId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            creditStatus: "PENDING" | "REGISTERED" | "REJECTED" | "CANCELLED";
+            /** @description The new ISSUE document carrying the corrected lines */
+            correctedFiscalDocumentId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            correctedStatus: "PENDING" | "REGISTERED" | "REJECTED" | "CANCELLED";
         };
-        /** @description cmp.FiscalDocument.cancel request. PRD inputs: "ids, corrections, reason" */
+        /** @description cmp.FiscalDocument.cancel request */
         FiscalDocumentCancelRequest: {
-            /** @description PRD: "ids" */
-            ids?: components["schemas"]["Uuid"][];
-            /** @description PRD: "corrections" */
-            corrections?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            fiscalDocumentId: components["schemas"]["Uuid"];
+            /** @description Why the action is taken (audited) */
+            reason: string;
         };
-        /** @description cmp.FiscalDocument.cancel result. PRD outputs: "status" */
+        /** @description cmp.FiscalDocument.cancel result */
         FiscalDocumentCancelResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            fiscalDocumentId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "PENDING" | "REGISTERED" | "REJECTED" | "CANCELLED";
+            /** @description The linked CANCELLATION document issued for a Registered original; null when the document never had a MARK */
+            cancellationFiscalDocumentId?: components["schemas"]["Uuid"] | null;
         };
         /** @description cmp.FiscalReconciliation.run request. PRD inputs: "date, entity" */
         FiscalReconciliationRunRequest: {
@@ -3917,7 +3946,10 @@ export interface operations {
     };
     "cmp.FiscalDocument.qrPayload": {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Fiscal document id */
+                id: components["schemas"]["Uuid"];
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
