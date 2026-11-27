@@ -22,6 +22,8 @@
         "pol.Renewal.create": [ "Staff.Underwriter" ],
         "pol.Renewal.offer": [ "Staff.Underwriter" ],
         "pol.Renewal.accept": [ "Staff.Underwriter" ],
+        "pol.Renewal.decline": [ "Staff.Underwriter" ],
+        "pol.Renewal.nonRenew": [ "Staff.UnderwritingManager" ],
         "pol.PolicyChange.create": [ "Staff.Underwriter" ],
         "pol.change": [ "Staff.Underwriter" ],
         "pol.Change.createOutOfSequence": [ "Staff.Underwriter" ],

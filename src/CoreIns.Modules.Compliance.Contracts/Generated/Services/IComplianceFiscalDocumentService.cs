@@ -55,7 +55,8 @@ public interface IComplianceFiscalDocumentService
     /// <para>Exposure: ui; consumers: DOC.</para>
     /// <para>Errors: CMP-ERR-NOT-FOUND (404).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.FiscalDocumentQrPayloadResponse> QrPayloadAsync(global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="id">Fiscal document id</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.FiscalDocumentQrPayloadResponse> QrPayloadAsync(global::System.Guid id, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Create a fiscal document from a source</summary>
     /// <remarks>

@@ -4186,11 +4186,11 @@ components:
       required: [artefactHash, artefactCode, label, productCode, productVersion, engineVersion, dataStatus, stepCount, tables, createdAt]
     RatingArtifactStatus:
       type: object
-      description: 'Contract addition (BO-RAT-04): lifecycle status derived from the activation rows. DRAFT = no activation yet (hidden from roles that may only see released artefacts).'
+      description: 'Contract addition (BO-RAT-04): lifecycle status derived from the activation rows. DRAFT, SUBMITTED and APPROVED = no activation yet (hidden from roles that may only see released artefacts).'
       properties:
         lifecycle:
           type: string
-          enum: [DRAFT, SCHEDULED, ACTIVE, SUPERSEDED, WITHDRAWN]
+          enum: [DRAFT, SUBMITTED, APPROVED, SCHEDULED, ACTIVE, SUPERSEDED, WITHDRAWN]
         effectiveFrom:
           type: [string, 'null']
           format: date
@@ -4274,40 +4274,50 @@ components:
           description: 'PRD: "compatibility records"'
     RatingChangeSetCreateRequest:
       type: object
-      description: 'rat.RatingChangeSet.create request. PRD inputs: "file or rows, mapping, change set"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingChangeSet.create request: a draft change set for one product version. The tables it points at are imported through rat.RateTable.import (or named here by hash).'
       properties:
-        file:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file or rows" (optional)'
-        rows:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file or rows" (optional)'
-        mapping:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "mapping"'
-        changeSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set"'
-      oneOf:
-      - required:
-        - file
-      - required:
-        - rows
+        productCode:
+          type: string
+        productVersion:
+          type: string
+        baseArtefactHash:
+          type: [string, 'null']
+          description: The artefact whose steps and tax plan are reused (default the one active for the product version).
+        tableHashes:
+          type: [object, 'null']
+          additionalProperties:
+            type: string
+          description: Table slot to rate-table hash, overriding the base artefact's pins.
+        reason:
+          type: string
+          maxLength: 500
+      required: [productCode, productVersion]
     RatingChangeSetCreateResponse:
       type: object
-      description: 'rat.RatingChangeSet.create result. PRD outputs: "table version, validation report, diff"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingChangeSet.create result.'
       properties:
-        tableVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "table version"'
-        validationReport:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validation report"'
-        diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
+        changeSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        productCode:
+          type: string
+        productVersion:
+          type: string
+        baseArtefactHash:
+          type: [string, 'null']
+        status:
+          type: string
+          enum: [OPEN, BUILT]
+        tables:
+          type: array
+          items:
+            type: object
+            properties:
+              slot:
+                type: string
+              hash:
+                type: string
+            required: [slot, hash]
+      required: [changeSetId, productCode, productVersion, baseArtefactHash, status, tables]
     RateTableImportRequest:
       type: object
       description: 'rat.RateTable.import request. PRD inputs: "file or rows, mapping, change set"'
@@ -4395,160 +4405,165 @@ components:
           description: 'PRD: "diff"'
     RatingArtifactBuildRequest:
       type: object
-      description: 'rat.RatingArtifact.build request. PRD inputs: "change set; artefact; slot dates; reason"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingArtifact.build request: compile and pin the change set. dataStatus APPROVED re-stamps the pinned tables as approved data (still needs the checker approval of submit/schedule).'
       properties:
-        changeSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set"'
-        artefact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "artefact"'
-        slotDates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "slot dates"'
+        changeSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        dataStatus:
+          type: string
+          enum: [ILLUSTRATIVE_TEST_DATA, APPROVED]
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          maxLength: 500
+      required: [changeSetId]
     RatingArtifactBuildResponse:
       type: object
-      description: 'rat.RatingArtifact.build result. PRD outputs: "artefact status, governance bundle id"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingArtifact.build result.'
       properties:
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
         artefactStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "artefact status"'
+          type: string
+          enum: [DRAFT, SUBMITTED, APPROVED, SCHEDULED, ACTIVE, SUPERSEDED, WITHDRAWN]
         governanceBundleId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "governance bundle id"'
+          description: The release record (maker-checker bundle) of the artefact.
+        dataStatus:
+          type: string
+        created:
+          type: boolean
+          description: False when an identical artefact already existed (same inputs, same hash).
+      required: [artefactHash, artefactStatus, governanceBundleId]
     RatingArtifactSubmitRequest:
       type: object
-      description: 'rat.RatingArtifact.submit request. PRD inputs: "change set; artefact; slot dates; reason"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingArtifact.submit request.'
       properties:
-        changeSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set"'
-        artefact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "artefact"'
-        slotDates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "slot dates"'
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          maxLength: 500
+      required: [artefactHash]
     RatingArtifactSubmitResponse:
       type: object
-      description: 'rat.RatingArtifact.submit result. PRD outputs: "artefact status, governance bundle id"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingArtifact.submit result.'
       properties:
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
         artefactStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "artefact status"'
+          type: string
+          enum: [DRAFT, SUBMITTED, APPROVED, SCHEDULED, ACTIVE, SUPERSEDED, WITHDRAWN]
         governanceBundleId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "governance bundle id"'
+          description: The release record (maker-checker bundle) of the artefact.
+        approvalRequestId:
+          type: [string, 'null']
+      required: [artefactHash, artefactStatus, governanceBundleId]
     RatingArtifactReturnRequest:
       type: object
-      description: 'rat.RatingArtifact.return request. PRD inputs: "change set; artefact; slot dates; reason"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingArtifact.return request.'
       properties:
-        changeSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set"'
-        artefact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "artefact"'
-        slotDates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "slot dates"'
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          maxLength: 500
+      required: [artefactHash, reason]
     RatingArtifactReturnResponse:
       type: object
-      description: 'rat.RatingArtifact.return result. PRD outputs: "artefact status, governance bundle id"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingArtifact.return result.'
       properties:
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
         artefactStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "artefact status"'
+          type: string
+          enum: [DRAFT, SUBMITTED, APPROVED, SCHEDULED, ACTIVE, SUPERSEDED, WITHDRAWN]
         governanceBundleId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "governance bundle id"'
+          description: The release record (maker-checker bundle) of the artefact.
+      required: [artefactHash, artefactStatus, governanceBundleId]
     RatingArtifactScheduleRequest:
       type: object
-      description: 'rat.RatingArtifact.schedule request. PRD inputs: "change set; artefact; slot dates; reason"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingArtifact.schedule request.'
       properties:
-        changeSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set"'
-        artefact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "artefact"'
-        slotDates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "slot dates"'
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          maxLength: 500
+        effectiveFrom:
+          type: string
+          format: date
+          description: First day the artefact rates new business and renewals (not in the past; default today).
+      required: [artefactHash]
     RatingArtifactScheduleResponse:
       type: object
-      description: 'rat.RatingArtifact.schedule result. PRD outputs: "artefact status, governance bundle id"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingArtifact.schedule result.'
       properties:
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
         artefactStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "artefact status"'
+          type: string
+          enum: [DRAFT, SUBMITTED, APPROVED, SCHEDULED, ACTIVE, SUPERSEDED, WITHDRAWN]
         governanceBundleId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "governance bundle id"'
+          description: The release record (maker-checker bundle) of the artefact.
+        activationId:
+          type: [string, 'null']
+        effectiveFrom:
+          type: string
+          format: date
+      required: [artefactHash, artefactStatus, governanceBundleId]
     RatingArtifactCancelScheduleRequest:
       type: object
-      description: 'rat.RatingArtifact.cancelSchedule request. PRD inputs: "change set; artefact; slot dates; reason"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingArtifact.cancelSchedule request.'
       properties:
-        changeSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set"'
-        artefact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "artefact"'
-        slotDates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "slot dates"'
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          maxLength: 500
+      required: [artefactHash]
     RatingArtifactCancelScheduleResponse:
       type: object
-      description: 'rat.RatingArtifact.cancelSchedule result. PRD outputs: "artefact status, governance bundle id"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingArtifact.cancelSchedule result.'
       properties:
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
         artefactStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "artefact status"'
+          type: string
+          enum: [DRAFT, SUBMITTED, APPROVED, SCHEDULED, ACTIVE, SUPERSEDED, WITHDRAWN]
         governanceBundleId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "governance bundle id"'
+          description: The release record (maker-checker bundle) of the artefact.
+      required: [artefactHash, artefactStatus, governanceBundleId]
     RatingArtifactRollbackRequest:
       type: object
-      description: 'rat.RatingArtifact.rollback request. PRD inputs: "change set; artefact; slot dates; reason"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingArtifact.rollback request: withdraw the artefact active for the product version and re-activate the one before it. History is kept; pinned worksheets are unaffected.'
       properties:
-        changeSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set"'
-        artefact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "artefact"'
-        slotDates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "slot dates"'
+        productCode:
+          type: string
+        productVersion:
+          type: string
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          maxLength: 500
+      required: [productCode, productVersion, reason]
     RatingArtifactRollbackResponse:
       type: object
-      description: 'rat.RatingArtifact.rollback result. PRD outputs: "artefact status, governance bundle id"'
+      description: 'Contract addition (BO-RAT-06): rat.RatingArtifact.rollback result.'
       properties:
+        withdrawnHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        reactivatedHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
         artefactStatus:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "artefact status"'
+          type: string
+          enum: [DRAFT, SUBMITTED, APPROVED, SCHEDULED, ACTIVE, SUPERSEDED, WITHDRAWN]
+          description: Lifecycle of the reactivated artefact.
         governanceBundleId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "governance bundle id"'
+      required: [withdrawnHash, reactivatedHash, artefactStatus, governanceBundleId]
     GoldenSuiteRunRequest:
       type: object
       description: 'rat.GoldenSuite.run request. PRD inputs: "slot, artefact, suites"'

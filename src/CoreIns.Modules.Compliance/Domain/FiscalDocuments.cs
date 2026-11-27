@@ -11,6 +11,12 @@ internal enum FiscalDocumentStatus
 
     /// <summary>Rejected by the channel (<c>FiscalDocRejected</c>).</summary>
     Rejected,
+
+    /// <summary>
+    /// Cancelled: a Registered document cancelled at the channel (<c>FiscalDocCancelled</c>, with a linked CANCELLATION
+    /// document), or a Rejected or Pending one withdrawn before it ever got a MARK (BO-CMP-06).
+    /// </summary>
+    Cancelled,
 }
 
 /// <summary>Fiscal document roles (REQ-CMP-031).</summary>
@@ -36,6 +42,12 @@ internal static class FiscalDocuments
     /// (PRD-11 BR-CMP-001, OI-CMP-03) stay out of the code and credits carry <see cref="PlaceholderDocumentType"/>.
     /// </summary>
     public const string CreditSeriesSuffix = "-CR";
+
+    /// <summary>Suffix of CMP's own cancellation series (BO-CMP-06); the cancellation document type stays the placeholder (OQ-012).</summary>
+    public const string CancellationSeriesSuffix = "-CN";
+
+    /// <summary>Largest id list one bulk resubmit accepts (BO-CMP-06).</summary>
+    public const int MaxBulkResubmit = 50;
 
     /// <summary>Slice-4 source (D-SL4-11): a CLM claim payment settlement receipt, role ISSUE only, category <see cref="ClaimSettlementReceipt"/>.</summary>
     public const string ClaimPaymentSource = "CLM_CLAIM_PAYMENT";

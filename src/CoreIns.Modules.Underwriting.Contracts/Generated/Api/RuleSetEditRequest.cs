@@ -16,6 +16,11 @@ public sealed record RuleSetEditRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("version")]
     public required string Version { get; init; }
 
+    /// <summary>Optimistic concurrency, the recordVersion the editor read; a newer stored version is refused with UW-ERR-STALE (409). Omit to skip the check.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? RecordVersion { get; init; }
+
     /// <summary>Contract member 'patches'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("patches")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Underwriting.Contracts.Api.RuleSetEditPatch> Patches { get; init; }

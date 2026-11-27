@@ -50,6 +50,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/doc/v1/documents/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Document library search
+         * @description Cross-object document library search (BO-DOC-01). Newest first (created, then document number), keyset-paged
+         *     (platform helper, NX-HD-12), scoped to the caller's legal entity. Each item carries its deliveries; `latestDeliveryStatus`
+         *     is the status of the newest one. `q` matches the document number or request number (prefix, case-insensitive).
+         */
+        get: operations["doc.Document.search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/doc/v1/documents/preview": {
         parameters: {
             query?: never;
@@ -1100,6 +1122,41 @@ export interface components {
         DocumentGetPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["DocumentGetItem"][];
         };
+        /** @description One delivery of a document. */
+        DocumentDeliverySummary: {
+            deliveryId: components["schemas"]["Uuid"];
+            channel: string;
+            medium: string;
+            status: string;
+            proofLevel?: string | null;
+            /** Format: date */
+            notificationDate?: string | null;
+            failureReason?: string | null;
+            isReprint: boolean;
+        };
+        /** @description One document of the library, with its deliveries (same shape as doc.Document.get). */
+        DocumentSearchItem: {
+            documentId: components["schemas"]["Uuid"];
+            documentNumber: string;
+            documentType: string;
+            requestNo: string;
+            /** @description MODULE/Type/id */
+            subject: string;
+            recipientPartyId: components["schemas"]["Uuid"];
+            language: string;
+            status: string;
+            medium: string;
+            archiveId: components["schemas"]["Uuid"];
+            contentHash: string;
+            /** Format: date-time */
+            createdAt: string;
+            latestDeliveryStatus?: string | null;
+            deliveries: components["schemas"]["DocumentDeliverySummary"][];
+        };
+        /** @description Page of doc.Document.search results (cursor pagination, contract §3.5.5) */
+        DocumentSearchPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["DocumentSearchItem"][];
+        };
         /** @description doc.Document.listForObject result. PRD outputs: "documents with statuses" */
         DocumentListForObjectItem: {
             /** @description PRD: "documents with statuses" */
@@ -1107,7 +1164,7 @@ export interface components {
         };
         /** @description Page of doc.Document.listForObject results (cursor pagination, contract §3.5.5) */
         DocumentListForObjectPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["DocumentListForObjectItem"][];
+            items?: components["schemas"]["DocumentSearchItem"][];
         };
         /** @description doc.Document.reprint request. PRD inputs: "document id, reason" */
         DocumentReprintRequest: {
@@ -1661,8 +1718,6 @@ export interface components {
          *     members until then.
          */
         Unspecified: unknown;
-        /** Format: date */
-        LocalDate: string;
         /** @description Cursor page (contract §3.5.5). Lists are filtered by the caller's legal entity and ABAC scope. */
         PageEnvelope: {
             items: unknown[];
@@ -1670,6 +1725,8 @@ export interface components {
             nextCursor: string | null;
             limit?: number;
         };
+        /** Format: date */
+        LocalDate: string;
         /**
          * Format: date-time
          * @description RFC 3339 timestamp in UTC (suffix Z).
@@ -1898,6 +1955,60 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "doc.Document.search": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                /** @description Document type (template key), e.g. DT-REFUND-ADVICE */
+                templateKey?: string;
+                /** @description Document status (Requested, Rendering, Rendered, Failed, Superseded) */
+                status?: string;
+                /** @description Delivery medium of the document */
+                medium?: string;
+                subjectModule?: string;
+                subjectType?: string;
+                subjectId?: string;
+                recipientPartyId?: components["schemas"]["Uuid"];
+                /** @description First creation date (UTC date, inclusive) */
+                createdFrom?: string;
+                /** @description Last creation date (UTC date, inclusive) */
+                createdTo?: string;
+                /** @description Document number or request number prefix */
+                q?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentSearchPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };

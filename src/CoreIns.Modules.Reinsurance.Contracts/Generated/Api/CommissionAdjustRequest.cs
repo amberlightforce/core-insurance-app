@@ -4,23 +4,33 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Commission.adjust request. PRD inputs: "section, year"</summary>
+/// <summary>ri.Commission.adjust request. Calculates the earned commission from the loss ratio on the sliding scale and opens a PENDING calculation with its PLT approval.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CommissionAdjustRequest
 {
-    /// <summary>PRD: "section"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("section")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Section { get; init; }
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
 
-    /// <summary>PRD: "year"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("year")]
+    /// <summary>Contract member 'cededPremium'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("cededPremium")]
+    public required global::CoreIns.SharedKernel.Money CededPremium { get; init; }
+
+    /// <summary>Contract member 'incurredLoss'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("incurredLoss")]
+    public required global::CoreIns.SharedKernel.Money IncurredLoss { get; init; }
+
+    /// <summary>The provisional commission rate already allowed on the premium, in percent</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("provisionalRatePct")]
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::CoreIns.Platform.Contracts.DecimalStringJsonConverter))]
+    public required decimal ProvisionalRatePct { get; init; }
+
+    /// <summary>Contract member 'scale'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("scale")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.CommissionScaleStep> Scale { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Year { get; init; }
+    public string? Reason { get; init; }
 }

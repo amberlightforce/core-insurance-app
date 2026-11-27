@@ -4,31 +4,42 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.FiscalDocument.correct request. PRD inputs: "ids, corrections, reason"</summary>
+/// <summary>cmp.FiscalDocument.correct request</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FiscalDocumentCorrectRequest
 {
-    /// <summary>PRD: "ids"</summary>
-    /// <remarks>
-    /// <para>Untyped id: no SharedKernel id type is mapped for 'id' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("ids")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? Ids { get; init; }
+    /// <summary>Contract member 'fiscalDocumentId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fiscalDocumentId")]
+    public required global::CoreIns.SharedKernel.Identifiers.FiscalDocumentId FiscalDocumentId { get; init; }
 
-    /// <summary>PRD: "corrections"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>The corrected lines of the replacement document</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("corrections")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Corrections { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<CorrectionItem> Corrections { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Why the action is taken (audited)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public required string Reason { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record CorrectionItem
+    {
+        /// <summary>Contract member 'fiscalCategoryKey'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("fiscalCategoryKey")]
+        public required string FiscalCategoryKey { get; init; }
+
+        /// <summary>Contract member 'amount'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+        public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+
+        /// <summary>Contract member 'chargeId'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("chargeId")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Identifiers.ChargeId? ChargeId { get; init; }
+
+        /// <summary>Contract member 'paymentId'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("paymentId")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Identifiers.PaymentId? PaymentId { get; init; }
+    }
 }

@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Rating.Contracts.Api;
 
-/// <summary>Contract addition (BO-RAT-04): lifecycle status derived from the activation rows. DRAFT = no activation yet (hidden from roles that may only see released artefacts).</summary>
+/// <summary>Contract addition (BO-RAT-04): lifecycle status derived from the activation rows. DRAFT, SUBMITTED and APPROVED = no activation yet (hidden from roles that may only see released artefacts).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RatingArtifactStatus
 {
@@ -32,6 +32,14 @@ public sealed record RatingArtifactStatus
         /// <summary><c>DRAFT</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DRAFT")]
         Draft,
+
+        /// <summary><c>SUBMITTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUBMITTED")]
+        Submitted,
+
+        /// <summary><c>APPROVED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVED")]
+        Approved,
 
         /// <summary><c>SCHEDULED</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SCHEDULED")]

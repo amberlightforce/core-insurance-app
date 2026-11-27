@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using CoreIns.Modules.Underwriting.Contracts.Api;
 using CoreIns.Modules.Underwriting.Domain;
@@ -107,6 +107,13 @@ internal sealed class RuleSetAuthoringSupport(RuleSetAuthoringStore store, Reque
         TestCaseCount = dto.TestCases.Count,
         CreatedAt = record.CreatedAt.ToString("O", CultureInfo.InvariantCulture),
         CreatedBy = record.CreatedBy,
+        RecordVersion = record.RecordVersion,
+        SubmittedBy = record.SubmittedBy,
+        SubmittedAt = record.SubmittedAt?.ToString("O", CultureInfo.InvariantCulture),
+        ApprovalRequestId = record.ApprovalRequestId?.ToString("D"),
+        DecidedBy = record.DecidedBy,
+        DecidedAt = record.DecidedAt?.ToString("O", CultureInfo.InvariantCulture),
+        DecisionReason = record.DecisionReason,
         Definition = RuleSetAuthoring.ToContract(dto),
     };
 
@@ -208,13 +215,17 @@ internal sealed class EditRuleSetHandler(RuleSetAuthoringStore store, RuleSetAut
                 return DomainError.Of(ModuleCode.UW, "RULESET-STATE", $"Rule set {request.RuleSetCode} {request.Version} is {record.Status}; only a Draft can be edited.");
             }
 
-            // TODO(hardening): optimistic concurrency (record_version / expected hash) so two editors do not overwrite each other.
+            if (request.RecordVersion is { } expected && expected != record.RecordVersion)
+            {
+                return DomainError.Of(ModuleCode.UW, "STALE", $"Rule set {request.RuleSetCode} {request.Version} changed since you read it (recordVersion {record.RecordVersion}); reload and edit again.");
+            }
+
             var dto = RuleSetAuthoring.Apply(RuleSetJson.Deserialize(record.Definition), request.Patches);
             var analysis = RuleSetAnalysis.Analyse(dto);
             var from = DateOnly.TryParseExact(dto.EffectiveFrom, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed) ? parsed : DateOnly.FromDateTime(record.EffectiveFrom);
-            if (!await store.UpdateDraftAsync(record.RuleSetCode, record.VersionNo, analysis.ContentHash ?? RuleSetAuthoring.DefinitionHash(dto), from, RuleSetJson.Serialize(dto), cancellationToken).ConfigureAwait(false))
+            if (!await store.UpdateDraftAsync(record.RuleSetCode, record.VersionNo, record.RecordVersion, analysis.ContentHash ?? RuleSetAuthoring.DefinitionHash(dto), from, RuleSetJson.Serialize(dto), cancellationToken).ConfigureAwait(false))
             {
-                return DomainError.Of(ModuleCode.UW, "RULESET-STATE", "The version is no longer a Draft.");
+                return DomainError.Of(ModuleCode.UW, "STALE", "The version was changed by someone else meanwhile (or is no longer a Draft); reload and edit again.");
             }
 
             return await support.ResponseAsync(record.RuleSetCode, record.VersionNo, cancellationToken).ConfigureAwait(false);

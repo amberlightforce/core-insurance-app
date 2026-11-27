@@ -85,6 +85,10 @@ public sealed record FiscalDocumentView
         /// <summary><c>REJECTED</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REJECTED")]
         Rejected,
+
+        /// <summary><c>CANCELLED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CANCELLED")]
+        Cancelled,
     }
 
     /// <summary>Generated contract member.</summary>

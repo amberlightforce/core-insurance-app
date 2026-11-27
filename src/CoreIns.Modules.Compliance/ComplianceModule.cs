@@ -54,6 +54,23 @@ public static class ComplianceModule
         services.AddCommand<RequestFiscalDocument, FiscalDocumentRequestResponse, RequestFiscalDocumentHandler>(
             CommandDescriptor.For("cmp.FiscalDocument.request") with { SupportsDryRun = true });
 
+        services.AddScoped<FiscalDocumentOperations>();
+        services.AddScoped<IValidator<ResubmitFiscalDocument>, ResubmitFiscalDocumentValidator>();
+        services.AddScoped<IValidator<BulkResubmitFiscalDocuments>, BulkResubmitFiscalDocumentsValidator>();
+        services.AddScoped<IValidator<CancelFiscalDocument>, CancelFiscalDocumentValidator>();
+        services.AddScoped<IValidator<CorrectFiscalDocument>, CorrectFiscalDocumentValidator>();
+        services.AddCommandAuditor<ResubmitFiscalDocument, FiscalDocumentResubmitResponse, ResubmitFiscalDocumentAuditor>();
+        services.AddCommandAuditor<BulkResubmitFiscalDocuments, FiscalDocumentBulkResubmitResponse, BulkResubmitFiscalDocumentsAuditor>();
+        services.AddCommandAuditor<CancelFiscalDocument, FiscalDocumentCancelResponse, CancelFiscalDocumentAuditor>();
+        services.AddCommandAuditor<CorrectFiscalDocument, FiscalDocumentCorrectResponse, CorrectFiscalDocumentAuditor>();
+        services.AddCommand<ResubmitFiscalDocument, FiscalDocumentResubmitResponse, ResubmitFiscalDocumentHandler>(CommandDescriptor.For("cmp.FiscalDocument.resubmit"));
+        services.AddCommand<BulkResubmitFiscalDocuments, FiscalDocumentBulkResubmitResponse, BulkResubmitFiscalDocumentsHandler>(
+            CommandDescriptor.For("cmp.FiscalDocument.bulkResubmit") with { SupportsDryRun = true });
+        services.AddCommand<CancelFiscalDocument, FiscalDocumentCancelResponse, CancelFiscalDocumentHandler>(
+            CommandDescriptor.For("cmp.FiscalDocument.cancel") with { SupportsDryRun = true });
+        services.AddCommand<CorrectFiscalDocument, FiscalDocumentCorrectResponse, CorrectFiscalDocumentHandler>(
+            CommandDescriptor.For("cmp.FiscalDocument.correct") with { SupportsDryRun = true });
+
         services.AddScoped<IComplianceFiscalDocumentService, ComplianceFiscalDocumentService>();
 
         services.AddAiRegister();
@@ -169,6 +186,14 @@ public static class ComplianceModule
             .Describe("Ένα παράπονο που έγινε δεκτό κλείνει μόνο με καταγεγραμμένη βασική αιτία.", "An upheld complaint closes only with a recorded root cause."),
         ErrorDefinition.For(ModuleCode.CMP, "NOT-A-COMPLAINT", 422, "Δεν πρόκειται για παράπονο", "Not a complaint")
             .Describe("Η γνωστοποίηση ζημιάς δεν είναι παράπονο· καταχωρήστε την ως αίτημα αποζημίωσης.", "A claim notification is not a complaint; register it as a claim."),
+        ErrorDefinition.For(ModuleCode.CMP, "NOT-REJECTED", 422, "Το παραστατικό δεν έχει απορριφθεί", "The fiscal document is not rejected")
+            .Describe("Επανυποβολή επιτρέπεται μόνο σε απορριφθέν ή εκκρεμές παραστατικό.", "Only a Rejected or Pending fiscal document can be resubmitted."),
+        ErrorDefinition.For(ModuleCode.CMP, "NOT-CANCELLABLE", 422, "Το παραστατικό δεν μπορεί να ακυρωθεί", "The fiscal document cannot be cancelled")
+            .Describe("Ακύρωση επιτρέπεται σε καταχωρημένο παραστατικό έκδοσης ή σε απορριφθέν/εκκρεμές που δεν έχει πιστωθεί, διορθωθεί ή ακυρωθεί.", "Only a Registered ISSUE or a Rejected or Pending document that was not credited, corrected or cancelled can be cancelled."),
+        ErrorDefinition.For(ModuleCode.CMP, "NOT-CORRECTABLE", 422, "Το παραστατικό δεν μπορεί να διορθωθεί", "The fiscal document cannot be corrected")
+            .Describe("Διόρθωση επιτρέπεται μόνο σε καταχωρημένο παραστατικό έκδοσης που δεν έχει πιστωθεί, διορθωθεί ή ακυρωθεί.", "Only a Registered ISSUE document that was not credited, corrected or cancelled can be corrected."),
+        ErrorDefinition.For(ModuleCode.CMP, "BULK-LIMIT", 422, "Υπέρβαση ορίου μαζικής επανυποβολής", "The bulk resubmit limit is exceeded")
+            .Describe("Μία μαζική επανυποβολή δέχεται έως 50 παραστατικά.", "One bulk resubmit accepts at most 50 documents."),
         ErrorDefinition.For(ModuleCode.CMP, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

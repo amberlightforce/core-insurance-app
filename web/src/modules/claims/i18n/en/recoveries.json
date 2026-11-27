@@ -1,7 +1,6 @@
 {
   "builder": { "kinds": { "RECOVERY_RESERVE": "Recovery reserve" } },
   "close": { "guard": { "open": "Open {number}" } },
-  "exposure": { "clocksNotTracked": "Statutory deadlines: not tracked (temporary)" },
   "moneyx": {
     "recoveries": "Recoveries",
     "received": "Recovery · {type}",

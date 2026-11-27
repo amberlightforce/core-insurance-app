@@ -20,7 +20,8 @@ internal sealed class ComplianceFiscalDocumentService(
     RequestContext context,
     ILegalEntityDirectory legalEntities,
     ICommandHandler<RequestFiscalDocument, FiscalDocumentRequestResponse> requestHandler,
-    FiscalDocumentReader reader) : IComplianceFiscalDocumentService
+    FiscalDocumentReader reader,
+    FiscalDocumentOperations operations) : IComplianceFiscalDocumentService
 {
     public async Task<FiscalDocumentRequestResponse> RequestAsync(FiscalDocumentRequestRequest request, CommandOptions options, CancellationToken cancellationToken = default)
     {
@@ -47,8 +48,9 @@ internal sealed class ComplianceFiscalDocumentService(
         string? cursor = null, int? limit = null, string? sourceType = null, Guid? sourceId = null, CancellationToken cancellationToken = default) =>
         throw NotAvailable("cmp.FiscalDocument.listBySource");
 
-    public Task<FiscalDocumentQrPayloadResponse> QrPayloadAsync(CancellationToken cancellationToken = default) =>
-        throw NotAvailable("cmp.FiscalDocument.qrPayload");
+    public async Task<FiscalDocumentQrPayloadResponse> QrPayloadAsync(Guid id, CancellationToken cancellationToken = default) =>
+        await operations.QrPayloadAsync(id, cancellationToken).ConfigureAwait(false)
+            ?? throw new DomainException(DomainError.Of(ModuleCode.CMP, "NOT-FOUND", "The fiscal document does not exist in your legal entity."));
 
     private static T Unwrap<T>(Result<T> result) => result.IsSuccess ? result.Value : throw new DomainException(result.Error!);
 

@@ -15,6 +15,8 @@ internal static class RenewalPermissions
     public const string Create = "pol.Renewal.create";
     public const string Offer = "pol.Renewal.offer";
     public const string Accept = "pol.Renewal.accept";
+    public const string Decline = "pol.Renewal.decline";
+    public const string NonRenew = "pol.Renewal.nonRenew";
 }
 
 /// <summary>REST facade of <c>pol.Renewal.*</c> (contracts/openapi/pol.yaml): thin, commands through the pipeline.</summary>
@@ -47,4 +49,18 @@ internal sealed class RenewalController : ControllerBase
     public async Task<IResult> AcceptAsync(
         [FromBody] RenewalAcceptRequest request, [FromServices] ICommandHandler<AcceptRenewal, RenewalAcceptResponse> handler, CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new AcceptRenewal(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>pol.Renewal.decline (the customer declines an offered renewal).</summary>
+    [HttpPost("renewals/decline")]
+    [Authorize(Policy = RenewalPermissions.Decline)]
+    public async Task<IResult> DeclineAsync(
+        [FromBody] RenewalDeclineRequest request, [FromServices] ICommandHandler<DeclineRenewal, RenewalDeclineResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new DeclineRenewal(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>pol.Renewal.nonRenew (insurer non-renewal with statutory notice).</summary>
+    [HttpPost("renewals/non-renew")]
+    [Authorize(Policy = RenewalPermissions.NonRenew)]
+    public async Task<IResult> NonRenewAsync(
+        [FromBody] RenewalNonRenewRequest request, [FromServices] ICommandHandler<NonRenew, RenewalNonRenewResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new NonRenew(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 }

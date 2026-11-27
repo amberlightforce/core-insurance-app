@@ -4,15 +4,44 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.FiscalDocument.cancel result. PRD outputs: "status"</summary>
+/// <summary>cmp.FiscalDocument.cancel result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FiscalDocumentCancelResponse
 {
-    /// <summary>PRD: "status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'fiscalDocumentId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fiscalDocumentId")]
+    public required global::CoreIns.SharedKernel.Identifiers.FiscalDocumentId FiscalDocumentId { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Status { get; init; }
+    public required StatusValue Status { get; init; }
+
+    /// <summary>The linked CANCELLATION document issued for a Registered original; null when the document never had a MARK</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'cancellationFiscalDocumentId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("cancellationFiscalDocumentId")]
+    public global::System.Guid? CancellationFiscalDocumentId { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>PENDING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PENDING")]
+        Pending,
+
+        /// <summary><c>REGISTERED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REGISTERED")]
+        Registered,
+
+        /// <summary><c>REJECTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REJECTED")]
+        Rejected,
+
+        /// <summary><c>CANCELLED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CANCELLED")]
+        Cancelled,
+    }
 }

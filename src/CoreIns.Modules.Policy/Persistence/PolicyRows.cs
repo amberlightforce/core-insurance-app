@@ -641,3 +641,43 @@ internal sealed class PsrExceptionRow
 
     public int RecordVersion { get; set; } = 1;
 }
+
+/// <summary>
+/// <c>pol.non_renewal</c>: the insurer's decision not to renew a term (BO-POL-09, REQ-POL-009). One per term. NOTICE_REQUESTED once the
+/// notice letter was asked of DOC, PSR_REVIEW while a vulnerable or unknown policyholder waits for a person (NX-HD-02).
+/// </summary>
+internal sealed class NonRenewalRow
+{
+    public Guid NonRenewalId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public PolicyId PolicyId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    public string ReasonCode { get; set; } = string.Empty;
+
+    public string? Note { get; set; }
+
+    /// <summary>NOTICE_REQUESTED or PSR_REVIEW.</summary>
+    public string Status { get; set; } = "NOTICE_REQUESTED";
+
+    /// <summary>The term end, when the non-renewal takes effect.</summary>
+    public Instant EffectiveAt { get; set; }
+
+    public Instant NoticeDeadline { get; set; }
+
+    public int NoticeDays { get; set; }
+
+    /// <summary>Legal status of the notice-period value (Settled, Unverified, PendingOpinion).</summary>
+    public string LegalStatus { get; set; } = string.Empty;
+
+    public Guid? NoticeDocumentId { get; set; }
+
+    public string RequestedBy { get; set; } = string.Empty;
+
+    public Instant CreatedAt { get; set; }
+
+    public int RecordVersion { get; set; } = 1;
+}

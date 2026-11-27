@@ -110,6 +110,11 @@ internal sealed class CreateRenewalHandler(
             return DomainError.Of(ModuleCode.POL, "ILLEGAL-TRANSITION", "The term has already been renewed.");
         }
 
+        if (await db.NonRenewals.AnyAsync(n => n.TermId == termId, cancellationToken).ConfigureAwait(false))
+        {
+            return DomainError.Of(ModuleCode.POL, "ILLEGAL-TRANSITION", "The term was non-renewed; it cannot be renewed.");
+        }
+
         var policy = await db.Policies.AsNoTracking().SingleAsync(p => p.PolicyId == policyId, cancellationToken).ConfigureAwait(false);
 
         // The risk tree valid at the end of the expiring term (half-open: the segment that ends at the expiry), as known now.

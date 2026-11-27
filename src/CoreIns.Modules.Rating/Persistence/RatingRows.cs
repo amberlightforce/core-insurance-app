@@ -123,3 +123,88 @@ internal sealed class WorksheetIndexRow
 
     public Instant CreatedAt { get; set; }
 }
+
+/// <summary><c>rat.change_set</c>: a draft that pins rate-table hashes for one product version (BO-RAT-06). Mutable only while OPEN.</summary>
+internal sealed class RatingChangeSetRow
+{
+    public Guid ChangeSetId { get; set; }
+
+    public Guid LegalEntityId { get; set; }
+
+    public string Jurisdiction { get; set; } = string.Empty;
+
+    public string ProductCode { get; set; } = string.Empty;
+
+    public string ProductVersion { get; set; } = string.Empty;
+
+    public string? BaseArtefactHash { get; set; }
+
+    /// <summary>JSON object: table slot (code) to rate-table hash.</summary>
+    public string Tables { get; set; } = "{}";
+
+    public string? Reason { get; set; }
+
+    /// <summary>OPEN or BUILT.</summary>
+    public string Status { get; set; } = string.Empty;
+
+    public int RecordVersion { get; set; }
+
+    public Instant CreatedAt { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public Instant UpdatedAt { get; set; }
+
+    public string UpdatedBy { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// <c>rat.artifact_release</c>: the maker-checker record of one built artefact (BUILT, SUBMITTED, APPROVED, RETURNED, SCHEDULED, ROLLED_BACK).
+/// <see cref="PayloadHash"/> is what the PLT approval (type RAT.Release) binds.
+/// </summary>
+internal sealed class ArtifactReleaseRow
+{
+    public Guid ReleaseId { get; set; }
+
+    public Guid ChangeSetId { get; set; }
+
+    public string ArtefactHash { get; set; } = string.Empty;
+
+    public Guid LegalEntityId { get; set; }
+
+    public string Jurisdiction { get; set; } = string.Empty;
+
+    public string ProductCode { get; set; } = string.Empty;
+
+    public string ProductVersion { get; set; } = string.Empty;
+
+    public string DataStatus { get; set; } = string.Empty;
+
+    public string Status { get; set; } = string.Empty;
+
+    public string? PayloadHash { get; set; }
+
+    public Guid? ApprovalRequestId { get; set; }
+
+    public string BuiltBy { get; set; } = string.Empty;
+
+    public Instant BuiltAt { get; set; }
+
+    public string? SubmittedBy { get; set; }
+
+    public string? SubmittedByPrincipal { get; set; }
+
+    public Instant? SubmittedAt { get; set; }
+
+    public string? DecidedBy { get; set; }
+
+    public Instant? DecidedAt { get; set; }
+
+    public string? DecisionComment { get; set; }
+
+    public Guid? ActivationId { get; set; }
+
+    public DateOnly? EffectiveFrom { get; set; }
+
+    public int RecordVersion { get; set; }
+}

@@ -407,13 +407,6 @@ function ClaimDetails({ claim }: { claim: ClaimView }) {
                   meta={t('file.exposuresMeta')}
                   count={claim.exposures.length}
                 >
-                  {claim.exposures.some(
-                    (e) =>
-                      (e.kind === 'MTPL_PD' || e.kind === 'MTPL_BI') &&
-                      (e as { statutoryClocks?: string }).statutoryClocks === 'NOT_TRACKED',
-                  ) ? (
-                    <p className={styles.muted}>{t('exposure.clocksNotTracked')}</p>
-                  ) : null}
                   <SimpleTable<ExposureView>
                     aria-label={t('exposure.title')}
                     columns={exposureColumns}

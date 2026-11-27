@@ -70,6 +70,35 @@ public sealed record RuleSetVersionDetail
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? CreatedBy { get; init; }
 
+    /// <summary>Incremented on every change of the stored version; send it back on edit for optimistic concurrency.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? RecordVersion { get; init; }
+
+    /// <summary>Contract member 'submittedBy'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("submittedBy")]
+    public string? SubmittedBy { get; init; }
+
+    /// <summary>Contract member 'submittedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("submittedAt")]
+    public string? SubmittedAt { get; init; }
+
+    /// <summary>The plt.Approval request of the release (UW.RULESET_APPROVAL).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequestId")]
+    public string? ApprovalRequestId { get; init; }
+
+    /// <summary>Contract member 'decidedBy'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decidedBy")]
+    public string? DecidedBy { get; init; }
+
+    /// <summary>Contract member 'decidedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decidedAt")]
+    public string? DecidedAt { get; init; }
+
+    /// <summary>Contract member 'decisionReason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decisionReason")]
+    public string? DecisionReason { get; init; }
+
     /// <summary>Contract member 'definition'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("definition")]
     public required global::CoreIns.Modules.Underwriting.Contracts.Api.RuleSetDefinition Definition { get; init; }

@@ -25,7 +25,7 @@ internal sealed class PackRegistryService(MarketDbContext db)
     public async Task<PackListPage> ListAsync(string? cursor, int? limit, CancellationToken cancellationToken)
     {
         var take = Math.Clamp(limit ?? DefaultLimit, 1, MaxLimit);
-        var all = await db.PackVersions.AsNoTracking().Where(v => v.PackId != CoreDefaults.PackId)
+        var all = await db.PackVersions.AsNoTracking().Where(v => v.PackId != CoreDefaults.PackId && !v.PackId.StartsWith(ConfigOverlay.PackPrefix))
             .Select(v => v.PackId).Distinct().ToListAsync(cancellationToken).ConfigureAwait(false);
         var ids = all.Where(id => cursor is null || string.CompareOrdinal(id, cursor) > 0).Order(StringComparer.Ordinal).Take(take + 1).ToList();
         var page = ids.Take(take).ToList();
@@ -45,7 +45,7 @@ internal sealed class PackRegistryService(MarketDbContext db)
     /// <summary>The pack with the given id: its UUID (derived from the code) or the code itself.</summary>
     public async Task<PackGetResponse> GetAsync(string id, CancellationToken cancellationToken)
     {
-        var codes = await db.PackVersions.AsNoTracking().Where(v => v.PackId != CoreDefaults.PackId)
+        var codes = await db.PackVersions.AsNoTracking().Where(v => v.PackId != CoreDefaults.PackId && !v.PackId.StartsWith(ConfigOverlay.PackPrefix))
             .Select(v => v.PackId).Distinct().ToListAsync(cancellationToken).ConfigureAwait(false);
         var code = codes.FirstOrDefault(c => string.Equals(c, id, StringComparison.Ordinal) || string.Equals(IdOf(c).ToString(), id, StringComparison.OrdinalIgnoreCase))
             ?? throw new DomainException(DomainError.Of(ModuleCode.MKT, "PACK-NOT-FOUND", $"No pack '{id}' is registered."));

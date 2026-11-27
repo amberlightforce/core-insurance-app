@@ -1097,10 +1097,23 @@
       }
     },
     "pol.Renewal.decline": {
-      "job": "unspecified"
+      "jobId": "01925e0a-0d35-7998-8346-40fa4e43c605",
+      "termId": "0192338f-dbd8-7c7f-897e-f66a988dbc26",
+      "state": "DRAFT",
+      "reasonCode": "SAMPLE_CODE",
+      "recordedAt": "2026-10-07T09:00:00Z"
     },
     "pol.Renewal.nonRenew": {
-      "job": "unspecified"
+      "nonRenewalId": "01929663-2f9f-71b7-8bd5-d5eb3bd1c0d5",
+      "termId": "0192be37-84c7-7bd7-81e0-ebf9ef567891",
+      "status": "NOTICE_REQUESTED",
+      "reasonCode": "SAMPLE_CODE",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "noticeDeadline": "2026-10-07T09:00:00Z",
+      "noticeDays": 1,
+      "legalStatus": "Settled",
+      "noticeDocumentId": "0192e91d-2a44-7071-8980-a73295fe24a4",
+      "recordedAt": "2026-10-07T09:00:00Z"
     },
     "pol.Renewal.offer": {
       "jobId": "019242f0-0449-7c7c-8128-d32db241c231",
@@ -3455,22 +3468,35 @@
       }
     },
     "RenewalDeclineRequest": {
+      "jobId": "019293e6-37a0-76af-8b0b-36b41008ad4a",
       "termId": "01928633-672b-7900-8b5d-c3c2d1c8f133",
-      "offer": "unspecified",
-      "acceptanceEvidence": "unspecified",
-      "reason": "unspecified"
+      "reasonCode": "SAMPLE_CODE",
+      "declinedAt": "2026-10-07T09:00:00Z",
+      "evidence": "Sample text"
     },
     "RenewalDeclineResponse": {
-      "job": "unspecified"
+      "jobId": "01926b56-b4d9-7721-80c5-91c426ccbbed",
+      "termId": "01924d22-9063-74a3-8859-4bb2d2107898",
+      "state": "DRAFT",
+      "reasonCode": "SAMPLE_CODE",
+      "recordedAt": "2026-10-07T09:00:00Z"
     },
     "RenewalNonRenewRequest": {
       "termId": "0192a9a9-e9e5-7f16-860f-84d19857d0b2",
-      "offer": "unspecified",
-      "acceptanceEvidence": "unspecified",
-      "reason": "unspecified"
+      "reasonCode": "SAMPLE_CODE",
+      "text": "Sample text"
     },
     "RenewalNonRenewResponse": {
-      "job": "unspecified"
+      "nonRenewalId": "0192fe8f-f313-7289-8908-ee6f1b9c6fd6",
+      "termId": "01928d76-451d-72ec-8ff7-a943e6396087",
+      "status": "NOTICE_REQUESTED",
+      "reasonCode": "SAMPLE_CODE",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "noticeDeadline": "2026-10-07T09:00:00Z",
+      "noticeDays": 1,
+      "legalStatus": "Settled",
+      "noticeDocumentId": "0192f6a2-8c72-75e5-8f13-0a28dfb2c894",
+      "recordedAt": "2026-10-07T09:00:00Z"
     },
     "RenewalOfferRequest": {
       "jobId": "0192b216-7683-7cf8-86ef-17e8ee5449a4",
