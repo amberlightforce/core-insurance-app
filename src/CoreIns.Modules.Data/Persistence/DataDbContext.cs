@@ -21,6 +21,12 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
 
     public DbSet<BiasReportRow> BiasReports => Set<BiasReportRow>();
 
+    public DbSet<DataContractRow> DataContracts => Set<DataContractRow>();
+
+    public DbSet<EventLedgerRow> EventLedger => Set<EventLedgerRow>();
+
+    public DbSet<QuarantineRow> Quarantine => Set<QuarantineRow>();
+
     protected override string Schema => DataModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -93,7 +99,129 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
             e.Property(x => x.Breached).HasColumnName("breached");
             e.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
         });
+
+        modelBuilder.Entity<DataContractRow>(e =>
+        {
+            e.ToTable("data_contract");
+            e.HasKey(x => x.ContractId).HasName("pk_data_contract");
+            e.Property(x => x.ContractId).HasColumnName("contract_id");
+            e.Property(x => x.Name).HasColumnName("name");
+            e.Property(x => x.Major).HasColumnName("major");
+            e.Property(x => x.Minor).HasColumnName("minor");
+            e.Property(x => x.Producer).HasColumnName("producer");
+            e.Property(x => x.Document).HasColumnName("document").HasColumnType("jsonb");
+            e.Property(x => x.Compatibility).HasColumnName("compatibility").HasColumnType("jsonb");
+            e.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            e.HasIndex(x => new { x.Name, x.Major, x.Minor }).IsUnique().HasDatabaseName("ux_data_contract_version");
+        });
+
+        // rpt_raw (bronze) layer: the append-only ledger of ingested events and the quarantine of refused ones.
+        modelBuilder.Entity<EventLedgerRow>(e =>
+        {
+            e.ToTable("event_ledger", DataModule.ReportingRawSchema);
+            e.HasKey(x => x.EventId).HasName("pk_event_ledger");
+            e.Property(x => x.EventId).HasColumnName("event_id");
+            e.Property(x => x.RegistryName).HasColumnName("registry_name");
+            e.Property(x => x.EventType).HasColumnName("event_type");
+            e.Property(x => x.Producer).HasColumnName("producer");
+            e.Property(x => x.SchemaVersion).HasColumnName("schema_version");
+            e.Property(x => x.AggregateType).HasColumnName("aggregate_type");
+            e.Property(x => x.AggregateId).HasColumnName("aggregate_id");
+            e.Property(x => x.AggregateSequence).HasColumnName("aggregate_sequence");
+            e.Property(x => x.OccurredAt).HasColumnName("occurred_at").HasColumnType("timestamptz");
+            e.Property(x => x.LegalEntity).HasColumnName("legal_entity");
+            e.Property(x => x.Origin).HasColumnName("origin");
+            e.Property(x => x.Envelope).HasColumnName("envelope").HasColumnType("jsonb");
+            e.Property(x => x.ReceivedAt).HasColumnName("received_at").HasColumnType("timestamptz");
+            e.HasIndex(x => new { x.RegistryName, x.OccurredAt }).HasDatabaseName("ix_event_ledger_registry_occurred");
+        });
+
+        modelBuilder.Entity<QuarantineRow>(e =>
+        {
+            e.ToTable("quarantine", DataModule.ReportingRawSchema, t => t.HasCheckConstraint("ck_quarantine_status", "status IN ('QUARANTINED','RELEASED')"));
+            e.HasKey(x => x.QuarantineId).HasName("pk_quarantine");
+            e.Property(x => x.QuarantineId).HasColumnName("quarantine_id");
+            e.Property(x => x.EventId).HasColumnName("event_id");
+            e.Property(x => x.RegistryName).HasColumnName("registry_name");
+            e.Property(x => x.Reasons).HasColumnName("reasons").HasColumnType("jsonb");
+            e.Property(x => x.Envelope).HasColumnName("envelope").HasColumnType("jsonb");
+            e.Property(x => x.Status).HasColumnName("status");
+            e.Property(x => x.ReceivedAt).HasColumnName("received_at").HasColumnType("timestamptz");
+            e.Property(x => x.ReleasedAt).HasColumnName("released_at").HasColumnType("timestamptz");
+            e.HasIndex(x => x.EventId).IsUnique().HasDatabaseName("ux_quarantine_event");
+            e.HasIndex(x => new { x.Status, x.RegistryName }).HasDatabaseName("ix_quarantine_status");
+        });
     }
+}
+
+/// <summary>One registered version of a data contract (the payload shape DAT expects of an event type).</summary>
+internal sealed class DataContractRow
+{
+    public Guid ContractId { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+
+    public int Major { get; set; }
+
+    public int Minor { get; set; }
+
+    public string Producer { get; set; } = string.Empty;
+
+    public string Document { get; set; } = "{}";
+
+    public string Compatibility { get; set; } = "{}";
+
+    public Instant CreatedAt { get; set; }
+}
+
+/// <summary>An event accepted into the raw layer; <c>event_id</c> is unique so redelivery is a no-op.</summary>
+internal sealed class EventLedgerRow
+{
+    public Guid EventId { get; set; }
+
+    public string RegistryName { get; set; } = string.Empty;
+
+    public string EventType { get; set; } = string.Empty;
+
+    public string Producer { get; set; } = string.Empty;
+
+    public string SchemaVersion { get; set; } = string.Empty;
+
+    public string AggregateType { get; set; } = string.Empty;
+
+    public string AggregateId { get; set; } = string.Empty;
+
+    public long AggregateSequence { get; set; }
+
+    public Instant OccurredAt { get; set; }
+
+    public string LegalEntity { get; set; } = string.Empty;
+
+    public string Origin { get; set; } = string.Empty;
+
+    public string Envelope { get; set; } = "{}";
+
+    public Instant ReceivedAt { get; set; }
+}
+
+/// <summary>An event refused by validation, kept with its reasons until released.</summary>
+internal sealed class QuarantineRow
+{
+    public Guid QuarantineId { get; set; }
+
+    public Guid EventId { get; set; }
+
+    public string RegistryName { get; set; } = string.Empty;
+
+    public string Reasons { get; set; } = "[]";
+
+    public string Envelope { get; set; } = "{}";
+
+    public string Status { get; set; } = "QUARANTINED";
+
+    public Instant ReceivedAt { get; set; }
+
+    public Instant? ReleasedAt { get; set; }
 }
 
 /// <summary>Per-subject data key (crypto-shred): destroying the key makes the encrypted facts unreadable.</summary>

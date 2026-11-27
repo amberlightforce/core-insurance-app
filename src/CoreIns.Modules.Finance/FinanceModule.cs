@@ -72,6 +72,15 @@ public static class FinanceModule
         services.AddCommand<Commands.CreateManualJournal, Domain.ManualJournalEnvelope, Commands.CreateManualJournalHandler>(
             CommandDescriptor.For("fin.ManualJournal.create") with { SupportsDryRun = true });
         services.AddCommand<Commands.WithdrawManualJournal, Domain.ManualJournalEnvelope, Commands.WithdrawManualJournalHandler>(CommandDescriptor.For("fin.ManualJournal.withdraw"));
+        services.AddScoped<FluentValidation.IValidator<Commands.RerunIntakeExceptions>, Commands.IntakeExceptionValidator<Commands.RerunIntakeExceptions>>();
+        services.AddCommandAuditor<Commands.RerunIntakeExceptions, CoreIns.Modules.Finance.Contracts.Api.IntakeExceptionRerunResponse, Commands.IntakeExceptionAuditor<Commands.RerunIntakeExceptions>>();
+        services.AddCommand<Commands.RerunIntakeExceptions, CoreIns.Modules.Finance.Contracts.Api.IntakeExceptionRerunResponse, Commands.IntakeExceptionHandler<Commands.RerunIntakeExceptions>>(CoreIns.Platform.Commands.CommandDescriptor.For("fin.IntakeException.rerun"));
+        services.AddScoped<FluentValidation.IValidator<Commands.MarkDuplicateIntakeExceptions>, Commands.IntakeExceptionValidator<Commands.MarkDuplicateIntakeExceptions>>();
+        services.AddCommandAuditor<Commands.MarkDuplicateIntakeExceptions, CoreIns.Modules.Finance.Contracts.Api.IntakeExceptionRerunResponse, Commands.IntakeExceptionAuditor<Commands.MarkDuplicateIntakeExceptions>>();
+        services.AddCommand<Commands.MarkDuplicateIntakeExceptions, CoreIns.Modules.Finance.Contracts.Api.IntakeExceptionRerunResponse, Commands.IntakeExceptionHandler<Commands.MarkDuplicateIntakeExceptions>>(CoreIns.Platform.Commands.CommandDescriptor.For("fin.IntakeException.markDuplicate"));
+        services.AddScoped<FluentValidation.IValidator<Commands.RejectIntakeExceptions>, Commands.IntakeExceptionValidator<Commands.RejectIntakeExceptions>>();
+        services.AddCommandAuditor<Commands.RejectIntakeExceptions, CoreIns.Modules.Finance.Contracts.Api.IntakeExceptionRerunResponse, Commands.IntakeExceptionAuditor<Commands.RejectIntakeExceptions>>();
+        services.AddCommand<Commands.RejectIntakeExceptions, CoreIns.Modules.Finance.Contracts.Api.IntakeExceptionRerunResponse, Commands.IntakeExceptionHandler<Commands.RejectIntakeExceptions>>(CoreIns.Platform.Commands.CommandDescriptor.For("fin.IntakeException.reject"));
 
         // Intake (worker): the posting source, the policy context and the context-only events (REQ-FIN-001, -036).
         services.AddEventHandler<JsonElement, BillingEntryPostedHandler>(Descriptor(BillingEntryPostedV1.Descriptor), "FIN.Intake.BillingEntryPosted", ModuleCode.FIN);

@@ -142,27 +142,43 @@ export function useWithdrawManualJournal(onDone: (r: ManualJournalEnvelope) => v
 
 export type IntakeAction = 'rerun' | 'mark-duplicate' | 'reject';
 
+export type IntakeOutcomeCode =
+  | 'POSTED'
+  | 'WAITING'
+  | 'STILL_SUSPENDED'
+  | 'NO_OP'
+  | 'NOT_FOUND'
+  | 'MARKED_DUPLICATE'
+  | 'REJECTED';
+
+/** One outcome per requested event (fin.IntakeException.* response). */
+export interface IntakeActionResponse {
+  outcomes: { eventId: string; outcome: IntakeOutcomeCode; detail?: string }[];
+}
+
 /** fin.IntakeException.rerun / markDuplicate / reject for the selected events. */
-export function useIntakeAction(onDone: () => void) {
+export function useIntakeAction(onDone: (response: IntakeActionResponse) => void) {
   const client = useQueryClient();
   return useMutation({
     mutationFn: ({
       action,
       itemIds,
+      reason,
       key,
     }: {
       action: IntakeAction;
       itemIds: string[];
+      reason?: string;
       key: string;
     }) =>
-      apiRequest<unknown>(`${base}/intake-exceptions/${action}`, {
+      apiRequest<IntakeActionResponse>(`${base}/intake-exceptions/${action}`, {
         method: 'POST',
-        body: { itemIds },
+        body: reason ? { itemIds, reason } : { itemIds },
         idempotencyKey: key,
       }),
-    onSuccess: () => {
+    onSuccess: (response) => {
       void client.invalidateQueries({ queryKey: ['fin', 'intake-exceptions'] });
-      onDone();
+      onDone(response);
     },
   });
 }

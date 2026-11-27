@@ -661,8 +661,25 @@
           "serviceOnly": true
         },
         "validFrom": "2026-10-07",
-        "recordVersion": 1
+        "recordVersion": 1,
+        "parentIntermediaryId": "019291a1-f119-7ec0-8320-8486f5961af4",
+        "cpdStatus": "COMPLIANT"
       }
+    },
+    "IntermediaryImportRegisterRequest": {
+      "format": "CSV",
+      "content": "sample"
+    },
+    "IntermediaryImportRegisterResponse": {
+      "processed": 1,
+      "updated": 1,
+      "unchanged": 1,
+      "unmatchedRegisterNumbers": [
+        "sample"
+      ],
+      "rejectedRows": [
+        "sample"
+      ]
     },
     "IntermediaryRegisterInput": {
       "registerName": "sample",
@@ -673,6 +690,68 @@
       "registerStatus": "ACTIVE",
       "verificationLink": "sample",
       "evidenceRef": "sample"
+    },
+    "IntermediarySuspendRequest": {
+      "intermediaryId": "0192d012-43aa-777e-898c-ea6a89d953bf",
+      "expectedRecordVersion": 1,
+      "reason": "sample"
+    },
+    "IntermediarySuspendResponse": {
+      "intermediary": {
+        "intermediaryId": "019297ea-a6b0-7698-8bc4-64f96f3488d2",
+        "partyId": "01922767-10c8-7b0b-8be9-7f04a3449409",
+        "partyNumber": "SAMPLE-000001",
+        "name": "sample",
+        "intermediaryType": "SAMPLE_CODE",
+        "status": "ONBOARDING",
+        "registerNumber": "sample",
+        "registerStatus": "ACTIVE",
+        "producerCode": "SAMPLE_CODE",
+        "producerCodeStatus": "ACTIVE",
+        "authorities": {
+          "collectPremium": true,
+          "issueCoverNotes": true,
+          "bindWithinAuthority": true,
+          "serviceOnly": true
+        },
+        "validFrom": "2026-10-07",
+        "recordVersion": 1,
+        "parentIntermediaryId": "01923bdc-43a0-7a72-8b0e-b2d974d1a0bf",
+        "cpdStatus": "COMPLIANT"
+      }
+    },
+    "IntermediaryTerminateRequest": {
+      "intermediaryId": "01928e77-b68a-7e9f-8b42-55a2a48a9046",
+      "expectedRecordVersion": 1,
+      "reason": "sample",
+      "effectiveDate": "2026-10-07"
+    },
+    "IntermediaryTerminateResponse": {
+      "intermediary": {
+        "intermediaryId": "01928a39-187f-7401-8e2a-66b83ccebcfe",
+        "partyId": "0192f03a-0ccc-76bd-83e0-17d9c61257ad",
+        "partyNumber": "SAMPLE-000001",
+        "name": "sample",
+        "intermediaryType": "SAMPLE_CODE",
+        "status": "ONBOARDING",
+        "registerNumber": "sample",
+        "registerStatus": "ACTIVE",
+        "producerCode": "SAMPLE_CODE",
+        "producerCodeStatus": "ACTIVE",
+        "authorities": {
+          "collectPremium": true,
+          "issueCoverNotes": true,
+          "bindWithinAuthority": true,
+          "serviceOnly": true
+        },
+        "validFrom": "2026-10-07",
+        "recordVersion": 1,
+        "parentIntermediaryId": "01924580-4f51-727a-8348-75b6e085106c",
+        "cpdStatus": "COMPLIANT"
+      },
+      "terminatedProducerCodes": [
+        "SAMPLE_CODE"
+      ]
     },
     "IntermediaryUpdateRequest": {
       "status": "ONBOARDING",
@@ -698,7 +777,9 @@
           "serviceOnly": true
         },
         "validFrom": "2026-10-07",
-        "recordVersion": 1
+        "recordVersion": 1,
+        "parentIntermediaryId": "0192ea2c-fe45-7bbe-8748-591865796dbb",
+        "cpdStatus": "COMPLIANT"
       }
     },
     "IntermediaryView": {
@@ -719,7 +800,9 @@
         "serviceOnly": true
       },
       "validFrom": "2026-10-07",
-      "recordVersion": 1
+      "recordVersion": 1,
+      "parentIntermediaryId": "01921c3f-bddc-7fa1-87ed-c34bf55e5dfd",
+      "cpdStatus": "COMPLIANT"
     },
     "LatinNameAsOnDocument": {
       "givenNames": "sample",
