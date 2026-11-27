@@ -4,20 +4,18 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Archive.setRetentionClass result. PRD outputs: "archive id, hash"</summary>
+/// <summary>doc.Archive.setRetentionClass result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ArchiveSetRetentionClassResponse
 {
-    /// <summary>PRD: "archive id"</summary>
+    /// <summary>Contract member 'archiveId'.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'archiveId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("archiveId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? ArchiveId { get; init; }
+    public required global::System.Guid ArchiveId { get; init; }
 
-    /// <summary>PRD: "hash"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? Hash { get; init; }
+    /// <summary>Contract member 'retentionClass'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("retentionClass")]
+    public required string RetentionClass { get; init; }
 }

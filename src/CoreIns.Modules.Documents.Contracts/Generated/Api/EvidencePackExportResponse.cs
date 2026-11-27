@@ -4,15 +4,30 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.EvidencePack.export result. PRD outputs: "sealed archive"</summary>
+/// <summary>doc.EvidencePack.export result: the sealed zip, stored as an archive entry (download with doc.Archive.download).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record EvidencePackExportResponse
 {
-    /// <summary>PRD: "sealed archive"</summary>
+    /// <summary>Contract member 'archiveId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'archiveId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("sealedArchive")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SealedArchive { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("archiveId")]
+    public required global::System.Guid ArchiveId { get; init; }
+
+    /// <summary>Contract member 'hash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash Hash { get; init; }
+
+    /// <summary>Contract member 'documentCount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("documentCount")]
+    public required int DocumentCount { get; init; }
+
+    /// <summary>Documents listed in the manifest but not included (DSAR restriction without a legal-claim reason).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("excludedCount")]
+    public required int ExcludedCount { get; init; }
+
+    /// <summary>Files in the zip, manifest included.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("entryCount")]
+    public required int EntryCount { get; init; }
 }

@@ -4,28 +4,18 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Archive.setRetentionClass request. PRD inputs: "binary stream + declared hash, metadata"</summary>
+/// <summary>doc.Archive.setRetentionClass request. The class must be in the market pack list (Documents:RetentionClasses); that list is empty until the market pack supplies it (D-REG-07), so every class is refused until then.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ArchiveSetRetentionClassRequest
 {
-    /// <summary>PRD: "binary stream + declared hash"</summary>
+    /// <summary>Contract member 'archiveId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'archiveId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("binaryStream")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? BinaryStream { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("archiveId")]
+    public required global::System.Guid ArchiveId { get; init; }
 
-    /// <summary>PRD: "binary stream + declared hash"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("declaredHash")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? DeclaredHash { get; init; }
-
-    /// <summary>PRD: "metadata"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("metadata")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Metadata { get; init; }
+    /// <summary>Contract member 'retentionClass'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("retentionClass")]
+    public required string RetentionClass { get; init; }
 }

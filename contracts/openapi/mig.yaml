@@ -26,6 +26,7 @@ tags:
 - name: ImportContract
 - name: Recon
 - name: Signoff
+- name: Staging
 paths:
   /api/mig/v1/xrefs/register:
     post:
@@ -1954,6 +1955,121 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/staging/load:
+    post:
+      operationId: mig.Staging.load
+      summary: Load a legacy extract into staging
+      description: |-
+        Load a legacy extract into staging
+
+        Inputs: source system, snapshot label, format (JSON or CSV) and the extract text. Outputs: the snapshot with its content hash and record counts. Staging is append-only and separate from batches: nothing is imported until a batch is created from it. Reloading the same source and snapshot label with identical content changes nothing; with different content it adds a new version and supersedes the earlier one (earlier records are kept for provenance).
+      tags:
+      - Staging
+      x-requirement:
+      - REQ-MIG-001
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-02: loading only writes staging rows; nothing is imported'
+      x-exposure:
+      - ui
+      x-permission: mig.Staging.load
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      x-source:
+      - BO-MIG-02
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StagingLoadRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StagingSnapshot'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/staging/snapshots:
+    get:
+      operationId: mig.Staging.snapshots
+      summary: List staged snapshots
+      description: |-
+        List staged snapshots
+
+        Inputs: optional source system. Outputs: the staged snapshots, newest first, with status (ACTIVE or SUPERSEDED), content hash, provenance and record counts per object type.
+      tags:
+      - Staging
+      x-requirement:
+      - REQ-MIG-001
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-maturity: pre-release
+      x-bounded: 'Snapshots of one legal entity, capped at 200 per call'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-02: a read'
+      x-exposure:
+      - ui
+      x-permission: mig.Staging.snapshots
+      x-error-codes:
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      x-source:
+      - BO-MIG-02
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: source
+        in: query
+        required: false
+        description: Source system code.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StagingSnapshotList'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
 x-operation-families:
 - family: mig.Wave.*
   summary: Plan and run waves and cohorts
@@ -2745,6 +2861,72 @@ components:
           items:
             type: string
       required: [runId, waived]
+    StagingLoadRequest:
+      type: object
+      properties:
+        source:
+          type: string
+          maxLength: 8
+          description: Legacy source system code (e.g. GR1).
+        snapshot:
+          type: string
+          maxLength: 64
+          description: Snapshot label of the extract (e.g. the extract date). Reloading the same source and label replaces the snapshot.
+        format:
+          type: string
+          enum: [JSON, CSV]
+        content:
+          type: string
+          description: 'The extract text. JSON is {"records":[{"objectType","legacyKey","data":{}}]} (or such an array, or one record object with id); CSV has a header row with objectType and legacyKey, every other column is a data field.'
+      required: [source, snapshot, format, content]
+    StagingSnapshot:
+      type: object
+      properties:
+        snapshotId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        source:
+          type: string
+        snapshot:
+          type: string
+        version:
+          type: integer
+          description: 1 for the first load of the source and label, then 2, 3 ... for each changed reload.
+        status:
+          type: string
+          enum: [ACTIVE, SUPERSEDED]
+        format:
+          type: string
+          enum: [JSON, CSV]
+        contentHash:
+          type: string
+          description: SHA-256 of the extract text as received.
+        recordCount:
+          type: integer
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Records per object type.
+        loadedBy:
+          type: string
+        loadedAt:
+          type: string
+          format: date-time
+        unchanged:
+          type: boolean
+          description: True when the load repeated the active snapshot's content and nothing was written.
+        supersededSnapshotId:
+          description: The snapshot this load superseded, when it did.
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required: [snapshotId, source, snapshot, version, status, format, contentHash, recordCount, counts, loadedBy, loadedAt]
+    StagingSnapshotList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StagingSnapshot'
+      required: [items]
     SignoffRequestRequest:
       type: object
       properties:

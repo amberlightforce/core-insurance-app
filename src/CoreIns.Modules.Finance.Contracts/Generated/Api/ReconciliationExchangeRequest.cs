@@ -4,28 +4,37 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.Reconciliation.exchange request. PRD inputs: "source, date, totals"</summary>
+/// <summary>fin.Reconciliation.exchange request: the daily control totals a source module (BIL, RI, CLM) pushes after its day close; the same source, date and currency replaces the earlier push.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReconciliationExchangeRequest
 {
-    /// <summary>PRD: "source"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'source'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("source")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Source { get; init; }
+    public required SourceValue Source { get; init; }
 
-    /// <summary>PRD: "date"</summary>
+    /// <summary>Contract member 'date'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("date")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? Date { get; init; }
+    public required global::CoreIns.SharedKernel.BusinessDate Date { get; init; }
 
-    /// <summary>PRD: "totals"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'totals'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("totals")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Totals { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Finance.Contracts.Api.ReconSourceTotal> Totals { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<SourceValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum SourceValue
+    {
+        /// <summary><c>BIL</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("BIL")]
+        Bil,
+
+        /// <summary><c>RI</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RI")]
+        Ri,
+
+        /// <summary><c>CLM</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CLM")]
+        Clm,
+    }
 }

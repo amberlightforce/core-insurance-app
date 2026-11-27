@@ -4,20 +4,48 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Archive.listForObject result. PRD outputs: "archive id, hash"</summary>
+/// <summary>doc.Archive.listForObject result: the archived artefacts (documents and their renditions) about one object.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ArchiveListForObjectItem
 {
-    /// <summary>PRD: "archive id"</summary>
+    /// <summary>Contract member 'archiveId'.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'archiveId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("archiveId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? ArchiveId { get; init; }
+    public required global::System.Guid ArchiveId { get; init; }
 
-    /// <summary>PRD: "hash"</summary>
+    /// <summary>Contract member 'hash'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash Hash { get; init; }
+
+    /// <summary>Contract member 'documentId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("documentId")]
+    public required global::CoreIns.SharedKernel.Identifiers.DocumentId DocumentId { get; init; }
+
+    /// <summary>Contract member 'contentType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contentType")]
+    public required string ContentType { get; init; }
+
+    /// <summary>Contract member 'parentArchiveId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'parentArchiveId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("parentArchiveId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? Hash { get; init; }
+    public global::System.Guid? ParentArchiveId { get; init; }
+
+    /// <summary>Contract member 'renditionKind'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("renditionKind")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? RenditionKind { get; init; }
+
+    /// <summary>Contract member 'retentionClass'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("retentionClass")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? RetentionClass { get; init; }
+
+    /// <summary>Contract member 'createdAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("createdAt")]
+    public required string CreatedAt { get; init; }
 }

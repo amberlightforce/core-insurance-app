@@ -4,23 +4,19 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.Reconciliation.detail result. PRD outputs: "items, matches"</summary>
+/// <summary>fin.Reconciliation.detail result: every definition of the period with its latest run, and the run history of the definition asked for.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReconciliationDetailResponse
 {
-    /// <summary>PRD: "items"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Items { get; init; }
+    /// <summary>Contract member 'period'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
+    public required string Period { get; init; }
 
-    /// <summary>PRD: "matches"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("matches")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Matches { get; init; }
+    /// <summary>Contract member 'definitions'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("definitions")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Finance.Contracts.Api.ReconDefinitionView> Definitions { get; init; }
+
+    /// <summary>All runs of the requested definition in the period, newest first (empty when no definition is asked for).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("runs")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Finance.Contracts.Api.ReconRunView> Runs { get; init; }
 }

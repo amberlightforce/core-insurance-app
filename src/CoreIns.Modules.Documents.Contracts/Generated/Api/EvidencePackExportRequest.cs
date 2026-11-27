@@ -4,11 +4,11 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.EvidencePack.export request. PRD inputs: "pack id / filters"</summary>
+/// <summary>doc.EvidencePack.export request (BO-DOC-04). Scope: `packId` (one document id) or any of `subject` (MODULE/Type/id),</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record EvidencePackExportRequest
 {
-    /// <summary>PRD: "pack id"</summary>
+    /// <summary>One document id</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'packId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
@@ -16,11 +16,28 @@ public sealed record EvidencePackExportRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Guid? PackId { get; init; }
 
-    /// <summary>PRD: "filters"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("filters")]
+    /// <summary>MODULE/Type/id</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("subject")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Filters { get; init; }
+    public string? Subject { get; init; }
+
+    /// <summary>Recipient party</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.PartyId? PartyId { get; init; }
+
+    /// <summary>Contract member 'createdFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("createdFrom")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? CreatedFrom { get; init; }
+
+    /// <summary>Contract member 'createdTo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("createdTo")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? CreatedTo { get; init; }
+
+    /// <summary>Needed to include documents of recipients under a DSAR restriction (GDPR Art. 18(2), legal claims); without it they are listed in the manifest as excluded.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalClaimReason")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LegalClaimReason { get; init; }
 }

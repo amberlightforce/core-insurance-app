@@ -6,6 +6,7 @@ using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts.Events;
 using CoreIns.Platform.Events;
+using CoreIns.Modules.Finance.Services;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
@@ -113,7 +114,7 @@ internal sealed class IntakeExceptionsGate(FinanceDbContext db) : ICloseTaskGate
 /// command pipeline, and lock / reopen publish PeriodClosed / PeriodReopened.
 /// </summary>
 internal sealed class PeriodCloseService(
-    FinanceDbContext db, IEnumerable<ICloseTaskGate> gates, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, IEventPublisher events)
+    FinanceDbContext db, IEnumerable<ICloseTaskGate> gates, ReconciliationService reconciliation, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, IEventPublisher events)
 {
     private static readonly DomainError NoEntity = DomainError.Of(ModuleCode.FIN, "VALIDATION", "The legal entity is not served by this stamp.");
 
@@ -151,7 +152,15 @@ internal sealed class PeriodCloseService(
             return DomainError.Of(ModuleCode.FIN, "VALIDATION", $"Period {period} is {row.Status}; tasks are signed off while it is open.");
         }
 
-        if (!breakAccepted && await BlockerAsync(legalEntity, period, task, cancellationToken).ConfigureAwait(false) is { } blocker)
+        if (breakAccepted)
+        {
+            // BO-FIN-08: the accepted breaks are the ones the reconciliations found; they are committed together with the sign-off below.
+            if (await reconciliation.AcceptOpenBreaksAsync(legalEntity.Value, period, reason ?? string.Empty, cancellationToken).ConfigureAwait(false) is { } rejected)
+            {
+                return rejected;
+            }
+        }
+        else if (await BlockerAsync(legalEntity, period, task, cancellationToken).ConfigureAwait(false) is { } blocker)
         {
             return DomainError.Of(ModuleCode.FIN, "GATES-FAILED", blocker);
         }

@@ -58,7 +58,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-ILLEGAL-TRANSITION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 16 operation(s): pol.Cancellation.create, pol.Change.createOutOfSequence, pol.Job.bind, pol.Job.notTaken, pol.Job.quote, pol.Job.updateDraft, pol.Job.withdraw, pol.PackRollbackException.review, pol.PolicyChange.create, pol.Psr.decide, pol.Reinstatement.create, pol.Renewal.accept, ….</para>
+    /// <para>Declared by 18 operation(s): pol.Cancellation.create, pol.Change.createOutOfSequence, pol.Job.bind, pol.Job.notTaken, pol.Job.quote, pol.Job.updateDraft, pol.Job.withdraw, pol.PackRollbackException.review, pol.PolicyChange.create, pol.Psr.decide, pol.Reinstatement.create, pol.Renewal.accept, ….</para>
     /// </remarks>
     public const string IllegalTransition = "POL-ERR-ILLEGAL-TRANSITION";
 
@@ -82,7 +82,7 @@ public static class PolicyErrorCodes
 
     /// <summary>POL-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 19 operation(s): pol.Cancellation.create, pol.Change.createOutOfSequence, pol.Job.bind, pol.Job.get, pol.Job.quote, pol.Job.updateDraft, pol.PackRollbackException.get, pol.PackRollbackException.review, pol.Policy.get, pol.PolicyChange.create, pol.Psr.decide, pol.Renewal.accept, ….</para>
+    /// <para>Declared by 21 operation(s): pol.Cancellation.create, pol.Change.createOutOfSequence, pol.Job.bind, pol.Job.get, pol.Job.quote, pol.Job.updateDraft, pol.PackRollbackException.get, pol.PackRollbackException.review, pol.Policy.get, pol.PolicyChange.create, pol.Psr.decide, pol.Renewal.accept, ….</para>
     /// </remarks>
     public const string NotFound = "POL-ERR-NOT-FOUND";
 
@@ -170,6 +170,12 @@ public static class PolicyErrorCodes
     /// </remarks>
     public const string RightExpired = "POL-ERR-RIGHT-EXPIRED";
 
+    /// <summary>POL-ERR-RUN-ACTIVE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): pol.RenewalRun.start.</para>
+    /// </remarks>
+    public const string RunActive = "POL-ERR-RUN-ACTIVE";
+
     /// <summary>POL-ERR-SEGMENT-INVARIANT (HTTP 409).</summary>
     /// <remarks>
     /// <para>Declared by 1 operation(s): pol.Job.bind.</para>
@@ -192,7 +198,7 @@ public static class PolicyErrorCodes
     public const string Prefix = "POL-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AfterCancellation, AuthorityRequired, ConflictsOpen, DependencyUnavailable, EffdateLimit, GateFailed, HumanConfirmationRequired, IdempotencyMismatch, IllegalTransition, JobConflict, Locked, MigrationReversalBlocked, NotFound, NotPreempted, NoticePeriodUnsettled, NoticeTooLate, OpenJob, OutOfSequence, Preempted, ProducerInvalid, ProductUnavailable, QuickQuoteNotBindable, QuoteStale, Rating, RebaseRequired, RetroactiveMtpl, RightExpired, SegmentInvariant, Stale, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AfterCancellation, AuthorityRequired, ConflictsOpen, DependencyUnavailable, EffdateLimit, GateFailed, HumanConfirmationRequired, IdempotencyMismatch, IllegalTransition, JobConflict, Locked, MigrationReversalBlocked, NotFound, NotPreempted, NoticePeriodUnsettled, NoticeTooLate, OpenJob, OutOfSequence, Preempted, ProducerInvalid, ProductUnavailable, QuickQuoteNotBindable, QuoteStale, Rating, RebaseRequired, RetroactiveMtpl, RightExpired, RunActive, SegmentInvariant, Stale, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -224,6 +230,7 @@ public static class PolicyErrorCodes
         [RebaseRequired] = 409,
         [RetroactiveMtpl] = 422,
         [RightExpired] = 422,
+        [RunActive] = 409,
         [SegmentInvariant] = 409,
         [Stale] = 409,
         [Validation] = 422,

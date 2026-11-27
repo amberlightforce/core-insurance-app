@@ -31,7 +31,9 @@
         "mig.Signoff.request": [ "Staff.MigrationManager", "Platform.Admin" ],
         "mig.Signoff.approve": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ],
         "mig.Signoff.reject": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ],
-        "mig.Signoff.status": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ]
+        "mig.Signoff.status": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "mig.Staging.load": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Staging.snapshots": [ "Staff.MigrationManager", "Platform.Admin" ]
       }
     },
     "Authority": {
