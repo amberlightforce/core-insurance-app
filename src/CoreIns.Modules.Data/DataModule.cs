@@ -4,6 +4,8 @@ using CoreIns.Modules.Data.Contracts;
 using CoreIns.Modules.Data.Domain;
 using CoreIns.Modules.Data.Persistence;
 using CoreIns.Modules.Data.Services;
+using CoreIns.Modules.Data.Services.Coverage;
+using CoreIns.Modules.Data.Services.Lineage;
 using CoreIns.Modules.Data.Services.Marts;
 using CoreIns.Platform;
 using CoreIns.Platform.Commands;
@@ -76,6 +78,15 @@ public static class DataModule
         services.AddScoped<IMartDefinition, RiCessionSummaryMart>();
         services.AddScoped<MartEngine>();
         services.AddScoped<MartGovernance>();
+        services.AddScoped<LineageTracer>();
+        services.AddScoped<CoverageReader>();
+        services.AddOptions<CoverageSweepOptions>().Bind(configuration.GetSection(CoverageSweepOptions.Section));
+        services.AddSingleton<CoverageSweepRunner>();
+        if (string.Equals(configuration["APP_ROLE"], "worker", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddHostedService<CoverageSweeper>();
+        }
+
         services.AddCommand<AdjustMart, MartAdjustResponse, AdjustMartHandler>(CommandDescriptor.For("dat.Mart.adjust") with { SupportsDryRun = true });
         services.AddCommandAuditor<AdjustMart, MartAdjustResponse, AdjustMartAuditor>();
         services.AddCommand<SignOffMart, MartSignOffResponse, SignOffMartHandler>(CommandDescriptor.For("dat.Mart.signOff") with { SupportsDryRun = true });

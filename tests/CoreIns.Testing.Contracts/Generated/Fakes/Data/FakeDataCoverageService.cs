@@ -14,5 +14,5 @@ public sealed class FakeDataCoverageService : global::CoreIns.Testing.Contracts.
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.CoverageStatusResponse> StatusAsync(global::System.Guid? aiFeatureId = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Data.Contracts.Api.CoverageStatusResponse>("dat.Coverage.status", [aiFeatureId], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.CoverageStatusResponse> StatusAsync(global::System.Guid? aiFeatureId = null, string? period = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Data.Contracts.Api.CoverageStatusResponse>("dat.Coverage.status", [aiFeatureId, period], cancellationToken);
 }

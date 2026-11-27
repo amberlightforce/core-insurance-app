@@ -6,7 +6,7 @@ import { ProblemBanner } from '../staff/ProblemBanner';
 import { Section } from '../staff/PageHeader';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
-import { martCodes, useRunMart, type MartCode, type MartRun } from './martApi';
+import { martCodes, useRunMart, type MartCode, type MartRunSummary } from './martApi';
 import local from './reports.module.css';
 import { RunPill } from './RunPill';
 
@@ -16,13 +16,13 @@ const families: Record<MartCode, StatusFamily> = {
   RI_CESSION_SUMMARY: 'plum',
 };
 
-/** One card per mart (BO-DAT-03 registry): name, last run known to this browser, status and the run button. */
+/** One card per mart (BO-DAT-03 registry): name, last run, status and the run button. */
 export function MartCatalogue({
   runs,
   onStarted,
   onSelect,
 }: {
-  runs: MartRun[];
+  runs: MartRunSummary[];
   onStarted: (runId: string) => void;
   onSelect: (runId: string) => void;
 }) {
