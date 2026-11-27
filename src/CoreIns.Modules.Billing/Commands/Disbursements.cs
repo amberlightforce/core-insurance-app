@@ -8,6 +8,7 @@ using CoreIns.Modules.Billing.Services;
 using CoreIns.Modules.Party.Contracts;
 using CoreIns.Modules.Party.Contracts.Api;
 using CoreIns.Platform.Audit;
+using CoreIns.Platform.Authority;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts;
@@ -24,6 +25,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using AuthorityCheckRequest = CoreIns.Platform.Authority.AuthorityCheckRequest;
 
 namespace CoreIns.Modules.Billing.Commands;
 
@@ -64,6 +66,19 @@ internal sealed class RequestDisbursementValidator : AbstractValidator<RequestDi
             RuleFor(c => c.Request.Lines).NotNull().Must(l => l is { Count: > 0 and <= 500 }).WithErrorCode("LINES_REQUIRED");
             RuleForEach(c => c.Request.Lines).Must(l => l.Amount.IsPositive && l.Amount.IsRoundedToMinorUnits).WithErrorCode("LINE_AMOUNT");
             RuleFor(c => c.Request.ClaimId).Null().WithErrorCode("CLAIM_NOT_ALLOWED");
+            RuleFor(c => c.Request.AdHocPayee).Null().WithErrorCode("AD_HOC_PAYEE_NOT_SUPPORTED");
+            RuleFor(c => c.Request.CoPayees).Must(p => p is null || p.Count == 0).WithErrorCode("CO_PAYEES_NOT_SUPPORTED");
+            RuleFor(c => c.Request.CardToken).Null().WithErrorCode("CARD_NOT_SUPPORTED");
+            RuleFor(c => c.Request.OffsetInstruction).Null().WithErrorCode("OFFSET_NOT_SUPPORTED");
+        });
+        // BO-BIL-09: the non-claim sources BIL gates itself (authority, second approver); no source approval evidence is needed.
+        When(c => DisbursementCodes.IsGeneric(c.Request.SourceType), () =>
+        {
+            RuleFor(c => c.Request.PayeePartyId).NotNull().WithErrorCode("PAYEE_REQUIRED");
+            RuleFor(c => c.Request.PayeeAccountId).NotNull().WithErrorCode("PAYEE_ACCOUNT_REQUIRED");
+            RuleFor(c => c.Request.StatementReference).MaximumLength(140).WithErrorCode("REFERENCE_LENGTH");
+            RuleFor(c => c.Request.ClaimId).Null().WithErrorCode("CLAIM_NOT_ALLOWED");
+            RuleFor(c => c.Request.Lines).Must(l => l is null || l.Count == 0).WithErrorCode("LINES_NOT_ALLOWED");
             RuleFor(c => c.Request.AdHocPayee).Null().WithErrorCode("AD_HOC_PAYEE_NOT_SUPPORTED");
             RuleFor(c => c.Request.CoPayees).Must(p => p is null || p.Count == 0).WithErrorCode("CO_PAYEES_NOT_SUPPORTED");
             RuleFor(c => c.Request.CardToken).Null().WithErrorCode("CARD_NOT_SUPPORTED");
@@ -115,6 +130,7 @@ internal sealed partial class RequestDisbursementHandler(
     INumberingService numbering,
     LedgerWriter ledger,
     DisbursementReleaser releaser,
+    IAuthorityService authority,
     IServiceProvider services,
     ILogger<RequestDisbursementHandler> logger) : ICommandHandler<RequestDisbursement, DisbursementRequestResponse>
 {
@@ -131,9 +147,10 @@ internal sealed partial class RequestDisbursementHandler(
         // 1. Source register (REQ-BIL-197, REQ-BIL-354) and method (REQ-BIL-209).
         var isRefund = request.SourceType == DisbursementCodes.RefundPayment;
         var isFs = request.SourceType == DisbursementCodes.FsClearing;
-        if (!isRefund && !isFs && request.SourceType != DisbursementCodes.ClaimPayment)
+        var isGeneric = DisbursementCodes.IsGeneric(request.SourceType);
+        if (!isRefund && !isFs && !isGeneric && request.SourceType != DisbursementCodes.ClaimPayment)
         {
-            return DomainError.Of(ModuleCode.BIL, "SOURCE", $"Source type {request.SourceType} is not in the source register of this release (CLM_CLAIM_PAYMENT, BIL_REFUND, FS_CLEARING).");
+            return DomainError.Of(ModuleCode.BIL, "SOURCE", $"Source type {request.SourceType} is not in the source register of this release (CLM_CLAIM_PAYMENT, BIL_REFUND, FS_CLEARING, BIL_COMMISSION, BIL_LEVY, TAX_REMITTANCE, BIL_OTHER).");
         }
 
         // CLEARING is the method of FS_CLEARING and of nothing else (REQ-BIL-354, -355).
@@ -169,7 +186,7 @@ internal sealed partial class RequestDisbursementHandler(
 
         // 2. Approval evidence (REQ-BIL-198): the approved content must be the content BIL is asked to pay.
         var expected = DisbursementContent.Hash(request.SourceType, request.SourceId, payeePartyId, payeeAccountId, request.Amount);
-        if (request.ApprovalContentHash != expected)
+        if ((request.ApprovalContentHash is not null || !isGeneric) && request.ApprovalContentHash != expected)
         {
             return DomainError.Of(ModuleCode.BIL, "APPROVAL-MISMATCH", "The request does not match the approved content hash; nothing is paid that was not approved.");
         }
@@ -192,8 +209,28 @@ internal sealed partial class RequestDisbursementHandler(
             refund = mismatch.Refund;
         }
 
+        // 2a-bis. A generic (non-claim) source is gated by BIL itself: the requester needs BIL.DISBURSEMENT authority over the amount
+        // (a Refer is fine, because a second person always approves; a Deny is a refusal), NX-EC-09, BO-BIL-09.
+        if (isGeneric)
+        {
+            var check = await authority.CheckAsync(
+                new AuthorityCheckRequest(
+                    context.Actor, context.Roles, SupportAuthorityTypes.Disbursement,
+                    new Dictionary<string, DimensionValue>(StringComparer.Ordinal) { [SupportAuthorityTypes.AmountDimension] = DimensionValue.Of(request.Amount) },
+                    new ObjectRef(ModuleCode.BIL, "Disbursement", request.SourceId), now),
+                cancellationToken).ConfigureAwait(false);
+            context.AuthorityChecks.Add(check);
+            if (check.Decision == AuthorityDecision.Deny)
+            {
+                return DomainError.Of(ModuleCode.BIL, "NOT-PERMITTED", $"No authority to request a disbursement of {request.Amount} (BIL.DISBURSEMENT: {check.ReasonCode}).") with
+                {
+                    Metadata = new Dictionary<string, string>(StringComparer.Ordinal) { ["authorityCheckId"] = check.CheckId.ToString(), ["reasonCode"] = check.ReasonCode },
+                };
+            }
+        }
+
         // 2b. A PLT approval named as evidence must be Approved for exactly this payment and content (D-SL2-10 d, REQ-PLT-117).
-        if (DisbursementApproval.TryParseApprovalRequest(request.ApprovalEvidenceRef, out var approvalRequestId))
+        if (!isGeneric && DisbursementApproval.TryParseApprovalRequest(request.ApprovalEvidenceRef, out var approvalRequestId))
         {
             var verified = await VerifyApprovalAsync(
                 approvalRequestId, request.SourceId, expected, isRefund ? DisbursementApproval.RefundType : isFs ? DisbursementApproval.FsNetType : DisbursementApproval.ClaimPaymentType,
@@ -213,8 +250,9 @@ internal sealed partial class RequestDisbursementHandler(
             return BillingErrors.NotFound("payee account");
         }
 
-        var purpose = isRefund ? DisbursementCodes.RefundPurpose : isFs ? DisbursementCodes.ClearingPurpose : DisbursementCodes.ClaimPaymentPurpose;
+        var purpose = isRefund ? DisbursementCodes.RefundPurpose : isFs ? DisbursementCodes.ClearingPurpose : isGeneric ? account.Purpose : DisbursementCodes.ClaimPaymentPurpose;
         if (account.PartyId != payeePartyId || account.Purpose != purpose
+            || (isGeneric && !DisbursementCodes.PurposesOf(request.SourceType).Contains(account.Purpose))
             || account.Status != Codes.Of(PayeeAccountStatus.Active) || account.ValidTo is not null)
         {
             return DomainError.Of(ModuleCode.BIL, "PAYEE-ACCOUNT", $"The payee account is not the payee's Active {purpose} account.");
@@ -231,7 +269,7 @@ internal sealed partial class RequestDisbursementHandler(
         }
 
         // 4. Duplicates (REQ-BIL-202): a live disbursement for the same source object or duplicate key.
-        var businessRef = isFs ? request.StatementReference : refund?.CreditSetKey;
+        var businessRef = isFs || isGeneric ? request.StatementReference : refund?.CreditSetKey;
         var existing = await ExistingAsync(legalEntity, request, payeeAccountId, businessRef, cancellationToken).ConfigureAwait(false);
         if (existing is not null)
         {
@@ -249,16 +287,18 @@ internal sealed partial class RequestDisbursementHandler(
         // 6. The disbursement: Requested → PendingApproval → Approved (the source's evidence is the approval).
         var number = await numbering.NextAsync(new NumberRequest(NumberingSchemes.Disbursement, today), cancellationToken).ConfigureAwait(false);
         var machine = DisbursementStateModel.Machine;
-        // The source's evidence is the approval, except for FS_CLEARING: it waits in PendingApproval for the release approval (D-SL4-12).
+        // The source's evidence is the approval, except for FS_CLEARING and the generic sources: they wait in PendingApproval for a second person (D-SL4-12, BO-BIL-09).
         var state = machine.FireOrThrow(machine.Start(DisbursementState.Requested).Value, DisbursementTrigger.EnterApproval);
-        state = isFs ? state : machine.FireOrThrow(state, DisbursementTrigger.Approve);
+        state = isFs || isGeneric ? state : machine.FireOrThrow(state, DisbursementTrigger.Approve);
         var row = new DisbursementRow
         {
             DisbursementId = disbursementId,
             LegalEntityId = legalEntity,
             Jurisdiction = ledger.Jurisdiction.Value,
             DisbursementNumber = number.Value,
-            SourceModule = (isRefund ? ModuleCode.BIL : ModuleCode.CLM).ToString(),
+            SourceModule = (isRefund || request.SourceType is DisbursementCodes.CommissionPayment or DisbursementCodes.LevyPayment or DisbursementCodes.OtherPayment
+                ? ModuleCode.BIL
+                : request.SourceType == DisbursementCodes.TaxRemittance ? ModuleCode.FIN : ModuleCode.CLM).ToString(),
             SourceType = request.SourceType,
             SourceId = request.SourceId,
             ClaimId = isRefund ? null : request.ClaimId,
@@ -271,7 +311,7 @@ internal sealed partial class RequestDisbursementHandler(
             Currency = request.Amount.Currency.Code,
             Method = request.Method,
             RequestedValueDate = request.RequestedValueDate,
-            ApprovalEvidenceRef = request.ApprovalEvidenceRef!,
+            ApprovalEvidenceRef = request.ApprovalEvidenceRef ?? "BIL/Disbursement/" + disbursementId.Value.ToString("D"),
             ApprovalContentHash = expected.Value,
             PurposeText = request.PurposeText,
             State = Codes.Of(state),
@@ -280,7 +320,7 @@ internal sealed partial class RequestDisbursementHandler(
             ScreenedAt = now,
             VopResult = account.VopResult ?? Codes.Of(VopOutcome.NotAvailable),
             RequestedAt = now,
-            ApprovedAt = isFs ? null : now,
+            ApprovedAt = isFs || isGeneric ? null : now,
             CreatedBy = context.Actor.ToString(),
             RecordVersion = 1,
         };
@@ -298,7 +338,8 @@ internal sealed partial class RequestDisbursementHandler(
         }
 
         // 7. Release to the bound bank channel; the stub acknowledges and debits at once (D-SL2-05).
-        if (!isFs && services.GetService<IBankChannel>() is { } channel)
+        // Generic sources are released by their batch (BO-BIL-10); FS_CLEARING after its release approval.
+        if (!isFs && !isGeneric && services.GetService<IBankChannel>() is { } channel)
         {
             await releaser.ReleaseAsync(row, channel, request.Amount, today, now, refund, cancellationToken).ConfigureAwait(false);
         }

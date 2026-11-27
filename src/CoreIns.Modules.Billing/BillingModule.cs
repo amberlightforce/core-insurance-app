@@ -129,6 +129,10 @@ public static class BillingModule
         services.AddCommandAuditor<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountAuditor>();
         services.AddCommand<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountHandler>(
             CommandDescriptor.For("bil.PayeeAccount.create") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<VerifyPayeeAccount>, VerifyPayeeAccountValidator>();
+        services.AddCommandAuditor<VerifyPayeeAccount, PayeeAccountVerifyResponse, VerifyPayeeAccountAuditor>();
+        services.AddCommand<VerifyPayeeAccount, PayeeAccountVerifyResponse, VerifyPayeeAccountHandler>(
+            CommandDescriptor.For("bil.PayeeAccount.verify") with { SupportsDryRun = false });
         services.AddScoped<DisbursementReleaser>();
         services.AddScoped<IValidator<ApproveDisbursementRelease>, ApproveDisbursementReleaseValidator>();
         services.AddCommandAuditor<ApproveDisbursementRelease, DisbursementApproveReleaseResponse, ApproveDisbursementReleaseAuditor>();
@@ -278,6 +282,8 @@ public static class BillingModule
             .Describe("Ο έλεγχος κυρώσεων δεν ήταν καθαρός· η πληρωμή δεν γίνεται.", "Sanctions screening was not clear; the payment is not made."),
         ErrorDefinition.For(ModuleCode.BIL, "SCREENING-UNAVAILABLE", 503, "Ο έλεγχος κυρώσεων δεν είναι διαθέσιμος", "Sanctions screening unavailable")
             .Describe("Ο έλεγχος κυρώσεων δεν ολοκληρώθηκε· η πληρωμή δεν γίνεται. Δοκιμάστε ξανά αργότερα.", "Sanctions screening did not complete; the payment is not made. Try again later."),
+        ErrorDefinition.For(ModuleCode.BIL, "VOP-UNAVAILABLE", 503, "Η επαλήθευση δικαιούχου δεν είναι διαθέσιμη", "Verification of payee unavailable")
+            .Describe("Η επαλήθευση δικαιούχου δεν ολοκληρώθηκε· δοκιμάστε ξανά αργότερα. Η πληρωμή δεν γίνεται χωρίς επαλήθευση.", "Verification of payee did not complete; try again later. No payment is made without it."),
         ErrorDefinition.For(ModuleCode.BIL, "NO-CREDIT", 422, "Δεν υπάρχει πιστωτικό υπόλοιπο προς επιστροφή", "No credit left to refund")
             .Describe("Ο λογαριασμός δεν έχει πιστωτικό υπόλοιπο ή αυτό συμψηφίστηκε με ανοιχτές ειδοποιήσεις πληρωμής.", "The account has no credit, or it is fully set against open invoices."),
         ErrorDefinition.For(ModuleCode.BIL, "REFUND-OPEN", 409, "Υπάρχει ήδη ανοιχτή επιστροφή", "A refund is already open")

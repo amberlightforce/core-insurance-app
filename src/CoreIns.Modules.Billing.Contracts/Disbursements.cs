@@ -35,6 +35,46 @@ public static class DisbursementCodes
 
     /// <summary>Payee account purpose of the clearing office (REQ-BIL-343).</summary>
     public const string ClearingPurpose = "CLEARING";
+
+    /// <summary>Source type of a commission payment to an intermediary (BIL itself; BO-BIL-09, paid by BO-BIL-17).</summary>
+    public const string CommissionPayment = "BIL_COMMISSION";
+
+    /// <summary>Source type of a payment of a levy to its authority (BIL itself; BO-BIL-09, requested by BO-BIL-14).</summary>
+    public const string LevyPayment = "BIL_LEVY";
+
+    /// <summary>Source type of a tax remittance such as an IPT return payment (calling module FIN; BO-BIL-09, BO-FIN-09).</summary>
+    public const string TaxRemittance = "TAX_REMITTANCE";
+
+    /// <summary>Source type of any other non-claim payable (BIL itself); the payee account may be any of <see cref="OtherPurposes"/>.</summary>
+    public const string OtherPayment = "BIL_OTHER";
+
+    /// <summary>Payee account purpose of commission payments (REQ-BIL-343).</summary>
+    public const string CommissionPurpose = "COMMISSION";
+
+    /// <summary>Payee account purpose of levy payments (REQ-BIL-343).</summary>
+    public const string LevyPurpose = "LEVY";
+
+    /// <summary>Payee account purpose of tax remittances (REQ-BIL-343).</summary>
+    public const string TaxPurpose = "TAX";
+
+    /// <summary>Account purposes a <see cref="OtherPayment"/> may use.</summary>
+    public static readonly IReadOnlyList<string> OtherPurposes = ["COMMISSION", "LEVY", "TAX", "RI", "REDRESS"];
+
+    /// <summary>
+    /// The non-claim sources BIL serves through its public facade (BO-BIL-09): requested by a person or module that holds
+    /// <c>BIL.DISBURSEMENT</c> authority over the amount, then approved by a second person (maker is never the approver).
+    /// They stay Approved until a batch release (BO-BIL-10) moves them to the bank.
+    /// </summary>
+    public static bool IsGeneric(string sourceType) => sourceType is CommissionPayment or LevyPayment or TaxRemittance or OtherPayment;
+
+    /// <summary>The payee account purposes a generic source may pay to.</summary>
+    public static IReadOnlyList<string> PurposesOf(string sourceType) => sourceType switch
+    {
+        CommissionPayment => [CommissionPurpose],
+        LevyPayment => [LevyPurpose],
+        TaxRemittance => [TaxPurpose],
+        _ => OtherPurposes,
+    };
 }
 
 /// <summary>

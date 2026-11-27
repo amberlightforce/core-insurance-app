@@ -87,13 +87,14 @@ internal sealed class PaymentService(RequestContext context, ICommandHandler<Tak
 }
 
 /// <summary>
-/// <see cref="IBillingPayeeAccountService"/>: <c>create</c> (REQ-BIL-343) and <c>get</c> (REQ-BIL-345, masked IBAN);
-/// <c>verify</c> is a later package (VoP runs at create through the bound adapter).
+/// <see cref="IBillingPayeeAccountService"/>: <c>create</c> (REQ-BIL-343), <c>get</c> (REQ-BIL-345, masked IBAN) and <c>verify</c>
+/// (REQ-BIL-344: re-run VoP on an account, or a pre-check).
 /// </summary>
 internal sealed class PayeeAccountService(
     RequestContext context,
     ILegalEntityDirectory legalEntities,
     ICommandHandler<CreatePayeeAccount, PayeeAccountCreateResponse> create,
+    ICommandHandler<VerifyPayeeAccount, PayeeAccountVerifyResponse> verify,
     DisbursementReader reader,
     Microsoft.Extensions.Options.IOptions<BillingOptions> billingOptions) : IBillingPayeeAccountService
 {
@@ -110,7 +111,7 @@ internal sealed class PayeeAccountService(
     }
 
     public Task<PayeeAccountVerifyResponse> VerifyAsync(PayeeAccountVerifyRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw InProcess.NotAvailable("bil.PayeeAccount.verify");
+        InProcess.RunAsync(context, verify, new VerifyPayeeAccount(request), options, cancellationToken);
 }
 
 /// <summary>

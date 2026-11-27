@@ -12,7 +12,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/down-payment/status
 CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/balance
 CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/query
 CONTRACT_NOT_SERVED GET /api/bil/v1/mandates/{}
-CONTRACT_NOT_SERVED GET /api/bil/v1/payee-accounts
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-instruments
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-plans
 CONTRACT_NOT_SERVED GET /api/bil/v1/receipts
@@ -191,7 +190,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/commission/simulate
 CONTRACT_NOT_SERVED POST /api/bil/v1/disbursement-batches/approve-release
 CONTRACT_NOT_SERVED POST /api/bil/v1/disbursement-batches/prepare
 CONTRACT_NOT_SERVED POST /api/bil/v1/disbursement-batches/release
-CONTRACT_NOT_SERVED POST /api/bil/v1/disbursements/request
 CONTRACT_NOT_SERVED POST /api/bil/v1/down-payment/initiate
 CONTRACT_NOT_SERVED POST /api/bil/v1/dsar/erase
 CONTRACT_NOT_SERVED POST /api/bil/v1/dsar/export
@@ -206,7 +204,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/mandates
 CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/amend
 CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/cancel
 CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/sign
-CONTRACT_NOT_SERVED POST /api/bil/v1/payee-accounts/verify
 CONTRACT_NOT_SERVED POST /api/bil/v1/payment-instruments/add
 CONTRACT_NOT_SERVED POST /api/bil/v1/payment-instruments/remove
 CONTRACT_NOT_SERVED POST /api/bil/v1/payment-plans/change

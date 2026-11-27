@@ -82,7 +82,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-IBAN-INVALID (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): bil.PayeeAccount.create, bil.PaymentInstrument.add, bil.PaymentInstrument.list, bil.PaymentInstrument.remove, clm.PayeeAccount.capture.</para>
+    /// <para>Declared by 6 operation(s): bil.PayeeAccount.create, bil.PayeeAccount.verify, bil.PaymentInstrument.add, bil.PaymentInstrument.list, bil.PaymentInstrument.remove, clm.PayeeAccount.capture.</para>
     /// </remarks>
     public const string IbanInvalid = "BIL-ERR-IBAN-INVALID";
 
@@ -148,13 +148,13 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 16 operation(s): bil.Allocation.allocate, bil.BillingAccount.get, bil.Disbursement.approveRelease, bil.Disbursement.get, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.Invoice.get, bil.Payment.take, bil.Receipt.get, bil.Receivable.get, bil.Receivable.register, ….</para>
+    /// <para>Declared by 17 operation(s): bil.Allocation.allocate, bil.BillingAccount.get, bil.Disbursement.approveRelease, bil.Disbursement.get, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.Invoice.get, bil.PayeeAccount.verify, bil.Payment.take, bil.Receipt.get, bil.Receivable.get, ….</para>
     /// </remarks>
     public const string NotFound = "BIL-ERR-NOT-FOUND";
 
     /// <summary>BIL-ERR-NOT-PERMITTED (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): bil.PaymentPlan.change, bil.PaymentPlan.select.</para>
+    /// <para>Declared by 3 operation(s): bil.Disbursement.request, bil.PaymentPlan.change, bil.PaymentPlan.select.</para>
     /// </remarks>
     public const string NotPermitted = "BIL-ERR-NOT-PERMITTED";
 
@@ -244,7 +244,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-SOD (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): bil.Disbursement.approveRelease, bil.Disbursement.stop, bil.Disbursement.void, bil.Refund.decide.</para>
+    /// <para>Declared by 5 operation(s): bil.Disbursement.approveRelease, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.Refund.decide.</para>
     /// </remarks>
     public const string Sod = "BIL-ERR-SOD";
 

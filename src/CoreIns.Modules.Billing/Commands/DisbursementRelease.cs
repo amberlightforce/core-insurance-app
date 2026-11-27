@@ -8,6 +8,7 @@ using CoreIns.Modules.Billing.Persistence;
 using CoreIns.Modules.Billing.Queries;
 using CoreIns.Modules.Billing.Services;
 using CoreIns.Platform.Audit;
+using CoreIns.Platform.Authority;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Events;
@@ -18,6 +19,7 @@ using CoreIns.SharedKernel.Results;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using AuthorityCheckRequest = CoreIns.Platform.Authority.AuthorityCheckRequest;
 
 namespace CoreIns.Modules.Billing.Commands;
 
@@ -66,6 +68,7 @@ internal sealed class ApproveDisbursementReleaseHandler(
     LedgerWriter ledger,
     DisbursementReleaser releaser,
     IEventPublisher events,
+    IAuthorityService authority,
     IServiceProvider services) : ICommandHandler<ApproveDisbursementRelease, DisbursementApproveReleaseResponse>
 {
     public async Task<Result<DisbursementApproveReleaseResponse>> HandleAsync(ApproveDisbursementRelease command, CancellationToken cancellationToken)
@@ -78,7 +81,8 @@ internal sealed class ApproveDisbursementReleaseHandler(
             return BillingErrors.NotFound("disbursement");
         }
 
-        if (row.SourceType != DisbursementCodes.FsClearing || row.State != Codes.Of(DisbursementState.PendingApproval))
+        var isGeneric = DisbursementCodes.IsGeneric(row.SourceType);
+        if ((row.SourceType != DisbursementCodes.FsClearing && !isGeneric) || row.State != Codes.Of(DisbursementState.PendingApproval))
         {
             return DomainError.Of(ModuleCode.BIL, "APPROVAL-REQUIRED", "The disbursement is not awaiting a release approval.");
         }
@@ -89,8 +93,28 @@ internal sealed class ApproveDisbursementReleaseHandler(
             return DomainError.Of(ModuleCode.BIL, "SOD", "The requester cannot approve the release of their own disbursement (REQ-BIL-357).");
         }
 
-        var account = await db.PayeeAccounts.AsNoTracking().SingleAsync(a => a.PayeeAccountId == row.PayeeAccountId, cancellationToken).ConfigureAwait(false);
         var amount = new Money(row.Amount, Currency.FromCode(row.Currency));
+        // BO-BIL-09: the approver of a generic disbursement must hold BIL.DISBURSEMENT authority over the amount (NX-EC-09); a Refer is a
+        // refusal here, as there is no one above the approver to refer to. Rejecting needs no authority beyond the permission.
+        if (isGeneric && request.Decision == DisbursementApproveReleaseRequest.DecisionValue.Approve)
+        {
+            var check = await authority.CheckAsync(
+                new AuthorityCheckRequest(
+                    context.Actor, context.Roles, SupportAuthorityTypes.Disbursement,
+                    new Dictionary<string, DimensionValue>(StringComparer.Ordinal) { [SupportAuthorityTypes.AmountDimension] = DimensionValue.Of(amount) },
+                    new ObjectRef(ModuleCode.BIL, "Disbursement", row.DisbursementId.Value.ToString()), clock.Now),
+                cancellationToken).ConfigureAwait(false);
+            context.AuthorityChecks.Add(check);
+            if (check.Decision != AuthorityDecision.Allow)
+            {
+                return DomainError.Of(ModuleCode.BIL, "SOD", $"No authority to approve a disbursement of {amount} (BIL.DISBURSEMENT: {check.ReasonCode}).") with
+                {
+                    Metadata = new Dictionary<string, string>(StringComparer.Ordinal) { ["authorityCheckId"] = check.CheckId.ToString(), ["reasonCode"] = check.ReasonCode },
+                };
+            }
+        }
+
+        var account = await db.PayeeAccounts.AsNoTracking().SingleAsync(a => a.PayeeAccountId == row.PayeeAccountId, cancellationToken).ConfigureAwait(false);
         var machine = DisbursementStateModel.Machine;
         var now = clock.Now;
         row.ReleaseApprovedBy = actor;
@@ -118,7 +142,8 @@ internal sealed class ApproveDisbursementReleaseHandler(
         {
             row.State = Codes.Of(machine.FireOrThrow(DisbursementState.PendingApproval, DisbursementTrigger.Approve));
             row.ApprovedAt = now;
-            if (services.GetService<IBankChannel>() is { } channel)
+            // Generic disbursements stay Approved until their batch is released (BO-BIL-10).
+            if (!isGeneric && services.GetService<IBankChannel>() is { } channel)
             {
                 await releaser.ReleaseAsync(row, channel, amount, ledger.Today, now, null, cancellationToken).ConfigureAwait(false);
             }
