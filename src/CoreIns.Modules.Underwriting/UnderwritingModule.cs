@@ -49,6 +49,22 @@ public static class UnderwritingModule
         services.AddCommandAuditor<EvaluateRules, RulesEvaluateResponse, EvaluateRulesAuditor>();
         services.AddCommand<EvaluateRules, RulesEvaluateResponse, EvaluateRulesHandler>(CommandDescriptor.For("uw.Rules.evaluate") with { SupportsDryRun = true });
 
+        services.AddScoped<RuleSetAuthoringStore>();
+        services.AddScoped<RuleSetAuthoringSupport>();
+        services.AddScoped<RuleSetAuthoringQueries>();
+        services.AddScoped<IValidator<CreateRuleSet>, CreateRuleSetValidator>();
+        services.AddScoped<IValidator<DraftRuleSet>, DraftRuleSetValidator>();
+        services.AddScoped<IValidator<EditRuleSet>, EditRuleSetValidator>();
+        services.AddScoped<IValidator<ImportRuleSet>, ImportRuleSetValidator>();
+        services.AddCommandAuditor<CreateRuleSet, RuleSetAuthoringResponse, RuleSetAuthoringAuditor<CreateRuleSet>>();
+        services.AddCommandAuditor<DraftRuleSet, RuleSetAuthoringResponse, RuleSetAuthoringAuditor<DraftRuleSet>>();
+        services.AddCommandAuditor<EditRuleSet, RuleSetAuthoringResponse, RuleSetAuthoringAuditor<EditRuleSet>>();
+        services.AddCommandAuditor<ImportRuleSet, RuleSetAuthoringResponse, RuleSetAuthoringAuditor<ImportRuleSet>>();
+        services.AddCommand<CreateRuleSet, RuleSetAuthoringResponse, CreateRuleSetHandler>(CommandDescriptor.For("uw.RuleSet.create"));
+        services.AddCommand<DraftRuleSet, RuleSetAuthoringResponse, DraftRuleSetHandler>(CommandDescriptor.For("uw.RuleSet.draft"));
+        services.AddCommand<EditRuleSet, RuleSetAuthoringResponse, EditRuleSetHandler>(CommandDescriptor.For("uw.RuleSet.edit"));
+        services.AddCommand<ImportRuleSet, RuleSetAuthoringResponse, ImportRuleSetHandler>(CommandDescriptor.For("uw.RuleSet.import"));
+
         services.AddUnderwritingAuthorityTypes();
         services.AddScoped<IValidator<DecideIssues>, DecideIssuesValidator>();
         services.AddCommandAuditor<DecideIssues, IssueDecideResponse, DecideIssuesAuditor>();
@@ -87,6 +103,12 @@ public static class UnderwritingModule
             .Describe("Η απόφαση υπερβαίνει την εξουσιοδότησή σας· παραπέμψτε τη στον ρόλο που αναφέρεται.", "The decision is above your authority; refer it to the role named."),
         ErrorDefinition.For(ModuleCode.UW, "ISSUE-TRANSITION", 422, "Το ζήτημα δεν μπορεί να αλλάξει έτσι", "The issue cannot change this way")
             .Describe("Μόνο ανοιχτό ζήτημα μπορεί να εγκριθεί ή να απορριφθεί.", "Only an Open issue can be approved or rejected."),
+        ErrorDefinition.For(ModuleCode.UW, "RULESET-NOT-FOUND", 404, "Δεν βρέθηκε το σύνολο κανόνων", "The rule set was not found")
+            .Describe("Δεν υπάρχει σύνολο κανόνων με αυτόν τον κωδικό και αυτή την έκδοση.", "There is no rule set with this code and version."),
+        ErrorDefinition.For(ModuleCode.UW, "RULESET-STATE", 409, "Η έκδοση δεν είναι πρόχειρη", "The version is not a draft")
+            .Describe("Μόνο πρόχειρη έκδοση μπορεί να τροποποιηθεί.", "Only a draft version can be edited."),
+        ErrorDefinition.For(ModuleCode.UW, "RULESET-EXISTS", 409, "Το σύνολο κανόνων υπάρχει ήδη", "The rule set already exists")
+            .Describe("Υπάρχει ήδη σύνολο κανόνων με αυτόν τον κωδικό και αυτή την έκδοση.", "A rule set with this code and version already exists."),
         ErrorDefinition.For(ModuleCode.UW, "STALE", 409, "Το ζήτημα άλλαξε στο μεταξύ", "The issue changed meanwhile")
             .Describe("Φορτώστε ξανά το ζήτημα και αποφασίστε πάλι.", "Reload the issue and decide again."),
     ];
