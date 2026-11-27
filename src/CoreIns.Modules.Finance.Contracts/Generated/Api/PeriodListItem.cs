@@ -4,15 +4,37 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.Period.list result. PRD outputs: "state"</summary>
+/// <summary>fin.Period.list result: one accounting month and its close state.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PeriodListItem
 {
-    /// <summary>PRD: "state"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'period'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
+    public required string Period { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("state")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? State { get; init; }
+    public required StateValue State { get; init; }
+
+    /// <summary>Contract member 'closedForPosting'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("closedForPosting")]
+    public required bool ClosedForPosting { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StateValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StateValue
+    {
+        /// <summary><c>OPEN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("OPEN")]
+        Open,
+
+        /// <summary><c>SOFT_CLOSED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SOFT_CLOSED")]
+        SoftClosed,
+
+        /// <summary><c>LOCKED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("LOCKED")]
+        Locked,
+    }
 }

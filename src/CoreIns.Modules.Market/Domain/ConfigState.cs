@@ -13,7 +13,10 @@ internal static class StateCauses
     public const string PackActivation = "PACK_ACTIVATION";
     public const string PackRollback = "PACK_ROLLBACK";
 
-    public static bool IsKnown(string cause) => cause is Genesis or PackActivation or PackRollback;
+    /// <summary>An approved configuration change request was applied (BO-MKT-01).</summary>
+    public const string ConfigChange = "CONFIG_CHANGE";
+
+    public static bool IsKnown(string cause) => cause is Genesis or PackActivation or PackRollback or ConfigChange;
 }
 
 /// <summary>
@@ -109,7 +112,7 @@ internal sealed record ManifestPack(string PackId, string Version, Sha256Hash Di
 /// <param name="Packs">The pack versions in force.</param>
 /// <param name="CoreDigest">Content digest of the core defaults.</param>
 /// <param name="ParentHash">The state this one replaces; null only for genesis.</param>
-/// <param name="Cause">GENESIS, PACK_ACTIVATION or PACK_ROLLBACK.</param>
+/// <param name="Cause">GENESIS, PACK_ACTIVATION, PACK_ROLLBACK or CONFIG_CHANGE.</param>
 internal sealed record ConfigStateManifest(IReadOnlyList<ManifestPack> Packs, Sha256Hash CoreDigest, ConfigurationHash? ParentHash, string Cause)
 {
     private const string ManifestVersion = "1";

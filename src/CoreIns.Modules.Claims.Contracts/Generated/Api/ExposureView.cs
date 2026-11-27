@@ -63,6 +63,11 @@ public sealed record ExposureView
     [global::System.Text.Json.Serialization.JsonPropertyName("createdAt")]
     public required global::CoreIns.SharedKernel.Instant CreatedAt { get; init; }
 
+    /// <summary>The CMP statutory clocks of a third-party MTPL exposure (BO-CLM-05); empty when none are tracked.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("statutoryClocks")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Claims.Contracts.Api.ExposureClockView>? StatutoryClocks { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

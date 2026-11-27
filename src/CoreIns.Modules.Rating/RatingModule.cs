@@ -39,6 +39,7 @@ public static class RatingModule
         services.AddModuleDbContext<RatingDbContext>(Schema);
         services.AddScoped<RatingStore>();
         services.AddScoped<RateTableImportService>();
+        services.AddScoped<ArtifactQueries>();
         services.AddEventHandler<ProductVersionPublishedV1, ProductVersionFallbackHandler>(
             EventDescriptor.From(ProductVersionPublishedV1.Descriptor), "RAT.ProductVersionPublished.Fallback", ModuleCode.RAT);
 

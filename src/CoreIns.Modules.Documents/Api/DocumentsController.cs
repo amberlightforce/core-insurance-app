@@ -2,6 +2,7 @@ using System.Text.Json;
 using CoreIns.Modules.Documents.Commands;
 using CoreIns.Modules.Documents.Contracts;
 using CoreIns.Modules.Documents.Contracts.Api;
+using CoreIns.Modules.Documents.Persistence;
 using CoreIns.Modules.Documents.Queries;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
@@ -9,6 +10,7 @@ using CoreIns.Platform.Errors;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Paging;
 using CoreIns.SharedKernel.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -34,6 +36,8 @@ internal static class DocumentsPermissions
     public const string TemplateList = "doc.Template.list";
     public const string ClauseGet = "doc.Clause.get";
     public const string BindingResolve = "doc.Binding.resolve";
+    public const string DocumentPreview = "doc.Document.preview";
+    public const string DocumentSearch = "doc.Document.search";
 }
 
 /// <summary>REST facade of the SL6-DOC-CORE operations (contracts/openapi/doc.yaml).</summary>
@@ -93,6 +97,47 @@ internal sealed class DocumentsController : ControllerBase
         var found = Guid.TryParse(id, out var guid) ? await reader.GetAsync(new DocumentId(guid), cancellationToken).ConfigureAwait(false) : null;
         return found is null ? NotFoundProblem("The document does not exist in your legal entity.") : Results.Ok(found);
     }
+
+    /// <summary>doc.Document.search: the document library, newest first, keyset-paged; scoped to the caller's legal entity.</summary>
+    [HttpGet("documents/search")]
+    [Authorize(Policy = DocumentsPermissions.DocumentSearch)]
+    public async Task<IResult> SearchAsync(
+        [FromQuery] string? cursor, [FromQuery] int? limit, [FromQuery] string? templateKey, [FromQuery] string? status, [FromQuery] string? medium,
+        [FromQuery] string? subjectModule, [FromQuery] string? subjectType, [FromQuery] string? subjectId, [FromQuery] Guid? recipientPartyId,
+        [FromQuery] string? createdFrom, [FromQuery] string? createdTo, [FromQuery] string? q, [FromServices] DocumentReader reader, CancellationToken cancellationToken)
+    {
+        if (!KeysetPaging.TryTake(limit, KeysetPaging.DefaultPageSize, out var take))
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", $"limit must be between 1 and {KeysetPaging.MaxPageSize}."));
+        }
+
+        DateOnly? from = null;
+        DateOnly? to = null;
+        if ((createdFrom is { Length: > 0 } && !TryDate(createdFrom, out from)) || (createdTo is { Length: > 0 } && !TryDate(createdTo, out to)))
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "createdFrom and createdTo must be dates (yyyy-MM-dd)."));
+        }
+
+        var filter = new DocumentSearchFilter(templateKey, status, medium, subjectModule, subjectType, subjectId, recipientPartyId, from, to, q?.Trim());
+        var page = await reader.SearchAsync(filter, cursor, take, cancellationToken).ConfigureAwait(false);
+        return page is null
+            ? Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "The cursor is malformed."))
+            : Results.Ok(new { items = page.Value.Items.Select(ToSearchItem), nextCursor = page.Value.NextCursor, limit = page.Value.Limit });
+    }
+
+    private static bool TryDate(string text, out DateOnly? date)
+    {
+        var ok = DateOnly.TryParseExact(text, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsed);
+        date = ok ? parsed : null;
+        return ok;
+    }
+
+    private static object ToSearchItem(DocumentView d) => new
+    {
+        d.DocumentId, d.DocumentNumber, d.DocumentType, d.RequestNo, d.Subject, d.RecipientPartyId, d.Language, d.Status, d.Medium, d.ArchiveId, d.ContentHash, d.CreatedAt,
+        latestDeliveryStatus = d.Deliveries.Count == 0 ? null : d.Deliveries[^1].Status,
+        d.Deliveries,
+    };
 
     /// <summary>doc.Document.listForObject (<c>objectRef</c> is <c>MOD/Type/id</c>).</summary>
     [HttpGet("documents/list-for-object")]
@@ -262,6 +307,60 @@ internal sealed class DocumentsController : ControllerBase
         return template is null
             ? Problem(DomainError.Of(ModuleCode.DOC, "BINDING-MISSING", "No approved template version is in force for this document type and scope."))
             : Results.Ok(new BindingResolveResponse { TemplateId = new TemplateId(template.TemplateId), DocumentType = template.DocumentType, Version = template.Version, Language = request.Language });
+    }
+
+    /// <summary>
+    /// doc.Document.preview: composes a template with a payload and returns the HTML. Reads only; no document, archive, number
+    /// or event is created. Without <c>templateId</c> the approved version in force at <c>validAt</c> (default: today in the legal entity's zone) is used.
+    /// </summary>
+    [HttpPost("documents/preview")]
+    [Authorize(Policy = DocumentsPermissions.DocumentPreview)]
+    public async Task<IResult> PreviewAsync(
+        [FromBody] DocumentPreviewRequest request,
+        [FromServices] TemplateCatalogue catalogue,
+        [FromServices] IClock clock,
+        [FromServices] Microsoft.Extensions.Options.IOptions<DocumentsOptions> options,
+        CancellationToken cancellationToken)
+    {
+        var zone = options.Value.Zone;
+        var language = request.Language.ToString();
+        if (!Domain.Templates.IsLanguage(language))
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "LANGUAGE-NOT-APPROVED", $"Language '{language}' is not approved for this template (el, en)."));
+        }
+
+        TemplateRow? template;
+        if (request.TemplateId is { } templateId)
+        {
+            template = await catalogue.GetTemplateAsync(templateId.Value, cancellationToken).ConfigureAwait(false);
+            if (template is not null && template.DocumentType != request.DocumentType)
+            {
+                template = null;
+            }
+        }
+        else
+        {
+            var at = request.ValidAt?.Value ?? clock.Now.ToBusinessDate(zone).Value;
+            template = await catalogue.ResolveAsync(new TemplateScope(request.DocumentType, at, request.ProductCode, request.LineOfBusiness, request.Jurisdiction), cancellationToken).ConfigureAwait(false);
+        }
+
+        if (template is null)
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "BINDING-MISSING", "No template version matches the document type and scope."));
+        }
+
+        var el = language == "el";
+        var clauses = await catalogue.ApprovedClausesAsync(cancellationToken).ConfigureAwait(false);
+        var composed = Rendering.TemplateComposer.Compose(
+            template.DocumentType, language, el ? template.TitleEl : template.TitleEn, el ? template.BodyEl : template.BodyEn,
+            request.Payload ?? new Dictionary<string, string>(), clauses, zone);
+        return composed.IsSuccess
+            ? Results.Ok(new DocumentPreviewResponse
+            {
+                DocumentType = template.DocumentType, TemplateId = new TemplateId(template.TemplateId), TemplateVersion = template.Version, TemplateStatus = template.Status,
+                Language = request.Language, Title = el ? template.TitleEl : template.TitleEn, Html = composed.Html!,
+            })
+            : Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", string.Join(" ", composed.Problems)));
     }
 
     internal static bool TryParseObjectRef(string? text, out ObjectRef subject)

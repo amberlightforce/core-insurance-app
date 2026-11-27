@@ -11,14 +11,16 @@
       "number": "Είσπραξη",
       "amount": "Μη εφαρμοσμένο",
       "reason": "Αιτία",
-      "method": "Μέθοδος",
+      "bankReference": "Τραπεζική αναφορά",
       "valueDate": "Ημ. αξίας"
     },
     "reasons": {
       "AMOUNT_MISMATCH": "Το ποσό δεν ταιριάζει",
       "NO_OPEN_INVOICE": "Κανένα ανοιχτό τιμολόγιο",
       "AMBIGUOUS_MATCH": "Αμφίσημη αντιστοίχιση",
-      "CONCURRENT_ALLOCATION": "Ταυτόχρονη κατανομή"
+      "CONCURRENT_ALLOCATION": "Ταυτόχρονη κατανομή",
+      "INVOICE_NOT_OPEN": "Το τιμολόγιο δεν είναι ανοιχτό",
+      "TRANSFERRED": "Μεταφέρθηκε από άλλον λογαριασμό"
     },
     "match": {
       "title": "Αντιστοίχιση είσπραξης {number}",
