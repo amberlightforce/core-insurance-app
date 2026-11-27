@@ -20,7 +20,7 @@ public interface IPartyAccountService
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: PTY-ERR-ACCOUNT-HAS-JOBS (422), PTY-ERR-MEMBER-IN-USE (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> AddMemberAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountAddMemberResponse> AddMemberAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountAddMemberRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Accounts</summary>
     /// <remarks>
@@ -31,7 +31,7 @@ public interface IPartyAccountService
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
     /// <para>Errors: PTY-ERR-ACCOUNT-HAS-JOBS (422), PTY-ERR-MEMBER-IN-USE (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> CreateAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountCreateResponse> CreateAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountCreateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Accounts</summary>
     /// <remarks>
@@ -42,7 +42,7 @@ public interface IPartyAccountService
     /// <para>Errors: PTY-ERR-ACCOUNT-HAS-JOBS (422), PTY-ERR-MEMBER-IN-USE (422).</para>
     /// </remarks>
     /// <param name="id">Identifier of the Account</param>
-    global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Account restructuring</summary>
     /// <remarks>
@@ -64,7 +64,7 @@ public interface IPartyAccountService
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: PTY-ERR-ACCOUNT-HAS-JOBS (422), PTY-ERR-MEMBER-IN-USE (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> RemoveMemberAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountRemoveMemberResponse> RemoveMemberAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountRemoveMemberRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Account restructuring</summary>
     /// <remarks>
@@ -87,7 +87,10 @@ public interface IPartyAccountService
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountSearchPage> SearchAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="partyId">Accounts this party holds or belongs to (active membership)</param>
+    /// <param name="status">query parameter 'status'</param>
+    /// <param name="accountNumber">query parameter 'accountNumber'</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountSearchPage> SearchAsync(string? cursor = null, int? limit = null, global::CoreIns.SharedKernel.Identifiers.PartyId? partyId = null, global::CoreIns.Modules.Party.Contracts.Api.AccountSearchStatus? status = null, global::CoreIns.SharedKernel.Identifiers.AccountNumber? accountNumber = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Accounts</summary>
     /// <remarks>
@@ -98,7 +101,7 @@ public interface IPartyAccountService
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: PTY-ERR-ACCOUNT-HAS-JOBS (422), PTY-ERR-MEMBER-IN-USE (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> SetHolderAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountSetHolderResponse> SetHolderAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountSetHolderRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Account restructuring</summary>
     /// <remarks>
@@ -120,5 +123,5 @@ public interface IPartyAccountService
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: PTY-ERR-ACCOUNT-HAS-JOBS (422), PTY-ERR-MEMBER-IN-USE (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> WithdrawAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.AccountWithdrawResponse> WithdrawAsync(global::CoreIns.Modules.Party.Contracts.Api.AccountWithdrawRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

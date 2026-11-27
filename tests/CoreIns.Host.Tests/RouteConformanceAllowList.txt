@@ -16,7 +16,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/payee-accounts
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-instruments
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-plans
 CONTRACT_NOT_SERVED GET /api/bil/v1/receipts
-CONTRACT_NOT_SERVED GET /api/bil/v1/suspense
 CONTRACT_NOT_SERVED GET /api/chn/v1/account-current
 CONTRACT_NOT_SERVED GET /api/chn/v1/agent-logs/query
 CONTRACT_NOT_SERVED GET /api/chn/v1/api-products
@@ -61,7 +60,6 @@ CONTRACT_NOT_SERVED GET /api/doc/v1/ipids/get
 CONTRACT_NOT_SERVED GET /api/doc/v1/signatures/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/actuarial-results/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/balances/{}
-CONTRACT_NOT_SERVED GET /api/fin/v1/close/tasks
 CONTRACT_NOT_SERVED GET /api/fin/v1/earning/status
 CONTRACT_NOT_SERVED GET /api/fin/v1/fiscal-reconciliation/results
 CONTRACT_NOT_SERVED GET /api/fin/v1/fx/runs
@@ -124,8 +122,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/users/search
 CONTRACT_NOT_SERVED GET /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
 CONTRACT_NOT_SERVED GET /api/pol/v1/jobs
-CONTRACT_NOT_SERVED GET /api/pty/v1/accounts/search
-CONTRACT_NOT_SERVED GET /api/pty/v1/accounts/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/commission-agreements/compare
 CONTRACT_NOT_SERVED GET /api/pty/v1/commission-agreements/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
@@ -233,9 +229,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/payment-plans/select
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/bank
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/fin
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/invariants
-CONTRACT_NOT_SERVED POST /api/bil/v1/suspense/refund-to-sender
-CONTRACT_NOT_SERVED POST /api/bil/v1/suspense/suggest
-CONTRACT_NOT_SERVED POST /api/bil/v1/suspense/transfer
 CONTRACT_NOT_SERVED POST /api/bil/v1/tax-levy/request-levy-payment
 CONTRACT_NOT_SERVED POST /api/bil/v1/transfers/money
 CONTRACT_NOT_SERVED POST /api/bil/v1/write-offs/decide
@@ -410,12 +403,7 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/actuarial-results/approve
 CONTRACT_NOT_SERVED POST /api/fin/v1/actuarial-results/reject
 CONTRACT_NOT_SERVED POST /api/fin/v1/actuarial-results/submit
 CONTRACT_NOT_SERVED POST /api/fin/v1/actuarial-results/validate
-CONTRACT_NOT_SERVED POST /api/fin/v1/close/accept-break
 CONTRACT_NOT_SERVED POST /api/fin/v1/close/evidence-pack
-CONTRACT_NOT_SERVED POST /api/fin/v1/close/lock
-CONTRACT_NOT_SERVED POST /api/fin/v1/close/reopen
-CONTRACT_NOT_SERVED POST /api/fin/v1/close/sign-off
-CONTRACT_NOT_SERVED POST /api/fin/v1/close/soft-close
 CONTRACT_NOT_SERVED POST /api/fin/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/fin/v1/dsar/restrict
 CONTRACT_NOT_SERVED POST /api/fin/v1/earning/result
@@ -580,14 +568,9 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/renewals/decline
 CONTRACT_NOT_SERVED POST /api/pol/v1/renewals/non-renew
 CONTRACT_NOT_SERVED POST /api/pol/v1/rewrites
 CONTRACT_NOT_SERVED POST /api/pol/v1/suspensions
-CONTRACT_NOT_SERVED POST /api/pty/v1/accounts
-CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/add-member
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/merge
-CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/remove-member
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/request-policy-move
-CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/set-holder
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/split
-CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/withdraw
 CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/approve
 CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/create-version
 CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/resolve
@@ -804,7 +787,6 @@ CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/to-complaint
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/withdraw
 CONTRACT_NOT_SERVED POST /api/wrk/v1/search/global
 SERVED_NOT_IN_CONTRACT GET /api/bil/v1/billing-ops/plan-instances
-SERVED_NOT_IN_CONTRACT GET /api/bil/v1/billing-ops/suspense
 SERVED_NOT_IN_CONTRACT GET /api/bil/v1/migrated-records/mandates
 SERVED_NOT_IN_CONTRACT GET /api/bil/v1/migrated-records/receivables
 SERVED_NOT_IN_CONTRACT GET /api/mkt/v1/pack-activations
