@@ -1812,71 +1812,77 @@ export interface components {
             valid: boolean;
             suggestions: string[];
         };
-        /** @description pty.PartyRole.assign request. PRD inputs: "party, role, context, period" */
+        /** @description pty.PartyRole.assign request (BO-PTY-03, REQ-PTY-002). Gives a party a role, optionally within a context object (a policy, claim, account...). The same party, role type and context cannot hold two overlapping periods (PTY-ERR-ROLE-DUPLICATE). A VENDOR role needs the party to have a verified AFM (vendor master, REQ-PTY-096). */
         PartyRoleAssignRequest: {
-            /** @description PRD: "party" */
-            party?: components["schemas"]["Unspecified"];
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
-            /** @description PRD: "context" */
-            context?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            partyId: components["schemas"]["Uuid"];
+            /** @description Role catalogue code, for example POLICYHOLDER, INSURED, BENEFICIARY, CLAIMANT, PAYEE, VENDOR */
+            roleType: components["schemas"]["Code"];
+            /** @description The business object the role is held in; null for a party-level role */
+            contextRef?: components["schemas"]["ObjectRef"] | null;
+            /** @description First day of the role; default today */
+            validFrom?: components["schemas"]["LocalDate"] | null;
+            /** @description Day the role ends (exclusive); null for open-ended */
+            validTo?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description pty.PartyRole.assign result. PRD outputs: "role" */
+        /** @description A party role as known at the asked time. */
+        PartyRoleView: {
+            roleId: components["schemas"]["Uuid"];
+            partyId: components["schemas"]["Uuid"];
+            roleType: components["schemas"]["Code"];
+            contextRef: components["schemas"]["ObjectRef"] | null;
+            validPeriod: components["schemas"]["DatePeriod"];
+        };
+        /** @description pty.PartyRole.assign result. */
         PartyRoleAssignResponse: {
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
+            role: components["schemas"]["PartyRoleView"];
         };
-        /** @description pty.PartyRole.end request. PRD inputs: "party, role, context, period" */
+        /** @description pty.PartyRole.end request (BO-PTY-03): end-dates a role (bitemporal, the earlier record stays in the history). */
         PartyRoleEndRequest: {
-            /** @description PRD: "party" */
-            party?: components["schemas"]["Unspecified"];
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
-            /** @description PRD: "context" */
-            context?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            roleId: components["schemas"]["Uuid"];
+            /** @description Day the role ends (exclusive); default today. Must be after the role start. */
+            validTo?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description pty.PartyRole.end result. PRD outputs: "role" */
+        /** @description pty.PartyRole.end result. */
         PartyRoleEndResponse: {
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
+            role: components["schemas"]["PartyRoleView"];
         };
-        /** @description pty.PartyRole.query result. PRD outputs: "role" */
-        PartyRoleQueryItem: {
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
-        };
+        PartyRoleQueryItem: components["schemas"]["PartyRoleView"];
         /** @description Page of pty.PartyRole.query results (cursor pagination, contract §3.5.5) */
         PartyRoleQueryPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["PartyRoleQueryItem"][];
         };
-        /** @description pty.Relationship.add request. PRD inputs: "parties, type, period" */
+        /** @description pty.Relationship.add request (BO-PTY-03, REQ-PTY-104). A directed link from one party to another (from SPOUSE_OF to, PARENT_OF, SUBSIDIARY_OF...). Hierarchical types refuse a cycle (PTY-ERR-RELATIONSHIP-CYCLE); the same pair and type cannot overlap in time (PTY-ERR-OVERLAP). */
         RelationshipAddRequest: {
-            /** @description PRD: "parties" */
-            parties?: components["schemas"]["Unspecified"];
-            /** @description PRD: "type" */
-            type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            fromPartyId: components["schemas"]["Uuid"];
+            toPartyId: components["schemas"]["Uuid"];
+            relationshipType: components["schemas"]["Code"];
+            /** @description First day of the relationship; default today */
+            validFrom?: components["schemas"]["LocalDate"] | null;
+            validTo?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description pty.Relationship.add result. PRD outputs: "—" */
-        RelationshipAddResponse: Record<string, never>;
-        /** @description pty.Relationship.end request. PRD inputs: "parties, type, period" */
+        /** @description A party relationship as known at the asked time. */
+        RelationshipView: {
+            relationshipId: components["schemas"]["Uuid"];
+            fromPartyId: components["schemas"]["Uuid"];
+            toPartyId: components["schemas"]["Uuid"];
+            relationshipType: components["schemas"]["Code"];
+            validPeriod: components["schemas"]["DatePeriod"];
+        };
+        /** @description pty.Relationship.add result. */
+        RelationshipAddResponse: {
+            relationship: components["schemas"]["RelationshipView"];
+        };
+        /** @description pty.Relationship.end request (BO-PTY-03): end-dates a relationship. */
         RelationshipEndRequest: {
-            /** @description PRD: "parties" */
-            parties?: components["schemas"]["Unspecified"];
-            /** @description PRD: "type" */
-            type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            relationshipId: components["schemas"]["Uuid"];
+            /** @description Day the relationship ends (exclusive); default today */
+            validTo?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description pty.Relationship.end result. PRD outputs: "—" */
-        RelationshipEndResponse: Record<string, never>;
-        /** @description pty.Relationship.query result. PRD outputs: "—" */
-        RelationshipQueryItem: Record<string, never>;
+        /** @description pty.Relationship.end result. */
+        RelationshipEndResponse: {
+            relationship: components["schemas"]["RelationshipView"];
+        };
+        RelationshipQueryItem: components["schemas"]["RelationshipView"];
         /** @description Page of pty.Relationship.query results (cursor pagination, contract §3.5.5) */
         RelationshipQueryPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["RelationshipQueryItem"][];
@@ -2607,6 +2613,11 @@ export interface components {
             type: components["schemas"]["Code"];
             id: string;
         };
+        /** @description Date period; `to` is null when open-ended. */
+        DatePeriod: {
+            from: components["schemas"]["LocalDate"];
+            to: components["schemas"]["LocalDate"] | null;
+        };
         /** @description Value inside an open structure. JSON numbers are not allowed at any depth: amounts are Money objects or decimal strings, counts are integers only where a typed field says so. */
         OpenValue: string | boolean | null | components["schemas"]["OpenValue"][] | {
             [key: string]: components["schemas"]["OpenValue"];
@@ -3259,11 +3270,24 @@ export interface operations {
     };
     "pty.PartyRole.query": {
         parameters: {
-            query?: {
+            query: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+                /**
+                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
+                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
+                 */
+                knownAt?: components["parameters"]["KnownAt"];
+                partyId: components["schemas"]["Uuid"];
+                roleType?: components["schemas"]["Code"];
             };
             header?: {
                 /**
@@ -3385,11 +3409,24 @@ export interface operations {
     };
     "pty.Relationship.query": {
         parameters: {
-            query?: {
+            query: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+                /**
+                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
+                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
+                 */
+                knownAt?: components["parameters"]["KnownAt"];
+                partyId: components["schemas"]["Uuid"];
+                relationshipType?: components["schemas"]["Code"];
             };
             header?: {
                 /**

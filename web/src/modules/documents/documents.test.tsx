@@ -159,6 +159,6 @@ describe('DocumentDetailPage', () => {
     const call = api.callsTo('POST', '/api/doc/v1/documents/reprint')[0];
     expect(call?.body).toEqual({ documentId: id, reason: 'Lost in post' });
     expect(call?.headers.get('Idempotency-Key')).toBeTruthy();
-    expect(await screen.findByText('Reprint requested')).toBeInTheDocument();
+    expect(await screen.findByRole('status', { name: 'Reprint requested' })).toBeInTheDocument();
   });
 });
