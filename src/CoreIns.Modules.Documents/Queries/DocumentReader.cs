@@ -5,6 +5,7 @@ using CoreIns.Platform.Context;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Json;
+using CoreIns.SharedKernel.Paging;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoreIns.Modules.Documents.Queries;
@@ -15,6 +16,10 @@ internal sealed record DeliveryView(
 internal sealed record DocumentView(
     Guid DocumentId, string DocumentNumber, string DocumentType, string RequestNo, string Subject, Guid RecipientPartyId,
     string Language, string Status, string Medium, Guid ArchiveId, string ContentHash, DateTimeOffset CreatedAt, IReadOnlyList<DeliveryView> Deliveries);
+
+internal sealed record DocumentSearchFilter(
+    string? TemplateKey, string? Status, string? Medium, string? SubjectModule, string? SubjectType, string? SubjectId, Guid? RecipientPartyId,
+    DateOnly? CreatedFrom, DateOnly? CreatedTo, string? Text);
 
 internal sealed record EvidenceView(
     Guid EvidenceId, Guid DeliveryId, string Provider, string ProviderEventId, string EventType, DateOnly? ProofDate, string? ProofReference, string Outcome, DateTimeOffset ReceivedAt);
@@ -30,6 +35,87 @@ internal sealed class DocumentReader(DocumentsDbContext db, RequestContext conte
         var entity = LegalEntity;
         var row = await db.Documents.AsNoTracking().SingleOrDefaultAsync(d => d.DocumentId == id && d.LegalEntityId == entity, cancellationToken).ConfigureAwait(false);
         return row is null ? null : (await ViewsAsync([row], cancellationToken).ConfigureAwait(false))[0];
+    }
+
+    /// <summary>
+    /// Library search: newest first by (created, document number); the cursor is an opaque keyset of both (NX-HD-12). Scoped to the legal entity;
+    /// rows are the same views <see cref="GetAsync"/> serves, so nothing beyond <c>get</c> is exposed. Returns null when the cursor is malformed.
+    /// </summary>
+    public async Task<(IReadOnlyList<DocumentView> Items, string? NextCursor, int Limit)?> SearchAsync(
+        DocumentSearchFilter f, string? cursor, int take, CancellationToken cancellationToken)
+    {
+        if (!KeysetPaging.TryDecode(cursor, 2, out var after) || (after is not null && !KeysetPaging.TryLong(after[0], out _)))
+        {
+            return null;
+        }
+
+        var entity = LegalEntity;
+        var query = db.Documents.AsNoTracking().Where(d => d.LegalEntityId == entity);
+        if (f.TemplateKey is { Length: > 0 } key)
+        {
+            query = query.Where(d => d.TemplateKey == key);
+        }
+
+        if (f.Status is { Length: > 0 } status)
+        {
+            query = query.Where(d => d.Status == status);
+        }
+
+        if (f.Medium is { Length: > 0 } medium)
+        {
+            query = query.Where(d => d.Medium == medium);
+        }
+
+        if (f.SubjectModule is { Length: > 0 } sm)
+        {
+            query = query.Where(d => d.SubjectModule == sm);
+        }
+
+        if (f.SubjectType is { Length: > 0 } st)
+        {
+            query = query.Where(d => d.SubjectType == st);
+        }
+
+        if (f.SubjectId is { Length: > 0 } sid)
+        {
+            query = query.Where(d => d.SubjectId == sid);
+        }
+
+        if (f.RecipientPartyId is { } party)
+        {
+            var recipient = new PartyId(party);
+            query = query.Where(d => d.RecipientPartyId == recipient);
+        }
+
+        if (f.CreatedFrom is { } from)
+        {
+            var start = Instant.FromUtcDateTime(from.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc));
+            query = query.Where(d => d.CreatedAt >= start);
+        }
+
+        if (f.CreatedTo is { } to)
+        {
+            var end = Instant.FromUtcDateTime(to.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc));
+            query = query.Where(d => d.CreatedAt < end);
+        }
+
+        if (f.Text is { Length: > 0 } text)
+        {
+            var like = text.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("%", "\\%", StringComparison.Ordinal).Replace("_", "\\_", StringComparison.Ordinal) + "%";
+            query = query.Where(d => EF.Functions.ILike(d.DocumentNumber, like) || EF.Functions.ILike(d.RequestNo, like));
+        }
+
+        if (after is not null)
+        {
+            var at = Instant.FromDateTimeOffset(new DateTimeOffset(long.Parse(after[0], System.Globalization.CultureInfo.InvariantCulture), TimeSpan.Zero));
+            var number = after[1];
+            query = query.Where(d => d.CreatedAt < at || (d.CreatedAt == at && d.DocumentNumber.CompareTo(number) < 0));
+        }
+
+        var rows = await query.OrderByDescending(d => d.CreatedAt).ThenByDescending(d => d.DocumentNumber).Take(take + 1)
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        var (page, next) = KeysetPaging.Slice(rows, take, r => KeysetPaging.Encode(KeysetPaging.Part(r.CreatedAt.ToDateTimeOffset().UtcTicks), r.DocumentNumber));
+        return (await ViewsAsync(page, cancellationToken).ConfigureAwait(false), next, take);
     }
 
     public async Task<IReadOnlyList<DocumentView>> ListForObjectAsync(ObjectRef subject, int limit, CancellationToken cancellationToken)
