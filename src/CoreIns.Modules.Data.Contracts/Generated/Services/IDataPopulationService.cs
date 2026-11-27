@@ -19,11 +19,15 @@ public interface IDataPopulationService
     /// <para>Exposure: ui; consumers: PFC, RAT.</para>
     /// <para>Errors: DAT-ERR-011 (422).</para>
     /// </remarks>
+    /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
+    /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
+    /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
+    /// <param name="knownAt">Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including</param>
     /// <param name="productSlot">PRD: "product/slot"</param>
     /// <param name="as">PRD: "as-of"</param>
     /// <param name="window">PRD: "window"</param>
     /// <param name="sampling">PRD: "sampling"</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.PopulationAggregateResponse> AggregateAsync(string? productSlot = null, string? @as = null, string? window = null, string? sampling = null, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.PopulationAggregateResponse> AggregateAsync(string? cursor = null, int? limit = null, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, string? productSlot = null, string? @as = null, string? window = null, string? sampling = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Point-in-time populations for RAT, PFC, UW</summary>
     /// <remarks>

@@ -27,6 +27,14 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
 
     public DbSet<QuarantineRow> Quarantine => Set<QuarantineRow>();
 
+    public DbSet<ProjectedEventRow> ProjectedEvents => Set<ProjectedEventRow>();
+
+    public DbSet<FactPolicyTermRow> FactPolicyTerms => Set<FactPolicyTermRow>();
+
+    public DbSet<FactPremiumRow> FactPremiums => Set<FactPremiumRow>();
+
+    public DbSet<FactClaimMovementRow> FactClaimMovements => Set<FactClaimMovementRow>();
+
     protected override string Schema => DataModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -151,6 +159,69 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
             e.HasIndex(x => x.EventId).IsUnique().HasDatabaseName("ux_quarantine_event");
             e.HasIndex(x => new { x.Status, x.RegistryName }).HasDatabaseName("ix_quarantine_status");
         });
+
+        // rpt_conformed (silver) layer: bitemporal facts projected from the raw ledger (BO-DAT-02).
+        modelBuilder.Entity<ProjectedEventRow>(e =>
+        {
+            e.ToTable("projected_event", DataModule.ReportingConformedSchema);
+            e.HasKey(x => x.EventId).HasName("pk_projected_event");
+            e.Property(x => x.EventId).HasColumnName("event_id");
+            e.Property(x => x.ProjectedAt).HasColumnName("projected_at").HasColumnType("timestamptz");
+        });
+
+        modelBuilder.Entity<FactPolicyTermRow>(e =>
+        {
+            e.ToTable("fact_policy_term", DataModule.ReportingConformedSchema);
+            e.HasKey(x => x.RowId).HasName("pk_fact_policy_term");
+            MapFact(e);
+            e.Property(x => x.PolicyId).HasColumnName("policy_id");
+            e.Property(x => x.TermId).HasColumnName("term_id");
+            e.Property(x => x.Status).HasColumnName("status");
+            e.Property(x => x.Reason).HasColumnName("reason");
+            e.HasIndex(x => new { x.LegalEntity, x.TermId }).HasDatabaseName("ix_fact_policy_term_term");
+        });
+
+        modelBuilder.Entity<FactPremiumRow>(e =>
+        {
+            e.ToTable("fact_premium", DataModule.ReportingConformedSchema);
+            e.HasKey(x => x.RowId).HasName("pk_fact_premium");
+            MapFact(e);
+            e.Property(x => x.InvoiceId).HasColumnName("invoice_id");
+            e.Property(x => x.TermId).HasColumnName("term_id");
+            e.Property(x => x.Category).HasColumnName("category");
+            e.Property(x => x.Kind).HasColumnName("kind");
+            e.Property(x => x.Amount).HasColumnName("amount").HasColumnType("numeric(18,2)");
+            e.Property(x => x.Currency).HasColumnName("currency");
+            e.HasIndex(x => new { x.LegalEntity, x.InvoiceId, x.Category }).HasDatabaseName("ix_fact_premium_key");
+        });
+
+        modelBuilder.Entity<FactClaimMovementRow>(e =>
+        {
+            e.ToTable("fact_claim_movement", DataModule.ReportingConformedSchema);
+            e.HasKey(x => x.RowId).HasName("pk_fact_claim_movement");
+            MapFact(e);
+            e.Property(x => x.ClaimId).HasColumnName("claim_id");
+            e.Property(x => x.MovementKey).HasColumnName("movement_key");
+            e.Property(x => x.MovementType).HasColumnName("movement_type");
+            e.Property(x => x.Amount).HasColumnName("amount").HasColumnType("numeric(18,2)");
+            e.Property(x => x.Currency).HasColumnName("currency");
+            e.Property(x => x.PolicyTermId).HasColumnName("policy_term_id");
+            e.HasIndex(x => new { x.LegalEntity, x.MovementKey }).HasDatabaseName("ix_fact_claim_movement_key");
+        });
+    }
+
+    private static void MapFact<T>(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<T> e)
+        where T : ConformedFactRow
+    {
+        e.Property(x => x.RowId).HasColumnName("row_id");
+        e.Property(x => x.LegalEntity).HasColumnName("legal_entity");
+        e.Property(x => x.ProductCode).HasColumnName("product_code");
+        e.Property(x => x.ValidFrom).HasColumnName("valid_from").HasColumnType("timestamptz");
+        e.Property(x => x.ValidTo).HasColumnName("valid_to").HasColumnType("timestamptz");
+        e.Property(x => x.RecordedFrom).HasColumnName("recorded_from").HasColumnType("timestamptz");
+        e.Property(x => x.RecordedTo).HasColumnName("recorded_to").HasColumnType("timestamptz");
+        e.Property(x => x.SourceEventId).HasColumnName("source_event_id");
+        e.HasIndex(x => new { x.LegalEntity, x.ValidFrom }).HasDatabaseName($"ix_{e.Metadata.GetTableName()}_valid");
     }
 }
 
@@ -317,4 +388,76 @@ internal sealed class DataDbContextDesignTimeFactory : IDesignTimeDbContextFacto
 {
     public DataDbContext CreateDbContext(string[] args) =>
         new(ModuleDbContextRegistration.MigrationOptions<DataDbContext>("Host=localhost;Database=coreins_design;Username=design", DataModule.Schema));
+}
+
+/// <summary>Marks a raw event as already conformed (idempotency guard of the projector).</summary>
+internal sealed class ProjectedEventRow
+{
+    public Guid EventId { get; set; }
+
+    public Instant ProjectedAt { get; set; }
+}
+
+/// <summary>Shared bitemporal columns of the conformed facts: valid time from the business event, record time from ingestion.</summary>
+internal abstract class ConformedFactRow
+{
+    public Guid RowId { get; set; }
+
+    public string LegalEntity { get; set; } = string.Empty;
+
+    public string ProductCode { get; set; } = string.Empty;
+
+    public Instant ValidFrom { get; set; }
+
+    public Instant? ValidTo { get; set; }
+
+    public Instant RecordedFrom { get; set; }
+
+    public Instant? RecordedTo { get; set; }
+
+    public Guid SourceEventId { get; set; }
+}
+
+/// <summary>State of one policy term over valid and record time.</summary>
+internal sealed class FactPolicyTermRow : ConformedFactRow
+{
+    public Guid PolicyId { get; set; }
+
+    public Guid TermId { get; set; }
+
+    public string Status { get; set; } = string.Empty;
+
+    public string? Reason { get; set; }
+}
+
+/// <summary>One premium-ledger amount per invoice and charge category (credit notes are negative).</summary>
+internal sealed class FactPremiumRow : ConformedFactRow
+{
+    public Guid InvoiceId { get; set; }
+
+    public Guid? TermId { get; set; }
+
+    public string Category { get; set; } = string.Empty;
+
+    public string Kind { get; set; } = string.Empty;
+
+    public decimal Amount { get; set; }
+
+    public string Currency { get; set; } = string.Empty;
+}
+
+/// <summary>One claim movement (reserve change, payment, payment void); the natural key makes a restatement a correction.</summary>
+internal sealed class FactClaimMovementRow : ConformedFactRow
+{
+    public Guid ClaimId { get; set; }
+
+    public string MovementKey { get; set; } = string.Empty;
+
+    public string MovementType { get; set; } = string.Empty;
+
+    public decimal Amount { get; set; }
+
+    public string Currency { get; set; } = string.Empty;
+
+    public Guid? PolicyTermId { get; set; }
 }
