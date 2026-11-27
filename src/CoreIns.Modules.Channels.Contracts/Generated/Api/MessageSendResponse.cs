@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>chn.Message.send result. PRD outputs: "thread"</summary>
+/// <summary>chn.Message.send result: the whole thread</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MessageSendResponse
 {
-    /// <summary>PRD: "thread"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'thread'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("thread")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Thread { get; init; }
+    public required global::CoreIns.Modules.Channels.Contracts.Api.MessageThread Thread { get; init; }
 }

@@ -743,6 +743,166 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chn/v1/portal/billing/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Portal billing summary
+         * @description Balances of the customer billing accounts (billed, overdue, credit) and the open invoice count. Read from BIL for the caller scope only.
+         */
+        get: operations["chn.PortalBilling.summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal/billing/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Portal invoices
+         * @description Invoices of the customer policies, earliest due date first; state=open (default) or all.
+         */
+        get: operations["chn.PortalBilling.invoices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal/billing/refunds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Portal refund status
+         * @description Status of refunds on the customer billing accounts. Amount and state only; no payee details.
+         */
+        get: operations["chn.PortalBilling.refunds"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal/billing/invoices/{id}/pay-now": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pay an invoice now
+         * @description Checks the transaction-permission matrix (payment.pay) and the ownership of the invoice and returns the pay-now link. No money moves here; the hosted payment page does that.
+         */
+        post: operations["chn.PortalBilling.payNow"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Portal document vault
+         * @description Documents addressed to the customer about their own policies. Staff-internal documents are never listed.
+         */
+        get: operations["chn.PortalDocument.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal/documents/{id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download a document
+         * @description Streams the archived document after ownership and matrix (document.download) checks; records that the portal opened it.
+         */
+        get: operations["chn.PortalDocument.download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/notification-subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Notification preferences
+         * @description The customer notification classes and whether each is on.
+         */
+        get: operations["chn.NotificationSubscription.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/messages/reply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Staff reply to a customer message
+         * @description A staff member answers a customer thread. The customer is notified in the portal.
+         */
+        post: operations["chn.Message.reply"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chn/v1/notifications": {
         parameters: {
             query?: never;
@@ -2307,12 +2467,21 @@ export interface components {
             open: components["schemas"]["Money"];
             overdue: boolean;
         };
-        /** @description chn.Portal.dashboard result. Open requests are not included yet (TODO(hardening) until BO-CHN-04 messages). */
+        /** @description chn.Portal.dashboard result: work left for the customer, plus open message threads and the unread notification count (BO-CHN-04). */
         PortalDashboardResponse: {
             policyCount: number;
             activePolicyCount: number;
             renewalsDue: components["schemas"]["PortalRenewalDue"][];
             unpaidInvoices: components["schemas"]["PortalUnpaidInvoice"][];
+            unreadNotificationCount: number;
+            /** @description Message threads the customer started that staff have not answered yet */
+            openRequests: components["schemas"]["PortalOpenRequest"][];
+        };
+        PortalOpenRequest: {
+            threadId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            topic: "GENERAL" | "POLICY" | "BILLING" | "CLAIM" | "DOCUMENT";
+            lastMessageAt: components["schemas"]["Instant"];
         };
         /** @description chn.Journey.start request. PRD inputs: "journey type, context" */
         JourneyStartRequest: {
@@ -2623,63 +2792,169 @@ export interface components {
         WithdrawalListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["WithdrawalListItem"][];
         };
-        /** @description chn.Notification.list result. PRD outputs: "items" */
+        /** @description chn.Notification.list result (BO-CHN-04): in-app notification of the customer. No personal data in the item; the page renders the text from the kind. */
         NotificationListItem: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
+            notificationId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            kind: "RENEWAL_OFFERED" | "INVOICE_ISSUED" | "CLAIM_UPDATED" | "DOCUMENT_READY" | "MESSAGE_REPLY";
+            /** @enum {string} */
+            notificationClass: "RENEWAL" | "BILLING" | "CLAIM" | "DOCUMENT" | "MESSAGE";
+            /** @description POLICY, INVOICE, CLAIM, DOCUMENT or MESSAGE_THREAD */
+            subjectType?: string;
+            subjectId?: string;
+            createdAt: components["schemas"]["Instant"];
+            readAt?: components["schemas"]["Instant"];
         };
-        /** @description Page of chn.Notification.list results (cursor pagination, contract §3.5.5) */
+        /** @description Page of chn.Notification.list results, newest first, with the unread count */
         NotificationListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["NotificationListItem"][];
+            unreadCount?: number;
         };
-        /** @description chn.Notification.markRead request. PRD inputs: "identity, classes" */
+        /** @description chn.Notification.markRead request. Idempotent: already-read items stay as they are. */
         NotificationMarkReadRequest: {
-            /** @description PRD: "identity" */
-            identity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "classes" */
-            classes?: components["schemas"]["Unspecified"];
+            notificationIds?: components["schemas"]["Uuid"][];
+            /** @description Mark every notification of the caller read */
+            all?: boolean;
         };
-        /** @description chn.Notification.markRead result. PRD outputs: "items" */
+        /** @description chn.Notification.markRead result */
         NotificationMarkReadResponse: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
+            updated: number;
+            unreadCount: number;
         };
-        /** @description chn.NotificationSubscription.set request. PRD inputs: "identity, classes" */
+        NotificationSubscriptionItem: {
+            /** @enum {string} */
+            notificationClass: "RENEWAL" | "BILLING" | "CLAIM" | "DOCUMENT" | "MESSAGE";
+            enabled: boolean;
+        };
+        /** @description chn.NotificationSubscription.set request */
         NotificationSubscriptionSetRequest: {
-            /** @description PRD: "identity" */
-            identity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "classes" */
-            classes?: components["schemas"]["Unspecified"];
+            /** @enum {string} */
+            notificationClass: "RENEWAL" | "BILLING" | "CLAIM" | "DOCUMENT" | "MESSAGE";
+            enabled: boolean;
         };
-        /** @description chn.NotificationSubscription.set result. PRD outputs: "items" */
+        /** @description chn.NotificationSubscription.set result: every class with its current setting */
         NotificationSubscriptionSetResponse: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
+            subscriptions: components["schemas"]["NotificationSubscriptionItem"][];
         };
-        /** @description chn.Message.send request. PRD inputs: "topic, object, text, files" */
+        /** @description chn.NotificationSubscription.list result */
+        NotificationSubscriptionListResponse: {
+            subscriptions: components["schemas"]["NotificationSubscriptionItem"][];
+        };
+        /** @description chn.Message.send request (BO-CHN-04). A new thread needs a topic; a policy reference must be one of the customer policies; threadId continues an existing thread. */
         MessageSendRequest: {
-            /** @description PRD: "topic" */
-            topic?: components["schemas"]["Unspecified"];
-            /** @description PRD: "object" */
-            object?: components["schemas"]["Unspecified"];
-            /** @description PRD: "text" */
-            text?: components["schemas"]["Unspecified"];
-            /** @description PRD: "files" */
-            files?: components["schemas"]["Unspecified"];
+            /** @enum {string} */
+            topic?: "GENERAL" | "POLICY" | "BILLING" | "CLAIM" | "DOCUMENT";
+            policyId?: components["schemas"]["Uuid"];
+            threadId?: components["schemas"]["Uuid"];
+            text: string;
         };
-        /** @description chn.Message.send result. PRD outputs: "thread" */
+        MessageItem: {
+            messageId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            direction: "CUSTOMER" | "STAFF";
+            text: string;
+            sentAt: components["schemas"]["Instant"];
+        };
+        /** @description A message thread. partyId is set for staff only; awaitingStaff is true while the last message is the customer. */
+        MessageThread: {
+            threadId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            topic: "GENERAL" | "POLICY" | "BILLING" | "CLAIM" | "DOCUMENT";
+            policyId?: components["schemas"]["Uuid"];
+            partyId?: components["schemas"]["Uuid"];
+            lastMessageAt: components["schemas"]["Instant"];
+            awaitingStaff: boolean;
+            messages: components["schemas"]["MessageItem"][];
+        };
+        /** @description chn.Message.send result: the whole thread */
         MessageSendResponse: {
-            /** @description PRD: "thread" */
-            thread?: components["schemas"]["Unspecified"];
+            thread: components["schemas"]["MessageThread"];
         };
-        /** @description chn.Message.list result. PRD outputs: "thread" */
+        /** @description chn.Message.list item */
         MessageListItem: {
-            /** @description PRD: "thread" */
-            thread?: components["schemas"]["Unspecified"];
+            thread: components["schemas"]["MessageThread"];
         };
-        /** @description Page of chn.Message.list results (cursor pagination, contract §3.5.5) */
+        /** @description Threads, latest activity first; messages inside a thread oldest first. A customer sees only their own threads; staff see all. */
         MessageListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["MessageListItem"][];
+        };
+        /** @description chn.Message.reply request */
+        MessageReplyRequest: {
+            threadId: components["schemas"]["Uuid"];
+            text: string;
+        };
+        /** @description chn.Message.reply result */
+        MessageReplyResponse: {
+            thread: components["schemas"]["MessageThread"];
+        };
+        PortalBillingAccountBalance: {
+            billingAccountId: components["schemas"]["Uuid"];
+            accountNumber: components["schemas"]["BusinessNumber"];
+            currency: string;
+            billed: components["schemas"]["Money"];
+            overdue: components["schemas"]["Money"];
+            unapplied: components["schemas"]["Money"];
+            credit: components["schemas"]["Money"];
+        };
+        /** @description chn.PortalBilling.summary result */
+        PortalBillingSummary: {
+            accounts: components["schemas"]["PortalBillingAccountBalance"][];
+            openInvoiceCount: number;
+            overdueInvoiceCount: number;
+        };
+        PortalInvoice: {
+            invoiceId: components["schemas"]["Uuid"];
+            invoiceNumber: components["schemas"]["BusinessNumber"];
+            policyId: components["schemas"]["Uuid"];
+            policyNumber?: components["schemas"]["BusinessNumber"];
+            issueDate: components["schemas"]["LocalDate"];
+            dueDate: components["schemas"]["LocalDate"];
+            state: string;
+            total: components["schemas"]["Money"];
+            paid: components["schemas"]["Money"];
+            open: components["schemas"]["Money"];
+            overdue: boolean;
+            /** @description Open amount above zero and the invoice is in a payable state */
+            payable: boolean;
+        };
+        /** @description Page of chn.PortalBilling.invoices results (cursor is an offset) */
+        PortalInvoiceListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["PortalInvoice"][];
+        };
+        PortalRefund: {
+            refundId: components["schemas"]["Uuid"];
+            state: string;
+            amount: components["schemas"]["Money"];
+            proposedAt: components["schemas"]["Instant"];
+            decidedAt?: components["schemas"]["Instant"];
+        };
+        /** @description chn.PortalBilling.refunds result */
+        PortalRefundListResponse: {
+            items: components["schemas"]["PortalRefund"][];
+        };
+        /** @description chn.PortalBilling.payNow result */
+        PortalPayNowResponse: {
+            invoiceId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "ALLOW" | "REFER" | "DENY";
+            payable: boolean;
+            /** @description Relative link of the hosted payment page; present only when payable */
+            payUrl?: string;
+            reasons: string[];
+        };
+        PortalDocument: {
+            documentId: components["schemas"]["Uuid"];
+            documentNumber: components["schemas"]["BusinessNumber"];
+            documentType: string;
+            policyId?: components["schemas"]["Uuid"];
+            language?: string;
+            createdAt: components["schemas"]["Instant"];
+            firstOpenedAt?: components["schemas"]["Instant"];
+            openCount: number;
+        };
+        /** @description Page of chn.PortalDocument.list results (cursor is an offset) */
+        PortalDocumentListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["PortalDocument"][];
         };
         /** @description chn.ApiProduct.create request. PRD inputs: "product definition" */
         ApiProductCreateRequest: {
@@ -4761,6 +5036,300 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalBilling.summary": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalBillingSummary"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalBilling.invoices": {
+        parameters: {
+            query?: {
+                state?: string;
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalInvoiceListPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalBilling.refunds": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalRefundListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalBilling.payNow": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalPayNowResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalDocument.list": {
+        parameters: {
+            query?: {
+                policyId?: string;
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalDocumentListPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalDocument.download": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.NotificationSubscription.list": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationSubscriptionListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.Message.reply": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageReplyRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageReplyResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };

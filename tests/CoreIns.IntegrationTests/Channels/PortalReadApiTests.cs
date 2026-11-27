@@ -124,29 +124,50 @@ public sealed class PortalReadApiTests(PostgresFixture database) : IClassFixture
 
         var cannedInvoices = _invoices.Canned<InvoiceListPage>("bil.Invoice.list");
         var invoiceTemplate = cannedInvoices.Items[0];
+        var billingAccount = BillingAccountId.New();
+        static Guid Derive(PolicyId policy, byte tag) { var bytes = policy.Value.ToByteArray(); bytes[15] = tag; return new Guid(bytes); }
         _invoices.Setup("bil.Invoice.list", call =>
         {
+            // Discovery asks per policy; the portal then lists once per billing account (all three policies share one account).
+            var account = (BillingAccountId?)call.Arguments[2];
             var policy = (PolicyId?)call.Arguments[3];
+            PolicyId[] policyIds = policy is { } one ? [one] : [_policyAlice, _policyBob, _policyCarol];
+            if (policy is null && account != billingAccount)
+            {
+                return new InvoiceListPage { Items = [], NextCursor = null, Limit = 100 };
+            }
+
             return new InvoiceListPage
             {
                 Items =
                 [
-                    invoiceTemplate with
+                    .. policyIds.SelectMany(id => new[]
                     {
-                        Invoice = invoiceTemplate.Invoice with
+                        invoiceTemplate with
                         {
-                            PolicyId = policy!.Value, State = InvoiceView.StateValue.Due, Open = Money.Of(50m, "EUR"), DueDate = new BusinessDate(new DateOnly(2026, 1, 15)),
+                            Invoice = invoiceTemplate.Invoice with
+                            {
+                                InvoiceId = new InvoiceId(Derive(id, 1)), BillingAccountId = billingAccount, PolicyId = id, State = InvoiceView.StateValue.Due,
+                                Total = Money.Of(50m, "EUR"), Paid = Money.Of(0m, "EUR"), Open = Money.Of(50m, "EUR"), DueDate = new BusinessDate(new DateOnly(2026, 1, 15)),
+                            },
                         },
-                    },
-                    invoiceTemplate with
-                    {
-                        Invoice = invoiceTemplate.Invoice with { PolicyId = policy!.Value, State = InvoiceView.StateValue.Paid, Open = Money.Of(0m, "EUR") },
-                    },
+                        invoiceTemplate with
+                        {
+                            Invoice = invoiceTemplate.Invoice with
+                            {
+                                InvoiceId = new InvoiceId(Derive(id, 2)), BillingAccountId = billingAccount, PolicyId = id, State = InvoiceView.StateValue.Paid,
+                                Total = Money.Of(40m, "EUR"), Paid = Money.Of(40m, "EUR"), Open = Money.Of(0m, "EUR"),
+                            },
+                        },
+                    }),
                 ],
                 NextCursor = null,
-                Limit = 50,
+                Limit = 100,
             };
         });
+        var billingAccounts = new FakeBillingBillingAccountService();
+        var cannedAccount = billingAccounts.Canned<BillingAccountGetResponse>("bil.BillingAccount.get");
+        billingAccounts.Setup("bil.BillingAccount.get", _ => cannedAccount with { Account = cannedAccount.Account with { BillingAccountId = billingAccount, PayerPartyId = _alice } });
 
         var parties = new FakePartyPartyService();
         var cannedParty = parties.Canned<PartyGetResponse>("pty.Party.get");
@@ -161,6 +182,8 @@ public sealed class PortalReadApiTests(PostgresFixture database) : IClassFixture
             services.AddSingleton<IPartyPartyService>(parties);
             services.RemoveAll<IBillingInvoiceService>();
             services.AddSingleton<IBillingInvoiceService>(_invoices);
+            services.RemoveAll<IBillingBillingAccountService>();
+            services.AddSingleton<IBillingBillingAccountService>(billingAccounts);
         }));
         return _factory;
     }

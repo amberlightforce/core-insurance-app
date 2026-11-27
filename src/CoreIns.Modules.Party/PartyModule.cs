@@ -6,6 +6,7 @@ using CoreIns.Modules.Party.Persistence;
 using CoreIns.Modules.Party.Queries;
 using CoreIns.Modules.Party.Services;
 using CoreIns.Platform;
+using CoreIns.Platform.Approvals;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Persistence;
@@ -112,6 +113,20 @@ public static class PartyModule
         services.AddCommand<RemoveAccountMember, AccountRemoveMemberResponse, RemoveAccountMemberHandler>(CommandDescriptor.For("pty.Account.removeMember"));
         services.AddCommand<WithdrawAccount, AccountWithdrawResponse, WithdrawAccountHandler>(CommandDescriptor.For("pty.Account.withdraw"));
 
+        services.AddOptions<CommissionOptions>().Bind(configuration.GetSection(CommissionOptions.Section));
+        services.AddPartyAuthorityTypes();
+        services.AddOwnerDecidedApprovalType(PartyAuthorityTypes.CommissionApprovalType);
+        services.AddScoped<CommissionAgreementQueries>();
+        services.AddScoped<IValidator<CreateCommissionVersion>, CreateCommissionVersionValidator>();
+        services.AddScoped<IValidator<SubmitCommissionVersion>, SubmitCommissionVersionValidator>();
+        services.AddScoped<IValidator<ApproveCommissionVersion>, ApproveCommissionVersionValidator>();
+        services.AddCommandAuditor<CreateCommissionVersion, CommissionAgreementCreateVersionResponse, CommissionAuditor>();
+        services.AddCommandAuditor<SubmitCommissionVersion, CommissionAgreementSubmitResponse, CommissionAuditor>();
+        services.AddCommandAuditor<ApproveCommissionVersion, CommissionAgreementApproveResponse, CommissionAuditor>();
+        services.AddCommand<CreateCommissionVersion, CommissionAgreementCreateVersionResponse, CreateCommissionVersionHandler>(CommandDescriptor.For("pty.CommissionAgreement.createVersion"));
+        services.AddCommand<SubmitCommissionVersion, CommissionAgreementSubmitResponse, SubmitCommissionVersionHandler>(CommandDescriptor.For("pty.CommissionAgreement.submit"));
+        services.AddCommand<ApproveCommissionVersion, CommissionAgreementApproveResponse, ApproveCommissionVersionHandler>(CommandDescriptor.For("pty.CommissionAgreement.approve") with { SupportsDryRun = true });
+
         services.AddScoped<VulnerabilityQueries>();
         services.AddScoped<VulnerabilityWriter>();
         services.AddScoped<IValidator<RecordVulnerability>, RecordVulnerabilityValidator>();
@@ -179,6 +194,14 @@ public static class PartyModule
             .Describe("Το πρόσωπο είναι ήδη μέλος αυτού του λογαριασμού.", "The party is already a member of this account."),
         ErrorDefinition.For(ModuleCode.PTY, "MEMBER-LIMIT", 422, "Έχει συμπληρωθεί το όριο μελών", "The member limit is reached")
             .Describe("Ο λογαριασμός δεν μπορεί να έχει περισσότερα μέλη από το επιτρεπόμενο όριο.", "The account cannot have more members than the allowed limit."),
+        ErrorDefinition.For(ModuleCode.PTY, "RATE-ABOVE-MAX", 422, "Το ποσοστό υπερβαίνει το μέγιστο", "The rate is above the maximum")
+            .Describe("Ένα ποσοστό προμήθειας υπερβαίνει το μέγιστο που επιτρέπεται.", "A commission rate is above the maximum allowed."),
+        ErrorDefinition.For(ModuleCode.PTY, "BACKDATE", 422, "Η ημερομηνία ισχύος είναι σε διακανονισμένη περίοδο", "The effective date is in a settled period")
+            .Describe("Η έκδοση δεν μπορεί να ισχύει από ημερομηνία πριν ή στη διακανονισμένη, ούτε πριν από την τελευταία ενεργή έκδοση.", "The version cannot take effect on or before the settled date, or before the latest active version."),
+        ErrorDefinition.For(ModuleCode.PTY, "INTERMEDIARY-NOT-ACTIVE", 422, "Ο διαμεσολαβητής είναι σε αναστολή ή έχει τερματιστεί", "The intermediary is suspended or terminated")
+            .Describe("Ένας διαμεσολαβητής σε αναστολή ή τερματισμένος δεν μπορεί να αποκτήσει νέα συμφωνία προμήθειας.", "A suspended or terminated intermediary cannot get a new commission agreement."),
+        ErrorDefinition.For(ModuleCode.PTY, "STATE", 409, "Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση", "The action is not allowed in the current state")
+            .Describe("Η έκδοση ή η συμφωνία δεν βρίσκεται σε κατάσταση που επιτρέπει την ενέργεια.", "The version or agreement is not in a state that allows the action."),
         ErrorDefinition.For(ModuleCode.PTY, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];
