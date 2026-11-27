@@ -41,7 +41,12 @@
         "mig.Mapping.list": [ "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin" ],
         "mig.Mapping.get": [ "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin" ],
         "mig.Mapping.publish": [ "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin" ],
-        "mig.Mapping.preview": [ "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin" ]
+        "mig.Mapping.preview": [ "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin" ],
+        "mig.Wave.plan": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Wave.get": [ "Staff.MigrationManager", "Staff.DataSteward", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "mig.Wave.convert": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Wave.adjust": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Wave.close": [ "Staff.MigrationManager", "Platform.Admin" ]
       }
     },
     "Authority": {

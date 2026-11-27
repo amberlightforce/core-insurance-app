@@ -43,6 +43,10 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
 
     public DbSet<Services.Mapping.CodeMapRow> CodeMaps => Set<Services.Mapping.CodeMapRow>();
 
+    public DbSet<Services.Waves.WaveRow> Waves => Set<Services.Waves.WaveRow>();
+
+    public DbSet<Services.Waves.WaveTermRow> WaveTerms => Set<Services.Waves.WaveTermRow>();
+
     protected override string Schema => MigrationModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -54,6 +58,7 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
         Services.Staging.StagingModel.Configure(modelBuilder);
         Services.Quality.DqModel.Configure(modelBuilder);
         Services.Mapping.MappingModel.Configure(modelBuilder);
+        Services.Waves.WaveModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BatchRow>(entity =>
         {
@@ -74,6 +79,8 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
             entity.Property(e => e.ProcessedCount).HasColumnName("processed_count").HasDefaultValue(0);
             entity.Property(e => e.FailedCount).HasColumnName("failed_count").HasDefaultValue(0);
             entity.Property(e => e.LeaseUntil).HasColumnName("lease_until").HasColumnType("timestamptz");
+            entity.Property(e => e.MappingSpecId).HasColumnName("mapping_spec_id");
+            entity.Property(e => e.MappingContentHash).HasColumnName("mapping_content_hash");
             entity.HasIndex(e => e.Status).HasDatabaseName("ix_batch_status");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
@@ -177,6 +184,12 @@ internal sealed class BatchRow
 
     /// <summary>Until when a worker owns the run; an expired lease is taken over (crash recovery).</summary>
     public Instant? LeaseUntil { get; set; }
+
+    /// <summary>The approved mapping spec the items were built from (BO-MIG-07); checked again before the run.</summary>
+    public Guid? MappingSpecId { get; set; }
+
+    /// <summary>The spec content hash at batch creation.</summary>
+    public string? MappingContentHash { get; set; }
 
     public Instant CreatedAt { get; set; }
 
