@@ -26,7 +26,12 @@
         "mig.ImportContract.conformance": [ "Staff.MigrationManager", "Platform.Admin" ],
         "mig.Recon.loadControlTotals": [ "Staff.MigrationManager", "Platform.Admin" ],
         "mig.Recon.run": [ "Staff.MigrationManager", "Platform.Admin" ],
-        "mig.Recon.results": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ]
+        "mig.Recon.results": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "mig.Signoff.waive": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "mig.Signoff.request": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Signoff.approve": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "mig.Signoff.reject": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "mig.Signoff.status": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ]
       }
     },
     "Authority": {
@@ -36,6 +41,18 @@
         {
           "Id": "mig-manager-batch-run-illustrative", "Role": "Staff.MigrationManager", "Type": "MIG.BATCH_RUN", "Illustrative": true,
           "Limits": [ { "Dimension": "scope", "Comparison": "InSet", "Codes": [ "BATCH" ] } ]
+        },
+        {
+          "Id": "mig-finance-signoff-illustrative", "Role": "Staff.Finance", "Type": "MIG.WAVE_SIGNOFF", "Illustrative": true,
+          "Limits": [ { "Dimension": "signatory", "Comparison": "InSet", "Codes": [ "FINANCE_CONTROLLER" ] } ]
+        },
+        {
+          "Id": "mig-compliance-signoff-illustrative", "Role": "Staff.ComplianceOfficer", "Type": "MIG.WAVE_SIGNOFF", "Illustrative": true,
+          "Limits": [ { "Dimension": "signatory", "Comparison": "InSet", "Codes": [ "COMPLIANCE_OFFICER" ] } ]
+        },
+        {
+          "Id": "mig-manager-signoff-illustrative", "Role": "Staff.MigrationManager", "Type": "MIG.WAVE_SIGNOFF", "Illustrative": true,
+          "Limits": [ { "Dimension": "signatory", "Comparison": "InSet", "Codes": [ "MIGRATION_LEAD" ] } ]
         }
       ]
     }

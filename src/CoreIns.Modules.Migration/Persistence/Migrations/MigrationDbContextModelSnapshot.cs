@@ -469,6 +469,143 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.SignOff.SignOffRow", b =>
+                {
+                    b.Property<Guid>("SignOffId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("signoff_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("requested_at");
+
+                    b.Property<string>("RequestedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("requested_by");
+
+                    b.Property<string>("ResultsHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("results_hash");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope");
+
+                    b.HasKey("SignOffId")
+                        .HasName("pk_signoff");
+
+                    b.HasIndex("LegalEntityId", "Scope", "RequestedAt")
+                        .HasDatabaseName("ix_signoff_scope");
+
+                    b.ToTable("signoff", "mig");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.SignOff.SignOffSignatoryRow", b =>
+                {
+                    b.Property<Guid>("SignatoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("signatory_id");
+
+                    b.Property<Guid>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text")
+                        .HasColumnName("comment");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<Guid>("SignOffId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("signoff_id");
+
+                    b.Property<string>("Signatory")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("signatory");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("SignatoryId")
+                        .HasName("pk_signoff_signatory");
+
+                    b.HasIndex("SignOffId", "Signatory")
+                        .IsUnique()
+                        .HasDatabaseName("ux_signoff_signatory");
+
+                    b.ToTable("signoff_signatory", "mig", t =>
+                        {
+                            t.HasCheckConstraint("ck_signoff_signatory_status", "status IN ('PENDING','APPROVED','REJECTED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.SignOff.SignOffWaiverRow", b =>
+                {
+                    b.Property<Guid>("WaiverId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("waiver_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<string>("VarianceKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("variance_key");
+
+                    b.Property<DateTime>("WaivedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("waived_at");
+
+                    b.Property<string>("WaivedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("waived_by");
+
+                    b.HasKey("WaiverId")
+                        .HasName("pk_signoff_waiver");
+
+                    b.HasIndex("LegalEntityId", "RunId", "VarianceKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_signoff_waiver_key");
+
+                    b.ToTable("signoff_waiver", "mig");
+                });
+
             modelBuilder.Entity("CoreIns.Platform.Persistence.DsarRestrictionRow", b =>
                 {
                     b.Property<Guid>("RestrictionId")
@@ -512,6 +649,16 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         .HasDatabaseName("ux_dsar_restriction_subject_class");
 
                     b.ToTable("dsar_restriction", "mig");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.SignOff.SignOffSignatoryRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Migration.Services.SignOff.SignOffRow", null)
+                        .WithMany()
+                        .HasForeignKey("SignOffId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_signoff_signatory_signoff");
                 });
 #pragma warning restore 612, 618
         }
