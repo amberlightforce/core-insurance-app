@@ -1960,21 +1960,55 @@ export interface components {
             /** @description Content hash of the decision table that was evaluated (REQ-UW-042) */
             ruleSetHash?: components["schemas"]["Sha256"];
         };
-        /** @description uw.Rules.evaluateBatch request. PRD inputs: "selection, checkpoint, rule set" */
+        /** @description uw.Rules.evaluateBatch request (BO-UW-03): many risk snapshots evaluated against one rule-set version, without any effect on jobs or issues. Pin a version (ruleSetCode + ruleSetVersion) or leave both out to use the version in force on effectiveDate. At most 200 items per request (UW-ERR-LIMIT-EXCEEDED above). */
         RulesEvaluateBatchRequest: {
-            /** @description PRD: "selection" */
-            selection?: components["schemas"]["Unspecified"];
-            /** @description PRD: "checkpoint" */
-            checkpoint?: components["schemas"]["Unspecified"];
-            /** @description PRD: "rule set" */
-            ruleSet?: components["schemas"]["Unspecified"];
+            productCode: components["schemas"]["Code"];
+            /** @enum {string} */
+            checkpoint: "PRE_QUOTE" | "PRE_BIND";
+            /** @description Pins the rule set; needs ruleSetVersion */
+            ruleSetCode?: string;
+            /** @description Pins the version (Active or Approved) */
+            ruleSetVersion?: string;
+            /** @description Default date the version in force is resolved at and the risks are evaluated at (default today) */
+            effectiveDate?: components["schemas"]["LocalDate"];
+            /** @description At most 200 items; more is UW-ERR-LIMIT-EXCEEDED (422) */
+            items: {
+                /** @description Caller's reference, echoed in the result */
+                itemRef: string;
+                /** @description Overrides the request date for this item (the version stays the one resolved) */
+                effectiveDate?: components["schemas"]["LocalDate"];
+                riskSnapshot: components["schemas"]["OpenObject"];
+            }[];
         };
-        /** @description uw.Rules.evaluateBatch result. PRD outputs: "job id, results" */
+        /** @description uw.Rules.evaluateBatch result: one result per item in request order, all against the same rule-set version (code, version and content hash are echoed, so a result is reproducible). Nothing is recorded. */
         RulesEvaluateBatchResponse: {
-            /** @description PRD: "job id" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "results" */
-            results?: components["schemas"]["Unspecified"];
+            ruleSetCode: components["schemas"]["Code"];
+            ruleSetVersion: string;
+            ruleSetHash: components["schemas"]["Sha256"];
+            /** @description ILLUSTRATIVE_TEST_DATA when the rule set is made-up test data (D-SLC-04) */
+            dataStatus?: string;
+            /** @description True when the caller pinned the version */
+            pinned: boolean;
+            results: {
+                itemRef: string;
+                /**
+                 * @description ERROR when the item's snapshot is not a valid risk (see error)
+                 * @enum {string}
+                 */
+                outcome: "ACCEPT" | "REFER" | "DECLINE" | "ERROR";
+                lane?: string | null;
+                hits: {
+                    ruleId: string;
+                    ruleType: string;
+                    issueType: components["schemas"]["Code"];
+                    blockingPoint: components["schemas"]["BlockingPoint"];
+                    messageEn: string;
+                    messageEl: string;
+                }[];
+                /** @description Why the item could not be evaluated */
+                error?: string | null;
+            }[];
+            warnings?: string[];
         };
         /** @description Typed from REQ-UW-002. PRD outputs: "blocked, issues" */
         IssueBlockingStatusResponse: {
@@ -2047,30 +2081,51 @@ export interface components {
         IssueListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["IssueListItem"][];
         };
-        /** @description uw.Issue.listForChannel result. PRD outputs: "issues, explanation" */
+        /** @description uw.Issue.listForChannel result (BO-UW-03): what a customer or agent may see of an issue. No rule id, severity, lane, issue key, decider or decision reason, and the message is in the request language. */
         IssueListForChannelItem: {
-            /** @description PRD: "issues" */
-            issues?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "explanation" */
-            explanation?: components["schemas"]["Unspecified"];
+            issueId: components["schemas"]["Uuid"];
+            issueType: components["schemas"]["Code"];
+            blockingPoint: components["schemas"]["BlockingPoint"];
+            /**
+             * @description Open is UNDER_REVIEW, Approved(WithConditions) is CLEARED, Rejected is NOT_ACCEPTED. Closed and Invalidated issues are not listed.
+             * @enum {string}
+             */
+            channelStatus: "UNDER_REVIEW" | "CLEARED" | "NOT_ACCEPTED";
+            /** @description Customer-safe wording in the Accept-Language language */
+            message: string;
+            raisedAt: components["schemas"]["Instant"];
         };
         /** @description Page of uw.Issue.listForChannel results (cursor pagination, contract §3.5.5) */
         IssueListForChannelPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["IssueListForChannelItem"][];
         };
-        /** @description uw.Issue.get result. PRD outputs: "issues, explanation" */
-        IssueGetResponse: {
-            /** @description PRD: "issues" */
-            issues?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "explanation" */
-            explanation?: components["schemas"]["Unspecified"];
+        /** @description Why an issue was raised (BO-UW-03): the rule and rule-set version that raised it, the derived fact the rule reads, its value on the evaluated facts and the rules declared threshold (RuleExplainDto). P2 safe: a drivers age is its band. */
+        IssueExplanation: {
+            issueId: components["schemas"]["Uuid"];
+            ruleId: string;
+            ruleSetCode: components["schemas"]["Code"];
+            ruleSetVersion: string;
+            ruleSetHash?: string | null;
+            /** @description The derived fact the rule reads (facts read), null when the rule declares none */
+            fact?: string | null;
+            /** @description The facts value on the job's latest recorded facts (a driver's age as its band) */
+            observed?: string | null;
+            /** @description The rules threshold */
+            limit?: string | null;
+            /** @description RULE_DECLARES_NO_LIMIT when the rule declares no threshold */
+            limitUnavailableReason?: string | null;
+            messageEn: string;
+            messageEl: string;
+            explanationKeys: string[];
         };
-        /** @description uw.Issue.explain result. PRD outputs: "issues, explanation" */
+        /** @description uw.Issue.get result (BO-UW-03): the issue and why it was raised */
+        IssueGetResponse: {
+            issue: components["schemas"]["IssueListItem"];
+            explanation: components["schemas"]["IssueExplanation"];
+        };
+        /** @description uw.Issue.explain result (BO-UW-03) */
         IssueExplainResponse: {
-            /** @description PRD: "issues" */
-            issues?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "explanation" */
-            explanation?: components["schemas"]["Unspecified"];
+            explanation: components["schemas"]["IssueExplanation"];
         };
         /** @description uw.Issue.decide request. PRD inputs: "issue ids, decision, scope, validity, tolerance, conditions, reason, message". Scope, validity, tolerance and conditions come with the full referral workbench: an approval holds through the issue's blocking point while the facts it relied on are unchanged (REQ-UW-091). */
         IssueDecideRequest: {
@@ -2148,10 +2203,26 @@ export interface components {
             /** @description PRD: "issue" */
             issue?: components["schemas"]["Unspecified"];
         };
-        /** @description uw.Approval.history result. PRD outputs: "rows" */
+        /** @description One event of an issues approval history (BO-UW-03): a decision, or the invalidation of an approval when the facts changed. */
         ApprovalHistoryItem: {
-            /** @description PRD: "rows" */
-            rows?: components["schemas"]["Unspecified"][];
+            issueId: components["schemas"]["Uuid"];
+            jobRef: components["schemas"]["Uuid"];
+            issueKey: string;
+            issueType: components["schemas"]["Code"];
+            /** @enum {string} */
+            event: "DECIDED" | "INVALIDATED";
+            /** @description For DECIDED, the decision */
+            decision?: components["schemas"]["IssueDecisionCode"] | null;
+            /** @description For DECIDED, the actor that decided */
+            approver?: string | null;
+            /** @description For DECIDED the deciders reason; for INVALIDATED the closing reason (VALUE_CHANGED) */
+            reason?: string | null;
+            /** @description Hash of the facts the decision was taken on (REQ-UW-091) */
+            fingerprint?: string | null;
+            authorityCheckId?: components["schemas"]["Uuid"] | null;
+            /** @description For INVALIDATED, the evaluation whose changed facts invalidated the approval */
+            invalidatedByEvaluationId?: components["schemas"]["Uuid"] | null;
+            at: components["schemas"]["Instant"];
         };
         /** @description Page of uw.Approval.history results (cursor pagination, contract §3.5.5) */
         ApprovalHistoryPage: components["schemas"]["PageEnvelope"] & {
@@ -3581,8 +3652,8 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Accepted; result or job reference */
-            202: {
+            /** @description One result per item, against one rule-set version */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3646,6 +3717,10 @@ export interface operations {
                 jobRef?: components["schemas"]["Uuid"];
                 /** @description Issue status to list; without a job the default is Open (the referral queue) */
                 status?: components["schemas"]["IssueStatusCode"];
+                /** @description Only issues of this issue type */
+                issueType?: components["schemas"]["Code"];
+                /** @description Only issues at this blocking point */
+                blockingPoint?: components["schemas"]["BlockingPoint"];
             };
             header?: {
                 /**
@@ -3678,11 +3753,13 @@ export interface operations {
     };
     "uw.Issue.listForChannel": {
         parameters: {
-            query?: {
+            query: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description POL job id (the quote or policy job whose issues the channel shows) */
+                jobRef: components["schemas"]["Uuid"];
             };
             header?: {
                 /**
@@ -3752,7 +3829,10 @@ export interface operations {
     };
     "uw.Issue.explain": {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Issue to explain */
+                issueId: components["schemas"]["Uuid"];
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key

@@ -18,7 +18,7 @@ public interface IPartyProducerOfRecordService
     /// <para>Status: full. Wave W2.</para>
     /// <para>Exposure: ui; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: PTY-ERR-MANDATE-MISSING (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PTY-ERR-VALIDATION (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.ProducerOfRecordBulkTransferResponse> BulkTransferAsync(global::CoreIns.Modules.Party.Contracts.Api.ProducerOfRecordBulkTransferRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
@@ -28,8 +28,9 @@ public interface IPartyProducerOfRecordService
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W2.</para>
     /// <para>Exposure: ui; consumers: BIL, CHN, DOC, PLT, POL.</para>
-    /// <para>Errors: PTY-ERR-MANDATE-MISSING (422).</para>
+    /// <para>Errors: PTY-ERR-NOT-FOUND (404), PTY-ERR-VALIDATION (422).</para>
     /// </remarks>
-    /// <param name="id">Identifier of the ProducerOfRecord</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.ProducerOfRecordGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="id">The policy id</param>
+    /// <param name="date">Business date to resolve the current producer for; today when omitted</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.ProducerOfRecordGetResponse> GetAsync(string id, global::CoreIns.SharedKernel.BusinessDate? date = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

@@ -63,6 +63,24 @@ public sealed record DocumentSearchItem
     [global::System.Text.Json.Serialization.JsonPropertyName("latestDeliveryStatus")]
     public string? LatestDeliveryStatus { get; init; }
 
+    /// <summary>The document type may be shown to the customer (portal); false for internal types.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("customerVisible")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? CustomerVisible { get; init; }
+
+    /// <summary>Hidden from the default library lists (BO-DOC-02); the document itself is kept.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("hidden")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Hidden { get; init; }
+
+    /// <summary>Contract member 'supersededByDocumentId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("supersededByDocumentId")]
+    public global::CoreIns.SharedKernel.Identifiers.DocumentId? SupersededByDocumentId { get; init; }
+
+    /// <summary>Contract member 'withdrawnReason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("withdrawnReason")]
+    public string? WithdrawnReason { get; init; }
+
     /// <summary>Contract member 'deliveries'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("deliveries")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Documents.Contracts.Api.DocumentDeliverySummary> Deliveries { get; init; }

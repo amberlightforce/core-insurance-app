@@ -22,7 +22,7 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-BACKDATE (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 7 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.resolve, pty.CommissionAgreement.simulate, pty.CommissionAgreement.submit.</para>
+    /// <para>Declared by 8 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.resolve, pty.CommissionAgreement.simulate, pty.CommissionAgreement.submit, pty.ProducerOfRecord.change.</para>
     /// </remarks>
     public const string Backdate = "PTY-ERR-BACKDATE";
 
@@ -68,12 +68,6 @@ public static class PartyErrorCodes
     /// </remarks>
     public const string LocationInUse = "PTY-ERR-LOCATION-IN-USE";
 
-    /// <summary>PTY-ERR-MANDATE-MISSING (HTTP 422).</summary>
-    /// <remarks>
-    /// <para>Declared by 4 operation(s): pty.ProducerOfRecord.bulkTransfer, pty.ProducerOfRecord.cancel, pty.ProducerOfRecord.change, pty.ProducerOfRecord.get.</para>
-    /// </remarks>
-    public const string MandateMissing = "PTY-ERR-MANDATE-MISSING";
-
     /// <summary>PTY-ERR-MEMBER-IN-USE (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 7 operation(s): pty.Account.addMember, pty.Account.create, pty.Account.get, pty.Account.removeMember, pty.Account.search, pty.Account.setHolder, pty.Account.withdraw.</para>
@@ -106,7 +100,7 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 9 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.submit, pty.Dsar.restrict, pty.Party.get, pty.Vulnerability.record, pty.Vulnerability.remove.</para>
+    /// <para>Declared by 12 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.submit, pty.Dsar.restrict, pty.Party.get, pty.ProducerOfRecord.cancel, pty.ProducerOfRecord.change, pty.ProducerOfRecord.get, pty.Vulnerability.record, pty.Vulnerability.remove.</para>
     /// </remarks>
     public const string NotFound = "PTY-ERR-NOT-FOUND";
 
@@ -127,6 +121,18 @@ public static class PartyErrorCodes
     /// <para>Declared by 3 operation(s): pty.Relationship.add, pty.Relationship.end, pty.Relationship.query.</para>
     /// </remarks>
     public const string Overlap = "PTY-ERR-OVERLAP";
+
+    /// <summary>PTY-ERR-POR-CODE-INVALID (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): pty.ProducerOfRecord.change.</para>
+    /// </remarks>
+    public const string PorCodeInvalid = "PTY-ERR-POR-CODE-INVALID";
+
+    /// <summary>PTY-ERR-POR-LETTER-REQUIRED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): pty.ProducerOfRecord.change.</para>
+    /// </remarks>
+    public const string PorLetterRequired = "PTY-ERR-POR-LETTER-REQUIRED";
 
     /// <summary>PTY-ERR-POSTCODE-FORMAT (HTTP 422).</summary>
     /// <remarks>
@@ -214,9 +220,15 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-STATE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.submit.</para>
+    /// <para>Declared by 7 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.submit, pty.ProducerOfRecord.cancel, pty.ProducerOfRecord.change.</para>
     /// </remarks>
     public const string State = "PTY-ERR-STATE";
+
+    /// <summary>PTY-ERR-VALIDATION (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): pty.ProducerOfRecord.bulkTransfer, pty.ProducerOfRecord.change, pty.ProducerOfRecord.get.</para>
+    /// </remarks>
+    public const string Validation = "PTY-ERR-VALIDATION";
 
     /// <summary>PTY-ERR-WINDOW-CLOSED (HTTP 422).</summary>
     /// <remarks>
@@ -228,7 +240,7 @@ public static class PartyErrorCodes
     public const string Prefix = "PTY-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AccountHasJobs, ActivationIncomplete, Backdate, DuplicateIdentifier, EvidenceRequired, IdCheckdigit, IdempotencyMismatch, IntermediaryNotActive, LiveDependant, LocationInUse, MandateMissing, MemberInUse, MergeCrossEntity, Merged, NoEmail, NotAvailable, NotFound, NotMigrated, OpenJob, Overlap, PostcodeFormat, ProofRequired, QueryTooShort, RateAboveMax, RegistryUnavailable, RelationshipCycle, Restricted, RoleDataMissing, RoleDuplicate, RoleType, ScreenInput, SelfApproval, SplitSum, Stale, State, WindowClosed];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AccountHasJobs, ActivationIncomplete, Backdate, DuplicateIdentifier, EvidenceRequired, IdCheckdigit, IdempotencyMismatch, IntermediaryNotActive, LiveDependant, LocationInUse, MemberInUse, MergeCrossEntity, Merged, NoEmail, NotAvailable, NotFound, NotMigrated, OpenJob, Overlap, PorCodeInvalid, PorLetterRequired, PostcodeFormat, ProofRequired, QueryTooShort, RateAboveMax, RegistryUnavailable, RelationshipCycle, Restricted, RoleDataMissing, RoleDuplicate, RoleType, ScreenInput, SelfApproval, SplitSum, Stale, State, Validation, WindowClosed];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -243,7 +255,6 @@ public static class PartyErrorCodes
         [IntermediaryNotActive] = 422,
         [LiveDependant] = 422,
         [LocationInUse] = 422,
-        [MandateMissing] = 422,
         [MemberInUse] = 422,
         [MergeCrossEntity] = 422,
         [Merged] = 409,
@@ -253,6 +264,8 @@ public static class PartyErrorCodes
         [NotMigrated] = 404,
         [OpenJob] = 422,
         [Overlap] = 422,
+        [PorCodeInvalid] = 422,
+        [PorLetterRequired] = 422,
         [PostcodeFormat] = 422,
         [ProofRequired] = 422,
         [QueryTooShort] = 422,
@@ -268,6 +281,7 @@ public static class PartyErrorCodes
         [SplitSum] = 422,
         [Stale] = 409,
         [State] = 409,
+        [Validation] = 422,
         [WindowClosed] = 422,
     };
 }

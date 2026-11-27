@@ -4,15 +4,15 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.ProducerOfRecord.cancel result. PRD outputs: "PoR"</summary>
+/// <summary>pty.ProducerOfRecord.cancel result: the policy history after the cancellation</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProducerOfRecordCancelResponse
 {
-    /// <summary>PRD: "PoR"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("poR")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PoR { get; init; }
+    /// <summary>Contract member 'policyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyId PolicyId { get; init; }
+
+    /// <summary>Contract member 'history'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("history")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Party.Contracts.Api.ProducerOfRecordEntry> History { get; init; }
 }

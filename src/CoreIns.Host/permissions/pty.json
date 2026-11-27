@@ -44,7 +44,12 @@
         "pty.CommissionAgreement.submit": [ "Staff.Underwriter", "Staff.UnderwritingManager" ],
         "pty.CommissionAgreement.approve": [ "Staff.Underwriter", "Staff.UnderwritingManager" ],
         "pty.CommissionAgreement.resolve": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin", "Service.RenewalRun" ],
-        "pty.CommissionAgreement.simulate": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ]
+        "pty.CommissionAgreement.simulate": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ],
+        // Producer of record (BO-PTY-09): reading is wide; changing it (a broker-of-record change moves commission) is a manager or admin authority.
+        "pty.ProducerOfRecord.get": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Service.RenewalRun" ],
+        "pty.ProducerOfRecord.change": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "pty.ProducerOfRecord.bulkTransfer": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "pty.ProducerOfRecord.cancel": [ "Staff.UnderwritingManager", "Platform.Admin" ]
       }
     },
     "Authority": {

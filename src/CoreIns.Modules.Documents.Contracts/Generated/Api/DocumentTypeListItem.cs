@@ -27,4 +27,8 @@ public sealed record DocumentTypeListItem
     /// <summary>Contract member 'requiredFields'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("requiredFields")]
     public required global::System.Collections.Generic.IReadOnlyList<string> RequiredFields { get; init; }
+
+    /// <summary>Letters of this type may be shown to the customer in the portal; false for internal types.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("customerVisible")]
+    public required bool CustomerVisible { get; init; }
 }

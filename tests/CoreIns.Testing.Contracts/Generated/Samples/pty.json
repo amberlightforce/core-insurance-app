@@ -774,10 +774,77 @@
       }
     },
     "pty.ProducerOfRecord.bulkTransfer": {
-      "poR": "unspecified"
+      "transferId": "01922dda-fc4b-71f4-81bc-0736a8399296",
+      "transferred": 1,
+      "refused": 1,
+      "results": [
+        {
+          "termId": "0192851d-c670-7731-8554-434486735aaf",
+          "outcome": "TRANSFERRED",
+          "errorCode": "sample",
+          "message": "sample",
+          "entry": {
+            "porId": "01929902-ccb3-7166-8494-a92dcc175d96",
+            "policyId": "01920fae-430d-7bf0-816c-e30d3945379f",
+            "policyTermId": "019287a7-1d16-7512-84d5-338c52279a01",
+            "intermediaryId": "01920729-6c03-7ae5-86c3-45785a6e93be",
+            "producerCode": "SAMPLE_CODE",
+            "validFrom": "2026-10-07",
+            "validTo": "2026-10-07",
+            "reason": "BROKER_OF_RECORD_LETTER",
+            "note": "sample",
+            "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+            "splitShare": "12.50",
+            "letterReference": "sample",
+            "transferId": "01922e6e-5816-7228-83d6-9b4e3e2baecb",
+            "status": "CURRENT",
+            "recordedAt": "2026-10-07T09:00:00Z",
+            "recordedBy": "sample"
+          }
+        }
+      ]
     },
     "pty.ProducerOfRecord.get": {
-      "poR": "unspecified"
+      "policyId": "01922944-6617-71a7-8cb8-16faed57b770",
+      "date": "2026-10-07",
+      "current": {
+        "porId": "01924918-f4b1-72a5-8882-b76cb8b934c2",
+        "policyId": "0192dac1-72ed-7548-8c04-29c0c23f4fc4",
+        "policyTermId": "0192ebfd-ddd6-7342-8202-26195a4cc36f",
+        "intermediaryId": "0192f9a9-e9bb-7436-8fa3-2ade51605a9a",
+        "producerCode": "SAMPLE_CODE",
+        "validFrom": "2026-10-07",
+        "validTo": "2026-10-07",
+        "reason": "BROKER_OF_RECORD_LETTER",
+        "note": "sample",
+        "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+        "splitShare": "12.50",
+        "letterReference": "sample",
+        "transferId": "01929a0f-fd57-78c3-8fec-4fe6f99382a4",
+        "status": "CURRENT",
+        "recordedAt": "2026-10-07T09:00:00Z",
+        "recordedBy": "sample"
+      },
+      "history": [
+        {
+          "porId": "01924e8b-b939-7ead-803e-cad5997e630f",
+          "policyId": "0192406f-77fa-754d-883d-8214c5aee7b9",
+          "policyTermId": "0192181d-8085-7665-8431-86572f71bfc2",
+          "intermediaryId": "0192fa27-06f5-7011-8f3b-0d270ede1837",
+          "producerCode": "SAMPLE_CODE",
+          "validFrom": "2026-10-07",
+          "validTo": "2026-10-07",
+          "reason": "BROKER_OF_RECORD_LETTER",
+          "note": "sample",
+          "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+          "splitShare": "12.50",
+          "letterReference": "sample",
+          "transferId": "0192493a-1d4b-7a3e-8a84-9e4c9fa89c22",
+          "status": "CURRENT",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "recordedBy": "sample"
+        }
+      ]
     },
     "pty.Screening.bulk": {
       "jobId": "01925415-d4d3-7447-8e03-da5c9c5d69cc",
@@ -2810,32 +2877,196 @@
         "note": "sample"
       }
     },
+    "ProducerOfRecordBulkTransferItem": {
+      "termId": "01920d00-6094-7840-8271-63434b2296a7"
+    },
     "ProducerOfRecordBulkTransferRequest": {
-      "term": "unspecified",
-      "date": "2026-10-07",
-      "change": "unspecified"
+      "terms": [
+        {
+          "termId": "0192ad75-e19a-7af9-8a9d-055af890ef77"
+        }
+      ],
+      "producerCode": "SAMPLE_CODE",
+      "effectiveDate": "2026-10-07",
+      "atRenewal": true,
+      "reason": "BROKER_OF_RECORD_LETTER",
+      "note": "sample",
+      "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+      "letterReference": "sample"
     },
     "ProducerOfRecordBulkTransferResponse": {
-      "poR": "unspecified"
+      "transferId": "01922ef3-0060-79a7-842c-29f1156ef7fd",
+      "transferred": 1,
+      "refused": 1,
+      "results": [
+        {
+          "termId": "0192a79a-0655-78b7-8ea0-aebef03c6cb9",
+          "outcome": "TRANSFERRED",
+          "errorCode": "sample",
+          "message": "sample",
+          "entry": {
+            "porId": "019285be-d0bf-79be-8c5e-0535c126c8dd",
+            "policyId": "0192c64f-7d62-7c12-820c-6446260fd68a",
+            "policyTermId": "019266b9-ead4-704b-837b-30f6583ba521",
+            "intermediaryId": "019286a3-0187-7ee4-8297-995d04b11ac1",
+            "producerCode": "SAMPLE_CODE",
+            "validFrom": "2026-10-07",
+            "validTo": "2026-10-07",
+            "reason": "BROKER_OF_RECORD_LETTER",
+            "note": "sample",
+            "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+            "splitShare": "12.50",
+            "letterReference": "sample",
+            "transferId": "0192ae2a-797b-7aa6-8a94-d8e02b842ce1",
+            "status": "CURRENT",
+            "recordedAt": "2026-10-07T09:00:00Z",
+            "recordedBy": "sample"
+          }
+        }
+      ]
+    },
+    "ProducerOfRecordBulkTransferResult": {
+      "termId": "019287b4-59ed-7f75-8da0-640a6097c69a",
+      "outcome": "TRANSFERRED",
+      "errorCode": "sample",
+      "message": "sample",
+      "entry": {
+        "porId": "01927a18-a449-771a-8592-dbf1e8a67895",
+        "policyId": "01920ef2-3fa6-717e-8c7d-58fc82b1e818",
+        "policyTermId": "019276ba-71a7-7b18-8c92-7164f06ac7ee",
+        "intermediaryId": "0192bd45-20d4-7ae3-871f-cbab87b01d3d",
+        "producerCode": "SAMPLE_CODE",
+        "validFrom": "2026-10-07",
+        "validTo": "2026-10-07",
+        "reason": "BROKER_OF_RECORD_LETTER",
+        "note": "sample",
+        "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+        "splitShare": "12.50",
+        "letterReference": "sample",
+        "transferId": "01924d40-6bcf-7480-8e41-90fb31d65559",
+        "status": "CURRENT",
+        "recordedAt": "2026-10-07T09:00:00Z",
+        "recordedBy": "sample"
+      }
     },
     "ProducerOfRecordCancelRequest": {
-      "term": "unspecified",
-      "date": "2026-10-07",
-      "change": "unspecified"
+      "porId": "0192bfe3-0fe7-7fc3-8a3e-b925ee4c8198",
+      "reason": "sample"
     },
     "ProducerOfRecordCancelResponse": {
-      "poR": "unspecified"
+      "policyId": "01922042-aa9a-7b01-826f-a13b99ebd061",
+      "history": [
+        {
+          "porId": "0192b24a-7f69-7f26-8770-01db420b57cd",
+          "policyId": "0192b79a-0d3f-77bd-83b8-f349156bb40c",
+          "policyTermId": "01926276-5307-7143-8d3b-1ba769bbe3e0",
+          "intermediaryId": "01921221-7553-7557-870a-399d2818fde0",
+          "producerCode": "SAMPLE_CODE",
+          "validFrom": "2026-10-07",
+          "validTo": "2026-10-07",
+          "reason": "BROKER_OF_RECORD_LETTER",
+          "note": "sample",
+          "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+          "splitShare": "12.50",
+          "letterReference": "sample",
+          "transferId": "01923a76-2d2b-77b3-876a-71e19d914de6",
+          "status": "CURRENT",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "recordedBy": "sample"
+        }
+      ]
     },
     "ProducerOfRecordChangeRequest": {
-      "term": "unspecified",
-      "date": "2026-10-07",
-      "change": "unspecified"
+      "termId": "019253b1-1b54-75f8-8b1e-fcd9d48a4079",
+      "producerCode": "SAMPLE_CODE",
+      "effectiveDate": "2026-10-07",
+      "atRenewal": true,
+      "reason": "BROKER_OF_RECORD_LETTER",
+      "note": "sample",
+      "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+      "splitShare": "12.50",
+      "letterReference": "sample"
     },
     "ProducerOfRecordChangeResponse": {
-      "poR": "unspecified"
+      "entry": {
+        "porId": "01922ca4-7850-72d0-83a5-e59d784ad288",
+        "policyId": "01928eb7-a622-7f0c-8344-728fec9ba748",
+        "policyTermId": "01921e25-a786-7d84-8e7f-b34b68be6b17",
+        "intermediaryId": "01921c55-981c-7ac9-8a3e-fc10787f9e06",
+        "producerCode": "SAMPLE_CODE",
+        "validFrom": "2026-10-07",
+        "validTo": "2026-10-07",
+        "reason": "BROKER_OF_RECORD_LETTER",
+        "note": "sample",
+        "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+        "splitShare": "12.50",
+        "letterReference": "sample",
+        "transferId": "0192902c-bac7-72cb-8f0c-36108ae555c4",
+        "status": "CURRENT",
+        "recordedAt": "2026-10-07T09:00:00Z",
+        "recordedBy": "sample"
+      },
+      "previousProducerCode": "SAMPLE_CODE"
+    },
+    "ProducerOfRecordEntry": {
+      "porId": "0192894e-fad7-7355-8380-a33f7f9a25e3",
+      "policyId": "01925e81-f779-7ace-8372-a644b929f209",
+      "policyTermId": "0192890a-2063-7344-8374-fbdcfca6d70f",
+      "intermediaryId": "01929b6e-44d5-7b46-8422-7a15af3d8543",
+      "producerCode": "SAMPLE_CODE",
+      "validFrom": "2026-10-07",
+      "validTo": "2026-10-07",
+      "reason": "BROKER_OF_RECORD_LETTER",
+      "note": "sample",
+      "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+      "splitShare": "12.50",
+      "letterReference": "sample",
+      "transferId": "0192e0df-6f8b-7bf5-8702-307d5dd7408a",
+      "status": "CURRENT",
+      "recordedAt": "2026-10-07T09:00:00Z",
+      "recordedBy": "sample"
     },
     "ProducerOfRecordGetResponse": {
-      "poR": "unspecified"
+      "policyId": "0192bcbb-c232-7ba1-8ed7-1e1fe2c88530",
+      "date": "2026-10-07",
+      "current": {
+        "porId": "0192d8ef-c3d9-740e-86ee-de75baeb9abd",
+        "policyId": "0192b2c6-8116-7b10-86b9-6ec3760a00b1",
+        "policyTermId": "01923979-aba8-73d5-8bf0-ea887d54710f",
+        "intermediaryId": "0192eb19-1204-7ab9-8fd6-a6d4f705d167",
+        "producerCode": "SAMPLE_CODE",
+        "validFrom": "2026-10-07",
+        "validTo": "2026-10-07",
+        "reason": "BROKER_OF_RECORD_LETTER",
+        "note": "sample",
+        "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+        "splitShare": "12.50",
+        "letterReference": "sample",
+        "transferId": "0192a125-f652-7456-88a9-936047067ec0",
+        "status": "CURRENT",
+        "recordedAt": "2026-10-07T09:00:00Z",
+        "recordedBy": "sample"
+      },
+      "history": [
+        {
+          "porId": "01929bdd-821b-76d7-8017-417c93a99100",
+          "policyId": "01925218-cdb4-7aed-829a-6f3754c70deb",
+          "policyTermId": "01922708-d8cc-7edc-8741-d8502789a4e0",
+          "intermediaryId": "019224cb-704c-7cd0-8e55-f881d4baa1d6",
+          "producerCode": "SAMPLE_CODE",
+          "validFrom": "2026-10-07",
+          "validTo": "2026-10-07",
+          "reason": "BROKER_OF_RECORD_LETTER",
+          "note": "sample",
+          "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+          "splitShare": "12.50",
+          "letterReference": "sample",
+          "transferId": "0192547a-9032-7b88-889f-c46a8384bbb4",
+          "status": "CURRENT",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "recordedBy": "sample"
+        }
+      ]
     },
     "RelationshipAddRequest": {
       "fromPartyId": "01924b7d-6031-789f-8edd-0abcbc3a2a07",

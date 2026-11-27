@@ -26,6 +26,11 @@ internal static class DocumentsPermissions
     public const string DocumentGet = "doc.Document.get";
     public const string DocumentListForObject = "doc.Document.listForObject";
     public const string DocumentReprint = "doc.Document.reprint";
+    public const string DocumentResend = "doc.Document.resend";
+    public const string DocumentHide = "doc.Document.hide";
+    public const string DocumentUnhide = "doc.Document.unhide";
+    public const string DocumentSupersede = "doc.Document.supersede";
+    public const string DocumentWithdraw = "doc.Document.withdraw";
     public const string DeliveryStatus = "doc.Delivery.status";
     public const string DeliveryEvidenceFor = "doc.Delivery.evidenceFor";
     public const string EvidencePackGet = "doc.EvidencePack.get";
@@ -111,7 +116,7 @@ internal sealed class DocumentsController : ControllerBase
     public async Task<IResult> SearchAsync(
         [FromQuery] string? cursor, [FromQuery] int? limit, [FromQuery] string? templateKey, [FromQuery] string? status, [FromQuery] string? medium,
         [FromQuery] string? subjectModule, [FromQuery] string? subjectType, [FromQuery] string? subjectId, [FromQuery] Guid? recipientPartyId,
-        [FromQuery] string? createdFrom, [FromQuery] string? createdTo, [FromQuery] string? q, [FromServices] DocumentReader reader, CancellationToken cancellationToken)
+        [FromQuery] string? createdFrom, [FromQuery] string? createdTo, [FromQuery] string? q, [FromQuery] bool? includeHidden, [FromServices] DocumentReader reader, CancellationToken cancellationToken)
     {
         if (!KeysetPaging.TryTake(limit, KeysetPaging.DefaultPageSize, out var take))
         {
@@ -125,7 +130,7 @@ internal sealed class DocumentsController : ControllerBase
             return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "createdFrom and createdTo must be dates (yyyy-MM-dd)."));
         }
 
-        var filter = new DocumentSearchFilter(templateKey, status, medium, subjectModule, subjectType, subjectId, recipientPartyId, from, to, q?.Trim());
+        var filter = new DocumentSearchFilter(templateKey, status, medium, subjectModule, subjectType, subjectId, recipientPartyId, from, to, q?.Trim(), includeHidden ?? false);
         var page = await reader.SearchAsync(filter, cursor, take, cancellationToken).ConfigureAwait(false);
         return page is null
             ? Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "The cursor is malformed."))
@@ -147,7 +152,7 @@ internal sealed class DocumentsController : ControllerBase
 
     private static object ToSearchItem(DocumentView d) => new
     {
-        d.DocumentId, d.DocumentNumber, d.DocumentType, d.RequestNo, d.Subject, d.RecipientPartyId, d.Language, d.Status, d.Medium, d.ArchiveId, d.ContentHash, d.CreatedAt,
+        d.DocumentId, d.DocumentNumber, d.DocumentType, d.RequestNo, d.Subject, d.RecipientPartyId, d.Language, d.Status, d.Medium, d.ArchiveId, d.ContentHash, d.CreatedAt, d.CustomerVisible, d.Hidden, supersededByDocumentId = d.SupersededByDocumentId, d.WithdrawnReason,
         latestDeliveryStatus = d.Deliveries.Count == 0 ? null : d.Deliveries[^1].Status,
         d.Deliveries,
     };
@@ -181,6 +186,83 @@ internal sealed class DocumentsController : ControllerBase
 
         var result = await handler.HandleAsync(new ReprintDocument(documentId, request.Reason?.ToString()), cancellationToken).ConfigureAwait(false);
         return result.IsFailure ? Problem(result.Error!) : Results.Ok(new DocumentReprintResponse { Link = DocumentReader.ToJson(result.Value) });
+    }
+
+    /// <summary>doc.Document.resend: a new delivery of the stored document (reason required).</summary>
+    [HttpPost("documents/resend")]
+    [Authorize(Policy = DocumentsPermissions.DocumentResend)]
+    public async Task<IResult> ResendAsync(
+        [FromBody] DocumentResendRequest request, [FromServices] ICommandHandler<ResendDocument, ResendResult> handler, CancellationToken cancellationToken)
+    {
+        if (request.DocumentId is not { } documentId)
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "documentId is required."));
+        }
+
+        var result = await handler.HandleAsync(new ResendDocument(documentId, request.Recipient is { } r ? new PartyId(r) : null, request.Channel, request.Reason), cancellationToken).ConfigureAwait(false);
+        return result.IsFailure ? Problem(result.Error!) : Results.Ok(new DocumentResendResponse { DeliveryId = result.Value.DeliveryId, Medium = result.Value.Medium });
+    }
+
+    /// <summary>doc.Document.hide: hide a document from the default library lists (the document is kept).</summary>
+    [HttpPost("documents/hide")]
+    [Authorize(Policy = DocumentsPermissions.DocumentHide)]
+    public async Task<IResult> HideAsync(
+        [FromBody] DocumentHideRequest request, [FromServices] ICommandHandler<SetDocumentHidden, HiddenResult> handler, CancellationToken cancellationToken)
+    {
+        if (request.DocumentId is not { } documentId)
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "documentId is required."));
+        }
+
+        var result = await handler.HandleAsync(new SetDocumentHidden(documentId, true, request.Reason), cancellationToken).ConfigureAwait(false);
+        return result.IsFailure ? Problem(result.Error!) : Results.Ok(new DocumentHideResponse { Status = result.Value.Status, Hidden = result.Value.Hidden });
+    }
+
+    /// <summary>doc.Document.unhide.</summary>
+    [HttpPost("documents/unhide")]
+    [Authorize(Policy = DocumentsPermissions.DocumentUnhide)]
+    public async Task<IResult> UnhideAsync(
+        [FromBody] DocumentUnhideRequest request, [FromServices] ICommandHandler<SetDocumentHidden, HiddenResult> handler, CancellationToken cancellationToken)
+    {
+        if (request.DocumentId is not { } documentId)
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "documentId is required."));
+        }
+
+        var result = await handler.HandleAsync(new SetDocumentHidden(documentId, false, request.Reason), cancellationToken).ConfigureAwait(false);
+        return result.IsFailure ? Problem(result.Error!) : Results.Ok(new DocumentUnhideResponse { Status = result.Value.Status, Hidden = result.Value.Hidden });
+    }
+
+    /// <summary>doc.Document.supersede: link the document to the one that replaces it.</summary>
+    [HttpPost("documents/supersede")]
+    [Authorize(Policy = DocumentsPermissions.DocumentSupersede)]
+    public async Task<IResult> SupersedeAsync(
+        [FromBody] DocumentSupersedeRequest request, [FromServices] ICommandHandler<SupersedeDocument, SupersedeResult> handler, CancellationToken cancellationToken)
+    {
+        if (request.DocumentId is not { } documentId || request.ReplacementDocumentId is not { } replacement)
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "documentId and replacementDocumentId are required."));
+        }
+
+        var result = await handler.HandleAsync(new SupersedeDocument(documentId, new DocumentId(replacement), request.Reason), cancellationToken).ConfigureAwait(false);
+        return result.IsFailure
+            ? Problem(result.Error!)
+            : Results.Ok(new DocumentSupersedeResponse { Status = result.Value.Status, SupersededByDocumentId = result.Value.SupersededBy!.Value });
+    }
+
+    /// <summary>doc.Document.withdraw: take a document out of use with a reason (archive and delivery evidence are kept).</summary>
+    [HttpPost("documents/withdraw")]
+    [Authorize(Policy = DocumentsPermissions.DocumentWithdraw)]
+    public async Task<IResult> WithdrawAsync(
+        [FromBody] DocumentWithdrawRequest request, [FromServices] ICommandHandler<SupersedeDocument, SupersedeResult> handler, CancellationToken cancellationToken)
+    {
+        if (request.DocumentId is not { } documentId)
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "documentId is required."));
+        }
+
+        var result = await handler.HandleAsync(new SupersedeDocument(documentId, null, request.Reason), cancellationToken).ConfigureAwait(false);
+        return result.IsFailure ? Problem(result.Error!) : Results.Ok(new DocumentWithdrawResponse { Status = result.Value.Status, WithdrawnReason = result.Value.Reason });
     }
 
     /// <summary>doc.Delivery.status.</summary>
@@ -338,7 +420,7 @@ internal sealed class DocumentsController : ControllerBase
         var types = await catalogue.ListTypesAsync(HttpContext.RequestAborted).ConfigureAwait(false);
         var items = types.Select(t => new DocumentTypeListItem
         {
-            DocumentType = t.DocumentType, DefaultMedium = t.DefaultMedium, TitleEl = t.TitleEl, TitleEn = t.TitleEn, RequiredFields = t.RequiredFields,
+            DocumentType = t.DocumentType, DefaultMedium = t.DefaultMedium, TitleEl = t.TitleEl, TitleEn = t.TitleEn, RequiredFields = t.RequiredFields, CustomerVisible = t.CustomerVisible,
         }).ToList();
         return Results.Ok(new DocumentTypeListPage { Items = items, NextCursor = null });
     }
