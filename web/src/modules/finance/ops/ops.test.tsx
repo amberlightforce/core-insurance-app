@@ -487,7 +487,7 @@ describe('EarningRunPage with a run', () => {
     const dialog = await screen.findByRole('dialog');
     await user.click(within(dialog).getByRole('button', { name: 'Εκτέλεση κατάκτησης' }));
     await waitFor(() => {
-      expect(posted).toMatchObject({ asOf: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) });
+      expect((posted as { asOf: string }).asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     });
   });
 });

@@ -2,8 +2,10 @@ using CoreIns.Modules.Finance.Commands;
 using CoreIns.Modules.Finance.Contracts.Api;
 using CoreIns.Modules.Finance.Services;
 using CoreIns.Platform.Commands;
+using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel.Results;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CoreIns.Modules.Finance.Api;

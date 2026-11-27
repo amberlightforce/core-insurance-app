@@ -44,12 +44,16 @@ function Status({ status }: { status: EarningStatus }) {
         {
           id: 'earned',
           label: t('ops.earning.earnedToDate'),
-          value: run.earnedToDate?.length ? run.earnedToDate.map((m) => fmt.money(m)).join(', ') : null,
+          value: run.earnedToDate?.length
+            ? run.earnedToDate.map((m) => fmt.money(m)).join(', ')
+            : null,
         },
         {
           id: 'posted',
           label: t('ops.earning.postedDelta'),
-          value: run.postedDelta?.length ? run.postedDelta.map((m) => fmt.money(m)).join(', ') : null,
+          value: run.postedDelta?.length
+            ? run.postedDelta.map((m) => fmt.money(m)).join(', ')
+            : null,
         },
       ]}
     />

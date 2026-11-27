@@ -2486,40 +2486,67 @@ export interface components {
             /** @description PRD: "reversal journal" */
             reversalJournal?: components["schemas"]["Unspecified"];
         };
-        /** @description fin.Earning.run request. PRD inputs: "entity, as-of" */
+        /** @description fin.Earning.run / fin.Earning.simulate request: earn premium up to and including this date (its calendar month is the accounting period the movement is posted in; the legal entity comes from the caller). */
         EarningRunRequest: {
-            /** @description PRD: "entity" */
-            entity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "as-of" */
-            as?: components["schemas"]["Unspecified"];
+            /** @description Earn up to and including this Europe/Athens calendar date; the period of this date must be open. */
+            asOf: components["schemas"]["LocalDate"];
         };
-        /** @description fin.Earning.run result. PRD outputs: "run, results" */
+        /** @description The earning of one policy term in one book (pro rata temporis by day, TERM_RATIO). */
+        EarningTermResult: {
+            policyTermId: components["schemas"]["Uuid"];
+            policyNumber?: string;
+            book: string;
+            termStart?: components["schemas"]["LocalDate"];
+            /** @description Exclusive end of the term. */
+            termEnd?: components["schemas"]["LocalDate"];
+            /** @description Net written premium of the term (written less credits) posted so far. */
+            writtenPremium: components["schemas"]["Money"];
+            /** @description Premium earned up to the as-of date after this run. */
+            earnedToDate: components["schemas"]["Money"];
+            /** @description Premium already earned before this run. */
+            previouslyEarned: components["schemas"]["Money"];
+            /** @description Earned in this run (negative when a credit made the term over-earned). */
+            delta: components["schemas"]["Money"];
+            daysEarned: number;
+            termDays: number;
+        };
+        /** @description One earning run (or a simulation of one) for an accounting period. */
+        EarningRunView: {
+            /** @description Run id; absent for a simulation. */
+            id?: components["schemas"]["Uuid"];
+            /** @description Accounting period, yyyy-MM. */
+            period: string;
+            asOf: components["schemas"]["LocalDate"];
+            /** @enum {string} */
+            state: "DONE" | "SIMULATED";
+            simulated: boolean;
+            startedAt?: components["schemas"]["Instant"];
+            finishedAt?: components["schemas"]["Instant"];
+            /** @description Policy terms earned (with written premium and known term dates). */
+            policiesProcessed: number;
+            /** @description Terms with written premium but no term dates, or not in the functional currency; not earned. */
+            termsSkipped: number;
+            /** @description Total premium earned to date per currency after this run. */
+            earnedToDate?: components["schemas"]["Money"][];
+            /** @description Net movement posted (or that would be posted) by this run per currency. */
+            postedDelta?: components["schemas"]["Money"][];
+            journalIds: components["schemas"]["Uuid"][];
+        };
+        /** @description fin.Earning.run result: the run and its per-term results (at most 200; fin.Earning.result pages them). */
         EarningRunResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
-            /** @description PRD: "results" */
-            results?: components["schemas"]["Unspecified"];
+            run: components["schemas"]["EarningRunView"];
+            results: components["schemas"]["EarningTermResult"][];
+            resultsTruncated: boolean;
         };
-        /** @description fin.Earning.status result. PRD outputs: "run, results" */
+        /** @description fin.Earning.status result: the latest completed earning run of the legal entity; absent until a first run. */
         EarningStatusResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
-            /** @description PRD: "results" */
-            results?: components["schemas"]["Unspecified"];
+            run?: components["schemas"]["EarningRunView"] | null;
         };
-        /** @description fin.Earning.simulate request. PRD inputs: "entity, as-of" */
-        EarningSimulateRequest: {
-            /** @description PRD: "entity" */
-            entity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "as-of" */
-            as?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Earning.simulate result. PRD outputs: "run, results" */
+        /** @description fin.Earning.simulate result: what a run would earn and post; nothing is written. */
         EarningSimulateResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
-            /** @description PRD: "results" */
-            results?: components["schemas"]["Unspecified"];
+            run: components["schemas"]["EarningRunView"];
+            results: components["schemas"]["EarningTermResult"][];
+            resultsTruncated: boolean;
         };
         /** @description fin.Earning.result request. PRD inputs: "entity, as-of" */
         EarningResultRequest: {
@@ -4750,7 +4777,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["EarningSimulateRequest"];
+                "application/json": components["schemas"]["EarningRunRequest"];
             };
         };
         responses: {
