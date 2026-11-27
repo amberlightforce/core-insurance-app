@@ -28,6 +28,10 @@ internal static class ConfigChangeSupport
     public const string Authority = "MKT_CONFIG_CHANGE";
     public const string Draft = "DRAFT";
     public const string Pending = "PENDING_APPROVAL";
+    public const string Scheduled = "SCHEDULED";
+    public const string CauseManual = "MANUAL";
+    public const string CauseImport = "IMPORT";
+    public const string SweeperActor = "mkt-config-sweeper";
     public const string Applied = "APPLIED";
     public const string Rejected = "REJECTED";
     public const string Withdrawn = "WITHDRAWN";
@@ -49,11 +53,20 @@ internal static class ConfigChangeSupport
             });
         }
 
-        return CanonicalJson.Hash(new JsonObject
+        var content = new JsonObject
         {
             ["requestId"] = row.Id.ToString("D"), ["legalEntity"] = entity, ["country"] = row.Country, ["baseHash"] = row.BaseHash.Trim(),
             ["reason"] = row.Reason, ["maker"] = row.CreatedBy, ["items"] = items,
-        });
+        };
+
+        // The effective instant is what the checker approves (BO-MKT-02): it is bound into the hash, so a window set or moved after approval
+        // no longer matches. Absent for an immediate change, which keeps the hash of requests written before scheduling existed.
+        if (row.EffectiveAt is { } effective)
+        {
+            content["effectiveAt"] = effective.ToString();
+        }
+
+        return CanonicalJson.Hash(content);
     }
 
     public static ConfigChangeRequestView View(ConfigChangeRequestRow row) => new()
@@ -63,10 +76,13 @@ internal static class ConfigChangeSupport
         {
             Draft => ConfigChangeRequestView.StatusValue.Draft,
             Pending => ConfigChangeRequestView.StatusValue.PendingApproval,
+            Scheduled => ConfigChangeRequestView.StatusValue.Scheduled,
             Applied => ConfigChangeRequestView.StatusValue.Applied,
             Rejected => ConfigChangeRequestView.StatusValue.Rejected,
             _ => ConfigChangeRequestView.StatusValue.Withdrawn,
         },
+        Cause = row.Cause == CauseImport ? ConfigChangeRequestView.CauseValue.Import : ConfigChangeRequestView.CauseValue.Manual,
+        EffectiveAt = row.EffectiveAt,
         Reason = row.Reason, Country = row.Country.Trim(), BaseHash = Sha256Hash.Parse(row.BaseHash.Trim()),
         Items = [.. row.Items.OrderBy(i => i.LineNo).Select(i => new ConfigChangeItemView
         {
@@ -86,6 +102,13 @@ internal sealed record SubmitConfigChange(ConfigChangeRequestSubmitRequest Reque
 internal sealed record ApproveConfigChange(ConfigChangeRequestApproveRequest Request) : ICommand<ConfigChangeRequestApproveResponse>;
 internal sealed record RejectConfigChange(ConfigChangeRequestRejectRequest Request) : ICommand<ConfigChangeRequestRejectResponse>;
 internal sealed record WithdrawConfigChange(ConfigChangeRequestWithdrawRequest Request) : ICommand<ConfigChangeRequestWithdrawResponse>;
+internal sealed record ScheduleConfigChange(ConfigChangeRequestScheduleRequest Request) : ICommand<ConfigChangeRequestScheduleResponse>;
+internal sealed record RebaseConfigChange(ConfigChangeRequestRebaseRequest Request) : ICommand<ConfigChangeRequestRebaseResponse>;
+internal sealed record PreviewConfigChange(ConfigChangeRequestPreviewRequest Request) : ICommand<ConfigChangeRequestPreviewResponse>;
+internal sealed record ImportConfigChange(ConfigChangeRequestImportRequest Request) : ICommand<ConfigChangeRequestImportResponse>;
+
+/// <summary>The due-date step (BO-MKT-02): applies one SCHEDULED request whose effective instant has come. Run by the worker sweeper as a service actor.</summary>
+internal sealed record ApplyDueConfigChange(Guid RequestId) : ICommand<string>;
 
 /// <summary>
 /// Create, update, submit, decide and withdraw of configuration change requests (BO-MKT-01, REQ-MKT-052..061). Every operation joins the command
@@ -211,22 +234,25 @@ internal sealed class ConfigChangeEngine(MarketDbContext db, DbSession session, 
         }
     }
 
-    public async Task<ConfigChangeRequestRow> CreateAsync(ConfigChangeRequestCreateRequest request, CancellationToken ct)
+    public Task<ConfigChangeRequestRow> CreateAsync(ConfigChangeRequestCreateRequest request, CancellationToken ct) =>
+        NewDraftAsync(request.Reason, request.Items, ConfigChangeSupport.CauseManual, importDigest: null, ct);
+
+    private async Task<ConfigChangeRequestRow> NewDraftAsync(string reason, IReadOnlyList<ConfigChangeItemInput> items, string cause, string? importDigest, CancellationToken ct)
     {
         RequireHuman();
-        CheckReason(request.Reason, 10);
+        CheckReason(reason, 10);
         var entity = await EntityAsync(ct).ConfigureAwait(false);
         var (state, manifest) = await NewestAsync(ct).ConfigureAwait(false);
         var pack = manifest.Packs.SingleOrDefault(p => p.PackId == entity.PackId)
             ?? throw ConfigChangeSupport.Refuse("CFG-VALIDATION", "The current state does not name the legal entity's pack.");
-        _ = Values(request.Items, pack.Country, forApply: false);
+        _ = Values(items, pack.Country, forApply: false);
         var now = clock.Now;
         var id = Guid.CreateVersion7();
         var row = new ConfigChangeRequestRow
         {
-            Id = id, LegalEntityId = entity.LegalEntityId, Country = pack.Country, Status = ConfigChangeSupport.Draft, Reason = request.Reason.Trim(),
+            Id = id, LegalEntityId = entity.LegalEntityId, Country = pack.Country, Status = ConfigChangeSupport.Draft, Reason = reason.Trim(),
             BaseHash = state.Hash.Trim(), CreatedBy = Maker, CreatedPrincipal = MakerPrincipal, CreatedAt = now, UpdatedAt = now,
-            Items = Rows(id, request.Items),
+            Items = Rows(id, items), Cause = cause, ImportDigest = importDigest,
         };
         if (!context.DryRun)
         {
@@ -280,6 +306,11 @@ internal sealed class ConfigChangeEngine(MarketDbContext db, DbSession session, 
         }
 
         _ = Values([.. row.Items.OrderBy(i => i.LineNo).Select(ToInput)], row.Country.Trim(), forApply: false);
+        if (row.EffectiveAt is { } effective && effective <= clock.Now)
+        {
+            throw ConfigChangeSupport.Refuse("CFG-VALIDATION", "The effective instant has passed; schedule the request again.");
+        }
+
         var hash = ConfigChangeSupport.Proof(row, entity.Code);
         var approval = await approvals.RequestAsync(new ApprovalRequestRequest
         {
@@ -311,9 +342,9 @@ internal sealed class ConfigChangeEngine(MarketDbContext db, DbSession session, 
         var entity = await EntityAsync(ct).ConfigureAwait(false);
         var row = await LoadAsync(request.RequestId, entity, ct).ConfigureAwait(false);
         RequireMaker(row);
-        if (row.Status is not (ConfigChangeSupport.Draft or ConfigChangeSupport.Pending))
+        if (row.Status is not (ConfigChangeSupport.Draft or ConfigChangeSupport.Pending or ConfigChangeSupport.Scheduled))
         {
-            throw ConfigChangeSupport.Refuse("STALE", "Only a DRAFT or PENDING_APPROVAL request can be withdrawn.");
+            throw ConfigChangeSupport.Refuse("STALE", "Only a DRAFT, PENDING_APPROVAL or SCHEDULED request can be withdrawn.");
         }
 
         if (row.Status == ConfigChangeSupport.Pending && row.ApprovalRequestId is { } approvalId)
@@ -364,14 +395,23 @@ internal sealed class ConfigChangeEngine(MarketDbContext db, DbSession session, 
         var now = decision.Decision.DecidedAt;
         if (approve)
         {
-            var verified = await approvals.VerifyForExecutionAsync(new ApprovalVerifyForExecutionRequest
-            { RequestId = row.ApprovalRequestId.Value, Hash = proof, Type = ConfigChangeSupport.ApprovalType, ObjectRef = ConfigChangeSupport.Subject(row.Id) }, ct).ConfigureAwait(false);
-            if (!verified.Ok || verified.Authority.Type != ConfigChangeSupport.Authority || verified.Authority.Codes?.GetValueOrDefault("legalEntity") != entity.Code)
+            await VerifyAsync(row, entity, proof, ct).ConfigureAwait(false);
+            if (row.EffectiveAt is { } effective && effective > clock.Now)
             {
-                throw ConfigChangeSupport.Refuse("SOD-VIOLATION", "Native PLT proof does not bind the required configuration-change authority.");
-            }
+                // Not due yet: the request waits, approved, for the sweeper. A stale base is still refused now, so the maker learns early.
+                var (newest, _) = await NewestAsync(ct).ConfigureAwait(false);
+                var conflicts = await ConflictsAsync(row, newest.Hash.Trim(), ct).ConfigureAwait(false);
+                if (conflicts.Count > 0)
+                {
+                    throw ConfigChangeSupport.Refuse("STALE", $"'{conflicts[0].Key}' changed since the request was written (base {row.BaseHash.Trim()[..12]}); rebase the request.");
+                }
 
-            await ApplyAsync(row, now, ct).ConfigureAwait(false);
+                row.Status = ConfigChangeSupport.Scheduled;
+            }
+            else
+            {
+                await ApplyAsync(row, now, ct).ConfigureAwait(false);
+            }
         }
         else
         {
@@ -386,30 +426,62 @@ internal sealed class ConfigChangeEngine(MarketDbContext db, DbSession session, 
         return row;
     }
 
-    /// <summary>Records the overlay pack version and the new configuration state for an approved request. Runs under the state lock, in the command transaction.</summary>
-    private async Task ApplyAsync(ConfigChangeRequestRow row, Instant decidedAt, CancellationToken ct)
+    /// <summary>Verify-for-execution: the PLT approval must be decided, unexpired and bound to exactly this content and authority.</summary>
+    private async Task VerifyAsync(ConfigChangeRequestRow row, LegalEntityRow entity, Sha256Hash proof, CancellationToken ct)
     {
-        var country = row.Country.Trim();
-        var (newest, manifest) = await NewestAsync(ct).ConfigureAwait(false);
-        var items = row.Items.OrderBy(i => i.LineNo).Select(ToInput).ToList();
-        var incoming = Values(items, country, forApply: true);
-
-        // A key another change touched since the request was written needs a fresh request: the maker would otherwise approve against values he never saw.
-        if (newest.Hash.Trim() != row.BaseHash.Trim())
+        if (row.ApprovalRequestId is not { } approvalId)
         {
-            var before = await states.ByHashAsync(ConfigurationHash.Parse(row.BaseHash.Trim()), ct).ConfigureAwait(false)
-                ?? throw ConfigChangeSupport.Refuse("CFG-HASH-UNKNOWN", "The base configuration state is unknown.");
-            var after = await states.ByHashAsync(ConfigurationHash.Parse(newest.Hash.Trim()), ct).ConfigureAwait(false)
-                ?? throw ConfigChangeSupport.Refuse("CFG-HASH-UNKNOWN", "The current configuration state is unknown.");
-            foreach (var key in incoming.Select(v => v.Key).Distinct(StringComparer.Ordinal))
+            throw ConfigChangeSupport.Refuse("SOD-VIOLATION", "The request has no approval.");
+        }
+
+        var verified = await approvals.VerifyForExecutionAsync(new ApprovalVerifyForExecutionRequest
+        { RequestId = approvalId, Hash = proof, Type = ConfigChangeSupport.ApprovalType, ObjectRef = ConfigChangeSupport.Subject(row.Id) }, ct).ConfigureAwait(false);
+        if (!verified.Ok || verified.Authority.Type != ConfigChangeSupport.Authority || verified.Authority.Codes?.GetValueOrDefault("legalEntity") != entity.Code)
+        {
+            throw ConfigChangeSupport.Refuse("SOD-VIOLATION", "Native PLT proof does not bind the required configuration-change authority.");
+        }
+    }
+
+    /// <summary>
+    /// The keys of the request whose value changed between its base state and the state <paramref name="currentHash"/>. A key another change touched since
+    /// the request was written needs a rebase: the maker would otherwise approve against values he never saw.
+    /// </summary>
+    private async Task<List<ConfigChangeConflict>> ConflictsAsync(ConfigChangeRequestRow row, string currentHash, CancellationToken ct)
+    {
+        var conflicts = new List<ConfigChangeConflict>();
+        if (currentHash == row.BaseHash.Trim())
+        {
+            return conflicts;
+        }
+
+        var before = await states.ByHashAsync(ConfigurationHash.Parse(row.BaseHash.Trim()), ct).ConfigureAwait(false)
+            ?? throw ConfigChangeSupport.Refuse("CFG-HASH-UNKNOWN", "The base configuration state is unknown.");
+        var after = await states.ByHashAsync(ConfigurationHash.Parse(currentHash), ct).ConfigureAwait(false)
+            ?? throw ConfigChangeSupport.Refuse("CFG-HASH-UNKNOWN", "The current configuration state is unknown.");
+        var country = row.Country.Trim();
+        var today = clock.Now.ToBusinessDate(TimeZoneInfo.Utc);
+        foreach (var item in row.Items.GroupBy(i => i.Key, StringComparer.Ordinal).Select(g => g.OrderBy(i => i.LineNo).First()))
+        {
+            if (Signature(before, item.Key) != Signature(after, item.Key))
             {
-                if (Signature(before, key) != Signature(after, key))
+                // Shown for the date the request's value starts on, which is where the two values compete.
+                var at = item.ValidFrom ?? today;
+                conflicts.Add(new ConfigChangeConflict
                 {
-                    throw ConfigChangeSupport.Refuse("STALE", $"'{key}' changed since the request was written (base {row.BaseHash.Trim()[..12]}); reject it and make a new request.");
-                }
+                    Key = item.Key,
+                    BaseValue = before.Find(item.Key, country, at)?.Value,
+                    CurrentValue = after.Find(item.Key, country, at)?.Value,
+                });
             }
         }
 
+        return conflicts;
+    }
+
+    /// <summary>The overlay version, content and next manifest an application of <paramref name="incoming"/> on the newest state gives. Nothing is written.</summary>
+    private async Task<(string Version, PackVersionContent Content, ConfigStateManifest Next)> BuildNextAsync(
+        string country, IReadOnlyList<PackConfigValue> incoming, ConfigStateRow newest, ConfigStateManifest manifest, CancellationToken ct)
+    {
         var overlayId = ConfigOverlay.PackIdFor(country);
         var existing = new List<PackConfigValue>();
         if (manifest.Packs.SingleOrDefault(p => p.PackId == overlayId) is { } named)
@@ -420,14 +492,261 @@ internal sealed class ConfigChangeEngine(MarketDbContext db, DbSession session, 
 
         var version = $"1.0.{await db.PackVersions.CountAsync(v => v.PackId == overlayId, ct).ConfigureAwait(false) + 1}";
         var content = Candidate(country, version, ConfigOverlay.Apply(existing, incoming), "applied overlay");
-        var at = decidedAt < newest.ActivatedAt ? newest.ActivatedAt : decidedAt;
-        await PersistedConfigurationStates.RegisterAsync(session.Connection, session.Transaction!, content, at, ct).ConfigureAwait(false);
         var packs = manifest.Packs.Where(p => p.PackId != overlayId).Append(new ManifestPack(overlayId, version, content.Digest, country)).ToList();
         var next = new ConfigStateManifest(packs, manifest.CoreDigest, ConfigurationHash.Parse(newest.Hash.Trim()), StateCauses.ConfigChange);
+        return (version, content, next);
+    }
+
+    /// <summary>Records the overlay pack version and the new configuration state for an approved request. Runs under the state lock, in the command transaction.</summary>
+    private async Task ApplyAsync(ConfigChangeRequestRow row, Instant at, CancellationToken ct)
+    {
+        var country = row.Country.Trim();
+        var (newest, manifest) = await NewestAsync(ct).ConfigureAwait(false);
+        var items = row.Items.OrderBy(i => i.LineNo).Select(ToInput).ToList();
+        var incoming = Values(items, country, forApply: true);
+        var conflicts = await ConflictsAsync(row, newest.Hash.Trim(), ct).ConfigureAwait(false);
+        if (conflicts.Count > 0)
+        {
+            throw ConfigChangeSupport.Refuse("STALE", $"'{conflicts[0].Key}' changed since the request was written (base {row.BaseHash.Trim()[..12]}); rebase the request.");
+        }
+
+        var (_, content, next) = await BuildNextAsync(country, incoming, newest, manifest, ct).ConfigureAwait(false);
+        at = at < newest.ActivatedAt ? newest.ActivatedAt : at;
+        await PersistedConfigurationStates.RegisterAsync(session.Connection, session.Transaction!, content, at, ct).ConfigureAwait(false);
         var hash = await ConfigStateWriter.AppendAsync(session.Connection, session.Transaction!, next, at, row.Id, ct).ConfigureAwait(false);
         row.Status = ConfigChangeSupport.Applied;
         row.AppliedAt = at;
         row.ResultingHash = hash.ToString();
+    }
+
+    public async Task<ConfigChangeRequestRow> ScheduleAsync(ConfigChangeRequestScheduleRequest request, CancellationToken ct)
+    {
+        RequireHuman();
+        var entity = await EntityAsync(ct).ConfigureAwait(false);
+        var row = await LoadAsync(request.RequestId, entity, ct).ConfigureAwait(false);
+        RequireMaker(row);
+
+        // Only a DRAFT: the instant is part of the approved content, so it cannot be set or moved once approval was asked for.
+        if (row.Status != ConfigChangeSupport.Draft)
+        {
+            throw ConfigChangeSupport.Refuse("STALE", "The effective instant can only be set on a DRAFT request; withdraw or rebase the request first.");
+        }
+
+        if (request.EffectiveAt is { } effective && effective <= clock.Now)
+        {
+            throw ConfigChangeSupport.Refuse("CFG-VALIDATION", "The effective instant must be in the future.");
+        }
+
+        row.EffectiveAt = request.EffectiveAt;
+        row.UpdatedAt = clock.Now;
+        row.RecordVersion++;
+        await db.SaveChangesAsync(ct).ConfigureAwait(false);
+        return row;
+    }
+
+    public async Task<(ConfigChangeRequestRow Row, Sha256Hash PreviousBase, List<ConfigChangeConflict> Conflicts)> RebaseAsync(ConfigChangeRequestRebaseRequest request, CancellationToken ct)
+    {
+        RequireHuman();
+        CheckReason(request.Reason, 1);
+        var entity = await EntityAsync(ct).ConfigureAwait(false);
+        await ConfigStateWriter.LockAsync(session.Connection, session.Transaction
+            ?? throw new InvalidOperationException("Rebasing requires a command transaction."), ct).ConfigureAwait(false);
+        var row = await LoadAsync(request.RequestId, entity, ct).ConfigureAwait(false);
+        RequireMaker(row);
+        if (row.Status is not (ConfigChangeSupport.Draft or ConfigChangeSupport.Pending or ConfigChangeSupport.Scheduled))
+        {
+            throw ConfigChangeSupport.Refuse("STALE", "Only a DRAFT, PENDING_APPROVAL or SCHEDULED request can be rebased.");
+        }
+
+        var (newest, _) = await NewestAsync(ct).ConfigureAwait(false);
+        var previous = Sha256Hash.Parse(row.BaseHash.Trim());
+        var conflicts = await ConflictsAsync(row, newest.Hash.Trim(), ct).ConfigureAwait(false);
+
+        // The approval was bound to the old base: it is withdrawn (a decided one is just dropped) and the maker submits the rebased content again.
+        if (row.Status == ConfigChangeSupport.Pending && row.ApprovalRequestId is { } approvalId)
+        {
+            _ = await approvals.WithdrawAsync(new ApprovalWithdrawRequest { ApprovalRequestId = new ApprovalRequestId(approvalId), Reason = request.Reason }, CommandOptions.New(), ct).ConfigureAwait(false);
+        }
+
+        row.BaseHash = newest.Hash.Trim();
+        row.Status = ConfigChangeSupport.Draft;
+        row.ApprovalRequestId = null;
+        row.ContentHash = null;
+        row.EffectiveAt = null;
+        row.DecisionReason = request.Reason;
+        row.UpdatedAt = clock.Now;
+        row.RecordVersion++;
+        await db.SaveChangesAsync(ct).ConfigureAwait(false);
+        return (row, previous, conflicts);
+    }
+
+    public async Task<ConfigChangePreviewRun> PreviewAsync(ConfigChangeRequestPreviewRequest request, CancellationToken ct)
+    {
+        var entity = await EntityAsync(ct).ConfigureAwait(false);
+        var row = await LoadAsync(request.RequestId, entity, ct).ConfigureAwait(false);
+        var country = row.Country.Trim();
+        var (newest, manifest) = await NewestAsync(ct).ConfigureAwait(false);
+        var items = row.Items.OrderBy(i => i.LineNo).Select(ToInput).ToList();
+        var incoming = Values(items, country, forApply: false);
+        var conflicts = await ConflictsAsync(row, newest.Hash.Trim(), ct).ConfigureAwait(false);
+        var current = await states.ByHashAsync(ConfigurationHash.Parse(newest.Hash.Trim()), ct).ConfigureAwait(false)
+            ?? throw ConfigChangeSupport.Refuse("CFG-HASH-UNKNOWN", "The current configuration state is unknown.");
+        var today = clock.Now.ToBusinessDate(ZoneOf(entity));
+
+        // What a date resolves to: the newest state before, and after the request the last of its values for that key covering the date.
+        var preview = new List<ConfigChangePreviewItem>();
+        foreach (var item in row.Items.OrderBy(i => i.LineNo))
+        {
+            var at = item.ValidFrom ?? today;
+            var before = current.Find(item.Key, country, at)?.Value;
+            var after = incoming.LastOrDefault(v => v.Key == item.Key && new DateRange(v.ValidFrom ?? BusinessDate.MinValue, v.ValidTo).Contains(at))?.Value ?? before;
+            preview.Add(new ConfigChangePreviewItem
+            {
+                Key = item.Key, LegalStatus = item.LegalStatus, ValidFrom = item.ValidFrom, ReferenceDate = at, Before = before, After = after,
+                Changed = before != after,
+            });
+        }
+
+        Sha256Hash? resulting = null;
+        if (conflicts.Count == 0)
+        {
+            var built = await BuildNextAsync(country, incoming, newest, manifest, ct).ConfigureAwait(false);
+            resulting = Sha256Hash.Parse(built.Next.Hash.ToString());
+        }
+
+        return new ConfigChangePreviewRun
+        {
+            RequestId = row.Id, BaseHash = Sha256Hash.Parse(row.BaseHash.Trim()), CurrentHash = Sha256Hash.Parse(newest.Hash.Trim()),
+            Stale = conflicts.Count > 0, Conflicts = conflicts, Items = preview, ResultingHash = resulting, EffectiveAt = row.EffectiveAt,
+        };
+    }
+
+    private static TimeZoneInfo ZoneOf(LegalEntityRow entity)
+    {
+        try
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById(entity.TimeZone);
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return TimeZoneInfo.Utc;
+        }
+    }
+
+    public async Task<ConfigChangeImportReport> ImportAsync(ConfigChangeRequestImportRequest request, CancellationToken ct)
+    {
+        RequireHuman();
+        var entity = await EntityAsync(ct).ConfigureAwait(false);
+        var (_, manifest) = await NewestAsync(ct).ConfigureAwait(false);
+        var pack = manifest.Packs.SingleOrDefault(p => p.PackId == entity.PackId)
+            ?? throw ConfigChangeSupport.Refuse("CFG-VALIDATION", "The current state does not name the legal entity's pack.");
+
+        // Every item is validated on its own so the report lists all problems; only a clean file creates a request.
+        var issues = new List<ConfigChangeImportIssue>();
+        var number = 0;
+        foreach (var item in request.Items)
+        {
+            number++;
+            try
+            {
+                _ = Values([item], pack.Country, forApply: false);
+            }
+            catch (DomainException ex)
+            {
+                issues.Add(new ConfigChangeImportIssue { Line = number, Key = item.Key, Code = ex.Error.Code.ToString(), Message = ex.Error.Detail ?? ex.Error.Code.ToString() });
+            }
+        }
+
+        if (issues.Count == 0)
+        {
+            try
+            {
+                _ = Values(request.Items, pack.Country, forApply: false);
+                CheckReason(request.Reason, 10);
+            }
+            catch (DomainException ex)
+            {
+                issues.Add(new ConfigChangeImportIssue { Line = 0, Key = null, Code = ex.Error.Code.ToString(), Message = ex.Error.Detail ?? ex.Error.Code.ToString() });
+            }
+        }
+
+        if (issues.Count > 0)
+        {
+            return new ConfigChangeImportReport { Valid = false, Duplicate = false, Issues = issues, Request = null };
+        }
+
+        // Idempotent: the same content (and source) imported again returns the request the first import made, unless that one was rejected or withdrawn.
+        var digest = ImportDigest(request, entity.Code, pack.Country);
+        var earlier = await db.ConfigChangeRequests.Include(r => r.Items)
+            .Where(r => r.LegalEntityId == entity.LegalEntityId && r.ImportDigest == digest
+                && r.Status != ConfigChangeSupport.Rejected && r.Status != ConfigChangeSupport.Withdrawn)
+            .OrderByDescending(r => r.Id).FirstOrDefaultAsync(ct).ConfigureAwait(false);
+        if (earlier is not null)
+        {
+            return new ConfigChangeImportReport { Valid = true, Duplicate = true, Issues = [], Request = ConfigChangeSupport.View(earlier) };
+        }
+
+        var row = await NewDraftAsync(request.Reason, request.Items, ConfigChangeSupport.CauseImport, digest, ct).ConfigureAwait(false);
+        return new ConfigChangeImportReport { Valid = true, Duplicate = false, Issues = [], Request = ConfigChangeSupport.View(row) };
+    }
+
+    private static string ImportDigest(ConfigChangeRequestImportRequest request, string entity, string country)
+    {
+        var items = new JsonArray();
+        foreach (var i in request.Items)
+        {
+            items.Add(new JsonObject
+            {
+                ["key"] = i.Key, ["value"] = i.Value, ["legalStatus"] = i.LegalStatus.ToString(), ["sourceRef"] = i.SourceRef.Trim(),
+                ["motorPath"] = i.MotorPath ?? false, ["validFrom"] = i.ValidFrom?.ToString(), ["validTo"] = i.ValidTo?.ToString(), ["note"] = i.Note,
+            });
+        }
+
+        return CanonicalJson.Hash(new JsonObject { ["legalEntity"] = entity, ["country"] = country, ["source"] = request.SourceLabel.Trim(), ["items"] = items }).ToString();
+    }
+
+    /// <summary>
+    /// The due-date step: applies a SCHEDULED request whose effective instant has come, as the service actor, under the state lock. The approval is verified
+    /// again for execution. A request that can no longer be applied (stale base, approval no longer valid) is closed as REJECTED with the reason instead of being
+    /// retried for ever. Returns what happened for the sweeper's log.
+    /// </summary>
+    public async Task<string> ApplyDueAsync(Guid requestId, CancellationToken ct)
+    {
+        var entity = await EntityAsync(ct).ConfigureAwait(false);
+        await ConfigStateWriter.LockAsync(session.Connection, session.Transaction
+            ?? throw new InvalidOperationException("Applying requires a command transaction."), ct).ConfigureAwait(false);
+        var row = await LoadAsync(requestId, entity, ct).ConfigureAwait(false);
+        if (row.Status != ConfigChangeSupport.Scheduled || row.EffectiveAt is not { } effective || effective > clock.Now)
+        {
+            return ApplyDueConfigChangeHandler.Skipped;
+        }
+
+        var outcome = ApplyDueConfigChangeHandler.Applied;
+        try
+        {
+            var proof = ConfigChangeSupport.Proof(row, entity.Code);
+            if (row.ContentHash is null || proof.ToString() != row.ContentHash.Trim())
+            {
+                throw ConfigChangeSupport.Refuse("SOD-VIOLATION", "Frozen content no longer matches its approval hash.");
+            }
+
+            await VerifyAsync(row, entity, proof, ct).ConfigureAwait(false);
+            await ApplyAsync(row, effective, ct).ConfigureAwait(false);
+        }
+        catch (DomainException ex)
+        {
+            // TODO(hardening): raise an alert for a scheduled change that could not be applied; today it is only visible as REJECTED with the reason.
+            var text = $"Not applied at the effective instant: {ex.Error.Detail ?? ex.Error.Code.ToString()}";
+            row.Status = ConfigChangeSupport.Rejected;
+            row.DecisionReason = text[..Math.Min(128, text.Length)];
+            outcome = ApplyDueConfigChangeHandler.Failed;
+        }
+
+        row.DecidedBy ??= ConfigChangeSupport.SweeperActor;
+        row.UpdatedAt = clock.Now;
+        row.RecordVersion++;
+        await db.SaveChangesAsync(ct).ConfigureAwait(false);
+        return outcome;
     }
 
     private static string Signature(ConfigurationCatalogue catalogue, string key) =>
@@ -490,6 +809,59 @@ internal sealed class WithdrawConfigChangeHandler(ConfigChangeEngine engine) : I
     }
 }
 
+internal sealed class ScheduleConfigChangeHandler(ConfigChangeEngine engine) : ICommandHandler<ScheduleConfigChange, ConfigChangeRequestScheduleResponse>
+{
+    public async Task<Result<ConfigChangeRequestScheduleResponse>> HandleAsync(ScheduleConfigChange c, CancellationToken ct)
+    {
+        try { return new ConfigChangeRequestScheduleResponse { Request = ConfigChangeSupport.View(await engine.ScheduleAsync(c.Request, ct).ConfigureAwait(false)) }; }
+        catch (DomainException ex) { return ex.Error; }
+    }
+}
+
+internal sealed class RebaseConfigChangeHandler(ConfigChangeEngine engine) : ICommandHandler<RebaseConfigChange, ConfigChangeRequestRebaseResponse>
+{
+    public async Task<Result<ConfigChangeRequestRebaseResponse>> HandleAsync(RebaseConfigChange c, CancellationToken ct)
+    {
+        try
+        {
+            var (row, previous, conflicts) = await engine.RebaseAsync(c.Request, ct).ConfigureAwait(false);
+            return new ConfigChangeRequestRebaseResponse { Request = ConfigChangeSupport.View(row), PreviousBaseHash = previous, Conflicts = conflicts };
+        }
+        catch (DomainException ex) { return ex.Error; }
+    }
+}
+
+internal sealed class PreviewConfigChangeHandler(ConfigChangeEngine engine) : ICommandHandler<PreviewConfigChange, ConfigChangeRequestPreviewResponse>
+{
+    public async Task<Result<ConfigChangeRequestPreviewResponse>> HandleAsync(PreviewConfigChange c, CancellationToken ct)
+    {
+        try { return new ConfigChangeRequestPreviewResponse { PreviewRun = await engine.PreviewAsync(c.Request, ct).ConfigureAwait(false) }; }
+        catch (DomainException ex) { return ex.Error; }
+    }
+}
+
+internal sealed class ImportConfigChangeHandler(ConfigChangeEngine engine) : ICommandHandler<ImportConfigChange, ConfigChangeRequestImportResponse>
+{
+    public async Task<Result<ConfigChangeRequestImportResponse>> HandleAsync(ImportConfigChange c, CancellationToken ct)
+    {
+        try { return new ConfigChangeRequestImportResponse { ValidationReport = await engine.ImportAsync(c.Request, ct).ConfigureAwait(false) }; }
+        catch (DomainException ex) { return ex.Error; }
+    }
+}
+
+internal sealed class ApplyDueConfigChangeHandler(ConfigChangeEngine engine) : ICommandHandler<ApplyDueConfigChange, string>
+{
+    public const string Applied = "APPLIED";
+    public const string Skipped = "SKIPPED";
+    public const string Failed = "FAILED";
+
+    public async Task<Result<string>> HandleAsync(ApplyDueConfigChange c, CancellationToken ct)
+    {
+        try { return await engine.ApplyDueAsync(c.RequestId, ct).ConfigureAwait(false); }
+        catch (DomainException ex) { return ex.Error; }
+    }
+}
+
 /// <summary>Audit facts shared by the six operations: the request is the object, its keys are the business keys, the status move is the change.</summary>
 internal static class ConfigChangeAudit
 {
@@ -538,4 +910,35 @@ internal sealed class WithdrawConfigChangeAuditor : ICommandAuditor<WithdrawConf
 {
     public CommandAuditFacts Describe(WithdrawConfigChange c, Result<ConfigChangeRequestWithdrawResponse>? r) =>
         ConfigChangeAudit.Facts(c.Request.RequestId, "withdraw", r is { IsSuccess: true } ok ? ok.Value.Request : null, "OPEN");
+}
+
+internal sealed class ScheduleConfigChangeAuditor : ICommandAuditor<ScheduleConfigChange, ConfigChangeRequestScheduleResponse>
+{
+    public CommandAuditFacts Describe(ScheduleConfigChange c, Result<ConfigChangeRequestScheduleResponse>? r) =>
+        ConfigChangeAudit.Facts(c.Request.RequestId, "schedule", r is { IsSuccess: true } ok ? ok.Value.Request : null, "DRAFT");
+}
+
+internal sealed class RebaseConfigChangeAuditor : ICommandAuditor<RebaseConfigChange, ConfigChangeRequestRebaseResponse>
+{
+    public CommandAuditFacts Describe(RebaseConfigChange c, Result<ConfigChangeRequestRebaseResponse>? r) =>
+        ConfigChangeAudit.Facts(c.Request.RequestId, "rebase", r is { IsSuccess: true } ok ? ok.Value.Request : null, "OPEN");
+}
+
+internal sealed class PreviewConfigChangeAuditor : ICommandAuditor<PreviewConfigChange, ConfigChangeRequestPreviewResponse>
+{
+    public CommandAuditFacts Describe(PreviewConfigChange c, Result<ConfigChangeRequestPreviewResponse>? r) =>
+        ConfigChangeAudit.Facts(c.Request.RequestId, "preview", null, "none");
+}
+
+internal sealed class ImportConfigChangeAuditor : ICommandAuditor<ImportConfigChange, ConfigChangeRequestImportResponse>
+{
+    public CommandAuditFacts Describe(ImportConfigChange c, Result<ConfigChangeRequestImportResponse>? r) =>
+        ConfigChangeAudit.Facts(r is { IsSuccess: true } ok ? ok.Value.ValidationReport.Request?.Id : null, "import",
+            r is { IsSuccess: true } shown ? shown.Value.ValidationReport.Request : null, "none");
+}
+
+internal sealed class ApplyDueConfigChangeAuditor : ICommandAuditor<ApplyDueConfigChange, string>
+{
+    public CommandAuditFacts Describe(ApplyDueConfigChange c, Result<string>? r) =>
+        ConfigChangeAudit.Facts(c.RequestId, "apply-due", null, "SCHEDULED");
 }

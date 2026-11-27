@@ -1,4 +1,4 @@
-using CoreIns.Modules.Market.Commands;
+﻿using CoreIns.Modules.Market.Commands;
 using CoreIns.Modules.Market.Contracts.Api;
 using CoreIns.Modules.Market.Persistence;
 using CoreIns.Platform.Commands;
@@ -19,7 +19,7 @@ namespace CoreIns.Modules.Market.Api;
 [Route("api/mkt/v1/config-change-requests")]
 internal sealed class ConfigChangeRequestsController(MarketDbContext db, RequestContext context) : ControllerBase
 {
-    private static readonly string[] Statuses = ["DRAFT", "PENDING_APPROVAL", "APPLIED", "REJECTED", "WITHDRAWN"];
+    private static readonly string[] Statuses = ["DRAFT", "PENDING_APPROVAL", "SCHEDULED", "APPLIED", "REJECTED", "WITHDRAWN"];
 
     /// <summary>mkt.ConfigChangeRequest.create.</summary>
     [HttpPost]
@@ -62,6 +62,34 @@ internal sealed class ConfigChangeRequestsController(MarketDbContext db, Request
     public async Task<IResult> WithdrawAsync([FromBody] ConfigChangeRequestWithdrawRequest request,
         [FromServices] ICommandHandler<WithdrawConfigChange, ConfigChangeRequestWithdrawResponse> handler, CancellationToken ct) =>
         (await handler.HandleAsync(new WithdrawConfigChange(request), ct).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>mkt.ConfigChangeRequest.schedule: sets the effective instant of a DRAFT (maker only); the checker approves it with the content.</summary>
+    [HttpPost("schedule")]
+    [Authorize(Policy = "mkt.ConfigChangeRequest.schedule")]
+    public async Task<IResult> ScheduleAsync([FromBody] ConfigChangeRequestScheduleRequest request,
+        [FromServices] ICommandHandler<ScheduleConfigChange, ConfigChangeRequestScheduleResponse> handler, CancellationToken ct) =>
+        (await handler.HandleAsync(new ScheduleConfigChange(request), ct).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>mkt.ConfigChangeRequest.rebase: maker only; moves the request onto the newest state and back to DRAFT.</summary>
+    [HttpPost("rebase")]
+    [Authorize(Policy = "mkt.ConfigChangeRequest.rebase")]
+    public async Task<IResult> RebaseAsync([FromBody] ConfigChangeRequestRebaseRequest request,
+        [FromServices] ICommandHandler<RebaseConfigChange, ConfigChangeRequestRebaseResponse> handler, CancellationToken ct) =>
+        (await handler.HandleAsync(new RebaseConfigChange(request), ct).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>mkt.ConfigChangeRequest.preview: diff and resulting hash against the newest state; writes nothing.</summary>
+    [HttpPost("preview")]
+    [Authorize(Policy = "mkt.ConfigChangeRequest.preview")]
+    public async Task<IResult> PreviewAsync([FromBody] ConfigChangeRequestPreviewRequest request,
+        [FromServices] ICommandHandler<PreviewConfigChange, ConfigChangeRequestPreviewResponse> handler, CancellationToken ct) =>
+        (await handler.HandleAsync(new PreviewConfigChange(request), ct).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>mkt.ConfigChangeRequest.import: validates every key and creates a DRAFT request; never applies.</summary>
+    [HttpPost("import")]
+    [Authorize(Policy = "mkt.ConfigChangeRequest.import")]
+    public async Task<IResult> ImportAsync([FromBody] ConfigChangeRequestImportRequest request,
+        [FromServices] ICommandHandler<ImportConfigChange, ConfigChangeRequestImportResponse> handler, CancellationToken ct) =>
+        (await handler.HandleAsync(new ImportConfigChange(request), ct).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
     private IQueryable<ConfigChangeRequestRow> Rows() => db.ConfigChangeRequests.AsNoTracking().Include(r => r.Items).Where(r =>
         db.LegalEntities.Any(e => e.LegalEntityId == r.LegalEntityId && e.Code == context.LegalEntity!.Value.Value));

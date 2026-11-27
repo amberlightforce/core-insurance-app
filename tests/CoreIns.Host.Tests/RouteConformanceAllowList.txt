@@ -419,10 +419,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/recalculate
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/record-filing
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/request-payment
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/transition
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/import
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/preview
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/rebase
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/schedule
 CONTRACT_NOT_SERVED POST /api/mkt/v1/configuration/export
 CONTRACT_NOT_SERVED POST /api/mkt/v1/cross-borders/check
 CONTRACT_NOT_SERVED POST /api/mkt/v1/currencies/convert-fixed
