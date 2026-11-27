@@ -368,7 +368,7 @@
       "proposedValues": "unspecified"
     },
     "PermissionEvaluateResponse": {
-      "ticketId": "sample",
+      "ticketId": "01922754-2555-7863-8e7c-9e322191e472",
       "outcome": "unspecified",
       "limits": "unspecified",
       "entry": "unspecified",
@@ -401,7 +401,7 @@
       "diff": "unspecified"
     },
     "PermissionMatrixRunScenariosRequest": {
-      "matrixId": "sample",
+      "matrixId": "01921c88-9fa9-719c-852e-24927698a73f",
       "version": "unspecified",
       "entries": [
         "unspecified"
@@ -417,7 +417,7 @@
     },
     "PermissionMatrixScheduleRequest": {
       "effectiveFrom": "2026-10-07T09:00:00Z",
-      "matrixId": "sample",
+      "matrixId": "019273af-6300-7e6d-8165-b7014f77cecc",
       "version": "unspecified",
       "entries": [
         "unspecified"
@@ -432,7 +432,7 @@
       "diff": "unspecified"
     },
     "PermissionMatrixSubmitRequest": {
-      "matrixId": "sample",
+      "matrixId": "0192834c-541e-7842-8ca0-aa1760f7fbb7",
       "version": "unspecified",
       "entries": [
         "unspecified"
@@ -447,7 +447,7 @@
       "diff": "unspecified"
     },
     "PermissionMatrixUpdateEntryRequest": {
-      "matrixId": "sample",
+      "matrixId": "0192332e-c3a3-7b6c-8e11-7b79f4c5bc26",
       "version": "unspecified",
       "entries": [
         "unspecified"

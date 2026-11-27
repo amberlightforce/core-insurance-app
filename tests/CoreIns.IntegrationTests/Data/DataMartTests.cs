@@ -186,6 +186,29 @@ public sealed class DataMartTests(PostgresFixture database) : IClassFixture<Post
     }
 
     [Fact]
+    public async Task Ri_mart_nets_a_recomputed_cession_because_events_are_incremental_deltas()
+    {
+        var contract = Guid.NewGuid();
+        var policy = Guid.NewGuid();
+        foreach (var (ceded, commission) in new[] { ("100.00", "10.00"), ("-30.00", "-3.00") }) // original set, then a recomputation delta set
+        {
+            var envelope = new JsonObject
+            {
+                ["payload"] = new JsonObject { ["riContractId"] = contract, ["deltaSetId"] = Guid.NewGuid(), ["cededAmount"] = Money3(ceded), ["commissionAmount"] = Money3(commission) },
+            };
+            await ScalarAsync($"""
+                INSERT INTO rpt_raw.event_ledger (event_id, registry_name, event_type, producer, schema_version, aggregate_type, aggregate_id, aggregate_sequence, occurred_at, legal_entity, origin, envelope, received_at)
+                VALUES ('{Guid.CreateVersion7()}', 'ri.CessionCalculated', 'CessionCalculated', 'RI', '1.0', 'Policy', '{policy}', 1, '2026-10-15T00:00:00Z', '{Entity}', 'LIVE', '{envelope.ToJsonString()}'::jsonb, '2026-10-15T00:00:00Z')
+                """);
+        }
+
+        var run = await RunAsync(new { mart = "RI_CESSION_SUMMARY", period = "2026-10", validAt = "2026-12-31" });
+        var get = await GetAsync($"/api/dat/v1/marts/{run.Text("runId")}");
+        Dec(Figure(get, $"CEDED_PREMIUM|ALL|2026-10|{contract}")!["value"]).ShouldBe(70m);
+        Dec(Figure(get, $"CEDED_COMMISSION|ALL|2026-10|{contract}")!["value"]).ShouldBe(7m);
+    }
+
+    [Fact]
     public async Task Bad_input_other_entities_and_non_data_roles_are_refused()
     {
         await RunAsync(new { mart = "PORTFOLIO_PREMIUM", period = "nonsense" }, HttpStatusCode.BadRequest);
