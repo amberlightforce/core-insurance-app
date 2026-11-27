@@ -5,6 +5,7 @@ using CoreIns.Modules.Documents.Contracts.Api;
 using CoreIns.Modules.Documents.Contracts.Events;
 using CoreIns.Modules.Documents.Domain;
 using CoreIns.Modules.Documents.Persistence;
+using CoreIns.Modules.Documents.Queries;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts.Common;
@@ -59,6 +60,7 @@ internal sealed class RequestDocumentHandler(
     IClock clock,
     IEventPublisher events,
     INumberingService numbering,
+    TemplateCatalogue catalogue,
     IOptions<DocumentsOptions> options) : ICommandHandler<RequestDocument, DocumentRequestOutcome>
 {
     public async Task<Result<DocumentRequestOutcome>> HandleAsync(RequestDocument command, CancellationToken cancellationToken)
@@ -74,10 +76,12 @@ internal sealed class RequestDocumentHandler(
             return new DocumentRequestOutcome(existing.DocumentId, DocumentNumber.Parse(existing.DocumentNumber), existing.Status, existing.Medium, IsDuplicate: true);
         }
 
-        var template = Templates.Find(spec.TemplateKey);
+        var now = clock.Now;
+        var today = now.ToBusinessDate(options.Value.Zone);
+        var template = await catalogue.ResolveLetterAsync(new TemplateScope(spec.TemplateKey, today.Value), cancellationToken).ConfigureAwait(false);
         if (template is null)
         {
-            return DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", $"Unknown template '{spec.TemplateKey}'.");
+            return DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", $"Unknown template '{spec.TemplateKey}' or no approved version in force.");
         }
 
         if (!Templates.IsLanguage(spec.Language))
@@ -96,8 +100,6 @@ internal sealed class RequestDocumentHandler(
             return DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", $"Missing placeholders: {string.Join(", ", missing)}.");
         }
 
-        var now = clock.Now;
-        var today = now.ToBusinessDate(options.Value.Zone);
         var medium = StatutoryDeliveryRule.MediumFor(template, spec.Medium);
         var documentId = DocumentId.New();
         var keys = BusinessKeys.Empty.With("documentId", documentId.Value.ToString("D"));
@@ -120,7 +122,7 @@ internal sealed class RequestDocumentHandler(
             ContentType = "text/html; charset=utf-8",
             Content = bytes,
             ContentHash = hash.Value,
-            Metadata = JsonSerializer.Serialize(new { documentId = documentId.Value, template = template.Key, language = spec.Language }),
+            Metadata = JsonSerializer.Serialize(new { documentId = documentId.Value, template = template.Key, templateVersion = template.Version, language = spec.Language }),
             CreatedAt = now,
         };
         var document = new DocumentRow
@@ -129,6 +131,7 @@ internal sealed class RequestDocumentHandler(
             LegalEntityId = legalEntity,
             DocumentNumber = number.Value,
             TemplateKey = template.Key,
+            TemplateVersion = template.Version,
             RequestNo = spec.RequestNo,
             SubjectModule = spec.Subject.Module.ToString(),
             SubjectType = spec.Subject.Type,
