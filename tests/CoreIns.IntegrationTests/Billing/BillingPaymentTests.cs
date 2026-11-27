@@ -56,9 +56,9 @@ public sealed class BillingPaymentTests(PostgresFixture database) : IClassFixtur
         Amount(balances!["balancesByState"]!["unapplied"]).ShouldBe(policy.Total - 10m + policy.Total + 25m);
         Amount(balances["balancesByState"]!["billed"]).ShouldBe(policy.Total);
 
-        // REQ-BIL-130/136: a manual allocation must be the invoice's whole open amount; the over-payment can cover it.
+        // REQ-BIL-130/136: a manual allocation may not exceed the invoice's open amount (a smaller one is a partial payment, NX-EC-11).
         var (bad, refused) = await _slice.PostAsync("/api/bil/v1/allocations/allocate",
-            new { receiptId = partial.Text("receipt.receiptId"), lines = new[] { new { invoiceId, amount = Money(policy.Total - 10m) } } });
+            new { receiptId = over.Text("receipt.receiptId"), lines = new[] { new { invoiceId, amount = Money(policy.Total + 1m) } } });
         bad.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity, refused?.ToJsonString());
         refused.Text("code").ShouldBe("BIL-ERR-AMOUNT-MISMATCH");
 
@@ -72,6 +72,23 @@ public sealed class BillingPaymentTests(PostgresFixture database) : IClassFixtur
         ok.StatusCode.ShouldBe(HttpStatusCode.OK, allocated?.ToJsonString());
         allocated.Text("receipt.state").ShouldBe("PARTIALLY_ALLOCATED");
         Amount(allocated!["receipt"]!["unallocated"]).ShouldBe(25m);
+        (await _slice.InvoiceOfAsync(policy.PolicyId)).Text("invoice.state").ShouldBe("PAID");
+    }
+
+    [Fact]
+    public async Task NX_EC_11_a_partial_allocation_pays_taxes_first_leaves_the_invoice_partially_paid_and_the_rest_completes_it()
+    {
+        var (policy, account, invoiceId) = await BilledAsync();
+        var (_, first) = await _slice.PostAsync("/api/bil/v1/payments/take", new { billingAccountId = account, amount = Money(10m), method = "BANK_TRANSFER" });
+        first.Text("allocationOutcome").ShouldBe("SUSPENSE");
+        var (ok, part) = await _slice.PostAsync("/api/bil/v1/allocations/allocate",
+            new { receiptId = first.Text("receipt.receiptId"), lines = new[] { new { invoiceId, amount = Money(10m) } } });
+        ok.StatusCode.ShouldBe(HttpStatusCode.OK, part?.ToJsonString());
+        part.Text("receipt.state").ShouldBe("ALLOCATED");
+        (await _slice.InvoiceOfAsync(policy.PolicyId)).Text("invoice.state").ShouldBe("PARTIALLY_PAID");
+
+        var (_, rest) = await _slice.PostAsync("/api/bil/v1/payments/take", new { billingAccountId = account, amount = Money(policy.Total - 10m), method = "BANK_TRANSFER", invoiceId });
+        rest.Text("allocationOutcome").ShouldBe("ALLOCATED");
         (await _slice.InvoiceOfAsync(policy.PolicyId)).Text("invoice.state").ShouldBe("PAID");
     }
 

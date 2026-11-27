@@ -239,6 +239,8 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
             entity.Property(e => e.IssueDate).HasColumnName("issue_date");
             entity.Property(e => e.DueDate).HasColumnName("due_date");
+            entity.Property(e => e.InstalmentNo).HasColumnName("instalment_no").HasDefaultValue(1);
+            entity.Property(e => e.InstalmentCount).HasColumnName("instalment_count").HasDefaultValue(1);
             entity.Property(e => e.Method).HasColumnName("method");
             entity.Property(e => e.Total).HasColumnName("total").HasColumnType("numeric(19,4)");
             entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
@@ -258,8 +260,8 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
             entity.HasIndex(e => new { e.LegalEntityId, e.InvoiceNumber }).IsUnique().HasDatabaseName("ux_invoice_number");
 
-            // One invoice per bound transaction in the ANNUAL slice: a replayed set can never bill twice.
-            entity.HasIndex(e => new { e.TransactionId, e.Kind }).IsUnique().HasFilter("kind = 'INVOICE'").HasDatabaseName("ux_invoice_transaction");
+            // One invoice per transaction and instalment number (ANNUAL has the single instalment 1): a replayed set can never bill twice.
+            entity.HasIndex(e => new { e.TransactionId, e.Kind, e.InstalmentNo }).IsUnique().HasFilter("kind = 'INVOICE'").HasDatabaseName("ux_invoice_transaction");
 
             // One credit note per source transaction and original invoice (PITFALLS 9: the business reference, not a key that
             // contains the credit note's own id). A transaction crediting two original invoices gets two credit notes.

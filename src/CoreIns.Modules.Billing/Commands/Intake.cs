@@ -134,10 +134,10 @@ internal sealed class AttachTermHandler(
             return new IntakeOutcome(false, await billing.ProgressAsync(bound.TermId, cancellationToken).ConfigureAwait(false));
         }
 
-        if (!string.Equals(bound.PaymentPlanRef, PaymentPlans.Annual, StringComparison.Ordinal))
+        if (PaymentPlans.InstalmentCount(bound.PaymentPlanRef) == 0)
         {
             await billing.RaiseAsync(ExceptionKinds.PlanUnsupported, bound.TermId.Value.ToString(), "PLAN-" + bound.PaymentPlanRef,
-                $"Payment plan '{bound.PaymentPlanRef}' is not served (the slice bills ANNUAL only, D-SLC-10c); the term is not billed.", cancellationToken)
+                $"Payment plan '{bound.PaymentPlanRef}' is not served (ANNUAL, SEMI_ANNUAL, QUARTERLY and MONTHLY are); the term is not billed.", cancellationToken)
                 .ConfigureAwait(false);
             return new IntakeOutcome(false, 0);
         }
@@ -188,7 +188,7 @@ internal sealed class AttachTermHandler(
             ProductCode = bound.ProductCode,
             ProductVersion = bound.ProductVersion.ToString(),
             ArtefactHash = bound.ArtefactHash.Value,
-            PlanCode = PaymentPlans.Annual,
+            PlanCode = bound.PaymentPlanRef,
             BillMode = PaymentPlans.DirectBill,
             Method = bound.PaymentMethod ?? TermBilling.DefaultMethod,
             TermFrom = bound.EffectivePeriod.Start.ToBusinessDate(zone),

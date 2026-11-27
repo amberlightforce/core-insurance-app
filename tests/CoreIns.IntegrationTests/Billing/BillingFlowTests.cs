@@ -287,6 +287,34 @@ public sealed class BillingFlowTests(PostgresFixture database) : IClassFixture<P
         (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.intake_exception WHERE kind = 'BIL-PLAN-UNSUPPORTED' AND subject = '{otherTerm}'")).ShouldBe(1);
     }
 
+    [Fact]
+    public async Task NX_EC_11_a_QUARTERLY_term_is_billed_as_four_instalment_invoices_that_sum_to_the_gross()
+    {
+        var policy = await _slice.BindAsync();
+        var envelopes = await _slice.EnvelopesAsync(policy.PolicyId);
+        var bound = envelopes.Single(e => e.EventType.Value == "PolicyBound");
+        var deltas = envelopes.Where(e => e.EventType.Value == "ChargeDeltaEmitted").ToList();
+        var term = Guid.CreateVersion7().ToString();
+        var transaction = Guid.CreateVersion7().ToString();
+        var quarterly = Retarget(bound, term, transaction);
+        var boundPayload = (JsonObject)quarterly.Payload.DeepClone();
+        boundPayload["paymentPlanRef"] = "QUARTERLY";
+        (await _slice.InvokeAsync("BIL.PolicyBound.AttachTerm", quarterly with { Payload = boundPayload })).ShouldBeTrue();
+        for (var i = 0; i < deltas.Count; i++)
+        {
+            var payload = (JsonObject)Retarget(deltas[i], term, transaction).Payload.DeepClone();
+            payload["chargeId"] = Guid.CreateVersion7().ToString();
+            var delta = Retarget(deltas[i], term, transaction) with { Payload = payload, Set = new EventSet(Guid.Parse(transaction), i + 1, deltas.Count) };
+            (await _slice.InvokeAsync("BIL.ChargeDeltaEmitted.Intake", delta)).ShouldBeTrue();
+        }
+
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE term_id = '{term}' AND kind = 'INVOICE'")).ShouldBe(4);
+        (await _slice.ScalarAsync<long>($"SELECT count(DISTINCT instalment_no) FROM bil.invoice WHERE term_id = '{term}'")).ShouldBe(4);
+        (await _slice.ScalarAsync<decimal>($"SELECT sum(total) FROM bil.invoice WHERE term_id = '{term}'")).ShouldBe(policy.Total);
+        (await _slice.ScalarAsync<decimal>($"SELECT sum(amount) FROM bil.invoice_item WHERE term_id = '{term}'")).ShouldBe(policy.Total);
+        (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.invoice WHERE term_id = '{term}' AND total <> (SELECT sum(amount) FROM bil.invoice_item i WHERE i.invoice_id = invoice.invoice_id)")).ShouldBe(0);
+    }
+
     private static EventEnvelope Retarget(EventEnvelope envelope, string term, string transaction)
     {
         var payload = (JsonObject)envelope.Payload.DeepClone();

@@ -226,6 +226,12 @@ internal sealed class InvoiceRow
 
     public BusinessDate DueDate { get; set; }
 
+    /// <summary>1-based number of this instalment within the term's schedule (NX-EC-11); 1 for ANNUAL and credit notes.</summary>
+    public int InstalmentNo { get; set; } = 1;
+
+    /// <summary>Instalments in the schedule this invoice belongs to.</summary>
+    public int InstalmentCount { get; set; } = 1;
+
     public string Method { get; set; } = string.Empty;
 
     public decimal Total { get; set; }

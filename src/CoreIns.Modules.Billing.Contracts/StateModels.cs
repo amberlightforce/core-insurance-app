@@ -72,7 +72,7 @@ public static class InvoiceStateModel
             .Permit(InvoiceState.Planned, InvoiceTrigger.Bill, InvoiceState.Billed)
             .Permit(InvoiceState.Billed, InvoiceTrigger.BecomeDue, InvoiceState.Due)
             .Permit([InvoiceState.Due, InvoiceState.PartiallyPaid, InvoiceState.Overdue], InvoiceTrigger.AllocateInFull, InvoiceState.Paid)
-            .Permit(InvoiceState.Due, InvoiceTrigger.AllocatePartially, InvoiceState.PartiallyPaid)
+            .Permit([InvoiceState.Due, InvoiceState.PartiallyPaid], InvoiceTrigger.AllocatePartially, InvoiceState.PartiallyPaid)
             .Permit([InvoiceState.Due, InvoiceState.PartiallyPaid], InvoiceTrigger.BecomeOverdue, InvoiceState.Overdue)
             .Permit(InvoiceState.Overdue, InvoiceTrigger.WriteOff, InvoiceState.WrittenOff)
             .Permit(InvoiceState.Paid, InvoiceTrigger.PaymentReversedBeforeDue, InvoiceState.Due)

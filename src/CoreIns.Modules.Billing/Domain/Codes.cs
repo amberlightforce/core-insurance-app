@@ -148,4 +148,23 @@ internal static class PaymentPlans
 
     /// <summary>Direct bill (the slice has no agency bill).</summary>
     public const string DirectBill = "DIRECT_BILL";
+
+    /// <summary>Two instalments, six months apart (NX-EC-11).</summary>
+    public const string SemiAnnual = "SEMI_ANNUAL";
+
+    /// <summary>Four instalments, three months apart (NX-EC-11).</summary>
+    public const string Quarterly = "QUARTERLY";
+
+    /// <summary>Twelve instalments, one month apart (NX-EC-11).</summary>
+    public const string Monthly = "MONTHLY";
+
+    /// <summary>Number of instalments of a plan reference; 0 when the plan is not served.</summary>
+    public static int InstalmentCount(string? planRef) => planRef switch
+    {
+        Annual => 1,
+        SemiAnnual => 2,
+        Quarterly => 4,
+        Monthly => 12,
+        _ => 0,
+    };
 }

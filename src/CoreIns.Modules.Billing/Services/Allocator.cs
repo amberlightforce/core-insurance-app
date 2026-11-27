@@ -19,9 +19,10 @@ namespace CoreIns.Modules.Billing.Services;
 /// Allocates a receipt's unapplied cash to whole invoices (REQ-BIL-129, REQ-BIL-130): one allocation row per invoice
 /// item in waterfall order (taxes and levies before fees before premium), items Settled, invoice Paid (derived from
 /// allocations, REQ-BIL-087), receipt Allocated or PartiallyAllocated, one ALLOCATED entry (LA-11 → LA-02) and
-/// <c>CashAllocated</c>, all in the caller's transaction. An amount that is not the invoice's exact open amount is
-/// refused (BIL-ERR-AMOUNT-MISMATCH): partial payments are not allocated in the slice, they stay unapplied. The
-/// database refuses any allocation above the receipt or the item (trigger, REQ-BIL-130).
+/// <c>CashAllocated</c>, all in the caller's transaction. An amount above the invoice's open amount is refused
+/// (BIL-ERR-AMOUNT-MISMATCH). An amount below it is a partial payment (NX-EC-11): it is applied down the same waterfall,
+/// items it covers are Settled, the one it cuts stays Open for the remainder, and the invoice becomes PartiallyPaid
+/// (an Overdue invoice stays Overdue). The database refuses any allocation above the receipt or the item (trigger, REQ-BIL-130).
 /// </summary>
 internal sealed class Allocator(BillingDbContext db, RequestContext context, LedgerWriter ledger, IEventPublisher events, IClock clock, IServiceProvider services)
 {
@@ -86,19 +87,22 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
             }
 
             var state = Codes.Parse<InvoiceState>(invoice.State);
-            var paid = InvoiceStateModel.Machine.Fire(state, InvoiceTrigger.AllocateInFull);
-            if (paid.IsFailure)
+            var full = InvoiceStateModel.Machine.Fire(state, InvoiceTrigger.AllocateInFull);
+            if (full.IsFailure)
             {
                 return DomainError.Of(ModuleCode.BIL, "AMOUNT-MISMATCH", $"Invoice {invoice.InvoiceNumber} is {invoice.State} and has nothing open to allocate.");
             }
 
             var items = await db.InvoiceItems.Where(i => i.InvoiceId == invoice.InvoiceId).ToListAsync(cancellationToken).ConfigureAwait(false);
             var invoiceOpen = items.Sum(i => open.GetValueOrDefault(i.InvoiceItemId));
-            if (amount.Amount != invoiceOpen)
+            if (amount.Amount > invoiceOpen || amount.Amount <= 0m)
             {
                 return DomainError.Of(ModuleCode.BIL, "AMOUNT-MISMATCH",
-                    $"The amount {amount} is not the open amount {new Money(invoiceOpen, currency)} of invoice {invoice.InvoiceNumber}; partial and over-payments stay unapplied in the slice.");
+                    $"The amount {amount} is not within the open amount {new Money(invoiceOpen, currency)} of invoice {invoice.InvoiceNumber}; an over-payment stays unapplied.");
             }
+
+            var partial = amount.Amount < invoiceOpen;
+            var remaining = amount.Amount;
 
             var rule = await ledger.RuleAsync(ledger.Key(EntryTypes.Allocated, RuleQualifiers.Any, RuleQualifiers.Any), cancellationToken).ConfigureAwait(false);
             if (rule.IsFailure)
@@ -109,10 +113,13 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
             foreach (var item in Waterfall.Order(items, i => i.ChargeCategory).ThenBy(i => i.LineNo))
             {
                 var itemOpen = open.GetValueOrDefault(item.InvoiceItemId);
-                if (itemOpen <= 0m)
+                if (itemOpen <= 0m || remaining <= 0m)
                 {
                     continue;
                 }
+
+                var applied = Math.Min(itemOpen, remaining);
+                remaining -= applied;
 
                 var row = new AllocationRow
                 {
@@ -122,7 +129,7 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
                     InvoiceId = invoice.InvoiceId,
                     InvoiceItemId = item.InvoiceItemId,
                     TermId = item.TermId,
-                    Amount = itemOpen,
+                    Amount = applied,
                     Currency = currency.Code,
                     RuleId = ruleId,
                     Source = source,
@@ -130,9 +137,13 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
                     RecordedAt = now,
                 };
                 rows.Add(row);
-                item.State = Codes.Of(InvoiceItemState.Settled);
+                if (applied == itemOpen)
+                {
+                    item.State = Codes.Of(InvoiceItemState.Settled);
+                }
+
                 termsTouched.Add(item.TermId);
-                legs.Add(new PostingLeg(rule.Value, new Money(itemOpen, currency), ServicingDimensions.Apply(
+                legs.Add(new PostingLeg(rule.Value, new Money(applied, currency), ServicingDimensions.Apply(
                     new LineDimensions
                     {
                         BillingAccountId = receipt.BillingAccountId,
@@ -152,7 +163,15 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
                     item.TransactionKind, item.CancellationSource, item.TreatmentRuleId)));
             }
 
-            invoice.State = Codes.Of(paid.Value);
+            if (!partial)
+            {
+                invoice.State = Codes.Of(full.Value);
+            }
+            else if (InvoiceStateModel.Machine.Fire(state, InvoiceTrigger.AllocatePartially) is { IsSuccess: true } part)
+            {
+                invoice.State = Codes.Of(part.Value);
+            }
+
             invoice.UpdatedAt = now;
             invoice.RecordVersion++;
         }

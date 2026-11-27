@@ -17,6 +17,7 @@ using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
 using CoreIns.Platform.Numbering;
 using CoreIns.Platform.Time;
+using CoreIns.Rules;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.Modules.Market.Contracts.Spi;
@@ -340,7 +341,7 @@ internal sealed class TermBilling(
     /// SL6-BIL-RESPREAD: the one billing correction of an out-of-sequence delta set, idempotent on the delta set. Invoices already
     /// paid are never touched: the difference falls on a new invoice (debit) or on credit notes against the invoices the credits
     /// correct (credit), so the term's billed total equals the re-rated premium. No notification (D-SL6).
-    /// TODO(hardening): the slice bills ANNUAL only (D-SLC-10c); instalment plans would re-spread the unpaid instalments here.
+    /// Instalment plans: the debit is billed over the instalments still to fall due (ScheduleOfAsync, NX-EC-11).
     /// </summary>
     private async Task RecordRespreadAsync(
         PlanInstanceRow plan, BillingAccountRow account, ChargeRow oos, List<ChargeRow> billable, IReadOnlyList<CreditAllocation> allocations, CancellationToken cancellationToken)
@@ -372,18 +373,113 @@ internal sealed class TermBilling(
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    /// <summary>ANNUAL: one invoice for the transaction's charges, billed and due on the billing date.</summary>
+    /// <summary>
+    /// Bills the transaction's charges as the plan's instalment invoices (NX-EC-11): ANNUAL is one invoice due on the billing date;
+    /// an instalment plan splits every charge over the schedule by largest remainder (premium evenly, tax/levy/fee pro rata to
+    /// each instalment's premium). An endorsement's delta is re-spread over the term's instalments still to fall due (or, when
+    /// none is left, billed at once); invoices already paid or past due are never touched. All instalment invoices are
+    /// issued now (state Due, future due dates); delinquency counts an instalment only from its due date.
+    /// </summary>
     private async Task BillAsync(PlanInstanceRow plan, BillingAccountRow account, List<ChargeRow> charges, CancellationToken cancellationToken)
     {
         var today = ledger.Today;
         var now = clock.Now;
         var currency = Currency.FromCode(account.Currency);
         var transactionId = charges[0].TransactionId;
+        var ordered = charges.OrderBy(c => c.SetIndex).ToList();
+        var schedule = ScheduleOf(plan, transactionId, today);
+        var split = InstalmentSplit.Split(
+            [.. ordered.Select(c => c.Amount)], [.. ordered.Select(c => c.ChargeCategory is not ("TAX" or "LEVY" or "FEE"))], schedule.Count);
+
+        var invoices = new List<InvoiceRow>();
+        var allItems = new List<InvoiceItemRow>();
+        for (var k = 0; k < schedule.Count; k++)
+        {
+            var shares = ordered.Select((c, ci) => (Charge: c, Amount: split[ci][k])).ToList();
+            var (invoice, items) = await BillInstalmentAsync(plan, account, shares, schedule[k], schedule.Count, today, now, cancellationToken).ConfigureAwait(false);
+            invoices.Add(invoice);
+            allItems.AddRange(items);
+        }
+
+        foreach (var charge in ordered)
+        {
+            charge.Status = Codes.Of(ChargeStatus.Scheduled);
+        }
+
+        var lineage = Lineage(plan.PolicyId, plan.TermId, transactionId);
+        events.Publish(new OutgoingEvent(
+            EventDescriptor.From(ChargesScheduledV1.Descriptor), "BillingAccount", account.BillingAccountId.Value.ToString(),
+            new ChargesScheduledV1
+            {
+                TermId = plan.TermId,
+                TransactionId = transactionId,
+                ChargeIds = [.. ordered.Select(c => c.ChargeId)],
+                Items = [.. allItems.Select(i => new ScheduledItem { ItemId = i.InvoiceItemId, Status = ScheduledItem.StatusValue.Billed })],
+            },
+            lineage.With("billingAccountId", account.BillingAccountId.Value.ToString())) { OccurredAt = now });
+
+        // One fiscal request per transaction (REQ-BIL-096): it rides on the first instalment invoice and covers the whole transaction.
+        await RequestFiscalDocumentAsync(invoices[0], account, allItems, cancellationToken).ConfigureAwait(false);
+        foreach (var invoice in invoices)
+        {
+            var items = allItems.Where(i => i.InvoiceId == invoice.InvoiceId).ToList();
+            events.Publish(new OutgoingEvent(
+                EventDescriptor.From(InvoiceIssuedV1.Descriptor), "BillingAccount", account.BillingAccountId.Value.ToString(),
+                new InvoiceIssuedV1
+                {
+                    InvoiceId = invoice.InvoiceId,
+                    InvoiceNumber = InvoiceNumber.Parse(invoice.InvoiceNumber),
+                    Kind = InvoiceIssuedV1.KindValue.Invoice,
+                    TermIds = [plan.TermId],
+                    TotalsByCategory = [.. items.GroupBy(i => i.ChargeCategory).OrderBy(g => g.Key, StringComparer.Ordinal)
+                        .Select(g => new CategoryTotal { Category = g.Key, Amount = Money.Sum(g.Select(i => new Money(i.Amount, currency)), currency) })],
+                    DueDate = invoice.DueDate,
+                    Method = invoice.Method,
+                    FiscalTriggerRef = invoice.FiscalDocumentId?.Value.ToString("D"),
+                },
+                lineage.With("invoiceId", invoice.InvoiceId.Value.ToString()).With("billingAccountId", account.BillingAccountId.Value.ToString())) { OccurredAt = now });
+        }
+
+        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// The instalments (number, due date) a transaction is billed in. ANNUAL: one, due today. The bound transaction of an
+    /// instalment plan: the whole schedule from the term start (a due date in the past is due today). Any later transaction
+    /// (an endorsement's debit): the term's instalment numbers whose date is still ahead, so the delta lands on the unpaid
+    /// future instalments (re-spread); one due today when none is left.
+    /// </summary>
+    private static List<(int No, BusinessDate Due)> ScheduleOf(PlanInstanceRow plan, PolicyTransactionId transactionId, BusinessDate today)
+    {
+        var count = Math.Max(1, PaymentPlans.InstalmentCount(plan.PlanCode));
+        if (count == 1)
+        {
+            return [(1, today)];
+        }
+
+        var months = 12 / count;
+        BusinessDate DueOf(int no) => plan.TermFrom.AddMonths(months * (no - 1));
+        if (transactionId == plan.BoundTransactionId)
+        {
+            return [.. Enumerable.Range(1, count).Select(no => (no, DueOf(no).CompareTo(today) < 0 ? today : DueOf(no)))];
+        }
+
+        var future = Enumerable.Range(1, count).Where(no => DueOf(no).CompareTo(today) > 0).ToList();
+        return future.Count == 0 ? [(1, today)] : [.. future.Select(no => (no, DueOf(no)))];
+    }
+
+    /// <summary>One instalment invoice with its items and its BILLED (and IPT_DUE) entries; the caller publishes the events.</summary>
+    private async Task<(InvoiceRow Invoice, List<InvoiceItemRow> Items)> BillInstalmentAsync(
+        PlanInstanceRow plan, BillingAccountRow account, List<(ChargeRow Charge, decimal Amount)> shares, (int No, BusinessDate Due) instalment, int instalmentCount,
+        BusinessDate today, Instant now, CancellationToken cancellationToken)
+    {
+        var currency = Currency.FromCode(account.Currency);
+        var transactionId = shares[0].Charge.TransactionId;
         var invoiceId = InvoiceId.New();
         var number = await numbering.NextAsync(new NumberRequest(NumberingSchemes.Invoice, today), cancellationToken).ConfigureAwait(false);
         var billed = InvoiceStateModel.Machine.FireOrThrow(InvoiceStateModel.Machine.Start(InvoiceState.Planned).Value, InvoiceTrigger.Bill);
         var due = InvoiceStateModel.Machine.FireOrThrow(billed, InvoiceTrigger.BecomeDue);
-        var total = Money.Sum(charges.Select(c => new Money(c.Amount, currency)), currency);
+        var total = Money.Sum(shares.Select(c => new Money(c.Amount, currency)), currency);
 
         var invoice = new InvoiceRow
         {
@@ -398,7 +494,9 @@ internal sealed class TermBilling(
             TermId = plan.TermId,
             TransactionId = transactionId,
             IssueDate = today,
-            DueDate = today,
+            DueDate = instalment.Due,
+            InstalmentNo = instalment.No,
+            InstalmentCount = instalmentCount,
             Method = plan.Method,
             Total = total.Amount,
             Currency = currency.Code,
@@ -413,7 +511,7 @@ internal sealed class TermBilling(
         var billedLegs = new List<PostingLeg>();
         var iptLegs = new List<PostingLeg>();
         var line = 0;
-        foreach (var charge in charges.OrderBy(c => c.SetIndex))
+        foreach (var (charge, share) in shares)
         {
             var item = new InvoiceItemRow
             {
@@ -432,17 +530,16 @@ internal sealed class TermBilling(
                 Provisional = charge.Provisional,
                 ValidFrom = charge.ValidFrom,
                 ValidTo = charge.ValidTo,
-                Amount = charge.Amount,
+                Amount = share,
                 Currency = charge.Currency,
-                State = Codes.Of(InvoiceItemState.Open), // Billed, and Open at once: the ANNUAL item is due on billing
+                State = Codes.Of(InvoiceItemState.Open), // Billed, and Open at once: the item is payable on issue (an instalment from its due date)
                 LineNo = ++line,
                 TransactionKind = charge.TransactionKind,
                 CancellationSource = charge.CancellationSource,
                 TreatmentRuleId = charge.TreatmentRuleId,
             };
             items.Add(item);
-            charge.Status = Codes.Of(ChargeStatus.Scheduled);
-            var amount = new Money(charge.Amount, currency);
+            var amount = new Money(share, currency);
             var dimensions = ChargeDimensions(charge, plan) with { InvoiceId = invoiceId, InvoiceItemId = item.InvoiceItemId };
 
             var rule = await ledger.RuleAsync(ledger.Key(EntryTypes.Billed, charge.ChargeCategory, RuleQualifiers.Any), cancellationToken).ConfigureAwait(false);
@@ -458,42 +555,13 @@ internal sealed class TermBilling(
 
         db.InvoiceItems.AddRange(items);
         var lineage = Lineage(plan.PolicyId, plan.TermId, transactionId).With("invoiceId", invoiceId.Value.ToString());
-
-        events.Publish(new OutgoingEvent(
-            EventDescriptor.From(ChargesScheduledV1.Descriptor), "BillingAccount", account.BillingAccountId.Value.ToString(),
-            new ChargesScheduledV1
-            {
-                TermId = plan.TermId,
-                TransactionId = transactionId,
-                ChargeIds = [.. charges.Select(c => c.ChargeId)],
-                Items = [.. items.Select(i => new ScheduledItem { ItemId = i.InvoiceItemId, Status = ScheduledItem.StatusValue.Billed })],
-            },
-            lineage.With("billingAccountId", account.BillingAccountId.Value.ToString())) { OccurredAt = now });
-
         ledger.Post(new EntrySpec(EntryTypes.Billed, account.BillingAccountId, billedLegs, lineage, "bil.Invoice.bill"));
         if (iptLegs.Count > 0)
         {
             ledger.Post(new EntrySpec(EntryTypes.IptDue, account.BillingAccountId, iptLegs, lineage, "bil.Invoice.bill"));
         }
 
-        await RequestFiscalDocumentAsync(invoice, account, items, cancellationToken).ConfigureAwait(false);
-
-        events.Publish(new OutgoingEvent(
-            EventDescriptor.From(InvoiceIssuedV1.Descriptor), "BillingAccount", account.BillingAccountId.Value.ToString(),
-            new InvoiceIssuedV1
-            {
-                InvoiceId = invoiceId,
-                InvoiceNumber = InvoiceNumber.Parse(invoice.InvoiceNumber),
-                Kind = InvoiceIssuedV1.KindValue.Invoice,
-                TermIds = [plan.TermId],
-                TotalsByCategory = [.. items.GroupBy(i => i.ChargeCategory).OrderBy(g => g.Key, StringComparer.Ordinal)
-                    .Select(g => new CategoryTotal { Category = g.Key, Amount = Money.Sum(g.Select(i => new Money(i.Amount, currency)), currency) })],
-                DueDate = invoice.DueDate,
-                Method = invoice.Method,
-                FiscalTriggerRef = invoice.FiscalDocumentId?.Value.ToString("D"),
-            },
-            lineage.With("billingAccountId", account.BillingAccountId.Value.ToString())) { OccurredAt = now });
-        await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return (invoice, items);
     }
 
     /// <summary>

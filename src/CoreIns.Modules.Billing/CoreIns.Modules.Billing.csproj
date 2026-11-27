@@ -29,6 +29,7 @@
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <!-- IBANs are P2: field encryption and blind index (D-ARC-14). -->
     <ProjectReference Include="..\CoreIns.Platform.DataProtection\CoreIns.Platform.DataProtection.csproj" />
+    <ProjectReference Include="..\CoreIns.Rules\CoreIns.Rules.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />
   </ItemGroup>
 
