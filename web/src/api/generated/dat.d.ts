@@ -234,6 +234,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/dat/v1/marts/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List mart runs of the legal entity in scope, newest first (BO-DAT-05 contract addition)
+         * @description List mart runs of the legal entity in scope, newest first (BO-DAT-05 contract addition).
+         *
+         *     Keyset-paged (contract §3.5.5). Status is COMPLETED or SIGNED_OFF; a sign-off carries its validity (a later adjustment invalidates it).
+         */
+        get: operations["dat.Mart.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/dat/v1/marts/{id}": {
         parameters: {
             query?: never;
@@ -1204,6 +1226,35 @@ export interface components {
             /** @description NotRegulatory for the management marts; regulatory layouts stay Unverified (BO-DAT-03). */
             legalStatus?: string;
         };
+        /** @description One row of dat.Mart.list: a stored run with its sign-off state (BO-DAT-05). */
+        MartRunListItem: {
+            runId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            mart: "PORTFOLIO_PREMIUM" | "CLAIMS_EXPERIENCE" | "RI_CESSION_SUMMARY";
+            /** @description The period the run was started with; empty = all. */
+            period: string;
+            productCode?: string;
+            /**
+             * @description SIGNED_OFF only while the sign-off is valid (no adjustment since).
+             * @enum {string}
+             */
+            status: "COMPLETED" | "SIGNED_OFF";
+            legalStatus?: string;
+            figureCount?: number;
+            snapshotHash: string;
+            createdBy: string;
+            createdAt: string;
+            /** @description Latest sign-off, if any; valid is false once an adjustment followed it. */
+            signOff?: {
+                signedBy?: string;
+                signedAt?: string;
+                valid?: boolean;
+            } | null;
+        };
+        /** @description Page of dat.Mart.list results (cursor pagination, contract §3.5.5) */
+        MartRunListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["MartRunListItem"][];
+        };
         /** @description dat.Mart.get result. PRD outputs: "figures, lineage pointer, diff" */
         MartGetResponse: {
             /** @description Run header: runId, mart, period, validAt, knownAt, status, snapshotHash, legalStatus, definitionVersion (BO-DAT-03). */
@@ -1363,6 +1414,8 @@ export interface components {
             graph?: components["schemas"]["Unspecified"];
             /** @description PRD: "source records ref" */
             sourceRecordsRef?: components["schemas"]["Unspecified"];
+            /** @description Cursor of the next page of source rows, or null on the last page (BO-DAT-05 contract addition). */
+            nextCursor?: string | null;
         };
         /** @description dat.Accumulation.snapshot result. PRD outputs: "aggregates" */
         AccumulationSnapshotResponse: {
@@ -1460,6 +1513,30 @@ export interface components {
             ungoverned?: components["schemas"]["Unspecified"];
             /** @description PRD: "Ungoverned + reasons" */
             reasons?: components["schemas"]["Unspecified"];
+            period?: string | null;
+            generatedAt?: string;
+            /** @description Events accepted for a handled type that are neither projected nor quarantined (BO-DAT-05). */
+            gapCount?: number;
+            /** @description Per conformed fact table and period: raw events projected, quarantined, or in a gap. */
+            tables?: components["schemas"]["CoverageLine"][];
+            /** @description Per mart and period: source events projected (or read directly), quarantined, or in a gap. */
+            marts?: components["schemas"]["CoverageLine"][];
+            /** @description Event types with no conformed fact and no mart, per period: counted, not projected. */
+            notHandled?: components["schemas"]["CoverageLine"][];
+        };
+        /** @description Control totals of one fact table, mart or unhandled event type in one ingestion period (BO-DAT-05). */
+        CoverageLine: {
+            /** @description Fact table, mart code or registry name of an unhandled event type. */
+            name: string;
+            /** @description YYYY-MM of the received time. */
+            period: string;
+            received: number;
+            projected: number;
+            quarantined: number;
+            /** @description Handled type, accepted into the raw ledger, but neither projected nor quarantined. */
+            gap: number;
+            /** @description Accepted but the type has no conformed fact or mart. */
+            notHandled: number;
         };
         /** @description dat.Monitor.metrics request. PRD inputs: "feature, version, metric records" */
         MonitorMetricsRequest: {
@@ -2419,6 +2496,45 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
+    "dat.Mart.list": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                /** @description Only runs of this mart. */
+                mart?: "PORTFOLIO_PREMIUM" | "CLAIMS_EXPERIENCE" | "RI_CESSION_SUMMARY";
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MartRunListPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
     "dat.Mart.get": {
         parameters: {
             query?: never;
@@ -2841,9 +2957,17 @@ export interface operations {
                  *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
                  */
                 knownAt?: components["parameters"]["KnownAt"];
-                /** @description PRD: "node" */
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                /** @description PRD: "node". Shorthand "<runId>/<figureKey>" for the two parameters below. */
                 node?: string;
-                /** @description PRD: "direction" */
+                /** @description Mart run id (BO-DAT-05). Required (here or through node). */
+                runId?: components["schemas"]["Uuid"];
+                /** @description Figure key within the run, e.g. GWP|MOTOR|2026-10| (BO-DAT-05). Required (here or through node). */
+                figureKey?: string;
+                /** @description PRD: "direction". Only "upstream" (the default) is served. */
                 direction?: string;
             };
             header?: {
@@ -2872,6 +2996,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
         };
     };
@@ -3289,6 +3414,8 @@ export interface operations {
             query?: {
                 /** @description PRD: "AI feature id" */
                 aiFeatureId?: components["schemas"]["Uuid"];
+                /** @description Ingestion period YYYY, YYYY-MM or from..to on received time (BO-DAT-05); omitted = all. */
+                period?: string;
             };
             header?: {
                 /**

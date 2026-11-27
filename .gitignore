@@ -8,7 +8,8 @@ StrykerOutput/
 # Node
 node_modules/
 dist/
-coverage/
+/web/coverage/
+/tests/**/coverage/
 test-results/
 playwright-report/
 # Build outputs (SBOMs, reports)

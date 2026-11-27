@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.TaxLevy.detail result. PRD outputs: "totals, detail"</summary>
+/// <summary>bil.TaxLevy.detail result. PRD outputs: "totals, detail". levies: the levy tracking per levy authority and period (BO-BIL-14)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TaxLevyDetailResponse
 {
@@ -23,4 +23,9 @@ public sealed record TaxLevyDetailResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("detail")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? Detail { get; init; }
+
+    /// <summary>Contract member 'levies'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("levies")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.TaxLevyTrackingItem>? Levies { get; init; }
 }

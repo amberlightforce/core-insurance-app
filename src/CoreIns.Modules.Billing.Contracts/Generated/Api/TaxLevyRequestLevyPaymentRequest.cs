@@ -8,19 +8,27 @@ namespace CoreIns.Modules.Billing.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TaxLevyRequestLevyPaymentRequest
 {
-    /// <summary>PRD: "type"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("type")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Type { get; init; }
+    /// <summary>Levy type = levy authority code (an upper-snake charge type that has levy lines in the period)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("levyType")]
+    public required string LevyType { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Accounting month yyyy-MM (validated by the handler)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("period")]
+    public required string Period { get; init; }
+
+    /// <summary>The authority as a party</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("payeePartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PayeePartyId { get; init; }
+
+    /// <summary>Active LEVY payee account of the authority, verification of payee matched</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'payeeAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("payeeAccountId")]
+    public required global::System.Guid PayeeAccountId { get; init; }
+
+    /// <summary>Extra duplicate key and payment reference</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("statementReference")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    public string? StatementReference { get; init; }
 }

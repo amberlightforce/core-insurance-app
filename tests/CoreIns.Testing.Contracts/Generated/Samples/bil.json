@@ -931,7 +931,43 @@
     },
     "bil.TaxLevy.detail": {
       "totals": "unspecified",
-      "detail": "unspecified"
+      "detail": "unspecified",
+      "levies": [
+        {
+          "levyType": "sample",
+          "period": "sample",
+          "currency": "SAMPLE_CODE",
+          "collected": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "payable": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "requested": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "approved": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paid": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "outstanding": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "legalStatus": "sample",
+          "provisional": true,
+          "payableId": "0192a62f-090e-7ba8-8b94-be79c43e869d",
+          "disbursementId": "01926377-0811-7543-8298-420fae92ab4a",
+          "disbursementStatus": "sample"
+        }
+      ]
     },
     "bil.TaxLevy.periods": {
       "totals": "unspecified",
@@ -3168,19 +3204,102 @@
     },
     "TaxLevyDetailResponse": {
       "totals": "unspecified",
-      "detail": "unspecified"
+      "detail": "unspecified",
+      "levies": [
+        {
+          "levyType": "sample",
+          "period": "sample",
+          "currency": "SAMPLE_CODE",
+          "collected": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "payable": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "requested": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "approved": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paid": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "outstanding": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "legalStatus": "sample",
+          "provisional": true,
+          "payableId": "0192131e-1817-7cd1-8d65-73b8d67bbd03",
+          "disbursementId": "0192a5f0-4028-7279-8d3c-7e725e7b6e89",
+          "disbursementStatus": "sample"
+        }
+      ]
     },
     "TaxLevyPeriodsResponse": {
       "totals": "unspecified",
       "detail": "unspecified"
     },
     "TaxLevyRequestLevyPaymentRequest": {
-      "type": "unspecified",
-      "period": "unspecified"
+      "levyType": "sample",
+      "period": "sample",
+      "payeePartyId": "0192c38c-1d9a-7e96-80b0-496b9e34caa2",
+      "payeeAccountId": "0192ce7e-8658-7ddc-821f-f241816c7014",
+      "statementReference": "sample"
     },
     "TaxLevyRequestLevyPaymentResponse": {
-      "totals": "unspecified",
-      "detail": "unspecified"
+      "payableId": "01921768-30e6-7e3d-8961-cf13622dcfb7",
+      "levyType": "sample",
+      "period": "sample",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "legalStatus": "sample",
+      "provisional": true,
+      "disbursementId": "019240bc-76b2-7cb6-8336-ba6e35615cc1",
+      "disbursementNumber": "SAMPLE-000001",
+      "status": "sample"
+    },
+    "TaxLevyTrackingItem": {
+      "levyType": "sample",
+      "period": "sample",
+      "currency": "SAMPLE_CODE",
+      "collected": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "payable": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "requested": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "approved": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "paid": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "outstanding": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "legalStatus": "sample",
+      "provisional": true,
+      "payableId": "0192ae24-02f7-7b37-8013-009d6a0af7de",
+      "disbursementId": "019205bc-fdf8-79ff-84be-42352c2c373c",
+      "disbursementStatus": "sample"
     },
     "TransferMoneyRequest": {
       "source": "unspecified",

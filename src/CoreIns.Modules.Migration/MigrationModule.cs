@@ -9,6 +9,7 @@ using CoreIns.Modules.Migration.Services;
 using CoreIns.Modules.Migration.Services.Reconciliation;
 using CoreIns.Modules.Migration.Services.SignOff;
 using CoreIns.Modules.Migration.Services.Mapping;
+using CoreIns.Modules.Migration.Services.Waves;
 using CoreIns.Modules.Migration.Services.Quality;
 using CoreIns.Modules.Migration.Services.Staging;
 using CoreIns.Platform;
@@ -103,6 +104,14 @@ public static class MigrationModule
         services.AddScoped<MappingService>();
         services.AddCommand<CreateMappingSpec, MappingSpecView, CreateMappingSpecHandler>(CommandDescriptor.For("mig.Mapping.create"));
         services.AddCommand<PublishMappingSpec, MappingSpecView, PublishMappingSpecHandler>(CommandDescriptor.For("mig.Mapping.publish"));
+
+        services.AddScoped<RoutingPeriods>();
+        services.AddScoped<WaveConversion>();
+        services.AddScoped<WaveService>();
+        services.AddCommand<PlanWave, WaveView, WaveCommandHandler>(CommandDescriptor.For("mig.Wave.plan"));
+        services.AddCommand<ConvertWave, WaveView, WaveCommandHandler>(CommandDescriptor.For("mig.Wave.convert"));
+        services.AddCommand<AdjustWave, WaveView, WaveCommandHandler>(CommandDescriptor.For("mig.Wave.adjust"));
+        services.AddCommand<CloseWave, WaveView, WaveCommandHandler>(CommandDescriptor.For("mig.Wave.close"));
 
         services.AddScoped<IMigrationXrefService, MigrationXrefService>();
         services.AddScoped<IMigrationRoutingService, MigrationRoutingService>();

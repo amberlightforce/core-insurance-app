@@ -45,6 +45,12 @@ internal sealed class MartsController : ControllerBase
     public async Task<IResult> ExportAsync([FromBody] MartExportRequest request, [FromServices] ICommandHandler<ExportMart, MartExportResponse> handler, CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new ExportMart(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
+    /// <summary>dat.Mart.list: the runs of the caller's legal entity, newest first (BO-DAT-05).</summary>
+    [HttpGet("api/dat/v1/marts/runs")]
+    [Authorize(Policy = "dat.Mart.list")]
+    public async Task<IResult> ListAsync([FromQuery] string? mart, [FromQuery] string? cursor, [FromQuery] int? limit, [FromServices] MartEngine engine, CancellationToken cancellationToken) =>
+        Scope() is { } legalEntity ? (await engine.ListAsync(legalEntity, mart, cursor, limit, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext) : NoScope();
+
     /// <summary>dat.Mart.get.</summary>
     [HttpGet("api/dat/v1/marts/{id}")]
     [Authorize(Policy = "dat.Mart.get")]

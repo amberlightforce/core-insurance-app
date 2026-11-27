@@ -4,23 +4,47 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.TaxLevy.requestLevyPayment result. PRD outputs: "totals, detail"</summary>
+/// <summary>bil.TaxLevy.requestLevyPayment result: the payable and its payment request (PendingApproval)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TaxLevyRequestLevyPaymentResponse
 {
-    /// <summary>PRD: "totals"</summary>
+    /// <summary>Contract member 'payableId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'payableId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("totals")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Totals { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("payableId")]
+    public required global::System.Guid PayableId { get; init; }
 
-    /// <summary>PRD: "detail"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("detail")]
+    /// <summary>Contract member 'levyType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("levyType")]
+    public required string LevyType { get; init; }
+
+    /// <summary>Contract member 'period'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
+    public required string Period { get; init; }
+
+    /// <summary>Contract member 'amount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+    public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+
+    /// <summary>Contract member 'legalStatus'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+    public required string LegalStatus { get; init; }
+
+    /// <summary>Contract member 'provisional'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("provisional")]
+    public required bool Provisional { get; init; }
+
+    /// <summary>Contract member 'disbursementId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("disbursementId")]
+    public required global::CoreIns.SharedKernel.Identifiers.DisbursementId DisbursementId { get; init; }
+
+    /// <summary>Contract member 'disbursementNumber'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("disbursementNumber")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Detail { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.DisbursementNumber? DisbursementNumber { get; init; }
+
+    /// <summary>Canonical disbursement state of the payment request</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required string Status { get; init; }
 }

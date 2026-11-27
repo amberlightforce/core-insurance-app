@@ -29,6 +29,9 @@ internal sealed record MappingSpecView(
     IReadOnlyList<MappingField> Fields, IReadOnlyList<MappingCodeMapDef> CodeMaps, string ContentHash, string CreatedBy, DateTimeOffset CreatedAt,
     string? RequestedBy, Guid? ApprovalRequestId, string? DecidedBy, DateTimeOffset? DecidedAt, string? DecisionComment);
 
+/// <summary>An approved spec with its fields and code tables, ready to map records.</summary>
+internal sealed record ApprovedMapping(MappingSpecRow Spec, List<MappingField> Fields, Dictionary<string, Dictionary<string, string>> Lookup);
+
 internal sealed record MappingSpecListView(IReadOnlyList<MappingSpecView> Items);
 
 internal sealed record MappingUnmappedCodeView(string CodeMap, string Value, int Count);
@@ -239,6 +242,36 @@ internal sealed class MappingService(MigrationDbContext db, RequestContext conte
 
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return ToView(row, fields, maps);
+    }
+
+    /// <summary>
+    /// Loads a spec a batch converts with and proves it is still what was approved (BO-MIG-07): it exists in the legal entity, its status is APPROVED, the
+    /// stored content still hashes to the recorded hash and, when given, to the hash the batch recorded at creation.
+    /// </summary>
+    public async Task<Result<ApprovedMapping>> LoadApprovedAsync(Guid specId, string? expectedHash, CancellationToken cancellationToken)
+    {
+        var legalEntity = LegalEntity;
+        var spec = await db.MappingSpecs.AsNoTracking().FirstOrDefaultAsync(s => s.SpecId == specId && s.LegalEntityId == legalEntity, cancellationToken).ConfigureAwait(false);
+        if (spec is null)
+        {
+            return MigrationErrors.NotFound("The mapping spec");
+        }
+
+        if (spec.Status != MappingStatus.Approved)
+        {
+            return MigrationErrors.State($"Mapping spec {spec.Name} v{spec.Version} is {spec.Status}; only an APPROVED spec can convert a batch.");
+        }
+
+        var fields = MappingEngine.Deserialize<List<MappingField>>(spec.Fields) ?? [];
+        var maps = await LoadMapsAsync(spec.SpecId, cancellationToken).ConfigureAwait(false);
+        if (MappingEngine.ContentHash(spec.Name, spec.SourceObjectType, spec.TargetModule, spec.TargetObjectType, fields, maps) != spec.ContentHash
+            || (expectedHash is not null && expectedHash != spec.ContentHash))
+        {
+            return MigrationErrors.State($"Mapping spec {spec.Name} v{spec.Version} no longer matches the content the batch was built from.");
+        }
+
+        var lookup = maps.ToDictionary(m => m.Name, m => m.Entries.ToDictionary(e => e.Legacy, e => e.Core, StringComparer.Ordinal), StringComparer.Ordinal);
+        return new ApprovedMapping(spec, fields, lookup);
     }
 
     public async Task<Result<MappingPreviewView>> PreviewAsync(MappingPreviewBody body, CancellationToken cancellationToken)

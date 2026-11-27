@@ -5467,9 +5467,9 @@ paths:
   /api/bil/v1/tax-levy/request-levy-payment:
     post:
       operationId: bil.TaxLevy.requestLevyPayment
-      summary: Levy payment periods; IPT accrual totals only (tax payments are TAX_REMITTANCE disbursements requested by FIN)
+      summary: Request the payment of one levy period to its authority
       description: |-
-        Levy payment periods; IPT accrual totals only (tax payments are `TAX_REMITTANCE` disbursements requested by FIN)
+        Creates the payable of one levy type (levy authority) and period from the levy lines of the sub-ledger and requests its payment as a `BIL_LEVY` disbursement (SEPA credit transfer, EUR) to the authority's Active LEVY payee account (VoP matched). A payment request is created from a payable, never from free text: the amount is the net levy accrued in the period. One payable per levy authority and period; a repeat is `BIL-ERR-DUPLICATE`. The disbursement waits in PendingApproval for a second person (`bil.Disbursement.approveRelease`). A levy whose legal status is not settled is refused in Production (`BIL-ERR-LEVY-UNSETTLED`, D-USR-19).
 
         PRD inputs: type, period
         PRD outputs: totals, detail
@@ -5494,6 +5494,15 @@ paths:
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: BIL-ERR-DUPLICATE
+        note: a payable already exists for this levy authority and period (existing ids in the metadata)
+        status: 409
+      - code: BIL-ERR-LEVY-UNSETTLED
+        note: the levy rows behind the period are not Settled and the environment is Production (D-USR-19)
+        status: 422
+      - code: BIL-ERR-NOTHING-PAYABLE
+        note: no positive net levy in the period and currency
+        status: 422
       x-source:
       - PRD-06 §9.1 l.1808
       parameters:
@@ -9277,7 +9286,7 @@ components:
           description: 'PRD: "detail"'
     TaxLevyDetailResponse:
       type: object
-      description: 'bil.TaxLevy.detail result. PRD outputs: "totals, detail"'
+      description: 'bil.TaxLevy.detail result. PRD outputs: "totals, detail". levies: the levy tracking per levy authority and period (BO-BIL-14)'
       properties:
         totals:
           $ref: common.yaml#/components/schemas/Unspecified
@@ -9285,26 +9294,121 @@ components:
         detail:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "detail"'
+        levies:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxLevyTrackingItem'
+    TaxLevyTrackingItem:
+      type: object
+      description: 'One levy authority in one month: collected, payable, requested, approved, paid and outstanding (exact amounts, shared rounding policy)'
+      properties:
+        levyType:
+          type: string
+          description: Levy type = levy authority code (the charge type of the levy lines)
+        period:
+          type: string
+          description: Accounting month yyyy-MM (validated by the handler)
+        currency:
+          $ref: ../events/common.schema.json#/$defs/Code
+        collected:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Levy collected on invoices, net of credits (the ledger payable accrual)
+        payable:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Amount of the payable created for the period (zero until a payment is requested)
+        requested:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Payable whose payment request is open (Requested, PendingApproval)
+        approved:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Payable approved for release, not yet paid (Approved, Released)
+        paid:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Payable paid (Issued, Cleared)
+        outstanding:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Collected less the payable (what no payment request covers yet)
+        legalStatus:
+          type: string
+          description: Settled, or the weakest legal status behind the levy lines (PendingOpinion, Unverified); a not-settled levy is refused in Production
+        provisional:
+          type: boolean
+        payableId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        disbursementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        disbursementStatus:
+          type: string
+      required:
+      - levyType
+      - period
+      - currency
+      - collected
+      - payable
+      - requested
+      - approved
+      - paid
+      - outstanding
+      - legalStatus
+      - provisional
     TaxLevyRequestLevyPaymentRequest:
       type: object
       description: 'bil.TaxLevy.requestLevyPayment request. PRD inputs: "type, period"'
       properties:
-        type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
+        levyType:
+          type: string
+          maxLength: 64
+          description: Levy type = levy authority code (an upper-snake charge type that has levy lines in the period)
         period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+          type: string
+          description: Accounting month yyyy-MM (validated by the handler)
+        payeePartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The authority as a party
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Active LEVY payee account of the authority, verification of payee matched
+        statementReference:
+          type: string
+          maxLength: 140
+          description: Extra duplicate key and payment reference
+      required:
+      - levyType
+      - period
+      - payeePartyId
+      - payeeAccountId
     TaxLevyRequestLevyPaymentResponse:
       type: object
-      description: 'bil.TaxLevy.requestLevyPayment result. PRD outputs: "totals, detail"'
+      description: 'bil.TaxLevy.requestLevyPayment result: the payable and its payment request (PendingApproval)'
       properties:
-        totals:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "totals"'
-        detail:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "detail"'
+        payableId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        levyType:
+          type: string
+        period:
+          type: string
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        legalStatus:
+          type: string
+        provisional:
+          type: boolean
+        disbursementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        disbursementNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        status:
+          type: string
+          description: Canonical disbursement state of the payment request
+      required:
+      - payableId
+      - levyType
+      - period
+      - amount
+      - legalStatus
+      - provisional
+      - disbursementId
+      - status
     LedgerQueryItem:
       type: object
       description: 'bil.Ledger.query result. PRD outputs: "entries, balances"'
