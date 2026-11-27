@@ -4,23 +4,29 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.ApprovalType.register result. PRD outputs: "request; decision"</summary>
+/// <summary>plt.ApprovalType.register result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ApprovalTypeRegisterResponse
 {
-    /// <summary>PRD: "request"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("request")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Request { get; init; }
+    /// <summary>Contract member 'type'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("type")]
+    public required string Type { get; init; }
 
-    /// <summary>PRD: "decision"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
+    /// <summary>Contract member 'description'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("description")]
+    public required string Description { get; init; }
+
+    /// <summary>Contract member 'defaultReferralRole'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("defaultReferralRole")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Decision { get; init; }
+    public string? DefaultReferralRole { get; init; }
+
+    /// <summary>Contract member 'defaultAuthorityType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("defaultAuthorityType")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? DefaultAuthorityType { get; init; }
+
+    /// <summary>1 on first registration, incremented on every update</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    public required int Version { get; init; }
 }

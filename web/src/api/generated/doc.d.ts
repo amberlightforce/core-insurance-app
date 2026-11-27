@@ -1197,28 +1197,46 @@ export interface components {
             /** @description PRD: "status" */
             status?: components["schemas"]["Unspecified"];
         };
-        /** @description doc.DocumentType.list result. PRD outputs: "types" */
+        /** @description doc.DocumentType.list result: one document type of the catalogue (BO-DOC-05). */
         DocumentTypeListItem: {
-            /** @description PRD: "types" */
-            types?: components["schemas"]["Unspecified"];
+            documentType: string;
+            defaultMedium: string;
+            titleEl: string;
+            titleEn: string;
+            requiredFields: string[];
         };
         /** @description Page of doc.DocumentType.list results (cursor pagination, contract §3.5.5) */
         DocumentTypeListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["DocumentTypeListItem"][];
         };
-        /** @description doc.Template.list result. PRD outputs: "objects" */
+        /** @description doc.Template.list result: one template version (BO-DOC-05). */
         TemplateListItem: {
-            /** @description PRD: "objects" */
-            objects?: components["schemas"]["Unspecified"];
+            templateId: components["schemas"]["Uuid"];
+            documentType: string;
+            version: number;
+            /** @description DRAFT or APPROVED. */
+            status: string;
+            validFrom: components["schemas"]["LocalDate"];
+            validTo?: components["schemas"]["LocalDate"];
+            productCode?: string;
+            lineOfBusiness?: string;
+            jurisdiction?: string;
+            titleEl?: string;
+            titleEn?: string;
         };
         /** @description Page of doc.Template.list results (cursor pagination, contract §3.5.5) */
         TemplateListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["TemplateListItem"][];
         };
-        /** @description doc.Clause.get result. PRD outputs: "objects" */
+        /** @description doc.Clause.get result: one library clause (BO-DOC-05). */
         ClauseGetResponse: {
-            /** @description PRD: "objects" */
-            objects?: components["schemas"]["Unspecified"];
+            clauseId: components["schemas"]["Uuid"];
+            code: string;
+            titleEl: string;
+            textEl: string;
+            titleEn: string;
+            textEn: string;
+            status: string;
         };
         /** @description doc.Forms.infer request. PRD inputs: "job id, version" */
         FormsInferRequest: {
@@ -1281,21 +1299,20 @@ export interface components {
             /** @description PRD: "per-ref results" */
             perRefResults?: components["schemas"]["Unspecified"];
         };
-        /** @description doc.Binding.resolve request. PRD inputs: "product version, form, language, channel, date" */
+        /** @description doc.Binding.resolve request (BO-DOC-05): the document type plus optional product, line and jurisdiction; the date is the validAt query parameter. */
         BindingResolveRequest: {
-            /** @description PRD: "product version" */
-            productVersion?: components["schemas"]["Unspecified"];
-            /** @description PRD: "form" */
-            form?: components["schemas"]["Unspecified"];
-            /** @description PRD: "language" */
+            documentType: string;
+            productCode?: string;
+            lineOfBusiness?: string;
+            jurisdiction?: string;
             language?: components["schemas"]["LanguageCode"];
-            /** @description PRD: "channel" */
-            channel?: components["schemas"]["Unspecified"];
         };
-        /** @description doc.Binding.resolve result. PRD outputs: "template version" */
+        /** @description doc.Binding.resolve result: the approved template version in force at validAt (BO-DOC-05). */
         BindingResolveResponse: {
-            /** @description PRD: "template version" */
-            templateVersion?: components["schemas"]["Unspecified"];
+            templateId: components["schemas"]["Uuid"];
+            documentType: string;
+            version: number;
+            language?: components["schemas"]["LanguageCode"];
         };
         /** @description Typed from REQ-DOC-007, REQ-DOC-224. PRD inputs: "transaction id" */
         ProofOfCoverIssueRequest: {

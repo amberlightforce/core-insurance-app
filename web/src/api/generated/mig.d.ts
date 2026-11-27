@@ -644,6 +644,13 @@ export interface components {
             counts: {
                 [key: string]: number;
             };
+            /**
+             * Format: int32
+             * @description Items with an outcome other than PENDING (progress of a background run, BO-MIG-01).
+             */
+            processedCount?: number;
+            /** Format: int32 */
+            failedCount?: number;
         };
         BatchResponse: {
             batch: components["schemas"]["BatchView"];
@@ -1304,6 +1311,15 @@ export interface operations {
         responses: {
             /** @description Success */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BatchResponse"];
+                };
+            };
+            /** @description Accepted. The batch is too large for the request and runs on the worker (status RUNNING); poll the batch. */
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };

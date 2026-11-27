@@ -226,13 +226,37 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Contract lifecycle
-         * @description Contract lifecycle
+         * Endorse an Active contract
+         * @description Endorse an Active contract from an effective date. Creates the next contract version (valid from the effective date, recorded now)
+         *     and opens a PLT approval; approved versions stay unchanged. ri.Contract.approveEndorsement decides it.
          *
          *     PRD inputs: contract, section, layer, clause data; reason
          *     PRD outputs: contract version
          */
         post: operations["ri.Contract.endorse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ri/v1/contracts/approve-endorsement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Decide an endorsement
+         * @description Decide a pending endorsement (APPROVE or REJECT) as the checker. The endorser cannot decide it (RI-ERR-SOD).
+         *
+         *     PRD inputs: contract, section, layer, clause data; reason
+         *     PRD outputs: contract version
+         */
+        post: operations["ri.Contract.approveEndorsement"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2791,7 +2815,7 @@ export interface components {
             participations: components["schemas"]["RiParticipationView"][];
             placedPct: components["schemas"]["Decimal"];
             status: components["schemas"]["RiContractStatus"];
-            /** @description Contract version row number; always 1 in slice 4 (endorsement is later, D-SL4-04) */
+            /** @description Contract version row number (1 = the original, 2 and up = endorsements) */
             versionNo: number;
             /** @description Start of the version row valid period */
             validFrom?: components["schemas"]["Instant"];
@@ -2826,23 +2850,41 @@ export interface components {
         ContractUpdateResponse: {
             contract: components["schemas"]["RiContractView"];
         };
-        /** @description ri.Contract.endorse request. PRD inputs: "contract, section, layer, clause data; reason" */
+        /** @description ri.Contract.endorse request. The endorsed content is the in-force content with the members named here replaced; the treaty period cannot change. */
         ContractEndorseRequest: {
-            /** @description PRD: "contract" */
-            contract?: components["schemas"]["Unspecified"];
-            /** @description PRD: "section" */
-            section?: components["schemas"]["Unspecified"];
-            /** @description PRD: "layer" */
-            layer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "clause data" */
-            clauseData?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            contractId: components["schemas"]["Uuid"];
+            /** @description The recordVersion the user saw; a different current version is RI-ERR-STALE */
+            expectedRecordVersion: number;
+            /** @description First day (Europe/Athens) the endorsed terms apply; inside the treaty period and after the in-force version's own start */
+            effectiveFrom: components["schemas"]["LocalDate"];
+            /** @description Why the contract is endorsed (audit; required) */
+            reason: components["schemas"]["Text"];
+            scope?: components["schemas"]["RiContractScope"];
+            clause?: components["schemas"]["RiContractClause"];
+            layers?: components["schemas"]["RiLayer"][];
+            participations?: components["schemas"]["RiParticipationInput"][];
+            placedPct?: components["schemas"]["Decimal"];
         };
-        /** @description ri.Contract.endorse result. PRD outputs: "contract version" */
+        /** @description ri.Contract.endorse result; the contract view is the endorsed (pending) version */
         ContractEndorseResponse: {
-            /** @description PRD: "contract version" */
-            contractVersion?: components["schemas"]["Unspecified"];
+            contract: components["schemas"]["RiContractView"];
+            approvalRequestId: components["schemas"]["Uuid"];
+        };
+        /** @description ri.Contract.approveEndorsement request. The checker must not be the endorser (RI-ERR-SOD). */
+        ContractApproveEndorsementRequest: {
+            contractId: components["schemas"]["Uuid"];
+            /** @description The pending endorsement version */
+            versionNo: number;
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            /** @description Reason; required for REJECT */
+            reason?: components["schemas"]["Text"];
+        };
+        /** @description ri.Contract.approveEndorsement result */
+        ContractApproveEndorsementResponse: {
+            contract: components["schemas"]["RiContractView"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
         };
         /** @description ri.Contract.submit request: Draft -> PendingApproval; opens the PLT approval RI.CONTRACT_APPROVE (enterer is the maker). */
         ContractSubmitRequest: {
@@ -2948,12 +2990,13 @@ export interface components {
         ContractListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["ContractListItem"][];
         };
-        /** @description ri.Contract.versionAt result. PRD outputs: "contracts, versions" */
+        /** @description ri.Contract.versionAt result: the contract version in force at validAt as known at knownAt */
         ContractVersionAtResponse: {
-            /** @description PRD: "contracts" */
-            contracts?: components["schemas"]["Unspecified"];
-            /** @description PRD: "versions" */
-            versions?: components["schemas"]["Unspecified"];
+            contract: components["schemas"]["RiContractView"];
+            validAt: components["schemas"]["LocalDate"];
+            knownAt: components["schemas"]["Instant"];
+            /** @description When the returned version became known (creation for version 1, approval for an endorsement) */
+            knownFrom: components["schemas"]["Instant"];
         };
         /** @description ri.Contract.applicable result (REQ-RI-001, REQ-RI-116) */
         ContractApplicableResponse: {
@@ -3400,44 +3443,73 @@ export interface components {
         /** @description Typed from REQ-RI-003, REQ-RI-128. PRD outputs: "batch id" */
         RecoveryRecalculateResponse: {
             batchId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            contractYear: number;
+            /** @description Delta rows the restatement booked (0 when the booked recoveries already equalled the full recalculation) */
+            rowsBooked: number;
         };
         /** @description ri.Occurrence.link request. PRD inputs: "claim ids, reason" */
         OccurrenceLinkRequest: {
-            /** @description PRD: "claim ids" */
-            claimIds?: components["schemas"]["Uuid"][];
+            /** @description PRD: "claim ids"; all under one contract (a link needs at least two) */
+            claimIds: components["schemas"]["Uuid"][];
             /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            reason: string;
         };
         /** @description ri.Occurrence.link result. PRD outputs: "occurrence" */
         OccurrenceLinkResponse: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
+            occurrence: components["schemas"]["OccurrenceView"];
+        };
+        /** @description A group of claims treated as one occurrence for the per-occurrence layers of a contract (REQ-RI-115). */
+        OccurrenceView: {
+            occurrenceId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            contractYear: number;
+            /** @description The claims currently linked (empty once the occurrence is dissolved) */
+            claimIds: components["schemas"]["Uuid"][];
+            reason?: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "DISSOLVED";
         };
         /** @description ri.Occurrence.unlink request. PRD inputs: "claim ids, reason" */
         OccurrenceUnlinkRequest: {
-            /** @description PRD: "claim ids" */
-            claimIds?: components["schemas"]["Uuid"][];
+            /** @description PRD: "claim ids"; all under one contract */
+            claimIds: components["schemas"]["Uuid"][];
             /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            reason: string;
         };
         /** @description ri.Occurrence.unlink result. PRD outputs: "occurrence" */
         OccurrenceUnlinkResponse: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
+            occurrence: components["schemas"]["OccurrenceView"];
         };
         /** @description ri.Recovery.adjust request. PRD inputs: "occurrence, amount, reason" */
         RecoveryAdjustRequest: {
-            /** @description PRD: "occurrence" */
-            occurrence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "amount" */
-            amount?: components["schemas"]["Money"];
+            contractId: components["schemas"]["Uuid"];
+            /** @description PRD: "occurrence" - the claim, or any claim of the linked occurrence */
+            claimId: components["schemas"]["Uuid"];
+            layerId: components["schemas"]["Uuid"];
+            /** @description PRD: "amount" - signed change of the incurred recoverable, EUR, split over the panel by largest remainder */
+            amount: components["schemas"]["Money"];
             /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            reason: string;
         };
         /** @description ri.Recovery.adjust result. PRD outputs: "item" */
         RecoveryAdjustResponse: {
-            /** @description PRD: "item" */
-            item?: components["schemas"]["Unspecified"];
+            item: components["schemas"]["RecoveryAdjustmentItem"];
+        };
+        /** @description One manual adjustment (a sealed delta, never an update). */
+        RecoveryAdjustmentItem: {
+            adjustmentId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            /** @description The claim the adjustment is booked on (the representative claim of a linked occurrence) */
+            claimId: components["schemas"]["Uuid"];
+            layerId: components["schemas"]["Uuid"];
+            amount: components["schemas"]["Money"];
+            reason: string;
+            recordedAt: components["schemas"]["Instant"];
+            parts: {
+                participantPartyId: components["schemas"]["Uuid"];
+                amount: components["schemas"]["Money"];
+            }[];
         };
         /** @description ri.CatOccurrence.propose request. PRD inputs: "cat code, contract, windows, damage ratio" */
         CatOccurrenceProposeRequest: {
@@ -3513,8 +3585,21 @@ export interface components {
         };
         /** @description ri.AggregateTracker.get result. PRD outputs: "schedule" */
         AggregateTrackerGetResponse: {
-            /** @description PRD: "schedule" */
-            schedule?: components["schemas"]["Unspecified"];
+            schedule: components["schemas"]["AggregateTrackerRow"][];
+        };
+        /** @description Aggregate position of one layer of one contract year (booked recoveries plus manual adjustments, after the placed percentage). */
+        AggregateTrackerRow: {
+            contractId: components["schemas"]["Uuid"];
+            contractYear: number;
+            layerId: components["schemas"]["Uuid"];
+            layerNo: number;
+            /** @description Annual aggregate limit of the layer (null = unlimited) */
+            aggregateLimit?: components["schemas"]["Money"] | null;
+            recoverableIncurred: components["schemas"]["Money"];
+            recoverablePaid: components["schemas"]["Money"];
+            recoverableOutstanding: components["schemas"]["Money"];
+            /** @description Part of recoverableIncurred that comes from manual adjustments */
+            adjustments: components["schemas"]["Money"];
         };
         /** @description ri.DepositSchedule.get result. PRD outputs: "schedule, adjustment" */
         DepositScheduleGetResponse: {
@@ -5047,6 +5132,59 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "ri.Contract.approveEndorsement": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContractApproveEndorsementRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContractApproveEndorsementResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -5311,7 +5449,20 @@ export interface operations {
     };
     "ri.Contract.versionAt": {
         parameters: {
-            query?: never;
+            query: {
+                /**
+                 * @description Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),
+                 *     including what PRD rows call `asOf`, `asAt` or `date` (kept in the operation's `x-prd-param-names`). Given once,
+                 *     as this query parameter, never repeated in the body (D-API-09). Default now. Date or RFC 3339 instant.
+                 */
+                validAt?: components["parameters"]["ValidAt"];
+                /**
+                 * @description Transaction (record) time, contract §3.5.5: the only name for a transaction-time instant (D-API-08), including
+                 *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
+                 */
+                knownAt?: components["parameters"]["KnownAt"];
+                contractId: components["schemas"]["Uuid"];
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
@@ -5338,6 +5489,8 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
@@ -7125,11 +7278,11 @@ export interface operations {
     };
     "ri.AggregateTracker.get": {
         parameters: {
-            query?: {
-                /** @description PRD: "layer" */
+            query: {
+                /** @description PRD: "layer" - a layer id or a layer number */
                 layer?: string;
-                /** @description PRD: "year" */
-                year?: string;
+                /** @description PRD: "year" - the contract year */
+                year: number;
             };
             header?: {
                 /**

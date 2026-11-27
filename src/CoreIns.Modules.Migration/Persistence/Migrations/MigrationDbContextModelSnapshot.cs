@@ -113,6 +113,12 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
 
+                    b.Property<int>("Cursor")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("cursor");
+
                     b.Property<DateTime?>("DryRunAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("dry_run_at");
@@ -120,6 +126,16 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                     b.Property<string>("DryRunHash")
                         .HasColumnType("text")
                         .HasColumnName("dry_run_hash");
+
+                    b.Property<int>("FailedCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("failed_count");
+
+                    b.Property<DateTime?>("LeaseUntil")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("lease_until");
 
                     b.Property<Guid>("LegalEntityId")
                         .HasColumnType("uuid")
@@ -133,6 +149,12 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                     b.Property<string>("PausedFrom")
                         .HasColumnType("text")
                         .HasColumnName("paused_from");
+
+                    b.Property<int>("ProcessedCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("processed_count");
 
                     b.Property<int>("RecordVersion")
                         .IsConcurrencyToken()
@@ -154,6 +176,9 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
 
                     b.HasKey("BatchId")
                         .HasName("pk_batch");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_batch_status");
 
                     b.ToTable("batch", "mig");
                 });

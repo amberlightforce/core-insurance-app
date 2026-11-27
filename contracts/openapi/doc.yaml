@@ -3310,11 +3310,26 @@ components:
           description: 'PRD: "status"'
     DocumentTypeListItem:
       type: object
-      description: 'doc.DocumentType.list result. PRD outputs: "types"'
+      description: 'doc.DocumentType.list result: one document type of the catalogue (BO-DOC-05).'
       properties:
-        types:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "types"'
+        documentType:
+          type: string
+        defaultMedium:
+          type: string
+        titleEl:
+          type: string
+        titleEn:
+          type: string
+        requiredFields:
+          type: array
+          items:
+            type: string
+      required:
+      - documentType
+      - defaultMedium
+      - titleEl
+      - titleEn
+      - requiredFields
     DocumentTypeListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -3327,11 +3342,37 @@ components:
       description: Page of doc.DocumentType.list results (cursor pagination, contract §3.5.5)
     TemplateListItem:
       type: object
-      description: 'doc.Template.list result. PRD outputs: "objects"'
+      description: 'doc.Template.list result: one template version (BO-DOC-05).'
       properties:
-        objects:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "objects"'
+        templateId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        documentType:
+          type: string
+        version:
+          type: integer
+        status:
+          type: string
+          description: DRAFT or APPROVED.
+        validFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        validTo:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        productCode:
+          type: string
+        lineOfBusiness:
+          type: string
+        jurisdiction:
+          type: string
+        titleEl:
+          type: string
+        titleEn:
+          type: string
+      required:
+      - templateId
+      - documentType
+      - version
+      - status
+      - validFrom
     TemplateListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -3344,11 +3385,30 @@ components:
       description: Page of doc.Template.list results (cursor pagination, contract §3.5.5)
     ClauseGetResponse:
       type: object
-      description: 'doc.Clause.get result. PRD outputs: "objects"'
+      description: 'doc.Clause.get result: one library clause (BO-DOC-05).'
       properties:
-        objects:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "objects"'
+        clauseId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        code:
+          type: string
+        titleEl:
+          type: string
+        textEl:
+          type: string
+        titleEn:
+          type: string
+        textEn:
+          type: string
+        status:
+          type: string
+      required:
+      - clauseId
+      - code
+      - titleEl
+      - textEl
+      - titleEn
+      - textEn
+      - status
     FormsInferRequest:
       type: object
       description: 'doc.Forms.infer request. PRD inputs: "job id, version"'
@@ -3438,27 +3498,36 @@ components:
           description: 'PRD: "per-ref results"'
     BindingResolveRequest:
       type: object
-      description: 'doc.Binding.resolve request. PRD inputs: "product version, form, language, channel, date"'
+      description: 'doc.Binding.resolve request (BO-DOC-05): the document type plus optional product, line and jurisdiction; the date is the validAt query parameter.'
       properties:
-        productVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product version"'
-        form:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "form"'
+        documentType:
+          type: string
+        productCode:
+          type: string
+        lineOfBusiness:
+          type: string
+        jurisdiction:
+          type: string
         language:
           $ref: ../events/common.schema.json#/$defs/LanguageCode
-          description: 'PRD: "language"'
-        channel:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "channel"'
+      required:
+      - documentType
     BindingResolveResponse:
       type: object
-      description: 'doc.Binding.resolve result. PRD outputs: "template version"'
+      description: 'doc.Binding.resolve result: the approved template version in force at validAt (BO-DOC-05).'
       properties:
-        templateVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "template version"'
+        templateId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        documentType:
+          type: string
+        version:
+          type: integer
+        language:
+          $ref: ../events/common.schema.json#/$defs/LanguageCode
+      required:
+      - templateId
+      - documentType
+      - version
     ProofOfCoverIssueRequest:
       type: object
       properties:

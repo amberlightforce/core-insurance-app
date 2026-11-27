@@ -174,10 +174,6 @@
       "status": "PendingApproval",
       "withdrawnAt": "2026-10-07T09:00:00Z"
     },
-    "plt.ApprovalType.register": {
-      "request": "unspecified",
-      "decision": "unspecified"
-    },
     "plt.Audit.append": {
       "key": "value"
     },
@@ -750,14 +746,17 @@
       }
     },
     "ApprovalTypeRegisterRequest": {
-      "type": "unspecified",
-      "objectRef": "unspecified",
-      "payloadHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-      "diff": "unspecified"
+      "type": "sample",
+      "description": "sample",
+      "defaultReferralRole": "sample",
+      "defaultAuthorityType": "sample"
     },
     "ApprovalTypeRegisterResponse": {
-      "request": "unspecified",
-      "decision": "unspecified"
+      "type": "sample",
+      "description": "sample",
+      "defaultReferralRole": "sample",
+      "defaultAuthorityType": "sample",
+      "version": 1
     },
     "ApprovalVerifyForExecutionRequest": {
       "requestId": "0192c8a5-da82-7d56-8126-04409a89bc8f",
