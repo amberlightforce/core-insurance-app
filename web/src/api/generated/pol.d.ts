@@ -2339,47 +2339,74 @@ export interface components {
             noticeDocumentId?: components["schemas"]["Uuid"];
             recordedAt: components["schemas"]["Instant"];
         };
-        /** @description pol.RenewalRun.start request. PRD inputs: "entity, product, window" */
+        /** @description pol.RenewalRun.start request (REQ-POL-247): select the terms of the legal entity that end inside the renewal window and queue them for the batch worker. With resumeRunId a paused run is resumed instead (no other field is read). One run per legal entity at a time (POL-ERR-RUN-ACTIVE). */
         RenewalRunStartRequest: {
-            /** @description PRD: "entity" */
-            entity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "product" */
-            product?: components["schemas"]["Unspecified"];
-            /** @description PRD: "window" */
-            window?: components["schemas"]["Unspecified"];
+            /** @description Only terms of this product code; absent means every product */
+            product?: components["schemas"]["Code"];
+            /** @description Select terms that end within this many Athens calendar days from today (and not yet); defaults to the configured pol.renewal.lead_days and cannot exceed it */
+            windowDays?: number;
+            /** @description Evaluate every term (skip rules, product availability) and record WOULD_CREATE without creating or offering any renewal */
+            dryRun?: boolean;
+            /** @description Resume this PAUSED run */
+            resumeRunId?: components["schemas"]["Uuid"];
         };
-        /** @description pol.RenewalRun.start result. PRD outputs: "run" */
+        /** @description One term of a renewal run and what happened to it. */
+        RenewalRunItemView: {
+            itemId: components["schemas"]["Uuid"];
+            seq: number;
+            termId: components["schemas"]["Uuid"];
+            policyId: components["schemas"]["Uuid"];
+            outcome: components["schemas"]["RenewalRunItemOutcome"];
+            /** @description Error code of a FAILED item (for example POL-ERR-PRODUCT-UNAVAILABLE) */
+            errorCode?: string;
+            /** @description Short reason; no personal data */
+            detail?: string;
+            /** @description The renewal job created (or found) for the term */
+            jobId?: components["schemas"]["Uuid"];
+            attempts: number;
+            updatedAt: components["schemas"]["Instant"];
+        };
+        /**
+         * @description PENDING until the worker has handled the term; WOULD_CREATE only in a dry run; SKIPPED_VULNERABLE goes to the PSR queue (NX-HD-02).
+         * @enum {string}
+         */
+        RenewalRunItemOutcome: "PENDING" | "CREATED" | "WOULD_CREATE" | "SKIPPED_NON_RENEWED" | "SKIPPED_VULNERABLE" | "SKIPPED_EXISTING" | "FAILED";
+        /** @description A renewal run with its counters and (up to 500) items, failed ones first. */
+        RenewalRunView: {
+            runId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "RUNNING" | "PAUSED" | "COMPLETED" | "COMPLETED_WITH_ERRORS";
+            dryRun: boolean;
+            product?: components["schemas"]["Code"];
+            windowDays: number;
+            total: number;
+            /** @description Items per outcome */
+            counts: components["schemas"]["Counts"];
+            items: components["schemas"]["RenewalRunItemView"][];
+            requestedBy: string;
+            createdAt: components["schemas"]["Instant"];
+            finishedAt?: components["schemas"]["Instant"];
+        };
+        /** @description pol.RenewalRun.start result: the run, RUNNING; the worker processes it. */
         RenewalRunStartResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
+            run: components["schemas"]["RenewalRunView"];
         };
-        /** @description pol.RenewalRun.retryItem request. PRD inputs: "entity, product, window" */
+        /** @description pol.RenewalRun.retryItem request: a FAILED item goes back to PENDING and the run to RUNNING. */
         RenewalRunRetryItemRequest: {
-            /** @description PRD: "entity" */
-            entity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "product" */
-            product?: components["schemas"]["Unspecified"];
-            /** @description PRD: "window" */
-            window?: components["schemas"]["Unspecified"];
+            runId: components["schemas"]["Uuid"];
+            itemId: components["schemas"]["Uuid"];
         };
-        /** @description pol.RenewalRun.retryItem result. PRD outputs: "run" */
+        /** @description pol.RenewalRun.retryItem result: the run. */
         RenewalRunRetryItemResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
+            run: components["schemas"]["RenewalRunView"];
         };
-        /** @description pol.RenewalRun.pause request. PRD inputs: "entity, product, window" */
+        /** @description pol.RenewalRun.pause request: the worker stops after the chunk it is on; start with resumeRunId continues. */
         RenewalRunPauseRequest: {
-            /** @description PRD: "entity" */
-            entity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "product" */
-            product?: components["schemas"]["Unspecified"];
-            /** @description PRD: "window" */
-            window?: components["schemas"]["Unspecified"];
+            runId: components["schemas"]["Uuid"];
         };
-        /** @description pol.RenewalRun.pause result. PRD outputs: "run" */
+        /** @description pol.RenewalRun.pause result: the run. */
         RenewalRunPauseResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
+            run: components["schemas"]["RenewalRunView"];
         };
         /** @description pol.PolicyMove.execute request. PRD inputs: "policyIds, targetAccountId, requestRef" */
         PolicyMoveExecuteRequest: {
@@ -2800,6 +2827,10 @@ export interface components {
             premium: components["schemas"]["Money"];
             taxes: components["schemas"]["Money"];
             total: components["schemas"]["Money"];
+        };
+        /** @description Named counts (e.g. by outcome or status). */
+        Counts: {
+            [key: string]: components["schemas"]["NonNegativeInt"];
         };
         /** @description ISO 3166-1 alpha-2 code. */
         CountryCode: string;
@@ -4540,6 +4571,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -4584,6 +4616,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];

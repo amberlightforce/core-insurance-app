@@ -4,31 +4,30 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.RenewalRun.start request. PRD inputs: "entity, product, window"</summary>
+/// <summary>pol.RenewalRun.start request (REQ-POL-247): select the terms of the legal entity that end inside the renewal window and queue them for the batch worker. With resumeRunId a paused run is resumed instead (no other field is read). One run per legal entity at a time (POL-ERR-RUN-ACTIVE).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RenewalRunStartRequest
 {
-    /// <summary>PRD: "entity"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("entity")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Entity { get; init; }
-
-    /// <summary>PRD: "product"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Only terms of this product code; absent means every product</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("product")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Product { get; init; }
+    public string? Product { get; init; }
 
-    /// <summary>PRD: "window"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("window")]
+    /// <summary>Select terms that end within this many Athens calendar days from today (and not yet); defaults to the configured pol.renewal.lead_days and cannot exceed it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("windowDays")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Window { get; init; }
+    public int? WindowDays { get; init; }
+
+    /// <summary>Evaluate every term (skip rules, product availability) and record WOULD_CREATE without creating or offering any renewal</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dryRun")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? DryRun { get; init; }
+
+    /// <summary>Resume this PAUSED run</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'resumeRunId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("resumeRunId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? ResumeRunId { get; init; }
 }
