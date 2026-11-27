@@ -230,6 +230,9 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
 
                     b.HasIndex("ExposureId");
 
+                    b.HasIndex("PayeePartyId")
+                        .HasDatabaseName("ix_claim_payment_payee_party");
+
                     b.HasIndex("ReissueOf")
                         .IsUnique()
                         .HasDatabaseName("ux_claim_payment_reissue")
@@ -484,6 +487,9 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                         .HasName("pk_claim");
 
                     b.HasIndex("DuplicateOfClaimId");
+
+                    b.HasIndex("PolicyTermId")
+                        .HasDatabaseName("ix_claim_policy_term");
 
                     b.HasIndex("LegalEntityId", "ClaimNumber")
                         .IsUnique()
@@ -917,6 +923,12 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
 
                     b.HasKey("TxnId")
                         .HasName("pk_financial_transaction");
+
+                    b.HasIndex("ClaimPaymentId")
+                        .HasDatabaseName("ix_financial_transaction_claim_payment");
+
+                    b.HasIndex("ExposureId")
+                        .HasDatabaseName("ix_financial_transaction_exposure");
 
                     b.HasIndex("RecoveryId");
 

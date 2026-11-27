@@ -218,6 +218,7 @@ internal static class DsarMapping
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.SubjectPartyId).HasColumnName("subject_party_id");
             entity.Property(e => e.DsarId).HasColumnName("dsar_id");
+            entity.HasIndex(e => e.DsarId).HasDatabaseName("ix_disclosure_log_dsar");
             entity.Property(e => e.Recipient).HasColumnName("recipient");
             entity.Property(e => e.Purpose).HasColumnName("purpose");
             entity.Property(e => e.LegalBasis).HasColumnName("legal_basis");

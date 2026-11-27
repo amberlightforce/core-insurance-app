@@ -63,6 +63,7 @@ internal sealed class ComplianceDbContext(DbContextOptions<ComplianceDbContext> 
             entity.Property(e => e.DocumentTypeIsPlaceholder).HasColumnName("document_type_is_placeholder");
             entity.Property(e => e.IssueDate).HasColumnName("issue_date");
             entity.Property(e => e.CounterpartyPartyId).HasColumnName("counterparty_party_id");
+            entity.HasIndex(e => e.CounterpartyPartyId).HasDatabaseName("ix_fiscal_document_counterparty_party");
             entity.Property(e => e.Total).HasColumnName("total").HasColumnType("numeric(19,4)");
             entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
             entity.Property(e => e.Lines).HasColumnName("lines").HasColumnType("jsonb");
@@ -165,6 +166,7 @@ internal sealed class ComplianceDbContext(DbContextOptions<ComplianceDbContext> 
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.VehicleRef).HasColumnName("vehicle_ref");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_bureau_handover_policy");
             entity.Property(e => e.HandoverDate).HasColumnName("handover_date");
             entity.Property(e => e.BatchId).HasColumnName("batch_id");
             entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");

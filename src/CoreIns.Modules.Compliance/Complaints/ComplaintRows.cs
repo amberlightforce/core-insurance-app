@@ -130,6 +130,7 @@ internal static class ComplaintMapping
             entity.Property(e => e.ReceivedAt).HasColumnName("received_at").HasColumnType("timestamptz");
             entity.Property(e => e.Channel).HasColumnName("channel");
             entity.Property(e => e.ComplainantPartyId).HasColumnName("complainant_party_id");
+            entity.HasIndex(e => e.ComplainantPartyId).HasDatabaseName("ix_complaint_complainant_party");
             entity.Property(e => e.ComplainantType).HasColumnName("complainant_type");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.Language).HasColumnName("language");
