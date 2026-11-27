@@ -12,7 +12,10 @@
         "dat.DataContract.get": [ "Platform.Admin" ],
         "dat.DataContract.list": [ "Platform.Admin" ],
         "dat.Ingestion.replay": [ "Platform.Admin" ],
-        "dat.Quarantine.release": [ "Platform.Admin" ]
+        "dat.Quarantine.release": [ "Platform.Admin" ],
+        "dat.Query.asOf": [ "Platform.Admin", "Staff.Finance", "Staff.ComplianceOfficer" ],
+        "dat.Population.aggregate": [ "Platform.Admin", "Staff.Finance", "Staff.ComplianceOfficer", "Staff.UnderwritingManager" ],
+        "dat.Kpi.get": [ "Platform.Admin", "Staff.Finance", "Staff.ComplianceOfficer", "Staff.UnderwritingManager" ]
       }
     }
   }

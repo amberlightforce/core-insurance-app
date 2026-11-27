@@ -510,6 +510,72 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/mig/v1/reconciliation/control-totals/load": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Load legacy control totals
+         * @description Load legacy control totals
+         *
+         *     Inputs: scope, control totals per module, object type, currency. Outputs: loaded count. Reloading a scope replaces its figures.
+         */
+        post: operations["mig.Recon.loadControlTotals"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/reconciliation/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run reconciliation
+         * @description Run reconciliation
+         *
+         *     Inputs: scope, optional batch id. Outputs: run id, green flag, variance report. Reads the modules through their reconciliation readers; writes only the result rows.
+         */
+        post: operations["mig.Recon.run"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/reconciliation/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reconciliation results
+         * @description Reconciliation results
+         *
+         *     Inputs: run id or scope. Outputs: the run report with every compared figure and the variance keys.
+         */
+        get: operations["mig.Recon.results"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -796,6 +862,68 @@ export interface components {
             /** @description PRD: "pass/fail per contract element" */
             passFailPerContractElement?: components["schemas"]["Unspecified"];
         };
+        /** @description One legacy control total. Amount is exact to the minor unit of the currency. */
+        ReconControlTotal: {
+            /** @description Module code of the importer, e.g. BIL, FIN, CLM, RI. */
+            module: string;
+            objectType: string;
+            /** @description Optional sub-dimension (a ledger account code for FIN); empty for the whole object type. */
+            key?: string | null;
+            currency: components["schemas"]["CurrencyCode"];
+            /** Format: int64 */
+            count: number;
+            amount: components["schemas"]["Decimal"];
+        };
+        ReconLoadControlTotalsRequest: {
+            /** @description Names the wave or cut-over the totals belong to (default 'default'). */
+            scope?: string | null;
+            totals: components["schemas"]["ReconControlTotal"][];
+        };
+        ReconLoadControlTotalsResponse: {
+            scope: string;
+            /** Format: int32 */
+            loaded: number;
+        };
+        ReconRunRequest: {
+            scope?: string | null;
+            /** @description Restrict the core side to one batch; omit to compare everything migrated. */
+            batchId?: components["schemas"]["Uuid"];
+        };
+        /** @description One compared figure. */
+        ReconResult: {
+            module: string;
+            objectType: string;
+            key: string;
+            currency: string;
+            /** Format: int64 */
+            legacyCount: number;
+            /** Format: int64 */
+            coreCount: number;
+            legacyAmount: components["schemas"]["Decimal"];
+            coreAmount: components["schemas"]["Decimal"];
+            /** Format: int64 */
+            countVariance: number;
+            amountVariance: components["schemas"]["Decimal"];
+            /** @enum {string} */
+            status: "MATCH" | "VARIANCE" | "MISSING_CORE" | "MISSING_LEGACY";
+        };
+        /** @description A reconciliation run. green is true when every figure matched; variances lists the keys that did not. */
+        ReconReport: {
+            runId: components["schemas"]["Uuid"];
+            scope: string;
+            /** @description Batch the core side was restricted to, when any. */
+            batchId?: components["schemas"]["Uuid"];
+            /** Format: date-time */
+            runAt: string;
+            green: boolean;
+            /** Format: int32 */
+            matched: number;
+            /** Format: int32 */
+            varianceCount: number;
+            /** @description Keys (module/objectType/key/currency) of the figures that did not match. */
+            variances: string[];
+            results: components["schemas"]["ReconResult"][];
+        };
         /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
         Uuid: string;
         /**
@@ -871,6 +999,10 @@ export interface components {
         OpenObject: {
             [key: string]: components["schemas"]["OpenValue"];
         };
+        /** @description ISO 4217 alphabetic code. */
+        CurrencyCode: string;
+        /** @description Decimal number as a string (no binary floating point for money or rates). */
+        Decimal: string;
     };
     responses: {
         /** @description Malformed request or failed schema validation. */
@@ -1938,6 +2070,133 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Recon.loadControlTotals": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReconLoadControlTotalsRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconLoadControlTotalsResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Recon.run": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReconRunRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconReport"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Recon.results": {
+        parameters: {
+            query?: {
+                /** @description A reconciliation run; the latest run of the scope when omitted. */
+                runId?: components["schemas"]["Uuid"];
+                /** @description Control-total scope (default 'default'). */
+                scope?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconReport"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };

@@ -1066,12 +1066,30 @@ export interface components {
             /** @description PRD: "batch id" */
             batchId?: components["schemas"]["Uuid"];
         };
-        /** @description doc.Document.preview request. PRD inputs: "as request" */
-        DocumentPreviewRequest: Record<string, never>;
-        /** @description doc.Document.preview result. PRD outputs: "rendition (DRAFT)" */
+        /** @description doc.Document.preview request (BO-DOC-06): render a template with a payload without persisting anything. Payload keys must be declared in the payload dictionary of the document type (unknown keys are refused). Without templateId the approved version in force at validAt is used; with templateId that exact version (also a DRAFT) is rendered. */
+        DocumentPreviewRequest: {
+            documentType: string;
+            language: components["schemas"]["LanguageCode"];
+            validAt?: components["schemas"]["LocalDate"];
+            templateId?: components["schemas"]["Uuid"];
+            productCode?: string;
+            lineOfBusiness?: string;
+            jurisdiction?: string;
+            /** @description Payload field name to text value (dates ISO yyyy-MM-dd or an ISO instant, money as a plain decimal). */
+            payload: {
+                [key: string]: string;
+            };
+        };
+        /** @description doc.Document.preview result (BO-DOC-06): the composed HTML. Nothing is stored. */
         DocumentPreviewResponse: {
-            /** @description PRD: "rendition (DRAFT)" */
-            rendition?: components["schemas"]["Unspecified"];
+            documentType: string;
+            templateId: components["schemas"]["Uuid"];
+            templateVersion: number;
+            /** @description DRAFT or APPROVED. */
+            templateStatus: string;
+            language: components["schemas"]["LanguageCode"];
+            title: string;
+            html: string;
         };
         /** @description doc.Document.get result. PRD outputs: "documents with statuses" */
         DocumentGetItem: {
@@ -1643,6 +1661,8 @@ export interface components {
          *     members until then.
          */
         Unspecified: unknown;
+        /** Format: date */
+        LocalDate: string;
         /** @description Cursor page (contract §3.5.5). Lists are filtered by the caller's legal entity and ABAC scope. */
         PageEnvelope: {
             items: unknown[];
@@ -1650,8 +1670,6 @@ export interface components {
             nextCursor: string | null;
             limit?: number;
         };
-        /** Format: date */
-        LocalDate: string;
         /**
          * Format: date-time
          * @description RFC 3339 timestamp in UTC (suffix Z).
@@ -1917,6 +1935,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
             429: components["responses"]["TooManyRequests"];
             500: components["responses"]["InternalError"];
         };

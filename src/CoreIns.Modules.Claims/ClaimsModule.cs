@@ -92,6 +92,7 @@ public static class ClaimsModule
         services.AddScoped<ICoverageSource, PolicySnapshotAdapter>();
         services.AddScoped<IMigrationImporter, MigrationImport.ClaimMigrationImporter>();
         services.AddScoped<IMigrationReverser, MigrationImport.ClaimMigrationReverser>();
+        services.AddScoped<IMigrationReconciliationReader, MigrationImport.ClaimMigrationReconciliationReader>();
 
         // Claim financials (SL2-CLM-MONEY): derived balances, the set lifecycle and the close guard over them (REQ-CLM-072/073).
         services.AddScoped<FinancialsReader>();
@@ -183,6 +184,16 @@ public static class ClaimsModule
         services.AddScoped<IValidator<CreateExposure>, CreateExposureValidator>();
         services.AddCommandAuditor<CreateExposure, ExposureCreateResponse, CreateExposureAuditor>();
         services.AddCommand<CreateExposure, ExposureCreateResponse, CreateExposureHandler>(CommandDescriptor.For("clm.Exposure.create") with { SupportsDryRun = true });
+        services.AddScoped<ExposureLifecycleSupport>();
+        services.AddScoped<IValidator<UpdateExposure>, UpdateExposureValidator>();
+        services.AddCommandAuditor<UpdateExposure, ExposureUpdateResponse, UpdateExposureAuditor>();
+        services.AddCommand<UpdateExposure, ExposureUpdateResponse, UpdateExposureHandler>(CommandDescriptor.For("clm.Exposure.update") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<CloseExposure>, CloseExposureValidator>();
+        services.AddCommandAuditor<CloseExposure, ExposureCloseResponse, CloseExposureAuditor>();
+        services.AddCommand<CloseExposure, ExposureCloseResponse, CloseExposureHandler>(CommandDescriptor.For("clm.Exposure.close") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ReopenExposure>, ReopenExposureValidator>();
+        services.AddCommandAuditor<ReopenExposure, ExposureReopenResponse, ReopenExposureAuditor>();
+        services.AddCommand<ReopenExposure, ExposureReopenResponse, ReopenExposureHandler>(CommandDescriptor.For("clm.Exposure.reopen") with { SupportsDryRun = true });
 
         // Friendly Settlement case (SL4-CLM-FS-CASE, REQ-CLM-155..158): capability-gated, SPI-backed; the statement WP adds its own commands.
         services.AddScoped<FsGate>();
