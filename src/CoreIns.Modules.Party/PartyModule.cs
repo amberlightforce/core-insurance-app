@@ -81,6 +81,10 @@ public static class PartyModule
         services.AddScoped<IPartyProducerCodeService, PartyProducerCodeService>();
         services.AddScoped<IPartyVulnerabilityService, PartyVulnerabilityService>();
 
+        // BO-MIG-06: migration SPI (importer and reverser of Person, Organisation and Contact).
+        services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationImporter, MigrationImport.PartyMigrationImporter>();
+        services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationReverser, MigrationImport.PartyMigrationReverser>();
+
         services.AddErrorDefinitions(Errors);
         return services;
     }
