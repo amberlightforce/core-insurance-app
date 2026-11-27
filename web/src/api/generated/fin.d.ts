@@ -2544,113 +2544,80 @@ export interface components {
             /** @description Closed-period guard for POL */
             closedForPosting?: boolean;
         };
-        /** @description fin.Period.list result. PRD outputs: "state" */
+        /** @description fin.Period.list result: one accounting month and its close state. */
         PeriodListItem: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
+            period: string;
+            /** @enum {string} */
+            state: "OPEN" | "SOFT_CLOSED" | "LOCKED";
+            closedForPosting: boolean;
         };
         /** @description Page of fin.Period.list results (cursor pagination, contract §3.5.5) */
         PeriodListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["PeriodListItem"][];
         };
-        /** @description fin.Close.tasks result. PRD outputs: "state, impact, pack" */
-        CloseTasksResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
-            /** @description PRD: "impact" */
-            impact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pack" */
-            pack?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Close.signOff request. PRD inputs: "period, task, reason" */
+        /** @description fin.Close.signOff request: the person responsible for a close task confirms it is done; a task with a blocker cannot be signed off. */
         CloseSignOffRequest: {
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "task" */
-            task?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Calendar month, yyyy-MM. */
+            period: string;
+            task: components["schemas"]["CloseTaskCode"];
+            /** @description Optional note kept with the sign-off. */
+            reason?: string;
         };
-        /** @description fin.Close.signOff result. PRD outputs: "state, impact, pack" */
-        CloseSignOffResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
-            /** @description PRD: "impact" */
-            impact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pack" */
-            pack?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Close.softClose request. PRD inputs: "period, task, reason" */
+        /** @description fin.Close.softClose request: every task of the period must be signed off. */
         CloseSoftCloseRequest: {
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "task" */
-            task?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Calendar month, yyyy-MM. */
+            period: string;
+            /** @description Why the period is closed now. */
+            reason: string;
         };
-        /** @description fin.Close.softClose result. PRD outputs: "state, impact, pack" */
-        CloseSoftCloseResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
-            /** @description PRD: "impact" */
-            impact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pack" */
-            pack?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Close.lock request. PRD inputs: "period, task, reason" */
+        /** @description fin.Close.lock request: locks a soft-closed period; the person who soft-closed it cannot lock it (two people). */
         CloseLockRequest: {
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "task" */
-            task?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Calendar month, yyyy-MM. */
+            period: string;
+            /** @description Why the period is locked. */
+            reason: string;
         };
-        /** @description fin.Close.lock result. PRD outputs: "state, impact, pack" */
-        CloseLockResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
-            /** @description PRD: "impact" */
-            impact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pack" */
-            pack?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Close.reopen request. PRD inputs: "period, task, reason" */
+        /** @description fin.Close.reopen request: the first call records the request and its reason; a different person repeating the call approves it and reopens the period. */
         CloseReopenRequest: {
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "task" */
-            task?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Calendar month, yyyy-MM. */
+            period: string;
+            /** @description Why the period is reopened (audited, sent to the approver). */
+            reason: string;
         };
-        /** @description fin.Close.reopen result. PRD outputs: "state, impact, pack" */
-        CloseReopenResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
-            /** @description PRD: "impact" */
-            impact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pack" */
-            pack?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Close.acceptBreak request. PRD inputs: "period, task, reason" */
+        /** @description fin.Close.acceptBreak request: accepts the open reconciliation breaks of the period with a reason; signs off the RECONCILIATIONS task. */
         CloseAcceptBreakRequest: {
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "task" */
-            task?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Calendar month, yyyy-MM. */
+            period: string;
+            /** @description Why the breaks are accepted. */
+            reason: string;
         };
-        /** @description fin.Close.acceptBreak result. PRD outputs: "state, impact, pack" */
-        CloseAcceptBreakResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
-            /** @description PRD: "impact" */
-            impact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pack" */
-            pack?: components["schemas"]["Unspecified"];
+        /** @enum {string} */
+        CloseTaskCode: "INTAKE_EXCEPTIONS" | "RECONCILIATIONS" | "EARNING_RUN" | "MANUAL_JOURNALS";
+        CloseTaskView: {
+            task: components["schemas"]["CloseTaskCode"];
+            /** @enum {string} */
+            status: "OPEN" | "SIGNED_OFF";
+            /** @description Role that signs the task off. */
+            signOffRole: string;
+            /** @description Why the task cannot be signed off yet, when it cannot. */
+            blocker?: string;
+            signedOffBy?: string;
+            signedOffAt?: components["schemas"]["Instant"];
+            reason?: string;
+        };
+        /** @description One accounting period with its close state and checklist. */
+        ClosePeriodView: {
+            period: string;
+            /** @enum {string} */
+            state: "OPEN" | "SOFT_CLOSED" | "LOCKED";
+            closedForPosting: boolean;
+            tasks: components["schemas"]["CloseTaskView"][];
+            softClosedBy?: string;
+            lockedBy?: string;
+            /** @description Set while a reopen is waiting for a second person. */
+            reopenRequestedBy?: string;
+            reopenRequestedAt?: components["schemas"]["Instant"];
+            reopenReason?: string;
         };
         /** @description fin.Close.evidencePack request. PRD inputs: "period, task, reason" */
         CloseEvidencePackRequest: {
@@ -4935,7 +4902,10 @@ export interface operations {
     };
     "fin.Close.tasks": {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Calendar month, yyyy-MM */
+                period: string;
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
@@ -4956,7 +4926,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CloseTasksResponse"];
+                    "application/json": components["schemas"]["ClosePeriodView"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4999,7 +4969,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CloseSignOffResponse"];
+                    "application/json": components["schemas"]["ClosePeriodView"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -5043,7 +5013,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CloseSoftCloseResponse"];
+                    "application/json": components["schemas"]["ClosePeriodView"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -5094,7 +5064,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CloseLockResponse"];
+                    "application/json": components["schemas"]["ClosePeriodView"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -5145,7 +5115,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CloseReopenResponse"];
+                    "application/json": components["schemas"]["ClosePeriodView"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -5189,7 +5159,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CloseAcceptBreakResponse"];
+                    "application/json": components["schemas"]["ClosePeriodView"];
                 };
             };
             400: components["responses"]["BadRequest"];

@@ -54,6 +54,12 @@ internal static class EntryTypes
 
     /// <summary>A stopped, voided, rejected or returned disbursement reversed: in transit LA-13 back to the source payable and, after clearing, cash LA-10 back to LA-13 (SL4-BIL-DISBOPS, D-SL4-13).</summary>
     public const string DisbursementReversed = "DISBURSEMENT_REVERSED";
+
+    /// <summary>Unapplied cash moved to another billing account (BO-BIL-08): LA-11 of the source to LA-11 of the target through the clearing account LA-29. FIN journalises nothing (memo).</summary>
+    public const string SuspenseTransferred = "SUSPENSE_TRANSFERRED";
+
+    /// <summary>A refund of unapplied cash to its sender approved (BO-BIL-08): unapplied cash LA-11 to refunds payable LA-12. FIN journalises nothing yet (memo, TODO(hardening)).</summary>
+    public const string SuspenseRefundApproved = "SUSPENSE_REFUND_APPROVED";
 }
 
 /// <summary>Sub-ledger accounts used by the slice (PRD-06 §7.1.4; the whole chart LA-01…LA-27 is seeded as data, REQ-BIL-282).</summary>

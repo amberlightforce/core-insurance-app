@@ -119,6 +119,8 @@ public static class FinanceModule
             services.AddEventHandler<JsonElement, ContextEventHandler>(Descriptor(contract), "FIN.Intake." + name, ModuleCode.FIN);
         }
 
+        Commands.PeriodCloseRegistration.AddPeriodClose(services);
+
         services.AddOptions<FinanceOptions>().Bind(configuration.GetSection(FinanceOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddErrorDefinitions(Errors);
@@ -148,5 +150,11 @@ public static class FinanceModule
             .Describe("Η χειρόγραφη εγγραφή δεν βρίσκεται σε κατάσταση που επιτρέπει την ενέργεια.", "The manual journal is not in a state that allows the action."),
         ErrorDefinition.For(ModuleCode.FIN, "UNBALANCED", 422, "Μη ισοσκελισμένη εγγραφή", "Unbalanced journal")
             .Describe("Οι χρεώσεις πρέπει να ισούνται με τις πιστώσεις σε κάθε νόμισμα.", "Debits must equal credits in every currency."),
+        ErrorDefinition.For(ModuleCode.FIN, "GATES-FAILED", 422, "Δεν ολοκληρώθηκαν οι έλεγχοι κλεισίματος", "Close checks not complete")
+            .Describe("Όλες οι εργασίες κλεισίματος πρέπει να έχουν υπογραφεί και να μην εκκρεμεί κάποιος έλεγχος.", "Every close task must be signed off and no check may be pending."),
+        ErrorDefinition.For(ModuleCode.FIN, "APPROVAL-REQUIRED", 422, "Απαιτείται δεύτερο πρόσωπο", "A second person is required")
+            .Describe("Η ενέργεια πρέπει να γίνει ή να εγκριθεί από άλλο πρόσωπο.", "The action must be done or approved by a different person."),
+        ErrorDefinition.For(ModuleCode.FIN, "PERIOD-LOCKED", 409, "Η περίοδος είναι κλειδωμένη", "The period is locked")
+            .Describe("Η λογιστική περίοδος είναι κλειδωμένη.", "The accounting period is locked."),
     ];
 }

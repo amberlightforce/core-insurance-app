@@ -30,7 +30,7 @@ import {
   useAllocateSuspense,
   useSuspense,
   type AllocationAllocateRequest,
-  type ReceiptView,
+  type SuspenseListItem,
 } from './api';
 import { canWorkBillingOps } from './roles';
 
@@ -38,7 +38,7 @@ interface Candidate {
   invoice: InvoiceView;
 }
 
-function MatchPanel({ receipt }: { receipt: ReceiptView }) {
+function MatchPanel({ receipt }: { receipt: SuspenseListItem }) {
   const { t } = useTranslation('billing');
   const fmt = useFormat();
   const key = useIdempotencyKey();
@@ -56,7 +56,7 @@ function MatchPanel({ receipt }: { receipt: ReceiptView }) {
   );
   const chosen = candidates.filter((i) => picked[i.invoice.invoiceId]);
   const chosenCents = chosen.reduce((n, i) => n + toCents(i.invoice.open.amount), 0);
-  const available = toCents(receipt.unallocated.amount);
+  const available = toCents(receipt.amount.amount);
   const over = chosenCents > available;
 
   return (
@@ -68,16 +68,12 @@ function MatchPanel({ receipt }: { receipt: ReceiptView }) {
           {
             id: 'unallocated',
             label: t('suspense.match.unallocated'),
-            value: fmt.money(receipt.unallocated),
+            value: fmt.money(receipt.amount),
           },
           {
             id: 'reason',
             label: t('suspense.columns.reason'),
-            value: receipt.suspenseReason
-              ? t(`suspense.reasons.${receipt.suspenseReason}`, {
-                  defaultValue: receipt.suspenseReason,
-                })
-              : '—',
+            value: t(`suspense.reasons.${receipt.reason}`, { defaultValue: receipt.reason }),
           },
           {
             id: 'valueDate',
@@ -157,26 +153,36 @@ export function SuspensePage() {
   const { t } = useTranslation('billing');
   const query = useSuspense();
   const [selected, setSelected] = useState<string | null>(null);
-  const current = query.data?.items.find((r) => r.receiptId === selected);
+  const current = query.data?.items.find((r) => r.suspenseItemId === selected);
 
-  const columns = useMemo<DataColumn<ReceiptView>[]>(
+  const columns = useMemo<DataColumn<SuspenseListItem>[]>(
     () => [
-      identifierColumn<ReceiptView>('number', t('suspense.columns.number'), (r) => r.receiptNumber),
-      moneyColumn<ReceiptView>(
+      identifierColumn<SuspenseListItem>(
+        'number',
+        t('suspense.columns.number'),
+        (r) => r.receiptNumber,
+      ),
+      moneyColumn<SuspenseListItem>(
         'amount',
         t('suspense.columns.amount'),
-        (r) => r.unallocated.amount,
+        (r) => r.amount.amount,
         {
           currency: 'EUR',
         },
       ),
-      textColumn<ReceiptView>('reason', t('suspense.columns.reason'), (r) =>
-        r.suspenseReason
-          ? t(`suspense.reasons.${r.suspenseReason}`, { defaultValue: r.suspenseReason })
-          : '—',
+      textColumn<SuspenseListItem>('reason', t('suspense.columns.reason'), (r) =>
+        t(`suspense.reasons.${r.reason}`, { defaultValue: r.reason }),
       ),
-      textColumn<ReceiptView>('method', t('suspense.columns.method'), (r) => r.method),
-      dateColumn<ReceiptView>('valueDate', t('suspense.columns.valueDate'), (r) => r.valueDate),
+      textColumn<SuspenseListItem>(
+        'bankReference',
+        t('suspense.columns.bankReference'),
+        (r) => r.bankReference ?? '—',
+      ),
+      dateColumn<SuspenseListItem>(
+        'valueDate',
+        t('suspense.columns.valueDate'),
+        (r) => r.valueDate,
+      ),
     ],
     [t],
   );
@@ -197,7 +203,7 @@ export function SuspensePage() {
       <Section title={t('suspense.listTitle')} family="ochre" count={query.data?.items.length}>
         <QueryView query={query}>
           {(page) => (
-            <DataTable<ReceiptView>
+            <DataTable<SuspenseListItem>
               searchable={false}
               showDensityToggle={false}
               showColumnSettings={false}
@@ -205,9 +211,9 @@ export function SuspensePage() {
               aria-label={t('suspense.listTitle')}
               columns={columns}
               data={page.items}
-              getRowId={(r) => r.receiptId}
+              getRowId={(r) => r.suspenseItemId}
               onOpen={(r) => {
-                setSelected(r.receiptId);
+                setSelected(r.suspenseItemId);
               }}
               emptyState={
                 <EmptyState
