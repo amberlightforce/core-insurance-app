@@ -25,8 +25,6 @@ CONTRACT_NOT_SERVED GET /api/chn/v1/book/changes
 CONTRACT_NOT_SERVED GET /api/chn/v1/claims/{}/tracking
 CONTRACT_NOT_SERVED GET /api/chn/v1/commission-statements
 CONTRACT_NOT_SERVED GET /api/chn/v1/languages/{}
-CONTRACT_NOT_SERVED GET /api/chn/v1/messages
-CONTRACT_NOT_SERVED GET /api/chn/v1/notifications
 CONTRACT_NOT_SERVED GET /api/chn/v1/policies/{}
 CONTRACT_NOT_SERVED GET /api/chn/v1/policies/{}/cover-note
 CONTRACT_NOT_SERVED GET /api/chn/v1/products/{}/describe
@@ -247,9 +245,6 @@ CONTRACT_NOT_SERVED POST /api/chn/v1/journeys/resume
 CONTRACT_NOT_SERVED POST /api/chn/v1/journeys/save
 CONTRACT_NOT_SERVED POST /api/chn/v1/journeys/start
 CONTRACT_NOT_SERVED POST /api/chn/v1/languages/set
-CONTRACT_NOT_SERVED POST /api/chn/v1/messages/send
-CONTRACT_NOT_SERVED POST /api/chn/v1/notification-subscriptions/set
-CONTRACT_NOT_SERVED POST /api/chn/v1/notifications/mark-read
 CONTRACT_NOT_SERVED POST /api/chn/v1/partners/register
 CONTRACT_NOT_SERVED POST /api/chn/v1/policies/{}/cancellation-requests
 CONTRACT_NOT_SERVED POST /api/chn/v1/policies/{}/changes
@@ -338,9 +333,6 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/run
 CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/supersede
 CONTRACT_NOT_SERVED POST /api/dat/v1/analytics/ask
 CONTRACT_NOT_SERVED POST /api/dat/v1/feature-store/build-training-set
-CONTRACT_NOT_SERVED POST /api/dat/v1/marts/adjust
-CONTRACT_NOT_SERVED POST /api/dat/v1/marts/export
-CONTRACT_NOT_SERVED POST /api/dat/v1/marts/sign-off
 CONTRACT_NOT_SERVED POST /api/dat/v1/models/approve
 CONTRACT_NOT_SERVED POST /api/dat/v1/models/record-validation
 CONTRACT_NOT_SERVED POST /api/dat/v1/models/retire
@@ -417,10 +409,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/recalculate
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/record-filing
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/request-payment
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/transition
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/import
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/preview
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/rebase
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/schedule
 CONTRACT_NOT_SERVED POST /api/mkt/v1/configuration/export
 CONTRACT_NOT_SERVED POST /api/mkt/v1/cross-borders/check
 CONTRACT_NOT_SERVED POST /api/mkt/v1/currencies/convert-fixed

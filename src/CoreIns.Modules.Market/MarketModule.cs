@@ -110,6 +110,22 @@ public static class MarketModule
         services.AddCommand<RejectConfigChange, ConfigChangeRequestRejectResponse, RejectConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.reject"));
         services.AddCommandAuditor<WithdrawConfigChange, ConfigChangeRequestWithdrawResponse, WithdrawConfigChangeAuditor>();
         services.AddCommand<WithdrawConfigChange, ConfigChangeRequestWithdrawResponse, WithdrawConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.withdraw"));
+        services.AddCommandAuditor<ScheduleConfigChange, ConfigChangeRequestScheduleResponse, ScheduleConfigChangeAuditor>();
+        services.AddCommand<ScheduleConfigChange, ConfigChangeRequestScheduleResponse, ScheduleConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.schedule"));
+        services.AddCommandAuditor<RebaseConfigChange, ConfigChangeRequestRebaseResponse, RebaseConfigChangeAuditor>();
+        services.AddCommand<RebaseConfigChange, ConfigChangeRequestRebaseResponse, RebaseConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.rebase"));
+        services.AddCommandAuditor<PreviewConfigChange, ConfigChangeRequestPreviewResponse, PreviewConfigChangeAuditor>();
+        services.AddCommand<PreviewConfigChange, ConfigChangeRequestPreviewResponse, PreviewConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.preview"));
+        services.AddCommandAuditor<ImportConfigChange, ConfigChangeRequestImportResponse, ImportConfigChangeAuditor>();
+        services.AddCommand<ImportConfigChange, ConfigChangeRequestImportResponse, ImportConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.import"));
+        services.AddCommandAuditor<ApplyDueConfigChange, string, ApplyDueConfigChangeAuditor>();
+        services.AddCommand<ApplyDueConfigChange, string, ApplyDueConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.applyDue") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddSingleton<ConfigChangeSweepRunner>();
+        if (string.Equals(configuration["APP_ROLE"], "worker", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddHostedService<ConfigChangeSweeper>();
+        }
+
         services.AddCommandAuditor<RequestPackRollback, PackRollbackResponse, RequestPackRollbackAuditor>();
         services.AddCommand<RequestPackRollback, PackRollbackResponse, RequestPackRollbackHandler>(CommandDescriptor.For("mkt.Pack.rollback") with { SupportsDryRun = true });
         services.AddCommandAuditor<RequestPackActivation, PackScheduleActivationResponse, RequestPackActivationAuditor>();

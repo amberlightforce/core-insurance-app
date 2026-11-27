@@ -18,12 +18,11 @@ namespace CoreIns.Modules.Channels.Queries;
 /// (REQ-CHN-305) and only customer-visible fields are mapped (no UW data, no internal notes, no rule or rating trace, no producer data).
 /// Every method returns null (404) for a caller without a live portal link and for a policy the caller does not own.
 /// </summary>
-internal sealed class PortalReader(PortalScope scope, IServiceProvider services, IClock clock)
+internal sealed class PortalReader(PortalScope scope, PortalBillingScope billing, PortalInbox inbox, IServiceProvider services, IClock clock)
 {
     private const int DefaultLimit = 25;
     private const int MaxLimit = 100;
     private const int RenewalWindowDays = 60;
-    private const int MaxInvoicePolicies = 50;
 
     public async Task<PortalMeResponse?> MeAsync(CancellationToken cancellationToken)
     {
@@ -101,7 +100,7 @@ internal sealed class PortalReader(PortalScope scope, IServiceProvider services,
 
     public async Task<PortalDashboardResponse?> DashboardAsync(CancellationToken cancellationToken)
     {
-        if (await scope.ResolveAsync(cancellationToken).ConfigureAwait(false) is null)
+        if (await scope.ResolveAsync(cancellationToken).ConfigureAwait(false) is not { } caller)
         {
             return null;
         }
@@ -123,51 +122,31 @@ internal sealed class PortalReader(PortalScope scope, IServiceProvider services,
             .OrderBy(r => r.ExpiresAt)
             .ToList();
 
-        // TODO(hardening): open requests (WRK) once messages/requests are scoped to the customer (BO-CHN-04).
         return new PortalDashboardResponse
         {
             PolicyCount = policies.Count,
             ActivePolicyCount = policies.Count(p => p.Status == TermStateCode.InForce),
             RenewalsDue = renewals,
-            UnpaidInvoices = await UnpaidInvoicesAsync(policies, now, cancellationToken).ConfigureAwait(false),
+            UnpaidInvoices = await UnpaidInvoicesAsync(today, cancellationToken).ConfigureAwait(false),
+            UnreadNotificationCount = await inbox.UnreadCountAsync(caller.PartyId, cancellationToken).ConfigureAwait(false),
+            OpenRequests = await inbox.OpenRequestsAsync(caller.PartyId, cancellationToken).ConfigureAwait(false),
         };
     }
 
-    private async Task<IReadOnlyList<PortalUnpaidInvoice>> UnpaidInvoicesAsync(IReadOnlyList<PolicySearchItem> policies, Instant now, CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<PortalUnpaidInvoice>> UnpaidInvoicesAsync(BusinessDate today, CancellationToken cancellationToken)
     {
-        if (services.GetService<IBillingInvoiceService>() is not { } invoices)
-        {
-            return [];
-        }
-
-        var today = now.UtcDate;
-        var result = new List<PortalUnpaidInvoice>();
-        // TODO(hardening): list invoices by billing account instead of per policy once BO-CHN-04 adds the BIL read for portal billing.
-        foreach (var policy in policies.Take(MaxInvoicePolicies))
-        {
-            try
-            {
-                var page = await invoices.ListAsync(null, 50, null, policy.PolicyId, null, cancellationToken).ConfigureAwait(false);
-                foreach (var item in page.Items.Select(i => i.Invoice).Where(i => i.PolicyId == policy.PolicyId && i.Open.Amount > 0m && IsUnpaid(i.State)))
+        // One BIL read per billing account (BO-CHN-04), already cut down to invoices of the own policies of the caller.
+        var data = await billing.LoadAsync(cancellationToken).ConfigureAwait(false);
+        return
+        [
+            .. (data?.Invoices ?? []).Select(r => r.Invoice).Where(PortalBillingScope.IsUnpaid).OrderBy(i => i.DueDate)
+                .Select(i => new PortalUnpaidInvoice
                 {
-                    result.Add(new PortalUnpaidInvoice
-                    {
-                        InvoiceId = item.InvoiceId, InvoiceNumber = item.InvoiceNumber, PolicyId = item.PolicyId, DueDate = item.DueDate, Open = item.Open,
-                        Overdue = item.State == InvoiceView.StateValue.Overdue || item.DueDate < today,
-                    });
-                }
-            }
-            catch (DomainException)
-            {
-                // One policy's billing being unreadable must not blank the dashboard.
-            }
-        }
-
-        return [.. result.OrderBy(i => i.DueDate)];
+                    InvoiceId = i.InvoiceId, InvoiceNumber = i.InvoiceNumber, PolicyId = i.PolicyId, DueDate = i.DueDate, Open = i.Open,
+                    Overdue = i.State == InvoiceView.StateValue.Overdue || i.DueDate < today,
+                }),
+        ];
     }
-
-    private static bool IsUnpaid(InvoiceView.StateValue state) =>
-        state is InvoiceView.StateValue.Billed or InvoiceView.StateValue.Due or InvoiceView.StateValue.PartiallyPaid or InvoiceView.StateValue.Overdue;
 
     private static PortalPolicyListItem ToListItem(PolicySearchItem p, PartyId caller) => new()
     {

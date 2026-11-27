@@ -93,6 +93,219 @@ namespace CoreIns.Modules.Channels.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Channels.Domain.DocumentOpenRow", b =>
+                {
+                    b.Property<Guid>("DocumentOpenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("document_open_id");
+
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("document_id");
+
+                    b.Property<DateTime>("FirstOpenedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("first_opened_at");
+
+                    b.Property<DateTime>("LastOpenedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("last_opened_at");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<int>("OpenCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("open_count");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.HasKey("DocumentOpenId")
+                        .HasName("pk_document_open");
+
+                    b.HasIndex("LegalEntityId", "PartyId", "DocumentId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_document_open_party_document");
+
+                    b.ToTable("document_open", "chn", t =>
+                        {
+                            t.HasCheckConstraint("ck_document_open_count", "open_count >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Channels.Domain.MessageRow", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("message_id");
+
+                    b.Property<string>("Direction")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("direction");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<Guid?>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("sent_at");
+
+                    b.Property<string>("SentBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("sent_by");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("text");
+
+                    b.Property<Guid>("ThreadId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("thread_id");
+
+                    b.Property<string>("Topic")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("topic");
+
+                    b.HasKey("MessageId")
+                        .HasName("pk_message");
+
+                    b.HasIndex("LegalEntityId", "PartyId", "SentAt")
+                        .HasDatabaseName("ix_message_party");
+
+                    b.HasIndex("LegalEntityId", "ThreadId", "SentAt")
+                        .HasDatabaseName("ix_message_thread");
+
+                    b.ToTable("message", "chn", t =>
+                        {
+                            t.HasCheckConstraint("ck_message_direction", "direction IN ('CUSTOMER', 'STAFF')");
+
+                            t.HasCheckConstraint("ck_message_topic", "topic IN ('GENERAL', 'POLICY', 'BILLING', 'CLAIM', 'DOCUMENT')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Channels.Domain.NotificationRow", b =>
+                {
+                    b.Property<Guid>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("notification_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("NotificationClass")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("notification_class");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("read_at");
+
+                    b.Property<string>("SourceKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_key");
+
+                    b.Property<string>("SubjectId")
+                        .HasColumnType("text")
+                        .HasColumnName("subject_id");
+
+                    b.Property<string>("SubjectType")
+                        .HasColumnType("text")
+                        .HasColumnName("subject_type");
+
+                    b.HasKey("NotificationId")
+                        .HasName("pk_notification");
+
+                    b.HasIndex("LegalEntityId", "PartyId", "CreatedAt")
+                        .HasDatabaseName("ix_notification_party");
+
+                    b.HasIndex("LegalEntityId", "PartyId", "Kind", "SourceKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_notification_source");
+
+                    b.ToTable("notification", "chn", t =>
+                        {
+                            t.HasCheckConstraint("ck_notification_class", "notification_class IN ('RENEWAL', 'BILLING', 'CLAIM', 'DOCUMENT', 'MESSAGE')");
+
+                            t.HasCheckConstraint("ck_notification_kind", "kind IN ('RENEWAL_OFFERED', 'INVOICE_ISSUED', 'CLAIM_UPDATED', 'DOCUMENT_READY', 'MESSAGE_REPLY')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Channels.Domain.NotificationSubscriptionRow", b =>
+                {
+                    b.Property<Guid>("SubscriptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("subscription_id");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("enabled");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("NotificationClass")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("notification_class");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("SubscriptionId")
+                        .HasName("pk_notification_subscription");
+
+                    b.HasIndex("LegalEntityId", "PartyId", "NotificationClass")
+                        .IsUnique()
+                        .HasDatabaseName("ux_notification_subscription_class");
+
+                    b.ToTable("notification_subscription", "chn", t =>
+                        {
+                            t.HasCheckConstraint("ck_notification_subscription_class", "notification_class IN ('RENEWAL', 'BILLING', 'CLAIM', 'DOCUMENT', 'MESSAGE')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Channels.Domain.PortalIdentityRow", b =>
                 {
                     b.Property<Guid>("PortalIdentityId")

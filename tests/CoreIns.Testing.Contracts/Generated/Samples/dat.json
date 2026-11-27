@@ -224,16 +224,22 @@
       "sourceRecordsRef": "unspecified"
     },
     "MartAdjustRequest": {
-      "figure": "unspecified",
+      "runId": "0192adde-69e4-781f-87a0-bfe147783f85",
+      "figureKey": "sample",
       "amount": {
         "amount": "120.50",
         "currency": "EUR"
       },
-      "reason": "unspecified",
-      "evidence": "unspecified"
+      "reason": "sample",
+      "evidence": "sample"
     },
     "MartAdjustResponse": {
-      "approvalRequest": "unspecified"
+      "adjustmentId": "0192df48-dbee-7db8-8653-4154d22f15c5",
+      "runId": "0192cdc0-671e-772c-80f7-5cb314fa7e3c",
+      "figureKey": "sample",
+      "adjustedValue": "sample",
+      "adjustmentsHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "signOffInvalidated": true
     },
     "MartCompareResponse": {
       "figures": "unspecified",
@@ -241,11 +247,17 @@
       "diff": "unspecified"
     },
     "MartExportRequest": {
-      "runId": "01920b1f-eb28-79ae-856d-7b897012da4f"
+      "runId": "01920b1f-eb28-79ae-856d-7b897012da4f",
+      "format": "CSV"
     },
     "MartExportResponse": {
-      "packageRef": "unspecified",
-      "manifestHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      "fileName": "sample",
+      "contentType": "sample",
+      "content": "sample",
+      "packageRef": "sample",
+      "manifestHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "legalStatus": "sample"
     },
     "MartFigureResponse": {
       "figures": "unspecified",
@@ -278,10 +290,14 @@
     },
     "MartSignOffRequest": {
       "runId": "019250b1-eb11-7ebe-8614-1dac8d5b92a5",
-      "comment": "unspecified"
+      "comment": "sample"
     },
     "MartSignOffResponse": {
-      "status": "unspecified"
+      "signOffId": "0192e144-bf83-7d13-8360-cce21945d772",
+      "runId": "0192626b-520b-721a-8e35-d0db6a961655",
+      "status": "sample",
+      "boundHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "signedBy": "sample"
     },
     "ModelApproveRequest": {
       "modelCard": "unspecified",

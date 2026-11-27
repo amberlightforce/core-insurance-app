@@ -75,6 +75,13 @@ public static class DataModule
         services.AddScoped<IMartDefinition, ClaimsExperienceMart>();
         services.AddScoped<IMartDefinition, RiCessionSummaryMart>();
         services.AddScoped<MartEngine>();
+        services.AddScoped<MartGovernance>();
+        services.AddCommand<AdjustMart, MartAdjustResponse, AdjustMartHandler>(CommandDescriptor.For("dat.Mart.adjust") with { SupportsDryRun = true });
+        services.AddCommandAuditor<AdjustMart, MartAdjustResponse, AdjustMartAuditor>();
+        services.AddCommand<SignOffMart, MartSignOffResponse, SignOffMartHandler>(CommandDescriptor.For("dat.Mart.signOff") with { SupportsDryRun = true });
+        services.AddCommandAuditor<SignOffMart, MartSignOffResponse, SignOffMartAuditor>();
+        services.AddCommand<ExportMart, MartExportResponse, ExportMartHandler>(CommandDescriptor.For("dat.Mart.export") with { SupportsDryRun = true });
+        services.AddCommandAuditor<ExportMart, MartExportResponse, ExportMartAuditor>();
         services.AddCommand<RunMart, MartRunResponse, RunMartHandler>(CommandDescriptor.For("dat.Mart.run") with { SupportsDryRun = true });
         services.AddScoped<DataContractReader>();
         services.AddCommand<RegisterDataContract, DataContractRegisterResponse, RegisterDataContractHandler>(CommandDescriptor.For("dat.DataContract.register") with { SupportsDryRun = true });
@@ -111,6 +118,12 @@ public static class DataModule
             .Describe("Περιορίστε το χρονικό διάστημα.", "Narrow the time window."),
         ErrorDefinition.For(ModuleCode.DAT, "010", 422, "Η προβολή δεν επιτρέπεται", "View not permitted")
             .Describe("Επιλέξτε μία από τις προβολές fact_policy_term, fact_premium, fact_claim_movement.", "Choose one of fact_policy_term, fact_premium, fact_claim_movement."),
+        ErrorDefinition.For(ModuleCode.DAT, "023", 422, "Ο υπογράφων ετοίμασε την εκτέλεση", "The signer prepared the run")
+            .Describe("Την έγκριση πρέπει να δώσει άλλο πρόσωπο από αυτό που εκτέλεσε ή προσάρμοσε.", "A second person must sign off: not the one who ran or adjusted it."),
+        ErrorDefinition.For(ModuleCode.DAT, "024", 422, "Η εκτέλεση δεν έχει εγκριθεί", "The run is not signed off")
+            .Describe("Εξάγονται μόνο εγκεκριμένες εκτελέσεις· μια νεότερη προσαρμογή ακυρώνει την έγκριση.", "Only signed-off runs are exported; a later adjustment invalidates the sign-off."),
+        ErrorDefinition.For(ModuleCode.DAT, "LAYOUT-UNVERIFIED", 422, "Μη επαληθευμένη ρυθμιστική διάταξη", "Regulatory layout unverified")
+            .Describe("Η ρυθμιστική διάταξη δεν έχει επαληθευτεί και δεν εγκρίνεται ούτε εξάγεται στην παραγωγή.", "The regulatory layout is Unverified and is not signed off or exported in Production."),
         ErrorDefinition.For(ModuleCode.DAT, "IDEMPOTENCY-MISMATCH", 409, "Το αναγνωριστικό αιτήματος χρησιμοποιήθηκε ήδη", "The request id was already used")
             .Describe("Το αναγνωριστικό αιτήματος αφορά άλλο υποκείμενο.", "The request id belongs to another subject."),
     ];

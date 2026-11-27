@@ -17,7 +17,9 @@
     <ProjectReference Include="..\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
     <!-- pty.Account.search/get and pty.Party.get: contracts only (BO-CHN-01). -->
     <ProjectReference Include="..\CoreIns.Modules.Party.Contracts\CoreIns.Modules.Party.Contracts.csproj" />
-    <!-- doc.Document.request (the acknowledgement): contracts only. -->
+    <!-- clm.Claim.get: contracts only (BO-CHN-04: claim status notifications). -->
+    <ProjectReference Include="..\CoreIns.Modules.Claims.Contracts\CoreIns.Modules.Claims.Contracts.csproj" />
+    <!-- doc.Document.request (the acknowledgement), doc.Document.listForObject and the content SPI (BO-CHN-04): contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Documents.Contracts\CoreIns.Modules.Documents.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />
     <ProjectReference Include="..\CoreIns.SharedKernel\CoreIns.SharedKernel.csproj" />

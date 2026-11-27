@@ -730,6 +730,72 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/mig/v1/quality/profile/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Profile a staged snapshot and run the DQ rules
+         * @description Profile a staged snapshot and run the DQ rules
+         *
+         *     Inputs: a snapshot id, or a source and snapshot label (the active snapshot is used). Outputs: the run with the rule-set version, finding counts by severity and a profile per object type (record count, null and blank rates, distinct counts, min and max of dates and amounts). Findings and the profile are stored insert-only per snapshot, rule-set version and run, and the run can be repeated; staging is only read.
+         */
+        post: operations["mig.Profile.run"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/quality/findings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List data quality findings
+         * @description List data quality findings
+         *
+         *     Inputs: a run id (or a snapshot id, which means its latest run), optional rule code, severity, object type and whether to include waived findings. Outputs: the run and its findings, each OPEN or WAIVED. A waiver that has passed its expiry no longer counts, so the finding is OPEN again.
+         */
+        get: operations["mig.Dq.findings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/quality/waive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Waive a data quality finding
+         * @description Waive a data quality finding
+         *
+         *     Inputs: finding id, reason and an expiry date (at most one year ahead). Outputs: the waiver. Only a data steward can waive. A waiver covers the same rule on the same legacy record of the same source in later runs until it expires, then the finding is OPEN again; waivers are never edited or deleted.
+         */
+        post: operations["mig.Dq.waive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1125,6 +1191,98 @@ export interface components {
         };
         StagingSnapshotList: {
             items: components["schemas"]["StagingSnapshot"][];
+        };
+        ProfileRunRequest: {
+            /** @description A specific snapshot; when absent give source and snapshot. */
+            snapshotId?: components["schemas"]["Uuid"];
+            source?: string | null;
+            /** @description Snapshot label; the active snapshot of the source and label is used. */
+            snapshot?: string | null;
+        };
+        DqFieldProfile: {
+            field: string;
+            /** @description Records with a non-null value. */
+            present: number;
+            /** @description Records without the field or with a null value. */
+            nullCount: number;
+            /** @description Records whose value is an empty or whitespace-only string. */
+            blankCount: number;
+            /** @description (null + blank) / records as a decimal string with 4 places. */
+            nullRate: string;
+            distinct: number;
+            /** @description Smallest value, for fields that are dates or amounts. */
+            min?: string | null;
+            max?: string | null;
+        };
+        DqObjectProfile: {
+            objectType: string;
+            recordCount: number;
+            fields: components["schemas"]["DqFieldProfile"][];
+        };
+        DqRun: {
+            runId: components["schemas"]["Uuid"];
+            snapshotId: components["schemas"]["Uuid"];
+            source: string;
+            snapshot: string;
+            ruleSetVersion: number;
+            recordCount: number;
+            errorCount: number;
+            warningCount: number;
+            findingsByRule: {
+                [key: string]: number;
+            };
+            profile: components["schemas"]["DqObjectProfile"][];
+            runBy: string;
+            /** Format: date-time */
+            runAt: string;
+        };
+        DqFinding: {
+            findingId: components["schemas"]["Uuid"];
+            runId: components["schemas"]["Uuid"];
+            snapshotId: components["schemas"]["Uuid"];
+            recordId: components["schemas"]["Uuid"];
+            objectType: string;
+            legacyKey: string;
+            ruleCode: string;
+            /** @enum {string} */
+            severity: "ERROR" | "WARNING";
+            field?: string | null;
+            message: string;
+            /** @enum {string} */
+            status: "OPEN" | "WAIVED";
+            /** @description The waiver in force, when the finding is WAIVED. */
+            waiverId?: components["schemas"]["Uuid"];
+            /** Format: date */
+            waivedUntil?: string | null;
+        };
+        DqFindingList: {
+            run: components["schemas"]["DqRun"];
+            /** @description Findings matching the filter, before limit and offset. */
+            total: number;
+            items: components["schemas"]["DqFinding"][];
+        };
+        DqWaiveRequest: {
+            findingId: components["schemas"]["Uuid"];
+            reason: string;
+            /**
+             * Format: date
+             * @description Last day the waiver holds; after it the finding is OPEN again. At most one year ahead.
+             */
+            expiresOn: string;
+        };
+        DqWaiver: {
+            waiverId: components["schemas"]["Uuid"];
+            findingId: components["schemas"]["Uuid"];
+            source: string;
+            objectType: string;
+            legacyKey: string;
+            ruleCode: string;
+            reason: string;
+            /** Format: date */
+            expiresOn: string;
+            waivedBy: string;
+            /** Format: date-time */
+            waivedAt: string;
         };
         SignoffRequestRequest: {
             scope?: string | null;
@@ -2729,6 +2887,145 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Profile.run": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileRunRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DqRun"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Dq.findings": {
+        parameters: {
+            query?: {
+                /** @description The run; when absent the latest run of the snapshot is used. */
+                runId?: components["schemas"]["Uuid"];
+                /** @description The snapshot, when no run id is given. */
+                snapshotId?: components["schemas"]["Uuid"];
+                /** @description Rule code. */
+                ruleCode?: string;
+                /** @description ERROR or WARNING. */
+                severity?: "ERROR" | "WARNING";
+                /** @description Object type of the staged record. */
+                objectType?: string;
+                /** @description Include waived findings (default true). */
+                includeWaived?: boolean;
+                /** @description Page size, 1 to 1000 (default 200). */
+                limit?: number;
+                /** @description Findings to skip. */
+                offset?: number;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DqFindingList"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Dq.waive": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DqWaiveRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DqWaiver"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };

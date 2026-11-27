@@ -25,6 +25,7 @@ export type ProductListPage = Pfc['schemas']['ProductListPage'];
 export type ProductListItem = Pfc['schemas']['ProductListItem'];
 export type ChargeTypeListPage = Pfc['schemas']['ChargeTypeListPage'];
 export type ChargeTypeListItem = Pfc['schemas']['ChargeTypeListItem'];
+export type ProductDescribeResponse = Pfc['schemas']['ProductDescribeResponse'];
 export type CatalogueGetResponse = Pfc['schemas']['CatalogueGetResponse'];
 export type CatalogueCoverage = Pfc['schemas']['CatalogueCoverage'];
 export type QuestionSetGetResponse = Pfc['schemas']['QuestionSetGetResponse'];

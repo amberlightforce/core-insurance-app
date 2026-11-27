@@ -99,6 +99,14 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                         .HasColumnType("char(64)")
                         .HasColumnName("base_hash");
 
+                    b.Property<string>("Cause")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasDefaultValue("MANUAL")
+                        .HasColumnName("cause");
+
                     b.Property<string>("ContentHash")
                         .HasColumnType("char(64)")
                         .HasColumnName("content_hash");
@@ -132,6 +140,14 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
                         .HasColumnName("decision_reason");
+
+                    b.Property<DateTime?>("EffectiveAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("effective_at");
+
+                    b.Property<string>("ImportDigest")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("import_digest");
 
                     b.Property<Guid>("LegalEntityId")
                         .HasColumnType("uuid")
@@ -167,14 +183,22 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
 
                     b.HasIndex("ResultingHash");
 
+                    b.HasIndex("LegalEntityId", "ImportDigest")
+                        .HasDatabaseName("ix_config_change_request_import");
+
                     b.HasIndex("LegalEntityId", "Status")
                         .HasDatabaseName("ix_config_change_request_entity_status");
+
+                    b.HasIndex("Status", "EffectiveAt")
+                        .HasDatabaseName("ix_config_change_request_due");
 
                     b.ToTable("config_change_request", "mkt", t =>
                         {
                             t.HasCheckConstraint("ck_config_change_request_base_hash", "base_hash ~ '^[0-9a-f]{64}$'");
 
-                            t.HasCheckConstraint("ck_config_change_request_status", "status IN ('DRAFT', 'PENDING_APPROVAL', 'APPLIED', 'REJECTED', 'WITHDRAWN')");
+                            t.HasCheckConstraint("ck_config_change_request_cause", "cause IN ('MANUAL', 'IMPORT')");
+
+                            t.HasCheckConstraint("ck_config_change_request_status", "status IN ('DRAFT', 'PENDING_APPROVAL', 'SCHEDULED', 'APPLIED', 'REJECTED', 'WITHDRAWN')");
                         });
                 });
 

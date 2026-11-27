@@ -4,11 +4,11 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Mart.signOff request. PRD inputs: "run id, comment"</summary>
+/// <summary>dat.Mart.signOff request (BO-DAT-04). The signer must be a different person from everyone who ran or adjusted the run.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MartSignOffRequest
 {
-    /// <summary>PRD: "run id"</summary>
+    /// <summary>The run to sign off.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'runId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
@@ -16,11 +16,8 @@ public sealed record MartSignOffRequest
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Guid? RunId { get; init; }
 
-    /// <summary>PRD: "comment"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Optional comment, up to 1000 characters.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Comment { get; init; }
+    public string? Comment { get; init; }
 }

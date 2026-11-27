@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>Page of chn.Notification.list results (cursor pagination, contract §3.5.5)</summary>
+/// <summary>Page of chn.Notification.list results, newest first, with the unread count</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record NotificationListPage
 {
@@ -20,4 +20,9 @@ public sealed record NotificationListPage
     [global::System.Text.Json.Serialization.JsonPropertyName("limit")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public int? Limit { get; init; }
+
+    /// <summary>Contract member 'unreadCount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("unreadCount")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? UnreadCount { get; init; }
 }

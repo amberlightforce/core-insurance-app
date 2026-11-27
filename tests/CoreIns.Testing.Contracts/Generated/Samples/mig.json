@@ -203,6 +203,150 @@
       "processedCount": 1,
       "failedCount": 1
     },
+    "DqFieldProfile": {
+      "field": "sample",
+      "present": 1,
+      "nullCount": 1,
+      "blankCount": 1,
+      "nullRate": "sample",
+      "distinct": 1,
+      "min": "sample",
+      "max": "sample"
+    },
+    "DqFinding": {
+      "findingId": "01928fb6-6da8-7214-8be6-71c55d3fc5da",
+      "runId": "01925237-3b99-7269-819d-8e2154448cc8",
+      "snapshotId": "019239f7-dd17-7511-81ed-16b8fab3d5a4",
+      "recordId": "0192af7b-6744-7805-8dae-528306c43781",
+      "objectType": "sample",
+      "legacyKey": "sample",
+      "ruleCode": "sample",
+      "severity": "ERROR",
+      "field": "sample",
+      "message": "sample",
+      "status": "OPEN",
+      "waiverId": "019250ba-ec9e-75b6-86e0-94e568fe96c6",
+      "waivedUntil": "2026-10-07"
+    },
+    "DqFindingList": {
+      "run": {
+        "runId": "01928a5a-0259-7179-81b9-e4d81448d212",
+        "snapshotId": "019253da-600f-705f-8fea-71acb43e31a4",
+        "source": "sample",
+        "snapshot": "sample",
+        "ruleSetVersion": 1,
+        "recordCount": 1,
+        "errorCount": 1,
+        "warningCount": 1,
+        "findingsByRule": {
+          "sample": 1
+        },
+        "profile": [
+          {
+            "objectType": "sample",
+            "recordCount": 1,
+            "fields": [
+              {
+                "field": "sample",
+                "present": 1,
+                "nullCount": 1,
+                "blankCount": 1,
+                "nullRate": "sample",
+                "distinct": 1,
+                "min": "sample",
+                "max": "sample"
+              }
+            ]
+          }
+        ],
+        "runBy": "sample",
+        "runAt": "2026-10-07T09:00:00Z"
+      },
+      "total": 1,
+      "items": [
+        {
+          "findingId": "0192461a-060e-7d7b-8887-5fa41322ffac",
+          "runId": "01924ecc-8b55-71bb-8fbe-11f51b38fa07",
+          "snapshotId": "0192bd1a-7871-72f8-8106-ac11832ed2a8",
+          "recordId": "0192aea2-566c-75a6-89ba-a595fbf6b8c5",
+          "objectType": "sample",
+          "legacyKey": "sample",
+          "ruleCode": "sample",
+          "severity": "ERROR",
+          "field": "sample",
+          "message": "sample",
+          "status": "OPEN",
+          "waiverId": "019288b4-0bbc-7099-8a18-1000a60d95d6",
+          "waivedUntil": "2026-10-07"
+        }
+      ]
+    },
+    "DqObjectProfile": {
+      "objectType": "sample",
+      "recordCount": 1,
+      "fields": [
+        {
+          "field": "sample",
+          "present": 1,
+          "nullCount": 1,
+          "blankCount": 1,
+          "nullRate": "sample",
+          "distinct": 1,
+          "min": "sample",
+          "max": "sample"
+        }
+      ]
+    },
+    "DqRun": {
+      "runId": "01928ccb-c0bd-7066-80d0-cfd4a0b0ba9a",
+      "snapshotId": "01922556-36da-7813-8f92-41382a0724cc",
+      "source": "sample",
+      "snapshot": "sample",
+      "ruleSetVersion": 1,
+      "recordCount": 1,
+      "errorCount": 1,
+      "warningCount": 1,
+      "findingsByRule": {
+        "sample": 1
+      },
+      "profile": [
+        {
+          "objectType": "sample",
+          "recordCount": 1,
+          "fields": [
+            {
+              "field": "sample",
+              "present": 1,
+              "nullCount": 1,
+              "blankCount": 1,
+              "nullRate": "sample",
+              "distinct": 1,
+              "min": "sample",
+              "max": "sample"
+            }
+          ]
+        }
+      ],
+      "runBy": "sample",
+      "runAt": "2026-10-07T09:00:00Z"
+    },
+    "DqWaiveRequest": {
+      "findingId": "01925930-a8a1-7de1-85ba-db83e53bc677",
+      "reason": "sample",
+      "expiresOn": "2026-10-07"
+    },
+    "DqWaiver": {
+      "waiverId": "0192face-9f59-77e6-8ea0-becbf647118b",
+      "findingId": "0192f368-9e37-7343-850d-6612bce4e5b4",
+      "source": "sample",
+      "objectType": "sample",
+      "legacyKey": "sample",
+      "ruleCode": "sample",
+      "reason": "sample",
+      "expiresOn": "2026-10-07",
+      "waivedBy": "sample",
+      "waivedAt": "2026-10-07T09:00:00Z"
+    },
     "EnquiryGetResponse": {
       "summaryMasterMarks": "unspecified",
       "freshness": "unspecified"
@@ -213,6 +357,11 @@
     },
     "ImportContractConformanceResponse": {
       "passFailPerContractElement": "unspecified"
+    },
+    "ProfileRunRequest": {
+      "snapshotId": "0192f451-90b0-731e-83e5-75a4bc89bb5d",
+      "source": "sample",
+      "snapshot": "sample"
     },
     "ReconControlTotal": {
       "module": "sample",

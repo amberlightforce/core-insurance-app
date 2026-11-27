@@ -100,10 +100,6 @@
   font-weight: 600;
 }
 
-.measure .labelReserve {
-  visibility: visible;
-}
-
 .errorDot {
   inline-size: 6px;
   block-size: 6px;
@@ -170,7 +166,8 @@
   outline-offset: calc(var(--focus-ring-width) * -1);
 }
 
-/* Off-screen measuring copy (natural widths); never visible, never announced. */
+/* Off-screen measuring copy (natural widths); never visible, never announced. `visibility: hidden` must reach
+   every descendant, so nothing inside may reset it to visible (that painted a ghost strip over the real tabs). */
 .measure {
   position: absolute;
   inset-block-start: 0;

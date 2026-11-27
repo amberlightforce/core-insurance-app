@@ -4,23 +4,20 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>chn.Notification.markRead request. PRD inputs: "identity, classes"</summary>
+/// <summary>chn.Notification.markRead request. Idempotent: already-read items stay as they are.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record NotificationMarkReadRequest
 {
-    /// <summary>PRD: "identity"</summary>
+    /// <summary>Contract member 'notificationIds'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'notificationId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("identity")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("notificationIds")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Identity { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? NotificationIds { get; init; }
 
-    /// <summary>PRD: "classes"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("classes")]
+    /// <summary>Mark every notification of the caller read</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("all")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Classes { get; init; }
+    public bool? All { get; init; }
 }
