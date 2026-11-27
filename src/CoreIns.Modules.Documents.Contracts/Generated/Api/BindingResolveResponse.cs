@@ -4,15 +4,24 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Binding.resolve result. PRD outputs: "template version"</summary>
+/// <summary>doc.Binding.resolve result: the approved template version in force at validAt (BO-DOC-05).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BindingResolveResponse
 {
-    /// <summary>PRD: "template version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("templateVersion")]
+    /// <summary>Contract member 'templateId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("templateId")]
+    public required global::CoreIns.SharedKernel.Identifiers.TemplateId TemplateId { get; init; }
+
+    /// <summary>Contract member 'documentType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("documentType")]
+    public required string DocumentType { get; init; }
+
+    /// <summary>Contract member 'version'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    public required int Version { get; init; }
+
+    /// <summary>Contract member 'language'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("language")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? TemplateVersion { get; init; }
+    public string? Language { get; init; }
 }

@@ -4,23 +4,45 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Identifier.verify result. PRD outputs: "status, suggestions"</summary>
+/// <summary>pty.Identifier.verify result (BO-PTY-01). valid = the IdValidator accepts the value (format and check digit). No registry or VIES adapter is bound yet, so a valid value stays SELF_DECLARED (source ID_VALIDATOR) and an invalid one becomes VERIFICATION_FAILED.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record IdentifierVerifyResponse
 {
-    /// <summary>PRD: "status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'status'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Status { get; init; }
+    public required StatusValue Status { get; init; }
 
-    /// <summary>PRD: "suggestions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'valid'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("valid")]
+    public required bool Valid { get; init; }
+
+    /// <summary>Contract member 'suggestions'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("suggestions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Suggestions { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<string> Suggestions { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>SELF_DECLARED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SELF_DECLARED")]
+        SelfDeclared,
+
+        /// <summary><c>DOCUMENT_VERIFIED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DOCUMENT_VERIFIED")]
+        DocumentVerified,
+
+        /// <summary><c>REGISTRY_VERIFIED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REGISTRY_VERIFIED")]
+        RegistryVerified,
+
+        /// <summary><c>VERIFICATION_FAILED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("VERIFICATION_FAILED")]
+        VerificationFailed,
+
+        /// <summary><c>EXPIRED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("EXPIRED")]
+        Expired,
+    }
 }

@@ -53,6 +53,14 @@ public static class PartyModule
         services.AddCommandAuditor<CreateParty, PartyCreateResponse, CreatePartyAuditor>();
         services.AddCommand<CreateParty, PartyCreateResponse, CreatePartyHandler>(CommandDescriptor.For("pty.Party.create") with { SupportsDryRun = true });
 
+        services.AddScoped<IValidator<UpdateParty>, UpdatePartyValidator>();
+        services.AddCommandAuditor<UpdateParty, PartyUpdateResponse, UpdatePartyAuditor>();
+        services.AddCommand<UpdateParty, PartyUpdateResponse, UpdatePartyHandler>(CommandDescriptor.For("pty.Party.update") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<VerifyIdentifier>, VerifyIdentifierValidator>();
+        services.AddCommandAuditor<VerifyIdentifier, IdentifierVerifyResponse, VerifyIdentifierAuditor>();
+        services.AddCommand<VerifyIdentifier, IdentifierVerifyResponse, VerifyIdentifierHandler>(CommandDescriptor.For("pty.Identifier.verify"));
+        services.AddScoped<PartyValidationService>();
+
         services.AddScoped<IValidator<RevealParty>, RevealPartyValidator>();
         services.AddCommandAuditor<RevealParty, PartyGetResponse, RevealPartyAuditor>();
         services.AddCommand<RevealParty, PartyGetResponse, RevealPartyHandler>(
@@ -62,6 +70,15 @@ public static class PartyModule
         services.AddCommandAuditor<CreateIntermediary, IntermediaryCreateResponse, IntermediaryAuditor>();
         services.AddCommand<CreateIntermediary, IntermediaryCreateResponse, CreateIntermediaryHandler>(CommandDescriptor.For("pty.Intermediary.create"));
 
+        services.AddScoped<IValidator<SuspendIntermediary>, SuspendIntermediaryValidator>();
+        services.AddScoped<IValidator<TerminateIntermediary>, TerminateIntermediaryValidator>();
+        services.AddScoped<IValidator<ImportIntermediaryRegister>, ImportIntermediaryRegisterValidator>();
+        services.AddCommandAuditor<SuspendIntermediary, IntermediarySuspendResponse, IntermediaryLifecycleAuditor>();
+        services.AddCommandAuditor<TerminateIntermediary, IntermediaryTerminateResponse, IntermediaryLifecycleAuditor>();
+        services.AddCommandAuditor<ImportIntermediaryRegister, IntermediaryImportRegisterResponse, IntermediaryLifecycleAuditor>();
+        services.AddCommand<SuspendIntermediary, IntermediarySuspendResponse, SuspendIntermediaryHandler>(CommandDescriptor.For("pty.Intermediary.suspend"));
+        services.AddCommand<TerminateIntermediary, IntermediaryTerminateResponse, TerminateIntermediaryHandler>(CommandDescriptor.For("pty.Intermediary.terminate"));
+        services.AddCommand<ImportIntermediaryRegister, IntermediaryImportRegisterResponse, ImportIntermediaryRegisterHandler>(CommandDescriptor.For("pty.Intermediary.importRegister"));
         services.AddScoped<IValidator<UpdateIntermediary>, UpdateIntermediaryValidator>();
         services.AddCommandAuditor<UpdateIntermediary, IntermediaryUpdateResponse, IntermediaryAuditor>();
         services.AddCommand<UpdateIntermediary, IntermediaryUpdateResponse, UpdateIntermediaryHandler>(CommandDescriptor.For("pty.Intermediary.update"));
@@ -81,6 +98,10 @@ public static class PartyModule
         services.AddScoped<IPartyProducerCodeService, PartyProducerCodeService>();
         services.AddScoped<IPartyVulnerabilityService, PartyVulnerabilityService>();
 
+        // BO-MIG-06: migration SPI (importer and reverser of Person, Organisation and Contact).
+        services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationImporter, MigrationImport.PartyMigrationImporter>();
+        services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationReverser, MigrationImport.PartyMigrationReverser>();
+
         services.AddErrorDefinitions(Errors);
         return services;
     }
@@ -98,6 +119,8 @@ public static class PartyModule
             .Describe("Η εγγραφή δεν υπάρχει στη νομική σας οντότητα.", "The record does not exist in your legal entity."),
         ErrorDefinition.For(ModuleCode.PTY, "MERGED", 409, "Το πρόσωπο έχει συγχωνευθεί", "The party was merged")
             .Describe("Χρησιμοποιήστε το πρόσωπο που επικράτησε στη συγχώνευση.", "Use the surviving party of the merge."),
+        ErrorDefinition.For(ModuleCode.PTY, "RESTRICTED", 409, "Η εγγραφή είναι περιορισμένη", "The record is restricted")
+            .Describe("Η εγγραφή του προσώπου περιορίζεται λόγω αιτήματος υποκειμένου δεδομένων και δεν μπορεί να αλλάξει.", "The party record is restricted by a data-subject request and cannot be changed."),
         ErrorDefinition.For(ModuleCode.PTY, "QUERY-TOO-SHORT", 422, "Η αναζήτηση είναι πολύ σύντομη", "The search is too short")
             .Describe("Δώστε τουλάχιστον 2 χαρακτήρες, αριθμό προσώπου ή αναγνωριστικό.", "Give at least 2 characters, a party number or an identifier."),
         ErrorDefinition.For(ModuleCode.PTY, "POSTCODE-FORMAT", 422, "Ο ταχυδρομικός κώδικας δεν έχει τη σωστή μορφή", "The postcode does not have the right format")

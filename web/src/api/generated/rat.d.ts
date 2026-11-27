@@ -3350,7 +3350,12 @@ export interface operations {
     };
     "rat.RateTable.diff": {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Contract addition (BO-RAT-05): table hash of the earlier version */
+                from: string;
+                /** @description Contract addition (BO-RAT-05): table hash of the later version */
+                to: string;
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key

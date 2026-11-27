@@ -109,7 +109,9 @@ internal sealed record BatchView(
     string? StartedBy,
     Guid? ApprovalRequestId,
     int ItemCount,
-    IReadOnlyDictionary<string, int> Counts);
+    IReadOnlyDictionary<string, int> Counts,
+    int ProcessedCount,
+    int FailedCount);
 
 /// <summary>One item outcome.</summary>
 internal sealed record OutcomeView(int Seq, string Module, string ObjectType, string LegacyId, string Outcome, Guid? CoreId, string? ErrorCode, string? Message);
