@@ -535,6 +535,95 @@ public sealed class ApprovalTests(PostgresFixture database) : IClassFixture<Post
         (await ScalarAsync<string>($"SELECT status FROM plt.approval_request WHERE request_id = '{requestId}'")).ShouldBe("PendingApproval");
     }
 
+    private Task<(HttpResponseMessage Response, JsonNode? Body)> VerifyAsync(string user, string roles, string requestId, string hash, string subjectId) =>
+        SendAsync(HttpMethod.Post, "/api/plt/v1/approval/verify-for-execution", user, roles,
+            new { requestId, hash, type = "CLM.TRANSACTION_SET", objectRef = new { module = "CLM", type = "TransactionSet", id = subjectId } });
+
+    [Fact]
+    public async Task BO_PLT_02_request_decide_then_verify_for_execution_is_ok_only_for_the_approved_hash()
+    {
+        var subject = Guid.NewGuid().ToString();
+        var hash = NewHash();
+        var requestId = await CreateAsync("maker-v", subject, hash, "5000.01");
+
+        var (pending, pendingBody) = await VerifyAsync("exec-1", Handler, requestId, hash, subject);
+        pending.StatusCode.ShouldBe(HttpStatusCode.OK, pendingBody?.ToJsonString());
+        pendingBody!["ok"]!.GetValue<bool>().ShouldBeFalse();
+
+        (await DecideAsync("manager-v", Manager, requestId, hash)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        var (ok, okBody) = await VerifyAsync("exec-1", Handler, requestId, hash, subject);
+        okBody!["ok"]!.GetValue<bool>().ShouldBeTrue(okBody.ToJsonString());
+        okBody["status"]!.GetValue<string>().ShouldBe("Approved");
+
+        // Stale content: the hash the owner is about to execute differs from the approved one.
+        var (stale, staleBody) = await VerifyAsync("exec-1", Handler, requestId, NewHash(), subject);
+        stale.StatusCode.ShouldBe((HttpStatusCode)422);
+        staleBody!["code"]!.GetValue<string>().ShouldBe("PLT-ERR-APPROVAL-HASH-MISMATCH");
+
+        // Another subject is refused too.
+        var (other, otherBody) = await VerifyAsync("exec-1", Handler, requestId, hash, Guid.NewGuid().ToString());
+        other.StatusCode.ShouldBe((HttpStatusCode)422);
+        otherBody!["code"]!.GetValue<string>().ShouldBe("PLT-ERR-APPROVAL-SUBJECT-MISMATCH");
+    }
+
+    [Fact]
+    public async Task BO_PLT_02_the_maker_withdraws_their_own_request_and_a_withdrawn_request_cannot_be_verified_or_decided()
+    {
+        var subject = Guid.NewGuid().ToString();
+        var hash = NewHash();
+        var requestId = await CreateAsync("maker-w", subject, hash, "5000.01");
+
+        // Someone else cannot withdraw it.
+        var (foreign, foreignBody) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval/withdraw", "handler-other", Handler, new { approvalRequestId = requestId, reason = "not mine" });
+        foreign.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        foreignBody!["code"]!.GetValue<string>().ShouldBe("PLT-ERR-NOT-OWNER");
+
+        var (withdrawn, body) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval/withdraw", "maker-w", Handler, new { approvalRequestId = requestId, reason = "typo" });
+        withdrawn.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        body!["status"]!.GetValue<string>().ShouldBe("Withdrawn");
+        (await ScalarAsync<string>($"SELECT status FROM plt.approval_request WHERE request_id = '{requestId}'")).ShouldBe("Withdrawn");
+
+        var (verified, verifiedBody) = await VerifyAsync("exec-1", Handler, requestId, hash, subject);
+        verified.StatusCode.ShouldBe(HttpStatusCode.OK);
+        verifiedBody!["ok"]!.GetValue<bool>().ShouldBeFalse();
+        verifiedBody["status"]!.GetValue<string>().ShouldBe("Withdrawn");
+
+        var (decided, _) = await DecideAsync("manager-w", Manager, requestId, hash);
+        decided.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+
+        // An approved request can no longer be withdrawn.
+        var hash2 = NewHash();
+        var second = await CreateAsync("maker-w", Guid.NewGuid().ToString(), hash2, "5000.01");
+        (await DecideAsync("manager-w", Manager, second, hash2)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var (late, _) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval/withdraw", "maker-w", Handler, new { approvalRequestId = second, reason = "late" });
+        late.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+    }
+
+    [Fact]
+    public async Task BO_PLT_02_approval_type_register_is_admin_only_idempotent_and_audited()
+    {
+        var type = "PLT.TEST_" + Guid.NewGuid().ToString("N")[..8].ToUpperInvariant();
+        var body = new { type, description = "Test approval type", defaultReferralRole = Manager, defaultAuthorityType = "CLM.PAYMENT" };
+
+        var (denied, _) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval-types/register", "manager-b", $"{Handler},{Manager}", body);
+        denied.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+
+        var (first, firstBody) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval-types/register", "admin-a", "Platform.Admin", body);
+        first.StatusCode.ShouldBe(HttpStatusCode.OK, firstBody?.ToJsonString());
+        firstBody!["version"]!.GetValue<int>().ShouldBe(1);
+        var (second, secondBody) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval-types/register", "admin-a", "Platform.Admin", body with { description = "Changed" });
+        second.StatusCode.ShouldBe(HttpStatusCode.OK);
+        secondBody!["version"]!.GetValue<int>().ShouldBe(2);
+        (await ScalarAsync<string>($"SELECT description FROM plt.approval_type WHERE approval_type = '{type}'")).ShouldBe("Changed");
+        (await ScalarAsync<long>($"SELECT count(*) FROM plt.audit_event WHERE operation = 'plt.ApprovalType.register' AND object_id = '{type}' AND outcome = 'Succeeded'")).ShouldBe(2);
+
+        var (unknown, _) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval-types/register", "admin-a", "Platform.Admin", body with { type = "PLT.OTHER_X1", defaultAuthorityType = "NO.SUCH" });
+        unknown.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        var (bad, _) = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval-types/register", "admin-a", "Platform.Admin", body with { type = "lowercase" });
+        bad.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
     private AsyncServiceScope Scope(string user, string roles, out IServiceProvider services)
     {
         var scope = _factory.Services.CreateAsyncScope();

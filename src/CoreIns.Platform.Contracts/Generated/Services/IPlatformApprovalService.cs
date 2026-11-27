@@ -58,7 +58,7 @@ public interface IPlatformApprovalService
     /// <remarks>
     /// <para>Operation plt.Approval.withdraw (command; HTTP POST /api/plt/v1/approval/withdraw).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full; fully typed from REQ-PLT-004, REQ-PLT-114 (SL4-CONTRACTS, D-SL4-14: owner module only, audited, no REST). Wave W1.</para>
+    /// <para>Status: full; fully typed from REQ-PLT-004, REQ-PLT-114 (SL4-CONTRACTS, D-SL4-14: owner module in process; BO-PLT-02: over REST only the maker withdraws own pending request, never an owner-decided type; audited). Wave W1.</para>
     /// <para>Exposure: internal; consumers: CLM.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
     /// <para>Errors: PLT-ERR-NOT-FOUND (404), PLT-ERR-NOT-OWNER (403), PLT-ERR-APPROVAL-STALE (409), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
