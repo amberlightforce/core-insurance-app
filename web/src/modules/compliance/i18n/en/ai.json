@@ -1,0 +1,58 @@
+{
+  "ai": {
+    "overline": "Compliance",
+    "title": "AI-system register",
+    "lead": "AI features in use, their AI Act class and review status.",
+    "list": {
+      "title": "Registered systems",
+      "empty": "No AI systems are registered."
+    },
+    "columns": {
+      "id": "Feature",
+      "name": "Name",
+      "class": "AI Act class",
+      "status": "Status",
+      "submittedBy": "Submitted by",
+      "approvedBy": "Approved by",
+      "actions": "Actions"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "IN_REVIEW": "In review",
+      "APPROVED": "Approved",
+      "SUSPENDED": "Suspended",
+      "RETIRED": "Retired"
+    },
+    "register": {
+      "title": "Register an AI system",
+      "featureId": "Feature id",
+      "featureIdHelp": "Format AI-XXX-01",
+      "featureIdInvalid": "Use the format AI-XXX-01.",
+      "name": "Name",
+      "nameRequired": "Enter a name.",
+      "class": "AI Act class",
+      "submit": "Register"
+    },
+    "registered": "AI system registered",
+    "action": {
+      "submit-for-review": "Submit for review",
+      "approve": "Approve",
+      "suspend": "Suspend",
+      "retire": "Retire"
+    },
+    "done": {
+      "submit-for-review": "Submitted for review",
+      "approve": "Approved",
+      "suspend": "Suspended",
+      "retire": "Retired"
+    },
+    "confirm": {
+      "submit-for-review": "Send this system to review.",
+      "approve": "Approve this system for use. You cannot approve what you submitted.",
+      "suspend": "Suspend this system; it stops being usable.",
+      "retire": "Retire this system permanently."
+    },
+    "reason": "Reason",
+    "cancel": "Cancel"
+  }
+}
