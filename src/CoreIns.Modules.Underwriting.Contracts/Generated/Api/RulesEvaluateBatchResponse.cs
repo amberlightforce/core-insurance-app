@@ -4,20 +4,113 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Rules.evaluateBatch result. PRD outputs: "job id, results"</summary>
+/// <summary>uw.Rules.evaluateBatch result: one result per item in request order, all against the same rule-set version (code, version and content hash are echoed, so a result is reproducible). Nothing is recorded.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RulesEvaluateBatchResponse
 {
-    /// <summary>PRD: "job id"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
+    /// <summary>Contract member 'ruleSetCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetCode")]
+    public required string RuleSetCode { get; init; }
 
-    /// <summary>PRD: "results"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("results")]
+    /// <summary>Contract member 'ruleSetVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetVersion")]
+    public required string RuleSetVersion { get; init; }
+
+    /// <summary>Contract member 'ruleSetHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash RuleSetHash { get; init; }
+
+    /// <summary>ILLUSTRATIVE_TEST_DATA when the rule set is made-up test data (D-SLC-04)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dataStatus")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Results { get; init; }
+    public string? DataStatus { get; init; }
+
+    /// <summary>True when the caller pinned the version</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("pinned")]
+    public required bool Pinned { get; init; }
+
+    /// <summary>Contract member 'results'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("results")]
+    public required global::System.Collections.Generic.IReadOnlyList<ResultItem> Results { get; init; }
+
+    /// <summary>Contract member 'warnings'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("warnings")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<string>? Warnings { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ResultItem
+    {
+        /// <summary>Contract member 'itemRef'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("itemRef")]
+        public required string ItemRef { get; init; }
+
+        /// <summary>ERROR when the item's snapshot is not a valid risk (see error)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+        public required OutcomeValue Outcome { get; init; }
+
+        /// <summary>Contract member 'lane'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("lane")]
+        public string? Lane { get; init; }
+
+        /// <summary>Contract member 'hits'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("hits")]
+        public required global::System.Collections.Generic.IReadOnlyList<HitItem> Hits { get; init; }
+
+        /// <summary>Why the item could not be evaluated</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("error")]
+        public string? Error { get; init; }
+
+        /// <summary>ERROR when the item's snapshot is not a valid risk (see error)</summary>
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public enum OutcomeValue
+        {
+            /// <summary><c>ACCEPT</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ACCEPT")]
+            Accept,
+
+            /// <summary><c>REFER</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REFER")]
+            Refer,
+
+            /// <summary><c>DECLINE</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DECLINE")]
+            Decline,
+
+            /// <summary><c>ERROR</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ERROR")]
+            Error,
+        }
+
+        /// <summary>Generated contract member.</summary>
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public sealed record HitItem
+        {
+            /// <summary>Contract member 'ruleId'.</summary>
+            [global::System.Text.Json.Serialization.JsonPropertyName("ruleId")]
+            public required string RuleId { get; init; }
+
+            /// <summary>Contract member 'ruleType'.</summary>
+            [global::System.Text.Json.Serialization.JsonPropertyName("ruleType")]
+            public required string RuleType { get; init; }
+
+            /// <summary>Contract member 'issueType'.</summary>
+            [global::System.Text.Json.Serialization.JsonPropertyName("issueType")]
+            public required string IssueType { get; init; }
+
+            /// <summary>Contract member 'blockingPoint'.</summary>
+            [global::System.Text.Json.Serialization.JsonPropertyName("blockingPoint")]
+            public required global::CoreIns.Platform.Contracts.Common.BlockingPoint BlockingPoint { get; init; }
+
+            /// <summary>Contract member 'messageEn'.</summary>
+            [global::System.Text.Json.Serialization.JsonPropertyName("messageEn")]
+            public required string MessageEn { get; init; }
+
+            /// <summary>Contract member 'messageEl'.</summary>
+            [global::System.Text.Json.Serialization.JsonPropertyName("messageEl")]
+            public required string MessageEl { get; init; }
+        }
+    }
 }

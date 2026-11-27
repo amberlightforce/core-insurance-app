@@ -7832,73 +7832,293 @@ components:
   schemas:
     ProgrammeCreateRequest:
       type: object
-      description: 'ri.Programme.create request. PRD inputs: "programme data; period; decision"'
+      description: ri.Programme.create request (BO-RI-01). Creates a Draft programme, version 1, in the caller's legal entity. The layers form one contiguous
+        ladder (each attachment equals the previous attachment plus limit) and every layer names a contract of the legal entity that carries it.
       properties:
-        programmeData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programme data"'
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Programme code, unique per legal entity and programme year (for example MOTOR-XOL)
+        name:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Programme name
+        lineCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Line of business the programme protects; two programmes of one line never overlap in period (RI-ERR-VALIDATION PROGRAMME_PERIOD_OVERLAP)
         period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+          description: Half-open period [from, to) of Europe/Athens dates; the programme year is the year of the start
+        layers:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiProgrammeLayerInput'
+          minItems: 1
+        reason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Reason code (audit)
+      required:
+      - code
+      - name
+      - lineCode
+      - period
+      - layers
     ProgrammeCreateResponse:
       type: object
-      description: 'ri.Programme.create result. PRD outputs: "programme, diff"'
+      description: ri.Programme.create result
       properties:
         programme:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programme"'
+          $ref: '#/components/schemas/RiProgramme'
         diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
+          $ref: '#/components/schemas/RiProgrammeDiff'
+      required:
+      - programme
+      - diff
     ProgrammeUpdateRequest:
       type: object
-      description: 'ri.Programme.update request. PRD inputs: "programme data; period; decision"'
+      description: 'ri.Programme.update request. A Draft version is edited in place; an approved, pending or active programme is never edited: the update
+        starts a new Draft version (the old one stays in force until the new one is approved). Members left out are unchanged.'
       properties:
-        programmeData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programme data"'
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The recordVersion the user saw; a different current version is RI-ERR-STALE
+        name:
+          $ref: ../events/common.schema.json#/$defs/Text
         period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+        layers:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiProgrammeLayerInput'
+          minItems: 1
+        reason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Reason code (audit)
+      required:
+      - expectedRecordVersion
     ProgrammeUpdateResponse:
       type: object
-      description: 'ri.Programme.update result. PRD outputs: "programme, diff"'
+      description: ri.Programme.update result
       properties:
         programme:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programme"'
+          $ref: '#/components/schemas/RiProgramme'
         diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
+          $ref: '#/components/schemas/RiProgrammeDiff'
+      required:
+      - programme
+      - diff
     ProgrammeRenewRequest:
       type: object
-      description: 'ri.Programme.renew request. PRD inputs: "programme data; period; decision"'
+      description: ri.Programme.renew request. Copies the programme to the next year with its layers; every contract it names is copied as a new Draft
+        contract of the next year (same treaty, layers, clause and panel, period moved by one year) that goes through the contract approval on its own.
       properties:
-        programmeData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programme data"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+        programmeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The programme to renew; its current version is copied
+        reason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Reason code (audit)
+      required:
+      - programmeId
     ProgrammeRenewResponse:
       type: object
-      description: 'ri.Programme.renew result. PRD outputs: "programme, diff"'
+      description: ri.Programme.renew result
       properties:
         programme:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programme"'
+          $ref: '#/components/schemas/RiProgramme'
         diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
+          $ref: '#/components/schemas/RiProgrammeDiff'
+      required:
+      - programme
+      - diff
+    RiProgrammeStatus:
+      type: string
+      enum:
+      - DRAFT
+      - PENDING_APPROVAL
+      - ACTIVE
+      - SUPERSEDED
+      - EXPIRED
+      description: Status of a programme version. BO-RI-01 only creates DRAFT; the approval (BO-RI-02) moves it on.
+    RiProgrammeLayerInput:
+      type: object
+      description: One layer of the programme ladder and the contract that carries it. The contract must have a layer with the same attachment and limit.
+      properties:
+        layerNo:
+          type: integer
+          minimum: 1
+          description: Layer number, unique within the programme, 1 = lowest
+        attachment:
+          $ref: ../events/common.schema.json#/$defs/Money
+        limit:
+          $ref: ../events/common.schema.json#/$defs/Money
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The contract of the legal entity that carries the layer (in force for the programme period)
+      required:
+      - layerNo
+      - attachment
+      - limit
+      - contractId
+    RiProgrammeLayer:
+      type: object
+      description: A layer of a programme with the contract that carries it.
+      properties:
+        layerNo:
+          type: integer
+        attachment:
+          $ref: ../events/common.schema.json#/$defs/Money
+        limit:
+          $ref: ../events/common.schema.json#/$defs/Money
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractNumber:
+          $ref: ../events/common.schema.json#/$defs/Text
+        contractStatus:
+          $ref: '#/components/schemas/RiContractStatus'
+      required:
+      - layerNo
+      - attachment
+      - limit
+      - contractId
+      - contractNumber
+      - contractStatus
+    RiProgrammeContract:
+      type: object
+      description: A contract of the programme (one per contract, however many layers it carries).
+      properties:
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractNumber:
+          $ref: ../events/common.schema.json#/$defs/Text
+        contractType:
+          $ref: '#/components/schemas/RiContractType'
+        contractYear:
+          type: integer
+        status:
+          $ref: '#/components/schemas/RiContractStatus'
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+      required:
+      - contractId
+      - contractNumber
+      - contractType
+      - contractYear
+      - status
+      - currency
+    RiProgrammeVersionSummary:
+      type: object
+      description: One version of the programme in the history.
+      properties:
+        versionNo:
+          type: integer
+        status:
+          $ref: '#/components/schemas/RiProgrammeStatus'
+        period:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        createdBy:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - versionNo
+      - status
+      - period
+      - createdAt
+      - createdBy
+    RiProgramme:
+      type: object
+      description: A reinsurance programme (BO-RI-01) with its current version. The current version is the highest version number; an earlier APPROVED/ACTIVE
+        one stays in force until it is superseded.
+      properties:
+        programmeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        legalEntity:
+          $ref: ../events/common.schema.json#/$defs/Code
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        name:
+          $ref: ../events/common.schema.json#/$defs/Text
+        lineCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        programmeYear:
+          type: integer
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        period:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+        status:
+          $ref: '#/components/schemas/RiProgrammeStatus'
+        versionNo:
+          type: integer
+          minimum: 1
+        recordVersion:
+          type: integer
+          minimum: 1
+        retention:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: The programme retention, equal to the attachment of layer 1
+        layers:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiProgrammeLayer'
+        contracts:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiProgrammeContract'
+        renewedFromId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The programme this one renewed, when it was created by renew
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiProgrammeVersionSummary'
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - programmeId
+      - legalEntity
+      - code
+      - name
+      - lineCode
+      - programmeYear
+      - currency
+      - period
+      - status
+      - versionNo
+      - recordVersion
+      - retention
+      - layers
+      - contracts
+      - versions
+      - createdAt
+    RiProgrammeDiff:
+      type: array
+      description: What the command changed, field by field (an empty list when nothing changed).
+      items:
+        type: object
+        properties:
+          field:
+            $ref: ../events/common.schema.json#/$defs/Text
+          before:
+            oneOf:
+            - $ref: ../events/common.schema.json#/$defs/Text
+            - type: 'null'
+          after:
+            oneOf:
+            - $ref: ../events/common.schema.json#/$defs/Text
+            - type: 'null'
+        required:
+        - field
+        - before
+        - after
     ProgrammeSubmitRequest:
       type: object
       description: 'ri.Programme.submit request. PRD inputs: "programme data; period; decision"'
@@ -7970,18 +8190,20 @@ components:
           description: 'PRD: "diff"'
     ProgrammeGetResponse:
       type: object
-      description: 'ri.Programme.get result. PRD outputs: "programmes"'
+      description: ri.Programme.get result
       properties:
-        programmes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programmes"'
+        programme:
+          $ref: '#/components/schemas/RiProgramme'
+      required:
+      - programme
     ProgrammeListItem:
       type: object
-      description: 'ri.Programme.list result. PRD outputs: "programmes"'
+      description: ri.Programme.list result
       properties:
-        programmes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programmes"'
+        programme:
+          $ref: '#/components/schemas/RiProgramme'
+      required:
+      - programme
     ProgrammeListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope

@@ -4,15 +4,72 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Approval.history result. PRD outputs: "rows"</summary>
+/// <summary>One event of an issues approval history (BO-UW-03): a decision, or the invalidation of an approval when the facts changed.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ApprovalHistoryItem
 {
-    /// <summary>PRD: "rows"</summary>
+    /// <summary>Contract member 'issueId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issueId")]
+    public required global::CoreIns.SharedKernel.Identifiers.UwIssueId IssueId { get; init; }
+
+    /// <summary>Contract member 'jobRef'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobRef")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobRef { get; init; }
+
+    /// <summary>Contract member 'issueKey'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issueKey")]
+    public required string IssueKey { get; init; }
+
+    /// <summary>Contract member 'issueType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issueType")]
+    public required string IssueType { get; init; }
+
+    /// <summary>Contract member 'event'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("event")]
+    public required EventValue Event { get; init; }
+
+    /// <summary>For DECIDED, the decision</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
+    public global::CoreIns.Modules.Underwriting.Contracts.Api.IssueDecisionCode? Decision { get; init; }
+
+    /// <summary>For DECIDED, the actor that decided</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approver")]
+    public string? Approver { get; init; }
+
+    /// <summary>For DECIDED the deciders reason; for INVALIDATED the closing reason (VALUE_CHANGED)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public string? Reason { get; init; }
+
+    /// <summary>Hash of the facts the decision was taken on (REQ-UW-091)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fingerprint")]
+    public string? Fingerprint { get; init; }
+
+    /// <summary>Contract member 'authorityCheckId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("authorityCheckId")]
+    public global::CoreIns.SharedKernel.Identifiers.AuthorityCheckId? AuthorityCheckId { get; init; }
+
+    /// <summary>For INVALIDATED, the evaluation whose changed facts invalidated the approval</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'invalidatedByEvaluationId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("rows")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Rows { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("invalidatedByEvaluationId")]
+    public global::System.Guid? InvalidatedByEvaluationId { get; init; }
+
+    /// <summary>Contract member 'at'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("at")]
+    public required global::CoreIns.SharedKernel.Instant At { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<EventValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum EventValue
+    {
+        /// <summary><c>DECIDED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DECIDED")]
+        Decided,
+
+        /// <summary><c>INVALIDATED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("INVALIDATED")]
+        Invalidated,
+    }
 }

@@ -37,6 +37,7 @@
     <EmbeddedResource Include="Seed\gr-test.finance.v3.json" LogicalName="CoreIns.Modules.Finance.Seed.gr-test.finance.v3.json" />
     <EmbeddedResource Include="Seed\gr-test.finance.v4.json" LogicalName="CoreIns.Modules.Finance.Seed.gr-test.finance.v4.json" />
     <EmbeddedResource Include="Seed\gr-test.finance.v5.json" LogicalName="CoreIns.Modules.Finance.Seed.gr-test.finance.v5.json" />
+    <EmbeddedResource Include="Seed\gr-test.finance.v6.json" LogicalName="CoreIns.Modules.Finance.Seed.gr-test.finance.v6.json" />
   </ItemGroup>
 
   <ItemGroup>

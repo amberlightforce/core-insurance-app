@@ -86,9 +86,27 @@ internal sealed class PolicyJobService(
     public Task<JobBindResponse> BindAsync(JobBindRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         InProcess.RunAsync(context, bind, new BindJob(request), options, cancellationToken);
 
-    public Task<JobListPage> ListAsync(
+    /// <summary>
+    /// pol.Job.list for ONE policy (the <c>policy</c> filter, required) and optionally one state: each item's <c>jobs</c> is a slim
+    /// <c>{jobId, jobType, state, createdAt}</c> object, newest first. Other filters and paging are not built.
+    /// TODO(hardening): account / participant filters, cursor paging, typed items.
+    /// </summary>
+    public async Task<JobListPage> ListAsync(
         string? cursor = null, int? limit = null, string? account = null, string? policy = null, string? participant = null, string? state = null,
-        CancellationToken cancellationToken = default) => throw InProcess.NotAvailable("pol.Job.list");
+        CancellationToken cancellationToken = default)
+    {
+        if (cursor is not null || account is not null || participant is not null || !Guid.TryParse(policy, out var policyId))
+        {
+            throw InProcess.NotAvailable("pol.Job.list without the policy filter (or with cursor, account or participant)");
+        }
+
+        var rows = await reader.ListForPolicyAsync(JobSupport.LegalEntity(context, legalEntities), policyId, state, cancellationToken).ConfigureAwait(false);
+        var items = rows.Take(Math.Clamp(limit ?? 50, 1, 50)).Select(r => new JobListItem
+        {
+            Jobs = System.Text.Json.JsonSerializer.SerializeToElement(new { jobId = r.JobId, jobType = r.JobType, state = r.State, createdAt = r.CreatedAt }),
+        }).ToList();
+        return new JobListPage { Items = items, NextCursor = null, Limit = items.Count };
+    }
 
     public Task<JobNewVersionResponse> NewVersionAsync(JobNewVersionRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         throw InProcess.NotAvailable("pol.Job.newVersion");

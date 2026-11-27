@@ -22,7 +22,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-APPROVAL-REQUIRED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): bil.BillingAccount.changePayer, bil.Disbursement.approveRelease, bil.Transfer.money.</para>
+    /// <para>Declared by 5 operation(s): bil.BillingAccount.changePayer, bil.Disbursement.approveRelease, bil.DisbursementBatch.approveRelease, bil.DisbursementBatch.release, bil.Transfer.money.</para>
     /// </remarks>
     public const string ApprovalRequired = "BIL-ERR-APPROVAL-REQUIRED";
 
@@ -130,7 +130,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-METHOD-UNAVAILABLE (HTTP 503).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): bil.DownPayment.initiate, bil.DownPayment.status, bil.Payment.take.</para>
+    /// <para>Declared by 5 operation(s): bil.DisbursementBatch.approveRelease, bil.DisbursementBatch.prepare, bil.DownPayment.initiate, bil.DownPayment.status, bil.Payment.take.</para>
     /// </remarks>
     public const string MethodUnavailable = "BIL-ERR-METHOD-UNAVAILABLE";
 
@@ -154,7 +154,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 17 operation(s): bil.Allocation.allocate, bil.BillingAccount.get, bil.Disbursement.approveRelease, bil.Disbursement.get, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.Invoice.get, bil.PayeeAccount.verify, bil.Payment.take, bil.Receipt.get, bil.Receivable.get, ….</para>
+    /// <para>Declared by 18 operation(s): bil.Allocation.allocate, bil.BillingAccount.get, bil.Disbursement.approveRelease, bil.Disbursement.get, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.DisbursementBatch.release, bil.Invoice.get, bil.PayeeAccount.verify, bil.Payment.take, bil.Receipt.get, ….</para>
     /// </remarks>
     public const string NotFound = "BIL-ERR-NOT-FOUND";
 
@@ -172,7 +172,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-NOTHING-PAYABLE (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): bil.TaxLevy.requestLevyPayment.</para>
+    /// <para>Declared by 3 operation(s): bil.DisbursementBatch.prepare, bil.DisbursementBatch.release, bil.TaxLevy.requestLevyPayment.</para>
     /// </remarks>
     public const string NothingPayable = "BIL-ERR-NOTHING-PAYABLE";
 
@@ -202,7 +202,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-PAYEE-BLOCKED (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.Refund.decide.</para>
+    /// <para>Declared by 7 operation(s): bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.DisbursementBatch.approveRelease, bil.Refund.decide.</para>
     /// </remarks>
     public const string PayeeBlocked = "BIL-ERR-PAYEE-BLOCKED";
 
@@ -250,13 +250,13 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-SCREENING-UNAVAILABLE (HTTP 503).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): bil.Disbursement.request.</para>
+    /// <para>Declared by 2 operation(s): bil.Disbursement.request, bil.DisbursementBatch.approveRelease.</para>
     /// </remarks>
     public const string ScreeningUnavailable = "BIL-ERR-SCREENING-UNAVAILABLE";
 
     /// <summary>BIL-ERR-SOD (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): bil.Disbursement.approveRelease, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.Refund.decide.</para>
+    /// <para>Declared by 6 operation(s): bil.Disbursement.approveRelease, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.DisbursementBatch.approveRelease, bil.Refund.decide.</para>
     /// </remarks>
     public const string Sod = "BIL-ERR-SOD";
 
@@ -268,7 +268,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): bil.Allocation.allocate, bil.Disbursement.approveRelease, bil.Refund.decide.</para>
+    /// <para>Declared by 4 operation(s): bil.Allocation.allocate, bil.Disbursement.approveRelease, bil.DisbursementBatch.approveRelease, bil.Refund.decide.</para>
     /// </remarks>
     public const string Stale = "BIL-ERR-STALE";
 
@@ -280,7 +280,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-VOP-HOLD (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): bil.Disbursement.request.</para>
+    /// <para>Declared by 2 operation(s): bil.Disbursement.request, bil.DisbursementBatch.approveRelease.</para>
     /// </remarks>
     public const string VopHold = "BIL-ERR-VOP-HOLD";
 

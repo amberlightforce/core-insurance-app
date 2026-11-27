@@ -4,31 +4,31 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Programme.create request. PRD inputs: "programme data; period; decision"</summary>
+/// <summary>ri.Programme.create request (BO-RI-01). Creates a Draft programme, version 1, in the caller's legal entity. The layers form one contiguous ladder (each attachment equals the previous attachment plus limit) and every layer names a contract of the legal entity that carries it.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProgrammeCreateRequest
 {
-    /// <summary>PRD: "programme data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("programmeData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ProgrammeData { get; init; }
+    /// <summary>Programme code, unique per legal entity and programme year (for example MOTOR-XOL)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("code")]
+    public required string Code { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Programme name</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("name")]
+    public required string Name { get; init; }
+
+    /// <summary>Line of business the programme protects; two programmes of one line never overlap in period (RI-ERR-VALIDATION PROGRAMME_PERIOD_OVERLAP)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lineCode")]
+    public required string LineCode { get; init; }
+
+    /// <summary>Half-open period [from, to) of Europe/Athens dates; the programme year is the year of the start</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("period")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    public required global::CoreIns.SharedKernel.DateRange Period { get; init; }
 
-    /// <summary>PRD: "decision"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Decision { get; init; }
+    /// <summary>Contract member 'layers'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("layers")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.RiProgrammeLayerInput> Layers { get; init; }
+
+    /// <summary>Reason code (audit)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public string? Reason { get; init; }
 }

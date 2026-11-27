@@ -2650,54 +2650,120 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** @description ri.Programme.create request. PRD inputs: "programme data; period; decision" */
+        /** @description ri.Programme.create request (BO-RI-01). Creates a Draft programme, version 1, in the caller's legal entity. The layers form one contiguous ladder (each attachment equals the previous attachment plus limit) and every layer names a contract of the legal entity that carries it. */
         ProgrammeCreateRequest: {
-            /** @description PRD: "programme data" */
-            programmeData?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            /** @description Programme code, unique per legal entity and programme year (for example MOTOR-XOL) */
+            code: components["schemas"]["Code"];
+            /** @description Programme name */
+            name: components["schemas"]["Text"];
+            /** @description Line of business the programme protects; two programmes of one line never overlap in period (RI-ERR-VALIDATION PROGRAMME_PERIOD_OVERLAP) */
+            lineCode: components["schemas"]["Code"];
+            /** @description Half-open period [from, to) of Europe/Athens dates; the programme year is the year of the start */
+            period: components["schemas"]["DatePeriod"];
+            layers: components["schemas"]["RiProgrammeLayerInput"][];
+            /** @description Reason code (audit) */
+            reason?: components["schemas"]["Code"] | null;
         };
-        /** @description ri.Programme.create result. PRD outputs: "programme, diff" */
+        /** @description ri.Programme.create result */
         ProgrammeCreateResponse: {
-            /** @description PRD: "programme" */
-            programme?: components["schemas"]["Unspecified"];
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
+            programme: components["schemas"]["RiProgramme"];
+            diff: components["schemas"]["RiProgrammeDiff"];
         };
-        /** @description ri.Programme.update request. PRD inputs: "programme data; period; decision" */
+        /** @description ri.Programme.update request. A Draft version is edited in place; an approved, pending or active programme is never edited: the update starts a new Draft version (the old one stays in force until the new one is approved). Members left out are unchanged. */
         ProgrammeUpdateRequest: {
-            /** @description PRD: "programme data" */
-            programmeData?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            /** @description The recordVersion the user saw; a different current version is RI-ERR-STALE */
+            expectedRecordVersion: number;
+            name?: components["schemas"]["Text"];
+            period?: components["schemas"]["DatePeriod"];
+            layers?: components["schemas"]["RiProgrammeLayerInput"][];
+            /** @description Reason code (audit) */
+            reason?: components["schemas"]["Code"] | null;
         };
-        /** @description ri.Programme.update result. PRD outputs: "programme, diff" */
+        /** @description ri.Programme.update result */
         ProgrammeUpdateResponse: {
-            /** @description PRD: "programme" */
-            programme?: components["schemas"]["Unspecified"];
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
+            programme: components["schemas"]["RiProgramme"];
+            diff: components["schemas"]["RiProgrammeDiff"];
         };
-        /** @description ri.Programme.renew request. PRD inputs: "programme data; period; decision" */
+        /** @description ri.Programme.renew request. Copies the programme to the next year with its layers; every contract it names is copied as a new Draft contract of the next year (same treaty, layers, clause and panel, period moved by one year) that goes through the contract approval on its own. */
         ProgrammeRenewRequest: {
-            /** @description PRD: "programme data" */
-            programmeData?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            /** @description The programme to renew; its current version is copied */
+            programmeId: components["schemas"]["Uuid"];
+            /** @description Reason code (audit) */
+            reason?: components["schemas"]["Code"] | null;
         };
-        /** @description ri.Programme.renew result. PRD outputs: "programme, diff" */
+        /** @description ri.Programme.renew result */
         ProgrammeRenewResponse: {
-            /** @description PRD: "programme" */
-            programme?: components["schemas"]["Unspecified"];
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
+            programme: components["schemas"]["RiProgramme"];
+            diff: components["schemas"]["RiProgrammeDiff"];
         };
+        /**
+         * @description Status of a programme version. BO-RI-01 only creates DRAFT; the approval (BO-RI-02) moves it on.
+         * @enum {string}
+         */
+        RiProgrammeStatus: "DRAFT" | "PENDING_APPROVAL" | "ACTIVE" | "SUPERSEDED" | "EXPIRED";
+        /** @description One layer of the programme ladder and the contract that carries it. The contract must have a layer with the same attachment and limit. */
+        RiProgrammeLayerInput: {
+            /** @description Layer number, unique within the programme, 1 = lowest */
+            layerNo: number;
+            attachment: components["schemas"]["Money"];
+            limit: components["schemas"]["Money"];
+            /** @description The contract of the legal entity that carries the layer (in force for the programme period) */
+            contractId: components["schemas"]["Uuid"];
+        };
+        /** @description A layer of a programme with the contract that carries it. */
+        RiProgrammeLayer: {
+            layerNo: number;
+            attachment: components["schemas"]["Money"];
+            limit: components["schemas"]["Money"];
+            contractId: components["schemas"]["Uuid"];
+            contractNumber: components["schemas"]["Text"];
+            contractStatus: components["schemas"]["RiContractStatus"];
+        };
+        /** @description A contract of the programme (one per contract, however many layers it carries). */
+        RiProgrammeContract: {
+            contractId: components["schemas"]["Uuid"];
+            contractNumber: components["schemas"]["Text"];
+            contractType: components["schemas"]["RiContractType"];
+            contractYear: number;
+            status: components["schemas"]["RiContractStatus"];
+            currency: components["schemas"]["CurrencyCode"];
+        };
+        /** @description One version of the programme in the history. */
+        RiProgrammeVersionSummary: {
+            versionNo: number;
+            status: components["schemas"]["RiProgrammeStatus"];
+            period: components["schemas"]["DatePeriod"];
+            createdAt: components["schemas"]["Instant"];
+            createdBy: components["schemas"]["Text"];
+        };
+        /** @description A reinsurance programme (BO-RI-01) with its current version. The current version is the highest version number; an earlier APPROVED/ACTIVE one stays in force until it is superseded. */
+        RiProgramme: {
+            programmeId: components["schemas"]["Uuid"];
+            legalEntity: components["schemas"]["Code"];
+            code: components["schemas"]["Code"];
+            name: components["schemas"]["Text"];
+            lineCode: components["schemas"]["Code"];
+            programmeYear: number;
+            currency: components["schemas"]["CurrencyCode"];
+            period: components["schemas"]["DatePeriod"];
+            status: components["schemas"]["RiProgrammeStatus"];
+            versionNo: number;
+            recordVersion: number;
+            /** @description The programme retention, equal to the attachment of layer 1 */
+            retention: components["schemas"]["Money"];
+            layers: components["schemas"]["RiProgrammeLayer"][];
+            contracts: components["schemas"]["RiProgrammeContract"][];
+            /** @description The programme this one renewed, when it was created by renew */
+            renewedFromId?: components["schemas"]["Uuid"] | null;
+            versions: components["schemas"]["RiProgrammeVersionSummary"][];
+            createdAt: components["schemas"]["Instant"];
+        };
+        /** @description What the command changed, field by field (an empty list when nothing changed). */
+        RiProgrammeDiff: {
+            field: components["schemas"]["Text"];
+            before: components["schemas"]["Text"] | null;
+            after: components["schemas"]["Text"] | null;
+        }[];
         /** @description ri.Programme.submit request. PRD inputs: "programme data; period; decision" */
         ProgrammeSubmitRequest: {
             /** @description PRD: "programme data" */
@@ -2746,15 +2812,13 @@ export interface components {
             /** @description PRD: "diff" */
             diff?: components["schemas"]["Unspecified"];
         };
-        /** @description ri.Programme.get result. PRD outputs: "programmes" */
+        /** @description ri.Programme.get result */
         ProgrammeGetResponse: {
-            /** @description PRD: "programmes" */
-            programmes?: components["schemas"]["Unspecified"];
+            programme: components["schemas"]["RiProgramme"];
         };
-        /** @description ri.Programme.list result. PRD outputs: "programmes" */
+        /** @description ri.Programme.list result */
         ProgrammeListItem: {
-            /** @description PRD: "programmes" */
-            programmes?: components["schemas"]["Unspecified"];
+            programme: components["schemas"]["RiProgramme"];
         };
         /** @description Page of ri.Programme.list results (cursor pagination, contract §3.5.5) */
         ProgrammeListPage: components["schemas"]["PageEnvelope"] & {
@@ -4557,12 +4621,25 @@ export interface components {
             nextCursor: string | null;
             limit?: number;
         };
-        /**
-         * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
-         *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
-         *     members until then.
-         */
-        Unspecified: unknown;
+        /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
+        Uuid: string;
+        /** @description Code value from a configured code list. Values are owned by configuration, not by this schema. */
+        Code: string;
+        Text: string;
+        /** @description ISO 4217 alphabetic code. */
+        CurrencyCode: string;
+        /** @description Date period; `to` is null when open-ended. */
+        DatePeriod: {
+            from: components["schemas"]["LocalDate"];
+            to: components["schemas"]["LocalDate"] | null;
+        };
+        /** @description Decimal number as a string (no binary floating point for money or rates). */
+        Decimal: string;
+        /** @description Amount as a decimal string plus ISO 4217 currency. */
+        Money: {
+            amount: components["schemas"]["Decimal"];
+            currency: components["schemas"]["CurrencyCode"];
+        };
         ProblemFieldError: {
             /** @description JSON pointer or dotted path of the field. */
             path: string;
@@ -4606,24 +4683,14 @@ export interface components {
             /** @description Field-level errors. */
             errors?: components["schemas"]["ProblemFieldError"][];
         };
-        /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
-        Uuid: string;
+        /**
+         * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
+         *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
+         *     members until then.
+         */
+        Unspecified: unknown;
         /** @description Business number issued through PLT numbering (NumberingScheme); format is configuration. */
         BusinessNumber: string;
-        /** @description ISO 4217 alphabetic code. */
-        CurrencyCode: string;
-        /** @description Date period; `to` is null when open-ended. */
-        DatePeriod: {
-            from: components["schemas"]["LocalDate"];
-            to: components["schemas"]["LocalDate"] | null;
-        };
-        /** @description Decimal number as a string (no binary floating point for money or rates). */
-        Decimal: string;
-        /** @description Amount as a decimal string plus ISO 4217 currency. */
-        Money: {
-            amount: components["schemas"]["Decimal"];
-            currency: components["schemas"]["CurrencyCode"];
-        };
         /** @description One layer of an excess-of-loss reinsurance contract (PRD-08 REQ-RI-031..-043; SL4-CONTRACTS). Amounts are in the contract currency (EUR only in slice 4). attachment, limit and aad are always set; aal is null when the layer has no annual aggregate limit. */
         RiLayer: {
             /** @description Layer number, unique within the contract, 1 = lowest */
@@ -4637,9 +4704,6 @@ export interface components {
             /** @description Annual aggregate limit; null when none */
             aal?: components["schemas"]["Money"] | null;
         };
-        /** @description Code value from a configured code list. Values are owned by configuration, not by this schema. */
-        Code: string;
-        Text: string;
         /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
         Sha256: string;
     };

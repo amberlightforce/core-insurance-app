@@ -273,6 +273,19 @@ internal static class FinanceSeed
     /// </summary>
     public const string GrTestV5 = "gr-test.finance.v5";
 
+    /// <summary>
+    /// The seed of migration DisbursementBatchPostings (BO-BIL-10): v5 plus the DISBURSEMENT_RELEASED and DISBURSEMENT_REVERSED rules of the
+    /// non-claim disbursement sources (commission, levy, tax remittance, other). A new rule-set version because v5 is immutable once applied;
+    /// effective from 2026-10-01 like v5 and winning the tie by version number.
+    /// </summary>
+    public const string GrTestV6 = "gr-test.finance.v6";
+
+    /// <summary>Migration Down of DisbursementBatchPostings: v6 superseded (rule rows are append-only, REQ-FIN-070); v5 governs again.</summary>
+    public const string SupersedeV6 = """
+        UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'
+         WHERE legal_entity_code = 'GR-TEST' AND book = 'IFRS17' AND version_no = 6;
+        """;
+
     /// <summary>Migration Down of LevyCreditPosting: v5 superseded (rule rows are append-only, REQ-FIN-070); v4 governs again.</summary>
     public const string SupersedeV5 = """
         UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'

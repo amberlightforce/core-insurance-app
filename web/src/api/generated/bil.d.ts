@@ -3316,47 +3316,70 @@ export interface components {
             registeredAt: components["schemas"]["Instant"];
             recordVersion: number;
         };
-        /** @description bil.DisbursementBatch.prepare request. PRD inputs: "bank account, value date" */
+        /** @description bil.DisbursementBatch.prepare request (BO-BIL-10). Groups the Approved non-claim disbursements (BIL_COMMISSION, BIL_LEVY, TAX_REMITTANCE, BIL_OTHER) that are not yet in a batch into one SEPA pain.001 credit-transfer file paid from the bank account on the value date. Without disbursementIds every eligible Approved item with a requested value date on or before it is taken; with them, an item that is not eligible (stopped, in a batch, payee not VoP-verified) refuses the call (BIL-ERR-HELD-ITEMS). */
         DisbursementBatchPrepareRequest: {
-            /** @description PRD: "bank account" */
-            bankAccount?: components["schemas"]["Unspecified"];
-            /** @description PRD: "value date" */
-            valueDate?: components["schemas"]["LocalDate"];
+            /** @description The own bank account to debit, as an IBAN (electronic or print format). */
+            bankAccount: string;
+            /** @description Execution date of the file; not before today. */
+            valueDate: components["schemas"]["LocalDate"];
+            /** @description Optional subset of Approved disbursements to batch. */
+            disbursementIds?: components["schemas"]["Uuid"][];
         };
-        /** @description bil.DisbursementBatch.prepare result. PRD outputs: "batch, file ref" */
+        /** @description bil.DisbursementBatch.prepare result: the batch (state Prepared) and the reference of its bank file. */
         DisbursementBatchPrepareResponse: {
-            /** @description PRD: "batch" */
-            batch?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file ref" */
-            fileRef?: components["schemas"]["Unspecified"];
+            batch: components["schemas"]["DisbursementBatchView"];
+            /** @description Reference of the pain.001 file in the bank-file store; the file itself is written when the release is approved. */
+            fileRef: string;
         };
-        /** @description bil.DisbursementBatch.release request. PRD inputs: "bank account, value date" */
+        /** @description bil.DisbursementBatch.release request (BO-BIL-10): the first person asks for the release. Items stopped since the preparation are dropped and the file and its hash are rebuilt; the second person approves that exact hash. */
         DisbursementBatchReleaseRequest: {
-            /** @description PRD: "bank account" */
-            bankAccount?: components["schemas"]["Unspecified"];
-            /** @description PRD: "value date" */
-            valueDate?: components["schemas"]["LocalDate"];
+            batchId: components["schemas"]["Uuid"];
         };
-        /** @description bil.DisbursementBatch.release result. PRD outputs: "batch, file ref" */
+        /** @description bil.DisbursementBatch.release result: the batch in state ReleaseRequested with the file hash the approver must confirm. */
         DisbursementBatchReleaseResponse: {
-            /** @description PRD: "batch" */
-            batch?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file ref" */
-            fileRef?: components["schemas"]["Unspecified"];
+            batch: components["schemas"]["DisbursementBatchView"];
+            fileRef: string;
         };
-        /** @description bil.DisbursementBatch.approveRelease request. PRD inputs: "bank account, value date" */
+        /** @description bil.DisbursementBatch.approveRelease request (BO-BIL-10): the second person releases the batch to the bank. The approver must hold Staff.BillingManager and must be neither the person who requested the release nor the requester of any item in the batch (BIL-ERR-SOD). */
         DisbursementBatchApproveReleaseRequest: {
-            /** @description PRD: "bank account" */
-            bankAccount?: components["schemas"]["Unspecified"];
-            /** @description PRD: "value date" */
-            valueDate?: components["schemas"]["LocalDate"];
+            batchId: components["schemas"]["Uuid"];
+            /** @description The hash of the file as shown by release; a different current hash is BIL-ERR-STALE. */
+            fileHash: components["schemas"]["Sha256"];
         };
-        /** @description bil.DisbursementBatch.approveRelease result. PRD outputs: "batch, file ref" */
+        /** @description bil.DisbursementBatch.approveRelease result: the batch in state Released; every item is released to the bank channel (DISBURSEMENT_RELEASED posted, and cleared too with the auto stub bank). */
         DisbursementBatchApproveReleaseResponse: {
-            /** @description PRD: "batch" */
-            batch?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file ref" */
-            fileRef?: components["schemas"]["Unspecified"];
+            batch: components["schemas"]["DisbursementBatchView"];
+            fileRef: string;
+        };
+        /** @description A disbursement batch as stored (BO-BIL-10). No IBAN or payee name; the file carries them, the API does not. */
+        DisbursementBatchView: {
+            batchId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "Prepared" | "ReleaseRequested" | "Released";
+            maskedBankAccount: string;
+            valueDate: components["schemas"]["LocalDate"];
+            itemCount: number;
+            totalAmount: components["schemas"]["Money"];
+            fileHash: components["schemas"]["Sha256"];
+            fileRef?: string;
+            preparedBy?: string;
+            preparedAt?: components["schemas"]["Instant"];
+            releaseRequestedBy?: string;
+            releaseRequestedAt?: components["schemas"]["Instant"];
+            releasedBy?: string;
+            releasedAt?: components["schemas"]["Instant"];
+            items: components["schemas"]["DisbursementBatchItem"][];
+        };
+        DisbursementBatchItem: {
+            disbursementId: components["schemas"]["Uuid"];
+            disbursementNumber: components["schemas"]["BusinessNumber"];
+            sourceType: components["schemas"]["DisbursementSourceType"];
+            sourceId: string;
+            amount: components["schemas"]["Money"];
+            /** @description The EndToEndId in the file (the disbursement number). */
+            endToEndId: string;
+            /** @description Canonical state of the disbursement now. */
+            status: string;
         };
         /** @description bil.WriteOff.propose request. PRD inputs: "items, reason" */
         WriteOffProposeRequest: {

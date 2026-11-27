@@ -4,31 +4,30 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Programme.update request. PRD inputs: "programme data; period; decision"</summary>
+/// <summary>ri.Programme.update request. A Draft version is edited in place; an approved, pending or active programme is never edited: the update starts a new Draft version (the old one stays in force until the new one is approved). Members left out are unchanged.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProgrammeUpdateRequest
 {
-    /// <summary>PRD: "programme data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("programmeData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ProgrammeData { get; init; }
+    /// <summary>The recordVersion the user saw; a different current version is RI-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'name'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("name")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Name { get; init; }
+
+    /// <summary>Contract member 'period'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("period")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    public global::CoreIns.SharedKernel.DateRange? Period { get; init; }
 
-    /// <summary>PRD: "decision"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
+    /// <summary>Contract member 'layers'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("layers")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Decision { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.RiProgrammeLayerInput>? Layers { get; init; }
+
+    /// <summary>Reason code (audit)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public string? Reason { get; init; }
 }

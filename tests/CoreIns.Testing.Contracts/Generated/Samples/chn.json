@@ -810,7 +810,8 @@
           "policyNumber": "SAMPLE-000001",
           "productCode": "SAMPLE_CODE",
           "expiresAt": "2026-10-07T09:00:00Z",
-          "daysLeft": 1
+          "daysLeft": 1,
+          "renewalJobId": "0192ab69-bd1a-7097-8625-0f15c3eb6f41"
         }
       ],
       "unpaidInvoices": [
@@ -966,6 +967,7 @@
     },
     "PortalPolicyDetailResponse": {
       "policyId": "0192776f-7489-79d7-8ac5-3772711ec29b",
+      "renewalJobId": "0192d569-0f32-790c-89b0-7bd3bbdd3010",
       "policyNumber": "SAMPLE-000001",
       "productCode": "SAMPLE_CODE",
       "status": "sample",
@@ -1083,7 +1085,8 @@
       "policyNumber": "SAMPLE-000001",
       "productCode": "SAMPLE_CODE",
       "expiresAt": "2026-10-07T09:00:00Z",
-      "daysLeft": 1
+      "daysLeft": 1,
+      "renewalJobId": "0192d59d-0203-70fe-8a1f-106dcca4d411"
     },
     "PortalUnpaidInvoice": {
       "invoiceId": "01922784-59d6-7e61-87cd-6d6c58a49026",

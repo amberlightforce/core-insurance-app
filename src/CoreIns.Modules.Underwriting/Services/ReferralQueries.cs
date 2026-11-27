@@ -19,7 +19,7 @@ using CoreIns.SharedKernel.Results;
 namespace CoreIns.Modules.Underwriting.Services;
 
 /// <summary>What a referral rule declares to be read and the fact value observed.</summary>
-internal sealed record RuleReading(string? Observed, string Limit);
+internal sealed record RuleReading(string? Observed, string Limit, string? Fact = null);
 
 /// <summary>
 /// <c>uw.Referral.list</c> and <c>uw.Referral.get</c> (D-USR-13): the referral workbench reads. UW owns the queues (issues and
@@ -223,7 +223,7 @@ internal sealed class ReferralQueries(
     /// What each referral rule of the jobs declares (rule set <c>explain</c>) combined with the stored derived facts: per job and
     /// rule id, the observed value and the limit; a rule without a declared limit gets none and RULE_DECLARES_NO_LIMIT.
     /// </summary>
-    private async Task<Dictionary<Guid, Dictionary<string, RuleReading>>> ExplainsAsync(Guid legalEntity, List<Guid> jobIds, CancellationToken cancellationToken)
+    internal async Task<Dictionary<Guid, Dictionary<string, RuleReading>>> ExplainsAsync(Guid legalEntity, List<Guid> jobIds, CancellationToken cancellationToken)
     {
         var result = new Dictionary<Guid, Dictionary<string, RuleReading>>();
         if (jobIds.Count == 0)
@@ -241,7 +241,7 @@ internal sealed class ReferralQueries(
                 var explain = rule.Explain ?? BuiltInRuleSets.BuiltInExplain(set.Code, rule);
                 if (explain is not null)
                 {
-                    readings[rule.Id] = new RuleReading(Observed(explain.Fact, record), explain.Limit);
+                    readings[rule.Id] = new RuleReading(Observed(explain.Fact, record), explain.Limit, explain.Fact);
                 }
             }
         }

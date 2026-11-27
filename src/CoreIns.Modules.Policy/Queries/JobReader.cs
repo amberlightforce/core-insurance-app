@@ -15,6 +15,25 @@ namespace CoreIns.Modules.Policy.Queries;
 /// </summary>
 internal sealed class JobReader(DbSession session)
 {
+    /// <summary>
+    /// The jobs of one policy, newest first, optionally of one state (the filters CHN needs to find the open renewal offer). Slim rows only
+    /// (no quote versions); filtered by legal entity.
+    /// </summary>
+    public async Task<IReadOnlyList<(Guid JobId, string JobType, string State, DateTime CreatedAt)>> ListForPolicyAsync(
+        LegalEntityId legalEntity, Guid policyId, string? state, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var rows = await connection.QueryAsync<(Guid JobId, string JobType, string State, DateTime CreatedAt)>(new CommandDefinition(
+            """
+            SELECT job_id AS JobId, job_type AS JobType, state AS State, created_at AS CreatedAt
+              FROM pol.job
+             WHERE policy_id = @policyId AND legal_entity_id = @le AND (@state::text IS NULL OR state = @state)
+             ORDER BY created_at DESC, job_id
+             LIMIT 50
+            """, new { policyId, le = legalEntity.Value, state }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        return [.. rows];
+    }
+
     public async Task<JobView?> GetAsync(LegalEntityId legalEntity, Guid jobId, CancellationToken cancellationToken)
     {
         var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
