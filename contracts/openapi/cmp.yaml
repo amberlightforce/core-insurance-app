@@ -302,6 +302,12 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: query
+        required: true
+        description: Fiscal document id
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -351,13 +357,18 @@ paths:
       - ui
       x-permission: cmp.FiscalDocument.resubmit
       x-error-codes:
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-NOT-REJECTED
         status: 422
-      - code: CMP-ERR-APPROVAL-REQUIRED
+        note: only a Rejected or Pending document can be resubmitted
+      - code: CMP-ERR-VALIDATION
         status: 422
+      - code: CMP-ERR-TRANSPORT-UNAVAILABLE
+        status: 503
       - code: CMP-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
         status: 409
+        note: contract §3.5.3 (replay with a different payload)
       x-source:
       - PRD-11 §9.1 l.1226
       parameters:
@@ -421,13 +432,16 @@ paths:
       - ui
       x-permission: cmp.FiscalDocument.bulkResubmit
       x-error-codes:
-      - code: CMP-ERR-NOT-REJECTED
+      - code: CMP-ERR-BULK-LIMIT
         status: 422
-      - code: CMP-ERR-APPROVAL-REQUIRED
+        note: more ids than the cap (50)
+      - code: CMP-ERR-VALIDATION
         status: 422
+      - code: CMP-ERR-TRANSPORT-UNAVAILABLE
+        status: 503
       - code: CMP-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
         status: 409
+        note: contract §3.5.3 (replay with a different payload)
       x-source:
       - PRD-11 §9.1 l.1226
       parameters:
@@ -493,13 +507,20 @@ paths:
       - ui
       x-permission: cmp.FiscalDocument.correct
       x-error-codes:
-      - code: CMP-ERR-NOT-REJECTED
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
+      - code: CMP-ERR-NOT-CORRECTABLE
         status: 422
-      - code: CMP-ERR-APPROVAL-REQUIRED
+        note: only a Registered ISSUE document not already credited, corrected or cancelled
+      - code: CMP-ERR-FISCAL-TOTAL
         status: 422
+      - code: CMP-ERR-VALIDATION
+        status: 422
+      - code: CMP-ERR-TRANSPORT-UNAVAILABLE
+        status: 503
       - code: CMP-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
         status: 409
+        note: contract §3.5.3 (replay with a different payload)
       x-source:
       - PRD-11 §9.1 l.1226
       parameters:
@@ -565,13 +586,18 @@ paths:
       - ui
       x-permission: cmp.FiscalDocument.cancel
       x-error-codes:
-      - code: CMP-ERR-NOT-REJECTED
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
+      - code: CMP-ERR-NOT-CANCELLABLE
         status: 422
-      - code: CMP-ERR-APPROVAL-REQUIRED
+        note: only a Registered ISSUE or a Rejected or Pending document not already credited, corrected or cancelled
+      - code: CMP-ERR-VALIDATION
         status: 422
+      - code: CMP-ERR-TRANSPORT-UNAVAILABLE
+        status: 503
       - code: CMP-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
         status: 409
+        note: contract §3.5.3 (replay with a different payload)
       x-source:
       - PRD-11 §9.1 l.1226
       parameters:
@@ -6475,6 +6501,7 @@ components:
           - PENDING
           - REGISTERED
           - REJECTED
+          - CANCELLED
         sourceType:
           $ref: ../events/common.schema.json#/$defs/Code
         sourceId:
@@ -6577,102 +6604,249 @@ components:
       description: Page of cmp.FiscalDocument.listBySource results (cursor pagination, contract §3.5.5)
     FiscalDocumentQrPayloadResponse:
       type: object
-      description: 'cmp.FiscalDocument.qrPayload result. PRD outputs: "document, identifiers"'
+      description: cmp.FiscalDocument.qrPayload result (REQ-CMP-054)
       properties:
-        document:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "document"'
-        identifiers:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "identifiers"'
+        fiscalDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+          enum:
+          - PENDING
+          - REGISTERED
+          - REJECTED
+          - CANCELLED
+        mark:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        uid:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        series:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        number:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        qrPayloadRef:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        qrPayload:
+          oneOf:
+          - type: string
+          - type: 'null'
+          description: The text to encode in the QR code; null until the document is Registered. Layout is Unverified (OQ-012); never AADE evidence when stub is true
+        stub:
+          type: boolean
+        layoutVerified:
+          type: boolean
+          description: False until the myDATA QR layout is verified (open user decision #15); a Production channel must refuse unverified layouts
+      required:
+      - fiscalDocumentId
+      - status
+      - stub
+      - layoutVerified
     FiscalDocumentResubmitRequest:
       type: object
-      description: 'cmp.FiscalDocument.resubmit request. PRD inputs: "ids, corrections, reason"'
+      description: cmp.FiscalDocument.resubmit request
       properties:
-        ids:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "ids"'
-        corrections:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "corrections"'
+        fiscalDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Why the action is taken (audited)
+      required:
+      - fiscalDocumentId
+      - reason
     FiscalDocumentResubmitResponse:
       type: object
-      description: 'cmp.FiscalDocument.resubmit result. PRD outputs: "status"'
+      description: cmp.FiscalDocument.resubmit result
       properties:
+        fiscalDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum:
+          - PENDING
+          - REGISTERED
+          - REJECTED
+          - CANCELLED
+        rejectionCodes:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        resubmitted:
+          type: boolean
+          description: False when the document was already registered (replay)
+      required:
+      - fiscalDocumentId
+      - status
+      - resubmitted
     FiscalDocumentBulkResubmitRequest:
       type: object
-      description: 'cmp.FiscalDocument.bulkResubmit request. PRD inputs: "ids, corrections, reason"'
+      description: cmp.FiscalDocument.bulkResubmit request
       properties:
         ids:
           type: array
+          minItems: 1
+          maxItems: 50
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "ids"'
-        corrections:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "corrections"'
+          description: Documents to resubmit (cap 50)
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Why the action is taken (audited)
+      required:
+      - ids
+      - reason
     FiscalDocumentBulkResubmitResponse:
       type: object
-      description: 'cmp.FiscalDocument.bulkResubmit result. PRD outputs: "status"'
+      description: cmp.FiscalDocument.bulkResubmit result
       properties:
-        status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+        requested:
+          type: integer
+        resubmitted:
+          type: integer
+        skipped:
+          type: integer
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              fiscalDocumentId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              outcome:
+                type: string
+                enum:
+                - RESUBMITTED
+                - SKIPPED
+              status:
+                type: string
+                enum:
+                - PENDING
+                - REGISTERED
+                - REJECTED
+                - CANCELLED
+              errorCode:
+                type: string
+                description: CMP-ERR code when SKIPPED (the document was not eligible)
+            required:
+            - fiscalDocumentId
+            - outcome
+      required:
+      - requested
+      - resubmitted
+      - skipped
+      - results
     FiscalDocumentCorrectRequest:
       type: object
-      description: 'cmp.FiscalDocument.correct request. PRD inputs: "ids, corrections, reason"'
+      description: cmp.FiscalDocument.correct request
       properties:
-        ids:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "ids"'
+        fiscalDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         corrections:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "corrections"'
+          type: array
+          minItems: 1
+          description: The corrected lines of the replacement document
+          items:
+            type: object
+            properties:
+              fiscalCategoryKey:
+                $ref: ../events/common.schema.json#/$defs/Code
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+              chargeId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              paymentId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+            required:
+            - fiscalCategoryKey
+            - amount
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Why the action is taken (audited)
+      required:
+      - fiscalDocumentId
+      - corrections
+      - reason
     FiscalDocumentCorrectResponse:
       type: object
-      description: 'cmp.FiscalDocument.correct result. PRD outputs: "status"'
+      description: cmp.FiscalDocument.correct result
       properties:
-        status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+        originalFiscalDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        creditFiscalDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The new CREDIT document that reverses the original
+        creditStatus:
+          type: string
+          enum:
+          - PENDING
+          - REGISTERED
+          - REJECTED
+          - CANCELLED
+        correctedFiscalDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The new ISSUE document carrying the corrected lines
+        correctedStatus:
+          type: string
+          enum:
+          - PENDING
+          - REGISTERED
+          - REJECTED
+          - CANCELLED
+      required:
+      - originalFiscalDocumentId
+      - creditFiscalDocumentId
+      - creditStatus
+      - correctedFiscalDocumentId
+      - correctedStatus
     FiscalDocumentCancelRequest:
       type: object
-      description: 'cmp.FiscalDocument.cancel request. PRD inputs: "ids, corrections, reason"'
+      description: cmp.FiscalDocument.cancel request
       properties:
-        ids:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "ids"'
-        corrections:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "corrections"'
+        fiscalDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Why the action is taken (audited)
+      required:
+      - fiscalDocumentId
+      - reason
     FiscalDocumentCancelResponse:
       type: object
-      description: 'cmp.FiscalDocument.cancel result. PRD outputs: "status"'
+      description: cmp.FiscalDocument.cancel result
       properties:
+        fiscalDocumentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum:
+          - PENDING
+          - REGISTERED
+          - REJECTED
+          - CANCELLED
+        cancellationFiscalDocumentId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The linked CANCELLATION document issued for a Registered original; null when the document never had a MARK
+      required:
+      - fiscalDocumentId
+      - status
     FiscalReconciliationRunRequest:
       type: object
       description: 'cmp.FiscalReconciliation.run request. PRD inputs: "date, entity"'

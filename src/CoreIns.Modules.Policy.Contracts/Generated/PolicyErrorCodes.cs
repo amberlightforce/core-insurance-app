@@ -92,6 +92,12 @@ public static class PolicyErrorCodes
     /// </remarks>
     public const string NotPreempted = "POL-ERR-NOT-PREEMPTED";
 
+    /// <summary>POL-ERR-NOTICE-PERIOD-UNSETTLED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): pol.Renewal.nonRenew.</para>
+    /// </remarks>
+    public const string NoticePeriodUnsettled = "POL-ERR-NOTICE-PERIOD-UNSETTLED";
+
     /// <summary>POL-ERR-NOTICE-TOO-LATE (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 5 operation(s): pol.Renewal.accept, pol.Renewal.create, pol.Renewal.decline, pol.Renewal.nonRenew, pol.Renewal.offer.</para>
@@ -186,7 +192,7 @@ public static class PolicyErrorCodes
     public const string Prefix = "POL-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AfterCancellation, AuthorityRequired, ConflictsOpen, DependencyUnavailable, EffdateLimit, GateFailed, HumanConfirmationRequired, IdempotencyMismatch, IllegalTransition, JobConflict, Locked, MigrationReversalBlocked, NotFound, NotPreempted, NoticeTooLate, OpenJob, OutOfSequence, Preempted, ProducerInvalid, ProductUnavailable, QuickQuoteNotBindable, QuoteStale, Rating, RebaseRequired, RetroactiveMtpl, RightExpired, SegmentInvariant, Stale, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AfterCancellation, AuthorityRequired, ConflictsOpen, DependencyUnavailable, EffdateLimit, GateFailed, HumanConfirmationRequired, IdempotencyMismatch, IllegalTransition, JobConflict, Locked, MigrationReversalBlocked, NotFound, NotPreempted, NoticePeriodUnsettled, NoticeTooLate, OpenJob, OutOfSequence, Preempted, ProducerInvalid, ProductUnavailable, QuickQuoteNotBindable, QuoteStale, Rating, RebaseRequired, RetroactiveMtpl, RightExpired, SegmentInvariant, Stale, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -205,6 +211,7 @@ public static class PolicyErrorCodes
         [MigrationReversalBlocked] = 409,
         [NotFound] = 404,
         [NotPreempted] = 409,
+        [NoticePeriodUnsettled] = 422,
         [NoticeTooLate] = 422,
         [OpenJob] = 422,
         [OutOfSequence] = 422,

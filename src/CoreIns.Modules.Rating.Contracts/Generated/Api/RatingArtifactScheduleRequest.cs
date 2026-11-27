@@ -4,39 +4,21 @@
 
 namespace CoreIns.Modules.Rating.Contracts.Api;
 
-/// <summary>rat.RatingArtifact.schedule request. PRD inputs: "change set; artefact; slot dates; reason"</summary>
+/// <summary>Contract addition (BO-RAT-06): rat.RatingArtifact.schedule request.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RatingArtifactScheduleRequest
 {
-    /// <summary>PRD: "change set"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("changeSet")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ChangeSet { get; init; }
+    /// <summary>Contract member 'artefactHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("artefactHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash ArtefactHash { get; init; }
 
-    /// <summary>PRD: "artefact"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("artefact")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Artefact { get; init; }
-
-    /// <summary>PRD: "slot dates"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("slotDates")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SlotDates { get; init; }
-
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'reason'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
+
+    /// <summary>First day the artefact rates new business and renewals (not in the past; default today).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveFrom")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? EffectiveFrom { get; init; }
 }

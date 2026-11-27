@@ -39,6 +39,8 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
 
     public DbSet<PsrExceptionRow> PsrExceptions => Set<PsrExceptionRow>();
 
+    public DbSet<NonRenewalRow> NonRenewals => Set<NonRenewalRow>();
+
     public DbSet<OosCorrectionRow> OosCorrections => Set<OosCorrectionRow>();
 
     public DbSet<MigrationImportRow> MigrationImports => Set<MigrationImportRow>();
@@ -429,6 +431,32 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.HasIndex(e => new { e.LegalEntityId, e.Status, e.RaisedAt }).HasDatabaseName("ix_psr_exception_queue");
             entity.HasOne<NonPaymentCancellationRow>().WithMany().HasForeignKey(e => e.NonPaymentId)
                 .HasConstraintName("fk_psr_exception_nonpay").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<NonRenewalRow>(entity =>
+        {
+            entity.ToTable("non_renewal", table =>
+            {
+                table.HasCheckConstraint("ck_non_renewal_status", "status IN ('NOTICE_REQUESTED', 'PSR_REVIEW')");
+            });
+            entity.HasKey(e => e.NonRenewalId).HasName("pk_non_renewal");
+            entity.Property(e => e.NonRenewalId).HasColumnName("non_renewal_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.ReasonCode).HasColumnName("reason_code");
+            entity.Property(e => e.Note).HasColumnName("note");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.EffectiveAt).HasColumnName("effective_at").HasColumnType("timestamptz");
+            entity.Property(e => e.NoticeDeadline).HasColumnName("notice_deadline").HasColumnType("timestamptz");
+            entity.Property(e => e.NoticeDays).HasColumnName("notice_days");
+            entity.Property(e => e.LegalStatus).HasColumnName("legal_status");
+            entity.Property(e => e.NoticeDocumentId).HasColumnName("notice_document_id");
+            entity.Property(e => e.RequestedBy).HasColumnName("requested_by");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => e.TermId).IsUnique().HasDatabaseName("ux_non_renewal_term");
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_non_renewal_policy");
         });
 
         modelBuilder.Entity<PackRollbackExceptionRow>(entity =>

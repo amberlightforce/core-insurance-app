@@ -1084,8 +1084,16 @@
       "limit": 1
     },
     "cmp.FiscalDocument.qrPayload": {
-      "document": "unspecified",
-      "identifiers": "unspecified"
+      "fiscalDocumentId": "0192cf3b-13a7-73a7-8f1d-2ed1002747e6",
+      "status": "PENDING",
+      "mark": "Sample text",
+      "uid": "Sample text",
+      "series": "Sample text",
+      "number": "Sample text",
+      "qrPayloadRef": "Sample text",
+      "qrPayload": "sample",
+      "stub": true,
+      "layoutVerified": true
     },
     "cmp.FiscalDocument.request": {
       "fiscalDocumentId": "01926a84-c8c5-7d92-8cb3-8cc2f004d9db",
@@ -3373,31 +3381,51 @@
       "ids": [
         "019201a3-88d3-710c-856c-921d10371bf7"
       ],
-      "corrections": "unspecified",
-      "reason": "unspecified"
+      "reason": "sample"
     },
     "FiscalDocumentBulkResubmitResponse": {
-      "status": "unspecified"
+      "requested": 1,
+      "resubmitted": 1,
+      "skipped": 1,
+      "results": [
+        {
+          "fiscalDocumentId": "01926aff-8cfe-7ea9-82e3-a0f27b513b34",
+          "outcome": "RESUBMITTED",
+          "status": "PENDING",
+          "errorCode": "sample"
+        }
+      ]
     },
     "FiscalDocumentCancelRequest": {
-      "ids": [
-        "01922486-ebcb-729b-8962-a7990845de49"
-      ],
-      "corrections": "unspecified",
-      "reason": "unspecified"
+      "fiscalDocumentId": "01929c07-3991-7901-85c8-844849167e0d",
+      "reason": "sample"
     },
     "FiscalDocumentCancelResponse": {
-      "status": "unspecified"
+      "fiscalDocumentId": "019283c8-b881-7c78-8513-27ef3a8c55e9",
+      "status": "PENDING",
+      "cancellationFiscalDocumentId": "01927f26-142c-7c08-8993-3d71c4051618"
     },
     "FiscalDocumentCorrectRequest": {
-      "ids": [
-        "0192b833-b6f7-7a48-84a4-53486f7bb102"
+      "fiscalDocumentId": "0192c624-08cc-718d-8bd3-f8e87a9ab6a3",
+      "corrections": [
+        {
+          "fiscalCategoryKey": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "chargeId": "0192985b-5fd4-75f6-82c5-61864db69eef",
+          "paymentId": "0192dd93-3984-7106-8c2b-23a1f1c994b3"
+        }
       ],
-      "corrections": "unspecified",
-      "reason": "unspecified"
+      "reason": "sample"
     },
     "FiscalDocumentCorrectResponse": {
-      "status": "unspecified"
+      "originalFiscalDocumentId": "01926416-2d68-7f6c-8423-3116f73d9486",
+      "creditFiscalDocumentId": "01922a24-acc8-73bc-8896-3c6b453b2413",
+      "creditStatus": "PENDING",
+      "correctedFiscalDocumentId": "0192a7c7-b8ae-7106-8459-149b596ef47b",
+      "correctedStatus": "PENDING"
     },
     "FiscalDocumentGetResponse": {
       "document": {
@@ -3470,8 +3498,16 @@
       "limit": 1
     },
     "FiscalDocumentQrPayloadResponse": {
-      "document": "unspecified",
-      "identifiers": "unspecified"
+      "fiscalDocumentId": "01920e63-002d-7da6-84bb-a0610660b4fb",
+      "status": "PENDING",
+      "mark": "Sample text",
+      "uid": "Sample text",
+      "series": "Sample text",
+      "number": "Sample text",
+      "qrPayloadRef": "Sample text",
+      "qrPayload": "sample",
+      "stub": true,
+      "layoutVerified": true
     },
     "FiscalDocumentRequestRequest": {
       "sourceType": "SAMPLE_CODE",
@@ -3504,14 +3540,16 @@
       ]
     },
     "FiscalDocumentResubmitRequest": {
-      "ids": [
-        "01927fe8-2200-7b00-8f94-5a324d6b31e6"
-      ],
-      "corrections": "unspecified",
-      "reason": "unspecified"
+      "fiscalDocumentId": "01920f84-bd03-75c0-8e97-d8f7db002eaf",
+      "reason": "sample"
     },
     "FiscalDocumentResubmitResponse": {
-      "status": "unspecified"
+      "fiscalDocumentId": "0192ef76-c24a-7cd9-8539-12112d54b039",
+      "status": "PENDING",
+      "rejectionCodes": [
+        "SAMPLE_CODE"
+      ],
+      "resubmitted": true
     },
     "FiscalDocumentView": {
       "fiscalDocumentId": "019256dd-a7f0-7151-861f-255b47aba9ed",

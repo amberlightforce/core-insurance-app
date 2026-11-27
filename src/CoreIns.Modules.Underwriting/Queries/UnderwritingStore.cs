@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Data;
 using CoreIns.Modules.Underwriting.Domain;
 using CoreIns.Platform.Context;
@@ -22,6 +22,10 @@ internal sealed class UnderwritingOptions
 internal sealed class RuleSetRecord
 {
     public string Hash { get; set; } = string.Empty;
+
+    public string Code { get; set; } = string.Empty;
+
+    public string Version { get; set; } = string.Empty;
 
     public string Definition { get; set; } = string.Empty;
 }
@@ -124,7 +128,7 @@ internal sealed class UnderwritingStore(DbSession session, IClock clock, Request
         args.Add("asOf", date, DbType.Date);
         var row = await connection.QueryFirstOrDefaultAsync<RuleSetRecord>(new CommandDefinition(
             """
-            SELECT content_hash AS Hash, definition::text AS Definition FROM uw.rule_set_version
+            SELECT content_hash AS Hash, rule_set_code AS Code, version_no AS Version, definition::text AS Definition FROM uw.rule_set_version
              WHERE product_code = @product AND checkpoint = @checkpoint AND status = 'Active' AND effective_from <= @asOf
              ORDER BY effective_from DESC, version_no DESC LIMIT 1
             """, args, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
@@ -133,7 +137,8 @@ internal sealed class UnderwritingStore(DbSession session, IClock clock, Request
             return null;
         }
 
-        var compiled = Cache.GetOrAdd(found.Hash, _ => CompiledRuleSet.Compile(RuleSetJson.Deserialize(found.Definition)));
+        // Keyed by code and version as well as the table hash: two versions with the same table (a re-release) must not share a compiled entry.
+        var compiled = Cache.GetOrAdd($"{found.Code}@{found.Version}#{found.Hash}", _ => CompiledRuleSet.Compile(RuleSetJson.Deserialize(found.Definition)));
         return string.Equals(compiled.Hash, found.Hash, StringComparison.Ordinal) ? compiled : null;
     }
 

@@ -1,4 +1,4 @@
-using CoreIns.Modules.Underwriting.Commands;
+﻿using CoreIns.Modules.Underwriting.Commands;
 using CoreIns.Modules.Underwriting.Contracts.Api;
 using CoreIns.Modules.Underwriting.Services;
 using CoreIns.Platform.Commands;
@@ -22,6 +22,9 @@ internal static class RuleSetPermissions
     public const string Simulate = "uw.RuleSet.simulate";
     public const string Export = "uw.RuleSet.export";
     public const string Import = "uw.RuleSet.import";
+    public const string Submit = "uw.RuleSet.submit";
+    public const string Approve = "uw.RuleSet.approve";
+    public const string Schedule = "uw.RuleSet.schedule";
 }
 
 /// <summary>REST facade of the rule-set authoring operations (BO-UW-01).</summary>
@@ -66,6 +69,36 @@ internal sealed class RuleSetController : ControllerBase
         [FromBody] RuleSetImportRequest request, [FromServices] ICommandHandler<ImportRuleSet, RuleSetAuthoringResponse> handler, CancellationToken cancellationToken)
     {
         var result = await handler.HandleAsync(new ImportRuleSet(request), cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.RuleSet.submit: a valid Draft goes to maker-checker approval.</summary>
+    [HttpPost("submit")]
+    [Authorize(Policy = RuleSetPermissions.Submit)]
+    public async Task<IResult> SubmitAsync(
+        [FromBody] RuleSetSubmitRequest request, [FromServices] ICommandHandler<SubmitRuleSet, RuleSetReleaseResponse> handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new SubmitRuleSet(request), cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.RuleSet.approve: the checker approves (or rejects) a Submitted version.</summary>
+    [HttpPost("approve")]
+    [Authorize(Policy = RuleSetPermissions.Approve)]
+    public async Task<IResult> ApproveAsync(
+        [FromBody] RuleSetApproveRequest request, [FromServices] ICommandHandler<ApproveRuleSet, RuleSetReleaseResponse> handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new ApproveRuleSet(request), cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.RuleSet.schedule: an Approved version becomes Active from a date (never in the past).</summary>
+    [HttpPost("schedule")]
+    [Authorize(Policy = RuleSetPermissions.Schedule)]
+    public async Task<IResult> ScheduleAsync(
+        [FromBody] RuleSetScheduleRequest request, [FromServices] ICommandHandler<ScheduleRuleSet, RuleSetReleaseResponse> handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new ScheduleRuleSet(request), cancellationToken).ConfigureAwait(false);
         return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
     }
 

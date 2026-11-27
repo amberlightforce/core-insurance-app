@@ -42,7 +42,6 @@ CONTRACT_NOT_SERVED GET /api/clm/v1/claim-trackings/{}
 CONTRACT_NOT_SERVED GET /api/clm/v1/conversations
 CONTRACT_NOT_SERVED GET /api/clm/v1/financials/daily-totals
 CONTRACT_NOT_SERVED GET /api/cmp/v1/bureaus/status
-CONTRACT_NOT_SERVED GET /api/cmp/v1/fiscal-documents/qr-payload
 CONTRACT_NOT_SERVED GET /api/cmp/v1/taxonomies
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/footprint
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/snapshot
@@ -155,8 +154,6 @@ CONTRACT_NOT_SERVED GET /api/uw/v1/external-reports
 CONTRACT_NOT_SERVED GET /api/uw/v1/external-reports/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/inspections/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/intakes/{}
-CONTRACT_NOT_SERVED GET /api/uw/v1/issue-types/search
-CONTRACT_NOT_SERVED GET /api/uw/v1/issue-types/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/issues/explain
 CONTRACT_NOT_SERVED GET /api/uw/v1/issues/list-for-channel
 CONTRACT_NOT_SERVED GET /api/uw/v1/issues/{}
@@ -327,11 +324,7 @@ CONTRACT_NOT_SERVED POST /api/cmp/v1/enfia-confirmations/import
 CONTRACT_NOT_SERVED POST /api/cmp/v1/enfia-confirmations/propose
 CONTRACT_NOT_SERVED POST /api/cmp/v1/enfia-confirmations/transmit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/evidence/submit
-CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/bulk-resubmit
-CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/cancel
-CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/correct
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/import
-CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/resubmit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-reconciliation/run
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-rules/certify
 CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions
@@ -558,8 +551,6 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/reinstatements
 CONTRACT_NOT_SERVED POST /api/pol/v1/renewal-runs/pause
 CONTRACT_NOT_SERVED POST /api/pol/v1/renewal-runs/retry-item
 CONTRACT_NOT_SERVED POST /api/pol/v1/renewal-runs/start
-CONTRACT_NOT_SERVED POST /api/pol/v1/renewals/decline
-CONTRACT_NOT_SERVED POST /api/pol/v1/renewals/non-renew
 CONTRACT_NOT_SERVED POST /api/pol/v1/rewrites
 CONTRACT_NOT_SERVED POST /api/pol/v1/suspensions
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/merge
@@ -606,13 +597,6 @@ CONTRACT_NOT_SERVED POST /api/rat/v1/pricing-modifications/propose
 CONTRACT_NOT_SERVED POST /api/rat/v1/pricing-modifications/withdraw
 CONTRACT_NOT_SERVED POST /api/rat/v1/rates/cancel-batch
 CONTRACT_NOT_SERVED POST /api/rat/v1/rates/rate-batch
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/build
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/cancel-schedule
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/return
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/rollback
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/schedule
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/submit
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-change-sets
 CONTRACT_NOT_SERVED POST /api/rat/v1/shadow-runs/start
 CONTRACT_NOT_SERVED POST /api/rat/v1/shadow-runs/stop
 CONTRACT_NOT_SERVED POST /api/rat/v1/worksheets/attach
@@ -716,7 +700,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/accept
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/clear
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/reject
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/verify-value
-CONTRACT_NOT_SERVED POST /api/uw/v1/issue-types/upsert
 CONTRACT_NOT_SERVED POST /api/uw/v1/issues/add-manual
 CONTRACT_NOT_SERVED POST /api/uw/v1/issues/close
 CONTRACT_NOT_SERVED POST /api/uw/v1/issues/reopen
@@ -736,9 +719,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/bulk-set
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/set
 CONTRACT_NOT_SERVED POST /api/uw/v1/review/lock
 CONTRACT_NOT_SERVED POST /api/uw/v1/review/release
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/approve
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/schedule
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/submit
 CONTRACT_NOT_SERVED POST /api/uw/v1/rules/evaluate-batch
 CONTRACT_NOT_SERVED POST /api/uw/v1/valuation/compute
 CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/bulk-reassign

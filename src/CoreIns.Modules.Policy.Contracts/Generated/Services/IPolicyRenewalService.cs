@@ -51,7 +51,7 @@ public interface IPolicyRenewalService
     /// <para>Status: full. Wave W6.</para>
     /// <para>Exposure: ui; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: POL-ERR-NOTICE-TOO-LATE (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-NOTICE-PERIOD-UNSETTLED (422), POL-ERR-NOTICE-TOO-LATE (422), POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.RenewalNonRenewResponse> NonRenewAsync(global::CoreIns.Modules.Policy.Contracts.Api.RenewalNonRenewRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
