@@ -46,6 +46,7 @@ public static class ChannelsModule
         services.AddSingleton<IDsarParticipant, ChannelsDsarParticipant>();
         services.AddScoped<WithdrawalReader>();
         services.AddScoped<CoreIns.Modules.Channels.Ai.TicketService>();
+        services.AddScoped<PermissionMatrixService>();
         services.TryAddScoped<IWithdrawalPolicyPort, PolicyContractWithdrawalPort>();
         services.TryAddScoped<IWithdrawalNotifier, LoggingWithdrawalNotifier>();
         services.AddCommand<ResubmitWithdrawal, string, ResubmitWithdrawalHandler>(CommandDescriptor.For("chn.Withdrawal.resubmit") with { RequiresIdempotencyKey = false, Idempotent = false });
@@ -84,5 +85,17 @@ public static class ChannelsModule
             .Describe("Το δελτίο δεν μπορεί πλέον να εγκριθεί ή να απορριφθεί.", "The ticket can no longer be approved or rejected."),
         ErrorDefinition.For(ModuleCode.CHN, "TICKET-STALE", 409, "Το δελτίο έχει ήδη κριθεί", "The ticket has already been decided")
             .Describe("Το δελτίο έχει ήδη εγκριθεί ή απορριφθεί.", "The ticket was already approved or rejected."),
+        ErrorDefinition.For(ModuleCode.CHN, "UNKNOWN-TRANSACTION", 422, "Άγνωστος τύπος συναλλαγής", "Unknown transaction type")
+            .Describe("Ο τύπος συναλλαγής δεν υπάρχει στον κατάλογο.", "The transaction type is not in the catalogue."),
+        ErrorDefinition.For(ModuleCode.CHN, "FINAL-ENTRY", 422, "Οριστική εγγραφή πίνακα", "Final matrix entry")
+            .Describe("Οι εγγραφές ΕΕ και χώρας δεν μπορούν να αλλάξουν.", "EU and country entries cannot be changed."),
+        ErrorDefinition.For(ModuleCode.CHN, "SCENARIO-FAILED", 422, "Αποτυχία σεναρίου", "Scenario failed")
+            .Describe("Ένα σενάριο δεν έδωσε το αναμενόμενο αποτέλεσμα.", "A scenario did not give the expected outcome."),
+        ErrorDefinition.For(ModuleCode.CHN, "INVALID-ENTRY", 422, "Μη έγκυρη εγγραφή", "Invalid entry")
+            .Describe("Η εγγραφή ή το σενάριο δεν είναι έγκυρο.", "The entry or scenario is not valid."),
+        ErrorDefinition.For(ModuleCode.CHN, "SELF-APPROVAL", 403, "Δεν επιτρέπεται αυτοέγκριση", "You cannot approve your own work")
+            .Describe("Ο δημιουργός ή υποβάλλων δεν μπορεί να εγκρίνει τον πίνακα.", "The person who prepared or submitted the matrix cannot approve it."),
+        ErrorDefinition.For(ModuleCode.CHN, "HUMAN-REQUIRED", 403, "Απαιτείται άνθρωπος", "A person is required")
+            .Describe("Μόνο φυσικό πρόσωπο μπορεί να κάνει αυτή την ενέργεια.", "Only a person can do this."),
     ];
 }

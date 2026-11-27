@@ -8,6 +8,11 @@ namespace CoreIns.Modules.Channels.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PermissionEvaluateResponse
 {
+    /// <summary>Contract addition (BO-CHN-05): the confirmation ticket raised for a REFER outcome.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ticketId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? TicketId { get; init; }
+
     /// <summary>PRD: "outcome"</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
