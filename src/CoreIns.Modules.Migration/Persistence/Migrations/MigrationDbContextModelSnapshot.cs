@@ -313,6 +313,138 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Mapping.CodeMapRow", b =>
+                {
+                    b.Property<Guid>("EntryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("entry_id");
+
+                    b.Property<string>("CoreValue")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("core_value");
+
+                    b.Property<string>("LegacyValue")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legacy_value");
+
+                    b.Property<string>("MapName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("map_name");
+
+                    b.Property<Guid>("SpecId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("spec_id");
+
+                    b.HasKey("EntryId")
+                        .HasName("pk_code_map");
+
+                    b.HasIndex("SpecId", "MapName", "LegacyValue")
+                        .IsUnique()
+                        .HasDatabaseName("ux_code_map_entry");
+
+                    b.ToTable("code_map", "mig");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Mapping.MappingSpecRow", b =>
+                {
+                    b.Property<Guid>("SpecId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("spec_id");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content_hash");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionComment")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_comment");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Fields")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("fields");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("RequestedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("requested_by");
+
+                    b.Property<string>("SourceObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_object_type");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TargetModule")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("target_module");
+
+                    b.Property<string>("TargetObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("target_object_type");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("SpecId")
+                        .HasName("pk_mapping_spec");
+
+                    b.HasIndex("LegalEntityId", "Name", "Version")
+                        .IsUnique()
+                        .HasDatabaseName("ux_mapping_spec_name_version");
+
+                    b.ToTable("mapping_spec", "mig", t =>
+                        {
+                            t.HasCheckConstraint("ck_mapping_spec_status", "status IN ('DRAFT','PENDING_APPROVAL','APPROVED','REJECTED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Migration.Services.Quality.DqFindingRow", b =>
                 {
                     b.Property<Guid>("FindingId")
@@ -1005,6 +1137,16 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         .HasDatabaseName("ux_dsar_restriction_subject_class");
 
                     b.ToTable("dsar_restriction", "mig");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Mapping.CodeMapRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Migration.Services.Mapping.MappingSpecRow", null)
+                        .WithMany()
+                        .HasForeignKey("SpecId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_code_map_spec");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Migration.Services.Quality.DqFindingRow", b =>

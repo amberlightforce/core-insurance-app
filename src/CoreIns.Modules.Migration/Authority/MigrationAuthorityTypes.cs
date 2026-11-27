@@ -1,4 +1,5 @@
 using CoreIns.Modules.Migration.Domain;
+using CoreIns.Modules.Migration.Services.Mapping;
 using CoreIns.Modules.Migration.Services.SignOff;
 using CoreIns.Platform;
 using CoreIns.Platform.Authority;
@@ -25,6 +26,9 @@ internal static class MigrationAuthorityTypes
         services.AddAuthorityType(new AuthorityTypeDefinition(
             AuthorityTypeCode.Parse(SignOffApproval.Type), ModuleCode.MIG, new LocalizedText("Έγκριση ολοκλήρωσης κύματος μετάπτωσης", "Sign off a migration wave"),
             [new AuthorityDimensionDefinition(SignOffApproval.SignatoryDimension, DimensionKind.Code)]));
+        services.AddAuthorityType(new AuthorityTypeDefinition(
+            AuthorityTypeCode.Parse(MappingApproval.Type), ModuleCode.MIG, new LocalizedText("Έγκριση προδιαγραφής αντιστοίχισης", "Approve a mapping spec"),
+            [new AuthorityDimensionDefinition(MappingApproval.ScopeDimension, DimensionKind.Code)]));
         return services;
     }
 }

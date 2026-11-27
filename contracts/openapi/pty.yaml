@@ -3904,6 +3904,12 @@ paths:
       - ui
       x-permission: pty.CommissionAgreement.get
       x-error-codes:
+      - code: PTY-ERR-INTERMEDIARY-NOT-ACTIVE
+        status: 422
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-STATE
+        status: 409
       - code: PTY-ERR-RATE-ABOVE-MAX
         status: 422
       - code: PTY-ERR-BACKDATE
@@ -3969,6 +3975,12 @@ paths:
       - ui
       x-permission: pty.CommissionAgreement.createVersion
       x-error-codes:
+      - code: PTY-ERR-INTERMEDIARY-NOT-ACTIVE
+        status: 422
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-STATE
+        status: 409
       - code: PTY-ERR-RATE-ABOVE-MAX
         status: 422
       - code: PTY-ERR-BACKDATE
@@ -4038,6 +4050,12 @@ paths:
       - ui
       x-permission: pty.CommissionAgreement.submit
       x-error-codes:
+      - code: PTY-ERR-INTERMEDIARY-NOT-ACTIVE
+        status: 422
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-STATE
+        status: 409
       - code: PTY-ERR-RATE-ABOVE-MAX
         status: 422
       - code: PTY-ERR-BACKDATE
@@ -4107,6 +4125,12 @@ paths:
       - ui
       x-permission: pty.CommissionAgreement.approve
       x-error-codes:
+      - code: PTY-ERR-INTERMEDIARY-NOT-ACTIVE
+        status: 422
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-STATE
+        status: 409
       - code: PTY-ERR-RATE-ABOVE-MAX
         status: 422
       - code: PTY-ERR-BACKDATE
@@ -4177,6 +4201,12 @@ paths:
       - ui
       x-permission: pty.CommissionAgreement.compare
       x-error-codes:
+      - code: PTY-ERR-INTERMEDIARY-NOT-ACTIVE
+        status: 422
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-STATE
+        status: 409
       - code: PTY-ERR-RATE-ABOVE-MAX
         status: 422
       - code: PTY-ERR-BACKDATE
@@ -4188,6 +4218,18 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: fromVersionId
+        in: query
+        required: true
+        description: The older version
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: toVersionId
+        in: query
+        required: true
+        description: The version to compare with; must belong to the same agreement
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -6895,38 +6937,314 @@ components:
       type: object
       description: 'pty.CommissionAgreement.resolve result. PRD outputs: "—"'
       x-status: minimal
+    CommissionRateLine:
+      type: object
+      description: One commission rate of a version, for a kind of business, optionally a line of business, on a premium basis
+      properties:
+        businessType:
+          type: string
+          enum:
+          - NEW_BUSINESS
+          - RENEWAL
+          - ANY
+        lineOfBusiness:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Null = every line
+        basis:
+          type: string
+          enum:
+          - NET_PREMIUM
+          - GROSS_PREMIUM
+        ratePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: Commission rate in percent, 0 to the maximum, at most 4 decimals (decimal string)
+      required:
+      - businessType
+      - basis
+      - ratePct
+    CommissionAgreementVersionView:
+      type: object
+      description: A version of a commission agreement. Once ACTIVE it is never edited; a change is a new version.
+      properties:
+        versionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        agreementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        versionNo:
+          type: integer
+          minimum: 1
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - PENDING_APPROVAL
+          - ACTIVE
+          - REJECTED
+        effectiveFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        effectiveTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Last day in force, derived from the next ACTIVE version; null while it is the latest
+        expectedAnnualVolume:
+          $ref: ../events/common.schema.json#/$defs/Money
+        maxRatePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        rateLines:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommissionRateLine'
+        contentHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        notes:
+          oneOf:
+          - type: string
+          - type: 'null'
+        createdBy:
+          type: string
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        submittedBy:
+          oneOf:
+          - type: string
+          - type: 'null'
+        decidedBy:
+          oneOf:
+          - type: string
+          - type: 'null'
+        decidedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        decisionComment:
+          oneOf:
+          - type: string
+          - type: 'null'
+      required:
+      - versionId
+      - agreementId
+      - versionNo
+      - status
+      - effectiveFrom
+      - expectedAnnualVolume
+      - maxRatePct
+      - rateLines
+      - contentHash
+      - createdBy
+      - createdAt
+    CommissionAgreementView:
+      type: object
+      description: A commission agreement (BO-PTY-10, REQ-PTY-010) of one intermediary for one scope, with its versions
+      properties:
+        agreementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        intermediaryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        productCode:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        lineOfBusiness:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommissionAgreementVersionView'
+      required:
+      - agreementId
+      - intermediaryId
+      - versions
+    CommissionFieldChange:
+      type: object
+      description: A scalar field that differs between two versions
+      properties:
+        field:
+          type: string
+        from:
+          oneOf:
+          - type: string
+          - type: 'null'
+        to:
+          oneOf:
+          - type: string
+          - type: 'null'
+      required:
+      - field
+    CommissionRateLineChange:
+      type: object
+      description: A rate line added, removed or changed between two versions (lines match on business type, line of business and basis)
+      properties:
+        kind:
+          type: string
+          enum:
+          - ADDED
+          - REMOVED
+          - CHANGED
+        businessType:
+          type: string
+        lineOfBusiness:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        basis:
+          type: string
+        fromRatePct:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Decimal
+          - type: 'null'
+        toRatePct:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Decimal
+          - type: 'null'
+      required:
+      - kind
+      - businessType
+      - basis
     CommissionAgreementGetResponse:
       type: object
-      description: 'pty.CommissionAgreement.get result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.CommissionAgreement.get result (BO-PTY-10): the agreement with all its versions, oldest first'
+      properties:
+        agreement:
+          $ref: '#/components/schemas/CommissionAgreementView'
+      required:
+      - agreement
     CommissionAgreementCreateVersionRequest:
       type: object
-      description: 'pty.CommissionAgreement.createVersion request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.CommissionAgreement.createVersion request (BO-PTY-10). Creates the agreement for the scope (intermediary, optional product and line) when it does not exist and adds a DRAFT version. Refused for an intermediary that is not ACTIVE, for a rate above the maximum, for an effective date at or before the settled date and for an effective date not after the latest version.'
+      properties:
+        intermediaryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        productCode:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Product the agreement is limited to; null = every product
+        lineOfBusiness:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Line of business the agreement is limited to; null = every line
+        effectiveFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        expectedAnnualVolume:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Expected annual premium volume (EUR); with the highest rate it decides who may approve
+        rateLines:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/CommissionRateLine'
+        notes:
+          oneOf:
+          - type: string
+            maxLength: 1000
+          - type: 'null'
+      required:
+      - intermediaryId
+      - effectiveFrom
+      - expectedAnnualVolume
+      - rateLines
     CommissionAgreementCreateVersionResponse:
       type: object
-      description: 'pty.CommissionAgreement.createVersion result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.CommissionAgreement.createVersion result'
+      properties:
+        agreement:
+          $ref: '#/components/schemas/CommissionAgreementView'
+        version:
+          $ref: '#/components/schemas/CommissionAgreementVersionView'
+      required:
+      - agreement
+      - version
     CommissionAgreementSubmitRequest:
       type: object
-      description: 'pty.CommissionAgreement.submit request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.CommissionAgreement.submit request (BO-PTY-10): DRAFT to PENDING_APPROVAL; the submitter becomes the maker of the PLT approval request.'
+      properties:
+        versionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          oneOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+      required:
+      - versionId
     CommissionAgreementSubmitResponse:
       type: object
-      description: 'pty.CommissionAgreement.submit result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.CommissionAgreement.submit result'
+      properties:
+        version:
+          $ref: '#/components/schemas/CommissionAgreementVersionView'
+      required:
+      - version
     CommissionAgreementApproveRequest:
       type: object
-      description: 'pty.CommissionAgreement.approve request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.CommissionAgreement.approve request (BO-PTY-10): the checker approves or rejects a PENDING_APPROVAL version. The maker and anyone who edited it cannot decide (PLT-ERR-SELF-APPROVAL, PLT-ERR-EDITOR-CANNOT-APPROVE); the checker needs commission authority for the expected volume and the highest rate. Supports dry-run.'
+      properties:
+        versionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        comment:
+          oneOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        contentHash:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Sha256
+          - type: 'null'
+          description: Hash of the content the checker reviewed; when given it must match the stored version
+      required:
+      - versionId
+      - decision
     CommissionAgreementApproveResponse:
       type: object
-      description: 'pty.CommissionAgreement.approve result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.CommissionAgreement.approve result'
+      properties:
+        version:
+          $ref: '#/components/schemas/CommissionAgreementVersionView'
+      required:
+      - version
     CommissionAgreementCompareResponse:
       type: object
-      description: 'pty.CommissionAgreement.compare result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.CommissionAgreement.compare result (BO-PTY-10): what differs between two versions of one agreement'
+      properties:
+        agreementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        fromVersionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        toVersionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        identical:
+          type: boolean
+        fieldChanges:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommissionFieldChange'
+        rateLineChanges:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommissionRateLineChange'
+      required:
+      - agreementId
+      - fromVersionId
+      - toVersionId
+      - identical
+      - fieldChanges
+      - rateLineChanges
     CommissionAgreementSimulateRequest:
       type: object
       description: 'pty.CommissionAgreement.simulate request. PRD inputs: "as named"'

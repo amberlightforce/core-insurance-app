@@ -157,6 +157,208 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.CommissionAgreementRow", b =>
+                {
+                    b.Property<Guid>("AgreementId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("agreement_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("IntermediaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("intermediary_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("LineOfBusiness")
+                        .HasColumnType("text")
+                        .HasColumnName("line_of_business");
+
+                    b.Property<string>("ProductCode")
+                        .HasColumnType("text")
+                        .HasColumnName("product_code");
+
+                    b.Property<string>("ScopeKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope_key");
+
+                    b.HasKey("AgreementId")
+                        .HasName("pk_commission_agreement");
+
+                    b.HasIndex("IntermediaryId");
+
+                    b.HasIndex("LegalEntityId", "IntermediaryId", "ScopeKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_commission_agreement_scope");
+
+                    b.ToTable("commission_agreement", "pty");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.CommissionAgreementVersionRow", b =>
+                {
+                    b.Property<Guid>("VersionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("version_id");
+
+                    b.Property<Guid>("AgreementId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agreement_id");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content_hash");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("currency");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionComment")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_comment");
+
+                    b.Property<DateOnly>("EffectiveFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("effective_from");
+
+                    b.Property<decimal>("ExpectedVolume")
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("expected_volume");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<decimal>("MaxRatePct")
+                        .HasColumnType("numeric(7,4)")
+                        .HasColumnName("max_rate_pct");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
+
+                    b.Property<int>("VersionNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("version_no");
+
+                    b.HasKey("VersionId")
+                        .HasName("pk_commission_agreement_version");
+
+                    b.HasIndex("AgreementId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_commission_version_open")
+                        .HasFilter("status IN ('DRAFT','PENDING_APPROVAL')");
+
+                    b.HasIndex("AgreementId", "VersionNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_commission_version_no");
+
+                    b.ToTable("commission_agreement_version", "pty", t =>
+                        {
+                            t.HasCheckConstraint("ck_commission_version_rate", "max_rate_pct >= 0 AND max_rate_pct <= 100");
+
+                            t.HasCheckConstraint("ck_commission_version_status", "status IN ('DRAFT','PENDING_APPROVAL','ACTIVE','REJECTED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.CommissionRateLineRow", b =>
+                {
+                    b.Property<Guid>("LineId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("line_id");
+
+                    b.Property<string>("Basis")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("basis");
+
+                    b.Property<string>("BusinessType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("business_type");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<int>("LineNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("line_no");
+
+                    b.Property<string>("LineOfBusiness")
+                        .HasColumnType("text")
+                        .HasColumnName("line_of_business");
+
+                    b.Property<decimal>("RatePct")
+                        .HasColumnType("numeric(7,4)")
+                        .HasColumnName("rate_pct");
+
+                    b.Property<Guid>("VersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("version_id");
+
+                    b.HasKey("LineId")
+                        .HasName("pk_commission_rate_line");
+
+                    b.HasIndex("VersionId", "LineNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_commission_line_no");
+
+                    b.ToTable("commission_rate_line", "pty", t =>
+                        {
+                            t.HasCheckConstraint("ck_commission_line_rate", "rate_pct >= 0 AND rate_pct <= 100");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.DsarRestrictionRow", b =>
                 {
                     b.Property<Guid>("RestrictionId")
@@ -1303,6 +1505,36 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_account_holder");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.CommissionAgreementRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.IntermediaryRow", null)
+                        .WithMany()
+                        .HasForeignKey("IntermediaryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_commission_agreement_intermediary");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.CommissionAgreementVersionRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.CommissionAgreementRow", null)
+                        .WithMany()
+                        .HasForeignKey("AgreementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_commission_version_agreement");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.CommissionRateLineRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.CommissionAgreementVersionRow", null)
+                        .WithMany()
+                        .HasForeignKey("VersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_commission_line_version");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryAppointmentRow", b =>

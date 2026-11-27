@@ -39,6 +39,10 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
 
     public DbSet<Services.Quality.DqWaiverRow> DqWaivers => Set<Services.Quality.DqWaiverRow>();
 
+    public DbSet<Services.Mapping.MappingSpecRow> MappingSpecs => Set<Services.Mapping.MappingSpecRow>();
+
+    public DbSet<Services.Mapping.CodeMapRow> CodeMaps => Set<Services.Mapping.CodeMapRow>();
+
     protected override string Schema => MigrationModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -49,6 +53,7 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
         Services.SignOff.SignOffModel.Configure(modelBuilder);
         Services.Staging.StagingModel.Configure(modelBuilder);
         Services.Quality.DqModel.Configure(modelBuilder);
+        Services.Mapping.MappingModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BatchRow>(entity =>
         {

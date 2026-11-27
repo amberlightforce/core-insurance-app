@@ -28,6 +28,7 @@ tags:
 - name: Signoff
 - name: Staging
 - name: Quality
+- name: Mapping
 paths:
   /api/mig/v1/xrefs/register:
     post:
@@ -2302,6 +2303,314 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/mapping/specs:
+    post:
+      operationId: mig.Mapping.create
+      summary: Create a mapping spec version
+      description: |-
+        Create a mapping spec version
+
+        Inputs: a spec name, the staged object type it reads, the module object type it produces, field mappings (target path, source field, transform: COPY, TRIM, UPPER, DATE, DECIMAL, ENUM, CONSTANT) and the code tables the ENUM fields look up (legacy code to core code). Outputs: the spec as a new DRAFT version of that name. A spec version is never edited: a change is a new version, and once it is put forward for approval or approved it is frozen (also in the database).
+      tags:
+      - Mapping
+      x-requirement:
+      - REQ-MIG-054..REQ-MIG-062
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-04: a spec is stored as a draft; nothing is imported'
+      x-exposure:
+      - ui
+      x-permission: mig.Mapping.create
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      x-source:
+      - BO-MIG-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MappingCreateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingSpec'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    get:
+      operationId: mig.Mapping.list
+      summary: List mapping specs
+      description: |-
+        List mapping specs
+
+        Inputs: optional name and status. Outputs: spec versions, newest first, with status and content hash.
+      tags:
+      - Mapping
+      x-requirement:
+      - REQ-MIG-054..REQ-MIG-062
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-maturity: pre-release
+      x-bounded: 'At most 200 spec versions per call, newest first'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-04: a read'
+      x-exposure:
+      - ui
+      x-permission: mig.Mapping.list
+      x-error-codes:
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      x-source:
+      - BO-MIG-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: name
+        in: query
+        required: false
+        description: Spec name.
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        description: DRAFT, PENDING_APPROVAL, APPROVED or REJECTED.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingSpecList'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/mapping/specs/{id}:
+    get:
+      operationId: mig.Mapping.get
+      summary: Get a mapping spec version
+      description: |-
+        Get a mapping spec version
+
+        Inputs: spec id. Outputs: the spec with its field mappings, code tables and approval state.
+      tags:
+      - Mapping
+      x-requirement:
+      - REQ-MIG-054..REQ-MIG-062
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-04: a read'
+      x-exposure:
+      - ui
+      x-permission: mig.Mapping.get
+      x-error-codes:
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-MIG-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the mapping spec version.
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingSpec'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/mapping/publish:
+    post:
+      operationId: mig.Mapping.publish
+      summary: Publish a mapping spec (maker-checker)
+      description: |-
+        Publish a mapping spec (maker-checker)
+
+        Inputs: spec id, and optionally reject with a comment. Outputs: the spec. A DRAFT spec is put forward for approval by its maker (PENDING_APPROVAL); a different person then calls publish again to approve it (APPROVED, immutable) or with reject. The maker cannot approve their own spec. Only an APPROVED spec can be referenced by a migration batch.
+      tags:
+      - Mapping
+      x-requirement:
+      - REQ-MIG-054..REQ-MIG-062
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-04: a spec is put forward or decided, never previewed'
+      x-exposure:
+      - ui
+      x-permission: mig.Mapping.publish
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      x-source:
+      - BO-MIG-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MappingPublishRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingSpec'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/mapping/preview:
+    post:
+      operationId: mig.Mapping.preview
+      summary: Preview a mapping over staged records
+      description: |-
+        Preview a mapping over staged records
+
+        Inputs: spec id and a staged snapshot (id, or source and label), a sample size (default 25, at most 500) and whether a snapshot with open data quality errors is refused (default true). Outputs: the first records of the spec's object type mapped to migration import items (object type, legacy id, payload, item hash) with the issues of each, and the code values that have no entry in the code table. Nothing is written; an unmapped code is reported and the field left out, never guessed.
+      tags:
+      - Mapping
+      x-requirement:
+      - REQ-MIG-054..REQ-MIG-062
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-maturity: pre-release
+      x-bounded: 'At most 500 sampled records per call'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: true
+      x-dry-run-note: 'BO-MIG-04: the preview is a dry run, it writes nothing'
+      x-exposure:
+      - ui
+      x-permission: mig.Mapping.preview
+      x-error-codes:
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      x-source:
+      - BO-MIG-04
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MappingPreviewRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingPreview'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
 x-operation-families:
 - family: mig.Wave.*
   summary: Plan and run waves and cohorts
@@ -3325,6 +3634,235 @@ components:
           type: string
           format: date-time
       required: [waiverId, findingId, source, objectType, legacyKey, ruleCode, reason, expiresOn, waivedBy, waivedAt]
+    MappingFieldSpec:
+      type: object
+      properties:
+        target:
+          type: string
+          description: Dotted path of the field in the importer payload, for example person.familyName.
+        source:
+          type: [string, 'null']
+          description: Field of the staged record; not used by CONSTANT.
+        transform:
+          type: string
+          enum: [COPY, TRIM, UPPER, DATE, DECIMAL, ENUM, CONSTANT]
+        format:
+          type: [string, 'null']
+          description: DATE only, the input pattern (default yyyy-MM-dd, for example dd/MM/yyyy); the output is always yyyy-MM-dd.
+        scale:
+          type: [integer, 'null']
+          description: DECIMAL only, decimal places of the output (0 to 6, default 2); an input with more places than the scale is an issue, never rounded.
+        codeMap:
+          type: [string, 'null']
+          description: ENUM only, the name of the code table.
+        value:
+          type: [string, 'null']
+          description: CONSTANT only.
+        required:
+          type: [boolean, 'null']
+          description: A missing source value is an issue (default false).
+      required: [target, transform]
+    MappingCodeEntry:
+      type: object
+      properties:
+        legacy:
+          type: string
+        core:
+          type: string
+      required: [legacy, core]
+    MappingCodeMap:
+      type: object
+      properties:
+        name:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingCodeEntry'
+      required: [name, entries]
+    MappingCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        sourceObjectType:
+          type: string
+          description: Object type of the staged records, for example Person.
+        targetModule:
+          type: string
+          description: Module code of the importer, for example PTY.
+        targetObjectType:
+          type: string
+          description: Object type of the importer, for example Person.
+        description:
+          type: [string, 'null']
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingFieldSpec'
+        codeMaps:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingCodeMap'
+      required: [name, sourceObjectType, targetModule, targetObjectType, fields]
+    MappingSpec:
+      type: object
+      properties:
+        specId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        name:
+          type: string
+        version:
+          type: integer
+        status:
+          type: string
+          enum: [DRAFT, PENDING_APPROVAL, APPROVED, REJECTED]
+        sourceObjectType:
+          type: string
+        targetModule:
+          type: string
+        targetObjectType:
+          type: string
+        description:
+          type: [string, 'null']
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingFieldSpec'
+        codeMaps:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingCodeMap'
+        contentHash:
+          type: string
+          description: SHA-256 of the fields and code tables; the approval covers this hash.
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        requestedBy:
+          type: [string, 'null']
+        approvalRequestId:
+          description: The platform approval request, once put forward.
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decidedBy:
+          type: [string, 'null']
+        decidedAt:
+          type: [string, 'null']
+          format: date-time
+        decisionComment:
+          type: [string, 'null']
+      required: [specId, name, version, status, sourceObjectType, targetModule, targetObjectType, fields, codeMaps, contentHash, createdBy, createdAt]
+    MappingSpecList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingSpec'
+      required: [items]
+    MappingPublishRequest:
+      type: object
+      properties:
+        specId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reject:
+          type: [boolean, 'null']
+          description: Reject a spec that is pending approval (default false means approve or put forward).
+        comment:
+          type: [string, 'null']
+      required: [specId]
+    MappingPreviewRequest:
+      type: object
+      properties:
+        specId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        snapshotId:
+          description: A specific snapshot; when absent give source and snapshot.
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        source:
+          type: [string, 'null']
+        snapshot:
+          type: [string, 'null']
+        sampleSize:
+          type: [integer, 'null']
+        requireCleanDq:
+          type: [boolean, 'null']
+      required: [specId]
+    MappingIssue:
+      type: object
+      properties:
+        code:
+          type: string
+          enum: [UNMAPPED_CODE, REQUIRED_MISSING, BAD_DATE, BAD_AMOUNT]
+        field:
+          type: string
+          description: The target path.
+        value:
+          type: [string, 'null']
+          description: The legacy value that could not be mapped.
+        message:
+          type: string
+      required: [code, field, message]
+    MappingPreviewItem:
+      type: object
+      properties:
+        legacyKey:
+          type: string
+        objectType:
+          type: string
+          description: The target object type of the import item.
+        legacyId:
+          type: string
+        itemHash:
+          type: string
+          description: SHA-256 of object type, legacy id and payload; the same record and spec always give the same hash.
+        payload: {}
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingIssue'
+      required: [legacyKey, objectType, legacyId, itemHash, payload, issues]
+    MappingUnmappedCode:
+      type: object
+      properties:
+        codeMap:
+          type: string
+        value:
+          type: string
+        count:
+          type: integer
+      required: [codeMap, value, count]
+    MappingPreview:
+      type: object
+      properties:
+        specId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        specVersion:
+          type: integer
+        specStatus:
+          type: string
+        snapshotId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        dqRunId:
+          description: The latest data quality run of the snapshot, when there is one.
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        sampled:
+          type: integer
+        clean:
+          type: integer
+        withIssues:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingPreviewItem'
+        unmappedCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingUnmappedCode'
+      required: [specId, specVersion, specStatus, snapshotId, sampled, clean, withIssues, items, unmappedCodes]
     SignoffRequestRequest:
       type: object
       properties:
