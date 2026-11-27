@@ -106,8 +106,13 @@ internal sealed class MigrationController : ControllerBase
 
     [HttpPost("batches/approve")]
     [Authorize(Policy = MigrationPermissions.BatchApprove)]
-    public async Task<IResult> ApproveBatchAsync([FromBody] ApproveBatchRequest body, [FromServices] ICommandHandler<ApproveBatch, BatchResponse> handler, CancellationToken cancellationToken) =>
-        (await handler.HandleAsync(new ApproveBatch(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+    public async Task<IResult> ApproveBatchAsync([FromBody] ApproveBatchRequest body, [FromServices] ICommandHandler<ApproveBatch, BatchResponse> handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new ApproveBatch(body), cancellationToken).ConfigureAwait(false);
+
+        // An approved batch too large for the request is left to the worker: 202, poll GET batches/{id}.
+        return result.IsSuccess && result.Value.Batch.Status == BatchStatus.Running ? Results.Accepted(value: result.Value) : result.ToHttpResult(HttpContext);
+    }
 
     [HttpPost("batches/pause")]
     [Authorize(Policy = MigrationPermissions.BatchPause)]
