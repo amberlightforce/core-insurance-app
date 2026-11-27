@@ -67,10 +67,12 @@
     "uw.Issue.listForChannel": {
       "items": [
         {
-          "issues": [
-            "unspecified"
-          ],
-          "explanation": "unspecified"
+          "issueId": "0192593f-65fa-7f63-8399-26261bbe7019",
+          "issueType": "SAMPLE_CODE",
+          "blockingPoint": "PRE_QUOTE",
+          "channelStatus": "UNDER_REVIEW",
+          "message": "sample",
+          "raisedAt": "2026-10-07T09:00:00Z"
         }
       ],
       "nextCursor": "sample",
@@ -157,16 +159,34 @@
       "dataAs": "unspecified"
     },
     "ApprovalHistoryItem": {
-      "rows": [
-        "unspecified"
-      ]
+      "issueId": "0192c8f7-3a80-7910-8efc-ee0c30d4ff14",
+      "jobRef": "0192ca7d-afe5-7d06-81e7-4e1be0a57458",
+      "issueKey": "sample",
+      "issueType": "SAMPLE_CODE",
+      "event": "DECIDED",
+      "decision": "APPROVE",
+      "approver": "sample",
+      "reason": "sample",
+      "fingerprint": "sample",
+      "authorityCheckId": "0192374f-2b97-77ea-8e88-b7360f2038ee",
+      "invalidatedByEvaluationId": "019264c2-e0d0-7c80-852c-8206709d2917",
+      "at": "2026-10-07T09:00:00Z"
     },
     "ApprovalHistoryPage": {
       "items": [
         {
-          "rows": [
-            "unspecified"
-          ]
+          "issueId": "0192b584-fcfb-7b68-8252-0a236bcb3b30",
+          "jobRef": "0192dea5-30de-7e6c-877d-7b30d2bbabf8",
+          "issueKey": "sample",
+          "issueType": "SAMPLE_CODE",
+          "event": "DECIDED",
+          "decision": "APPROVE",
+          "approver": "sample",
+          "reason": "sample",
+          "fingerprint": "sample",
+          "authorityCheckId": "01921fae-225a-7059-8aaf-94e741b82436",
+          "invalidatedByEvaluationId": "0192da9d-c482-707c-8d18-759706d1a020",
+          "at": "2026-10-07T09:00:00Z"
         }
       ],
       "nextCursor": "sample",
@@ -486,30 +506,99 @@
       "authorityCheckId": "01925e7f-6ba9-7aa5-8ea3-f39796e34931"
     },
     "IssueExplainResponse": {
-      "issues": [
-        "unspecified"
-      ],
-      "explanation": "unspecified"
+      "explanation": {
+        "issueId": "01925b22-0365-746a-8336-cc510bbea10a",
+        "ruleId": "sample",
+        "ruleSetCode": "SAMPLE_CODE",
+        "ruleSetVersion": "sample",
+        "ruleSetHash": "sample",
+        "fact": "sample",
+        "observed": "sample",
+        "limit": "sample",
+        "limitUnavailableReason": "sample",
+        "messageEn": "sample",
+        "messageEl": "sample",
+        "explanationKeys": [
+          "sample"
+        ]
+      }
+    },
+    "IssueExplanation": {
+      "issueId": "0192e6f9-e27c-7421-8243-54c9c5dd1e9d",
+      "ruleId": "sample",
+      "ruleSetCode": "SAMPLE_CODE",
+      "ruleSetVersion": "sample",
+      "ruleSetHash": "sample",
+      "fact": "sample",
+      "observed": "sample",
+      "limit": "sample",
+      "limitUnavailableReason": "sample",
+      "messageEn": "sample",
+      "messageEl": "sample",
+      "explanationKeys": [
+        "sample"
+      ]
     },
     "IssueGetResponse": {
-      "issues": [
-        "unspecified"
-      ],
-      "explanation": "unspecified"
+      "issue": {
+        "id": "0192e664-1479-7d88-8499-c5d789e73c3b",
+        "jobRef": "01924b85-9be7-7b29-8a44-cc127e497aca",
+        "issueType": "SAMPLE_CODE",
+        "issueKey": "sample",
+        "ruleId": "sample",
+        "severity": "SAMPLE_CODE",
+        "blockingPoint": "PRE_QUOTE",
+        "lane": "SAMPLE_CODE",
+        "status": "Open",
+        "recordVersion": 1,
+        "messageEn": "sample",
+        "messageEl": "sample",
+        "raisedAt": "2026-10-07T09:00:00Z",
+        "raisedBy": "sample",
+        "decision": {
+          "decision": "APPROVE",
+          "decidedBy": "sample",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "reason": "sample",
+          "message": "sample",
+          "authorityCheckId": "019295e1-c308-7605-8e4c-233a36725c35"
+        },
+        "closeReason": "sample"
+      },
+      "explanation": {
+        "issueId": "01929329-5b0e-7d6c-87db-968e46a57546",
+        "ruleId": "sample",
+        "ruleSetCode": "SAMPLE_CODE",
+        "ruleSetVersion": "sample",
+        "ruleSetHash": "sample",
+        "fact": "sample",
+        "observed": "sample",
+        "limit": "sample",
+        "limitUnavailableReason": "sample",
+        "messageEn": "sample",
+        "messageEl": "sample",
+        "explanationKeys": [
+          "sample"
+        ]
+      }
     },
     "IssueListForChannelItem": {
-      "issues": [
-        "unspecified"
-      ],
-      "explanation": "unspecified"
+      "issueId": "0192ab1f-768a-7971-825d-e1d73b119308",
+      "issueType": "SAMPLE_CODE",
+      "blockingPoint": "PRE_QUOTE",
+      "channelStatus": "UNDER_REVIEW",
+      "message": "sample",
+      "raisedAt": "2026-10-07T09:00:00Z"
     },
     "IssueListForChannelPage": {
       "items": [
         {
-          "issues": [
-            "unspecified"
-          ],
-          "explanation": "unspecified"
+          "issueId": "0192071c-5975-790e-82ae-69027f1fe4a5",
+          "issueType": "SAMPLE_CODE",
+          "blockingPoint": "PRE_QUOTE",
+          "channelStatus": "UNDER_REVIEW",
+          "message": "sample",
+          "raisedAt": "2026-10-07T09:00:00Z"
         }
       ],
       "nextCursor": "sample",
@@ -2188,13 +2277,48 @@
       }
     },
     "RulesEvaluateBatchRequest": {
-      "selection": "unspecified",
-      "checkpoint": "unspecified",
-      "ruleSet": "unspecified"
+      "productCode": "SAMPLE_CODE",
+      "checkpoint": "PRE_QUOTE",
+      "ruleSetCode": "sample",
+      "ruleSetVersion": "sample",
+      "effectiveDate": "2026-10-07",
+      "items": [
+        {
+          "itemRef": "sample",
+          "effectiveDate": "2026-10-07",
+          "riskSnapshot": {
+            "note": "sample"
+          }
+        }
+      ]
     },
     "RulesEvaluateBatchResponse": {
-      "jobId": "0192f345-40b8-7e74-8de9-cb4c3bb50c5c",
-      "results": "unspecified"
+      "ruleSetCode": "SAMPLE_CODE",
+      "ruleSetVersion": "sample",
+      "ruleSetHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "dataStatus": "sample",
+      "pinned": true,
+      "results": [
+        {
+          "itemRef": "sample",
+          "outcome": "ACCEPT",
+          "lane": "sample",
+          "hits": [
+            {
+              "ruleId": "sample",
+              "ruleType": "sample",
+              "issueType": "SAMPLE_CODE",
+              "blockingPoint": "PRE_QUOTE",
+              "messageEn": "sample",
+              "messageEl": "sample"
+            }
+          ],
+          "error": "sample"
+        }
+      ],
+      "warnings": [
+        "sample"
+      ]
     },
     "RulesEvaluateRequest": {
       "jobRef": "0192296d-8202-70d4-8d1f-7d4f4682f358",

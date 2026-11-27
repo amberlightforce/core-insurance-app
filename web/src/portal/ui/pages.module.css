@@ -1,0 +1,210 @@
+/*
+ * Shared styles of the customer portal pages (BO-CHN-13): list rows, key figures, message bubbles and the change
+ * flow. Tokens only; mobile-first (the 390 px layout is the base, wider screens add columns).
+ */
+.rows {
+  display: flex;
+  flex-direction: column;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  min-inline-size: 0;
+  padding-block: var(--space-3);
+  border-block-start: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+.row:first-child {
+  border-block-start: none;
+}
+
+.rowMain {
+  display: flex;
+  flex: 1 1 220px;
+  flex-direction: column;
+  gap: var(--space-0_5);
+  min-inline-size: 0;
+}
+
+.rowTitle {
+  margin: var(--space-0);
+  color: var(--color-text-primary);
+  font: var(--type-label-lg);
+  overflow-wrap: anywhere;
+}
+
+.rowMeta {
+  margin: var(--space-0);
+  color: var(--color-text-secondary);
+  font: var(--type-body-sm);
+}
+
+.fullRow {
+  flex-basis: 100%;
+}
+
+.rowSide {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.rowLink {
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.rowLink:hover .rowTitle {
+  color: var(--color-text-link);
+}
+
+.rowLink:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.amount {
+  color: var(--color-text-primary);
+  font: var(--type-label-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.mono {
+  font: var(--type-mono);
+}
+
+/* Key figures (balance, due, overdue): numbers first, label under. */
+.figures {
+  display: grid;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: var(--space-3);
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sunken);
+}
+
+.figureValue {
+  margin: var(--space-0);
+  color: var(--color-text-primary);
+  font: var(--type-numeric-kpi);
+  letter-spacing: var(--type-numeric-kpi-tracking);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.figureLabel {
+  margin: var(--space-0);
+  color: var(--color-text-secondary);
+  font: var(--type-body-sm);
+}
+
+/* Two-column layout for a page with a side card (stacks on a phone). */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.unread .rowTitle::before {
+  content: '';
+  display: inline-block;
+  inline-size: var(--size-status-dot);
+  block-size: var(--size-status-dot);
+  margin-inline-end: var(--space-2);
+  border-radius: var(--radius-full);
+  background-color: var(--color-status-info-solid);
+}
+
+/* Message thread bubbles. */
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.bubble {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0_5);
+  max-inline-size: min(100%, 52ch);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sunken);
+  color: var(--color-text-primary);
+  font: var(--type-body);
+  overflow-wrap: anywhere;
+}
+
+.bubble[data-from='CUSTOMER'] {
+  align-self: flex-end;
+  background-color: var(--color-status-brand-bg);
+  color: var(--color-status-brand-fg);
+}
+
+.bubbleMeta {
+  color: inherit;
+  font: var(--type-caption);
+  opacity: 0.8;
+}
+
+.bubbleText {
+  margin: var(--space-0);
+  white-space: pre-wrap;
+}
+
+/* The policy change summary: a short list of before / after figures. */
+.changeFigures {
+  display: grid;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+  gap: var(--space-2);
+}
+
+.coverageList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@media (width >= 900px) {
+  .split {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+.fieldset {
+  min-inline-size: 0;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  border: none;
+}

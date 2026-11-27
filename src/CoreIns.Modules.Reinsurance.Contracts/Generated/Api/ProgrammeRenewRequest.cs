@@ -4,31 +4,15 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Programme.renew request. PRD inputs: "programme data; period; decision"</summary>
+/// <summary>ri.Programme.renew request. Copies the programme to the next year with its layers; every contract it names is copied as a new Draft contract of the next year (same treaty, layers, clause and panel, period moved by one year) that goes through the contract approval on its own.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProgrammeRenewRequest
 {
-    /// <summary>PRD: "programme data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("programmeData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ProgrammeData { get; init; }
+    /// <summary>The programme to renew; its current version is copied</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("programmeId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiProgrammeId ProgrammeId { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
-
-    /// <summary>PRD: "decision"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Decision { get; init; }
+    /// <summary>Reason code (audit)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public string? Reason { get; init; }
 }

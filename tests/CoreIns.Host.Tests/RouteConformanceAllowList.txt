@@ -130,7 +130,6 @@ CONTRACT_NOT_SERVED GET /api/ri/v1/facs/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/ifrs17-links/query
 CONTRACT_NOT_SERVED GET /api/ri/v1/line-tables/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/security-rules/{}
-CONTRACT_NOT_SERVED GET /api/uw/v1/approval/history
 CONTRACT_NOT_SERVED GET /api/uw/v1/contingencies
 CONTRACT_NOT_SERVED GET /api/uw/v1/declines/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/disclosure-findings
@@ -139,9 +138,6 @@ CONTRACT_NOT_SERVED GET /api/uw/v1/external-reports
 CONTRACT_NOT_SERVED GET /api/uw/v1/external-reports/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/inspections/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/intakes/{}
-CONTRACT_NOT_SERVED GET /api/uw/v1/issues/explain
-CONTRACT_NOT_SERVED GET /api/uw/v1/issues/list-for-channel
-CONTRACT_NOT_SERVED GET /api/uw/v1/issues/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/refusal-registers/query
 CONTRACT_NOT_SERVED GET /api/uw/v1/renewal-directions/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/desktop/get
@@ -162,7 +158,6 @@ CONTRACT_NOT_SERVED PATCH /api/bil/v1/billing-accounts/{}
 CONTRACT_NOT_SERVED PATCH /api/clm/v1/services/{}
 CONTRACT_NOT_SERVED PATCH /api/pfc/v1/pogs/{}
 CONTRACT_NOT_SERVED PATCH /api/plt/v1/users/{}
-CONTRACT_NOT_SERVED PATCH /api/ri/v1/programmes/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/contingencies/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
 CONTRACT_NOT_SERVED PATCH /api/wrk/v1/activities/{}
@@ -179,9 +174,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/billing-preview/compute
 CONTRACT_NOT_SERVED POST /api/bil/v1/commission/dispute
 CONTRACT_NOT_SERVED POST /api/bil/v1/commission/run-payments
 CONTRACT_NOT_SERVED POST /api/bil/v1/commission/simulate
-CONTRACT_NOT_SERVED POST /api/bil/v1/disbursement-batches/approve-release
-CONTRACT_NOT_SERVED POST /api/bil/v1/disbursement-batches/prepare
-CONTRACT_NOT_SERVED POST /api/bil/v1/disbursement-batches/release
 CONTRACT_NOT_SERVED POST /api/bil/v1/down-payment/initiate
 CONTRACT_NOT_SERVED POST /api/bil/v1/dsar/erase
 CONTRACT_NOT_SERVED POST /api/bil/v1/dsar/export
@@ -579,9 +571,7 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/notices/draft
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/send
 CONTRACT_NOT_SERVED POST /api/ri/v1/participations/add
 CONTRACT_NOT_SERVED POST /api/ri/v1/participations/replace
-CONTRACT_NOT_SERVED POST /api/ri/v1/programmes
 CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/approve
-CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/renew
 CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/return
 CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/submit
 CONTRACT_NOT_SERVED POST /api/ri/v1/reconciliation/fin
@@ -629,7 +619,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/release
 CONTRACT_NOT_SERVED POST /api/uw/v1/refusal-registers/export
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/bulk-set
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/set
-CONTRACT_NOT_SERVED POST /api/uw/v1/rules/evaluate-batch
 CONTRACT_NOT_SERVED POST /api/uw/v1/valuation/compute
 CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/bulk-reassign
 CONTRACT_NOT_SERVED POST /api/wrk/v1/assignments/simulate

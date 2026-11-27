@@ -245,6 +245,8 @@ public abstract class PortalEngagementHost(PostgresFixture database) : IAsyncDis
         DocumentId = new DocumentId(id), DocumentNumber = "DOC-" + id.ToString("N")[..6], DocumentType = type, RequestNo = "REQ-" + id.ToString("N")[..6], Subject = "POL/Policy/x",
         RecipientPartyId = recipient, Language = "el", Status = status, Medium = "EMAIL", ArchiveId = Guid.NewGuid(), ContentHash = new string('a', 64),
         CreatedAt = "2026-01-02T10:00:00+00:00", Deliveries = [],
+        // The DOC document-type flag (BO-DOC-02): internal types are not customer-visible.
+        CustomerVisible = !type.Contains("INTERNAL", StringComparison.Ordinal), Hidden = false,
     };
 
     protected static string InvoiceIdOf(PolicyId policy, byte tag)

@@ -26,8 +26,8 @@
 }
 
 .hash {
+  font: var(--type-caption);
   font-family: var(--font-family-mono);
-  font-size: var(--type-caption-size, 0.75rem);
   color: var(--color-text-tertiary);
   overflow-wrap: anywhere;
 }
@@ -50,13 +50,13 @@
   background-color: var(--color-state-row-selected, var(--color-state-row-hover));
 }
 
-@media (max-width: 1023px) {
+@media (width <= 1023px) {
   .kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 479px) {
+@media (width <= 479px) {
   .kpis {
     grid-template-columns: minmax(0, 1fr);
   }

@@ -20,6 +20,11 @@ internal static class UnderwritingPermissions
     public const string Evaluate = "uw.Rules.evaluate";
     public const string BlockingStatus = "uw.Issue.blockingStatus";
     public const string List = "uw.Issue.list";
+    public const string EvaluateBatch = "uw.Rules.evaluateBatch";
+    public const string IssueGet = "uw.Issue.get";
+    public const string IssueExplain = "uw.Issue.explain";
+    public const string ListForChannel = "uw.Issue.listForChannel";
+    public const string ApprovalHistory = "uw.Approval.history";
     public const string Decide = "uw.Issue.decide";
     public const string ReferralList = "uw.Referral.list";
     public const string ReferralGet = "uw.Referral.get";
@@ -83,8 +88,27 @@ internal sealed class UnderwritingController : ControllerBase
     [Authorize(Policy = UnderwritingPermissions.List)]
     public async Task<IResult> ListAsync(
         [FromQuery] Guid? jobRef, [FromQuery] string? status, [FromQuery] string? cursor, [FromQuery] int? limit,
-        [FromServices] UnderwritingIssueQueries queries, CancellationToken cancellationToken)
+        [FromServices] UnderwritingIssueQueries queries, CancellationToken cancellationToken,
+        [FromQuery] string? issueType = null, [FromQuery] string? blockingPoint = null)
     {
+        BlockingPoint? point = null;
+        if (blockingPoint is not null)
+        {
+            point = blockingPoint switch
+            {
+                "PRE_QUOTE" => BlockingPoint.PreQuote,
+                "PRE_BIND" => BlockingPoint.PreBind,
+                "PRE_ISSUE" => BlockingPoint.PreIssue,
+                "NON_BLOCKING" => BlockingPoint.NonBlocking,
+                _ => null,
+            };
+            if (point is null)
+            {
+                return Problem(DomainError.Of(ModuleCode.UW, "VALIDATION", "blockingPoint must be PRE_QUOTE, PRE_BIND, PRE_ISSUE or NON_BLOCKING."), HttpContext);
+            }
+        }
+
+
         IssueStatusCode? statusCode = null;
         if (status is not null)
         {
@@ -96,7 +120,58 @@ internal sealed class UnderwritingController : ControllerBase
             statusCode = parsed;
         }
 
-        var result = await queries.ListAsync(jobRef, statusCode, cursor, limit, cancellationToken).ConfigureAwait(false);
+        var result = await queries.ListAsync(jobRef, statusCode, cursor, limit, cancellationToken, issueType, point).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Rules.evaluateBatch: many risks against one rule-set version, with no effect on jobs or issues (a command: Idempotency-Key required).</summary>
+    [HttpPost("rules/evaluate-batch")]
+    [Authorize(Policy = UnderwritingPermissions.EvaluateBatch)]
+    public Task<IResult> EvaluateBatchAsync(
+        [FromBody] RulesEvaluateBatchRequest request, [FromServices] ICommandHandler<EvaluateRulesBatch, RulesEvaluateBatchResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new EvaluateRulesBatch(request), cancellationToken);
+
+    /// <summary>uw.Issue.explain: why an issue was raised (rule, facts read, observed value, threshold).</summary>
+    [HttpGet("issues/explain")]
+    [Authorize(Policy = UnderwritingPermissions.IssueExplain)]
+    public async Task<IResult> ExplainAsync([FromQuery] Guid issueId, [FromServices] IssueReadQueries queries, CancellationToken cancellationToken)
+    {
+        var result = await queries.ExplainAsync(issueId, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Issue.listForChannel: the issues of a job with customer-safe wording (no rule ids or internals).</summary>
+    [HttpGet("issues/list-for-channel")]
+    [Authorize(Policy = UnderwritingPermissions.ListForChannel)]
+    public async Task<IResult> ListForChannelAsync(
+        [FromQuery] Guid? jobRef, [FromQuery] string? cursor, [FromQuery] int? limit, [FromServices] IssueReadQueries queries, CancellationToken cancellationToken)
+    {
+        if (jobRef is null || jobRef == Guid.Empty)
+        {
+            return Problem(DomainError.Of(ModuleCode.UW, "VALIDATION", "jobRef is required."), HttpContext);
+        }
+
+        var result = await queries.ListForChannelAsync(jobRef.Value, cursor, limit, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Issue.get: one issue with why it was raised.</summary>
+    [HttpGet("issues/{id:guid}")]
+    [Authorize(Policy = UnderwritingPermissions.IssueGet)]
+    public async Task<IResult> GetIssueAsync(Guid id, [FromServices] IssueReadQueries queries, CancellationToken cancellationToken)
+    {
+        var result = await queries.GetAsync(id, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Approval.history: decisions and approval invalidations per job and/or issue key.</summary>
+    [HttpGet("approval/history")]
+    [Authorize(Policy = UnderwritingPermissions.ApprovalHistory)]
+    public async Task<IResult> ApprovalHistoryAsync(
+        [FromQuery] Guid? jobRef, [FromQuery] string? issueKey, [FromQuery] string? cursor, [FromQuery] int? limit,
+        [FromServices] IssueReadQueries queries, CancellationToken cancellationToken)
+    {
+        var result = await queries.HistoryAsync(jobRef, issueKey, cursor, limit, cancellationToken).ConfigureAwait(false);
         return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
     }
 

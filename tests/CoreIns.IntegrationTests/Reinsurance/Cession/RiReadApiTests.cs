@@ -120,15 +120,28 @@ public sealed class RiReadApiTests(PostgresFixture database) : IClassFixture<Pos
         paged["nextCursor"].ShouldNotBeNull();
         (await slice.SendAsync(HttpMethod.Get, "/api/ri/v1/participations?cursor=zzz")).Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-        var (listResponse, programmes) = await slice.SendAsync(HttpMethod.Get, "/api/ri/v1/programmes?limit=50");
-        listResponse.StatusCode.ShouldBe(HttpStatusCode.OK, programmes?.ToJsonString());
-        var programme = programmes!["items"]!.AsArray().Single(p => p!["programmes"]!["contractYear"]!.GetValue<int>() == 2026);
-        programme!["programmes"]!["contracts"]!.AsArray().Any(c => c!["contractId"]!.GetValue<string>() == contractId).ShouldBeTrue();
+        var (created, createdBody) = await slice.SendAsync(
+            HttpMethod.Post, "/api/ri/v1/programmes",
+            new
+            {
+                code = "RD-" + Guid.NewGuid().ToString("N")[..8].ToUpperInvariant(),
+                name = "Synthetic read programme",
+                lineCode = RegistrySlice.NewProduct(),
+                period = new { from = "2026-01-01", to = "2027-01-01" },
+                layers = new[] { new { layerNo = 1, attachment = RegistrySlice.Money("500000.00"), limit = RegistrySlice.Money("500000.00"), contractId } },
+            });
+        created.StatusCode.ShouldBe(HttpStatusCode.Created, createdBody?.ToJsonString());
+        var programmeId = createdBody!["programme"]!["programmeId"]!.GetValue<string>();
 
-        var (getResponse, one) = await slice.SendAsync(HttpMethod.Get, "/api/ri/v1/programmes/2026");
+        var (listResponse, programmes) = await slice.SendAsync(HttpMethod.Get, "/api/ri/v1/programmes?limit=200");
+        listResponse.StatusCode.ShouldBe(HttpStatusCode.OK, programmes?.ToJsonString());
+        var programme = programmes!["items"]!.AsArray().Single(p => p!["programme"]!["programmeId"]!.GetValue<string>() == programmeId);
+        programme!["programme"]!["contracts"]!.AsArray().Any(c => c!["contractId"]!.GetValue<string>() == contractId).ShouldBeTrue();
+
+        var (getResponse, one) = await slice.SendAsync(HttpMethod.Get, $"/api/ri/v1/programmes/{programmeId}");
         getResponse.StatusCode.ShouldBe(HttpStatusCode.OK, one?.ToJsonString());
-        one!["programmes"]!["programmeId"]!.GetValue<string>().ShouldBe("2026");
-        (await slice.SendAsync(HttpMethod.Get, "/api/ri/v1/programmes/1901")).Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        one!["programme"]!["programmeId"]!.GetValue<string>().ShouldBe(programmeId);
+        (await slice.SendAsync(HttpMethod.Get, $"/api/ri/v1/programmes/{Guid.NewGuid()}")).Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         (await slice.SendAsync(HttpMethod.Get, "/api/ri/v1/programmes/abc")).Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         (await slice.SendAsync(HttpMethod.Get, "/api/ri/v1/programmes?limit=0")).Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         (await slice.SendAsync(HttpMethod.Get, "/api/ri/v1/programmes", roles: "Staff.Underwriter")).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
