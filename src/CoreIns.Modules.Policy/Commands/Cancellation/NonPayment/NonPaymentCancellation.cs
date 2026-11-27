@@ -103,7 +103,8 @@ internal sealed partial class PartyVulnerabilityCheck(Dependency<IPartyVulnerabi
 /// (source NonPayment, reason NON_PAYMENT, pro-rata refund path of E2E-03) and requests the cancellation notice.
 /// </summary>
 internal sealed class NonPaymentCancellationService(
-    PolicyDbContext db, CancelPolicyHandler cancel, IClock clock, Dependency<IDocumentRequestService> documents, IOptions<PolicyOptions> options)
+    PolicyDbContext db, CancelPolicyHandler cancel, IClock clock, Dependency<IDocumentRequestService> documents, IOptions<PolicyOptions> options,
+    PartyDisplayName partyNames)
 {
     public const string ReasonCode = "NON_PAYMENT";
 
@@ -152,8 +153,8 @@ internal sealed class NonPaymentCancellationService(
                 "el",
                 new Dictionary<string, string>(StringComparer.Ordinal)
                 {
-                    // TODO(hardening): the addressee's name belongs to PTY; POL holds none, so the letter greets "Sir/Madam".
-                    ["customerName"] = "Κύριε/Κυρία",
+                    // The addressee's name is read from PTY (falls back to the neutral greeting when PTY cannot supply it).
+                    ["customerName"] = await partyNames.ResolveAsync(policy.PolicyholderPartyId, cancellationToken).ConfigureAwait(false),
                     ["policyNo"] = policy.PolicyNumber.ToString(),
                     ["effectiveDate"] = effective.ToBusinessDate(options.Value.Zone).ToString(),
                 }),
@@ -169,7 +170,7 @@ internal sealed class NonPaymentCancellationService(
 /// </summary>
 internal sealed partial class CancellationForNonPaymentRequestedHandler(
     PolicyDbContext db, ILegalEntityDirectory legalEntities, IClock clock, IOptions<PolicyOptions> options,
-    IVulnerabilityCheck vulnerability, NonPaymentCancellationService service, ILogger<CancellationForNonPaymentRequestedHandler> logger)
+    IVulnerabilityCheck vulnerability, NonPaymentCancellationService service, PsrWorkTasks psrTasks, ILogger<CancellationForNonPaymentRequestedHandler> logger)
     : IEventHandler<CancellationForNonPaymentRequestedV1>
 {
     public const string Name = "POL.CancellationForNonPaymentRequested.Cancel";
@@ -217,6 +218,10 @@ internal sealed partial class CancellationForNonPaymentRequestedHandler(
                 Reason = reason, RaisedAt = now,
             });
             await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            // The review task in the Work PSR queue (the exception row above stays the record the POL PSR decision endpoints act on).
+            await psrTasks.RaiseAsync(
+                "WRK-POL-NONPAY-PSR-EXCEPTION", new ObjectRef(ModuleCode.POL, "Policy", row.PolicyId.Value.ToString("D")),
+                $"{reason}:{row.NonPaymentId:D}", cancellationToken).ConfigureAwait(false);
             return;
         }
 

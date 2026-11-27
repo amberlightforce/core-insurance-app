@@ -68,3 +68,6 @@ export const productRoles = [
   'Platform.ReleaseManager',
   'Platform.DesignAuthority',
 ] as const;
+
+/** Roles that work the finance operations screens: trial balance, manual journals, intake exceptions, period close, earning (fin.* grants). */
+export const financeRoles = ['Staff.Finance', 'Platform.Admin'] as const;

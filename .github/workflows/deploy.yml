@@ -56,6 +56,14 @@ jobs:
       STAMP_LEGAL_ENTITY: ${{ vars.STAMP_LEGAL_ENTITY }}
       IMMUTABILITY_RETENTION_DAYS: ${{ vars.IMMUTABILITY_RETENTION_DAYS }}
     steps:
+      # Production deploys come from main only. The required-reviewer gate itself is the `prod` environment's protection
+      # rule (a GitHub setting; see docs/runbooks/deploy-rollback.md, "Prod approval gate"), which holds this job until approved.
+      - name: Guard - prod only from main
+        if: ${{ inputs.environment == 'prod' && github.ref != 'refs/heads/main' }}
+        run: |
+          echo "::error::prod deploys must run from main (got $GITHUB_REF)"
+          exit 1
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
@@ -105,9 +113,10 @@ jobs:
             --parameters "infra/azure/${{ inputs.environment }}.bicepparam" \
             --parameters deployJobs=true deployApps=true imageTag="$IMAGE_TAG"
 
-      - name: Smoke test
+      - name: Smoke test (liveness, readiness depth, anonymous 401s, optional authenticated reads)
         run: |
           FQDN=$(az containerapp show --name api --resource-group "$RESOURCE_GROUP" --query properties.configuration.ingress.fqdn -o tsv)
-          curl --fail --silent --show-error "https://$FQDN/health/live"
-          # API calls must get 401 from the application, never a sign-in redirect (INFRASTRUCTURE §6.1).
-          test "$(curl --silent --output /dev/null --write-out '%{http_code}' "https://$FQDN/api/plt/v1/health")" = "401"
+          # Best effort: a bearer token for the staff app registration enables the authenticated read checks.
+          SMOKE_TOKEN=$(az account get-access-token --resource "api://${ENTRA_CLIENT_ID}" --query accessToken -o tsv 2>/dev/null || true)
+          export SMOKE_TOKEN
+          scripts/smoke.sh "$FQDN"

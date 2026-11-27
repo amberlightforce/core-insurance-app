@@ -34,4 +34,6 @@ COPY --from=web /web/dist ./wwwroot
 # The base image's built-in unprivileged user (UID 1654).
 USER $APP_UID
 EXPOSE 8080
+# NX-OT-13: the image has no curl/wget, so probe /health/live with bash's /dev/tcp (exit 0 only on an HTTP 200).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3     CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /health/live HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3 && head -n1 <&3 | grep -q ' 200'"]
 ENTRYPOINT ["dotnet", "CoreIns.Host.dll"]

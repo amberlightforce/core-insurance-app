@@ -115,8 +115,8 @@ internal sealed class NonpayService(
                 "el",
                 new Dictionary<string, string>(StringComparer.Ordinal)
                 {
-                    // TODO(hardening): the addressee's name belongs to PTY; BIL holds none, so the letter greets "Sir/Madam" until pty.Party is read here.
-                    ["customerName"] = "Κύριε/Κυρία",
+                    // The addressee's name is read from PTY (falls back to the neutral greeting when PTY cannot supply it).
+                    ["customerName"] = await new PartyDisplayName(services).ResolveAsync(account.PayerPartyId, cancellationToken).ConfigureAwait(false),
                     ["policyNo"] = plan.PolicyNumber,
                     ["amountDue"] = $"{arrears.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)} {account.Currency}",
                     ["dueDate"] = (await db.Invoices.AsNoTracking().Where(i => i.TermId == termId && i.Total > 0m && i.DueDate <= cutoff).MinAsync(i => i.DueDate, cancellationToken).ConfigureAwait(false)).ToString(),
@@ -129,6 +129,11 @@ internal sealed class NonpayService(
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return row;
     }
+
+    /// <summary>The PSR review task in the Work queue for a delinquency case (the BIL exception record is written by <c>billing.RaiseAsync</c> as before).</summary>
+    private Task RaisePsrAsync(string pattern, DelinquencyCaseRow row, string reason, CancellationToken cancellationToken) =>
+        new PsrWorkTasks(services, services.GetRequiredService<Microsoft.Extensions.Logging.ILogger<PsrWorkTasks>>())
+            .RaiseAsync(pattern, new ObjectRef(ModuleCode.BIL, Nonpay.ObjectType, row.CaseId.ToString("D")), $"{reason}:{row.CaseId:D}", cancellationToken);
 
     /// <summary>Deterministic per-case idempotency key of the notice document request (case id + template).</summary>
     internal static IdempotencyKey NoticeKey(Guid caseId)
@@ -248,6 +253,7 @@ internal sealed class NonpayService(
         await billing.RaiseAsync(
             Nonpay.NoticeReturnedActivity, row.CaseId.ToString("D"), "NOTICE-RETURNED",
             $"The non-payment notice of delinquency case {row.CaseId} was not delivered ({reason}); no clock was started (D-SL6-03).", cancellationToken).ConfigureAwait(false);
+        await RaisePsrAsync(Nonpay.NoticeReturnedActivity, row, "NOTICE-RETURNED", cancellationToken).ConfigureAwait(false);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
@@ -288,6 +294,7 @@ internal sealed class NonpayService(
             await billing.RaiseAsync(
                 Nonpay.HoldActivity, row.CaseId.ToString("D"), "ELAPSED-ON-HOLD",
                 $"The non-payment waiting period of case {row.CaseId} elapsed while the case is {row.State}; no cancellation was requested.", cancellationToken).ConfigureAwait(false);
+            await RaisePsrAsync(Nonpay.HoldActivity, row, "ELAPSED-ON-HOLD", cancellationToken).ConfigureAwait(false);
             await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return;
         }
@@ -385,6 +392,7 @@ internal sealed class NonpayService(
         await billing.RaiseAsync(
             Nonpay.HoldActivity, current.CaseId.ToString("D"), "HOLD",
             $"Delinquency case {current.CaseId} is on hold ({current.HoldReason}); cancellation for non-payment is stopped until a person decides (D-SL6-04).", cancellationToken).ConfigureAwait(false);
+        await RaisePsrAsync(Nonpay.HoldActivity, current, "HOLD", cancellationToken).ConfigureAwait(false);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return current;
     }
