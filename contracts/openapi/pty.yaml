@@ -755,6 +755,10 @@ paths:
       - code: PTY-ERR-ROLE-DATA-MISSING
         note: structured
         status: 422
+      - code: PTY-ERR-ROLE-DUPLICATE
+        status: 409
+      - code: PTY-ERR-ROLE-TYPE
+        status: 422
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -899,6 +903,18 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      - name: partyId
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: roleType
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
       responses:
         '200':
           description: Success
@@ -932,7 +948,7 @@ paths:
       x-wave: W2
       x-work-packages:
       - W2-PTY-02
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
@@ -944,6 +960,8 @@ paths:
       x-permission: pty.Relationship.add
       x-error-codes:
       - code: PTY-ERR-OVERLAP
+        status: 422
+      - code: PTY-ERR-RELATIONSHIP-CYCLE
         status: 422
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -995,7 +1013,7 @@ paths:
       x-wave: W2
       x-work-packages:
       - W2-PTY-02
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: command
@@ -1058,7 +1076,7 @@ paths:
       x-wave: W2
       x-work-packages:
       - W2-PTY-02
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 3
       x-operation-kind: query
@@ -1078,6 +1096,18 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      - name: partyId
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: relationshipType
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
       responses:
         '200':
           description: Success
@@ -5463,57 +5493,84 @@ components:
       - suggestions
     PartyRoleAssignRequest:
       type: object
-      description: 'pty.PartyRole.assign request. PRD inputs: "party, role, context, period"'
+      description: 'pty.PartyRole.assign request (BO-PTY-03, REQ-PTY-002). Gives a party a role, optionally within a context object (a policy, claim, account...). The same party, role type and context cannot hold two overlapping periods (PTY-ERR-ROLE-DUPLICATE). A VENDOR role needs the party to have a verified AFM (vendor master, REQ-PTY-096).'
       properties:
-        party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
-        role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
-        context:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "context"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        roleType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Role catalogue code, for example POLICYHOLDER, INSURED, BENEFICIARY, CLAIMANT, PAYEE, VENDOR
+        contextRef:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/ObjectRef
+          - type: 'null'
+          description: The business object the role is held in; null for a party-level role
+        validFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: First day of the role; default today
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Day the role ends (exclusive); null for open-ended
+      required:
+      - partyId
+      - roleType
+    PartyRoleView:
+      type: object
+      description: 'A party role as known at the asked time.'
+      properties:
+        roleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        roleType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        contextRef:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/ObjectRef
+          - type: 'null'
+        validPeriod:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+      required:
+      - roleId
+      - partyId
+      - roleType
+      - contextRef
+      - validPeriod
     PartyRoleAssignResponse:
       type: object
-      description: 'pty.PartyRole.assign result. PRD outputs: "role"'
+      description: 'pty.PartyRole.assign result.'
       properties:
         role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
+          $ref: '#/components/schemas/PartyRoleView'
+      required:
+      - role
     PartyRoleEndRequest:
       type: object
-      description: 'pty.PartyRole.end request. PRD inputs: "party, role, context, period"'
+      description: 'pty.PartyRole.end request (BO-PTY-03): end-dates a role (bitemporal, the earlier record stays in the history).'
       properties:
-        party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
-        role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
-        context:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "context"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+        roleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Day the role ends (exclusive); default today. Must be after the role start.
+      required:
+      - roleId
     PartyRoleEndResponse:
       type: object
-      description: 'pty.PartyRole.end result. PRD outputs: "role"'
+      description: 'pty.PartyRole.end result.'
       properties:
         role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
+          $ref: '#/components/schemas/PartyRoleView'
+      required:
+      - role
     PartyRoleQueryItem:
-      type: object
-      description: 'pty.PartyRole.query result. PRD outputs: "role"'
-      properties:
-        role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
+      $ref: '#/components/schemas/PartyRoleView'
     PartyRoleQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -5526,42 +5583,78 @@ components:
       description: Page of pty.PartyRole.query results (cursor pagination, contract §3.5.5)
     RelationshipAddRequest:
       type: object
-      description: 'pty.Relationship.add request. PRD inputs: "parties, type, period"'
+      description: 'pty.Relationship.add request (BO-PTY-03, REQ-PTY-104). A directed link from one party to another (from SPOUSE_OF to, PARENT_OF, SUBSIDIARY_OF...). Hierarchical types refuse a cycle (PTY-ERR-RELATIONSHIP-CYCLE); the same pair and type cannot overlap in time (PTY-ERR-OVERLAP).'
       properties:
-        parties:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "parties"'
-        type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+        fromPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        toPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        relationshipType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        validFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: First day of the relationship; default today
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+      required:
+      - fromPartyId
+      - toPartyId
+      - relationshipType
+    RelationshipView:
+      type: object
+      description: 'A party relationship as known at the asked time.'
+      properties:
+        relationshipId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        fromPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        toPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        relationshipType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        validPeriod:
+          $ref: ../events/common.schema.json#/$defs/DatePeriod
+      required:
+      - relationshipId
+      - fromPartyId
+      - toPartyId
+      - relationshipType
+      - validPeriod
     RelationshipAddResponse:
       type: object
-      description: 'pty.Relationship.add result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Relationship.add result.'
+      properties:
+        relationship:
+          $ref: '#/components/schemas/RelationshipView'
+      required:
+      - relationship
     RelationshipEndRequest:
       type: object
-      description: 'pty.Relationship.end request. PRD inputs: "parties, type, period"'
+      description: 'pty.Relationship.end request (BO-PTY-03): end-dates a relationship.'
       properties:
-        parties:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "parties"'
-        type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+        relationshipId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Day the relationship ends (exclusive); default today
+      required:
+      - relationshipId
     RelationshipEndResponse:
       type: object
-      description: 'pty.Relationship.end result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Relationship.end result.'
+      properties:
+        relationship:
+          $ref: '#/components/schemas/RelationshipView'
+      required:
+      - relationship
     RelationshipQueryItem:
-      type: object
-      description: 'pty.Relationship.query result. PRD outputs: "—"'
-      x-status: minimal
+      $ref: '#/components/schemas/RelationshipView'
     RelationshipQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
