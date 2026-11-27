@@ -87,6 +87,10 @@ internal static class MigrationErrors
             .Describe("Υπάρχει μόνο ένας κύριος ανά ασφαλιστήριο και ημερομηνία.", "There is exactly one master per policy and date."),
         ErrorDefinition.For(ModuleCode.MIG, ReversalBlocked, 422, "Η αναίρεση μπλοκαρίστηκε", "Reversal blocked")
             .Describe("Το αντικείμενο έχει δραστηριότητα μετά τη μετάπτωση.", "The object has post-migration activity."),
+        ErrorDefinition.For(ModuleCode.MIG, "SIGNOFF-SOD", 403, "Διαχωρισμός καθηκόντων", "Separation of duties")
+            .Describe("Όποιος εκτέλεσε τη συμφωνία ή φόρτωσε τα σύνολα ελέγχου δεν μπορεί να υπογράψει.", "The person who ran the reconciliation or loaded its control totals cannot sign off, and one person signs for one signatory only."),
+        ErrorDefinition.For(ModuleCode.MIG, "SIGNOFF-STALE", 409, "Η υπογραφή δεν καλύπτει πλέον τη συμφωνία", "The sign-off no longer covers the reconciliation")
+            .Describe("Υπάρχει νεότερη εκτέλεση ή τα αποτελέσματα άλλαξαν· ζητήστε νέα υπογραφή.", "A newer run exists or the results changed; request sign-off again."),
         ErrorDefinition.For(ModuleCode.MIG, NotReversible, 422, "Η δέσμη δεν αναιρείται", "The batch is not reversible")
             .Describe("Μονάδα της δέσμης δεν διαθέτει αναιρέτη.", "A module of the batch has no reverser."),
     ];

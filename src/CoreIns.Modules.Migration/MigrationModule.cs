@@ -7,6 +7,7 @@ using CoreIns.Modules.Migration.Domain;
 using CoreIns.Modules.Migration.Persistence;
 using CoreIns.Modules.Migration.Services;
 using CoreIns.Modules.Migration.Services.Reconciliation;
+using CoreIns.Modules.Migration.Services.SignOff;
 using CoreIns.Platform;
 using CoreIns.Platform.Approvals;
 using CoreIns.Platform.Commands;
@@ -46,6 +47,7 @@ public static class MigrationModule
         services.AddSingleton<IDsarParticipant, MigrationDsarParticipant>();
         services.AddMigrationAuthorityTypes();
         services.AddOwnerDecidedApprovalType(BatchApproval.Type);
+        services.AddOwnerDecidedApprovalType(SignOffApproval.Type);
         services.AddScoped<BatchRunner>();
         services.AddOptions<MigrationBatchOptions>().Bind(configuration.GetSection(MigrationBatchOptions.Section));
         services.AddScoped<BatchProcessor>();
@@ -80,6 +82,12 @@ public static class MigrationModule
         services.AddScoped<ReconciliationService>();
         services.AddCommand<LoadControlTotals, ReconLoadView, LoadControlTotalsHandler>(CommandDescriptor.For("mig.Recon.loadControlTotals"));
         services.AddCommand<RunReconciliation, ReconReportView, RunReconciliationHandler>(CommandDescriptor.For("mig.Recon.run"));
+
+        services.AddScoped<SignOffService>();
+        services.AddCommand<WaiveVariances, SignOffWaiveView, WaiveVariancesHandler>(CommandDescriptor.For("mig.Signoff.waive"));
+        services.AddCommand<RequestSignOff, SignOffStatusView, RequestSignOffHandler>(CommandDescriptor.For("mig.Signoff.request"));
+        services.AddCommand<ApproveSignOff, SignOffStatusView, SignOffDecisionHandler>(CommandDescriptor.For("mig.Signoff.approve"));
+        services.AddCommand<RejectSignOff, SignOffStatusView, SignOffDecisionHandler>(CommandDescriptor.For("mig.Signoff.reject"));
 
         services.AddScoped<IMigrationXrefService, MigrationXrefService>();
         services.AddScoped<IMigrationRoutingService, MigrationRoutingService>();
