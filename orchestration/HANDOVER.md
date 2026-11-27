@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # HANDOVER — Greek P&C Core Insurance
 
 > **Verified takeover checkpoint — 2026-10-09:** Eight recovered/follow-up PRs (#28/#34/#37/#39/#43/#44/#45/#46) are merged after all required checks. Combined candidate servicing and RI registry acceptance passes all 10 tests. Open RI #47/#48, product fallback #49 and platform #50 remain separate review/dependency gates. The RI recovery API and pack activation/rollback backends are unfinished. See [CODEX-TAKEOVER.md](CODEX-TAKEOVER.md) for current evidence and next steps. Older paragraphs below are historical.

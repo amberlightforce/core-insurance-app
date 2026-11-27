@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # Codex takeover — 9 October 2026
 
 The user authorized subagents to assess and recover Claude's interrupted work. This is the current checkpoint; older phase tables in STATUS/HANDOVER remain historical.
