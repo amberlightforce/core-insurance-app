@@ -108,7 +108,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
 CONTRACT_NOT_SERVED GET /api/pol/v1/jobs
 CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
-CONTRACT_NOT_SERVED GET /api/pty/v1/producer-of-records/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/screening/case-get
 CONTRACT_NOT_SERVED GET /api/rat/v1/breakdowns/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/change-explanations/get
@@ -210,9 +209,6 @@ CONTRACT_NOT_SERVED POST /api/chn/v1/api-products
 CONTRACT_NOT_SERVED POST /api/chn/v1/api-products/deprecate
 CONTRACT_NOT_SERVED POST /api/chn/v1/api-products/publish
 CONTRACT_NOT_SERVED POST /api/chn/v1/api-products/retire
-CONTRACT_NOT_SERVED POST /api/chn/v1/changes/confirm
-CONTRACT_NOT_SERVED POST /api/chn/v1/changes/preview
-CONTRACT_NOT_SERVED POST /api/chn/v1/changes/refer
 CONTRACT_NOT_SERVED POST /api/chn/v1/claims
 CONTRACT_NOT_SERVED POST /api/chn/v1/clients/approve
 CONTRACT_NOT_SERVED POST /api/chn/v1/clients/request
@@ -330,14 +326,9 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/scr-results/accept
 CONTRACT_NOT_SERVED POST /api/dat/v1/scr-results/submit
 CONTRACT_NOT_SERVED POST /api/dat/v1/synthetic/generate
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/delete-draft
-CONTRACT_NOT_SERVED POST /api/doc/v1/documents/hide
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/import
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/render-as-of
 CONTRACT_NOT_SERVED POST /api/doc/v1/documents/request-batch
-CONTRACT_NOT_SERVED POST /api/doc/v1/documents/resend
-CONTRACT_NOT_SERVED POST /api/doc/v1/documents/supersede
-CONTRACT_NOT_SERVED POST /api/doc/v1/documents/unhide
-CONTRACT_NOT_SERVED POST /api/doc/v1/documents/withdraw
 CONTRACT_NOT_SERVED POST /api/doc/v1/form-patterns/validate-references
 CONTRACT_NOT_SERVED POST /api/doc/v1/forms/add-manual
 CONTRACT_NOT_SERVED POST /api/doc/v1/forms/infer
@@ -514,9 +505,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/start
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/unmerge
-CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/bulk-transfer
-CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/cancel
-CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/change
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/bulk
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/case-decide
 CONTRACT_NOT_SERVED POST /api/rat/v1/bonus-malus/transition

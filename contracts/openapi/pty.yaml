@@ -3607,7 +3607,9 @@ paths:
       - POL
       x-permission: pty.ProducerOfRecord.get
       x-error-codes:
-      - code: PTY-ERR-MANDATE-MISSING
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-VALIDATION
         status: 422
       x-source:
       - PRD-01 §9.1 l.1656
@@ -3617,9 +3619,15 @@ paths:
       - name: id
         in: path
         required: true
-        description: Identifier of the ProducerOfRecord
+        description: The policy id
         schema:
           type: string
+      - name: date
+        in: query
+        required: false
+        description: Business date to resolve the current producer for; today when omitted
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
       responses:
         '200':
           description: Success
@@ -3669,8 +3677,18 @@ paths:
       - ui
       x-permission: pty.ProducerOfRecord.change
       x-error-codes:
-      - code: PTY-ERR-MANDATE-MISSING
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-POR-CODE-INVALID
         status: 422
+      - code: PTY-ERR-POR-LETTER-REQUIRED
+        status: 422
+      - code: PTY-ERR-BACKDATE
+        status: 422
+      - code: PTY-ERR-VALIDATION
+        status: 422
+      - code: PTY-ERR-STATE
+        status: 409
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -3738,7 +3756,7 @@ paths:
       - CHN
       x-permission: pty.ProducerOfRecord.bulkTransfer
       x-error-codes:
-      - code: PTY-ERR-MANDATE-MISSING
+      - code: PTY-ERR-VALIDATION
         status: 422
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -3805,8 +3823,10 @@ paths:
       - ui
       x-permission: pty.ProducerOfRecord.cancel
       x-error-codes:
-      - code: PTY-ERR-MANDATE-MISSING
-        status: 422
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-STATE
+        status: 409
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -6992,73 +7012,299 @@ components:
       - unchanged
       - unmatchedRegisterNumbers
       - rejectedRows
+    ProducerOfRecordEntry:
+      type: object
+      description: 'One producer-of-record segment of a policy (BO-PTY-09, REQ-PTY-218): the producer code responsible from validFrom until validTo (open end = still responsible). Append-only: a change supersedes rows (status SUPERSEDED) and never rewrites them.'
+      properties:
+        porId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyTermId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The term in whose context the change was made
+        intermediaryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        producerCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        validFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: First day the code is no longer responsible; null = open ended
+        reason:
+          type: string
+          enum:
+          - BROKER_OF_RECORD_LETTER
+          - INTERMEDIARY_LEFT
+          - CUSTOMER_REQUEST
+          - PORTFOLIO_TRANSFER
+          - CORRECTION
+          - OTHER
+        note:
+          oneOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        commissionConsequence:
+          type: string
+          enum:
+          - NEW_PRODUCER_FROM_DATE
+          - OLD_PRODUCER_KEEPS_EARNED
+          - OLD_PRODUCER_KEEPS_ALL
+          description: Which producer earns the commission on the term from the effective date
+        splitShare:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Decimal
+          - type: 'null'
+          description: Percent (above 0, at most 100) of the commission the new producer earns when it is shared with the previous one
+        letterReference:
+          oneOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+          description: Broker-of-record letter reference; required when the responsible intermediary changes
+        transferId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Set when the row came from a bulk transfer
+        status:
+          type: string
+          enum:
+          - CURRENT
+          - SUPERSEDED
+          description: SUPERSEDED rows are history (a later change or a cancellation replaced them)
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordedBy:
+          type: string
+      required:
+      - porId
+      - policyId
+      - policyTermId
+      - intermediaryId
+      - producerCode
+      - validFrom
+      - reason
+      - commissionConsequence
+      - status
+      - recordedAt
+      - recordedBy
     ProducerOfRecordGetResponse:
       type: object
-      description: 'pty.ProducerOfRecord.get result. PRD outputs: "PoR"'
+      description: 'pty.ProducerOfRecord.get result (BO-PTY-09): the producer of record of a policy on a date and the whole history, oldest first'
       properties:
-        poR:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "PoR"'
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        current:
+          oneOf:
+          - $ref: '#/components/schemas/ProducerOfRecordEntry'
+          - type: 'null'
+          description: The segment responsible on the date; null when no change was ever recorded (the term's own producer code applies)
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProducerOfRecordEntry'
+      required:
+      - policyId
+      - date
+      - history
     ProducerOfRecordChangeRequest:
       type: object
-      description: 'pty.ProducerOfRecord.change request. PRD inputs: "term, date / change"'
+      description: 'pty.ProducerOfRecord.change request (BO-PTY-09, REQ-PTY-218): change the producer of record of a policy term mid-term without a policy transaction. The new code must be active, its intermediary not suspended or terminated, and the product appointed. A change of intermediary needs the broker-of-record letter reference. The effective date must be inside the term and after the commission settled date. Supports dry-run.'
       properties:
-        term:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
-        change:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change"'
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        producerCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        effectiveDate:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Required unless atRenewal is true
+        atRenewal:
+          type: boolean
+          description: true = the change starts on the first day after the term (the renewal); the effective date is then ignored
+        reason:
+          type: string
+          enum:
+          - BROKER_OF_RECORD_LETTER
+          - INTERMEDIARY_LEFT
+          - CUSTOMER_REQUEST
+          - PORTFOLIO_TRANSFER
+          - CORRECTION
+          - OTHER
+        note:
+          oneOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        commissionConsequence:
+          type: string
+          enum:
+          - NEW_PRODUCER_FROM_DATE
+          - OLD_PRODUCER_KEEPS_EARNED
+          - OLD_PRODUCER_KEEPS_ALL
+        splitShare:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Decimal
+          - type: 'null'
+        letterReference:
+          oneOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+      required:
+      - termId
+      - producerCode
+      - reason
+      - commissionConsequence
     ProducerOfRecordChangeResponse:
       type: object
-      description: 'pty.ProducerOfRecord.change result. PRD outputs: "PoR"'
+      description: 'pty.ProducerOfRecord.change result'
       properties:
-        poR:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "PoR"'
+        entry:
+          $ref: '#/components/schemas/ProducerOfRecordEntry'
+        previousProducerCode:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+      required:
+      - entry
+    ProducerOfRecordBulkTransferItem:
+      type: object
+      description: One policy term of a bulk transfer
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - termId
     ProducerOfRecordBulkTransferRequest:
       type: object
-      description: 'pty.ProducerOfRecord.bulkTransfer request. PRD inputs: "term, date / change"'
+      description: 'pty.ProducerOfRecord.bulkTransfer request (BO-PTY-09): move the given policy terms to one producer code with the same rules as change, one result per term (a refused term does not stop the others). At most 500 terms. Supports dry-run.'
       properties:
-        term:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
-        change:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change"'
+        terms:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/ProducerOfRecordBulkTransferItem'
+        producerCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        effectiveDate:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+        atRenewal:
+          type: boolean
+        reason:
+          type: string
+          enum:
+          - BROKER_OF_RECORD_LETTER
+          - INTERMEDIARY_LEFT
+          - CUSTOMER_REQUEST
+          - PORTFOLIO_TRANSFER
+          - CORRECTION
+          - OTHER
+        note:
+          oneOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        commissionConsequence:
+          type: string
+          enum:
+          - NEW_PRODUCER_FROM_DATE
+          - OLD_PRODUCER_KEEPS_EARNED
+          - OLD_PRODUCER_KEEPS_ALL
+        letterReference:
+          oneOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+      required:
+      - terms
+      - producerCode
+      - reason
+      - commissionConsequence
+    ProducerOfRecordBulkTransferResult:
+      type: object
+      description: Outcome of one term in a bulk transfer
+      properties:
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        outcome:
+          type: string
+          enum:
+          - TRANSFERRED
+          - REFUSED
+        errorCode:
+          oneOf:
+          - type: string
+            maxLength: 100
+          - type: 'null'
+        message:
+          oneOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        entry:
+          oneOf:
+          - $ref: '#/components/schemas/ProducerOfRecordEntry'
+          - type: 'null'
+      required:
+      - termId
+      - outcome
     ProducerOfRecordBulkTransferResponse:
       type: object
-      description: 'pty.ProducerOfRecord.bulkTransfer result. PRD outputs: "PoR"'
+      description: 'pty.ProducerOfRecord.bulkTransfer result: per-term outcome'
       properties:
-        poR:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "PoR"'
+        transferId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        transferred:
+          type: integer
+        refused:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProducerOfRecordBulkTransferResult'
+      required:
+      - transferId
+      - transferred
+      - refused
+      - results
     ProducerOfRecordCancelRequest:
       type: object
-      description: 'pty.ProducerOfRecord.cancel request. PRD inputs: "term, date / change"'
+      description: 'pty.ProducerOfRecord.cancel request (BO-PTY-09): withdraw a change that has not taken effect yet (validFrom after today); the previous producer carries on. A change already in force cannot be cancelled: change it again.'
       properties:
-        term:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
-        change:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change"'
+        porId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - porId
+      - reason
     ProducerOfRecordCancelResponse:
       type: object
-      description: 'pty.ProducerOfRecord.cancel result. PRD outputs: "PoR"'
+      description: 'pty.ProducerOfRecord.cancel result: the policy history after the cancellation'
       properties:
-        poR:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "PoR"'
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProducerOfRecordEntry'
+      required:
+      - policyId
+      - history
     CommissionAgreementResolveRequest:
       type: object
       description: 'pty.CommissionAgreement.resolve request. PRD inputs: "as named"'

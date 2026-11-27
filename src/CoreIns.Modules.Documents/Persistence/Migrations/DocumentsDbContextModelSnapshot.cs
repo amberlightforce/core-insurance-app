@@ -239,6 +239,16 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("document_number");
 
+                    b.Property<bool>("Hidden")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("hidden");
+
+                    b.Property<string>("HiddenReason")
+                        .HasColumnType("text")
+                        .HasColumnName("hidden_reason");
+
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasColumnType("char(2)")
@@ -286,6 +296,10 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("subject_type");
 
+                    b.Property<Guid?>("SupersededBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("superseded_by");
+
                     b.Property<string>("TemplateKey")
                         .IsRequired()
                         .HasColumnType("text")
@@ -294,6 +308,10 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                     b.Property<int?>("TemplateVersion")
                         .HasColumnType("integer")
                         .HasColumnName("template_version");
+
+                    b.Property<string>("WithdrawnReason")
+                        .HasColumnType("text")
+                        .HasColumnName("withdrawn_reason");
 
                     b.HasKey("DocumentId")
                         .HasName("pk_document");
@@ -336,6 +354,12 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                     b.Property<string>("DocumentType")
                         .HasColumnType("text")
                         .HasColumnName("document_type");
+
+                    b.Property<bool>("CustomerVisible")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("customer_visible");
 
                     b.Property<string>("DefaultMedium")
                         .IsRequired()

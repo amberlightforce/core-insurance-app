@@ -140,6 +140,17 @@ public static class PartyModule
         services.AddCommand<SubmitCommissionVersion, CommissionAgreementSubmitResponse, SubmitCommissionVersionHandler>(CommandDescriptor.For("pty.CommissionAgreement.submit"));
         services.AddCommand<ApproveCommissionVersion, CommissionAgreementApproveResponse, ApproveCommissionVersionHandler>(CommandDescriptor.For("pty.CommissionAgreement.approve") with { SupportsDryRun = true });
 
+        services.AddScoped<ProducerOfRecordWriter>();
+        services.AddScoped<IValidator<ChangeProducerOfRecord>, ChangeProducerOfRecordValidator>();
+        services.AddScoped<IValidator<BulkTransferProducerOfRecord>, BulkTransferProducerOfRecordValidator>();
+        services.AddScoped<IValidator<CancelProducerOfRecord>, CancelProducerOfRecordValidator>();
+        services.AddCommandAuditor<ChangeProducerOfRecord, ProducerOfRecordChangeResponse, ProducerOfRecordAuditor>();
+        services.AddCommandAuditor<BulkTransferProducerOfRecord, ProducerOfRecordBulkTransferResponse, ProducerOfRecordAuditor>();
+        services.AddCommandAuditor<CancelProducerOfRecord, ProducerOfRecordCancelResponse, ProducerOfRecordAuditor>();
+        services.AddCommand<ChangeProducerOfRecord, ProducerOfRecordChangeResponse, ChangeProducerOfRecordHandler>(CommandDescriptor.For("pty.ProducerOfRecord.change") with { SupportsDryRun = true });
+        services.AddCommand<BulkTransferProducerOfRecord, ProducerOfRecordBulkTransferResponse, BulkTransferProducerOfRecordHandler>(CommandDescriptor.For("pty.ProducerOfRecord.bulkTransfer") with { SupportsDryRun = true });
+        services.AddCommand<CancelProducerOfRecord, ProducerOfRecordCancelResponse, CancelProducerOfRecordHandler>(CommandDescriptor.For("pty.ProducerOfRecord.cancel"));
+
         services.AddScoped<VulnerabilityQueries>();
         services.AddScoped<VulnerabilityWriter>();
         services.AddScoped<IValidator<RecordVulnerability>, RecordVulnerabilityValidator>();
@@ -155,6 +166,7 @@ public static class PartyModule
         services.AddScoped<IPartyProducerCodeService, PartyProducerCodeService>();
         services.AddScoped<IPartyVulnerabilityService, PartyVulnerabilityService>();
         services.AddScoped<IPartyAccountService, PartyAccountService>();
+        services.AddScoped<IPartyProducerOfRecordService, PartyProducerOfRecordService>();
 
         // BO-MIG-06: migration SPI (importer and reverser of Person, Organisation and Contact).
         services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationImporter, MigrationImport.PartyMigrationImporter>();
@@ -213,6 +225,10 @@ public static class PartyModule
             .Describe("Η έκδοση δεν μπορεί να ισχύει από ημερομηνία πριν ή στη διακανονισμένη, ούτε πριν από την τελευταία ενεργή έκδοση.", "The version cannot take effect on or before the settled date, or before the latest active version."),
         ErrorDefinition.For(ModuleCode.PTY, "INTERMEDIARY-NOT-ACTIVE", 422, "Ο διαμεσολαβητής είναι σε αναστολή ή έχει τερματιστεί", "The intermediary is suspended or terminated")
             .Describe("Ένας διαμεσολαβητής σε αναστολή ή τερματισμένος δεν μπορεί να αποκτήσει νέα συμφωνία προμήθειας.", "A suspended or terminated intermediary cannot get a new commission agreement."),
+        ErrorDefinition.For(ModuleCode.PTY, "POR-CODE-INVALID", 422, "Ο κωδικός παραγωγού δεν μπορεί να αναλάβει το ασφαλιστήριο", "The producer code cannot take the policy")
+            .Describe("Ο κωδικός είναι ανενεργός, ο διαμεσολαβητής σε αναστολή ή τερματισμένος, ή το προϊόν δεν είναι διορισμένο.", "The code is inactive, its intermediary is suspended or terminated, or the product is not appointed."),
+        ErrorDefinition.For(ModuleCode.PTY, "POR-LETTER-REQUIRED", 422, "Απαιτείται η επιστολή αλλαγής διαμεσολαβητή", "The broker-of-record letter is required")
+            .Describe("Η αλλαγή σε άλλον διαμεσολαβητή χρειάζεται αναφορά της επιστολής του πελάτη (letterReference).", "A change to another intermediary needs the customer's letter reference (letterReference)."),
         ErrorDefinition.For(ModuleCode.PTY, "STATE", 409, "Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση", "The action is not allowed in the current state")
             .Describe("Η έκδοση ή η συμφωνία δεν βρίσκεται σε κατάσταση που επιτρέπει την ενέργεια.", "The version or agreement is not in a state that allows the action."),
         ErrorDefinition.For(ModuleCode.PTY, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")

@@ -54,6 +54,9 @@ public static class DocumentsModule
         services.AddCommand<ReceiveProviderEvent, ProviderEventResult, ReceiveProviderEventHandler>(
             CommandDescriptor.For("doc.ProviderEvent.receive") with { RequiresIdempotencyKey = false });
         services.AddCommand<ReprintDocument, ReprintResult, ReprintDocumentHandler>(CommandDescriptor.For("doc.Document.reprint"));
+        services.AddCommand<ResendDocument, ResendResult, ResendDocumentHandler>(CommandDescriptor.For("doc.Document.resend"));
+        services.AddCommand<SetDocumentHidden, HiddenResult, SetDocumentHiddenHandler>(CommandDescriptor.For("doc.Document.hide"));
+        services.AddCommand<SupersedeDocument, SupersedeResult, SupersedeDocumentHandler>(CommandDescriptor.For("doc.Document.supersede"));
         services.AddCommand<StoreArchive, ArchiveStoreResponse, StoreArchiveHandler>(CommandDescriptor.For("doc.Archive.store"));
         services.AddCommand<VerifyArchive, ArchiveVerifyResponse, VerifyArchiveHandler>(CommandDescriptor.For("doc.Archive.verify"));
         services.AddCommand<AddRendition, ArchiveAddRenditionResponse, AddRenditionHandler>(CommandDescriptor.For("doc.Archive.addRendition"));
@@ -84,6 +87,12 @@ public static class DocumentsModule
             .Describe("Η κλάση διατήρησης δεν υπάρχει στη λίστα του πακέτου αγοράς.", "The retention class is not in the market pack list."),
         ErrorDefinition.For(ModuleCode.DOC, "PACK-TOO-LARGE", 422, "Πολύ μεγάλο πακέτο τεκμηρίων", "The evidence pack is too large")
             .Describe("Το εύρος περιέχει περισσότερα έγγραφα από το όριο· περιορίστε το.", "The scope holds more documents than the limit; narrow it."),
+        ErrorDefinition.For(ModuleCode.DOC, "INVALID-STATE-TRANSITION", 409, "Η ενέργεια δεν επιτρέπεται σε αυτή την κατάσταση", "The action is not allowed in this state")
+            .Describe("Το έγγραφο βρίσκεται σε κατάσταση που δεν επιτρέπει αυτή την ενέργεια.", "The document is in a state that does not allow this action."),
+        ErrorDefinition.For(ModuleCode.DOC, "ROLE-REQUIRED", 403, "Απαιτείται ρόλος διαχειριστή", "Administrator role required")
+            .Describe("Η απόσυρση ή αντικατάσταση νόμιμης ειδοποίησης απαιτεί τον ρόλο διαχειριστή.", "Withdrawing or replacing a statutory notice needs the administrator role."),
+        ErrorDefinition.For(ModuleCode.DOC, "DSAR-RESTRICTED", 422, "Περιορισμένα δεδομένα παραλήπτη", "The recipient data is restricted")
+            .Describe("Τα δεδομένα του παραλήπτη είναι περιορισμένα (DSAR)· δεν γίνεται νέα αποστολή.", "The recipient data is restricted (DSAR); no new delivery is made."),
         ErrorDefinition.For(ModuleCode.DOC, "HASH-MISMATCH", 422, "Το αποτύπωμα δεν ταιριάζει", "The hash does not match")
             .Describe("Το δηλωμένο αποτύπωμα SHA-256 διαφέρει από το περιεχόμενο.", "The declared SHA-256 differs from the content."),
     ];

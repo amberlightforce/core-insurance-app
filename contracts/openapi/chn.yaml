@@ -1678,15 +1678,323 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal/renewals/accept:
+    post:
+      operationId: chn.PortalRenewal.accept
+      summary: Accept a renewal offer
+      description: |-
+        Accepts the offered renewal of one of the customer's own policies (matrix policy.renewal.accept). A referral outcome performs nothing and raises a ticket.
+      tags:
+      - PortalRenewal
+      x-requirement:
+      - REQ-CHN-004
+      - REQ-CHN-005
+      - REQ-CHN-047
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalRenewal.accept
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      - code: CHN-ERR-NOT-PERMITTED
+        status: 403
+      - code: CHN-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      x-source:
+      - BO-CHN-03
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortalRenewalAcceptRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalRenewalAcceptResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal/renewals/decline:
+    post:
+      operationId: chn.PortalRenewal.decline
+      summary: Decline a renewal offer
+      description: |-
+        Declines the offered renewal (matrix policy.renewal.decline). A customer flagged vulnerable is never declined online: the request is referred to staff.
+      tags:
+      - PortalRenewal
+      x-requirement:
+      - REQ-CHN-004
+      - REQ-CHN-005
+      - REQ-CHN-047
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalRenewal.decline
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      - code: CHN-ERR-NOT-PERMITTED
+        status: 403
+      - code: CHN-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      x-source:
+      - BO-CHN-03
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortalRenewalDeclineRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalRenewalDeclineResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal/cancellations/request:
+    post:
+      operationId: chn.PortalCancellation.submit
+      summary: Request a cancellation
+      description: |-
+        Asks to cancel one of the customer's own policies (matrix policy.cancel). Never cancels directly: staff are given a request and act on it.
+      tags:
+      - PortalCancellation
+      x-requirement:
+      - REQ-CHN-004
+      - REQ-CHN-005
+      - REQ-CHN-047
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalCancellation.submit
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      - code: CHN-ERR-NOT-PERMITTED
+        status: 403
+      - code: CHN-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      x-source:
+      - BO-CHN-03
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortalCancellationSubmitRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalCancellationSubmitResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal/contact:
+    get:
+      operationId: chn.PortalContact.get
+      summary: Own contact details
+      description: |-
+        The caller's own current addresses, phones and e-mails with the ids and the record version needed to change them.
+      tags:
+      - PortalContact
+      x-requirement:
+      - REQ-CHN-004
+      - REQ-CHN-005
+      - REQ-CHN-047
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalContact.get
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-CHN-03
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalContactView'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/chn/v1/portal/contact/update:
+    post:
+      operationId: chn.PortalContact.update
+      summary: Change own contact details
+      description: |-
+        Adds, replaces or removes one address, phone or e-mail of the caller's own party through PTY (matrix contact.update). Ids are per version: a replace returns the new id and the old id is gone. A stale record version is refused.
+      tags:
+      - PortalContact
+      x-requirement:
+      - REQ-CHN-004
+      - REQ-CHN-005
+      - REQ-CHN-047
+      x-wave: W6
+      x-work-packages:
+      - W6-CHN-01
+      x-status: minimal
+      x-maturity: pre-release
+      x-io-shared: 1
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: chn.PortalContact.update
+      x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
+      - code: CHN-ERR-NOT-PERMITTED
+        status: 403
+      - code: CHN-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      - code: CHN-ERR-STALE
+        status: 409
+      x-source:
+      - BO-CHN-03
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortalContactUpdateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalContactUpdateResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/chn/v1/changes/preview:
     post:
       operationId: chn.Change.preview
-      summary: Self-service change composition
+      summary: Self-service change (preview)
       description: |-
-        Self-service change composition
-
-        PRD inputs: policy, intent, values, effective date
-        PRD outputs: diff, premium, billing preview, outcome; request number when referred
+        Starts a change job on one of the customer's own policies, quotes it and returns what confirming will bind. Checks the transaction-permission matrix (policy.change) and ownership.
       tags:
       - Change
       x-requirement:
@@ -1708,14 +2016,15 @@ paths:
       x-status: full
       x-maturity: pre-release
       x-io-shared: 3
-      x-operation-kind: query
-      x-idempotency: none
+      x-operation-kind: command
+      x-idempotency: required
       x-dry-run: false
-      x-dry-run-note: 'PRD: Key; DR'
       x-exposure:
       - ui
       x-permission: chn.Change.preview
       x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
       - code: CHN-ERR-NOT-PERMITTED
         status: 403
       - code: CHN-ERR-LIMIT-EXCEEDED
@@ -1723,6 +2032,7 @@ paths:
       x-source:
       - PRD-12 §9.1 l.1831
       parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       requestBody:
@@ -1744,6 +2054,10 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
         '422':
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
@@ -1751,12 +2065,9 @@ paths:
   /api/chn/v1/changes/confirm:
     post:
       operationId: chn.Change.confirm
-      summary: Self-service change composition
+      summary: Self-service change (confirm)
       description: |-
-        Self-service change composition
-
-        PRD inputs: policy, intent, values, effective date
-        PRD outputs: diff, premium, billing preview, outcome; request number when referred
+        Confirms a previewed change after an explicit acknowledgement: binds exactly the previewed quote version, or raises a referral when the matrix (policy.change, amount) requires staff. Idempotent.
       tags:
       - Change
       x-requirement:
@@ -1780,12 +2091,13 @@ paths:
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
       x-exposure:
       - ui
       x-permission: chn.Change.confirm
       x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
       - code: CHN-ERR-NOT-PERMITTED
         status: 403
       - code: CHN-ERR-LIMIT-EXCEEDED
@@ -1799,7 +2111,6 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -1821,6 +2132,8 @@ paths:
           $ref: common.yaml#/components/responses/Forbidden
         '409':
           $ref: common.yaml#/components/responses/Conflict
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '422':
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
@@ -1828,12 +2141,9 @@ paths:
   /api/chn/v1/changes/refer:
     post:
       operationId: chn.Change.refer
-      summary: Self-service change composition
+      summary: Self-service change (refer)
       description: |-
-        Self-service change composition
-
-        PRD inputs: policy, intent, values, effective date
-        PRD outputs: diff, premium, billing preview, outcome; request number when referred
+        Asks staff to handle a previewed change instead: raises a ticket and binds nothing.
       tags:
       - Change
       x-requirement:
@@ -1857,12 +2167,13 @@ paths:
       x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
       x-exposure:
       - ui
       x-permission: chn.Change.refer
       x-error-codes:
+      - code: CHN-ERR-NOT-FOUND
+        status: 404
       - code: CHN-ERR-NOT-PERMITTED
         status: 403
       - code: CHN-ERR-LIMIT-EXCEEDED
@@ -1876,7 +2187,6 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -1898,6 +2208,8 @@ paths:
           $ref: common.yaml#/components/responses/Forbidden
         '409':
           $ref: common.yaml#/components/responses/Conflict
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '422':
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
@@ -7657,113 +7969,486 @@ components:
         gates:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "gates"'
+    ChangeInstruction:
+      type: object
+      description: One edit of the draft of a change (same shape and ops as POL DraftInstruction; the customer may not send anything else).
+      properties:
+        op:
+          type: string
+          enum:
+          - SET_VEHICLE
+          - REMOVE_VEHICLE
+          - SET_DRIVER
+          - REMOVE_DRIVER
+          - SET_COVERAGES
+          - SET_ANSWERS
+        locator:
+          type: string
+        vehicle:
+          $ref: common.yaml#/components/schemas/Unspecified
+        driver:
+          $ref: common.yaml#/components/schemas/Unspecified
+        coverages:
+          $ref: common.yaml#/components/schemas/Unspecified
+        questionSet:
+          $ref: common.yaml#/components/schemas/Unspecified
+      required:
+      - op
     ChangePreviewRequest:
       type: object
-      description: 'chn.Change.preview request. PRD inputs: "policy, intent, values, effective date"'
+      description: 'chn.Change.preview request (BO-CHN-03): a change to one of the customers own policies.'
       properties:
-        policy:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "policy"'
-        intent:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "intent"'
-        values:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "values"'
+        policyId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
         effectiveDate:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "effective date"'
+          $ref: '../events/common.schema.json#/$defs/LocalDate'
+        instructions:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/ChangeInstruction'
+      required:
+      - policyId
+      - instructions
     ChangePreviewResponse:
       type: object
-      description: 'chn.Change.preview result. PRD outputs: "diff, premium, billing preview, outcome; request number when
-        referred"'
+      description: 'chn.Change.preview result: what confirming will bind, and whether the matrix lets the customer confirm (ALLOW) or requires staff (REFER).'
       properties:
-        diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
-        premium:
-          $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "premium"'
-        billingPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "billing preview"'
+        changeId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        policyId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        jobId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        versionNo:
+          type: integer
+        effectiveAt:
+          $ref: '../events/common.schema.json#/$defs/Instant'
         outcome:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcome"'
-        requestNumberWhenReferred:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request number when referred"'
+          type: string
+          enum:
+          - ALLOW
+          - REFER
+        reasons:
+          type: array
+          items:
+            type: string
+        annualBefore:
+          $ref: '../events/common.schema.json#/$defs/Money'
+        annualAfter:
+          $ref: '../events/common.schema.json#/$defs/Money'
+        premiumChange:
+          $ref: '../events/common.schema.json#/$defs/Money'
+        taxChange:
+          $ref: '../events/common.schema.json#/$defs/Money'
+        totalChange:
+          $ref: '../events/common.schema.json#/$defs/Money'
+        additionalDue:
+          $ref: '../events/common.schema.json#/$defs/Money'
+        refundDue:
+          $ref: '../events/common.schema.json#/$defs/Money'
+        validUntil:
+          $ref: '../events/common.schema.json#/$defs/Instant'
+      required:
+      - changeId
+      - policyId
+      - jobId
+      - versionNo
+      - effectiveAt
+      - outcome
+      - reasons
+      - premiumChange
+      - taxChange
+      - totalChange
     ChangeConfirmRequest:
       type: object
-      description: 'chn.Change.confirm request. PRD inputs: "policy, intent, values, effective date"'
+      description: 'chn.Change.confirm request: the previewed change and the customers explicit acknowledgement.'
       properties:
-        policy:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "policy"'
-        intent:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "intent"'
-        values:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "values"'
-        effectiveDate:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "effective date"'
+        changeId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        acknowledged:
+          type: boolean
+          description: Must be true (the customer saw the preview).
+      required:
+      - changeId
+      - acknowledged
     ChangeConfirmResponse:
       type: object
-      description: 'chn.Change.confirm result. PRD outputs: "diff, premium, billing preview, outcome; request number when
-        referred"'
+      description: 'chn.Change.confirm result: CONFIRMED (bound) or REFERRED (a ticket was raised and nothing was bound).'
       properties:
-        diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
-        premium:
-          $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "premium"'
-        billingPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "billing preview"'
+        changeId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        policyId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
         outcome:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcome"'
-        requestNumberWhenReferred:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request number when referred"'
+          type: string
+          enum:
+          - CONFIRMED
+          - REFERRED
+        ticketId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        transactionId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        effectiveAt:
+          $ref: '../events/common.schema.json#/$defs/Instant'
+        totalChange:
+          $ref: '../events/common.schema.json#/$defs/Money'
+      required:
+      - changeId
+      - policyId
+      - outcome
     ChangeReferRequest:
       type: object
-      description: 'chn.Change.refer request. PRD inputs: "policy, intent, values, effective date"'
+      description: 'chn.Change.refer request: hand a previewed change to staff.'
       properties:
-        policy:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "policy"'
-        intent:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "intent"'
-        values:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "values"'
-        effectiveDate:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "effective date"'
+        changeId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+      required:
+      - changeId
     ChangeReferResponse:
       type: object
-      description: 'chn.Change.refer result. PRD outputs: "diff, premium, billing preview, outcome; request number when referred"'
+      description: 'chn.Change.refer result: a ticket was raised and nothing was bound.'
       properties:
-        diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
-        premium:
-          $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "premium"'
-        billingPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "billing preview"'
+        changeId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        policyId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
         outcome:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "outcome"'
-        requestNumberWhenReferred:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request number when referred"'
+          type: string
+          enum:
+          - REFERRED
+        ticketId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+      required:
+      - changeId
+      - policyId
+      - outcome
+    PortalRenewalAcceptRequest:
+      type: object
+      properties:
+        policyId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        jobId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        acknowledged:
+          type: boolean
+          description: Must be true.
+      required:
+      - policyId
+      - jobId
+      - acknowledged
+    PortalRenewalAcceptResponse:
+      type: object
+      properties:
+        policyId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        jobId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        outcome:
+          type: string
+          enum:
+          - ACCEPTED
+          - REFERRED
+        ticketId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        newTermId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        newTermNumber:
+          type: integer
+      required:
+      - policyId
+      - jobId
+      - outcome
+    PortalRenewalDeclineRequest:
+      type: object
+      properties:
+        policyId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        jobId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        reasonCode:
+          type: string
+          enum:
+          - PRICE
+          - FOUND_ALTERNATIVE
+          - NO_LONGER_NEEDED
+          - OTHER
+      required:
+      - policyId
+      - jobId
+      - reasonCode
+    PortalRenewalDeclineResponse:
+      type: object
+      properties:
+        policyId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        jobId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        outcome:
+          type: string
+          enum:
+          - DECLINED
+          - REFERRED
+        ticketId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+      required:
+      - policyId
+      - jobId
+      - outcome
+    PortalCancellationSubmitRequest:
+      type: object
+      properties:
+        policyId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        effectiveDate:
+          $ref: '../events/common.schema.json#/$defs/LocalDate'
+        reasonCode:
+          type: string
+          enum:
+          - NO_LONGER_NEEDED
+          - SOLD_ASSET
+          - FOUND_ALTERNATIVE
+          - PRICE
+          - OTHER
+      required:
+      - policyId
+      - reasonCode
+    PortalCancellationSubmitResponse:
+      type: object
+      properties:
+        policyId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        outcome:
+          type: string
+          enum:
+          - REQUESTED
+        ticketId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+      required:
+      - policyId
+      - outcome
+      - ticketId
+    PortalContactAddress:
+      type: object
+      properties:
+        addressId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        types:
+          type: array
+          items:
+            type: string
+        primary:
+          type: boolean
+        country:
+          type: string
+        street:
+          type: string
+        number:
+          type: string
+        building:
+          type: string
+        floor:
+          type: string
+        unit:
+          type: string
+        postcode:
+          type: string
+        locality:
+          type: string
+        municipality:
+          type: string
+        regionalUnit:
+          type: string
+        region:
+          type: string
+        formattedLines:
+          type: array
+          items:
+            type: string
+      required:
+      - addressId
+      - types
+      - primary
+      - country
+      - formattedLines
+    PortalContactPoint:
+      type: object
+      properties:
+        contactPointId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        type:
+          type: string
+          enum:
+          - MOBILE
+          - LANDLINE
+          - WORK_PHONE
+          - EMAIL
+        value:
+          type: string
+        purpose:
+          type: string
+        primary:
+          type: boolean
+        verified:
+          type: boolean
+      required:
+      - contactPointId
+      - type
+      - value
+      - primary
+      - verified
+    PortalContactView:
+      type: object
+      description: 'chn.PortalContact.get result: the callers own current contact details.'
+      properties:
+        recordVersion:
+          type: integer
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortalContactAddress'
+        contactPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortalContactPoint'
+      required:
+      - recordVersion
+      - addresses
+      - contactPoints
+    PortalContactAddressInput:
+      type: object
+      properties:
+        types:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum:
+            - LEGAL
+            - MAILING
+            - BILLING
+        primary:
+          type: boolean
+        country:
+          type: string
+          minLength: 2
+          maxLength: 2
+        street:
+          type: string
+          maxLength: 120
+        number:
+          type: string
+          maxLength: 20
+        building:
+          type: string
+          maxLength: 60
+        floor:
+          type: string
+          maxLength: 20
+        unit:
+          type: string
+          maxLength: 20
+        postcode:
+          type: string
+          maxLength: 20
+        locality:
+          type: string
+          maxLength: 80
+        municipality:
+          type: string
+          maxLength: 80
+        regionalUnit:
+          type: string
+          maxLength: 80
+        region:
+          type: string
+          maxLength: 80
+      required:
+      - types
+      - country
+    PortalContactPointInput:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - MOBILE
+          - LANDLINE
+          - EMAIL
+        value:
+          type: string
+          minLength: 3
+          maxLength: 254
+          description: A phone number in international form or an e-mail address.
+        purpose:
+          type: string
+          enum:
+          - PERSONAL
+          - WORK
+        primary:
+          type: boolean
+      required:
+      - type
+      - value
+    PortalContactUpdateRequest:
+      type: object
+      description: 'chn.PortalContact.update request: one change. ADD needs the input of its kind; REPLACE and REMOVE need locationId (the current addressId or contactPointId).'
+      properties:
+        action:
+          type: string
+          enum:
+          - ADD
+          - REPLACE
+          - REMOVE
+        kind:
+          type: string
+          enum:
+          - ADDRESS
+          - CONTACT_POINT
+        locationId:
+          $ref: '../events/common.schema.json#/$defs/Uuid'
+        address:
+          $ref: '#/components/schemas/PortalContactAddressInput'
+        contactPoint:
+          $ref: '#/components/schemas/PortalContactPointInput'
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - action
+      - kind
+      - expectedRecordVersion
+    PortalContactUpdateResponse:
+      type: object
+      description: 'chn.PortalContact.update result: APPLIED with the ids and the new record version only (no contact data, so nothing personal is stored with the idempotency record), or REFERRED (a ticket was raised and nothing changed).'
+      properties:
+        outcome:
+          type: string
+          enum:
+          - APPLIED
+          - REFERRED
+        action:
+          type: string
+          enum:
+          - ADD
+          - REPLACE
+          - REMOVE
+        kind:
+          type: string
+          enum:
+          - ADDRESS
+          - CONTACT_POINT
+        locationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        recordVersion:
+          type: integer
+        ticketId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - outcome
+      - action
+      - kind
     WithdrawalDeclareRequest:
       type: object
       description: 'chn.Withdrawal.declare request (typed by SL6-CHN-WITHDRAW, D-SL6-06). PRD inputs: "name, contract id, e-mail, reason"'
