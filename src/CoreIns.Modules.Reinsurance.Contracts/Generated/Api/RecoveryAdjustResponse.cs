@@ -8,11 +8,7 @@ namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RecoveryAdjustResponse
 {
-    /// <summary>PRD: "item"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'item'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("item")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Item { get; init; }
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RecoveryAdjustmentItem Item { get; init; }
 }

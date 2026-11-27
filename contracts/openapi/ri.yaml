@@ -4040,15 +4040,16 @@ paths:
       - name: layer
         in: query
         required: false
-        description: 'PRD: "layer"'
+        description: 'PRD: "layer" - a layer id or a layer number'
         schema:
           type: string
       - name: year
         in: query
-        required: false
-        description: 'PRD: "year"'
+        required: true
+        description: 'PRD: "year" - the contract year'
         schema:
-          type: string
+          type: integer
+          minimum: 1900
       responses:
         '200':
           description: Success
@@ -9163,8 +9164,20 @@ components:
       properties:
         batchId:
           $ref: ../events/common.schema.json#/$defs/Uuid
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractYear:
+          type: integer
+          minimum: 1900
+        rowsBooked:
+          type: integer
+          minimum: 0
+          description: Delta rows the restatement booked (0 when the booked recoveries already equalled the full recalculation)
       required:
       - batchId
+      - contractId
+      - contractYear
+      - rowsBooked
       description: 'Typed from REQ-RI-003, REQ-RI-128. PRD outputs: "batch id"'
     OccurrenceLinkRequest:
       type: object
@@ -9172,58 +9185,158 @@ components:
       properties:
         claimIds:
           type: array
+          minItems: 1
+          maxItems: 100
+          uniqueItems: true
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "claim ids"'
+          description: 'PRD: "claim ids"; all under one contract (a link needs at least two)'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
+          type: string
+          minLength: 1
+          maxLength: 1024
           description: 'PRD: "reason"'
+      required:
+      - claimIds
+      - reason
     OccurrenceLinkResponse:
       type: object
       description: 'ri.Occurrence.link result. PRD outputs: "occurrence"'
       properties:
         occurrence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "occurrence"'
+          $ref: '#/components/schemas/OccurrenceView'
+      required:
+      - occurrence
+    OccurrenceView:
+      type: object
+      description: A group of claims treated as one occurrence for the per-occurrence layers of a contract (REQ-RI-115).
+      properties:
+        occurrenceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractYear:
+          type: integer
+          minimum: 1900
+        claimIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The claims currently linked (empty once the occurrence is dissolved)
+        reason:
+          type: string
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - DISSOLVED
+      required:
+      - occurrenceId
+      - contractId
+      - contractYear
+      - claimIds
+      - status
     OccurrenceUnlinkRequest:
       type: object
       description: 'ri.Occurrence.unlink request. PRD inputs: "claim ids, reason"'
       properties:
         claimIds:
           type: array
+          minItems: 1
+          maxItems: 100
+          uniqueItems: true
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "claim ids"'
+          description: 'PRD: "claim ids"; all under one contract'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
+          type: string
+          minLength: 1
+          maxLength: 1024
           description: 'PRD: "reason"'
+      required:
+      - claimIds
+      - reason
     OccurrenceUnlinkResponse:
       type: object
       description: 'ri.Occurrence.unlink result. PRD outputs: "occurrence"'
       properties:
         occurrence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "occurrence"'
+          $ref: '#/components/schemas/OccurrenceView'
+      required:
+      - occurrence
     RecoveryAdjustRequest:
       type: object
       description: 'ri.Recovery.adjust request. PRD inputs: "occurrence, amount, reason"'
       properties:
-        occurrence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "occurrence"'
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'PRD: "occurrence" - the claim, or any claim of the linked occurrence'
+        layerId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         amount:
           $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amount"'
+          description: 'PRD: "amount" - signed change of the incurred recoverable, EUR, split over the panel by largest remainder'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
+          type: string
+          minLength: 1
+          maxLength: 1024
           description: 'PRD: "reason"'
+      required:
+      - contractId
+      - claimId
+      - layerId
+      - amount
+      - reason
     RecoveryAdjustResponse:
       type: object
       description: 'ri.Recovery.adjust result. PRD outputs: "item"'
       properties:
         item:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "item"'
+          $ref: '#/components/schemas/RecoveryAdjustmentItem'
+      required:
+      - item
+    RecoveryAdjustmentItem:
+      type: object
+      description: One manual adjustment (a sealed delta, never an update).
+      properties:
+        adjustmentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The claim the adjustment is booked on (the representative claim of a linked occurrence)
+        layerId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        reason:
+          type: string
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        parts:
+          type: array
+          items:
+            type: object
+            properties:
+              participantPartyId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+            required:
+            - participantPartyId
+            - amount
+      required:
+      - adjustmentId
+      - contractId
+      - claimId
+      - layerId
+      - amount
+      - reason
+      - recordedAt
+      - parts
     CatOccurrenceProposeRequest:
       type: object
       description: 'ri.CatOccurrence.propose request. PRD inputs: "cat code, contract, windows, damage ratio"'
@@ -9333,8 +9446,48 @@ components:
       description: 'ri.AggregateTracker.get result. PRD outputs: "schedule"'
       properties:
         schedule:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "schedule"'
+          type: array
+          items:
+            $ref: '#/components/schemas/AggregateTrackerRow'
+      required:
+      - schedule
+    AggregateTrackerRow:
+      type: object
+      description: Aggregate position of one layer of one contract year (booked recoveries plus manual adjustments, after the placed percentage).
+      properties:
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractYear:
+          type: integer
+          minimum: 1900
+        layerId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        layerNo:
+          type: integer
+          minimum: 1
+        aggregateLimit:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+          description: Annual aggregate limit of the layer (null = unlimited)
+        recoverableIncurred:
+          $ref: ../events/common.schema.json#/$defs/Money
+        recoverablePaid:
+          $ref: ../events/common.schema.json#/$defs/Money
+        recoverableOutstanding:
+          $ref: ../events/common.schema.json#/$defs/Money
+        adjustments:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Part of recoverableIncurred that comes from manual adjustments
+      required:
+      - contractId
+      - contractYear
+      - layerId
+      - layerNo
+      - recoverableIncurred
+      - recoverablePaid
+      - recoverableOutstanding
+      - adjustments
     DepositInstalment:
       type: object
       description: One instalment of a deposit schedule; the instalments sum exactly to the deposit premium (largest-remainder split)

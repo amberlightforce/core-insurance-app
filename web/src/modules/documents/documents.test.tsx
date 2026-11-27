@@ -71,7 +71,7 @@ describe('SubjectDocumentsPage', () => {
     ]);
     page();
     expect(await screen.findByText('DOC-000001')).toBeInTheDocument();
-    expect(screen.getByText('Issued')).toBeInTheDocument();
+    expect(screen.getByText(/Issued/)).toBeInTheDocument();
     expect(
       api
         .callsTo('GET', '/api/doc/v1/documents/list-for-object')[0]

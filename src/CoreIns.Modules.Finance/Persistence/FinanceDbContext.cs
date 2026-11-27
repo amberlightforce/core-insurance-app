@@ -36,6 +36,10 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
 
     public DbSet<JournalLineRow> JournalLines => Set<JournalLineRow>();
 
+    public DbSet<ManualJournalRow> ManualJournals => Set<ManualJournalRow>();
+
+    public DbSet<ManualJournalLineRow> ManualJournalLines => Set<ManualJournalLineRow>();
+
     public DbSet<MigrationImport.MigrationImportRow> MigrationImports => Set<MigrationImport.MigrationImportRow>();
 
     protected override string Schema => FinanceModule.Schema;
@@ -276,6 +280,7 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
         });
 
         MigrationImport.FinanceMigrationModel.Configure(modelBuilder);
+        ManualJournalModel.Configure(modelBuilder);
 
         modelBuilder.Entity<JournalEntryRow>(entity =>
         {

@@ -1173,45 +1173,756 @@
       "versions": "unspecified",
       "reports": "unspecified"
     },
-    "RuleSetCreateResponse": {
-      "versions": "unspecified",
-      "reports": "unspecified"
+    "RuleSetAuthoringResponse": {
+      "version": {
+        "ruleSetCode": "sample",
+        "version": "sample",
+        "productCode": "sample",
+        "checkpoint": "sample",
+        "status": "Draft",
+        "effectiveFrom": "sample",
+        "dataStatus": "sample",
+        "contentHash": "sample",
+        "definitionHash": "sample",
+        "ruleCount": 1,
+        "testCaseCount": 1,
+        "createdAt": "sample",
+        "createdBy": "sample",
+        "definition": {
+          "code": "sample",
+          "version": "sample",
+          "productCode": "sample",
+          "checkpoint": "sample",
+          "effectiveFrom": "sample",
+          "dataStatus": "sample",
+          "note": "sample",
+          "hitPolicy": "sample",
+          "variables": [
+            {
+              "name": "sample",
+              "type": "sample",
+              "expression": "sample"
+            }
+          ],
+          "inputs": [
+            {
+              "name": "sample",
+              "type": "sample",
+              "expression": "sample"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "sample",
+              "type": "sample"
+            }
+          ],
+          "rules": [
+            {
+              "id": "sample",
+              "conditions": [
+                "sample"
+              ],
+              "outputs": [
+                "sample"
+              ],
+              "explain": {
+                "fact": "sample",
+                "limit": "sample"
+              }
+            }
+          ],
+          "testCases": [
+            {
+              "name": "sample",
+              "firstRegistrationYear": "samp",
+              "vehicleValue": "sample",
+              "engineCc": 1,
+              "usage": "sample",
+              "driverBirthDates": [
+                "sample"
+              ],
+              "claimsLast5Years": 1,
+              "effectiveDate": "sample",
+              "expectedRuleIds": [
+                "sample"
+              ]
+            }
+          ]
+        }
+      },
+      "validation": {
+        "ruleSetCode": "sample",
+        "version": "sample",
+        "valid": true,
+        "compiles": true,
+        "issues": [
+          {
+            "code": "sample",
+            "message": "sample",
+            "ruleId": "sample",
+            "testCase": "sample"
+          }
+        ],
+        "testResults": [
+          {
+            "name": "sample",
+            "passed": true,
+            "failure": "sample",
+            "matchedRuleIds": [
+              "sample"
+            ]
+          }
+        ],
+        "uncoveredRuleIds": [
+          "sample"
+        ],
+        "contentHash": "sample"
+      }
     },
-    "RuleSetDraftResponse": {
-      "versions": "unspecified",
-      "reports": "unspecified"
+    "RuleSetColumn": {
+      "name": "sample",
+      "type": "sample",
+      "expression": "sample"
     },
-    "RuleSetEditResponse": {
-      "versions": "unspecified",
-      "reports": "unspecified"
+    "RuleSetCreateRequest": {
+      "ruleSetCode": "sample",
+      "productCode": "sample",
+      "checkpoint": "sample",
+      "effectiveFrom": "sample",
+      "note": "sample",
+      "definition": {
+        "code": "sample",
+        "version": "sample",
+        "productCode": "sample",
+        "checkpoint": "sample",
+        "effectiveFrom": "sample",
+        "dataStatus": "sample",
+        "note": "sample",
+        "hitPolicy": "sample",
+        "variables": [
+          {
+            "name": "sample",
+            "type": "sample",
+            "expression": "sample"
+          }
+        ],
+        "inputs": [
+          {
+            "name": "sample",
+            "type": "sample",
+            "expression": "sample"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "sample",
+            "type": "sample"
+          }
+        ],
+        "rules": [
+          {
+            "id": "sample",
+            "conditions": [
+              "sample"
+            ],
+            "outputs": [
+              "sample"
+            ],
+            "explain": {
+              "fact": "sample",
+              "limit": "sample"
+            }
+          }
+        ],
+        "testCases": [
+          {
+            "name": "sample",
+            "firstRegistrationYear": "samp",
+            "vehicleValue": "sample",
+            "engineCc": 1,
+            "usage": "sample",
+            "driverBirthDates": [
+              "sample"
+            ],
+            "claimsLast5Years": 1,
+            "effectiveDate": "sample",
+            "expectedRuleIds": [
+              "sample"
+            ]
+          }
+        ]
+      }
+    },
+    "RuleSetDefinition": {
+      "code": "sample",
+      "version": "sample",
+      "productCode": "sample",
+      "checkpoint": "sample",
+      "effectiveFrom": "sample",
+      "dataStatus": "sample",
+      "note": "sample",
+      "hitPolicy": "sample",
+      "variables": [
+        {
+          "name": "sample",
+          "type": "sample",
+          "expression": "sample"
+        }
+      ],
+      "inputs": [
+        {
+          "name": "sample",
+          "type": "sample",
+          "expression": "sample"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "sample",
+          "type": "sample"
+        }
+      ],
+      "rules": [
+        {
+          "id": "sample",
+          "conditions": [
+            "sample"
+          ],
+          "outputs": [
+            "sample"
+          ],
+          "explain": {
+            "fact": "sample",
+            "limit": "sample"
+          }
+        }
+      ],
+      "testCases": [
+        {
+          "name": "sample",
+          "firstRegistrationYear": "samp",
+          "vehicleValue": "sample",
+          "engineCc": 1,
+          "usage": "sample",
+          "driverBirthDates": [
+            "sample"
+          ],
+          "claimsLast5Years": 1,
+          "effectiveDate": "sample",
+          "expectedRuleIds": [
+            "sample"
+          ]
+        }
+      ]
+    },
+    "RuleSetDraftRequest": {
+      "ruleSetCode": "sample",
+      "fromVersion": "sample",
+      "effectiveFrom": "sample"
+    },
+    "RuleSetEditPatch": {
+      "op": "SET_CELL",
+      "ruleId": "sample",
+      "column": "sample",
+      "value": "sample",
+      "rule": {
+        "id": "sample",
+        "conditions": [
+          "sample"
+        ],
+        "outputs": [
+          "sample"
+        ],
+        "explain": {
+          "fact": "sample",
+          "limit": "sample"
+        }
+      },
+      "testCase": {
+        "name": "sample",
+        "firstRegistrationYear": "samp",
+        "vehicleValue": "sample",
+        "engineCc": 1,
+        "usage": "sample",
+        "driverBirthDates": [
+          "sample"
+        ],
+        "claimsLast5Years": 1,
+        "effectiveDate": "sample",
+        "expectedRuleIds": [
+          "sample"
+        ]
+      },
+      "testCaseName": "sample",
+      "effectiveFrom": "sample",
+      "note": "sample"
+    },
+    "RuleSetEditRequest": {
+      "ruleSetCode": "sample",
+      "version": "sample",
+      "patches": [
+        {
+          "op": "SET_CELL",
+          "ruleId": "sample",
+          "column": "sample",
+          "value": "sample",
+          "rule": {
+            "id": "sample",
+            "conditions": [
+              "sample"
+            ],
+            "outputs": [
+              "sample"
+            ],
+            "explain": {
+              "fact": "sample",
+              "limit": "sample"
+            }
+          },
+          "testCase": {
+            "name": "sample",
+            "firstRegistrationYear": "samp",
+            "vehicleValue": "sample",
+            "engineCc": 1,
+            "usage": "sample",
+            "driverBirthDates": [
+              "sample"
+            ],
+            "claimsLast5Years": 1,
+            "effectiveDate": "sample",
+            "expectedRuleIds": [
+              "sample"
+            ]
+          },
+          "testCaseName": "sample",
+          "effectiveFrom": "sample",
+          "note": "sample"
+        }
+      ]
+    },
+    "RuleSetExplain": {
+      "fact": "sample",
+      "limit": "sample"
+    },
+    "RuleSetExportDocument": {
+      "format": "sample",
+      "definitionHash": "sample",
+      "definition": {
+        "code": "sample",
+        "version": "sample",
+        "productCode": "sample",
+        "checkpoint": "sample",
+        "effectiveFrom": "sample",
+        "dataStatus": "sample",
+        "note": "sample",
+        "hitPolicy": "sample",
+        "variables": [
+          {
+            "name": "sample",
+            "type": "sample",
+            "expression": "sample"
+          }
+        ],
+        "inputs": [
+          {
+            "name": "sample",
+            "type": "sample",
+            "expression": "sample"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "sample",
+            "type": "sample"
+          }
+        ],
+        "rules": [
+          {
+            "id": "sample",
+            "conditions": [
+              "sample"
+            ],
+            "outputs": [
+              "sample"
+            ],
+            "explain": {
+              "fact": "sample",
+              "limit": "sample"
+            }
+          }
+        ],
+        "testCases": [
+          {
+            "name": "sample",
+            "firstRegistrationYear": "samp",
+            "vehicleValue": "sample",
+            "engineCc": 1,
+            "usage": "sample",
+            "driverBirthDates": [
+              "sample"
+            ],
+            "claimsLast5Years": 1,
+            "effectiveDate": "sample",
+            "expectedRuleIds": [
+              "sample"
+            ]
+          }
+        ]
+      }
     },
     "RuleSetExportResponse": {
-      "versions": "unspecified",
-      "reports": "unspecified"
+      "document": {
+        "format": "sample",
+        "definitionHash": "sample",
+        "definition": {
+          "code": "sample",
+          "version": "sample",
+          "productCode": "sample",
+          "checkpoint": "sample",
+          "effectiveFrom": "sample",
+          "dataStatus": "sample",
+          "note": "sample",
+          "hitPolicy": "sample",
+          "variables": [
+            {
+              "name": "sample",
+              "type": "sample",
+              "expression": "sample"
+            }
+          ],
+          "inputs": [
+            {
+              "name": "sample",
+              "type": "sample",
+              "expression": "sample"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "sample",
+              "type": "sample"
+            }
+          ],
+          "rules": [
+            {
+              "id": "sample",
+              "conditions": [
+                "sample"
+              ],
+              "outputs": [
+                "sample"
+              ],
+              "explain": {
+                "fact": "sample",
+                "limit": "sample"
+              }
+            }
+          ],
+          "testCases": [
+            {
+              "name": "sample",
+              "firstRegistrationYear": "samp",
+              "vehicleValue": "sample",
+              "engineCc": 1,
+              "usage": "sample",
+              "driverBirthDates": [
+                "sample"
+              ],
+              "claimsLast5Years": 1,
+              "effectiveDate": "sample",
+              "expectedRuleIds": [
+                "sample"
+              ]
+            }
+          ]
+        }
+      }
     },
-    "RuleSetImportResponse": {
-      "versions": "unspecified",
-      "reports": "unspecified"
+    "RuleSetImportRequest": {
+      "document": {
+        "format": "sample",
+        "definitionHash": "sample",
+        "definition": {
+          "code": "sample",
+          "version": "sample",
+          "productCode": "sample",
+          "checkpoint": "sample",
+          "effectiveFrom": "sample",
+          "dataStatus": "sample",
+          "note": "sample",
+          "hitPolicy": "sample",
+          "variables": [
+            {
+              "name": "sample",
+              "type": "sample",
+              "expression": "sample"
+            }
+          ],
+          "inputs": [
+            {
+              "name": "sample",
+              "type": "sample",
+              "expression": "sample"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "sample",
+              "type": "sample"
+            }
+          ],
+          "rules": [
+            {
+              "id": "sample",
+              "conditions": [
+                "sample"
+              ],
+              "outputs": [
+                "sample"
+              ],
+              "explain": {
+                "fact": "sample",
+                "limit": "sample"
+              }
+            }
+          ],
+          "testCases": [
+            {
+              "name": "sample",
+              "firstRegistrationYear": "samp",
+              "vehicleValue": "sample",
+              "engineCc": 1,
+              "usage": "sample",
+              "driverBirthDates": [
+                "sample"
+              ],
+              "claimsLast5Years": 1,
+              "effectiveDate": "sample",
+              "expectedRuleIds": [
+                "sample"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "RuleSetOutputColumn": {
+      "name": "sample",
+      "type": "sample"
+    },
+    "RuleSetRef": {
+      "ruleSetCode": "sample",
+      "version": "sample"
+    },
+    "RuleSetRule": {
+      "id": "sample",
+      "conditions": [
+        "sample"
+      ],
+      "outputs": [
+        "sample"
+      ],
+      "explain": {
+        "fact": "sample",
+        "limit": "sample"
+      }
     },
     "RuleSetScheduleResponse": {
       "versions": "unspecified",
       "reports": "unspecified"
     },
+    "RuleSetSimulateItem": {
+      "evaluationId": "sample",
+      "recordedRuleIds": [
+        "sample"
+      ],
+      "simulatedRuleIds": [
+        "sample"
+      ],
+      "addedRuleIds": [
+        "sample"
+      ],
+      "removedRuleIds": [
+        "sample"
+      ],
+      "recordedOutcome": "sample",
+      "simulatedOutcome": "sample",
+      "error": "sample"
+    },
+    "RuleSetSimulateRequest": {
+      "ruleSetCode": "sample",
+      "version": "sample",
+      "limit": 1
+    },
     "RuleSetSimulateResponse": {
-      "versions": "unspecified",
-      "reports": "unspecified"
+      "ruleSetCode": "sample",
+      "version": "sample",
+      "evaluated": 1,
+      "changed": 1,
+      "newReferrals": 1,
+      "newDeclines": 1,
+      "items": [
+        {
+          "evaluationId": "sample",
+          "recordedRuleIds": [
+            "sample"
+          ],
+          "simulatedRuleIds": [
+            "sample"
+          ],
+          "addedRuleIds": [
+            "sample"
+          ],
+          "removedRuleIds": [
+            "sample"
+          ],
+          "recordedOutcome": "sample",
+          "simulatedOutcome": "sample",
+          "error": "sample"
+        }
+      ],
+      "warnings": [
+        "sample"
+      ]
     },
     "RuleSetSubmitResponse": {
       "versions": "unspecified",
       "reports": "unspecified"
     },
-    "RuleSetTestResponse": {
-      "versions": "unspecified",
-      "reports": "unspecified"
+    "RuleSetTestCase": {
+      "name": "sample",
+      "firstRegistrationYear": "samp",
+      "vehicleValue": "sample",
+      "engineCc": 1,
+      "usage": "sample",
+      "driverBirthDates": [
+        "sample"
+      ],
+      "claimsLast5Years": 1,
+      "effectiveDate": "sample",
+      "expectedRuleIds": [
+        "sample"
+      ]
     },
-    "RuleSetValidateResponse": {
-      "versions": "unspecified",
-      "reports": "unspecified"
+    "RuleSetTestOutcome": {
+      "name": "sample",
+      "passed": true,
+      "failure": "sample",
+      "matchedRuleIds": [
+        "sample"
+      ]
+    },
+    "RuleSetValidationIssue": {
+      "code": "sample",
+      "message": "sample",
+      "ruleId": "sample",
+      "testCase": "sample"
+    },
+    "RuleSetValidationReport": {
+      "ruleSetCode": "sample",
+      "version": "sample",
+      "valid": true,
+      "compiles": true,
+      "issues": [
+        {
+          "code": "sample",
+          "message": "sample",
+          "ruleId": "sample",
+          "testCase": "sample"
+        }
+      ],
+      "testResults": [
+        {
+          "name": "sample",
+          "passed": true,
+          "failure": "sample",
+          "matchedRuleIds": [
+            "sample"
+          ]
+        }
+      ],
+      "uncoveredRuleIds": [
+        "sample"
+      ],
+      "contentHash": "sample"
+    },
+    "RuleSetVersionDetail": {
+      "ruleSetCode": "sample",
+      "version": "sample",
+      "productCode": "sample",
+      "checkpoint": "sample",
+      "status": "Draft",
+      "effectiveFrom": "sample",
+      "dataStatus": "sample",
+      "contentHash": "sample",
+      "definitionHash": "sample",
+      "ruleCount": 1,
+      "testCaseCount": 1,
+      "createdAt": "sample",
+      "createdBy": "sample",
+      "definition": {
+        "code": "sample",
+        "version": "sample",
+        "productCode": "sample",
+        "checkpoint": "sample",
+        "effectiveFrom": "sample",
+        "dataStatus": "sample",
+        "note": "sample",
+        "hitPolicy": "sample",
+        "variables": [
+          {
+            "name": "sample",
+            "type": "sample",
+            "expression": "sample"
+          }
+        ],
+        "inputs": [
+          {
+            "name": "sample",
+            "type": "sample",
+            "expression": "sample"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "sample",
+            "type": "sample"
+          }
+        ],
+        "rules": [
+          {
+            "id": "sample",
+            "conditions": [
+              "sample"
+            ],
+            "outputs": [
+              "sample"
+            ],
+            "explain": {
+              "fact": "sample",
+              "limit": "sample"
+            }
+          }
+        ],
+        "testCases": [
+          {
+            "name": "sample",
+            "firstRegistrationYear": "samp",
+            "vehicleValue": "sample",
+            "engineCc": 1,
+            "usage": "sample",
+            "driverBirthDates": [
+              "sample"
+            ],
+            "claimsLast5Years": 1,
+            "effectiveDate": "sample",
+            "expectedRuleIds": [
+              "sample"
+            ]
+          }
+        ]
+      }
     },
     "RulesEvaluateBatchRequest": {
       "selection": "unspecified",

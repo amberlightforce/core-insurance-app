@@ -17,6 +17,12 @@ public static class ReinsuranceAuthorityTypes
     /// <summary>Approve or return a reinsurance contract (the maker-checker of REQ-RI-057).</summary>
     public static AuthorityTypeCode ContractApprove { get; } = AuthorityTypeCode.Parse("RI.CONTRACT_APPROVE");
 
+    /// <summary>Make a manual recovery adjustment (BO-RI-08); limited by the amount of the adjustment.</summary>
+    public static AuthorityTypeCode RecoveryAdjustment { get; } = AuthorityTypeCode.Parse("RI.RECOVERY_ADJUSTMENT");
+
+    /// <summary>The amount dimension (EUR, absolute value of the adjustment; money, so it carries its currency).</summary>
+    public const string AmountDimension = "amount";
+
     /// <summary>The contract-type code dimension.</summary>
     public const string ContractTypeDimension = "contractType";
 
@@ -26,9 +32,6 @@ public static class ReinsuranceAuthorityTypes
     /// </summary>
     public static AuthorityTypeCode AdjustmentApprove { get; } = AuthorityTypeCode.Parse("RI.ADJUSTMENT_APPROVE");
 
-    /// <summary>The adjustment amount (money, so it carries its currency).</summary>
-    public const string AmountDimension = "amount";
-
     /// <summary>The definitions.</summary>
     public static IReadOnlyList<AuthorityTypeDefinition> Definitions { get; } =
     [
@@ -37,6 +40,9 @@ public static class ReinsuranceAuthorityTypes
             [new AuthorityDimensionDefinition(ContractTypeDimension, DimensionKind.Code)]),
         new AuthorityTypeDefinition(
             AdjustmentApprove, ModuleCode.RI, new LocalizedText("Έγκριση προσαρμογής αντασφαλιστικού ασφαλίστρου ή προμήθειας", "Approve reinsurance premium adjustment or commission"),
+            [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
+        new AuthorityTypeDefinition(
+            RecoveryAdjustment, ModuleCode.RI, new LocalizedText("Χειροκίνητη προσαρμογή ανάκτησης", "Manual recovery adjustment"),
             [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
     ];
 

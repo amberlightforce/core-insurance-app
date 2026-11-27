@@ -78,8 +78,6 @@ CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17-groups/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17/movements
 CONTRACT_NOT_SERVED GET /api/fin/v1/levy-returns
 CONTRACT_NOT_SERVED GET /api/fin/v1/levy-returns/{}
-CONTRACT_NOT_SERVED GET /api/fin/v1/manual-journals
-CONTRACT_NOT_SERVED GET /api/fin/v1/manual-journals/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/periods/status
 CONTRACT_NOT_SERVED GET /api/fin/v1/reconciliation/breaks
 CONTRACT_NOT_SERVED GET /api/fin/v1/reconciliation/detail
@@ -156,7 +154,6 @@ CONTRACT_NOT_SERVED GET /api/rat/v1/worksheets/explain
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/footprint
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/query
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/zone
-CONTRACT_NOT_SERVED GET /api/ri/v1/aggregate-tracker/get
 CONTRACT_NOT_SERVED GET /api/ri/v1/close/status
 CONTRACT_NOT_SERVED GET /api/ri/v1/collaterals
 CONTRACT_NOT_SERVED GET /api/ri/v1/commission/history
@@ -468,10 +465,8 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/recalculate
 CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/record-filing
 CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/request-payment
 CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/transition
-CONTRACT_NOT_SERVED POST /api/fin/v1/manual-journals
 CONTRACT_NOT_SERVED POST /api/fin/v1/manual-journals/decide
 CONTRACT_NOT_SERVED POST /api/fin/v1/manual-journals/submit
-CONTRACT_NOT_SERVED POST /api/fin/v1/manual-journals/withdraw
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/compile
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/decide
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/draft
@@ -639,9 +634,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/lift-restriction
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/restrict
 CONTRACT_NOT_SERVED POST /api/pty/v1/import/reverse
-CONTRACT_NOT_SERVED POST /api/pty/v1/intermediaries/import-register
-CONTRACT_NOT_SERVED POST /api/pty/v1/intermediaries/suspend
-CONTRACT_NOT_SERVED POST /api/pty/v1/intermediaries/terminate
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/complete
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/start
@@ -744,8 +736,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/line-tables/set
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/acknowledge
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/draft
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/send
-CONTRACT_NOT_SERVED POST /api/ri/v1/occurrences/link
-CONTRACT_NOT_SERVED POST /api/ri/v1/occurrences/unlink
 CONTRACT_NOT_SERVED POST /api/ri/v1/participations/add
 CONTRACT_NOT_SERVED POST /api/ri/v1/participations/replace
 CONTRACT_NOT_SERVED POST /api/ri/v1/programmes
@@ -754,8 +744,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/renew
 CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/return
 CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/submit
 CONTRACT_NOT_SERVED POST /api/ri/v1/reconciliation/fin
-CONTRACT_NOT_SERVED POST /api/ri/v1/recoveries/adjust
-CONTRACT_NOT_SERVED POST /api/ri/v1/recoveries/recalculate
 CONTRACT_NOT_SERVED POST /api/ri/v1/securities/report
 CONTRACT_NOT_SERVED POST /api/ri/v1/security-rules/set
 CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/approve
@@ -813,17 +801,9 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/bulk-set
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/set
 CONTRACT_NOT_SERVED POST /api/uw/v1/review/lock
 CONTRACT_NOT_SERVED POST /api/uw/v1/review/release
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets
 CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/approve
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/draft
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/edit
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/export
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/import
 CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/schedule
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/simulate
 CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/submit
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/test
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/validate
 CONTRACT_NOT_SERVED POST /api/uw/v1/rules/evaluate-batch
 CONTRACT_NOT_SERVED POST /api/uw/v1/valuation/compute
 CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/bulk-reassign
