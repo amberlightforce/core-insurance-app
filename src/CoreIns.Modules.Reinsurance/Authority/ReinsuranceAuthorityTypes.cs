@@ -20,12 +20,24 @@ public static class ReinsuranceAuthorityTypes
     /// <summary>The contract-type code dimension.</summary>
     public const string ContractTypeDimension = "contractType";
 
+    /// <summary>
+    /// Approve or reject a reinsurance adjustment premium or sliding-scale commission calculation (BO-RI-10), limited by the
+    /// absolute amount of the adjustment (illustrative grants in <c>permissions/ri.json</c>).
+    /// </summary>
+    public static AuthorityTypeCode AdjustmentApprove { get; } = AuthorityTypeCode.Parse("RI.ADJUSTMENT_APPROVE");
+
+    /// <summary>The adjustment amount (money, so it carries its currency).</summary>
+    public const string AmountDimension = "amount";
+
     /// <summary>The definitions.</summary>
     public static IReadOnlyList<AuthorityTypeDefinition> Definitions { get; } =
     [
         new AuthorityTypeDefinition(
             ContractApprove, ModuleCode.RI, new LocalizedText("Έγκριση αντασφαλιστικής σύμβασης", "Approve reinsurance contract"),
             [new AuthorityDimensionDefinition(ContractTypeDimension, DimensionKind.Code)]),
+        new AuthorityTypeDefinition(
+            AdjustmentApprove, ModuleCode.RI, new LocalizedText("Έγκριση προσαρμογής αντασφαλιστικού ασφαλίστρου ή προμήθειας", "Approve reinsurance premium adjustment or commission"),
+            [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
     ];
 
     /// <summary>Registers the reinsurance authority types.</summary>

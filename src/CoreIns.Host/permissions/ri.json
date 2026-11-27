@@ -25,7 +25,15 @@
         "ri.CessionException.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Programme.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Programme.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
-        "ri.Participation.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ]
+        "ri.Participation.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        // Premium accounting (BO-RI-10): the accountant sets schedules and calculates (maker), the manager decides (checker); PLT RI.ADJUSTMENT_APPROVE.
+        "ri.DepositSchedule.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.DepositSchedule.reschedule": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Adjustment.calculate": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Adjustment.approve": [ "Staff.ReinsuranceManager" ],
+        "ri.Commission.adjust": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Commission.approve": [ "Staff.ReinsuranceManager" ],
+        "ri.Commission.history": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ]
       }
     },
     "Authority": {
@@ -37,6 +45,16 @@
         {
           "Id": "ri-manager-contract-approve-illustrative", "Role": "Staff.ReinsuranceManager", "Type": "RI.CONTRACT_APPROVE", "Illustrative": true,
           "Limits": [ { "Dimension": "contractType", "Comparison": "InSet", "Codes": [ "XOL_PER_RISK" ] } ]
+        },
+        // BO-RI-10 (ILLUSTRATIVE, ignored in Production): adjustment premium / commission approval by absolute amount, EUR. Above the accountant's
+        // limit refers to the manager (four eyes); above the manager's limit DENY.
+        {
+          "Id": "ri-accountant-adjustment-illustrative", "Role": "Staff.ReinsuranceAccountant", "Type": "RI.ADJUSTMENT_APPROVE", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "ri-manager-adjustment-illustrative", "Role": "Staff.ReinsuranceManager", "Type": "RI.ADJUSTMENT_APPROVE", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000000.00", "Currency": "EUR" } ]
         }
       ]
     }

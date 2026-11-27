@@ -49,6 +49,14 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
 
     public DbSet<TrackerRow> Trackers => Set<TrackerRow>();
 
+    public DbSet<DepositScheduleRow> DepositSchedules => Set<DepositScheduleRow>();
+
+    public DbSet<AdjustmentRow> Adjustments => Set<AdjustmentRow>();
+
+    public DbSet<CommissionRow> Commissions => Set<CommissionRow>();
+
+    public DbSet<AccountingDecisionRow> AccountingDecisions => Set<AccountingDecisionRow>();
+
     protected override string Schema => ReinsuranceModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -57,6 +65,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
         DsarRestrictionModel.Configure(modelBuilder);
         ConfigureRecovery(modelBuilder);
         ConfigureCession(modelBuilder);
+        AccountingModel.Configure(modelBuilder);
 
         modelBuilder.Entity<ContractRow>(entity =>
         {

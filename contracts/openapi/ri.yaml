@@ -4447,6 +4447,12 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: contractId
+        in: query
+        required: false
+        description: Only the commission calculations of this contract
+        schema:
+          type: string
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
       responses:
@@ -9329,117 +9335,379 @@ components:
         schedule:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "schedule"'
+    DepositInstalment:
+      type: object
+      description: One instalment of a deposit schedule; the instalments sum exactly to the deposit premium (largest-remainder split)
+      properties:
+        seq:
+          type: integer
+          minimum: 1
+        dueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - seq
+      - dueDate
+      - amount
+    DepositScheduleView:
+      type: object
+      description: One revision of the minimum and deposit premium schedule of a contract layer and year (BO-RI-10). Revisions are append-only; the highest revision is current.
+      properties:
+        scheduleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        layerNo:
+          type: integer
+          minimum: 1
+        contractYear:
+          type: integer
+        revision:
+          type: integer
+          minimum: 1
+        current:
+          type: boolean
+          description: False when a later revision superseded this one
+        minimumPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        depositPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        instalments:
+          type: array
+          items:
+            $ref: '#/components/schemas/DepositInstalment'
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        createdBy:
+          type: string
+      required:
+      - scheduleId
+      - contractId
+      - layerNo
+      - contractYear
+      - revision
+      - current
+      - minimumPremium
+      - depositPremium
+      - instalments
+      - createdAt
+      - createdBy
+    AdjustmentView:
+      type: object
+      description: The adjustment premium of a contract layer and year (BO-RI-10), the premium earned on the subject premium (never below the minimum premium) less the deposit premium. Positive is an additional premium due to the reinsurer, negative a return. PENDING until decided once through PLT (RI.ADJUSTMENT_APPROVE).
+      properties:
+        adjustmentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        layerNo:
+          type: integer
+        contractYear:
+          type: integer
+        scheduleId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The deposit schedule revision the adjustment was calculated against
+        subjectPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        ratePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        calculatedPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        minimumPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        depositPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        adjustmentAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        status:
+          type: string
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        createdBy:
+          type: string
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        decidedBy:
+          type: string
+      required:
+      - adjustmentId
+      - contractId
+      - layerNo
+      - contractYear
+      - scheduleId
+      - subjectPremium
+      - ratePct
+      - calculatedPremium
+      - minimumPremium
+      - depositPremium
+      - adjustmentAmount
+      - status
+      - createdAt
+      - createdBy
     DepositScheduleGetResponse:
       type: object
-      description: 'ri.DepositSchedule.get result. PRD outputs: "schedule, adjustment"'
+      description: ri.DepositSchedule.get result; the adjustment is the latest one of the schedule's layer and year, if any
       properties:
         schedule:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "schedule"'
+          $ref: '#/components/schemas/DepositScheduleView'
         adjustment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adjustment"'
+          $ref: '#/components/schemas/AdjustmentView'
+      required:
+      - schedule
     DepositScheduleRescheduleRequest:
       type: object
-      description: 'ri.DepositSchedule.reschedule request. PRD inputs: "layer, year"'
+      description: ri.DepositSchedule.reschedule request, sets (first call) or replaces (next calls) the minimum and deposit premium schedule of a layer for the contract's year. The deposit is split over the instalments with the largest-remainder rule.
       properties:
-        layer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "layer"'
-        year:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "year"'
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        layerNo:
+          type: integer
+          minimum: 1
+        minimumPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Minimum premium; not above the deposit premium
+        depositPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        instalmentCount:
+          type: integer
+          minimum: 1
+          maximum: 12
+        firstDueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        intervalMonths:
+          type: integer
+          minimum: 1
+          maximum: 12
+          description: Months between instalments (1, 2, 3, 4, 6 or 12)
+        expectedRevision:
+          type: integer
+          minimum: 0
+          description: The current revision the user saw (0 for none); a different current revision is RI-ERR-STALE
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - contractId
+      - layerNo
+      - minimumPremium
+      - depositPremium
+      - instalmentCount
+      - firstDueDate
+      - intervalMonths
+      - reason
     DepositScheduleRescheduleResponse:
       type: object
-      description: 'ri.DepositSchedule.reschedule result. PRD outputs: "schedule, adjustment"'
+      description: ri.DepositSchedule.reschedule result
       properties:
         schedule:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "schedule"'
-        adjustment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adjustment"'
+          $ref: '#/components/schemas/DepositScheduleView'
+      required:
+      - schedule
     AdjustmentCalculateRequest:
       type: object
-      description: 'ri.Adjustment.calculate request. PRD inputs: "layer, year"'
+      description: ri.Adjustment.calculate request. Opens a PENDING adjustment and its PLT approval; the layer needs a deposit schedule.
       properties:
-        layer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "layer"'
-        year:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "year"'
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        layerNo:
+          type: integer
+          minimum: 1
+        subjectPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: The final subject (gross written) premium of the contract year
+        ratePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: The premium rate applied to the subject premium, in percent
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - contractId
+      - layerNo
+      - subjectPremium
+      - ratePct
     AdjustmentCalculateResponse:
       type: object
-      description: 'ri.Adjustment.calculate result. PRD outputs: "schedule, adjustment"'
+      description: ri.Adjustment.calculate result
       properties:
-        schedule:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "schedule"'
         adjustment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adjustment"'
+          $ref: '#/components/schemas/AdjustmentView'
+      required:
+      - adjustment
     AdjustmentApproveRequest:
       type: object
-      description: 'ri.Adjustment.approve request. PRD inputs: "layer, year"'
+      description: ri.Adjustment.approve request; the adjustment is decided once. The person who calculated it cannot decide it (RI-ERR-SOD).
       properties:
-        layer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "layer"'
-        year:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "year"'
+        adjustmentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - adjustmentId
+      - decision
     AdjustmentApproveResponse:
       type: object
-      description: 'ri.Adjustment.approve result. PRD outputs: "schedule, adjustment"'
+      description: ri.Adjustment.approve result
       properties:
-        schedule:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "schedule"'
         adjustment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adjustment"'
+          $ref: '#/components/schemas/AdjustmentView'
+      required:
+      - adjustment
+    CommissionScaleStep:
+      type: object
+      description: One step of a sliding scale; the step with the highest lossRatioFromPct not above the loss ratio applies
+      properties:
+        lossRatioFromPct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        commissionRatePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+      required:
+      - lossRatioFromPct
+      - commissionRatePct
+    CommissionView:
+      type: object
+      description: One sliding-scale commission calculation of a contract year (BO-RI-10), append-only. The adjustment is the earned commission less the provisional commission. PENDING until decided once through PLT (RI.ADJUSTMENT_APPROVE).
+      properties:
+        commissionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractYear:
+          type: integer
+        cededPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        incurredLoss:
+          $ref: ../events/common.schema.json#/$defs/Money
+        lossRatioPct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        provisionalRatePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        earnedRatePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        provisionalCommission:
+          $ref: ../events/common.schema.json#/$defs/Money
+        earnedCommission:
+          $ref: ../events/common.schema.json#/$defs/Money
+        adjustmentAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        scale:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommissionScaleStep'
+        status:
+          type: string
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        createdBy:
+          type: string
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        decidedBy:
+          type: string
+      required:
+      - commissionId
+      - contractId
+      - contractYear
+      - cededPremium
+      - incurredLoss
+      - lossRatioPct
+      - provisionalRatePct
+      - earnedRatePct
+      - provisionalCommission
+      - earnedCommission
+      - adjustmentAmount
+      - scale
+      - status
+      - createdAt
+      - createdBy
     CommissionAdjustRequest:
       type: object
-      description: 'ri.Commission.adjust request. PRD inputs: "section, year"'
+      description: ri.Commission.adjust request. Calculates the earned commission from the loss ratio on the sliding scale and opens a PENDING calculation with its PLT approval.
       properties:
-        section:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "section"'
-        year:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "year"'
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        cededPremium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        incurredLoss:
+          $ref: ../events/common.schema.json#/$defs/Money
+        provisionalRatePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: The provisional commission rate already allowed on the premium, in percent
+        scale:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommissionScaleStep'
+          minItems: 1
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - contractId
+      - cededPremium
+      - incurredLoss
+      - provisionalRatePct
+      - scale
     CommissionAdjustResponse:
       type: object
-      description: 'ri.Commission.adjust result. PRD outputs: "adjustment"'
+      description: ri.Commission.adjust result
       properties:
-        adjustment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adjustment"'
+        commission:
+          $ref: '#/components/schemas/CommissionView'
+      required:
+      - commission
     CommissionApproveRequest:
       type: object
-      description: 'ri.Commission.approve request. PRD inputs: "section, year"'
+      description: ri.Commission.approve request; the calculation is decided once. The person who calculated it cannot decide it (RI-ERR-SOD).
       properties:
-        section:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "section"'
-        year:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "year"'
+        commissionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - commissionId
+      - decision
     CommissionApproveResponse:
       type: object
-      description: 'ri.Commission.approve result. PRD outputs: "adjustment"'
+      description: ri.Commission.approve result
       properties:
-        adjustment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adjustment"'
+        commission:
+          $ref: '#/components/schemas/CommissionView'
+      required:
+      - commission
     CommissionHistoryItem:
       type: object
-      description: 'ri.Commission.history result. PRD outputs: "adjustment"'
+      description: One commission calculation (ri.Commission.history result), newest first
       properties:
-        adjustment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adjustment"'
+        commission:
+          $ref: '#/components/schemas/CommissionView'
+      required:
+      - commission
     CommissionHistoryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope

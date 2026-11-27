@@ -1,6 +1,7 @@
 using CoreIns.Modules.Claims.Contracts.Events;
 using CoreIns.Modules.Migration.Contracts.Spi;
 using CoreIns.Modules.Policy.Contracts.Events;
+using CoreIns.Modules.Reinsurance.Accounting;
 using CoreIns.Modules.Reinsurance.Cession;
 using CoreIns.Modules.Reinsurance.Authority;
 using CoreIns.Modules.Reinsurance.Intake;
@@ -10,6 +11,7 @@ using CoreIns.Modules.Reinsurance.Contracts.Api;
 using CoreIns.Modules.Reinsurance.Persistence;
 using CoreIns.Modules.Reinsurance.Registry;
 using CoreIns.Platform;
+using CoreIns.Platform.Approvals;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
@@ -66,6 +68,8 @@ public static class ReinsuranceModule
                 // SL6-RI-CESSION-DELTA: the premium ledger, cession rows, exception log and tracker are sealed (SELECT, INSERT only).
                 $"GRANT SELECT, INSERT ON {Schema}.premium_delta, {Schema}.cession, {Schema}.cession_exception, {Schema}.tracker TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.cession_treaty TO {appRole}",
+                // BO-RI-10: premium accounting rows are append-only (SELECT, INSERT only).
+                $"GRANT SELECT, INSERT ON {Schema}.deposit_schedule, {Schema}.adjustment, {Schema}.commission, {Schema}.accounting_decision TO {appRole}",
             ]),
     ];
 
@@ -110,6 +114,33 @@ public static class ReinsuranceModule
         services.AddCommand<ApproveEndorsement, ContractApproveEndorsementResponse, ApproveEndorsementHandler>(
             CommandDescriptor.For("ri.Contract.approveEndorsement") with { SupportsDryRun = true });
         services.AddScoped<ContractVersionQuery>();
+
+        // BO-RI-10: premium accounting (deposit schedules, adjustment premium, sliding-scale commission). Adjustments and commission are
+        // decided by their own approve operations, never in the generic approvals inbox.
+        services.AddOwnerDecidedApprovalType(AccountingApprovals.ApprovalType);
+        services.AddScoped<AccountingApprovals>();
+        services.AddScoped<DepositScheduleReader>();
+        services.AddScoped<CommissionHistoryReader>();
+        services.AddScoped<IValidator<RescheduleDeposit>, RescheduleDepositValidator>();
+        services.AddCommandAuditor<RescheduleDeposit, DepositScheduleRescheduleResponse, RescheduleDepositAuditor>();
+        services.AddCommand<RescheduleDeposit, DepositScheduleRescheduleResponse, RescheduleDepositHandler>(
+            CommandDescriptor.For("ri.DepositSchedule.reschedule") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<CalculateAdjustment>, CalculateAdjustmentValidator>();
+        services.AddCommandAuditor<CalculateAdjustment, AdjustmentCalculateResponse, CalculateAdjustmentAuditor>();
+        services.AddCommand<CalculateAdjustment, AdjustmentCalculateResponse, CalculateAdjustmentHandler>(
+            CommandDescriptor.For("ri.Adjustment.calculate") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ApproveAdjustment>, ApproveAdjustmentValidator>();
+        services.AddCommandAuditor<ApproveAdjustment, AdjustmentApproveResponse, ApproveAdjustmentAuditor>();
+        services.AddCommand<ApproveAdjustment, AdjustmentApproveResponse, ApproveAdjustmentHandler>(
+            CommandDescriptor.For("ri.Adjustment.approve") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<AdjustCommission>, AdjustCommissionValidator>();
+        services.AddCommandAuditor<AdjustCommission, CommissionAdjustResponse, AdjustCommissionAuditor>();
+        services.AddCommand<AdjustCommission, CommissionAdjustResponse, AdjustCommissionHandler>(
+            CommandDescriptor.For("ri.Commission.adjust") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ApproveCommission>, ApproveCommissionValidator>();
+        services.AddCommandAuditor<ApproveCommission, CommissionApproveResponse, ApproveCommissionAuditor>();
+        services.AddCommand<ApproveCommission, CommissionApproveResponse, ApproveCommissionHandler>(
+            CommandDescriptor.For("ri.Commission.approve") with { SupportsDryRun = true });
 
         // The scanner's per-contract command (internal, no HTTP; exactly-once by the row lock and the state it finds).
         services.AddCommandAuditor<ApplyDueLifecycle, string, ApplyDueLifecycleAuditor>();
