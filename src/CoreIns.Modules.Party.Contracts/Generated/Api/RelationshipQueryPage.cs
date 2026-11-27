@@ -9,11 +9,8 @@ namespace CoreIns.Modules.Party.Contracts.Api;
 public sealed record RelationshipQueryPage
 {
     /// <summary>Contract member 'items'.</summary>
-    /// <remarks>
-    /// <para>Open object: members not defined by the contract yet.</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("items")]
-    public required global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement> Items { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Party.Contracts.Api.RelationshipView> Items { get; init; }
 
     /// <summary>Cursor of the next page, or null on the last page.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("nextCursor")]

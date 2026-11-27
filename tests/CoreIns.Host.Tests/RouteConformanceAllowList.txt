@@ -134,9 +134,7 @@ CONTRACT_NOT_SERVED GET /api/pty/v1/accounts/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/commission-agreements/compare
 CONTRACT_NOT_SERVED GET /api/pty/v1/commission-agreements/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
-CONTRACT_NOT_SERVED GET /api/pty/v1/party-roles/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/producer-of-records/{}
-CONTRACT_NOT_SERVED GET /api/pty/v1/relationships/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/screening/case-get
 CONTRACT_NOT_SERVED GET /api/rat/v1/breakdowns/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/change-explanations/get
@@ -640,13 +638,9 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/locations/add
 CONTRACT_NOT_SERVED POST /api/pty/v1/locations/remove
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/unmerge
-CONTRACT_NOT_SERVED POST /api/pty/v1/party-roles/assign
-CONTRACT_NOT_SERVED POST /api/pty/v1/party-roles/end
 CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/bulk-transfer
 CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/cancel
 CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/change
-CONTRACT_NOT_SERVED POST /api/pty/v1/relationships/add
-CONTRACT_NOT_SERVED POST /api/pty/v1/relationships/end
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/bulk
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/case-decide
 CONTRACT_NOT_SERVED POST /api/rat/v1/bonus-malus/transition
