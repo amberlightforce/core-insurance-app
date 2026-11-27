@@ -1685,6 +1685,208 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ProgrammeLayerRow", b =>
+                {
+                    b.Property<Guid>("LayerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("layer_id");
+
+                    b.Property<decimal>("Attachment")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("attachment");
+
+                    b.Property<Guid>("ContractId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("contract_id");
+
+                    b.Property<int>("LayerNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("layer_no");
+
+                    b.Property<decimal>("LimitAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("limit_amount");
+
+                    b.Property<Guid>("VersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("version_id");
+
+                    b.HasKey("LayerId")
+                        .HasName("pk_programme_layer");
+
+                    b.HasIndex("ContractId")
+                        .HasDatabaseName("ix_programme_layer_contract");
+
+                    b.HasIndex("VersionId", "LayerNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_programme_layer_no");
+
+                    b.ToTable("programme_layer", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_programme_layer_amounts", "attachment >= 0 AND limit_amount > 0");
+
+                            t.HasCheckConstraint("ck_programme_layer_no", "layer_no >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ProgrammeRow", b =>
+                {
+                    b.Property<Guid>("ProgrammeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("programme_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<int>("CurrentVersionNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_version_no");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("LineCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("line_code");
+
+                    b.PrimitiveCollection<string[]>("Participants")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("participants");
+
+                    b.Property<int>("ProgrammeYear")
+                        .HasColumnType("integer")
+                        .HasColumnName("programme_year");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<Guid?>("RenewedFromId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("renewed_from_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ProgrammeId")
+                        .HasName("pk_programme");
+
+                    b.HasIndex("RenewedFromId");
+
+                    b.HasIndex("LegalEntityId", "LineCode")
+                        .HasDatabaseName("ix_programme_line");
+
+                    b.HasIndex("LegalEntityId", "ProgrammeYear")
+                        .HasDatabaseName("ix_programme_year");
+
+                    b.HasIndex("LegalEntityId", "Code", "ProgrammeYear")
+                        .IsUnique()
+                        .HasDatabaseName("ux_programme_code_year");
+
+                    b.ToTable("programme", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_programme_currency", "currency = 'EUR'");
+
+                            t.HasCheckConstraint("ck_programme_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+
+                            t.HasCheckConstraint("ck_programme_participants", "cardinality(participants) >= 1");
+
+                            t.HasCheckConstraint("ck_programme_record_version", "record_version >= 1 AND current_version_no >= 1");
+
+                            t.HasCheckConstraint("ck_programme_year", "programme_year BETWEEN 1990 AND 2200");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ProgrammeVersionRow", b =>
+                {
+                    b.Property<Guid>("VersionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("version_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("ProgrammeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("programme_id");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateOnly>("ValidTo")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_to");
+
+                    b.Property<int>("VersionNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("version_no");
+
+                    b.HasKey("VersionId")
+                        .HasName("pk_programme_version");
+
+                    b.HasIndex("ProgrammeId", "VersionNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_programme_version_no");
+
+                    b.ToTable("programme_version", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_programme_version_no", "version_no >= 1");
+
+                            t.HasCheckConstraint("ck_programme_version_period", "valid_to > valid_from");
+
+                            t.HasCheckConstraint("ck_programme_version_status", "status IN ('DRAFT', 'PENDING_APPROVAL', 'ACTIVE', 'SUPERSEDED', 'EXPIRED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.RecoveryAdjustmentRow", b =>
                 {
                     b.Property<Guid>("AdjustmentRowId")
@@ -2280,6 +2482,42 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_participation_version");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ProgrammeLayerRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.ContractRow", null)
+                        .WithMany()
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_programme_layer_contract");
+
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.ProgrammeVersionRow", null)
+                        .WithMany()
+                        .HasForeignKey("VersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_programme_layer_version");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ProgrammeRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.ProgrammeRow", null)
+                        .WithMany()
+                        .HasForeignKey("RenewedFromId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_programme_renewed_from");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ProgrammeVersionRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.ProgrammeRow", null)
+                        .WithMany()
+                        .HasForeignKey("ProgrammeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_programme_version_programme");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.RecoveryRow", b =>

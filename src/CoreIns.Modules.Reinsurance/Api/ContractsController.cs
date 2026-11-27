@@ -33,6 +33,9 @@ internal static class ReinsurancePermissions
     public const string CessionListByPolicy = "ri.Cession.listByPolicy";
     public const string CessionGet = "ri.Cession.get";
     public const string CessionExceptionList = "ri.CessionException.list";
+    public const string ProgrammeCreate = "ri.Programme.create";
+    public const string ProgrammeUpdate = "ri.Programme.update";
+    public const string ProgrammeRenew = "ri.Programme.renew";
     public const string ProgrammeList = "ri.Programme.list";
     public const string ProgrammeGet = "ri.Programme.get";
     public const string ParticipationList = "ri.Participation.list";

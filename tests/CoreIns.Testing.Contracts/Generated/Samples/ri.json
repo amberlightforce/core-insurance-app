@@ -2986,37 +2986,362 @@
       "diff": "unspecified"
     },
     "ProgrammeCreateRequest": {
-      "programmeData": "unspecified",
-      "period": "unspecified",
-      "decision": "unspecified"
+      "code": "SAMPLE_CODE",
+      "name": "Sample text",
+      "lineCode": "SAMPLE_CODE",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "layers": [
+        {
+          "layerNo": 1,
+          "attachment": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "limit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "contractId": "01924254-3636-7158-8070-68c61b2e06c0"
+        }
+      ],
+      "reason": "SAMPLE_CODE"
     },
     "ProgrammeCreateResponse": {
-      "programme": "unspecified",
-      "diff": "unspecified"
+      "programme": {
+        "programmeId": "019267e0-bb6f-71a8-8a48-d86d53cafd7b",
+        "legalEntity": "SAMPLE_CODE",
+        "code": "SAMPLE_CODE",
+        "name": "Sample text",
+        "lineCode": "SAMPLE_CODE",
+        "programmeYear": 1,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "status": "DRAFT",
+        "versionNo": 1,
+        "recordVersion": 1,
+        "retention": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "contractId": "01920fc7-d70e-7b17-88b7-99616bc5a803",
+            "contractNumber": "Sample text",
+            "contractStatus": "DRAFT"
+          }
+        ],
+        "contracts": [
+          {
+            "contractId": "01920248-7a52-7a29-85be-dbab4c9b79bc",
+            "contractNumber": "Sample text",
+            "contractType": "XOL_PER_RISK",
+            "contractYear": 1,
+            "status": "DRAFT",
+            "currency": "EUR"
+          }
+        ],
+        "renewedFromId": "0192717d-eff0-7aab-8d62-f19b90f0755a",
+        "versions": [
+          {
+            "versionNo": 1,
+            "status": "DRAFT",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "diff": [
+        {
+          "field": "Sample text",
+          "before": "Sample text",
+          "after": "Sample text"
+        }
+      ]
     },
     "ProgrammeGetResponse": {
-      "programmes": "unspecified"
+      "programme": {
+        "programmeId": "019200be-9b12-7978-8968-19d18eb27daa",
+        "legalEntity": "SAMPLE_CODE",
+        "code": "SAMPLE_CODE",
+        "name": "Sample text",
+        "lineCode": "SAMPLE_CODE",
+        "programmeYear": 1,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "status": "DRAFT",
+        "versionNo": 1,
+        "recordVersion": 1,
+        "retention": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "contractId": "019210a1-7e50-7787-8d15-372d67373804",
+            "contractNumber": "Sample text",
+            "contractStatus": "DRAFT"
+          }
+        ],
+        "contracts": [
+          {
+            "contractId": "0192ffe5-fb6b-70ca-89b4-0457c938ebfc",
+            "contractNumber": "Sample text",
+            "contractType": "XOL_PER_RISK",
+            "contractYear": 1,
+            "status": "DRAFT",
+            "currency": "EUR"
+          }
+        ],
+        "renewedFromId": "01926338-c411-7b22-8521-83fdf035b8da",
+        "versions": [
+          {
+            "versionNo": 1,
+            "status": "DRAFT",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ProgrammeListItem": {
-      "programmes": "unspecified"
+      "programme": {
+        "programmeId": "0192ab1d-0884-7d3d-86d4-699471953a5e",
+        "legalEntity": "SAMPLE_CODE",
+        "code": "SAMPLE_CODE",
+        "name": "Sample text",
+        "lineCode": "SAMPLE_CODE",
+        "programmeYear": 1,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "status": "DRAFT",
+        "versionNo": 1,
+        "recordVersion": 1,
+        "retention": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "contractId": "01920d69-d27c-75b1-82bd-dd769930f8d1",
+            "contractNumber": "Sample text",
+            "contractStatus": "DRAFT"
+          }
+        ],
+        "contracts": [
+          {
+            "contractId": "0192310e-e079-7196-8235-e26d29d1d977",
+            "contractNumber": "Sample text",
+            "contractType": "XOL_PER_RISK",
+            "contractYear": 1,
+            "status": "DRAFT",
+            "currency": "EUR"
+          }
+        ],
+        "renewedFromId": "0192cf99-a73c-73c3-8a83-d6a2e863ce8b",
+        "versions": [
+          {
+            "versionNo": 1,
+            "status": "DRAFT",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ProgrammeListPage": {
       "items": [
         {
-          "programmes": "unspecified"
+          "programme": {
+            "programmeId": "01921a4a-56a5-7460-8638-dd3e3dd7dc81",
+            "legalEntity": "SAMPLE_CODE",
+            "code": "SAMPLE_CODE",
+            "name": "Sample text",
+            "lineCode": "SAMPLE_CODE",
+            "programmeYear": 1,
+            "currency": "EUR",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "status": "DRAFT",
+            "versionNo": 1,
+            "recordVersion": 1,
+            "retention": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "layers": [
+              {
+                "layerNo": 1,
+                "attachment": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                },
+                "limit": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                },
+                "contractId": "01926ca3-edd7-78b9-8812-759b0710acf2",
+                "contractNumber": "Sample text",
+                "contractStatus": "DRAFT"
+              }
+            ],
+            "contracts": [
+              {
+                "contractId": "01928079-9b38-7638-84f1-c50d9f032688",
+                "contractNumber": "Sample text",
+                "contractType": "XOL_PER_RISK",
+                "contractYear": 1,
+                "status": "DRAFT",
+                "currency": "EUR"
+              }
+            ],
+            "renewedFromId": "0192f103-d540-70e2-8b37-1f33e000ad1f",
+            "versions": [
+              {
+                "versionNo": 1,
+                "status": "DRAFT",
+                "period": {
+                  "from": "2026-01-01",
+                  "to": "2027-01-01"
+                },
+                "createdAt": "2026-10-07T09:00:00Z",
+                "createdBy": "Sample text"
+              }
+            ],
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "ProgrammeRenewRequest": {
-      "programmeData": "unspecified",
-      "period": "unspecified",
-      "decision": "unspecified"
+      "programmeId": "01928c76-6118-7da5-861d-77e057a88f79",
+      "reason": "SAMPLE_CODE"
     },
     "ProgrammeRenewResponse": {
-      "programme": "unspecified",
-      "diff": "unspecified"
+      "programme": {
+        "programmeId": "0192f5b9-599e-79f9-80bf-6933b1c8ead2",
+        "legalEntity": "SAMPLE_CODE",
+        "code": "SAMPLE_CODE",
+        "name": "Sample text",
+        "lineCode": "SAMPLE_CODE",
+        "programmeYear": 1,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "status": "DRAFT",
+        "versionNo": 1,
+        "recordVersion": 1,
+        "retention": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "contractId": "01928cc9-3d8a-7e0b-8a0e-4dad99feeecd",
+            "contractNumber": "Sample text",
+            "contractStatus": "DRAFT"
+          }
+        ],
+        "contracts": [
+          {
+            "contractId": "0192ac59-c642-722a-8634-beec2fbc70dd",
+            "contractNumber": "Sample text",
+            "contractType": "XOL_PER_RISK",
+            "contractYear": 1,
+            "status": "DRAFT",
+            "currency": "EUR"
+          }
+        ],
+        "renewedFromId": "01928482-1337-7312-82a2-98afa05d0474",
+        "versions": [
+          {
+            "versionNo": 1,
+            "status": "DRAFT",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "diff": [
+        {
+          "field": "Sample text",
+          "before": "Sample text",
+          "after": "Sample text"
+        }
+      ]
     },
     "ProgrammeReturnRequest": {
       "programmeData": "unspecified",
@@ -3037,13 +3362,96 @@
       "diff": "unspecified"
     },
     "ProgrammeUpdateRequest": {
-      "programmeData": "unspecified",
-      "period": "unspecified",
-      "decision": "unspecified"
+      "expectedRecordVersion": 1,
+      "name": "Sample text",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "layers": [
+        {
+          "layerNo": 1,
+          "attachment": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "limit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "contractId": "0192f0c3-1a6e-7c2a-8f0c-6ad44feb0dca"
+        }
+      ],
+      "reason": "SAMPLE_CODE"
     },
     "ProgrammeUpdateResponse": {
-      "programme": "unspecified",
-      "diff": "unspecified"
+      "programme": {
+        "programmeId": "01922fe3-721a-7299-8ee7-fd60bf14e4fc",
+        "legalEntity": "SAMPLE_CODE",
+        "code": "SAMPLE_CODE",
+        "name": "Sample text",
+        "lineCode": "SAMPLE_CODE",
+        "programmeYear": 1,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "status": "DRAFT",
+        "versionNo": 1,
+        "recordVersion": 1,
+        "retention": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "contractId": "0192eff6-be84-70a0-8958-673fe9b1182e",
+            "contractNumber": "Sample text",
+            "contractStatus": "DRAFT"
+          }
+        ],
+        "contracts": [
+          {
+            "contractId": "0192d109-2174-7fdc-868d-81d7f5edfe69",
+            "contractNumber": "Sample text",
+            "contractType": "XOL_PER_RISK",
+            "contractYear": 1,
+            "status": "DRAFT",
+            "currency": "EUR"
+          }
+        ],
+        "renewedFromId": "019231c3-bcdb-77ba-86b6-1f3e8a97f8e2",
+        "versions": [
+          {
+            "versionNo": 1,
+            "status": "DRAFT",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "diff": [
+        {
+          "field": "Sample text",
+          "before": "Sample text",
+          "after": "Sample text"
+        }
+      ]
     },
     "ReconciliationFinRequest": {
       "period": "unspecified"
@@ -3366,6 +3774,110 @@
       "brokerPartyId": "0192ee17-1c2a-79e8-8db3-d3fd514d5c1c",
       "signedLinePct": "12.50",
       "lead": true
+    },
+    "RiProgramme": {
+      "programmeId": "0192ef1e-3c0a-7a6d-8cba-d3b0a323fcd9",
+      "legalEntity": "SAMPLE_CODE",
+      "code": "SAMPLE_CODE",
+      "name": "Sample text",
+      "lineCode": "SAMPLE_CODE",
+      "programmeYear": 1,
+      "currency": "EUR",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "status": "DRAFT",
+      "versionNo": 1,
+      "recordVersion": 1,
+      "retention": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "layers": [
+        {
+          "layerNo": 1,
+          "attachment": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "limit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "contractId": "01921ea9-55e4-7ef9-8fff-5cff9acaaf1c",
+          "contractNumber": "Sample text",
+          "contractStatus": "DRAFT"
+        }
+      ],
+      "contracts": [
+        {
+          "contractId": "01921bb4-5a84-7e37-8c5a-8a42d3b03359",
+          "contractNumber": "Sample text",
+          "contractType": "XOL_PER_RISK",
+          "contractYear": 1,
+          "status": "DRAFT",
+          "currency": "EUR"
+        }
+      ],
+      "renewedFromId": "01926658-8bbf-7392-823a-6b70309536c7",
+      "versions": [
+        {
+          "versionNo": 1,
+          "status": "DRAFT",
+          "period": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "createdAt": "2026-10-07T09:00:00Z",
+          "createdBy": "Sample text"
+        }
+      ],
+      "createdAt": "2026-10-07T09:00:00Z"
+    },
+    "RiProgrammeContract": {
+      "contractId": "019274f0-40ce-7b49-820d-cd1e17d597cf",
+      "contractNumber": "Sample text",
+      "contractType": "XOL_PER_RISK",
+      "contractYear": 1,
+      "status": "DRAFT",
+      "currency": "EUR"
+    },
+    "RiProgrammeLayer": {
+      "layerNo": 1,
+      "attachment": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "limit": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "contractId": "0192a529-5161-7ab5-8fae-6abf4f566456",
+      "contractNumber": "Sample text",
+      "contractStatus": "DRAFT"
+    },
+    "RiProgrammeLayerInput": {
+      "layerNo": 1,
+      "attachment": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "limit": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "contractId": "0192ac2c-0f3e-7e9a-8603-7f8714789886"
+    },
+    "RiProgrammeVersionSummary": {
+      "versionNo": 1,
+      "status": "DRAFT",
+      "period": {
+        "from": "2026-01-01",
+        "to": "2027-01-01"
+      },
+      "createdAt": "2026-10-07T09:00:00Z",
+      "createdBy": "Sample text"
     },
     "SecurityReportRequest": {
       "rules": "unspecified"

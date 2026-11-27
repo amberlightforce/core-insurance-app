@@ -4,23 +4,32 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Programme.create result. PRD outputs: "programme, diff"</summary>
+/// <summary>ri.Programme.create result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProgrammeCreateResponse
 {
-    /// <summary>PRD: "programme"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'programme'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("programme")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Programme { get; init; }
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiProgramme Programme { get; init; }
 
-    /// <summary>PRD: "diff"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'diff'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("diff")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Diff { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<DiffItem> Diff { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record DiffItem
+    {
+        /// <summary>Contract member 'field'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("field")]
+        public required string Field { get; init; }
+
+        /// <summary>Contract member 'before'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("before")]
+        public required string? Before { get; init; }
+
+        /// <summary>Contract member 'after'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("after")]
+        public required string? After { get; init; }
+    }
 }
