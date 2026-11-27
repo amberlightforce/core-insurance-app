@@ -1,5 +1,10 @@
 using System.Text.RegularExpressions;
+using CoreIns.Modules.Finance.Commands;
+using CoreIns.Modules.Finance.Contracts.Api;
 using CoreIns.Modules.Finance.Queries;
+using CoreIns.Platform.Commands;
+using CoreIns.Platform.Errors;
+using CoreIns.SharedKernel.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +16,9 @@ internal static class FinanceOpsPermissions
 {
     public const string TrialBalance = "fin.Balance.trialBalance";
     public const string IntakeExceptionList = "fin.IntakeException.list";
+    public const string IntakeExceptionRerun = "fin.IntakeException.rerun";
+    public const string IntakeExceptionMarkDuplicate = "fin.IntakeException.markDuplicate";
+    public const string IntakeExceptionReject = "fin.IntakeException.reject";
     public const string PeriodList = "fin.Period.list";
 }
 
@@ -66,6 +74,26 @@ internal sealed class IntakeExceptionsController : ControllerBase
             return this.Problem(FinanceHttp.Invalid("cursor is malformed."));
         }
     }
+    /// <summary>fin.IntakeException.rerun: re-dispatches the stored events; an event that is no longer suspended is a no-op.</summary>
+    [HttpPost("rerun")]
+    [Authorize(Policy = FinanceOpsPermissions.IntakeExceptionRerun)]
+    public async Task<IResult> RerunAsync(
+        [FromBody] IntakeExceptionRerunRequest request, [FromServices] ICommandHandler<RerunIntakeExceptions, IntakeExceptionRerunResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new RerunIntakeExceptions(request.ItemIds, request.Reason), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>fin.IntakeException.markDuplicate: closes the events as duplicates of an already posted fact; a reason is required.</summary>
+    [HttpPost("mark-duplicate")]
+    [Authorize(Policy = FinanceOpsPermissions.IntakeExceptionMarkDuplicate)]
+    public async Task<IResult> MarkDuplicateAsync(
+        [FromBody] IntakeExceptionMarkDuplicateRequest request, [FromServices] ICommandHandler<MarkDuplicateIntakeExceptions, IntakeExceptionRerunResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new MarkDuplicateIntakeExceptions(request.ItemIds, request.Reason), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>fin.IntakeException.reject: closes the events without posting; a reason is required.</summary>
+    [HttpPost("reject")]
+    [Authorize(Policy = FinanceOpsPermissions.IntakeExceptionReject)]
+    public async Task<IResult> RejectAsync(
+        [FromBody] IntakeExceptionRejectRequest request, [FromServices] ICommandHandler<RejectIntakeExceptions, IntakeExceptionRerunResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new RejectIntakeExceptions(request.ItemIds, request.Reason), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 }
 
 /// <summary>REST facade of <c>fin.Period.list</c> (REQ-FIN-007, -232): accounting periods and their state.</summary>

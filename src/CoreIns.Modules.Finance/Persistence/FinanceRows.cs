@@ -251,6 +251,13 @@ internal sealed class BusinessEventRow
     public Instant UpdatedAt { get; set; }
 
     public int RecordVersion { get; set; }
+
+    /// <summary>Why finance closed the event as a duplicate or rejected it, or re-ran it (BO-FIN-03).</summary>
+    public string? ResolutionReason { get; set; }
+
+    public string? ResolvedBy { get; set; }
+
+    public Instant? ResolvedAt { get; set; }
 }
 
 /// <summary><c>fin.financial_period</c>: calendar-month accounting periods (close states arrive with W5-FIN close work).</summary>
