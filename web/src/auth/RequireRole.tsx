@@ -16,7 +16,7 @@ export function RequireRole({ roles }: { roles: readonly string[] }) {
   if (hasAnyRole(userRoles, roles)) return <Outlet />;
   return (
     <div className={styles.page}>
-      <Banner variant="warning" live="none" title={t('noPermission.title')}>
+      <Banner variant="warning" live="alert" autoFocus title={t('noPermission.title')}>
         {t('noPermission.body')}
       </Banner>
     </div>

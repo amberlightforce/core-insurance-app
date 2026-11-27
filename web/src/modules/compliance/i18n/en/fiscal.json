@@ -1,0 +1,68 @@
+{
+  "fiscal": {
+    "overline": "Compliance",
+    "title": "Fiscal documents",
+    "lead": "Fiscal documents registered with the tax channel, and the ones that need attention.",
+    "back": "Back to fiscal documents",
+    "notFound": "This fiscal document does not exist in your legal entity.",
+    "breaks": {
+      "title": "Reconciliation breaks",
+      "body": "Documents the channel has rejected or not yet registered.",
+      "empty": "No breaks: every document is registered."
+    },
+    "list": {
+      "title": "All documents",
+      "empty": "No fiscal documents match."
+    },
+    "filter": {
+      "sourceType": "Source type",
+      "sourceId": "Source id",
+      "all": "All sources"
+    },
+    "columns": {
+      "number": "Number",
+      "role": "Role",
+      "source": "Source",
+      "status": "Status",
+      "issued": "Issued",
+      "total": "Total",
+      "mark": "MARK",
+      "rejections": "Rejection codes"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "REGISTERED": "Registered",
+      "REJECTED": "Rejected"
+    },
+    "role": {
+      "ISSUE": "Issue",
+      "CREDIT": "Credit note",
+      "CANCELLATION": "Cancellation"
+    },
+    "stub": {
+      "title": "Stub channel",
+      "body": "These identifiers are synthetic and are not fiscal evidence."
+    },
+    "placeholder": {
+      "title": "Placeholder document type",
+      "body": "The document type is a placeholder until the tax document types are settled; it is never sent to the real service."
+    },
+    "detail": {
+      "identifiers": "Identifiers",
+      "uid": "UID",
+      "channel": "Channel",
+      "documentType": "Document type",
+      "counterparty": "Counterparty",
+      "corrects": "Corrects",
+      "rejections": "Rejection codes",
+      "lines": "Lines",
+      "revision": "Revision"
+    },
+    "lines": {
+      "category": "Category",
+      "amount": "Amount",
+      "charge": "Charge",
+      "empty": "No lines."
+    }
+  }
+}

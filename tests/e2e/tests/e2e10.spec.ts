@@ -13,23 +13,14 @@ type Key = keyof typeof FEATURES;
 const KEYS = Object.keys(FEATURES) as Key[];
 const GATE_DEADLINE_MS = 60_000;
 
+const OPEN_STATUS: Record<Key, number> = { fnol: 200, pty: 404, bil: 404, uw: 404, chn: 200 };
+
 const ENDPOINTS: Record<Key, { path: string; body: unknown }> = {
   fnol: { path: '/api/clm/v1/fnol/assist', body: { text: 'Rear-end collision on 2026-10-03, plate ΥΝΖ 4821, no injuries.' } },
-  pty: {
-    path: '/api/pty/v1/parties/explain-duplicate',
-    body: {
-      a: { name: 'Maria Papadopoulou', identifier: '123456789', birthDate: '1980-05-17' },
-      b: { name: 'maria papadopoulou', identifier: '123456789', birthDate: '1980-05-17' },
-    },
-  },
-  bil: {
-    path: '/api/bil/v1/suspense/suggest-match',
-    body: {
-      payment: { amount: 120.5, reference: 'INV-0042', payerName: 'Maria' },
-      candidates: [{ invoiceNo: 'INV-0041', openAmount: 99 }, { invoiceNo: 'INV-0042', openAmount: 120.5 }],
-    },
-  },
-  uw: { path: '/api/uw/v1/referrals/summarize', body: { referralId: 'R-1', reasons: ['Sum insured above authority'], sumInsured: 750000, product: 'PROPERTY' } },
+  // Facts are loaded server-side by id (NX-HD-14); with the gate open, unknown ids answer 404 (no caller-supplied facts).
+  pty: { path: '/api/pty/v1/parties/explain-duplicate', body: { partyIdA: '00000000-0000-4000-8000-0000000000a1', partyIdB: '00000000-0000-4000-8000-0000000000a2' } },
+  bil: { path: '/api/bil/v1/suspense/suggest-match', body: { receiptId: '00000000-0000-4000-8000-0000000000b1' } },
+  uw: { path: '/api/uw/v1/referrals/summarize', body: { referralId: '00000000-0000-4000-8000-0000000000c1' } },
   chn: { path: '/api/chn/v1/agent/mcp', body: { jsonrpc: '2.0', id: 1, method: 'tools/list' } },
 };
 
@@ -82,7 +73,7 @@ test('E2E-10 AI kill switch: approval gate, suggestions, bias breach, register s
       const set = await call(request, admin, 'POST', '/api/plt/v1/ai-toggle/set', { featureId: feature, enabled: true });
       expect(set.status, set.text).toBe(200);
     }
-    for (const key of KEYS) await waitFor(key, 200);
+    for (const key of KEYS) await waitFor(key, OPEN_STATUS[key]);
   });
 
   // ---- 3. The five endpoints answer with suggestions.
@@ -91,13 +82,7 @@ test('E2E-10 AI kill switch: approval gate, suggestions, bias breach, register s
     expect(fnol['suggestion']['cause']).toBe('COLLISION');
     expect(fnol['suggestion']['lossDate']).toBe('2026-10-03');
     expect(fnol['interactionId']).toBeTruthy();
-    const pty = (await invoke('pty')).body;
-    expect(pty['suggestion']['likelihood']).toBe('LIKELY_DUPLICATE');
-    expect(pty['interactionId']).toBeTruthy();
-    const bil = (await invoke('bil')).body;
-    expect(bil['suggestion']['matches'][0]['invoiceNo']).toBe('INV-0042');
-    const uw = (await invoke('uw')).body;
-    expect(String(uw['suggestion']['summary'])).toContain('Sum insured above authority');
+    for (const key of ['pty', 'bil', 'uw'] as Key[]) expect((await invoke(key)).status, `${key}: gate open, unknown id`).toBe(404);
     const tools = (await invoke('chn')).body;
     expect((tools['result']['tools'] as unknown[]).length).toBeGreaterThan(0);
   });
@@ -124,7 +109,7 @@ test('E2E-10 AI kill switch: approval gate, suggestions, bias breach, register s
     expect(bad.body['modelStatus']).toBe('SUSPENDED');
     await waitFor('fnol', 503);
     expect((await resolveFeature(FEATURES.fnol))['enabled']).toBe(false);
-    for (const key of ['pty', 'bil', 'uw', 'chn'] as Key[]) expect((await invoke(key)).status, `${key} is untouched`).toBe(200);
+    for (const key of ['pty', 'bil', 'uw', 'chn'] as Key[]) expect((await invoke(key)).status, `${key} is untouched`).toBe(OPEN_STATUS[key]);
   });
 
   // ---- 6. CMP suspends AI-PTY-01: AiSystemStatusChanged is consumed by PLT and that feature goes off, the others stay on.
@@ -134,7 +119,7 @@ test('E2E-10 AI kill switch: approval gate, suggestions, bias breach, register s
     expect(await registerStatus(FEATURES.pty)).toBe('SUSPENDED');
     await waitFor('pty', 503);
     expect((await resolveFeature(FEATURES.pty))['enabled']).toBe(false);
-    for (const key of ['bil', 'uw', 'chn'] as Key[]) expect((await invoke(key)).status, `${key} is untouched`).toBe(200);
+    for (const key of ['bil', 'uw', 'chn'] as Key[]) expect((await invoke(key)).status, `${key} is untouched`).toBe(OPEN_STATUS[key]);
   });
 
   // ---- 7. Global kill switch: every endpoint refuses within 60 s.

@@ -57,10 +57,20 @@ internal sealed class TicketRow
     public string? ExecutedCommandRef { get; set; }
 }
 
+/// <summary>Executes an approved ticket's state-changing tool in the owning module (in-process) and returns its command reference.</summary>
+internal interface ITicketExecutor
+{
+    /// <summary>The catalogue tool this executor serves.</summary>
+    string Tool { get; }
+
+    Task<string> ExecuteAsync(TicketRow ticket, CancellationToken cancellationToken);
+}
+
 /// <summary>The MCP tool catalogue of this slice: a small subset of PRD-12 section 9.1.4 (class, whether a human ticket is needed).</summary>
 internal static class AgentTools
 {
     public const string FeatureId = "AI-CHN-02";
+    public const string ToolsResourceUri = "chn://tools";
     public static readonly TimeSpan TicketLifetime = TimeSpan.FromHours(24);
 
     public static readonly (string Tool, string Cls, bool TicketRequired)[] Catalogue =
@@ -119,7 +129,7 @@ internal static class StepUp
 }
 
 /// <summary>Ticket reads and decisions (chn.Ticket.get, approve, reject). Never gated by the AI switch: a human can always decide a pending ticket.</summary>
-internal sealed class TicketService(ChannelsDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock)
+internal sealed class TicketService(ChannelsDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, IEnumerable<ITicketExecutor> executors)
 {
     public LegalEntityId LegalEntity => legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
 
@@ -197,8 +207,14 @@ internal sealed class TicketService(ChannelsDbContext db, RequestContext context
         row.DecidedAt = now;
         row.DecidedBy = context.Actor.ToString();
 
-        // TODO(hardening): on approval execute the owning module's command with the agent's arguments and record its reference.
+        // On approval, run the owning module's command with the agent's arguments through the registered executor for the tool and record
+        // its reference. Without a registered executor the ticket stays Approved with no reference (the human completes the action).
         row.ExecutedCommandRef = null;
+        if (approve && executors.FirstOrDefault(e => e.Tool == row.Tool) is { } executor)
+        {
+            row.ExecutedCommandRef = await executor.ExecuteAsync(row, cancellationToken).ConfigureAwait(false);
+        }
+
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return row;
     }
@@ -244,9 +260,18 @@ internal sealed class AgentMcpController : ControllerBase
             case AgentMcpRequest.MethodValue.ToolsCall:
                 return await CallAsync(request, tickets, interactionId, cancellationToken).ConfigureAwait(false);
             default:
-                // TODO(hardening): resources/read serves the PRD resource catalogue; none are published yet.
-                return Rpc(request, new { contents = Array.Empty<object>(), interactionId });
+                return Rpc(request, ResourcesResult(request, interactionId));
         }
+    }
+
+    /// <summary>The published resources: the tool catalogue (<c>chn://tools</c>). resources/read of another uri returns no contents.</summary>
+    private static object ResourcesResult(AgentMcpRequest request, Guid interactionId)
+    {
+        var tools = AgentTools.Catalogue.Select(t => new { name = t.Tool, @class = t.Cls, ticketRequired = t.TicketRequired }).ToArray();
+        var uri = request.Params is { ValueKind: JsonValueKind.Object } p && p.TryGetProperty("uri", out var u) && u.ValueKind == JsonValueKind.String ? u.GetString() : null;
+        return uri == AgentTools.ToolsResourceUri
+            ? new { contents = new[] { new { uri, mimeType = "application/json", text = JsonSerializer.Serialize(tools) } }, interactionId }
+            : new { contents = Array.Empty<object>(), interactionId };
     }
 
     private static async Task<IResult> CallAsync(AgentMcpRequest request, TicketService tickets, Guid interactionId, CancellationToken cancellationToken)

@@ -75,6 +75,8 @@ public static class PolicyModule
         services.AddModuleDbContext<PolicyDbContext>(Schema);
 
         services.AddScoped(typeof(Dependency<>));
+        services.AddScoped<PartyDisplayName>();
+        services.AddScoped<PsrWorkTasks>();
         services.AddScoped<RiskTrees>();
         services.AddScoped<RatingInput>();
         services.AddScoped<JobReader>();

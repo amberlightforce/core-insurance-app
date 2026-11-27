@@ -19,6 +19,44 @@ internal sealed class FiscalDocumentReader(ComplianceDbContext db)
         return row is null ? null : ToResponse(row);
     }
 
+    /// <summary><c>cmp.FiscalDocument.listBySource</c>: documents of this legal entity, newest first, optionally narrowed by source.</summary>
+    public async Task<IReadOnlyList<FiscalDocumentGetResponse>> ListAsync(
+        LegalEntityId legalEntity, string? sourceType, string? sourceId, int limit, CancellationToken cancellationToken)
+    {
+        var query = db.FiscalDocuments.AsNoTracking().Where(d => d.LegalEntityId == legalEntity);
+        if (!string.IsNullOrWhiteSpace(sourceType))
+        {
+            query = query.Where(d => d.SourceType == sourceType);
+        }
+
+        if (!string.IsNullOrWhiteSpace(sourceId))
+        {
+            query = query.Where(d => d.SourceId == sourceId);
+        }
+
+        var rows = await query.OrderByDescending(d => d.IssueDate).ThenByDescending(d => d.FiscalDocumentId)
+            .Take(Math.Clamp(limit, 1, 200)).ToListAsync(cancellationToken).ConfigureAwait(false);
+        return [.. rows.Select(ToResponse)];
+    }
+
+    /// <summary>
+    /// <c>cmp.FiscalReconciliation.breaks</c>: the documents the channel has not registered (Rejected, or still Pending)
+    /// for the legal entity, optionally up to a business date. A break is a document whose books and channel disagree.
+    /// </summary>
+    public async Task<IReadOnlyList<FiscalDocumentGetResponse>> BreaksAsync(
+        LegalEntityId legalEntity, BusinessDate? upTo, int limit, CancellationToken cancellationToken)
+    {
+        var query = db.FiscalDocuments.AsNoTracking()
+            .Where(d => d.LegalEntityId == legalEntity && (d.Status == "REJECTED" || d.Status == "PENDING"));
+        if (upTo is { } date)
+        {
+            query = query.Where(d => d.IssueDate <= date);
+        }
+
+        var rows = await query.OrderBy(d => d.IssueDate).Take(Math.Clamp(limit, 1, 200)).ToListAsync(cancellationToken).ConfigureAwait(false);
+        return [.. rows.Select(ToResponse)];
+    }
+
     private static FiscalDocumentGetResponse ToResponse(FiscalDocumentRow row)
     {
         var currency = Currency.FromCode(row.Currency);

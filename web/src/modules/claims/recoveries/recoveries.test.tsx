@@ -2,6 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { ClaimView } from '../../../api/types';
+import { expectNoA11yViolations } from '../../../test/axe';
 import { mockApi, problem, renderScreen, type MockRoute } from '../../../test/mockApi';
 import { ClaimViewPage } from '../ClaimViewPage';
 import { closeGuardFindings } from '../closeGuard';
@@ -171,6 +172,7 @@ describe('claim file recoveries', () => {
     );
     const { user } = view('recoveries');
     expect(await screen.findByText('Υποκατάσταση', {}, slow)).toBeInTheDocument();
+    await expectNoA11yViolations();
     expect(screen.queryByText('Προτείνεται υποκατάσταση')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Απαίτηση' }));
     const form = await screen.findByRole('form', { name: 'Απαίτηση ποσού' }, slow);

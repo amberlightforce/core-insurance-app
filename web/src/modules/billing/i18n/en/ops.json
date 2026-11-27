@@ -1,0 +1,86 @@
+{
+  "suspense": {
+    "title": "Suspense",
+    "open": "Suspense",
+    "subtitle": "Unapplied receipts waiting to be matched to invoices",
+    "listTitle": "Unapplied receipts",
+    "emptyTitle": "No unapplied receipts",
+    "emptyBody": "Receipts that cannot be matched automatically appear here.",
+    "roleNote": "Allocating needs a billing role",
+    "columns": {
+      "number": "Receipt",
+      "amount": "Unapplied",
+      "reason": "Reason",
+      "method": "Method",
+      "valueDate": "Value date"
+    },
+    "reasons": {
+      "AMOUNT_MISMATCH": "Amount does not match",
+      "NO_OPEN_INVOICE": "No open invoice",
+      "AMBIGUOUS_MATCH": "Ambiguous match",
+      "CONCURRENT_ALLOCATION": "Concurrent allocation"
+    },
+    "match": {
+      "title": "Match receipt {number}",
+      "facts": "Receipt facts",
+      "amount": "Receipt amount",
+      "unallocated": "Unapplied amount",
+      "hint": "Pick whole open invoices of the same account; each is settled in full.",
+      "invoice": "{number} - open {open}, due {due}",
+      "noneTitle": "No open invoices on this account",
+      "noneBody": "There is nothing to match this receipt to yet.",
+      "over": "The selected invoices exceed the unapplied amount",
+      "submit": "Allocate {total}",
+      "done": "Receipt allocated",
+      "failed": "The allocation failed"
+    }
+  },
+  "plans": {
+    "title": "Payment plans",
+    "open": "Payment plans",
+    "subtitle": "The plan instance of every attached policy term",
+    "listTitle": "Plan instances",
+    "search": "Policy number starts with",
+    "emptyTitle": "No plan instances",
+    "emptyBody": "Plans appear when a policy term is bound.",
+    "active": "Active",
+    "cancelled": "Cancelled",
+    "columns": {
+      "policy": "Policy",
+      "term": "Term",
+      "plan": "Plan",
+      "mode": "Bill mode",
+      "method": "Method",
+      "from": "From",
+      "to": "To",
+      "state": "State"
+    }
+  },
+  "mandates": {
+    "title": "SEPA mandates",
+    "open": "Mandates",
+    "subtitle": "Direct-debit mandates on record",
+    "scopeNote": "Shows mandates imported by the migration; new mandates are not created here yet.",
+    "listTitle": "Mandates",
+    "search": "Reference starts with",
+    "emptyTitle": "No mandates",
+    "emptyBody": "Imported SEPA mandates appear here.",
+    "columns": {
+      "reference": "Reference",
+      "iban": "IBAN",
+      "signed": "Signed",
+      "status": "Status",
+      "origin": "Origin"
+    },
+    "status": { "ACTIVE": "Active", "CANCELLED": "Cancelled" },
+    "origin": { "MIGRATION": "Migrated" }
+  },
+  "accountCurrents": {
+    "title": "Account-currents",
+    "open": "Account-currents",
+    "subtitle": "Intermediary statements and disputes",
+    "listTitle": "Statements",
+    "unavailableTitle": "Not available yet",
+    "unavailableBody": "Intermediary account-currents are not served by the billing service yet, so there is nothing to show."
+  }
+}

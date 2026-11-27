@@ -8,9 +8,12 @@ import {
   billingRoles,
   claimsRoles,
   complianceRoles,
+  fiscalRoles,
   dsarRoles,
+  financeRoles,
   migrationRoles,
   packRoles,
+  productRoles,
   packRollbackReviewerRoles,
   reinsuranceRoles,
   underwritingRoles,
@@ -137,6 +140,56 @@ const moduleRoutes: RouteObject[] = [
       },
     ],
   },
+  // NX-UI-14c: billing operations screens (billing roles).
+  {
+    path: 'billing/suspense',
+    element: <RequireRole roles={billingRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/ops/SuspensePage')).SuspensePage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'billing/plans',
+    element: <RequireRole roles={billingRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/ops/PlansPage')).PlansPage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'billing/mandates',
+    element: <RequireRole roles={billingRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/ops/MandatesPage')).MandatesPage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'billing/account-currents',
+    element: <RequireRole roles={billingRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/ops/AccountCurrentsPage'))
+            .AccountCurrentsPage,
+        }),
+      },
+    ],
+  },
   {
     // SL6-UI-BIL-DELINQ: delinquency cases (billing roles; guard shared with refunds).
     path: 'billing/delinquency',
@@ -246,8 +299,82 @@ const moduleRoutes: RouteObject[] = [
     }),
   },
   {
+    path: 'documents',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/DocumentsHomePage')).DocumentsHomePage,
+    }),
+  },
+  {
+    path: 'documents/subject/:module/:type/:id',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/SubjectDocumentsPage')).SubjectDocumentsPage,
+    }),
+  },
+  {
+    path: 'documents/:documentId',
+    lazy: async () => ({
+      Component: (await import('./modules/documents/DocumentDetailPage')).DocumentDetailPage,
+    }),
+  },
+  {
+    path: 'reports',
+    lazy: async () => ({
+      Component: (await import('./modules/reports/ReportsPage')).ReportsPage,
+    }),
+  },
+  {
     path: 'finance/journals/policy/:policyNumber',
     lazy: async () => ({ Component: (await import('./modules/finance/JournalPage')).JournalPage }),
+  },
+  {
+    path: 'finance',
+    element: <RequireRole roles={financeRoles} />,
+    children: [
+      {
+        path: 'trial-balance',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/TrialBalancePage')).TrialBalancePage,
+        }),
+      },
+      {
+        path: 'manual-journals',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/ManualJournalsPage')).ManualJournalsPage,
+        }),
+      },
+      {
+        path: 'manual-journals/new',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/ManualJournalFormPage'))
+            .ManualJournalFormPage,
+        }),
+      },
+      {
+        path: 'manual-journals/:id',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/ManualJournalPage')).ManualJournalPage,
+        }),
+      },
+      {
+        path: 'intake-exceptions',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/IntakeExceptionsPage'))
+            .IntakeExceptionsPage,
+        }),
+      },
+      {
+        path: 'period-close',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/PeriodClosePage')).PeriodClosePage,
+        }),
+      },
+      {
+        path: 'earning',
+        lazy: async () => ({
+          Component: (await import('./modules/finance/ops/EarningRunPage')).EarningRunPage,
+        }),
+      },
+    ],
   },
 ];
 
@@ -310,6 +437,24 @@ moduleRoutes.push(
     ],
   },
 );
+moduleRoutes.push({
+  path: 'products',
+  element: <RequireRole roles={productRoles} />,
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/products/ProductCataloguePage')).ProductCataloguePage,
+      }),
+    },
+    {
+      path: ':code',
+      lazy: async () => ({
+        Component: (await import('./modules/products/ProductDetailPage')).ProductDetailPage,
+      }),
+    },
+  ],
+});
 moduleRoutes.push({
   path: 'reinsurance',
   element: <RequireRole roles={reinsuranceRoles} />,
@@ -382,6 +527,40 @@ moduleRoutes.push({
 });
 
 moduleRoutes.push({
+  // NX-UI-11: fiscal documents, reconciliation breaks and the AI-system register.
+  path: 'compliance/fiscal',
+  element: <RequireRole roles={fiscalRoles} />,
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/compliance/fiscal/FiscalListPage')).FiscalListPage,
+      }),
+    },
+    {
+      path: ':id',
+      lazy: async () => ({
+        Component: (await import('./modules/compliance/fiscal/FiscalDocumentPage'))
+          .FiscalDocumentPage,
+      }),
+    },
+  ],
+});
+
+moduleRoutes.push({
+  path: 'compliance/ai-systems',
+  element: <RequireRole roles={complianceRoles} />,
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/compliance/ai/AiRegisterPage')).AiRegisterPage,
+      }),
+    },
+  ],
+});
+
+moduleRoutes.push({
   path: 'compliance/dsar',
   element: <RequireRole roles={dsarRoles} />,
   children: [
@@ -437,12 +616,17 @@ const implemented = new Set([
   '/admin/migration',
   '/compliance',
   '/compliance/dsar',
+  '/compliance/fiscal',
+  '/compliance/ai-systems',
   '/channels/withdrawals',
   '/policies/pack-rollback',
+  '/products',
   '/parties',
   '/policies',
   '/billing',
   '/finance',
+  '/documents',
+  '/reports',
   '/claims',
   '/underwriting',
   '/reinsurance',

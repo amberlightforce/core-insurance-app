@@ -233,6 +233,9 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
                     b.HasKey("ComplaintId")
                         .HasName("pk_complaint");
 
+                    b.HasIndex("ComplainantPartyId")
+                        .HasDatabaseName("ix_complaint_complainant_party");
+
                     b.HasIndex("LegalEntityId", "Number")
                         .IsUnique()
                         .HasDatabaseName("ux_complaint_number");
@@ -302,6 +305,9 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
 
                     b.HasKey("EntryId")
                         .HasName("pk_disclosure_log");
+
+                    b.HasIndex("DsarId")
+                        .HasDatabaseName("ix_disclosure_log_dsar");
 
                     b.HasIndex("LegalEntityId", "SubjectPartyId")
                         .HasDatabaseName("ix_disclosure_log_subject");
@@ -527,6 +533,9 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
 
                     b.HasKey("HandoverId")
                         .HasName("pk_bureau_handover");
+
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_bureau_handover_policy");
 
                     b.HasIndex("LegalEntityId", "VehicleRef")
                         .IsUnique()
@@ -823,6 +832,9 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
 
                     b.HasKey("FiscalDocumentId")
                         .HasName("pk_fiscal_document");
+
+                    b.HasIndex("CounterpartyPartyId")
+                        .HasDatabaseName("ix_fiscal_document_counterparty_party");
 
                     b.HasIndex("LegalEntityId", "Series", "Number")
                         .IsUnique()

@@ -5,6 +5,9 @@
         "fin.Journal.get": [ "Staff.Finance", "Staff.Billing", "Platform.Admin" ],
         "fin.Journal.query": [ "Staff.Finance", "Staff.Billing", "Platform.Admin" ],
         "fin.PostingRules.list": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.Balance.trialBalance": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.IntakeException.list": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.Period.list": [ "Staff.Finance", "Platform.Admin" ],
         "fin.Period.devLock": [ "Staff.Finance", "Platform.Admin" ]
       }
     }

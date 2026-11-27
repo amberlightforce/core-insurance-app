@@ -949,20 +949,71 @@
         "0192f5c9-4485-7d78-8e25-79603ae537fd"
       ]
     },
+    "DeadLetterListItem": {
+      "deadLetterId": "01928aef-6314-7e69-897a-1046690f3a12",
+      "handler": "sample",
+      "module": "sample",
+      "eventId": "0192f9bc-1fcb-7bb6-8cf7-55147b714926",
+      "eventType": "sample",
+      "aggregateType": "sample",
+      "aggregateId": "sample",
+      "errorClass": "sample",
+      "errorMessage": "sample",
+      "attempts": 1,
+      "parkedAt": "2026-10-07T09:00:00Z",
+      "status": "Parked",
+      "resolvedAt": "2026-10-07T09:00:00Z",
+      "resolutionReason": "sample"
+    },
     "DeadLetterListPage": {
       "items": [
         {
-          "key": "value"
+          "deadLetterId": "0192724e-15ed-787c-82d4-09b0a91559bb",
+          "handler": "sample",
+          "module": "sample",
+          "eventId": "01928dcc-80df-7228-85b9-7d7cd154993e",
+          "eventType": "sample",
+          "aggregateType": "sample",
+          "aggregateId": "sample",
+          "errorClass": "sample",
+          "errorMessage": "sample",
+          "attempts": 1,
+          "parkedAt": "2026-10-07T09:00:00Z",
+          "status": "Parked",
+          "resolvedAt": "2026-10-07T09:00:00Z",
+          "resolutionReason": "sample"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
+    "DeadLetterReplayOutcome": {
+      "deadLetterId": "0192eb62-68f0-7070-8ef0-4cc01d60d653",
+      "outcome": "Replayed",
+      "errorMessage": "sample"
+    },
     "DeadLetterReplayRequest": {
-      "consumer": "unspecified",
-      "fromPosition": "unspecified",
       "deadLetterIds": [
         "019204e1-b1c5-7683-8de1-f8396a3089b1"
+      ],
+      "handler": "sample",
+      "module": "sample",
+      "eventType": "sample",
+      "parkedFrom": "2026-10-07T09:00:00Z",
+      "parkedTo": "2026-10-07T09:00:00Z"
+    },
+    "DeadLetterReplayResponse": {
+      "dryRun": true,
+      "matched": 1,
+      "replayed": 1,
+      "stillFailing": 1,
+      "skipped": 1,
+      "results": [
+        {
+          "deadLetterId": "019221e7-f1f9-7736-8697-4844ddf29751",
+          "outcome": "Replayed",
+          "errorMessage": "sample"
+        }
       ]
     },
     "DecisionTableActivateRequest": {

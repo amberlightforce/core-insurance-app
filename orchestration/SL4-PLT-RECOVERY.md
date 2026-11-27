@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # SL4-PLT recovery: roles, development identity and owning-module withdrawal
 
 Branch `codex/sl4-platform`; owned checkout `agent-ad6062491a131f6ec`.

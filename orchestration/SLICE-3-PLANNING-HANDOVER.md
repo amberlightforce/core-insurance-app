@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # Slice 3 planning handover — W6 policy servicing
 
 **Written:** 2026-10-08 by the orchestrator at the end of slice 2. **For:** whoever plans and runs slice 3 (a new

@@ -319,6 +319,12 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                     b.HasKey("BusinessEventId")
                         .HasName("pk_business_event");
 
+                    b.HasIndex("BillingAccountId")
+                        .HasDatabaseName("ix_business_event_billing_account");
+
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_business_event_policy");
+
                     b.HasIndex("SourceEventId")
                         .IsUnique()
                         .HasDatabaseName("ux_business_event_source");
@@ -909,6 +915,15 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
 
                     b.HasKey("LineId")
                         .HasName("pk_journal_line");
+
+                    b.HasIndex("BillingAccountId")
+                        .HasDatabaseName("ix_journal_line_billing_account");
+
+                    b.HasIndex("InvoiceId")
+                        .HasDatabaseName("ix_journal_line_invoice");
+
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_journal_line_policy_id");
 
                     b.HasIndex("JournalId", "LineNo")
                         .IsUnique()
