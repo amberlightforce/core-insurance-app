@@ -21,6 +21,9 @@ internal static class ReinsurancePermissions
     public const string ContractUpdate = "ri.Contract.update";
     public const string ContractSubmit = "ri.Contract.submit";
     public const string ContractApprove = "ri.Contract.approve";
+    public const string ContractEndorse = "ri.Contract.endorse";
+    public const string ContractApproveEndorsement = "ri.Contract.approveEndorsement";
+    public const string ContractVersionAt = "ri.Contract.versionAt";
     public const string ContractGet = "ri.Contract.get";
     public const string ContractList = "ri.Contract.list";
     public const string ContractApplicable = "ri.Contract.applicable";

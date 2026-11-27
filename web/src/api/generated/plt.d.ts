@@ -886,6 +886,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/plt/v1/dead-letters/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Replay and DLQ
+         * @description Replay and DLQ
+         *
+         *     PRD inputs: consumer, from position; dead-letter ids
+         *     PRD outputs: —
+         */
+        get: operations["plt.DeadLetter.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plt/v1/dead-letters/discard": {
         parameters: {
             query?: never;
@@ -2505,23 +2528,28 @@ export interface components {
         AuthorityAttachDecisionResponse: Record<string, never>;
         /** @description plt.Authority.whoCanApprove result. PRD outputs: "—" */
         AuthorityWhoCanApproveResponse: Record<string, never>;
-        /** @description plt.ApprovalType.register request. PRD inputs: "type, object ref, payload hash, diff" */
+        /** @description plt.ApprovalType.register request: registers (or updates, idempotently by type) an approval type definition. Administrator only. */
         ApprovalTypeRegisterRequest: {
-            /** @description PRD: "type" */
-            type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "object ref" */
-            objectRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payload hash" */
-            payloadHash?: components["schemas"]["Sha256"];
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
+            /** @description Approval type code, e.g. CLM.TRANSACTION_SET */
+            type: string;
+            /** @description What the approval type decides */
+            description: string;
+            /** @description Role whose inbox receives requests of this type unless the owning module names another */
+            defaultReferralRole?: string;
+            /** @description Registered authority type a checker must hold for this approval type */
+            defaultAuthorityType?: string;
         };
-        /** @description plt.ApprovalType.register result. PRD outputs: "request; decision" */
+        /** @description plt.ApprovalType.register result */
         ApprovalTypeRegisterResponse: {
-            /** @description PRD: "request" */
-            request?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            type: string;
+            description: string;
+            defaultReferralRole?: string;
+            defaultAuthorityType?: string;
+            /**
+             * Format: int32
+             * @description 1 on first registration, incremented on every update
+             */
+            version: number;
         };
         /**
          * @description Approval request state (REQ-PLT-114 subset built by SL2-PLT; Returned, Expired and Consumed come with W1-PLT-02). Withdrawn = superseded by a newer request for the same subject.
@@ -2753,23 +2781,59 @@ export interface components {
         };
         /** @description plt.Consumer.replay result. PRD outputs: "—" */
         ConsumerReplayResponse: Record<string, never>;
-        /** @description plt.DeadLetter.list result. PRD outputs: "—" */
-        DeadLetterListItem: Record<string, never>;
+        /** @enum {string} */
+        DeadLetterStatus: "Parked" | "Replayed" | "DiscardPending" | "Discarded";
+        /** @description A parked (or resolved) outbox message: metadata and the last error only, never the event payload (it may hold personal data; the archived event stays in plt.event_archive). */
+        DeadLetterListItem: {
+            deadLetterId: components["schemas"]["Uuid"];
+            /** @description Event handler that kept failing, e.g. CLM.ClaimOpened.Reserve */
+            handler: string;
+            /** @description Module of the handler (its name prefix) */
+            module: string;
+            eventId: components["schemas"]["Uuid"];
+            eventType: string;
+            aggregateType: string;
+            aggregateId: string;
+            errorClass: string;
+            /** @description Last failure, truncated to 500 characters */
+            errorMessage: string;
+            attempts: number;
+            parkedAt: components["schemas"]["Instant"];
+            status: components["schemas"]["DeadLetterStatus"];
+            resolvedAt?: components["schemas"]["Instant"] | null;
+            resolutionReason?: string | null;
+        };
         /** @description Page of plt.DeadLetter.list results (cursor pagination, contract §3.5.5) */
         DeadLetterListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["DeadLetterListItem"][];
         };
-        /** @description plt.DeadLetter.replay request. PRD inputs: "consumer, from position; dead-letter ids" */
+        /** @description plt.DeadLetter.replay request (NX-OT-14). Name the dead letters (deadLetterIds) or select the Parked ones by filter (handler, module, eventType, parkedFrom, parkedTo); at least one of them is required. At most 100 are replayed per call. */
         DeadLetterReplayRequest: {
-            /** @description PRD: "consumer" */
-            consumer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "from position" */
-            fromPosition?: components["schemas"]["Unspecified"];
-            /** @description PRD: "dead-letter ids" */
+            /** @description Dead letters to replay */
             deadLetterIds?: components["schemas"]["Uuid"][];
+            handler?: string;
+            module?: string;
+            eventType?: string;
+            parkedFrom?: components["schemas"]["Instant"];
+            parkedTo?: components["schemas"]["Instant"];
         };
-        /** @description plt.DeadLetter.replay result. PRD outputs: "—" */
-        DeadLetterReplayResponse: Record<string, never>;
+        /** @description What happened to one dead letter in a replay. */
+        DeadLetterReplayOutcome: {
+            deadLetterId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "Replayed" | "StillFailing" | "AlreadyResolved" | "NotFound" | "HandlerMissing" | "WouldReplay";
+            /** @description The new failure when the handler still fails */
+            errorMessage?: string | null;
+        };
+        /** @description plt.DeadLetter.replay result: per-letter outcomes and counts. A dry run replays nothing and reports WouldReplay for every Parked match. */
+        DeadLetterReplayResponse: {
+            dryRun: boolean;
+            matched: number;
+            replayed: number;
+            stillFailing: number;
+            skipped: number;
+            results: components["schemas"]["DeadLetterReplayOutcome"][];
+        };
         /** @description plt.DeadLetter.discard request. PRD inputs: "consumer, from position; dead-letter ids" */
         DeadLetterDiscardRequest: {
             /** @description PRD: "consumer" */
@@ -5242,6 +5306,18 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description Only dead letters of this event type */
+                eventType?: string;
+                /** @description Only dead letters of handlers of this module (the handler-name prefix, e.g. CLM) */
+                module?: string;
+                /** @description Only dead letters of this handler */
+                handler?: string;
+                /** @description Only dead letters in this status (default all) */
+                status?: components["schemas"]["DeadLetterStatus"];
+                /** @description Parked at or after (UTC instant) */
+                parkedFrom?: string;
+                /** @description Parked before (UTC instant) */
+                parkedTo?: string;
             };
             header?: {
                 /**
@@ -5269,7 +5345,6 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
             500: components["responses"]["InternalError"];
         };
     };
@@ -5319,8 +5394,45 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "plt.DeadLetter.get": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the dead letter */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeadLetterListItem"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
         };
     };

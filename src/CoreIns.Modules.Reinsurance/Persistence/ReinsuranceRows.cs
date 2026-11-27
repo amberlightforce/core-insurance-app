@@ -98,6 +98,12 @@ internal sealed class ContractVersionRow
     public Instant CreatedAt { get; set; }
 
     public string CreatedBy { get; set; } = string.Empty;
+
+    /// <summary>Null for version 1; PENDING, APPROVED or REJECTED for an endorsement (version 2 and up, BO-RI-03).</summary>
+    public string? EndorsementStatus { get; set; }
+
+    /// <summary>The endorser's reason (endorsements only).</summary>
+    public string? EndorsementReason { get; set; }
 }
 
 /// <summary><c>ri.section</c>: the section with its scope (PRD-08 §3 RISection). One section per version in slice 4.</summary>

@@ -123,6 +123,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
                 table.HasCheckConstraint("ck_contract_version_hash", "content_hash ~ '^[0-9a-f]{64}$'");
                 table.HasCheckConstraint("ck_contract_version_rev", "content_rev >= 1");
                 table.HasCheckConstraint("ck_contract_version_approved", "(approved_at IS NULL) = (approved_by IS NULL)");
+                table.HasCheckConstraint("ck_contract_version_endorsement", "(version_no = 1) = (endorsement_status IS NULL) AND (endorsement_status IS NULL OR endorsement_status IN ('PENDING', 'APPROVED', 'REJECTED'))");
             });
             entity.HasKey(e => e.VersionId).HasName("pk_contract_version");
             entity.Property(e => e.VersionId).HasColumnName("version_id");
@@ -140,6 +141,8 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.Property(e => e.ApprovedBy).HasColumnName("approved_by");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.EndorsementStatus).HasColumnName("endorsement_status");
+            entity.Property(e => e.EndorsementReason).HasColumnName("endorsement_reason");
             entity.HasIndex(e => new { e.ContractId, e.VersionNo }).IsUnique().HasDatabaseName("ux_contract_version_no");
             entity.HasOne<ContractRow>().WithMany().HasForeignKey(e => e.ContractId).HasConstraintName("fk_contract_version_contract").OnDelete(DeleteBehavior.Restrict);
         });
