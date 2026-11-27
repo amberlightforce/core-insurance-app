@@ -27,6 +27,46 @@ internal sealed class DisbursementReader(BillingDbContext db)
             return null;
         }
 
+        return View(row);
+    }
+
+    /// <summary>
+    /// <c>bil.PayeeAccount.list</c> (REQ-BIL-345, BO-BIL-09): the entity's accounts, newest first, filtered by party and purpose and
+    /// optionally only those valid on <paramref name="validOn"/>. The IBAN is masked in every item.
+    /// </summary>
+    public async Task<PayeeAccountListPage> ListPayeeAccountsAsync(
+        LegalEntityId legalEntity, Guid? partyId, string? purpose, BusinessDate? validOn, string? cursor, int? limit, CancellationToken cancellationToken)
+    {
+        var size = Math.Clamp(limit ?? 50, 1, 200);
+        var query = db.PayeeAccounts.AsNoTracking().Where(a => a.LegalEntityId == legalEntity);
+        if (partyId is { } party)
+        {
+            var typed = new PartyId(party);
+            query = query.Where(a => a.PartyId == typed);
+        }
+
+        if (purpose is not null)
+        {
+            query = query.Where(a => a.Purpose == purpose);
+        }
+
+        if (validOn is { } date)
+        {
+            query = query.Where(a => a.ValidFrom <= date && (a.ValidTo == null || a.ValidTo > date));
+        }
+
+        var offset = int.TryParse(cursor, out var skip) && skip > 0 ? skip : 0;
+        var rows = await query.OrderByDescending(a => a.CreatedAt).ThenByDescending(a => a.PayeeAccountId).Skip(offset).Take(size + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
+        return new PayeeAccountListPage
+        {
+            Items = [.. rows.Take(size).Select(r => View(r))],
+            NextCursor = rows.Count > size ? (offset + size).ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
+            Limit = size,
+        };
+    }
+
+    private static PayeeAccountGetResponse View(PayeeAccountRow row)
+    {
         return new PayeeAccountGetResponse
         {
             PayeeAccountId = row.PayeeAccountId,
@@ -139,7 +179,7 @@ internal sealed class DisbursementReader(BillingDbContext db)
             ClearedAt = row.ClearedAt,
             StatementReference = row.StatementRef,
             Lines = FsLines.Deserialize(row.Lines),
-            ReleaseApproval = row.SourceType == DisbursementCodes.FsClearing
+            ReleaseApproval = row.SourceType == DisbursementCodes.FsClearing || DisbursementCodes.IsGeneric(row.SourceType)
                 ? new DisbursementRequestResponse.ReleaseApprovalDetail
                 {
                     Required = true,

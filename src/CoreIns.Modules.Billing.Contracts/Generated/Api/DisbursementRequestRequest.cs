@@ -11,7 +11,7 @@ namespace CoreIns.Modules.Billing.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DisbursementRequestRequest
 {
-    /// <summary>Open code (D-CON-24), registered in the source register (REQ-BIL-354). Served: CLM_CLAIM_PAYMENT (SEPA_CT) and FS_CLEARING (method CLEARING only, D-SL4-02); others are refused with BIL-ERR-SOURCE</summary>
+    /// <summary>Open code (D-CON-24), registered in the source register (REQ-BIL-354). Served: CLM_CLAIM_PAYMENT (SEPA_CT) and FS_CLEARING (method CLEARING only, D-SL4-02); BO-BIL-09 adds BIL_COMMISSION, BIL_LEVY, TAX_REMITTANCE and BIL_OTHER (SEPA_CT, public REST facade); others are refused with BIL-ERR-SOURCE</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("sourceType")]
     public required string SourceType { get; init; }
 

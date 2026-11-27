@@ -201,3 +201,26 @@ internal sealed class ExposureRow : ClaimsRow
 
     public Instant UpdatedAt { get; set; }
 }
+
+/// <summary>
+/// <c>clm.fnol_draft</c>: an incomplete FNOL saved for later (BO-CLM-02, D-SL2-11). Not a claim: no claim number, no exposure, no
+/// clock, no event, never in claim lists. The payload is a P2 envelope bound to the draft id; only the creator reads it.
+/// </summary>
+internal sealed class FnolDraftRow : ClaimsRow
+{
+    public const string Draft = "DRAFT";
+    public const string Submitted = "SUBMITTED";
+    public const string Discarded = "DISCARDED";
+
+    public Guid DraftId { get; set; }
+
+    public string Status { get; set; } = Draft;
+
+    /// <summary>The FNOL request so far as JSON, P2 envelope bound to draft_id.</summary>
+    public byte[] PayloadEncrypted { get; set; } = [];
+
+    /// <summary>The claim the draft became on submit.</summary>
+    public ClaimId? ClaimId { get; set; }
+
+    public Instant UpdatedAt { get; set; }
+}

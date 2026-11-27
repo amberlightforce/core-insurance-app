@@ -4,31 +4,19 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Claim.reopen request. PRD inputs: "ids, changes, reason"</summary>
+/// <summary>clm.Claim.reopen request (BO-CLM-02, REQ-CLM-074). Closed to Open(InProgress) with a coded reason; the exposures closed together with the claim reopen with it and their statutory clocks resume or start afresh (BO-CLM-05).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClaimReopenRequest
 {
-    /// <summary>PRD: "ids"</summary>
-    /// <remarks>
-    /// <para>Untyped id: no SharedKernel id type is mapped for 'id' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("ids")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? Ids { get; init; }
+    /// <summary>Contract member 'claimId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ClaimId ClaimId { get; init; }
 
-    /// <summary>PRD: "changes"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("changes")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Changes { get; init; }
+    /// <summary>The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    /// <summary>Contract member 'reasonCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
+    public required string ReasonCode { get; init; }
 }

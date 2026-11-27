@@ -4,28 +4,19 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Statement.generate request. PRD inputs: "contract/counterparty, period, currency"</summary>
+/// <summary>ri.Statement.generate request. One statement per reinsurer, period and currency; an existing one is replaced only by a reissue.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record StatementGenerateRequest
 {
-    /// <summary>PRD: "contract/counterparty"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("contractCounterparty")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ContractCounterparty { get; init; }
+    /// <summary>Contract member 'reinsurerPartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reinsurerPartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId ReinsurerPartyId { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>yyyy-MM</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("period")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    public required string Period { get; init; }
 
-    /// <summary>PRD: "currency"</summary>
+    /// <summary>EUR when omitted</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("currency")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Currency? Currency { get; init; }
 }
