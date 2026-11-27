@@ -4,31 +4,19 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Party.update result. PRD outputs: "party, duplicate suggestions, missing data"</summary>
+/// <summary>pty.Party.update result (BO-PTY-01): the party after the change, with possible duplicates of the new name.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PartyUpdateResponse
 {
-    /// <summary>PRD: "party"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'party'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("party")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Party { get; init; }
+    public required global::CoreIns.Modules.Party.Contracts.Api.PartyView Party { get; init; }
 
-    /// <summary>PRD: "duplicate suggestions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'duplicateSuggestions'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("duplicateSuggestions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DuplicateSuggestions { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Party.Contracts.Api.PartySearchItem> DuplicateSuggestions { get; init; }
 
-    /// <summary>PRD: "missing data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'missingData'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("missingData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? MissingData { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<string> MissingData { get; init; }
 }
