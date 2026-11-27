@@ -15,8 +15,24 @@
         "fin.ManualJournal.create": [ "Staff.Finance", "Platform.Admin" ],
         "fin.ManualJournal.list": [ "Staff.Finance", "Platform.Admin" ],
         "fin.ManualJournal.get": [ "Staff.Finance", "Platform.Admin" ],
-        "fin.ManualJournal.withdraw": [ "Staff.Finance", "Platform.Admin" ]
+        "fin.ManualJournal.withdraw": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.ManualJournal.submit": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.ManualJournal.decide": [ "Staff.Finance", "Platform.Admin" ]
       }
+    },
+    "Authority": {
+      // ILLUSTRATIVE TEST DATA (no approved finance authority matrix exists): a manual journal is approved by a second person; the total of its
+      // debits is limited per holder, a larger journal refers up to Platform.Admin and above that is denied. Ignored in Production (fail closed: DENY).
+      "Grants": [
+        {
+          "Id": "fin-finance-manualjournal-illustrative", "Role": "Staff.Finance", "Type": "FIN.MANUAL_JOURNAL", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "10000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "fin-admin-manualjournal-illustrative", "Role": "Platform.Admin", "Type": "FIN.MANUAL_JOURNAL", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ]
+        }
+      ]
     }
   }
 }

@@ -744,7 +744,7 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_journal_entry_reversal", "(source_type = 'REVERSAL') = (reverses_journal_id IS NOT NULL)");
 
-                            t.HasCheckConstraint("ck_journal_entry_source_type", "source_type IN ('EVENT', 'REVERSAL')");
+                            t.HasCheckConstraint("ck_journal_entry_source_type", "source_type IN ('EVENT', 'REVERSAL', 'MANUAL')");
                         });
                 });
 
@@ -1033,6 +1033,10 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                     b.Property<DateOnly>("AccountingDate")
                         .HasColumnType("date")
                         .HasColumnName("accounting_date");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
 
                     b.Property<string>("Book")
                         .IsRequired()

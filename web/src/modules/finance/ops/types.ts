@@ -80,7 +80,8 @@ export interface ManualJournalEnvelope {
   postedIds?: string[];
 }
 
-export interface ManualJournalSubmitRequest {
+/** fin.ManualJournal.create request. */
+export interface ManualJournalCreateRequest {
   description: string;
   book: string;
   accountingDate: string;
@@ -89,10 +90,16 @@ export interface ManualJournalSubmitRequest {
   evidence: { reference: string };
 }
 
+/** fin.ManualJournal.submit request: the maker sends a DRAFT for approval. */
+export interface ManualJournalSubmitRequest {
+  id: string;
+}
+
 export interface ManualJournalDecideRequest {
   id: string;
   decision: 'APPROVE' | 'REJECT';
-  reason?: string;
+  /** Required for a rejection. */
+  comment?: string;
 }
 
 /** fin.Earning.status: every member is optional until the backend defines the run record. */

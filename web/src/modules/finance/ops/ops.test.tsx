@@ -231,6 +231,25 @@ describe('ManualJournalPage four-eyes', () => {
     expect(screen.getByText('PLT-ERR-SOD')).toBeInTheDocument();
   });
 
+  it('lets the maker submit a draft for approval by id', async () => {
+    const draft = journal({ status: 'DRAFT', createdBy: 'fin-maker' });
+    const api = mockApi([
+      getRoute(draft),
+      {
+        method: 'POST',
+        path: '/api/fin/v1/manual-journals/submit',
+        respond: () => ({ body: { manualJournal: journal(), postedIds: [] } }),
+      },
+    ]);
+    const { user } = page();
+    await user.click(await screen.findByRole('button', { name: 'Υποβολή για έγκριση' }));
+    await waitFor(() => {
+      expect(api.callsTo('POST', '/api/fin/v1/manual-journals/submit')[0]?.body).toEqual({
+        id: journalId,
+      });
+    });
+  });
+
   it('requires a reason to reject and sends the decision', async () => {
     signIn('fin-checker', ['Staff.Finance']);
     const api = mockApi([
@@ -251,7 +270,7 @@ describe('ManualJournalPage four-eyes', () => {
       expect(api.callsTo('POST', '/api/fin/v1/manual-journals/decide')[0]?.body).toEqual({
         id: journalId,
         decision: 'REJECT',
-        reason: 'Λάθος λογαριασμός',
+        comment: 'Λάθος λογαριασμός',
       });
     });
   });

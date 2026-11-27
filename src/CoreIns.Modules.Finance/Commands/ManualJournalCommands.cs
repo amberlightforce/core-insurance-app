@@ -4,6 +4,9 @@ using CoreIns.Modules.Finance.Posting;
 using CoreIns.Modules.Finance.Queries;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
+using CoreIns.Platform.Contracts;
+using CoreIns.Platform.Contracts.Api;
+using CoreIns.Platform.Errors;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
@@ -116,7 +119,7 @@ internal sealed class CreateManualJournalHandler(FinanceDbContext db, ReferenceD
 /// <c>fin.ManualJournal.withdraw</c>: the maker takes a journal back before it is decided. Only the maker may (FIN-ERR-SOD);
 /// a decided, posted or already withdrawn journal answers FIN-ERR-STATE. The lines stay for the audit trail.
 /// </summary>
-internal sealed class WithdrawManualJournalHandler(FinanceDbContext db, RequestContext context, IClock clock, ILegalEntityDirectory legalEntities)
+internal sealed class WithdrawManualJournalHandler(FinanceDbContext db, RequestContext context, IClock clock, ILegalEntityDirectory legalEntities, IPlatformApprovalService approvals)
     : ICommandHandler<WithdrawManualJournal, ManualJournalEnvelope>
 {
     public async Task<Result<ManualJournalEnvelope>> HandleAsync(WithdrawManualJournal command, CancellationToken cancellationToken)
@@ -139,6 +142,20 @@ internal sealed class WithdrawManualJournalHandler(FinanceDbContext db, RequestC
         if (!ManualJournalStatus.CanWithdraw(row.Status))
         {
             return DomainError.Of(ModuleCode.FIN, "STATE", $"A {row.Status} manual journal cannot be withdrawn.");
+        }
+
+        if (row.Status == ManualJournalStatus.Submitted && row.ApprovalRequestId is { } pending)
+        {
+            // The open approval request goes with it, so a checker cannot approve a journal that was taken back.
+            try
+            {
+                await approvals.WithdrawAsync(
+                    new ApprovalWithdrawRequest { ApprovalRequestId = new ApprovalRequestId(pending), Reason = "Withdrawn by the maker." }, CommandOptions.New(), cancellationToken).ConfigureAwait(false);
+            }
+            catch (DomainException ex)
+            {
+                return ex.Error;
+            }
         }
 
         row.Status = ManualJournalStatus.Withdrawn;
