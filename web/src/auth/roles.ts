@@ -59,3 +59,6 @@ export const reinsuranceRoles = [
 export function hasAnyRole(userRoles: readonly string[], allowed: readonly string[]): boolean {
   return userRoles.some((role) => allowed.includes(role));
 }
+
+/** Fiscal documents and reconciliation breaks (cmp.FiscalDocument.get/listBySource, cmp.FiscalReconciliation.breaks). */
+export const fiscalRoles = ['Staff.ComplianceOfficer', 'Staff.Billing', 'Platform.Admin'] as const;

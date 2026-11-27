@@ -7,7 +7,12 @@
       "title": "Statutory clocks",
       "open": "open",
       "empty": "No statutory clocks are running.",
-      "columns": { "code": "Clock", "subject": "Subject", "status": "Status", "deadline": "Due" },
+      "columns": {
+        "code": "Clock",
+        "subject": "Subject",
+        "status": "Status",
+        "deadline": "Due"
+      },
       "status": {
         "RUNNING": "Running",
         "WARNED": "Due soon",
@@ -21,12 +26,26 @@
     "complaints": {
       "title": "Complaints",
       "empty": "No complaints on file.",
-      "columns": { "number": "Number", "status": "Status", "deadline": "Next deadline" }
+      "columns": {
+        "number": "Number",
+        "status": "Status",
+        "deadline": "Next deadline"
+      }
     },
     "dsar": {
       "title": "Data-subject requests",
       "body": "Open, verify and fulfil GDPR access, portability, erasure, restriction and objection requests.",
       "open": "Open the DSAR console"
+    },
+    "fiscal": {
+      "title": "Fiscal documents",
+      "body": "Registered, pending and rejected fiscal documents, and reconciliation breaks.",
+      "open": "Open fiscal documents"
+    },
+    "ai": {
+      "title": "AI-system register",
+      "body": "Register AI systems and move them through review, approval, suspension and retirement.",
+      "open": "Open the AI register"
     }
   }
 }
