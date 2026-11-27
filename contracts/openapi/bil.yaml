@@ -1631,6 +1631,7 @@ paths:
       - W7-BIL-01
       x-status: full
       x-maturity: pre-release
+      x-typed: 'BO-BIL-09: REQ-BIL-345; the IBAN is masked in every item (the full IBAN is never returned)'
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -1703,7 +1704,14 @@ paths:
       - CHN
       - CLM
       x-permission: bil.PayeeAccount.verify
+      x-typed: 'BO-BIL-09: REQ-BIL-344, REQ-BIL-214 (VoP unavailable fails closed)'
       x-error-codes:
+      - code: BIL-ERR-NOT-FOUND
+        note: payee account not found in the caller's legal entity
+        status: 404
+      - code: BIL-ERR-IBAN-INVALID
+        note: pre-check IBAN fails ISO 13616 structure or check digits
+        status: 422
       - code: BIL-ERR-VOP-UNAVAILABLE
         retryable: true
         status: 503
@@ -4066,6 +4074,12 @@ paths:
       - code: BIL-ERR-LINES-MISMATCH
         note: FS_CLEARING lines are missing or do not sum to the amount
         status: 422
+      - code: BIL-ERR-NOT-PERMITTED
+        note: the requester holds no BIL.DISBURSEMENT authority over the amount (BO-BIL-09 sources)
+        status: 403
+      - code: BIL-ERR-SOD
+        note: the approver of a BO-BIL-09 disbursement is its requester or lacks BIL.DISBURSEMENT authority over the amount
+        status: 403
       x-source:
       - PRD-06 §9.1 l.1801
       parameters:
@@ -7398,31 +7412,71 @@ components:
       description: Verification status of a payee account (REQ-BIL-345)
     PayeeAccountVerifyRequest:
       type: object
-      description: 'bil.PayeeAccount.verify request. PRD inputs: "payee_account_id (or IBAN + name for a pre-check)"'
+      description: 'bil.PayeeAccount.verify request (BO-BIL-09). PRD inputs: "payee_account_id (or IBAN + name for a pre-check)".
+        Either an existing account is (re-)verified and the result recorded on it, or an IBAN and holder name are pre-checked
+        with nothing stored. The IBAN is P2: never returned, logged or published.'
       properties:
         payeeAccountId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "payee_account_id (or IBAN + name for a pre-check)"'
+          description: Existing payee account to (re-)verify; its stored IBAN and holder name are checked
+        iban:
+          type: string
+          minLength: 15
+          maxLength: 42
+          description: IBAN for a pre-check (ISO 13616, mod-97 checked; spaces allowed). P2.
+        holderName:
+          type: string
+          minLength: 1
+          maxLength: 140
+          description: Holder name for a pre-check
+      oneOf:
+      - required:
+        - payeeAccountId
+      - required:
+        - iban
+        - holderName
     PayeeAccountVerifyResponse:
       type: object
-      description: 'bil.PayeeAccount.verify result. PRD outputs: "Match / CloseMatch (suggested name) / NoMatch / NotAvailable,
-        checked at"'
+      description: 'bil.PayeeAccount.verify result (BO-BIL-09). PRD outputs: "Match / CloseMatch (suggested name) / NoMatch /
+        NotAvailable, checked at". When no verifier is bound or it fails, the call is refused with BIL-ERR-VOP-UNAVAILABLE (503).'
       properties:
-        match:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "Match"'
-        closeMatch:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "CloseMatch (suggested name)"'
-        noMatch:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "NoMatch"'
-        notAvailable:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "NotAvailable"'
+        outcome:
+          type: string
+          enum:
+          - Match
+          - CloseMatch
+          - NoMatch
+          - NotAvailable
+          description: Verification-of-payee outcome (REQ-BIL-203)
+        suggestedName:
+          oneOf:
+          - type: string
+          - type: 'null'
+          description: The bank's suggested holder name on a CloseMatch
         checkedAt:
           $ref: ../events/common.schema.json#/$defs/Instant
           description: 'PRD: "checked at"'
+        payeeAccountId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The account that was verified; null for a pre-check
+        verificationStatus:
+          oneOf:
+          - $ref: '#/components/schemas/PayeeVerificationStatus'
+          - type: 'null'
+          description: Verification status now recorded on the account; null for a pre-check
+        maskedIban:
+          type: string
+          description: IBAN masked except the last four characters
+        preCheck:
+          type: boolean
+          description: True when nothing was stored (IBAN and holder name were given instead of an account)
+      required:
+      - outcome
+      - checkedAt
+      - maskedIban
+      - preCheck
     PayeeAccountGetResponse:
       type: object
       description: 'Typed from REQ-BIL-345 (SL2-BIL-DISB). PRD outputs: "accounts with periods, verification, cooling-off".
@@ -7477,19 +7531,6 @@ components:
       - validPeriod
       - coolingOffUntil
       - change
-    PayeeAccountListItem:
-      type: object
-      description: 'bil.PayeeAccount.list result. PRD outputs: "accounts with periods, verification, cooling-off"'
-      properties:
-        accountsPeriods:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "accounts with periods"'
-        verification:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "verification"'
-        coolingOff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "cooling-off"'
     PayeeAccountListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7498,7 +7539,7 @@ components:
           items:
             type: array
             items:
-              $ref: '#/components/schemas/PayeeAccountListItem'
+              $ref: '#/components/schemas/PayeeAccountGetResponse'
       description: Page of bil.PayeeAccount.list results (cursor pagination, contract §3.5.5)
     MandateCreateRequest:
       type: object
@@ -8469,7 +8510,8 @@ components:
         sourceType:
           $ref: ../events/common.schema.json#/$defs/DisbursementSourceType
           description: 'Open code (D-CON-24), registered in the source register (REQ-BIL-354). Served: CLM_CLAIM_PAYMENT (SEPA_CT) and FS_CLEARING
-            (method CLEARING only, D-SL4-02); others are refused with BIL-ERR-SOURCE'
+            (method CLEARING only, D-SL4-02); BO-BIL-09 adds BIL_COMMISSION, BIL_LEVY, TAX_REMITTANCE and BIL_OTHER (SEPA_CT, public REST facade);
+            others are refused with BIL-ERR-SOURCE'
         sourceId:
           type: string
           description: Id of the source object

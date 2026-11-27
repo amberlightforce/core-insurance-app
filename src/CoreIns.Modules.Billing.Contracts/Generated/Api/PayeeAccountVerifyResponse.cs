@@ -4,44 +4,60 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.PayeeAccount.verify result. PRD outputs: "Match / CloseMatch (suggested name) / NoMatch / NotAvailable, checked at"</summary>
+/// <summary>bil.PayeeAccount.verify result (BO-BIL-09). PRD outputs: "Match / CloseMatch (suggested name) / NoMatch / NotAvailable, checked at". When no verifier is bound or it fails, the call is refused with BIL-ERR-VOP-UNAVAILABLE (503).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PayeeAccountVerifyResponse
 {
-    /// <summary>PRD: "Match"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("match")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Match { get; init; }
+    /// <summary>Verification-of-payee outcome (REQ-BIL-203)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    public required OutcomeValue Outcome { get; init; }
 
-    /// <summary>PRD: "CloseMatch (suggested name)"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("closeMatch")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? CloseMatch { get; init; }
-
-    /// <summary>PRD: "NoMatch"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("noMatch")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? NoMatch { get; init; }
-
-    /// <summary>PRD: "NotAvailable"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("notAvailable")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? NotAvailable { get; init; }
+    /// <summary>The bank's suggested holder name on a CloseMatch</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("suggestedName")]
+    public string? SuggestedName { get; init; }
 
     /// <summary>PRD: "checked at"</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("checkedAt")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Instant? CheckedAt { get; init; }
+    public required global::CoreIns.SharedKernel.Instant CheckedAt { get; init; }
+
+    /// <summary>The account that was verified; null for a pre-check</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'payeeAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("payeeAccountId")]
+    public global::System.Guid? PayeeAccountId { get; init; }
+
+    /// <summary>Verification status now recorded on the account; null for a pre-check</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("verificationStatus")]
+    public global::CoreIns.Modules.Billing.Contracts.Api.PayeeVerificationStatus? VerificationStatus { get; init; }
+
+    /// <summary>IBAN masked except the last four characters</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("maskedIban")]
+    public required string MaskedIban { get; init; }
+
+    /// <summary>True when nothing was stored (IBAN and holder name were given instead of an account)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("preCheck")]
+    public required bool PreCheck { get; init; }
+
+    /// <summary>Verification-of-payee outcome (REQ-BIL-203)</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum OutcomeValue
+    {
+        /// <summary><c>Match</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Match")]
+        Match,
+
+        /// <summary><c>CloseMatch</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CloseMatch")]
+        CloseMatch,
+
+        /// <summary><c>NoMatch</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NoMatch")]
+        NoMatch,
+
+        /// <summary><c>NotAvailable</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NotAvailable")]
+        NotAvailable,
+    }
 }

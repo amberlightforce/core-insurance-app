@@ -35,6 +35,10 @@ internal sealed class PayeeProtection(FieldEncryptor encryptor, BlindIndexer bli
     public ValueTask<byte[]> EncryptAsync(SkLegalEntityId legalEntity, Guid payeeAccountId, CoreIns.SharedKernel.Iban iban, CancellationToken cancellationToken) =>
         encryptor.EncryptAsync(KeyOwner(legalEntity), IbanField, iban.Value, payeeAccountId.ToString("N"), cancellationToken);
 
+    /// <summary>The IBAN of a stored account, for a bank call only (never logged, returned or published).</summary>
+    public ValueTask<string> DecryptAsync(Guid payeeAccountId, byte[] envelope, CancellationToken cancellationToken) =>
+        encryptor.DecryptAsync(envelope, IbanField, payeeAccountId.ToString("N"), cancellationToken);
+
     /// <summary>Blind index under the Active key (writes).</summary>
     public ValueTask<string> IndexAsync(SkLegalEntityId legalEntity, CoreIns.SharedKernel.Iban iban, CancellationToken cancellationToken) =>
         blindIndexer.ComputeAsync(KeyOwner(legalEntity), IndexName, iban.Value, BlindIndexNormalisers.Iban, cancellationToken);

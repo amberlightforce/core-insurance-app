@@ -14,7 +14,12 @@
         "bil.Allocation.allocate": [ "Staff.Billing" ],
         // SL2-BIL-DISB: Claims calls create/request in process; the API serves reads (claims roles: SL2-PLT).
         "bil.PayeeAccount.create": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "bil.PayeeAccount.list": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        // BO-BIL-09: verification of payee runs a bank check; billing staff and claims roles that register accounts may re-run it.
+        "bil.PayeeAccount.verify": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "bil.PayeeAccount.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        // BO-BIL-09: the public facade for non-claim sources (commission, levy, tax remittance, other); BIL.DISBURSEMENT authority is checked again by the handler.
+        "bil.Disbursement.request": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.Disbursement.get": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "bil.Disbursement.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
         "bil.Disbursement.approveRelease": [ "Staff.BillingManager" ],
@@ -65,6 +70,15 @@
         {
           "Id": "bil-billingmgr-refund-illustrative", "Role": "Staff.BillingManager", "Type": "BIL.REFUND", "Illustrative": true,
           "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ]
+        },
+        // BO-BIL-09: request and approval of non-claim disbursements by amount (ILLUSTRATIVE, ignored in Production: fail closed).
+        {
+          "Id": "bil-billing-disb-illustrative", "Role": "Staff.Billing", "Type": "BIL.DISBURSEMENT", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "10000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "bil-billingmgr-disb-illustrative", "Role": "Staff.BillingManager", "Type": "BIL.DISBURSEMENT", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ]
         },
         // NX-EC-09: stop/void of a disbursement by amount (ILLUSTRATIVE, ignored in Production: fail closed). A payment above the
         // actor's limit is refused; there is no referral for an immediate correction.

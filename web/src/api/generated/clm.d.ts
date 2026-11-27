@@ -50,6 +50,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clm/v1/fnol/drafts/{draftId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * FNOL for all channels
+         * @description FNOL for all channels
+         *
+         *     PRD inputs: FNOL payload
+         *     PRD outputs: claim, exposures, checklist, assignment
+         */
+        get: operations["clm.Fnol.getDraft"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clm/v1/fnol/{id}": {
         parameters: {
             query?: never;
@@ -1679,6 +1702,8 @@ export interface components {
             channelMetadata?: components["schemas"]["OpenObject"];
             /** @description Optional liability facts captured at FNOL (D-SL4-17) */
             liabilityFacts?: components["schemas"]["LiabilityFacts"];
+            /** @description The saved draft (clm.Fnol.saveDraft) this submit completes; the draft is marked SUBMITTED in the same transaction (BO-CLM-02) */
+            draftId?: components["schemas"]["Uuid"] | null;
         };
         /** @description An incident of the loss (REQ-CLM-064). The slice records vehicle incidents only; no injury (P3) fields. */
         FnolIncidentInput: {
@@ -1748,21 +1773,31 @@ export interface components {
             };
             requiredDocuments?: components["schemas"]["Code"][];
         };
-        /** @description clm.Fnol.saveDraft request. PRD inputs: "FNOL payload" */
+        /** @description clm.Fnol.saveDraft request (BO-CLM-02, D-SL2-11). Stores an incomplete FNOL for later; no claim number, no clocks, no events. The payload may miss any mandatory field. Omit draftId to start a draft; send it with expectedRecordVersion to update one. */
         FnolSaveDraftRequest: {
-            /** @description PRD: "FNOL payload" */
-            fnolPayload?: components["schemas"]["Unspecified"];
+            /** @description The draft to update; null starts a new one */
+            draftId?: components["schemas"]["Uuid"] | null;
+            /** @description The draft's recordVersion the user saw (required with draftId); a different current version is CLM-ERR-STALE */
+            expectedRecordVersion?: number | null;
+            /** @description The FNOL so far (stored encrypted, P2) */
+            fnolPayload: components["schemas"]["FnolSubmitRequest"];
         };
-        /** @description clm.Fnol.saveDraft result. PRD outputs: "claim, exposures, checklist, assignment" */
+        /** @description clm.Fnol.saveDraft result (BO-CLM-02). Holds no FNOL content. */
         FnolSaveDraftResponse: {
-            /** @description PRD: "claim" */
-            claim?: components["schemas"]["Unspecified"];
-            /** @description PRD: "exposures" */
-            exposures?: components["schemas"]["Unspecified"];
-            /** @description PRD: "checklist" */
-            checklist?: components["schemas"]["Unspecified"];
-            /** @description PRD: "assignment" */
-            assignment?: components["schemas"]["Unspecified"];
+            draftId: components["schemas"]["Uuid"];
+            recordVersion: number;
+            savedAt: components["schemas"]["Instant"];
+        };
+        /** @description clm.Fnol.getDraft result (BO-CLM-02): the draft to resume. Only its creator reads it. */
+        FnolDraftGetResponse: {
+            draftId: components["schemas"]["Uuid"];
+            recordVersion: number;
+            /** @enum {string} */
+            status: "DRAFT" | "SUBMITTED" | "DISCARDED";
+            savedAt: components["schemas"]["Instant"];
+            /** @description The claim the draft became when it was submitted */
+            claimId: components["schemas"]["Uuid"] | null;
+            fnolPayload: components["schemas"]["FnolSubmitRequest"];
         };
         /** @description clm.Fnol.get result: the immutable FNOL snapshot as submitted (REQ-CLM-044). Typed by SL2-CLM-CORE. */
         FnolGetResponse: {
@@ -1962,33 +1997,29 @@ export interface components {
             /** @description Exposures that fail the guard; empty for a claim-level guard. Always set */
             exposureIds: components["schemas"]["Uuid"][];
         };
-        /** @description clm.Claim.reopen request. PRD inputs: "ids, changes, reason" */
+        /** @description clm.Claim.reopen request (BO-CLM-02, REQ-CLM-074). Closed to Open(InProgress) with a coded reason; the exposures closed together with the claim reopen with it and their statutory clocks resume or start afresh (BO-CLM-05). */
         ClaimReopenRequest: {
-            /** @description PRD: "ids" */
-            ids?: components["schemas"]["Uuid"][];
-            /** @description PRD: "changes" */
-            changes?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            claimId: components["schemas"]["Uuid"];
+            /** @description The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE */
+            expectedRecordVersion: number;
+            reasonCode: components["schemas"]["Code"];
         };
         /** @description clm.Claim.reopen result. PRD outputs: "claim" */
         ClaimReopenResponse: {
-            /** @description PRD: "claim" */
-            claim?: components["schemas"]["Unspecified"];
+            claim: components["schemas"]["ClaimSummary"];
         };
-        /** @description clm.Claim.merge request. PRD inputs: "ids, changes, reason" */
+        /** @description clm.Claim.merge request (BO-CLM-02). Two open claims of one policy and loss date; the duplicate closes as DUPLICATE with a pointer to the survivor and keeps its claim number. Refused while the duplicate has any financial transaction, payment, transaction set or open recovery (nothing moves, nothing is counted twice). */
         ClaimMergeRequest: {
-            /** @description PRD: "ids" */
-            ids?: components["schemas"]["Uuid"][];
-            /** @description PRD: "changes" */
-            changes?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            survivorClaimId: components["schemas"]["Uuid"];
+            duplicateClaimId: components["schemas"]["Uuid"];
+            /** @description The duplicate claim's recordVersion the user saw; a different current version is CLM-ERR-STALE */
+            expectedRecordVersion: number;
+            reasonCode: components["schemas"]["Code"];
         };
         /** @description clm.Claim.merge result. PRD outputs: "claim" */
         ClaimMergeResponse: {
-            /** @description PRD: "claim" */
-            claim?: components["schemas"]["Unspecified"];
+            survivor: components["schemas"]["ClaimSummary"];
+            duplicate: components["schemas"]["ClaimSummary"];
         };
         /** @description Body of clm.Claim.searchByCriteria (D-SLC-05, REQ-CLM-011 subset). At least one criterion; criteria combine with AND. */
         ClaimSearchCriteria: {
@@ -3275,12 +3306,6 @@ export interface components {
             /** @description Field-level errors. */
             errors?: components["schemas"]["ProblemFieldError"][];
         };
-        /**
-         * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
-         *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
-         *     members until then.
-         */
-        Unspecified: unknown;
         /** @description ISO 3166-1 alpha-2 code. */
         CountryCode: string;
         /** @description Cursor page (contract §3.5.5). Lists are filtered by the caller's legal entity and ABAC scope. */
@@ -3290,6 +3315,12 @@ export interface components {
             nextCursor: string | null;
             limit?: number;
         };
+        /**
+         * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
+         *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
+         *     members until then.
+         */
+        Unspecified: unknown;
         Text: string;
         /** @description ISO 4217 alphabetic code. */
         CurrencyCode: string;
@@ -3534,6 +3565,44 @@ export interface operations {
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "clm.Fnol.getDraft": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the FNOL draft */
+                draftId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FnolDraftGetResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };

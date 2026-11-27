@@ -4,28 +4,18 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Statement.reissue request. PRD inputs: "contract/counterparty, period, currency"</summary>
+/// <summary>ri.Statement.reissue request. After a reversal or adjustment item, builds the next version from the current items, supersedes the issued or disputed one and links back to it. Refused when nothing changed.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record StatementReissueRequest
 {
-    /// <summary>PRD: "contract/counterparty"</summary>
+    /// <summary>Contract member 'statementId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'statementId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("contractCounterparty")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ContractCounterparty { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("statementId")]
+    public required global::System.Guid StatementId { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
-
-    /// <summary>PRD: "currency"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("currency")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Currency? Currency { get; init; }
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
 }

@@ -21,6 +21,9 @@ public static class SupportAuthorityTypes
     /// <summary>Stop or void of an issued disbursement, limited by its amount (NX-EC-09).</summary>
     public static AuthorityTypeCode DisbursementStop { get; } = AuthorityTypeCode.Parse("BIL.DISBURSEMENT_STOP");
 
+    /// <summary>Request and approval of a non-claim disbursement (commission, levy, tax remittance, other), limited by its amount (BO-BIL-09).</summary>
+    public static AuthorityTypeCode Disbursement { get; } = AuthorityTypeCode.Parse("BIL.DISBURSEMENT");
+
     /// <summary>The refund amount (money, so it carries its currency).</summary>
     public const string AmountDimension = "amount";
 
@@ -63,6 +66,9 @@ public static class SupportAuthorityTypes
             ]),
         new AuthorityTypeDefinition(
             DisbursementStop, ModuleCode.BIL, new LocalizedText("Στάση/ακύρωση εκταμίευσης", "Disbursement stop or void"),
+            [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
+        new AuthorityTypeDefinition(
+            Disbursement, ModuleCode.BIL, new LocalizedText("Εκταμίευση", "Disbursement"),
             [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
         new AuthorityTypeDefinition(
             EffectiveDateOverride, ModuleCode.POL, new LocalizedText("Παράκαμψη ημερομηνίας έναρξης", "Effective-date override"),

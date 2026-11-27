@@ -39,6 +39,13 @@
         "ri.Item.reverse": [ "Staff.ReinsuranceAccountant" ],
         "ri.Item.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Balance.report": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        // Reinsurer statements (BO-RI-14): the accountant generates, submits, issues, records the answer and reissues; the manager is the checker.
+        "ri.Statement.generate": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Statement.submit": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Statement.approve": [ "Staff.ReinsuranceManager" ],
+        "ri.Statement.issue": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
+        "ri.Statement.recordResponse": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
+        "ri.Statement.reissue": [ "Staff.ReinsuranceAccountant" ],
         // BO-RI-08: restatement, occurrences, adjustments and the aggregate tracker. The adjustment's real gate is the RI.RECOVERY_ADJUSTMENT authority.
         "ri.Recovery.recalculate": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Occurrence.link": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],

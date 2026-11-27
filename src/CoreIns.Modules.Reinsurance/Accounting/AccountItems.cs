@@ -507,7 +507,7 @@ internal sealed class AccountItemReader(ReinsuranceDbContext db, RequestContext 
 
         if (request.PeriodTo is { } to)
         {
-            query = query.Where(i => string.Compare(i.Period, to, StringComparison.Ordinal) <= 0);
+            query = query.Where(i => i.Period.CompareTo(to) <= 0);
         }
 
         var items = await query.Select(i => new { i.ReinsurerPartyId, i.Currency, i.Period, i.Kind, i.Amount }).ToListAsync(cancellationToken).ConfigureAwait(false);

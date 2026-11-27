@@ -509,11 +509,13 @@
       "change": true
     },
     "bil.PayeeAccount.verify": {
-      "match": "unspecified",
-      "closeMatch": "unspecified",
-      "noMatch": "unspecified",
-      "notAvailable": "unspecified",
-      "checkedAt": "2026-10-07T09:00:00Z"
+      "outcome": "Match",
+      "suggestedName": "sample",
+      "checkedAt": "2026-10-07T09:00:00Z",
+      "payeeAccountId": "0192c141-ac65-779a-8ff2-7e1a2058b4db",
+      "verificationStatus": "Unverified",
+      "maskedIban": "GR1601101250000000012300695",
+      "preCheck": true
     },
     "bil.Payment.take": {
       "receipt": {
@@ -2090,17 +2092,25 @@
       "coolingOffUntil": "2026-10-07",
       "change": true
     },
-    "PayeeAccountListItem": {
-      "accountsPeriods": "unspecified",
-      "verification": "unspecified",
-      "coolingOff": "unspecified"
-    },
     "PayeeAccountListPage": {
       "items": [
         {
-          "accountsPeriods": "unspecified",
-          "verification": "unspecified",
-          "coolingOff": "unspecified"
+          "payeeAccountId": "01928f04-1072-7ca0-8c67-f043cc17095c",
+          "partyId": "01926e69-60f5-70ea-8192-4ba1ee540ddb",
+          "purpose": "SAMPLE_CODE",
+          "maskedIban": "GR1601101250000000012300695",
+          "holderName": "sample",
+          "source": "SAMPLE_CODE",
+          "status": "Active",
+          "verificationStatus": "Unverified",
+          "vopResult": "Match",
+          "vopCheckedAt": "2026-10-07T09:00:00Z",
+          "validPeriod": {
+            "from": "2026-01-01",
+            "to": "2027-01-01"
+          },
+          "coolingOffUntil": "2026-10-07",
+          "change": true
         }
       ],
       "nextCursor": "sample",
@@ -2110,11 +2120,13 @@
       "payeeAccountId": "01927af7-5ad6-753a-8f7f-056d03b656b8"
     },
     "PayeeAccountVerifyResponse": {
-      "match": "unspecified",
-      "closeMatch": "unspecified",
-      "noMatch": "unspecified",
-      "notAvailable": "unspecified",
-      "checkedAt": "2026-10-07T09:00:00Z"
+      "outcome": "Match",
+      "suggestedName": "sample",
+      "checkedAt": "2026-10-07T09:00:00Z",
+      "payeeAccountId": "01928f35-3c33-7212-84f3-6e0fd501194d",
+      "verificationStatus": "Unverified",
+      "maskedIban": "GR1601101250000000012300695",
+      "preCheck": true
     },
     "PaymentInstrumentAddRequest": {
       "iban": "unspecified",
