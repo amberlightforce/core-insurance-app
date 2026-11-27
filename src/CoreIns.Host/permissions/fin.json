@@ -17,7 +17,11 @@
         "fin.Close.lock": [ "Staff.Finance", "Platform.Admin" ],
         "fin.Close.reopen": [ "Staff.Finance", "Platform.Admin" ],
         "fin.Close.acceptBreak": [ "Staff.Finance", "Platform.Admin" ],
-        "fin.Period.devLock": [ "Staff.Finance", "Platform.Admin" ]
+        "fin.Period.devLock": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.ManualJournal.create": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.ManualJournal.list": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.ManualJournal.get": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.ManualJournal.withdraw": [ "Staff.Finance", "Platform.Admin" ]
       }
     }
   }

@@ -72,6 +72,23 @@ export function useManualJournal(id: string) {
   });
 }
 
+/** fin.ManualJournal.create: stores a balanced, evidenced DRAFT; nothing is posted (submit and decide are BO-FIN-01b). */
+export function useCreateManualJournal(onDone: (r: ManualJournalEnvelope) => void) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ request, key }: { request: ManualJournalSubmitRequest; key: string }) =>
+      apiRequest<ManualJournalEnvelope>(`${base}/manual-journals`, {
+        method: 'POST',
+        body: request,
+        idempotencyKey: key,
+      }),
+    onSuccess: (response) => {
+      void client.invalidateQueries({ queryKey: ['fin', 'manual-journals'] });
+      onDone(response);
+    },
+  });
+}
+
 /** fin.ManualJournal.submit: the maker proposes the journal; it posts only after another user approves it. */
 export function useSubmitManualJournal(onDone: (r: ManualJournalEnvelope) => void) {
   const client = useQueryClient();
