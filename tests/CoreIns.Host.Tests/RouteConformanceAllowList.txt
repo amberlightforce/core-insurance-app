@@ -44,9 +44,7 @@ CONTRACT_NOT_SERVED GET /api/cmp/v1/taxonomies
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/footprint
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/snapshot
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/trend
-CONTRACT_NOT_SERVED GET /api/dat/v1/coverage/status
 CONTRACT_NOT_SERVED GET /api/dat/v1/feature-store/get-online
-CONTRACT_NOT_SERVED GET /api/dat/v1/lineage/trace
 CONTRACT_NOT_SERVED GET /api/dat/v1/scr-results/{}
 CONTRACT_NOT_SERVED GET /api/doc/v1/forms/{}
 CONTRACT_NOT_SERVED GET /api/doc/v1/ipids/get

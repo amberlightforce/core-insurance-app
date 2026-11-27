@@ -78,7 +78,7 @@
     "failed": "The report could not be run",
     "notRegulatory": "Management, not regulatory",
     "lastRun": "Last run {when}",
-    "neverRun": "Not run from this browser yet",
+    "neverRun": "Not run yet",
     "run": "Run report",
     "open": "Open",
     "marts": {
@@ -166,8 +166,8 @@
   },
   "history": {
     "title": "Run history",
-    "empty": "No reports have been run from this browser yet.",
-    "note": "Shows the runs started from this browser; a server-side run list is not available yet.",
+    "empty": "No reports have been run yet.",
+    "note": "Shows the newest runs of this legal entity.",
     "mart": "Report",
     "started": "Started",
     "status": "Status",

@@ -159,14 +159,7 @@ export function ReportsPage() {
       />
       <KpiStrip />
       <Section title={t('catalogue.title')} family="brand" meta={t('catalogue.source')}>
-        <MartCatalogue
-          runs={history.runs}
-          onStarted={(runId) => {
-            history.remember(runId);
-            select(runId);
-          }}
-          onSelect={select}
-        />
+        <MartCatalogue runs={history.runs} onStarted={select} onSelect={select} />
       </Section>
       {selected ? (
         <Section title={t('run.title')} family="info">

@@ -3,17 +3,17 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '../../design-system';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
-import type { MartRun } from './martApi';
+import type { MartRunSummary } from './martApi';
 import local from './reports.module.css';
 import { RunPill } from './RunPill';
 
-/** Runs started from this browser; the server has no run-list read yet. */
+/** The newest runs of the legal entity (dat.Mart.list). */
 export function RunHistory({
   runs,
   selected,
   onSelect,
 }: {
-  runs: MartRun[];
+  runs: MartRunSummary[];
   selected: string | null;
   onSelect: (runId: string) => void;
 }) {

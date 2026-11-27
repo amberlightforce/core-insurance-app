@@ -124,6 +124,32 @@ const figure = {
   unit: 'EUR',
   sourceCount: 3,
 };
+/** dat.Mart.list: the summaries of the given runs (newest first). */
+const listRoute = (...runs: { id: string; over?: Record<string, unknown> }[]): MockRoute => ({
+  method: 'GET',
+  path: '/api/dat/v1/marts/runs',
+  respond: () => ({
+    body: {
+      items: runs.map(({ id, over }) => {
+        const full = run(id, over);
+        return {
+          runId: full.runId,
+          mart: full.mart,
+          period: full.period,
+          productCode: full.productCode,
+          status: full.status,
+          snapshotHash: full.snapshotHash,
+          legalStatus: full.legalStatus,
+          figureCount: full.figureCount,
+          createdAt: full.createdAt,
+          createdBy: full.createdBy,
+          signOff: full.signOff,
+        };
+      }),
+      nextCursor: null,
+    },
+  }),
+});
 const runRoute = (id: string, over: Record<string, unknown> = {}): MockRoute => ({
   method: 'GET',
   path: `/api/dat/v1/marts/${id}`,
@@ -141,6 +167,7 @@ describe('mart reports', () => {
         path: '/api/dat/v1/marts/run',
         respond: () => ({ status: 202, body: { runId, status: 'COMPLETED' } }),
       },
+      listRoute(),
       runRoute(runId),
     ]);
     const { user, container } = renderScreen(<ReportsPage />, {
@@ -163,10 +190,10 @@ describe('mart reports', () => {
 
   it('lets another user sign off, and shows the problem when an unsigned export is refused', async () => {
     signIn('dev:checker');
-    localStorage.setItem('coreins.reports.runs', JSON.stringify([runId]));
     const api = mockApi([
       ...billingRoutes,
       kpiRoute,
+      listRoute({ id: runId }),
       runRoute(runId),
       {
         method: 'POST',
@@ -185,10 +212,10 @@ describe('mart reports', () => {
 
   it('disables sign-off for a person who adjusted a figure', async () => {
     signIn('dev:adjuster');
-    localStorage.setItem('coreins.reports.runs', JSON.stringify([runId]));
     mockApi([
       ...billingRoutes,
       kpiRoute,
+      listRoute({ id: runId }),
       runRoute(runId, {
         adjustments: [
           {
@@ -213,10 +240,10 @@ describe('mart reports', () => {
 
   it('submits an adjustment with reason and evidence', async () => {
     signIn('dev:checker');
-    localStorage.setItem('coreins.reports.runs', JSON.stringify([runId]));
     const api = mockApi([
       ...billingRoutes,
       kpiRoute,
+      listRoute({ id: runId }),
       runRoute(runId),
       {
         method: 'POST',
@@ -248,10 +275,10 @@ describe('mart reports', () => {
 
   it('compares two runs of the same mart', async () => {
     signIn('dev:checker');
-    localStorage.setItem('coreins.reports.runs', JSON.stringify([runId, otherRunId]));
     mockApi([
       ...billingRoutes,
       kpiRoute,
+      listRoute({ id: runId }, { id: otherRunId, over: { createdAt: '2026-11-02T10:00:00Z' } }),
       runRoute(runId),
       runRoute(otherRunId, { createdAt: '2026-11-02T10:00:00Z' }),
       {
@@ -288,6 +315,7 @@ describe('mart reports', () => {
   it('shows the no-permission banner when the KPI read is forbidden', async () => {
     signIn('dev:maker');
     mockApi([
+      listRoute(),
       ...billingRoutes,
       {
         method: 'GET',
@@ -301,17 +329,16 @@ describe('mart reports', () => {
 
   it('shows the empty history before any run', async () => {
     signIn('dev:maker');
-    mockApi([...billingRoutes, kpiRoute]);
+    mockApi([...billingRoutes, kpiRoute, listRoute()]);
     renderScreen(<ReportsPage />, { path: '/reports', url: '/reports' });
-    expect(
-      await screen.findByText(/No reports have been run from this browser/),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/No reports have been run yet/)).toBeInTheDocument();
   });
 });
 
 describe('ReportsPage', () => {
   it('summarises receivables and delinquency from the live reads', async () => {
     mockApi([
+      listRoute(),
       {
         method: 'GET',
         path: '/api/bil/v1/receivables',
@@ -328,7 +355,9 @@ describe('ReportsPage', () => {
     ]);
     renderScreen(<ReportsPage />, { path: '/reports', url: '/reports' });
     expect(await screen.findByRole('heading', { level: 1, name: 'Reports' })).toBeInTheDocument();
-    expect(await screen.findByText(/150[.,]50/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/150[.,]50/)).toBeInTheDocument();
+    });
     expect(screen.getByText(/not available through the API yet/)).toBeInTheDocument();
   });
 });

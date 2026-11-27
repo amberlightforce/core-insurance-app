@@ -16,8 +16,9 @@ public interface IDataCoverageService
     /// <para>Operation dat.Coverage.status (query; HTTP GET /api/dat/v1/coverage/status).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W8.</para>
-    /// <para>Exposure: internal; consumers: PLT.</para>
+    /// <para>Exposure: ui, internal; consumers: PLT.</para>
     /// </remarks>
     /// <param name="aiFeatureId">PRD: "AI feature id"</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.CoverageStatusResponse> StatusAsync(global::System.Guid? aiFeatureId = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="period">Ingestion period YYYY, YYYY-MM or from..to on received time (BO-DAT-05); omitted = all.</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.CoverageStatusResponse> StatusAsync(global::System.Guid? aiFeatureId = null, string? period = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

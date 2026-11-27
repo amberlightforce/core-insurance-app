@@ -750,6 +750,64 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/dat/v1/marts/runs:
+    get:
+      operationId: dat.Mart.list
+      summary: List mart runs of the legal entity in scope, newest first (BO-DAT-05 contract addition)
+      description: |-
+        List mart runs of the legal entity in scope, newest first (BO-DAT-05 contract addition).
+
+        Keyset-paged (contract §3.5.5). Status is COMPLETED or SIGNED_OFF; a sign-off carries its validity (a later adjustment invalidates it).
+      tags:
+      - Mart
+      x-requirement:
+      - REQ-DAT-003
+      x-anchor:
+      - REQ-DAT-003
+      x-anchor-mapped:
+      - REQ-DAT-003
+      x-wave: W8
+      x-work-packages:
+      - W8-DAT-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: —'
+      x-exposure:
+      - ui
+      x-permission: dat.Mart.list
+      x-error-codes: []
+      x-source:
+      - BO-DAT-05
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: mart
+        in: query
+        required: false
+        description: Only runs of this mart.
+        schema:
+          type: string
+          enum: [PORTFOLIO_PREMIUM, CLAIMS_EXPERIENCE, RI_CESSION_SUMMARY]
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MartRunListPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/dat/v1/marts/{id}:
     get:
       operationId: dat.Mart.get
@@ -1419,16 +1477,30 @@ paths:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/KnownAt
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
       - name: node
         in: query
         required: false
-        description: 'PRD: "node"'
+        description: 'PRD: "node". Shorthand "<runId>/<figureKey>" for the two parameters below.'
+        schema:
+          type: string
+      - name: runId
+        in: query
+        required: false
+        description: 'Mart run id (BO-DAT-05). Required (here or through node).'
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: figureKey
+        in: query
+        required: false
+        description: 'Figure key within the run, e.g. GWP|MOTOR|2026-10| (BO-DAT-05). Required (here or through node).'
         schema:
           type: string
       - name: direction
         in: query
         required: false
-        description: 'PRD: "direction"'
+        description: 'PRD: "direction". Only "upstream" (the default) is served.'
         schema:
           type: string
       responses:
@@ -1444,6 +1516,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/dat/v1/accumulation/snapshot:
@@ -2071,6 +2145,7 @@ paths:
       x-dry-run-note: 'PRD: —'
       x-in-process: true
       x-exposure:
+      - ui
       - internal
       x-consumers:
       - PLT
@@ -2087,6 +2162,12 @@ paths:
         description: 'PRD: "AI feature id"'
         schema:
           $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: period
+        in: query
+        required: false
+        description: 'Ingestion period YYYY, YYYY-MM or from..to on received time (BO-DAT-05); omitted = all.'
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -3425,6 +3506,55 @@ components:
         legalStatus:
           type: string
           description: 'NotRegulatory for the management marts; regulatory layouts stay Unverified (BO-DAT-03).'
+    MartRunListItem:
+      type: object
+      description: 'One row of dat.Mart.list: a stored run with its sign-off state (BO-DAT-05).'
+      required: [runId, mart, period, status, createdBy, createdAt, snapshotHash]
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        mart:
+          type: string
+          enum: [PORTFOLIO_PREMIUM, CLAIMS_EXPERIENCE, RI_CESSION_SUMMARY]
+        period:
+          type: string
+          description: 'The period the run was started with; empty = all.'
+        productCode:
+          type: string
+        status:
+          type: string
+          enum: [COMPLETED, SIGNED_OFF]
+          description: 'SIGNED_OFF only while the sign-off is valid (no adjustment since).'
+        legalStatus:
+          type: string
+        figureCount:
+          type: integer
+        snapshotHash:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+        signOff:
+          type: [object, 'null']
+          description: 'Latest sign-off, if any; valid is false once an adjustment followed it.'
+          properties:
+            signedBy:
+              type: string
+            signedAt:
+              type: string
+            valid:
+              type: boolean
+    MartRunListPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/MartRunListItem'
+      description: Page of dat.Mart.list results (cursor pagination, contract §3.5.5)
     MartGetResponse:
       type: object
       description: 'dat.Mart.get result. PRD outputs: "figures, lineage pointer, diff"'
@@ -3654,6 +3784,9 @@ components:
         sourceRecordsRef:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "source records ref"'
+        nextCursor:
+          type: [string, 'null']
+          description: Cursor of the next page of source rows, or null on the last page (BO-DAT-05 contract addition).
     AccumulationSnapshotResponse:
       type: object
       description: 'dat.Accumulation.snapshot result. PRD outputs: "aggregates"'
@@ -3800,6 +3933,51 @@ components:
         reasons:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "Ungoverned + reasons"'
+        period:
+          type: [string, 'null']
+        generatedAt:
+          type: string
+        gapCount:
+          type: integer
+          description: 'Events accepted for a handled type that are neither projected nor quarantined (BO-DAT-05).'
+        tables:
+          type: array
+          description: 'Per conformed fact table and period: raw events projected, quarantined, or in a gap.'
+          items:
+            $ref: '#/components/schemas/CoverageLine'
+        marts:
+          type: array
+          description: 'Per mart and period: source events projected (or read directly), quarantined, or in a gap.'
+          items:
+            $ref: '#/components/schemas/CoverageLine'
+        notHandled:
+          type: array
+          description: 'Event types with no conformed fact and no mart, per period: counted, not projected.'
+          items:
+            $ref: '#/components/schemas/CoverageLine'
+    CoverageLine:
+      type: object
+      description: 'Control totals of one fact table, mart or unhandled event type in one ingestion period (BO-DAT-05).'
+      required: [name, period, received, projected, quarantined, gap, notHandled]
+      properties:
+        name:
+          type: string
+          description: 'Fact table, mart code or registry name of an unhandled event type.'
+        period:
+          type: string
+          description: 'YYYY-MM of the received time.'
+        received:
+          type: integer
+        projected:
+          type: integer
+        quarantined:
+          type: integer
+        gap:
+          type: integer
+          description: 'Handled type, accepted into the raw ledger, but neither projected nor quarantined.'
+        notHandled:
+          type: integer
+          description: 'Accepted but the type has no conformed fact or mart.'
     MonitorMetricsRequest:
       type: object
       description: 'dat.Monitor.metrics request. PRD inputs: "feature, version, metric records"'
