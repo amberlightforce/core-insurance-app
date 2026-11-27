@@ -1,3 +1,5 @@
+> **REFERENCE — not the active plan.** Requirement-to-work-package map. **The Status column is not maintained** (everything says "not started"); what is really built is in [`../build-out/COVERAGE.md`](../build-out/COVERAGE.md). Current plans and the document map: [`README.md`](../README.md).
+
 # Work-package backlog — Motor MVP cut
 
 Generated 2026-10-07 from PRD-18 Annex B.1 (requirement level), the module PRDs' §5 capability groups, PLAN.md §3 and DECISIONS.md. Machine-readable source of truth: `backlog.json` (same folder). Status of every WP starts as `not started` (deferred WPs: `deferred`).
