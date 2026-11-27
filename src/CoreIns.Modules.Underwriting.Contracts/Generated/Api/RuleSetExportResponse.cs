@@ -4,23 +4,11 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.RuleSet.export result. PRD outputs: "versions, reports"</summary>
+/// <summary>Generated contract member.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RuleSetExportResponse
 {
-    /// <summary>PRD: "versions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("versions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Versions { get; init; }
-
-    /// <summary>PRD: "reports"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reports")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reports { get; init; }
+    /// <summary>Contract member 'document'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("document")]
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.RuleSetExportDocument Document { get; init; }
 }
