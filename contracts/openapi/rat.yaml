@@ -1844,6 +1844,18 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: from
+        in: query
+        required: true
+        description: 'Contract addition (BO-RAT-05): table hash of the earlier version'
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: true
+        description: 'Contract addition (BO-RAT-05): table hash of the later version'
+        schema:
+          type: string
       responses:
         '200':
           description: Success

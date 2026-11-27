@@ -45,9 +45,7 @@ CONTRACT_NOT_SERVED GET /api/clm/v1/claim-trackings/{}
 CONTRACT_NOT_SERVED GET /api/clm/v1/conversations
 CONTRACT_NOT_SERVED GET /api/clm/v1/financials/daily-totals
 CONTRACT_NOT_SERVED GET /api/cmp/v1/bureaus/status
-CONTRACT_NOT_SERVED GET /api/cmp/v1/fiscal-documents/list-by-source
 CONTRACT_NOT_SERVED GET /api/cmp/v1/fiscal-documents/qr-payload
-CONTRACT_NOT_SERVED GET /api/cmp/v1/fiscal-reconciliation/breaks
 CONTRACT_NOT_SERVED GET /api/cmp/v1/taxonomies
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/footprint
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/snapshot
@@ -156,7 +154,6 @@ CONTRACT_NOT_SERVED GET /api/rat/v1/change-explanations/get
 CONTRACT_NOT_SERVED GET /api/rat/v1/impact-analysises/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/pricing-modifications
 CONTRACT_NOT_SERVED GET /api/rat/v1/pricing-modifications/{}
-CONTRACT_NOT_SERVED GET /api/rat/v1/rate-tables/diff
 CONTRACT_NOT_SERVED GET /api/rat/v1/rates/get-batch
 CONTRACT_NOT_SERVED GET /api/rat/v1/rates/get-batch-results
 CONTRACT_NOT_SERVED GET /api/rat/v1/rating-artifacts
@@ -699,8 +696,6 @@ CONTRACT_NOT_SERVED POST /api/rat/v1/price-reviews/decide
 CONTRACT_NOT_SERVED POST /api/rat/v1/price-reviews/request
 CONTRACT_NOT_SERVED POST /api/rat/v1/pricing-modifications/propose
 CONTRACT_NOT_SERVED POST /api/rat/v1/pricing-modifications/withdraw
-CONTRACT_NOT_SERVED POST /api/rat/v1/rate-tables/import
-CONTRACT_NOT_SERVED POST /api/rat/v1/rate-tables/validate
 CONTRACT_NOT_SERVED POST /api/rat/v1/rates/cancel-batch
 CONTRACT_NOT_SERVED POST /api/rat/v1/rates/rate-batch
 CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/build
