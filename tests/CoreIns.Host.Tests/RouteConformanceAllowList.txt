@@ -191,7 +191,6 @@ CONTRACT_NOT_SERVED GET /api/wrk/v1/requests
 CONTRACT_NOT_SERVED GET /api/wrk/v1/requests/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/teams/summary
 CONTRACT_NOT_SERVED PATCH /api/bil/v1/billing-accounts/{}
-CONTRACT_NOT_SERVED PATCH /api/clm/v1/exposures/{}
 CONTRACT_NOT_SERVED PATCH /api/clm/v1/services/{}
 CONTRACT_NOT_SERVED PATCH /api/mkt/v1/config-change-requests/{}
 CONTRACT_NOT_SERVED PATCH /api/pfc/v1/pogs/{}
@@ -315,8 +314,6 @@ CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/purge
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/rectify
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/restrict
-CONTRACT_NOT_SERVED POST /api/clm/v1/exposures/close
-CONTRACT_NOT_SERVED POST /api/clm/v1/exposures/reopen
 CONTRACT_NOT_SERVED POST /api/clm/v1/fnol/save-draft
 CONTRACT_NOT_SERVED POST /api/clm/v1/fraud/score
 CONTRACT_NOT_SERVED POST /api/clm/v1/import/claim

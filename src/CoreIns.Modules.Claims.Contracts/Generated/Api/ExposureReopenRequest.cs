@@ -4,15 +4,19 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Exposure.reopen request. PRD inputs: "exposure data"</summary>
+/// <summary>clm.Exposure.reopen request (BO-CLM-01). Needs a reason code; the claim must be open.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ExposureReopenRequest
 {
-    /// <summary>PRD: "exposure data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exposureData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ExposureData { get; init; }
+    /// <summary>Contract member 'exposureId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("exposureId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ExposureId ExposureId { get; init; }
+
+    /// <summary>The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
+
+    /// <summary>Contract member 'reasonCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
+    public required string ReasonCode { get; init; }
 }
