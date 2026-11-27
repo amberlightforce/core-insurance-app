@@ -33,6 +33,35 @@ export default defineConfig([
     },
   },
   {
+    // Customer portal (BO-CHN-12, README open decision #1): same Vite app, own shell, NO staff imports. Portal code may
+    // use the design system, api client, i18n, format, dev session and role list; never staff modules, the staff shell
+    // or the staff route tree. Tests may import the shared test helpers.
+    files: ['src/portal/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '**/modules/**',
+                '**/app-shell/**',
+                '**/App',
+                '**/App.tsx',
+                '**/routes',
+                '**/routes.tsx',
+                '**/auth/RequireRole',
+                '**/dev-auth/DevSignIn',
+              ],
+              message:
+                'Portal code must not import staff modules, the staff shell or the staff routes (BO-CHN-12). Use src/portal/ui or the design system.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     // Stories and the Storybook preview are not hot-reloaded app modules.
     files: ['.storybook/**/*.{ts,tsx}', 'src/**/*.stories.tsx'],
     rules: { 'react-refresh/only-export-components': 'off' },

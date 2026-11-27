@@ -1,0 +1,284 @@
+/*
+ * Customer portal page primitives (BO-CHN-12). The Aegean language of the staff screens (opaque cards on the
+ * ambient canvas, coloured-dot section headers, pills) with customer-sized type and touch targets. Portal code
+ * owns these classes: it never imports staff modules.
+ */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  inline-size: 100%;
+  max-inline-size: 1120px;
+  margin-inline: auto;
+  padding: var(--space-4) var(--space-4) var(--space-6);
+}
+
+/* Hero (mockup `.canopy`): soft sea blooms behind the title. */
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-5);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.heroImagery {
+  position: absolute;
+  inset: 0;
+  z-index: calc(var(--z-raised) * -1);
+}
+
+.heroImagery i {
+  position: absolute;
+  border-radius: var(--radius-full);
+  filter: blur(var(--blur-canopy));
+}
+
+.heroImagery i:nth-child(1) {
+  inset-block-start: -60%;
+  inset-inline-start: -15%;
+  inline-size: 70%;
+  block-size: 140%;
+  background-color: var(--color-ambient-sea-1);
+}
+
+.heroImagery i:nth-child(2) {
+  inset-block-start: -50%;
+  inset-inline-start: 40%;
+  inline-size: 50%;
+  block-size: 120%;
+  background-color: var(--color-ambient-sea-2);
+}
+
+.heroImagery i:nth-child(3) {
+  inset-block-end: -40%;
+  inset-inline-end: -10%;
+  inline-size: 40%;
+  block-size: 90%;
+  background-color: var(--color-ambient-sea-3);
+}
+
+.heroImagery::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-canopy-scrim);
+}
+
+.overline {
+  margin: var(--space-0);
+  color: var(--color-text-tertiary);
+  font: var(--type-overline);
+  letter-spacing: var(--type-overline-tracking);
+  text-transform: uppercase;
+}
+
+.title {
+  margin: var(--space-1) var(--space-0) var(--space-0);
+  color: var(--color-text-primary);
+  font: var(--type-display);
+  letter-spacing: var(--type-display-tracking);
+  text-wrap: balance;
+}
+
+.lead {
+  max-inline-size: 60ch;
+  margin: var(--space-0);
+  color: var(--color-text-secondary);
+  font: var(--type-body);
+  letter-spacing: var(--type-body-tracking);
+}
+
+/* Section card with a family dot (mockup `.wl`). */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-inline-size: 0;
+  padding: var(--space-inset-card);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sheet);
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-block-size: var(--size-control-md);
+}
+
+.sectionTitle {
+  margin: var(--space-0);
+  color: var(--color-text-primary);
+  font: var(--type-heading-3);
+  letter-spacing: var(--type-heading-3-tracking);
+}
+
+.dot {
+  --_dot: var(--color-status-neutral-solid);
+
+  flex: none;
+  inline-size: var(--size-status-dot);
+  block-size: var(--size-status-dot);
+  margin-inline: var(--space-1) var(--space-0_5);
+  border-radius: var(--radius-full);
+  background-color: var(--_dot);
+  box-shadow:
+    0 0 0 var(--shadow-dot-halo-spread) color-mix(in srgb, var(--_dot) 18%, transparent),
+    0 0 var(--shadow-dot-glow-blur) color-mix(in srgb, var(--_dot) 60%, transparent);
+}
+
+.dot[data-family='success'] {
+  --_dot: var(--color-status-success-solid);
+}
+
+.dot[data-family='warning'] {
+  --_dot: var(--color-status-warning-solid);
+}
+
+.dot[data-family='info'] {
+  --_dot: var(--color-status-info-solid);
+}
+
+.dot[data-family='brand'] {
+  --_dot: var(--color-status-brand-solid);
+}
+
+.dot[data-family='teal'] {
+  --_dot: var(--color-status-teal-solid);
+}
+
+.dot[data-family='plum'] {
+  --_dot: var(--color-status-plum-solid);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.muted {
+  margin: var(--space-0);
+  color: var(--color-text-secondary);
+  font: var(--type-body);
+}
+
+.grid {
+  display: grid;
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: var(--space-3);
+}
+
+.gridItem {
+  display: flex;
+}
+
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1_5);
+  min-block-size: var(--size-control-md);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-link);
+  font: var(--type-label-lg);
+  outline: none;
+}
+
+.textLink:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* A shortcut card: the whole card is one link. */
+.shortcut {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-block-size: 112px;
+  padding: var(--space-inset-card);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-sheet);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  outline: none;
+  transition:
+    border-color var(--motion-duration-feedback-lg) var(--motion-ease-feedback),
+    box-shadow var(--motion-duration-feedback-lg) var(--motion-ease-feedback);
+}
+
+.shortcut:hover {
+  border-color: var(--color-border-control);
+  box-shadow: var(--elevation-2);
+}
+
+.shortcut:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.shortcutIcon {
+  display: grid;
+  place-items: center;
+  inline-size: var(--size-control-md);
+  block-size: var(--size-control-md);
+  border-radius: var(--radius-md);
+  background-color: var(--color-status-brand-bg);
+  color: var(--color-status-brand-fg);
+}
+
+.shortcutTitle {
+  margin: var(--space-0);
+  font: var(--type-heading-3);
+  letter-spacing: var(--type-heading-3-tracking);
+}
+
+.shortcutBody {
+  margin: var(--space-0);
+  color: var(--color-text-secondary);
+  font: var(--type-body-sm);
+}
+
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: var(--space-6);
+}
+
+.problemList {
+  margin: var(--space-1) var(--space-0) var(--space-0);
+  padding-inline-start: var(--space-4);
+}
+
+@media (width < 600px) {
+  .page {
+    padding: var(--space-3) var(--space-3) var(--space-5);
+  }
+
+  .hero {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .title {
+    font: var(--type-heading-1);
+    letter-spacing: var(--type-heading-1-tracking);
+  }
+}
