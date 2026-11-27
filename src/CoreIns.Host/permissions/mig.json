@@ -36,7 +36,12 @@
         "mig.Staging.snapshots": [ "Staff.MigrationManager", "Platform.Admin" ],
         "mig.Profile.run": [ "Staff.MigrationManager", "Platform.Admin" ],
         "mig.Dq.findings": [ "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin" ],
-        "mig.Dq.waive": [ "Staff.DataSteward", "Platform.Admin" ]
+        "mig.Dq.waive": [ "Staff.DataSteward", "Platform.Admin" ],
+        "mig.Mapping.create": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Mapping.list": [ "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin" ],
+        "mig.Mapping.get": [ "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin" ],
+        "mig.Mapping.publish": [ "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin" ],
+        "mig.Mapping.preview": [ "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin" ]
       }
     },
     "Authority": {
@@ -46,6 +51,14 @@
         {
           "Id": "mig-manager-batch-run-illustrative", "Role": "Staff.MigrationManager", "Type": "MIG.BATCH_RUN", "Illustrative": true,
           "Limits": [ { "Dimension": "scope", "Comparison": "InSet", "Codes": [ "BATCH" ] } ]
+        },
+        {
+          "Id": "mig-manager-mapping-illustrative", "Role": "Staff.MigrationManager", "Type": "MIG.MAPPING_SPEC", "Illustrative": true,
+          "Limits": [ { "Dimension": "scope", "Comparison": "InSet", "Codes": [ "MAPPING" ] } ]
+        },
+        {
+          "Id": "mig-steward-mapping-illustrative", "Role": "Staff.DataSteward", "Type": "MIG.MAPPING_SPEC", "Illustrative": true,
+          "Limits": [ { "Dimension": "scope", "Comparison": "InSet", "Codes": [ "MAPPING" ] } ]
         },
         {
           "Id": "mig-finance-signoff-illustrative", "Role": "Staff.Finance", "Type": "MIG.WAVE_SIGNOFF", "Illustrative": true,

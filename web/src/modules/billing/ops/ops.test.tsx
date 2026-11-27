@@ -85,7 +85,10 @@ describe('suspense workbench', () => {
         },
       },
     ]);
-    renderScreen(<SuspensePage />, { path: '/billing/suspense', url: '/billing/suspense' });
+    renderScreen(<SuspensePage />, {
+      path: '/billing/suspense/:suspenseItemId?',
+      url: '/billing/suspense',
+    });
     const grid = await screen.findByRole('grid');
     expect(within(grid).getByText('RC-0001')).toBeInTheDocument();
     expect(within(grid).getByText('120,00 €')).toBeInTheDocument();
@@ -116,7 +119,10 @@ describe('suspense workbench', () => {
         respond: () => ({ body: { items: [], nextCursor: null, limit: 100 } }),
       },
     ]);
-    renderScreen(<SuspensePage />, { path: '/billing/suspense', url: '/billing/suspense' });
+    renderScreen(<SuspensePage />, {
+      path: '/billing/suspense/:suspenseItemId?',
+      url: '/billing/suspense',
+    });
     expect(await screen.findByText('Δεν υπάρχουν μη εφαρμοσμένες εισπράξεις')).toBeInTheDocument();
   });
 });

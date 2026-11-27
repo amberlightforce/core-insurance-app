@@ -48,11 +48,84 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
 
     public DbSet<AccountMemberRow> AccountMembers => Set<AccountMemberRow>();
 
+    public DbSet<CommissionAgreementRow> CommissionAgreements => Set<CommissionAgreementRow>();
+
+    public DbSet<CommissionAgreementVersionRow> CommissionVersions => Set<CommissionAgreementVersionRow>();
+
+    public DbSet<CommissionRateLineRow> CommissionRateLines => Set<CommissionRateLineRow>();
+
     protected override string Schema => PartyModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<CommissionAgreementRow>(entity =>
+        {
+            entity.ToTable("commission_agreement");
+            entity.HasKey(e => e.AgreementId).HasName("pk_commission_agreement");
+            entity.Property(e => e.AgreementId).HasColumnName("agreement_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.IntermediaryId).HasColumnName("intermediary_id");
+            entity.Property(e => e.ProductCode).HasColumnName("product_code");
+            entity.Property(e => e.LineOfBusiness).HasColumnName("line_of_business");
+            entity.Property(e => e.ScopeKey).HasColumnName("scope_key");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.HasIndex(e => new { e.LegalEntityId, e.IntermediaryId, e.ScopeKey }).IsUnique().HasDatabaseName("ux_commission_agreement_scope");
+            entity.HasOne<IntermediaryRow>().WithMany().HasForeignKey(e => e.IntermediaryId).HasConstraintName("fk_commission_agreement_intermediary").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<CommissionAgreementVersionRow>(entity =>
+        {
+            entity.ToTable("commission_agreement_version", table =>
+            {
+                table.HasCheckConstraint("ck_commission_version_status", "status IN ('DRAFT','PENDING_APPROVAL','ACTIVE','REJECTED')");
+                table.HasCheckConstraint("ck_commission_version_rate", "max_rate_pct >= 0 AND max_rate_pct <= 100");
+            });
+            entity.HasKey(e => e.VersionId).HasName("pk_commission_agreement_version");
+            entity.Property(e => e.VersionId).HasColumnName("version_id");
+            entity.Property(e => e.AgreementId).HasColumnName("agreement_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.VersionNo).HasColumnName("version_no");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.EffectiveFrom).HasColumnName("effective_from");
+            entity.Property(e => e.ExpectedVolume).HasColumnName("expected_volume").HasColumnType("numeric(18,2)");
+            entity.Property(e => e.Currency).HasColumnName("currency");
+            entity.Property(e => e.MaxRatePct).HasColumnName("max_rate_pct").HasColumnType("numeric(7,4)");
+            entity.Property(e => e.ContentHash).HasColumnName("content_hash");
+            entity.Property(e => e.ApprovalRequestId).HasColumnName("approval_request_id");
+            entity.Property(e => e.Notes).HasColumnName("notes");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.SubmittedBy).HasColumnName("submitted_by");
+            entity.Property(e => e.SubmittedAt).HasColumnName("submitted_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecidedBy).HasColumnName("decided_by");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecisionComment).HasColumnName("decision_comment");
+            entity.HasIndex(e => new { e.AgreementId, e.VersionNo }).IsUnique().HasDatabaseName("ux_commission_version_no");
+            entity.HasIndex(e => e.AgreementId).IsUnique().HasFilter("status IN ('DRAFT','PENDING_APPROVAL')").HasDatabaseName("ux_commission_version_open");
+            entity.HasOne<CommissionAgreementRow>().WithMany().HasForeignKey(e => e.AgreementId).HasConstraintName("fk_commission_version_agreement").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<CommissionRateLineRow>(entity =>
+        {
+            entity.ToTable("commission_rate_line", table =>
+            {
+                table.HasCheckConstraint("ck_commission_line_rate", "rate_pct >= 0 AND rate_pct <= 100");
+            });
+            entity.HasKey(e => e.LineId).HasName("pk_commission_rate_line");
+            entity.Property(e => e.LineId).HasColumnName("line_id");
+            entity.Property(e => e.VersionId).HasColumnName("version_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.LineNo).HasColumnName("line_no");
+            entity.Property(e => e.BusinessType).HasColumnName("business_type");
+            entity.Property(e => e.LineOfBusiness).HasColumnName("line_of_business");
+            entity.Property(e => e.Basis).HasColumnName("basis");
+            entity.Property(e => e.RatePct).HasColumnName("rate_pct").HasColumnType("numeric(7,4)");
+            entity.HasIndex(e => new { e.VersionId, e.LineNo }).IsUnique().HasDatabaseName("ux_commission_line_no");
+            entity.HasOne<CommissionAgreementVersionRow>().WithMany().HasForeignKey(e => e.VersionId).HasConstraintName("fk_commission_line_version").OnDelete(DeleteBehavior.Restrict);
+        });
 
         modelBuilder.Entity<AccountRow>(entity =>
         {
