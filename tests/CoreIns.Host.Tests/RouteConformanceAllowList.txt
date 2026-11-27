@@ -178,8 +178,6 @@ CONTRACT_NOT_SERVED GET /api/uw/v1/external-reports
 CONTRACT_NOT_SERVED GET /api/uw/v1/external-reports/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/inspections/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/intakes/{}
-CONTRACT_NOT_SERVED GET /api/uw/v1/issue-types/search
-CONTRACT_NOT_SERVED GET /api/uw/v1/issue-types/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/issues/explain
 CONTRACT_NOT_SERVED GET /api/uw/v1/issues/list-for-channel
 CONTRACT_NOT_SERVED GET /api/uw/v1/issues/{}
@@ -793,7 +791,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/accept
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/clear
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/reject
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/verify-value
-CONTRACT_NOT_SERVED POST /api/uw/v1/issue-types/upsert
 CONTRACT_NOT_SERVED POST /api/uw/v1/issues/add-manual
 CONTRACT_NOT_SERVED POST /api/uw/v1/issues/close
 CONTRACT_NOT_SERVED POST /api/uw/v1/issues/reopen
@@ -813,9 +810,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/bulk-set
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/set
 CONTRACT_NOT_SERVED POST /api/uw/v1/review/lock
 CONTRACT_NOT_SERVED POST /api/uw/v1/review/release
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/approve
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/schedule
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/submit
 CONTRACT_NOT_SERVED POST /api/uw/v1/rules/evaluate-batch
 CONTRACT_NOT_SERVED POST /api/uw/v1/valuation/compute
 CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/bulk-reassign
