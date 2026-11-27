@@ -810,17 +810,9 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/bulk-set
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/set
 CONTRACT_NOT_SERVED POST /api/uw/v1/review/lock
 CONTRACT_NOT_SERVED POST /api/uw/v1/review/release
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets
 CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/approve
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/draft
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/edit
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/export
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/import
 CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/schedule
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/simulate
 CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/submit
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/test
-CONTRACT_NOT_SERVED POST /api/uw/v1/rule-sets/validate
 CONTRACT_NOT_SERVED POST /api/uw/v1/rules/evaluate-batch
 CONTRACT_NOT_SERVED POST /api/uw/v1/valuation/compute
 CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/bulk-reassign
