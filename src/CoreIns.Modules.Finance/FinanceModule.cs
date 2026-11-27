@@ -80,6 +80,7 @@ public static class FinanceModule
         // Maker-checker of manual journals (BO-FIN-01b): FIN decides through its own operation, which posts the approved journal.
         services.AddAuthorityType(Commands.ManualJournalApproval.Definition);
         services.AddOwnerDecidedApprovalType(Commands.ManualJournalApproval.Type);
+        services.AddScoped<Domain.ICloseTaskGate, Commands.ManualJournalsCloseGate>();
         services.AddScoped<FluentValidation.IValidator<Commands.RerunIntakeExceptions>, Commands.IntakeExceptionValidator<Commands.RerunIntakeExceptions>>();
         services.AddCommandAuditor<Commands.RerunIntakeExceptions, CoreIns.Modules.Finance.Contracts.Api.IntakeExceptionRerunResponse, Commands.IntakeExceptionAuditor<Commands.RerunIntakeExceptions>>();
         services.AddCommand<Commands.RerunIntakeExceptions, CoreIns.Modules.Finance.Contracts.Api.IntakeExceptionRerunResponse, Commands.IntakeExceptionHandler<Commands.RerunIntakeExceptions>>(CoreIns.Platform.Commands.CommandDescriptor.For("fin.IntakeException.rerun"));

@@ -105,9 +105,9 @@ internal sealed class SubmitManualJournalHandler(
             return DomainError.Of(ModuleCode.FIN, "STATE", $"A {row.Status} manual journal cannot be submitted.");
         }
 
-        if (await periods.IsLockedAsync(row.LegalEntityId, row.AccountingDate, cancellationToken).ConfigureAwait(false))
+        if (await periods.StateAsync(row.LegalEntityId, FinancePeriods.CodeOf(row.AccountingDate), cancellationToken).ConfigureAwait(false) != FinancePeriods.Open)
         {
-            return DomainError.Of(ModuleCode.FIN, "PERIOD-LOCKED", $"The accounting period {FinancePeriods.CodeOf(row.AccountingDate)} is locked.");
+            return DomainError.Of(ModuleCode.FIN, "PERIOD-LOCKED", $"The accounting period {FinancePeriods.CodeOf(row.AccountingDate)} is not open.");
         }
 
         var lines = await db.ManualJournalLines.AsNoTracking().Where(l => l.ManualJournalId == id).OrderBy(l => l.LineNo).ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -218,9 +218,9 @@ internal sealed class DecideManualJournalHandler(
         if (approve)
         {
             // Everything that can refuse the posting is checked before the approval is decided, so a refusal leaves the request open.
-            if (await periods.IsLockedAsync(legalEntity.Value, row.AccountingDate, cancellationToken).ConfigureAwait(false))
+            if (await periods.StateAsync(legalEntity.Value, FinancePeriods.CodeOf(row.AccountingDate), cancellationToken).ConfigureAwait(false) != FinancePeriods.Open)
             {
-                return DomainError.Of(ModuleCode.FIN, "PERIOD-LOCKED", $"The accounting period {FinancePeriods.CodeOf(row.AccountingDate)} is locked; the journal cannot be posted.");
+                return DomainError.Of(ModuleCode.FIN, "PERIOD-LOCKED", $"The accounting period {FinancePeriods.CodeOf(row.AccountingDate)} is not open (soft-closed or locked); the journal cannot be posted.");
             }
 
             var profile = await reference.BookProfileAsync(code.Value, cancellationToken).ConfigureAwait(false);
@@ -299,5 +299,23 @@ internal sealed class DecideManualJournalHandler(
         }
 
         return ManualJournalReader.ToEnvelope(row, lines);
+    }
+}
+
+/// <summary>
+/// Blocks the MANUAL_JOURNALS close task while the period still has manual journals waiting for a decision: SUBMITTED, or APPROVED but not
+/// yet POSTED. DRAFTs do not block (they change no ledger) but a DRAFT cannot be submitted into a closed period.
+/// </summary>
+internal sealed class ManualJournalsCloseGate(FinanceDbContext db) : ICloseTaskGate
+{
+    public string Task => PeriodClose.ManualJournals;
+
+    public async Task<string?> BlockerAsync(Guid legalEntity, string period, CancellationToken cancellationToken)
+    {
+        var waiting = await db.ManualJournals.AsNoTracking()
+            .Where(r => r.LegalEntityId == legalEntity && (r.Status == ManualJournalStatus.Submitted || r.Status == ManualJournalStatus.Approved))
+            .Select(r => r.AccountingDate).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var count = waiting.Count(d => FinancePeriods.CodeOf(d) == period);
+        return count == 0 ? null : $"{count} manual journal(s) of the period are submitted but not yet posted or rejected.";
     }
 }
