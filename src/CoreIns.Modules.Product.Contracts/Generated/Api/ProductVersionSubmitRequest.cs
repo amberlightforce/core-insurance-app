@@ -4,15 +4,18 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.ProductVersion.submit request. PRD inputs: "change set id"</summary>
+/// <summary>pfc.ProductVersion.submit request (BO-PFC-04). Submits an open change set for sign-off.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProductVersionSubmitRequest
 {
-    /// <summary>PRD: "change set id"</summary>
+    /// <summary>Contract member 'changeSetId'.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'changeSetId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("changeSetId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? ChangeSetId { get; init; }
+    public required global::System.Guid ChangeSetId { get; init; }
+
+    /// <summary>The change-set record version the submitter saw (optimistic concurrency)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    public required int RecordVersion { get; init; }
 }

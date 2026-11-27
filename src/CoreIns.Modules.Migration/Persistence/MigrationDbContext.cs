@@ -17,12 +17,17 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
 
     public DbSet<RoutingRow> Routes => Set<RoutingRow>();
 
+    public DbSet<Services.Reconciliation.ControlTotalRow> ControlTotals => Set<Services.Reconciliation.ControlTotalRow>();
+
+    public DbSet<Services.Reconciliation.ReconResultRow> ReconResults => Set<Services.Reconciliation.ReconResultRow>();
+
     protected override string Schema => MigrationModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.MapDsarRestrictions();
+        Services.Reconciliation.ReconciliationModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BatchRow>(entity =>
         {

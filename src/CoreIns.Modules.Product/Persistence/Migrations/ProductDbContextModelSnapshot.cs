@@ -532,6 +532,167 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Product.Persistence.ReleaseRequestRow", b =>
+                {
+                    b.Property<Guid>("ReleaseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("release_id");
+
+                    b.Property<DateOnly?>("ActivationDate")
+                        .HasColumnType("date")
+                        .HasColumnName("activation_date");
+
+                    b.Property<Guid>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<string>("CandidateArtefactHash")
+                        .IsRequired()
+                        .HasColumnType("char(64)")
+                        .HasColumnName("candidate_artefact_hash");
+
+                    b.Property<Guid>("ChangeSetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("change_set_id");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionComment")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_comment");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateOnly?>("NewBusinessFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("new_business_from");
+
+                    b.Property<DateOnly?>("NewBusinessTo")
+                        .HasColumnType("date")
+                        .HasColumnName("new_business_to");
+
+                    b.Property<int>("NewMajor")
+                        .HasColumnType("integer")
+                        .HasColumnName("new_major");
+
+                    b.Property<int>("NewMinor")
+                        .HasColumnType("integer")
+                        .HasColumnName("new_minor");
+
+                    b.Property<string>("PayloadHash")
+                        .IsRequired()
+                        .HasColumnType("char(64)")
+                        .HasColumnName("payload_hash");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("published_at");
+
+                    b.Property<Guid?>("PublishedVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("published_version_id");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<DateOnly?>("RenewalFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("renewal_from");
+
+                    b.Property<DateOnly?>("RenewalTo")
+                        .HasColumnType("date")
+                        .HasColumnName("renewal_to");
+
+                    b.Property<string>("ScheduleReason")
+                        .HasColumnType("text")
+                        .HasColumnName("schedule_reason");
+
+                    b.Property<DateTime?>("ScheduledAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("scheduled_at");
+
+                    b.Property<string>("ScheduledBy")
+                        .HasColumnType("text")
+                        .HasColumnName("scheduled_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<string>("SubmittedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
+
+                    b.Property<string>("SubmittedByPrincipal")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by_principal");
+
+                    b.HasKey("ReleaseId")
+                        .HasName("pk_release_request");
+
+                    b.HasIndex("ApprovalRequestId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_release_approval");
+
+                    b.HasIndex("ChangeSetId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_release_live_per_change_set")
+                        .HasFilter("status IN ('SUBMITTED', 'APPROVED', 'SCHEDULED')");
+
+                    b.HasIndex("PublishedVersionId");
+
+                    b.HasIndex("Status", "ActivationDate")
+                        .HasDatabaseName("ix_release_due");
+
+                    b.HasIndex("ProductId", "NewMajor", "NewMinor")
+                        .IsUnique()
+                        .HasDatabaseName("ux_release_live_per_number")
+                        .HasFilter("status IN ('SUBMITTED', 'APPROVED', 'SCHEDULED')");
+
+                    b.ToTable("release_request", "pfc", t =>
+                        {
+                            t.HasCheckConstraint("ck_release_hash", "payload_hash ~ '^[0-9a-f]{64}$' AND candidate_artefact_hash ~ '^[0-9a-f]{64}$'");
+
+                            t.HasCheckConstraint("ck_release_new_number", "new_major >= 0 AND new_minor >= 0");
+
+                            t.HasCheckConstraint("ck_release_published", "(status = 'PUBLISHED') = (published_version_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_release_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_release_scheduled", "(status IN ('SCHEDULED', 'PUBLISHED')) = (new_business_from IS NOT NULL AND renewal_from IS NOT NULL AND activation_date IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_release_sod", "decided_by IS NULL OR decided_by <> submitted_by");
+
+                            t.HasCheckConstraint("ck_release_status", "status IN ('SUBMITTED', 'APPROVED', 'RETURNED', 'SCHEDULED', 'PUBLISHED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Product.Persistence.ChangeSetEditRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Product.Persistence.ChangeSetRow", null)
@@ -616,6 +777,29 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                         .HasForeignKey("ReplacesVersionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_product_version_replaces");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Product.Persistence.ReleaseRequestRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Product.Persistence.ChangeSetRow", null)
+                        .WithMany()
+                        .HasForeignKey("ChangeSetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_release_change_set");
+
+                    b.HasOne("CoreIns.Modules.Product.Persistence.ProductRow", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_release_product");
+
+                    b.HasOne("CoreIns.Modules.Product.Persistence.ProductVersionRow", null)
+                        .WithMany()
+                        .HasForeignKey("PublishedVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_release_published_version");
                 });
 #pragma warning restore 612, 618
         }

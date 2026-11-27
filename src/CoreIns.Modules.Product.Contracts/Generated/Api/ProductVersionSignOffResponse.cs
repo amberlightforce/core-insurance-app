@@ -4,15 +4,40 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.ProductVersion.signOff result. PRD outputs: "approval state"</summary>
+/// <summary>pfc.ProductVersion.signOff result: the approval state and the change set (SUBMITTED when approved, OPEN again when returned)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProductVersionSignOffResponse
 {
-    /// <summary>PRD: "approval state"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'approvalState'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("approvalState")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ApprovalState { get; init; }
+    public required ApprovalStateValue ApprovalState { get; init; }
+
+    /// <summary>Contract member 'changeSetState'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("changeSetState")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.ChangeSetState ChangeSetState { get; init; }
+
+    /// <summary>Contract member 'releaseId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'releaseId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("releaseId")]
+    public required global::System.Guid ReleaseId { get; init; }
+
+    /// <summary>Contract member 'version'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    public required global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber Version { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ApprovalStateValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ApprovalStateValue
+    {
+        /// <summary><c>APPROVED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVED")]
+        Approved,
+
+        /// <summary><c>RETURNED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RETURNED")]
+        Returned,
+    }
 }

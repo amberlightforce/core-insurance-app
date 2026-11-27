@@ -42,6 +42,33 @@ export interface FinancePeriod {
   closedForPosting: boolean;
 }
 
+export type CloseTaskCode =
+  'INTAKE_EXCEPTIONS' | 'RECONCILIATIONS' | 'EARNING_RUN' | 'MANUAL_JOURNALS';
+
+/** One close checklist task (fin.Close.tasks). */
+export interface CloseTask {
+  task: CloseTaskCode;
+  status: 'OPEN' | 'SIGNED_OFF';
+  signOffRole: string;
+  blocker?: string | null;
+  signedOffBy?: string | null;
+  signedOffAt?: string | null;
+  reason?: string | null;
+}
+
+/** A period with its close checklist: the response of every fin.Close operation. */
+export interface ClosePeriodView {
+  period: string;
+  state: 'OPEN' | 'SOFT_CLOSED' | 'LOCKED';
+  closedForPosting: boolean;
+  tasks: CloseTask[];
+  softClosedBy?: string | null;
+  lockedBy?: string | null;
+  reopenRequestedBy?: string | null;
+  reopenRequestedAt?: string | null;
+  reopenReason?: string | null;
+}
+
 export interface Page<T> {
   items: T[];
   nextCursor: string | null;

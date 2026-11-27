@@ -26,6 +26,9 @@ internal static class ClaimsPermissions
     public const string ClaimSearch = "clm.Claim.search";
     public const string ClaimClose = "clm.Claim.close";
     public const string ExposureCreate = "clm.Exposure.create";
+    public const string ExposureUpdate = "clm.Exposure.update";
+    public const string ExposureClose = "clm.Exposure.close";
+    public const string ExposureReopen = "clm.Exposure.reopen";
     public const string CoverageReverify = "clm.Coverage.reverify";
     public const string ClaimUpdate = "clm.Claim.update";
 }

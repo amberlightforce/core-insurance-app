@@ -746,6 +746,70 @@
     }
   },
   {
+    "eventId": "0192d2c8-518f-7d66-8d0d-043df4ad5b80",
+    "eventType": "ExposureClosed",
+    "schemaVersion": "1.0",
+    "producer": "CLM",
+    "aggregateType": "Claim",
+    "aggregateId": "01922472-20f7-7fc1-802f-4916762d4406",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "claimId": "01926f0f-4c95-753a-8870-90ce87992dd7",
+      "exposureId": "019221fd-b2ac-75c0-8ea3-ecf68c841a6d"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "exposureId": "0192d002-8b56-70f2-8f6e-b74c5205593b",
+      "exposureNumber": "SAMPLE-000001",
+      "outcome": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "0192b23c-1523-7982-8569-6ad7a6ce9e57",
+    "eventType": "ExposureClosed",
+    "schemaVersion": "1.0",
+    "producer": "CLM",
+    "aggregateType": "Claim",
+    "aggregateId": "01920bbb-c05b-7ce9-8b6d-840fc2496670",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "claimId": "0192a864-391e-7d2f-8e2f-9c3cd7dbfdaa",
+      "exposureId": "01925cf7-5276-7ee1-807e-af80fd65a166"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "exposureId": "01926830-4f1a-788e-8c04-2ba5ad435655",
+      "exposureNumber": "SAMPLE-000001",
+      "outcome": "SAMPLE_CODE"
+    }
+  },
+  {
     "eventId": "01920956-e2b7-7024-8c85-98d58f1f4e70",
     "eventType": "ExposureCreated",
     "schemaVersion": "1.0",
@@ -815,6 +879,70 @@
       "claimantPartyId": "0192b67c-6c2c-7d5b-8462-6009ba867e28",
       "siiLob": "SAMPLE_CODE",
       "accidentDate": "2026-10-07"
+    }
+  },
+  {
+    "eventId": "01928908-f043-73e1-8493-e759066a15ac",
+    "eventType": "ExposureReopened",
+    "schemaVersion": "1.0",
+    "producer": "CLM",
+    "aggregateType": "Claim",
+    "aggregateId": "019295e3-f372-7deb-806e-27a1c1185555",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "claimId": "01924282-7e84-7025-8357-d01be7428e96",
+      "exposureId": "01920ca6-3e52-7398-8f51-4e7b553ec1e9"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "exposureId": "0192cc7f-874d-78e2-8690-8cf826c41ce4",
+      "exposureNumber": "SAMPLE-000001",
+      "reasonCode": "SAMPLE_CODE"
+    }
+  },
+  {
+    "eventId": "01929d88-6bd5-7a3b-8fe6-cc41a593e67f",
+    "eventType": "ExposureReopened",
+    "schemaVersion": "1.0",
+    "producer": "CLM",
+    "aggregateType": "Claim",
+    "aggregateId": "0192db61-832e-7834-8940-49a072a482cd",
+    "aggregateSequence": 1,
+    "occurredAt": "2026-10-07T09:00:00Z",
+    "recordedAt": "2026-10-07T09:00:01Z",
+    "legalEntity": "GR-TEST",
+    "jurisdiction": "GR",
+    "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "businessKeys": {
+      "claimId": "01921a99-a501-7a97-86d1-446b503f5d2f",
+      "exposureId": "01920212-b939-75ad-8eb6-d62f24be1310"
+    },
+    "correlationId": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "causationId": null,
+    "actor": {
+      "kind": "SERVICE",
+      "id": "contract-samples"
+    },
+    "aiInteractionId": null,
+    "origin": "LIVE",
+    "dataClassification": "P0",
+    "payload": {
+      "exposureId": "0192d2f1-e645-7dfe-8553-3d4e6481722f",
+      "exposureNumber": "SAMPLE-000001",
+      "reasonCode": "SAMPLE_CODE"
     }
   },
   {

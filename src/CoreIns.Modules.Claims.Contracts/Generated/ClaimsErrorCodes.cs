@@ -28,7 +28,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-CLOSE-GUARD (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update.</para>
+    /// <para>Declared by 6 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Exposure.close.</para>
     /// </remarks>
     public const string CloseGuard = "CLM-ERR-CLOSE-GUARD";
 
@@ -100,7 +100,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-ILLEGAL-TRANSITION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 14 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.create, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.openOwnSettlement, clm.FriendlySettlement.submit, clm.Payment.reissue, clm.Payment.void, ….</para>
+    /// <para>Declared by 17 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.close, clm.Exposure.create, clm.Exposure.reopen, clm.Exposure.update, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.openOwnSettlement, ….</para>
     /// </remarks>
     public const string IllegalTransition = "CLM-ERR-ILLEGAL-TRANSITION";
 
@@ -136,7 +136,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 28 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.create, clm.Financials.get, clm.Fnol.get, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.evaluate, clm.FriendlySettlement.get, clm.FriendlySettlement.getStatement, clm.FriendlySettlement.openOwnSettlement, ….</para>
+    /// <para>Declared by 31 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.close, clm.Exposure.create, clm.Exposure.reopen, clm.Exposure.update, clm.Financials.get, clm.Fnol.get, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.evaluate, ….</para>
     /// </remarks>
     public const string NotFound = "CLM-ERR-NOT-FOUND";
 
@@ -226,7 +226,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 9 operation(s): clm.Claim.close, clm.Claim.update, clm.Exposure.create, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.openOwnSettlement, clm.FriendlySettlement.submit, clm.Recovery.demand, clm.Recovery.recordMilestone, clm.Recovery.writeOff.</para>
+    /// <para>Declared by 12 operation(s): clm.Claim.close, clm.Claim.update, clm.Exposure.close, clm.Exposure.create, clm.Exposure.reopen, clm.Exposure.update, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.openOwnSettlement, clm.FriendlySettlement.submit, clm.Recovery.demand, clm.Recovery.recordMilestone, clm.Recovery.writeOff.</para>
     /// </remarks>
     public const string Stale = "CLM-ERR-STALE";
 

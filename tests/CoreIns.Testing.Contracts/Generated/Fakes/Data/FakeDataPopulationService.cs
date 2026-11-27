@@ -14,7 +14,7 @@ public sealed class FakeDataPopulationService : global::CoreIns.Testing.Contract
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.PopulationAggregateResponse> AggregateAsync(string? productSlot = null, string? @as = null, string? window = null, string? sampling = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Data.Contracts.Api.PopulationAggregateResponse>("dat.Population.aggregate", [productSlot, @as, window, sampling], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.PopulationAggregateResponse> AggregateAsync(string? cursor = null, int? limit = null, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, string? productSlot = null, string? @as = null, string? window = null, string? sampling = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Data.Contracts.Api.PopulationAggregateResponse>("dat.Population.aggregate", [cursor, limit, validAt, knownAt, productSlot, @as, window, sampling], cancellationToken);
 
     /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.PopulationSampleResponse> SampleAsync(global::CoreIns.Modules.Data.Contracts.Api.PopulationSampleRequest request, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Data.Contracts.Api.PopulationSampleResponse>("dat.Population.sample", [request], cancellationToken);

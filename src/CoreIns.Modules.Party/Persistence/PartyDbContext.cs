@@ -40,11 +40,57 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
 
     public DbSet<VulnerabilityRow> Vulnerabilities => Set<VulnerabilityRow>();
 
+    public DbSet<PartyRoleRow> Roles => Set<PartyRoleRow>();
+
+    public DbSet<PartyRelationshipRow> Relationships => Set<PartyRelationshipRow>();
+
     protected override string Schema => PartyModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<PartyRoleRow>(entity =>
+        {
+            entity.ToTable("party_role", table => BitemporalChecks(table, "party_role"));
+            entity.HasKey(e => e.RowId).HasName("pk_party_role");
+            entity.Property(e => e.RowId).HasColumnName("row_id");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            MapBitemporal(entity);
+            entity.Property(e => e.RoleType).HasColumnName("role_type");
+            entity.Property(e => e.ContextModule).HasColumnName("context_module");
+            entity.Property(e => e.ContextType).HasColumnName("context_type");
+            entity.Property(e => e.ContextId).HasColumnName("context_id");
+            entity.HasIndex(e => new { e.PartyId, e.RoleType }).HasDatabaseName("ix_party_role_party");
+            entity.HasIndex(e => e.RoleId).HasDatabaseName("ix_party_role_role");
+            entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.PartyId).HasConstraintName("fk_party_role_party").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PartyRelationshipRow>(entity =>
+        {
+            entity.ToTable("party_relationship", table =>
+            {
+                BitemporalChecks(table, "party_relationship");
+                table.HasCheckConstraint("ck_party_relationship_distinct", "from_party_id <> to_party_id");
+            });
+            entity.HasKey(e => e.RowId).HasName("pk_party_relationship");
+            entity.Property(e => e.RowId).HasColumnName("row_id");
+            entity.Property(e => e.RelationshipId).HasColumnName("relationship_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.FromPartyId).HasColumnName("from_party_id");
+            entity.Property(e => e.ToPartyId).HasColumnName("to_party_id");
+            entity.Property(e => e.RelationshipType).HasColumnName("relationship_type");
+            entity.Property(e => e.ValidFrom).HasColumnName("valid_from");
+            entity.Property(e => e.ValidTo).HasColumnName("valid_to");
+            entity.Property(e => e.RecordedFrom).HasColumnName("recorded_from").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordedTo).HasColumnName("recorded_to").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.HasIndex(e => e.FromPartyId).HasDatabaseName("ix_party_relationship_from");
+            entity.HasIndex(e => e.ToPartyId).HasDatabaseName("ix_party_relationship_to");
+            entity.HasIndex(e => e.RelationshipId).HasDatabaseName("ix_party_relationship_rel");
+            entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.FromPartyId).HasConstraintName("fk_party_relationship_from").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.ToPartyId).HasConstraintName("fk_party_relationship_to").OnDelete(DeleteBehavior.Restrict);
+        });
 
         modelBuilder.Entity<VulnerabilityRow>(entity =>
         {
