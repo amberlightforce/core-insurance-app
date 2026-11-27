@@ -666,31 +666,203 @@
       "artefactStatus": "unspecified",
       "governanceBundleId": "0192c3bb-f9a7-758d-86d7-160112f3247d"
     },
+    "RatingArtifactCompatibilityRecord": {
+      "productCode": "sample",
+      "productVersion": "sample",
+      "relation": "PINNED",
+      "compatible": true,
+      "reason": "sample"
+    },
     "RatingArtifactCompatibilityResponse": {
-      "manifest": "unspecified",
-      "status": "unspecified",
-      "compatibilityRecords": "unspecified"
+      "manifest": {
+        "artefactHash": "sample",
+        "artefactCode": "sample",
+        "label": "sample",
+        "productCode": "sample",
+        "productVersion": "sample",
+        "engineVersion": "sample",
+        "dataStatus": "sample",
+        "stepCount": 1,
+        "tables": [
+          {
+            "slot": "sample",
+            "hash": "sample"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "status": {
+        "lifecycle": "DRAFT",
+        "effectiveFrom": "2026-10-07",
+        "effectiveTo": "2026-10-07",
+        "activations": [
+          {
+            "activationId": "sample",
+            "productVersion": "sample",
+            "status": "sample",
+            "effectiveFrom": "2026-10-07",
+            "effectiveTo": "2026-10-07"
+          }
+        ]
+      },
+      "compatibilityRecords": [
+        {
+          "productCode": "sample",
+          "productVersion": "sample",
+          "relation": "PINNED",
+          "compatible": true,
+          "reason": "sample"
+        }
+      ]
     },
     "RatingArtifactGetResponse": {
-      "manifest": "unspecified",
-      "status": "unspecified",
-      "compatibilityRecords": "unspecified"
+      "manifest": {
+        "artefactHash": "sample",
+        "artefactCode": "sample",
+        "label": "sample",
+        "productCode": "sample",
+        "productVersion": "sample",
+        "engineVersion": "sample",
+        "dataStatus": "sample",
+        "stepCount": 1,
+        "tables": [
+          {
+            "slot": "sample",
+            "hash": "sample"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "status": {
+        "lifecycle": "DRAFT",
+        "effectiveFrom": "2026-10-07",
+        "effectiveTo": "2026-10-07",
+        "activations": [
+          {
+            "activationId": "sample",
+            "productVersion": "sample",
+            "status": "sample",
+            "effectiveFrom": "2026-10-07",
+            "effectiveTo": "2026-10-07"
+          }
+        ]
+      },
+      "compatibilityRecords": [
+        {
+          "productCode": "sample",
+          "productVersion": "sample",
+          "relation": "PINNED",
+          "compatible": true,
+          "reason": "sample"
+        }
+      ]
     },
     "RatingArtifactListItem": {
-      "manifest": "unspecified",
-      "status": "unspecified",
-      "compatibilityRecords": "unspecified"
+      "manifest": {
+        "artefactHash": "sample",
+        "artefactCode": "sample",
+        "label": "sample",
+        "productCode": "sample",
+        "productVersion": "sample",
+        "engineVersion": "sample",
+        "dataStatus": "sample",
+        "stepCount": 1,
+        "tables": [
+          {
+            "slot": "sample",
+            "hash": "sample"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "status": {
+        "lifecycle": "DRAFT",
+        "effectiveFrom": "2026-10-07",
+        "effectiveTo": "2026-10-07",
+        "activations": [
+          {
+            "activationId": "sample",
+            "productVersion": "sample",
+            "status": "sample",
+            "effectiveFrom": "2026-10-07",
+            "effectiveTo": "2026-10-07"
+          }
+        ]
+      },
+      "compatibilityRecords": [
+        {
+          "productCode": "sample",
+          "productVersion": "sample",
+          "relation": "PINNED",
+          "compatible": true,
+          "reason": "sample"
+        }
+      ]
     },
     "RatingArtifactListPage": {
       "items": [
         {
-          "manifest": "unspecified",
-          "status": "unspecified",
-          "compatibilityRecords": "unspecified"
+          "manifest": {
+            "artefactHash": "sample",
+            "artefactCode": "sample",
+            "label": "sample",
+            "productCode": "sample",
+            "productVersion": "sample",
+            "engineVersion": "sample",
+            "dataStatus": "sample",
+            "stepCount": 1,
+            "tables": [
+              {
+                "slot": "sample",
+                "hash": "sample"
+              }
+            ],
+            "createdAt": "2026-10-07T09:00:00Z"
+          },
+          "status": {
+            "lifecycle": "DRAFT",
+            "effectiveFrom": "2026-10-07",
+            "effectiveTo": "2026-10-07",
+            "activations": [
+              {
+                "activationId": "sample",
+                "productVersion": "sample",
+                "status": "sample",
+                "effectiveFrom": "2026-10-07",
+                "effectiveTo": "2026-10-07"
+              }
+            ]
+          },
+          "compatibilityRecords": [
+            {
+              "productCode": "sample",
+              "productVersion": "sample",
+              "relation": "PINNED",
+              "compatible": true,
+              "reason": "sample"
+            }
+          ]
         }
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "RatingArtifactManifest": {
+      "artefactHash": "sample",
+      "artefactCode": "sample",
+      "label": "sample",
+      "productCode": "sample",
+      "productVersion": "sample",
+      "engineVersion": "sample",
+      "dataStatus": "sample",
+      "stepCount": 1,
+      "tables": [
+        {
+          "slot": "sample",
+          "hash": "sample"
+        }
+      ],
+      "createdAt": "2026-10-07T09:00:00Z"
     },
     "RatingArtifactResolveRequest": {
       "slot": "unspecified",
@@ -731,6 +903,20 @@
     "RatingArtifactScheduleResponse": {
       "artefactStatus": "unspecified",
       "governanceBundleId": "01925bfe-399c-7999-8d94-94746fd25ce9"
+    },
+    "RatingArtifactStatus": {
+      "lifecycle": "DRAFT",
+      "effectiveFrom": "2026-10-07",
+      "effectiveTo": "2026-10-07",
+      "activations": [
+        {
+          "activationId": "sample",
+          "productVersion": "sample",
+          "status": "sample",
+          "effectiveFrom": "2026-10-07",
+          "effectiveTo": "2026-10-07"
+        }
+      ]
     },
     "RatingArtifactSubmitRequest": {
       "changeSet": "unspecified",
