@@ -40,7 +40,7 @@ public static class ChannelsErrorCodes
 
     /// <summary>CHN-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 61 operation(s): chn.Agent.mcp, chn.Aggregator.quote, chn.ApiProduct.create, chn.ApiProduct.deprecate, chn.ApiProduct.publish, chn.ApiProduct.retire, chn.Change.confirm, chn.Change.refer, chn.Client.approve, chn.Client.request, chn.Client.revoke, chn.Client.suspend, ….</para>
+    /// <para>Declared by 65 operation(s): chn.Agent.mcp, chn.Aggregator.quote, chn.ApiProduct.create, chn.ApiProduct.deprecate, chn.ApiProduct.publish, chn.ApiProduct.retire, chn.Change.confirm, chn.Change.refer, chn.Client.approve, chn.Client.request, chn.Client.revoke, chn.Client.suspend, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "CHN-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -70,13 +70,13 @@ public static class ChannelsErrorCodes
 
     /// <summary>CHN-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 24 operation(s): chn.Dsar.erase, chn.Dsar.export, chn.Dsar.restrict, chn.Message.reply, chn.Message.send, chn.NotificationSubscription.list, chn.Portal.dashboard, chn.Portal.me, chn.Portal.policies, chn.Portal.policy, chn.PortalBilling.invoices, chn.PortalBilling.payNow, ….</para>
+    /// <para>Declared by 32 operation(s): chn.Change.confirm, chn.Change.preview, chn.Change.refer, chn.Dsar.erase, chn.Dsar.export, chn.Dsar.restrict, chn.Message.reply, chn.Message.send, chn.NotificationSubscription.list, chn.Portal.dashboard, chn.Portal.me, chn.Portal.policies, ….</para>
     /// </remarks>
     public const string NotFound = "CHN-ERR-NOT-FOUND";
 
     /// <summary>CHN-ERR-NOT-PERMITTED (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): chn.Change.confirm, chn.Change.preview, chn.Change.refer, chn.Message.list, chn.Message.send.</para>
+    /// <para>Declared by 9 operation(s): chn.Change.confirm, chn.Change.preview, chn.Change.refer, chn.Message.list, chn.Message.send, chn.PortalCancellation.submit, chn.PortalContact.update, chn.PortalRenewal.accept, chn.PortalRenewal.decline.</para>
     /// </remarks>
     public const string NotPermitted = "CHN-ERR-NOT-PERMITTED";
 
@@ -103,6 +103,12 @@ public static class ChannelsErrorCodes
     /// <para>Declared by 1 operation(s): chn.PortalIdentity.link.</para>
     /// </remarks>
     public const string SelfLink = "CHN-ERR-SELF-LINK";
+
+    /// <summary>CHN-ERR-STALE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): chn.PortalContact.update.</para>
+    /// </remarks>
+    public const string Stale = "CHN-ERR-STALE";
 
     /// <summary>CHN-ERR-TICKET-EXPIRED (HTTP 422).</summary>
     /// <remarks>
@@ -150,7 +156,7 @@ public static class ChannelsErrorCodes
     public const string Prefix = "CHN-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [ChannelDisabled, CodeExpired, DeeplinkInvalid, EndpointNotHttps, FinalEntry, IdempotencyMismatch, IdentityLinked, LanguageNotEnabled, LimitExceeded, Mapping, NotFound, NotPermitted, Pol, RightExpired, ScenarioFailed, SelfLink, TicketExpired, TicketStale, TokenInvalid, UnknownTransaction, WalletTimeout, WalletUnavailable, WrongState];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [ChannelDisabled, CodeExpired, DeeplinkInvalid, EndpointNotHttps, FinalEntry, IdempotencyMismatch, IdentityLinked, LanguageNotEnabled, LimitExceeded, Mapping, NotFound, NotPermitted, Pol, RightExpired, ScenarioFailed, SelfLink, Stale, TicketExpired, TicketStale, TokenInvalid, UnknownTransaction, WalletTimeout, WalletUnavailable, WrongState];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -171,6 +177,7 @@ public static class ChannelsErrorCodes
         [RightExpired] = 422,
         [ScenarioFailed] = 422,
         [SelfLink] = 403,
+        [Stale] = 409,
         [TicketExpired] = 422,
         [TicketStale] = 409,
         [TokenInvalid] = 422,

@@ -23,6 +23,12 @@ internal static class UnderwritingPermissions
     public const string Decide = "uw.Issue.decide";
     public const string ReferralList = "uw.Referral.list";
     public const string ReferralGet = "uw.Referral.get";
+    public const string ReferralRequest = "uw.Referral.request";
+    public const string ReferralWithdraw = "uw.Referral.withdraw";
+    public const string ReferralReferUp = "uw.Referral.referUp";
+    public const string ReferralRequestInformation = "uw.Referral.requestInformation";
+    public const string ReviewLock = "uw.Review.lock";
+    public const string ReviewRelease = "uw.Review.release";
 }
 
 /// <summary>REST facade of <c>uw.Rules.evaluate</c>, <c>uw.Issue.blockingStatus</c>, <c>uw.Issue.list</c> and <c>uw.Issue.decide</c>.</summary>
@@ -138,6 +144,55 @@ internal sealed class UnderwritingController : ControllerBase
     public async Task<IResult> GetReferralAsync(string id, [FromServices] ReferralQueries queries, CancellationToken cancellationToken)
     {
         var result = await queries.GetAsync(id, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Referral.request: put a job in front of the underwriters, or resume it after information was supplied (BO-UW-05).</summary>
+    [HttpPost("referrals/request")]
+    [Authorize(Policy = UnderwritingPermissions.ReferralRequest)]
+    public Task<IResult> RequestReferralAsync(
+        [FromBody] ReferralRequestRequest request, [FromServices] ICommandHandler<RequestReferral, ReferralRequestResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new RequestReferral(request), cancellationToken);
+
+    /// <summary>uw.Referral.withdraw: take the referral back.</summary>
+    [HttpPost("referrals/withdraw")]
+    [Authorize(Policy = UnderwritingPermissions.ReferralWithdraw)]
+    public Task<IResult> WithdrawReferralAsync(
+        [FromBody] ReferralWithdrawRequest request, [FromServices] ICommandHandler<WithdrawReferral, ReferralWithdrawResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new WithdrawReferral(request), cancellationToken);
+
+    /// <summary>uw.Referral.referUp: send the referral to a higher authority.</summary>
+    [HttpPost("referrals/refer-up")]
+    [Authorize(Policy = UnderwritingPermissions.ReferralReferUp)]
+    public Task<IResult> ReferUpAsync(
+        [FromBody] ReferralReferUpRequest request, [FromServices] ICommandHandler<ReferReferralUp, ReferralReferUpResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new ReferReferralUp(request), cancellationToken);
+
+    /// <summary>uw.Referral.requestInformation: pause the SLA and ask for more information.</summary>
+    [HttpPost("referrals/request-information")]
+    [Authorize(Policy = UnderwritingPermissions.ReferralRequestInformation)]
+    public Task<IResult> RequestInformationAsync(
+        [FromBody] ReferralRequestInformationRequest request, [FromServices] ICommandHandler<RequestReferralInformation, ReferralRequestInformationResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new RequestReferralInformation(request), cancellationToken);
+
+    /// <summary>uw.Review.lock: take or renew the soft review lock of a referred job.</summary>
+    [HttpPost("review/lock")]
+    [Authorize(Policy = UnderwritingPermissions.ReviewLock)]
+    public Task<IResult> LockReviewAsync(
+        [FromBody] ReviewLockRequest request, [FromServices] ICommandHandler<LockReview, ReviewLockResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new LockReview(request), cancellationToken);
+
+    /// <summary>uw.Review.release: release the lock, or break another underwriter's (a manager, with a reason).</summary>
+    [HttpPost("review/release")]
+    [Authorize(Policy = UnderwritingPermissions.ReviewRelease)]
+    public Task<IResult> ReleaseReviewAsync(
+        [FromBody] ReviewReleaseRequest request, [FromServices] ICommandHandler<ReleaseReview, ReviewReleaseResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new ReleaseReview(request), cancellationToken);
+
+    private async Task<IResult> RunAsync<TCommand, TResult>(ICommandHandler<TCommand, TResult> handler, TCommand command, CancellationToken cancellationToken)
+        where TCommand : ICommand<TResult>
+    {
+        var result = await handler.HandleAsync(command, cancellationToken).ConfigureAwait(false);
         return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
     }
 

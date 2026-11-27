@@ -214,9 +214,6 @@ CONTRACT_NOT_SERVED POST /api/chn/v1/api-products
 CONTRACT_NOT_SERVED POST /api/chn/v1/api-products/deprecate
 CONTRACT_NOT_SERVED POST /api/chn/v1/api-products/publish
 CONTRACT_NOT_SERVED POST /api/chn/v1/api-products/retire
-CONTRACT_NOT_SERVED POST /api/chn/v1/changes/confirm
-CONTRACT_NOT_SERVED POST /api/chn/v1/changes/preview
-CONTRACT_NOT_SERVED POST /api/chn/v1/changes/refer
 CONTRACT_NOT_SERVED POST /api/chn/v1/claims
 CONTRACT_NOT_SERVED POST /api/chn/v1/clients/approve
 CONTRACT_NOT_SERVED POST /api/chn/v1/clients/request
@@ -635,15 +632,9 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/check
 CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/copy
 CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/impact
 CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/release
-CONTRACT_NOT_SERVED POST /api/uw/v1/referrals/refer-up
-CONTRACT_NOT_SERVED POST /api/uw/v1/referrals/request
-CONTRACT_NOT_SERVED POST /api/uw/v1/referrals/request-information
-CONTRACT_NOT_SERVED POST /api/uw/v1/referrals/withdraw
 CONTRACT_NOT_SERVED POST /api/uw/v1/refusal-registers/export
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/bulk-set
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/set
-CONTRACT_NOT_SERVED POST /api/uw/v1/review/lock
-CONTRACT_NOT_SERVED POST /api/uw/v1/review/release
 CONTRACT_NOT_SERVED POST /api/uw/v1/rules/evaluate-batch
 CONTRACT_NOT_SERVED POST /api/uw/v1/valuation/compute
 CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/bulk-reassign

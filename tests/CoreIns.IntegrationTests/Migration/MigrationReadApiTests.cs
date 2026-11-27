@@ -12,10 +12,11 @@ using static CoreIns.IntegrationTests.Party.PartyApi;
 namespace CoreIns.IntegrationTests.Migration;
 
 /// <summary>NX-HD-08b: enquiries, redrive, masked archive access, archive DSAR operations and import-contract conformance.</summary>
+// The stub importer takes a real module code with no real importer (DOC), so it never collides with PTY/POL/BIL/... importers; conformance needs a ModuleCode.
 public sealed class MigrationReadApiTests(PostgresFixture database) : IClassFixture<PostgresFixture>, IAsyncDisposable
 {
     private const string Roles = "Platform.Admin,Staff.MigrationManager";
-    private readonly Flaky _pty = new("PTY");
+    private readonly Flaky _pty = new("DOC");
     private ApiHostFactory? _root;
     private WebApplicationFactory<Program>? _factory;
     private HttpClient? _client;
@@ -66,7 +67,7 @@ public sealed class MigrationReadApiTests(PostgresFixture database) : IClassFixt
 
     private async Task<string> RunBatchAsync(params string[] legacyIds)
     {
-        var items = legacyIds.Select(id => new { module = "PTY", objectType = "Party", legacyId = id, payload = new { name = "Legacy " + id, iban = "GR0000" } }).ToArray();
+        var items = legacyIds.Select(id => new { module = "DOC", objectType = "Party", legacyId = id, payload = new { name = "Legacy " + id, iban = "GR0000" } }).ToArray();
         var (created, body) = await SendAsync(HttpMethod.Post, "/api/mig/v1/batches", new { name = "read api", items });
         created.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         var batch = body.Text("batch.batchId");
@@ -166,16 +167,16 @@ public sealed class MigrationReadApiTests(PostgresFixture database) : IClassFixt
     [Fact]
     public async Task Conformance_reports_importer_and_reverser_registration_per_element()
     {
-        var (response, body) = await SendAsync(HttpMethod.Post, "/api/mig/v1/import-contracts/conformance", new { module = "PTY" });
+        var (response, body) = await SendAsync(HttpMethod.Post, "/api/mig/v1/import-contracts/conformance", new { module = "DOC" });
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         body!["passed"]!.GetValue<bool>().ShouldBeFalse();
         var elements = body["passFailPerContractElement"]!.AsArray();
         elements!.Single(e => e.Text("element") == "IMigrationImporter")!["passed"]!.GetValue<bool>().ShouldBeTrue();
 
-        var (_, importOnly) = await SendAsync(HttpMethod.Post, "/api/mig/v1/import-contracts/conformance", new { module = "PTY", operation = "import" });
+        var (_, importOnly) = await SendAsync(HttpMethod.Post, "/api/mig/v1/import-contracts/conformance", new { module = "DOC", operation = "import" });
         importOnly!["passed"]!.GetValue<bool>().ShouldBeTrue();
         (await SendAsync(HttpMethod.Post, "/api/mig/v1/import-contracts/conformance", new { module = "NOPE" })).Response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
-        (await SendAsync(HttpMethod.Post, "/api/mig/v1/import-contracts/conformance", new { module = "PTY", operation = "drop" })).Response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+        (await SendAsync(HttpMethod.Post, "/api/mig/v1/import-contracts/conformance", new { module = "DOC", operation = "drop" })).Response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
     }
 
     [Fact]

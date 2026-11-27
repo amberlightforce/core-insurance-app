@@ -4,44 +4,89 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>chn.Change.preview result. PRD outputs: "diff, premium, billing preview, outcome; request number when referred"</summary>
+/// <summary>chn.Change.preview result: what confirming will bind, and whether the matrix lets the customer confirm (ALLOW) or requires staff (REFER).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ChangePreviewResponse
 {
-    /// <summary>PRD: "diff"</summary>
+    /// <summary>Contract member 'changeId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'changeId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("diff")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Diff { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("changeId")]
+    public required global::System.Guid ChangeId { get; init; }
 
-    /// <summary>PRD: "premium"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("premium")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Money? Premium { get; init; }
+    /// <summary>Contract member 'policyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyId PolicyId { get; init; }
 
-    /// <summary>PRD: "billing preview"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("billingPreview")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? BillingPreview { get; init; }
+    /// <summary>Contract member 'jobId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
-    /// <summary>PRD: "outcome"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'versionNo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("versionNo")]
+    public required int VersionNo { get; init; }
+
+    /// <summary>Contract member 'effectiveAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveAt")]
+    public required global::CoreIns.SharedKernel.Instant EffectiveAt { get; init; }
+
+    /// <summary>Contract member 'outcome'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Outcome { get; init; }
+    public required OutcomeValue Outcome { get; init; }
 
-    /// <summary>PRD: "request number when referred"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("requestNumberWhenReferred")]
+    /// <summary>Contract member 'reasons'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasons")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> Reasons { get; init; }
+
+    /// <summary>Contract member 'annualBefore'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("annualBefore")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RequestNumberWhenReferred { get; init; }
+    public global::CoreIns.SharedKernel.Money? AnnualBefore { get; init; }
+
+    /// <summary>Contract member 'annualAfter'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("annualAfter")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Money? AnnualAfter { get; init; }
+
+    /// <summary>Contract member 'premiumChange'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("premiumChange")]
+    public required global::CoreIns.SharedKernel.Money PremiumChange { get; init; }
+
+    /// <summary>Contract member 'taxChange'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("taxChange")]
+    public required global::CoreIns.SharedKernel.Money TaxChange { get; init; }
+
+    /// <summary>Contract member 'totalChange'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("totalChange")]
+    public required global::CoreIns.SharedKernel.Money TotalChange { get; init; }
+
+    /// <summary>Contract member 'additionalDue'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("additionalDue")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Money? AdditionalDue { get; init; }
+
+    /// <summary>Contract member 'refundDue'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("refundDue")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Money? RefundDue { get; init; }
+
+    /// <summary>Contract member 'validUntil'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validUntil")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? ValidUntil { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum OutcomeValue
+    {
+        /// <summary><c>ALLOW</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ALLOW")]
+        Allow,
+
+        /// <summary><c>REFER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REFER")]
+        Refer,
+    }
 }

@@ -175,6 +175,51 @@ internal sealed class IssueRow
     public Guid? AuthorityCheckId { get; set; }
 }
 
+/// <summary>
+/// <c>uw.referral_state</c>: the handling state of a referred job (BO-UW-05): lifecycle, paused SLA, refer-up target, and the soft
+/// review lock (owner and lease expiry). Decisions stay on <c>uw.issue</c>. Optimistic on <c>record_version</c>.
+/// </summary>
+internal sealed class ReferralStateRow
+{
+    public Guid LegalEntityId { get; set; }
+
+    public Guid JobId { get; set; }
+
+    public string Lifecycle { get; set; } = "Active";
+
+    public bool AwaitingInfo { get; set; }
+
+    public string? InfoComment { get; set; }
+
+    public Instant? SlaPausedAt { get; set; }
+
+    public Instant? SlaDue { get; set; }
+
+    public string Priority { get; set; } = "NORMAL";
+
+    public string? RequiredRole { get; set; }
+
+    public string? ReferredBy { get; set; }
+
+    public string RequestComment { get; set; } = string.Empty;
+
+    public string RequestedBy { get; set; } = string.Empty;
+
+    public Instant RequestedAt { get; set; }
+
+    public string? LockOwner { get; set; }
+
+    public Instant? LockAcquiredAt { get; set; }
+
+    public Instant? LockExpiresAt { get; set; }
+
+    public int RecordVersion { get; set; } = 1;
+
+    public Instant UpdatedAt { get; set; }
+
+    public string UpdatedBy { get; set; } = string.Empty;
+}
+
 /// <summary>The Underwriting module's EF Core context (schema <c>uw</c>): tables and migrations; reads and writes use Dapper on the scope's connection.</summary>
 internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbContext> options) : ModuleDbContext(options)
 {
@@ -185,6 +230,8 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
     public DbSet<EvaluationRow> Evaluations => Set<EvaluationRow>();
 
     public DbSet<IssueRow> Issues => Set<IssueRow>();
+
+    public DbSet<ReferralStateRow> ReferralStates => Set<ReferralStateRow>();
 
     protected override string Schema => UnderwritingModule.Schema;
 
@@ -320,6 +367,37 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
             entity.HasIndex(e => new { e.JobId, e.Status }).HasDatabaseName("ix_issue_job");
             entity.HasOne<EvaluationRow>().WithMany().HasForeignKey(e => e.RaisedEvaluationId)
                 .HasConstraintName("fk_issue_raised_evaluation").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ReferralStateRow>(entity =>
+        {
+            entity.ToTable("referral_state", table =>
+            {
+                table.HasCheckConstraint("ck_referral_state_lifecycle", "lifecycle IN ('Active', 'Withdrawn')");
+                table.HasCheckConstraint("ck_referral_state_priority", "priority IN ('NORMAL', 'HIGH')");
+                table.HasCheckConstraint("ck_referral_state_lock", "(lock_owner IS NULL) = (lock_expires_at IS NULL)");
+            });
+            entity.HasKey(e => new { e.LegalEntityId, e.JobId }).HasName("pk_referral_state");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.JobId).HasColumnName("job_id");
+            entity.Property(e => e.Lifecycle).HasColumnName("lifecycle");
+            entity.Property(e => e.AwaitingInfo).HasColumnName("awaiting_info");
+            entity.Property(e => e.InfoComment).HasColumnName("info_comment");
+            entity.Property(e => e.SlaPausedAt).HasColumnName("sla_paused_at").HasColumnType("timestamptz");
+            entity.Property(e => e.SlaDue).HasColumnName("sla_due").HasColumnType("timestamptz");
+            entity.Property(e => e.Priority).HasColumnName("priority");
+            entity.Property(e => e.RequiredRole).HasColumnName("required_role");
+            entity.Property(e => e.ReferredBy).HasColumnName("referred_by");
+            entity.Property(e => e.RequestComment).HasColumnName("request_comment");
+            entity.Property(e => e.RequestedBy).HasColumnName("requested_by");
+            entity.Property(e => e.RequestedAt).HasColumnName("requested_at").HasColumnType("timestamptz");
+            entity.Property(e => e.LockOwner).HasColumnName("lock_owner");
+            entity.Property(e => e.LockAcquiredAt).HasColumnName("lock_acquired_at").HasColumnType("timestamptz");
+            entity.Property(e => e.LockExpiresAt).HasColumnName("lock_expires_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+            entity.HasIndex(e => new { e.LegalEntityId, e.Lifecycle, e.SlaDue }).HasDatabaseName("ix_referral_state_queue");
         });
     }
 }

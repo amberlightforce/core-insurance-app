@@ -558,6 +558,106 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chn/v1/portal/renewals/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Accept a renewal offer
+         * @description Accepts the offered renewal of one of the customer's own policies (matrix policy.renewal.accept). A referral outcome performs nothing and raises a ticket.
+         */
+        post: operations["chn.PortalRenewal.accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal/renewals/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Decline a renewal offer
+         * @description Declines the offered renewal (matrix policy.renewal.decline). A customer flagged vulnerable is never declined online: the request is referred to staff.
+         */
+        post: operations["chn.PortalRenewal.decline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal/cancellations/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Request a cancellation
+         * @description Asks to cancel one of the customer's own policies (matrix policy.cancel). Never cancels directly: staff are given a request and act on it.
+         */
+        post: operations["chn.PortalCancellation.submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal/contact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Own contact details
+         * @description The caller's own current addresses, phones and e-mails with the ids and the record version needed to change them.
+         */
+        get: operations["chn.PortalContact.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal/contact/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change own contact details
+         * @description Adds, replaces or removes one address, phone or e-mail of the caller's own party through PTY (matrix contact.update). Ids are per version: a replace returns the new id and the old id is gone. A stale record version is refused.
+         */
+        post: operations["chn.PortalContact.update"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chn/v1/changes/preview": {
         parameters: {
             query?: never;
@@ -568,11 +668,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Self-service change composition
-         * @description Self-service change composition
-         *
-         *     PRD inputs: policy, intent, values, effective date
-         *     PRD outputs: diff, premium, billing preview, outcome; request number when referred
+         * Self-service change (preview)
+         * @description Starts a change job on one of the customer's own policies, quotes it and returns what confirming will bind. Checks the transaction-permission matrix (policy.change) and ownership.
          */
         post: operations["chn.Change.preview"];
         delete?: never;
@@ -591,11 +688,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Self-service change composition
-         * @description Self-service change composition
-         *
-         *     PRD inputs: policy, intent, values, effective date
-         *     PRD outputs: diff, premium, billing preview, outcome; request number when referred
+         * Self-service change (confirm)
+         * @description Confirms a previewed change after an explicit acknowledgement: binds exactly the previewed quote version, or raises a referral when the matrix (policy.change, amount) requires staff. Idempotent.
          */
         post: operations["chn.Change.confirm"];
         delete?: never;
@@ -614,11 +708,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Self-service change composition
-         * @description Self-service change composition
-         *
-         *     PRD inputs: policy, intent, values, effective date
-         *     PRD outputs: diff, premium, billing preview, outcome; request number when referred
+         * Self-service change (refer)
+         * @description Asks staff to handle a previewed change instead: raises a ticket and binds nothing.
          */
         post: operations["chn.Change.refer"];
         delete?: never;
@@ -2634,77 +2725,188 @@ export interface components {
             /** @description PRD: "gates" */
             gates?: components["schemas"]["Unspecified"];
         };
-        /** @description chn.Change.preview request. PRD inputs: "policy, intent, values, effective date" */
+        /** @description One edit of the draft of a change (same shape and ops as POL DraftInstruction; the customer may not send anything else). */
+        ChangeInstruction: {
+            /** @enum {string} */
+            op: "SET_VEHICLE" | "REMOVE_VEHICLE" | "SET_DRIVER" | "REMOVE_DRIVER" | "SET_COVERAGES" | "SET_ANSWERS";
+            locator?: string;
+            vehicle?: components["schemas"]["Unspecified"];
+            driver?: components["schemas"]["Unspecified"];
+            coverages?: components["schemas"]["Unspecified"];
+            questionSet?: components["schemas"]["Unspecified"];
+        };
+        /** @description chn.Change.preview request (BO-CHN-03): a change to one of the customers own policies. */
         ChangePreviewRequest: {
-            /** @description PRD: "policy" */
-            policy?: components["schemas"]["Unspecified"];
-            /** @description PRD: "intent" */
-            intent?: components["schemas"]["Unspecified"];
-            /** @description PRD: "values" */
-            values?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effective date" */
+            policyId: components["schemas"]["Uuid"];
             effectiveDate?: components["schemas"]["LocalDate"];
+            instructions: components["schemas"]["ChangeInstruction"][];
         };
-        /** @description chn.Change.preview result. PRD outputs: "diff, premium, billing preview, outcome; request number when referred" */
+        /** @description chn.Change.preview result: what confirming will bind, and whether the matrix lets the customer confirm (ALLOW) or requires staff (REFER). */
         ChangePreviewResponse: {
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
-            /** @description PRD: "premium" */
-            premium?: components["schemas"]["Money"];
-            /** @description PRD: "billing preview" */
-            billingPreview?: components["schemas"]["Unspecified"];
-            /** @description PRD: "outcome" */
-            outcome?: components["schemas"]["Unspecified"];
-            /** @description PRD: "request number when referred" */
-            requestNumberWhenReferred?: components["schemas"]["Unspecified"];
+            changeId: components["schemas"]["Uuid"];
+            policyId: components["schemas"]["Uuid"];
+            jobId: components["schemas"]["Uuid"];
+            versionNo: number;
+            effectiveAt: components["schemas"]["Instant"];
+            /** @enum {string} */
+            outcome: "ALLOW" | "REFER";
+            reasons: string[];
+            annualBefore?: components["schemas"]["Money"];
+            annualAfter?: components["schemas"]["Money"];
+            premiumChange: components["schemas"]["Money"];
+            taxChange: components["schemas"]["Money"];
+            totalChange: components["schemas"]["Money"];
+            additionalDue?: components["schemas"]["Money"];
+            refundDue?: components["schemas"]["Money"];
+            validUntil?: components["schemas"]["Instant"];
         };
-        /** @description chn.Change.confirm request. PRD inputs: "policy, intent, values, effective date" */
+        /** @description chn.Change.confirm request: the previewed change and the customers explicit acknowledgement. */
         ChangeConfirmRequest: {
-            /** @description PRD: "policy" */
-            policy?: components["schemas"]["Unspecified"];
-            /** @description PRD: "intent" */
-            intent?: components["schemas"]["Unspecified"];
-            /** @description PRD: "values" */
-            values?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effective date" */
-            effectiveDate?: components["schemas"]["LocalDate"];
+            changeId: components["schemas"]["Uuid"];
+            /** @description Must be true (the customer saw the preview). */
+            acknowledged: boolean;
         };
-        /** @description chn.Change.confirm result. PRD outputs: "diff, premium, billing preview, outcome; request number when referred" */
+        /** @description chn.Change.confirm result: CONFIRMED (bound) or REFERRED (a ticket was raised and nothing was bound). */
         ChangeConfirmResponse: {
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
-            /** @description PRD: "premium" */
-            premium?: components["schemas"]["Money"];
-            /** @description PRD: "billing preview" */
-            billingPreview?: components["schemas"]["Unspecified"];
-            /** @description PRD: "outcome" */
-            outcome?: components["schemas"]["Unspecified"];
-            /** @description PRD: "request number when referred" */
-            requestNumberWhenReferred?: components["schemas"]["Unspecified"];
+            changeId: components["schemas"]["Uuid"];
+            policyId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "CONFIRMED" | "REFERRED";
+            ticketId?: components["schemas"]["Uuid"];
+            transactionId?: components["schemas"]["Uuid"];
+            effectiveAt?: components["schemas"]["Instant"];
+            totalChange?: components["schemas"]["Money"];
         };
-        /** @description chn.Change.refer request. PRD inputs: "policy, intent, values, effective date" */
+        /** @description chn.Change.refer request: hand a previewed change to staff. */
         ChangeReferRequest: {
-            /** @description PRD: "policy" */
-            policy?: components["schemas"]["Unspecified"];
-            /** @description PRD: "intent" */
-            intent?: components["schemas"]["Unspecified"];
-            /** @description PRD: "values" */
-            values?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effective date" */
-            effectiveDate?: components["schemas"]["LocalDate"];
+            changeId: components["schemas"]["Uuid"];
         };
-        /** @description chn.Change.refer result. PRD outputs: "diff, premium, billing preview, outcome; request number when referred" */
+        /** @description chn.Change.refer result: a ticket was raised and nothing was bound. */
         ChangeReferResponse: {
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
-            /** @description PRD: "premium" */
-            premium?: components["schemas"]["Money"];
-            /** @description PRD: "billing preview" */
-            billingPreview?: components["schemas"]["Unspecified"];
-            /** @description PRD: "outcome" */
-            outcome?: components["schemas"]["Unspecified"];
-            /** @description PRD: "request number when referred" */
-            requestNumberWhenReferred?: components["schemas"]["Unspecified"];
+            changeId: components["schemas"]["Uuid"];
+            policyId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "REFERRED";
+            ticketId?: components["schemas"]["Uuid"];
+        };
+        PortalRenewalAcceptRequest: {
+            policyId: components["schemas"]["Uuid"];
+            jobId: components["schemas"]["Uuid"];
+            /** @description Must be true. */
+            acknowledged: boolean;
+        };
+        PortalRenewalAcceptResponse: {
+            policyId: components["schemas"]["Uuid"];
+            jobId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "ACCEPTED" | "REFERRED";
+            ticketId?: components["schemas"]["Uuid"];
+            newTermId?: components["schemas"]["Uuid"];
+            newTermNumber?: number;
+        };
+        PortalRenewalDeclineRequest: {
+            policyId: components["schemas"]["Uuid"];
+            jobId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            reasonCode: "PRICE" | "FOUND_ALTERNATIVE" | "NO_LONGER_NEEDED" | "OTHER";
+        };
+        PortalRenewalDeclineResponse: {
+            policyId: components["schemas"]["Uuid"];
+            jobId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "DECLINED" | "REFERRED";
+            ticketId?: components["schemas"]["Uuid"];
+        };
+        PortalCancellationSubmitRequest: {
+            policyId: components["schemas"]["Uuid"];
+            effectiveDate?: components["schemas"]["LocalDate"];
+            /** @enum {string} */
+            reasonCode: "NO_LONGER_NEEDED" | "SOLD_ASSET" | "FOUND_ALTERNATIVE" | "PRICE" | "OTHER";
+        };
+        PortalCancellationSubmitResponse: {
+            policyId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "REQUESTED";
+            ticketId: components["schemas"]["Uuid"];
+        };
+        PortalContactAddress: {
+            addressId: components["schemas"]["Uuid"];
+            types: string[];
+            primary: boolean;
+            country: string;
+            street?: string;
+            number?: string;
+            building?: string;
+            floor?: string;
+            unit?: string;
+            postcode?: string;
+            locality?: string;
+            municipality?: string;
+            regionalUnit?: string;
+            region?: string;
+            formattedLines: string[];
+        };
+        PortalContactPoint: {
+            contactPointId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            type: "MOBILE" | "LANDLINE" | "WORK_PHONE" | "EMAIL";
+            value: string;
+            purpose?: string;
+            primary: boolean;
+            verified: boolean;
+        };
+        /** @description chn.PortalContact.get result: the callers own current contact details. */
+        PortalContactView: {
+            recordVersion: number;
+            addresses: components["schemas"]["PortalContactAddress"][];
+            contactPoints: components["schemas"]["PortalContactPoint"][];
+        };
+        PortalContactAddressInput: {
+            types: ("LEGAL" | "MAILING" | "BILLING")[];
+            primary?: boolean;
+            country: string;
+            street?: string;
+            number?: string;
+            building?: string;
+            floor?: string;
+            unit?: string;
+            postcode?: string;
+            locality?: string;
+            municipality?: string;
+            regionalUnit?: string;
+            region?: string;
+        };
+        PortalContactPointInput: {
+            /** @enum {string} */
+            type: "MOBILE" | "LANDLINE" | "EMAIL";
+            /** @description A phone number in international form or an e-mail address. */
+            value: string;
+            /** @enum {string} */
+            purpose?: "PERSONAL" | "WORK";
+            primary?: boolean;
+        };
+        /** @description chn.PortalContact.update request: one change. ADD needs the input of its kind; REPLACE and REMOVE need locationId (the current addressId or contactPointId). */
+        PortalContactUpdateRequest: {
+            /** @enum {string} */
+            action: "ADD" | "REPLACE" | "REMOVE";
+            /** @enum {string} */
+            kind: "ADDRESS" | "CONTACT_POINT";
+            locationId?: components["schemas"]["Uuid"];
+            address?: components["schemas"]["PortalContactAddressInput"];
+            contactPoint?: components["schemas"]["PortalContactPointInput"];
+            expectedRecordVersion: number;
+        };
+        /** @description chn.PortalContact.update result: APPLIED with the ids and the new record version only (no contact data, so nothing personal is stored with the idempotency record), or REFERRED (a ticket was raised and nothing changed). */
+        PortalContactUpdateResponse: {
+            /** @enum {string} */
+            outcome: "APPLIED" | "REFERRED";
+            /** @enum {string} */
+            action: "ADD" | "REPLACE" | "REMOVE";
+            /** @enum {string} */
+            kind: "ADDRESS" | "CONTACT_POINT";
+            locationId?: components["schemas"]["Uuid"];
+            recordVersion?: number;
+            ticketId?: components["schemas"]["Uuid"];
         };
         /** @description chn.Withdrawal.declare request (typed by SL6-CHN-WITHDRAW, D-SL6-06). PRD inputs: "name, contract id, e-mail, reason" */
         WithdrawalDeclareRequest: {
@@ -4682,10 +4884,231 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
-    "chn.Change.preview": {
+    "chn.PortalRenewal.accept": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortalRenewalAcceptRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalRenewalAcceptResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalRenewal.decline": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortalRenewalDeclineRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalRenewalDeclineResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalCancellation.submit": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortalCancellationSubmitRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalCancellationSubmitResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalContact.get": {
         parameters: {
             query?: never;
             header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalContactView"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalContact.update": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortalContactUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalContactUpdateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.Change.preview": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
                  *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
@@ -4715,20 +5138,15 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
     "chn.Change.confirm": {
         parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
+            query?: never;
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -4765,6 +5183,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
@@ -4772,14 +5191,7 @@ export interface operations {
     };
     "chn.Change.refer": {
         parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
+            query?: never;
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -4816,6 +5228,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];

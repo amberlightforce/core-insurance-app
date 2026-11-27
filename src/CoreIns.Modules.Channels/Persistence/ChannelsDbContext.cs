@@ -29,6 +29,8 @@ internal sealed class ChannelsDbContext(DbContextOptions<ChannelsDbContext> opti
 
     public DbSet<DocumentOpenRow> DocumentOpens => Set<DocumentOpenRow>();
 
+    public DbSet<PortalChangeRow> PortalChanges => Set<PortalChangeRow>();
+
     protected override string Schema => ChannelsModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -227,6 +229,37 @@ internal sealed class ChannelsDbContext(DbContextOptions<ChannelsDbContext> opti
             entity.Property(e => e.LastOpenedAt).HasColumnName("last_opened_at").HasColumnType("timestamptz");
             entity.Property(e => e.OpenCount).HasColumnName("open_count");
             entity.HasIndex(e => new { e.LegalEntityId, e.PartyId, e.DocumentId }).IsUnique().HasDatabaseName("ux_document_open_party_document");
+        });
+
+        modelBuilder.Entity<PortalChangeRow>(entity =>
+        {
+            entity.ToTable("portal_change", table =>
+            {
+                var states = string.Join(", ", PortalChangeStatuses.All.Select(s => $"'{s}'"));
+                table.HasCheckConstraint("ck_portal_change_status", $"status IN ({states})");
+                table.HasCheckConstraint("ck_portal_change_amount", "amount >= 0");
+                table.HasCheckConstraint("ck_portal_change_version", "version_no >= 1");
+            });
+            entity.HasKey(e => e.ChangeId).HasName("pk_portal_change");
+            entity.Property(e => e.ChangeId).HasColumnName("change_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.JobId).HasColumnName("job_id");
+            entity.Property(e => e.VersionNo).HasColumnName("version_no");
+            entity.Property(e => e.EffectiveAt).HasColumnName("effective_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(18,2)");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.Property(e => e.PaymentPlanOption).HasColumnName("payment_plan_option");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.TicketId).HasColumnName("ticket_id");
+            entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            // One change per POL job: a job is never previewed twice for different customers.
+            entity.HasIndex(e => new { e.LegalEntityId, e.JobId }).IsUnique().HasDatabaseName("ux_portal_change_job");
+            entity.HasIndex(e => new { e.LegalEntityId, e.PartyId, e.CreatedAt }).HasDatabaseName("ix_portal_change_party");
         });
 
         modelBuilder.Entity<PermissionMatrixEntryRow>(entity =>

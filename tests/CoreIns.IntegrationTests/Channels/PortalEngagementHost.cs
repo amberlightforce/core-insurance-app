@@ -214,8 +214,14 @@ public abstract class PortalEngagementHost(PostgresFixture database) : IAsyncDis
             services.AddSingleton<IDocumentContentService>(Content);
             services.RemoveAll<IClaimsClaimService>();
             services.AddSingleton<IClaimsClaimService>(claims);
+            ConfigureExtra(services, policies);
         }));
         return _factory;
+    }
+
+    /// <summary>Lets a subclass replace or add doubles (BO-CHN-03 adds the POL change/renewal and PTY location doubles).</summary>
+    protected virtual void ConfigureExtra(IServiceCollection services, FakePolicyPolicyService policies)
+    {
     }
 
     protected static string PolicyTag(PolicyId id) => id.Value.ToString("N")[..6];

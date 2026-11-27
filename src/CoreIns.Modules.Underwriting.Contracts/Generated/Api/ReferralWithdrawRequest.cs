@@ -4,36 +4,20 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Referral.withdraw request. PRD inputs: "job ref, issue ids, comment, attachments"</summary>
+/// <summary>uw.Referral.withdraw request: take the referral back (the requester or a manager; refused while another underwriter holds the review lock).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReferralWithdrawRequest
 {
-    /// <summary>PRD: "job ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>POL job id of the referred job</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("jobRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? JobRef { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobRef { get; init; }
 
-    /// <summary>PRD: "issue ids"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("issueIds")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.UwIssueId>? IssueIds { get; init; }
-
-    /// <summary>PRD: "comment"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Why the referral is withdrawn</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Comment { get; init; }
+    public required string Comment { get; init; }
 
-    /// <summary>PRD: "attachments"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("attachments")]
+    /// <summary>Record version of the referral as read; a different stored version is UW-ERR-STALE (409). Omit to skip the check.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Attachments { get; init; }
+    public int? ExpectedRecordVersion { get; init; }
 }
