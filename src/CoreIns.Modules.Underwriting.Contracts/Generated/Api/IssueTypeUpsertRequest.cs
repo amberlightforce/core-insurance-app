@@ -4,31 +4,73 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.IssueType.upsert request. PRD inputs: "name, description, code"</summary>
+/// <summary>uw.IssueType.upsert request, creates the issue type or changes it (the code is its identity).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record IssueTypeUpsertRequest
 {
-    /// <summary>PRD: "name"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("name")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Name { get; init; }
-
-    /// <summary>PRD: "description"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("description")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Description { get; init; }
-
-    /// <summary>PRD: "code"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Capitals, digits and underscore (2 to 64 characters).</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("code")]
+    public required string Code { get; init; }
+
+    /// <summary>Contract member 'nameEl'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("nameEl")]
+    public required string NameEl { get; init; }
+
+    /// <summary>Contract member 'nameEn'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("nameEn")]
+    public required string NameEn { get; init; }
+
+    /// <summary>Contract member 'severity'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("severity")]
+    public required SeverityValue Severity { get; init; }
+
+    /// <summary>Contract member 'defaultLane'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("defaultLane")]
+    public required DefaultLaneValue DefaultLane { get; init; }
+
+    /// <summary>Contract member 'blockingPoint'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("blockingPoint")]
+    public required global::CoreIns.Platform.Contracts.Common.BlockingPoint BlockingPoint { get; init; }
+
+    /// <summary>Defaults to true.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("active")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Code { get; init; }
+    public bool? Active { get; init; }
+
+    /// <summary>When changing an existing type, the recordVersion read (optimistic concurrency, UW-ERR-STALE).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? RecordVersion { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<SeverityValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum SeverityValue
+    {
+        /// <summary><c>REFER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REFER")]
+        Refer,
+
+        /// <summary><c>DECLINE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DECLINE")]
+        Decline,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DefaultLaneValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DefaultLaneValue
+    {
+        /// <summary><c>STRAIGHT_THROUGH</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("STRAIGHT_THROUGH")]
+        StraightThrough,
+
+        /// <summary><c>ASSISTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ASSISTED")]
+        Assisted,
+
+        /// <summary><c>EXPERT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("EXPERT")]
+        Expert,
+    }
 }
