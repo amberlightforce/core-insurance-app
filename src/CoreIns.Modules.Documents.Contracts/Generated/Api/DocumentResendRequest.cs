@@ -4,36 +4,30 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Document.resend request. PRD inputs: "document id, recipient, channel, reason"</summary>
+/// <summary>doc.Document.resend request (BO-DOC-02): a new delivery of the same archived document. A reason is required.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DocumentResendRequest
 {
-    /// <summary>PRD: "document id"</summary>
+    /// <summary>Contract member 'documentId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("documentId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.DocumentId? DocumentId { get; init; }
 
-    /// <summary>PRD: "recipient"</summary>
+    /// <summary>Recipient party; defaults to the document's recipient.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'recipient' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("recipient")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Recipient { get; init; }
+    public global::System.Guid? Recipient { get; init; }
 
-    /// <summary>PRD: "channel"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Delivery medium (EMAIL, REGISTERED_POST); defaults to the document's medium. A statutory notice is always registered post.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Channel { get; init; }
+    public string? Channel { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'reason'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
 }

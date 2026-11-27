@@ -56,7 +56,7 @@ public sealed class TemplateCatalogueTests(PostgresFixture database) : IClassFix
         var (typesResponse, types) = await SendAsync(client, HttpMethod.Get, "/api/doc/v1/document-types", roles: Admin);
         typesResponse.StatusCode.ShouldBe(HttpStatusCode.OK, types?.ToJsonString());
         var items = types!["items"]!.AsArray();
-        items.Select(i => i.Text("documentType")).ShouldBe(["DT-CANCELLATION-NOTICE", "DT-NONPAY-NOTICE", "DT-REFUND-ADVICE", "DT-WITHDRAWAL-ACK"]);
+        items.Select(i => i.Text("documentType")).ShouldBe(["DT-CANCELLATION-NOTICE", "DT-NONPAY-NOTICE", "DT-NONRENEWAL-NOTICE", "DT-REFUND-ADVICE", "DT-WITHDRAWAL-ACK"]);
         var nonPay = items.Single(i => i.Text("documentType") == "DT-NONPAY-NOTICE");
         nonPay.Text("defaultMedium").ShouldBe("REGISTERED_POST");
         nonPay.Text("titleEn").ShouldBe("Notice of non-payment of premium");

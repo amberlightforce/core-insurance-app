@@ -4,28 +4,25 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Document.supersede request. PRD inputs: "document id, replacement, reason"</summary>
+/// <summary>doc.Document.supersede request (BO-DOC-02): link the document to the one that replaces it. The old document becomes Superseded; nothing is edited or deleted. A reason is required.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DocumentSupersedeRequest
 {
-    /// <summary>PRD: "document id"</summary>
+    /// <summary>Contract member 'documentId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("documentId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.DocumentId? DocumentId { get; init; }
 
-    /// <summary>PRD: "replacement"</summary>
+    /// <summary>An existing Rendered document about the same subject.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'replacementDocumentId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("replacement")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("replacementDocumentId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Replacement { get; init; }
+    public global::System.Guid? ReplacementDocumentId { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'reason'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
 }

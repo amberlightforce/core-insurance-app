@@ -15,11 +15,12 @@ internal sealed record DeliveryView(
 
 internal sealed record DocumentView(
     Guid DocumentId, string DocumentNumber, string DocumentType, string RequestNo, string Subject, Guid RecipientPartyId,
-    string Language, string Status, string Medium, Guid ArchiveId, string ContentHash, DateTimeOffset CreatedAt, IReadOnlyList<DeliveryView> Deliveries);
+    string Language, string Status, string Medium, Guid ArchiveId, string ContentHash, DateTimeOffset CreatedAt, IReadOnlyList<DeliveryView> Deliveries,
+    bool CustomerVisible = false, bool Hidden = false, Guid? SupersededByDocumentId = null, string? WithdrawnReason = null);
 
 internal sealed record DocumentSearchFilter(
     string? TemplateKey, string? Status, string? Medium, string? SubjectModule, string? SubjectType, string? SubjectId, Guid? RecipientPartyId,
-    DateOnly? CreatedFrom, DateOnly? CreatedTo, string? Text);
+    DateOnly? CreatedFrom, DateOnly? CreatedTo, string? Text, bool IncludeHidden = false);
 
 internal sealed record EvidenceView(
     Guid EvidenceId, Guid DeliveryId, string Provider, string ProviderEventId, string EventType, DateOnly? ProofDate, string? ProofReference, string Outcome, DateTimeOffset ReceivedAt);
@@ -51,6 +52,11 @@ internal sealed class DocumentReader(DocumentsDbContext db, RequestContext conte
 
         var entity = LegalEntity;
         var query = db.Documents.AsNoTracking().Where(d => d.LegalEntityId == entity);
+        if (!f.IncludeHidden)
+        {
+            query = query.Where(d => !d.Hidden);
+        }
+
         if (f.TemplateKey is { Length: > 0 } key)
         {
             query = query.Where(d => d.TemplateKey == key);
@@ -224,6 +230,9 @@ internal sealed class DocumentReader(DocumentsDbContext db, RequestContext conte
     private async Task<IReadOnlyList<DocumentView>> ViewsAsync(IReadOnlyList<DocumentRow> rows, CancellationToken cancellationToken)
     {
         var ids = rows.Select(r => r.DocumentId).ToList();
+        var keys = rows.Select(r => r.TemplateKey).Distinct().ToList();
+        var visible = (await db.DocumentTypes.AsNoTracking().Where(t => keys.Contains(t.DocumentType) && t.CustomerVisible).Select(t => t.DocumentType)
+            .ToListAsync(cancellationToken).ConfigureAwait(false)).ToHashSet(StringComparer.Ordinal);
         var deliveries = await db.Deliveries.AsNoTracking().Where(d => ids.Contains(d.DocumentId)).OrderBy(d => d.CreatedAt).ThenBy(d => d.DeliveryId)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         return
@@ -232,7 +241,8 @@ internal sealed class DocumentReader(DocumentsDbContext db, RequestContext conte
                 r.DocumentId.Value, r.DocumentNumber, r.TemplateKey, r.RequestNo, $"{r.SubjectModule}/{r.SubjectType}/{r.SubjectId}", r.RecipientPartyId.Value,
                 r.Language, r.Status, r.Medium, r.ArchiveId, r.ContentHash, r.CreatedAt.ToDateTimeOffset(),
                 [.. deliveries.Where(d => d.DocumentId == r.DocumentId).Select(d => new DeliveryView(
-                    d.DeliveryId.Value, d.Channel, d.Medium, d.Status, d.ProofLevel, d.NotificationDate?.Value, d.FailureReason, d.IsReprint))])),
+                    d.DeliveryId.Value, d.Channel, d.Medium, d.Status, d.ProofLevel, d.NotificationDate?.Value, d.FailureReason, d.IsReprint))],
+                visible.Contains(r.TemplateKey), r.Hidden, r.SupersededBy?.Value, r.WithdrawnReason)),
         ];
     }
 }

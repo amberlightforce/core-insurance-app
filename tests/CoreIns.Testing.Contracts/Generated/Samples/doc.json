@@ -58,6 +58,10 @@
           "contentHash": "sample",
           "createdAt": "2026-10-07T09:00:00Z",
           "latestDeliveryStatus": "sample",
+          "customerVisible": true,
+          "hidden": true,
+          "supersededByDocumentId": "01929df0-177d-7744-884a-fc0881504ba1",
+          "withdrawnReason": "sample",
           "deliveries": [
             {
               "deliveryId": "01928e23-3f89-7851-8df0-d7f2a7d9e221",
@@ -305,10 +309,11 @@
     },
     "DocumentHideRequest": {
       "documentId": "0192eb60-ed11-764d-8d0b-f8082d78137e",
-      "reason": "unspecified"
+      "reason": "sample"
     },
     "DocumentHideResponse": {
-      "status": "unspecified"
+      "status": "sample",
+      "hidden": true
     },
     "DocumentImportRequest": {
       "binary": "unspecified",
@@ -342,6 +347,10 @@
           "contentHash": "sample",
           "createdAt": "2026-10-07T09:00:00Z",
           "latestDeliveryStatus": "sample",
+          "customerVisible": true,
+          "hidden": true,
+          "supersededByDocumentId": "0192a03f-e939-7dd1-82ef-d576c3d6d0e4",
+          "withdrawnReason": "sample",
           "deliveries": [
             {
               "deliveryId": "01927821-9465-77f9-8e36-f4e82ab76f58",
@@ -444,12 +453,13 @@
     },
     "DocumentResendRequest": {
       "documentId": "019230de-1513-7e94-82a1-f682006caabb",
-      "recipient": "unspecified",
-      "channel": "unspecified",
-      "reason": "unspecified"
+      "recipient": "019202f6-4d07-712c-83bd-d24fe951f142",
+      "channel": "sample",
+      "reason": "sample"
     },
     "DocumentResendResponse": {
-      "deliveryId": "01929bc4-f5e4-739f-878c-b204a376a83f"
+      "deliveryId": "01929bc4-f5e4-739f-878c-b204a376a83f",
+      "medium": "sample"
     },
     "DocumentSearchItem": {
       "documentId": "0192d7b1-695c-7de5-801e-489c2a712b13",
@@ -465,6 +475,10 @@
       "contentHash": "sample",
       "createdAt": "2026-10-07T09:00:00Z",
       "latestDeliveryStatus": "sample",
+      "customerVisible": true,
+      "hidden": true,
+      "supersededByDocumentId": "01920b64-92f5-749f-8d1c-04d358fb2312",
+      "withdrawnReason": "sample",
       "deliveries": [
         {
           "deliveryId": "0192a448-424d-7916-8a53-696bd33be23f",
@@ -494,6 +508,10 @@
           "contentHash": "sample",
           "createdAt": "2026-10-07T09:00:00Z",
           "latestDeliveryStatus": "sample",
+          "customerVisible": true,
+          "hidden": true,
+          "supersededByDocumentId": "0192ca8f-3f59-782b-8a5d-93feb9297843",
+          "withdrawnReason": "sample",
           "deliveries": [
             {
               "deliveryId": "01924059-5621-70ab-8b1e-9706bad4ff62",
@@ -513,11 +531,12 @@
     },
     "DocumentSupersedeRequest": {
       "documentId": "01924cd1-5c04-7eaf-8068-d7c63059362b",
-      "replacement": "unspecified",
-      "reason": "unspecified"
+      "replacementDocumentId": "019250f9-a908-7e5c-8a4b-39fbc3dec22c",
+      "reason": "sample"
     },
     "DocumentSupersedeResponse": {
-      "status": "unspecified"
+      "status": "sample",
+      "supersededByDocumentId": "019207a6-e310-70eb-8b01-e19463620f0b"
     },
     "DocumentTypeListItem": {
       "documentType": "sample",
@@ -526,7 +545,8 @@
       "titleEn": "sample",
       "requiredFields": [
         "sample"
-      ]
+      ],
+      "customerVisible": true
     },
     "DocumentTypeListPage": {
       "items": [
@@ -537,7 +557,8 @@
           "titleEn": "sample",
           "requiredFields": [
             "sample"
-          ]
+          ],
+          "customerVisible": true
         }
       ],
       "nextCursor": "sample",
@@ -545,18 +566,19 @@
     },
     "DocumentUnhideRequest": {
       "documentId": "01923405-8c93-73d0-80f9-c41f1d0e8e23",
-      "reason": "unspecified"
+      "reason": "sample"
     },
     "DocumentUnhideResponse": {
-      "status": "unspecified"
+      "status": "sample",
+      "hidden": true
     },
     "DocumentWithdrawRequest": {
       "documentId": "01927396-332a-70b6-8cfb-54ec489419b5",
-      "replacement": "unspecified",
-      "reason": "unspecified"
+      "reason": "sample"
     },
     "DocumentWithdrawResponse": {
-      "status": "unspecified"
+      "status": "sample",
+      "withdrawnReason": "sample"
     },
     "EvidencePackExportRequest": {
       "packId": "01925f46-ce3c-7d5b-8276-b07016710155",
