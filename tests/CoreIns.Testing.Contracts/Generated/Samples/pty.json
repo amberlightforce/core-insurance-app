@@ -1,19 +1,83 @@
 {
   "responses": {
     "pty.Account.addMember": {
-      "key": "value"
+      "account": {
+        "accountId": "01923b10-a876-7552-8761-6fb716ca915d",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "0192189e-a69b-7671-8391-a6ac64f1ff9a",
+        "members": [
+          {
+            "partyId": "01922d24-477d-759b-8b9d-3ddbc78d1f1a",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "pty.Account.create": {
-      "key": "value"
+      "account": {
+        "accountId": "0192e8e2-665f-7f32-8f0c-c0c6e6e4ce1b",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "0192a8c6-4e57-767f-897a-7ebfff93c93b",
+        "members": [
+          {
+            "partyId": "01923541-0156-7dd4-8900-9b07475eaee5",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "pty.Account.get": {
-      "key": "value"
+      "account": {
+        "accountId": "01922737-d794-7ca4-828f-4a6eabdce797",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "0192f6b1-4bee-7f05-8900-63fea27d269d",
+        "members": [
+          {
+            "partyId": "01922c02-9058-769d-8d24-4a2381cf09c8",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "pty.Account.merge": {
       "request": "unspecified"
     },
     "pty.Account.removeMember": {
-      "key": "value"
+      "account": {
+        "accountId": "0192d07e-cfb1-7b6e-8afe-dccc266cbece",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "019271cb-5167-76db-86fa-d417a3b99883",
+        "members": [
+          {
+            "partyId": "0192eab9-fa08-764e-8939-ffd8c1f7c4df",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "pty.Account.requestPolicyMove": {
       "request": "unspecified"
@@ -21,20 +85,58 @@
     "pty.Account.search": {
       "items": [
         {
-          "key": "value"
+          "accountId": "01921d02-0468-795a-8e87-0ef66a1928c6",
+          "accountNumber": "SAMPLE-000001",
+          "accountType": "INDIVIDUAL",
+          "name": "sample",
+          "status": "PENDING",
+          "holderPartyId": "019234d2-ff25-79e8-89a6-8c10dc24adfe",
+          "memberCount": 1
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "pty.Account.setHolder": {
-      "key": "value"
+      "account": {
+        "accountId": "0192e0d9-56d7-7eb6-88ff-dae711a9fa7f",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "01927da0-2aae-742b-874b-914f8e3d54a9",
+        "members": [
+          {
+            "partyId": "01926c59-d11d-7ce0-835c-c00f5b7717d8",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "pty.Account.split": {
       "request": "unspecified"
     },
     "pty.Account.withdraw": {
-      "key": "value"
+      "account": {
+        "accountId": "0192f378-6af4-7e92-8741-757a7a3594ac",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "01921a7d-3912-72a3-8cf7-43a7755d1826",
+        "members": [
+          {
+            "partyId": "019289e9-445e-703d-8e79-3a50a62a7115",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "pty.CommissionAgreement.resolve": {
       "key": "value"
@@ -577,6 +679,78 @@
     }
   },
   "schemas": {
+    "AccountAddMemberRequest": {
+      "accountId": "019298aa-84c2-7695-87bf-25797a0695c9",
+      "partyId": "01925c7f-5c8f-7d42-8dd2-49a49e12006e",
+      "memberRole": "SAMPLE_CODE"
+    },
+    "AccountAddMemberResponse": {
+      "account": {
+        "accountId": "01925d90-f8fb-7b35-83af-7314d42afde0",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "0192c6df-9be7-7b4a-8e35-deb5d031de6e",
+        "members": [
+          {
+            "partyId": "0192dda6-fd34-7cc5-89b5-2acb751368ab",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
+    },
+    "AccountCreateRequest": {
+      "holderPartyId": "0192d452-2608-7a17-849b-a75676cb754a",
+      "accountType": "INDIVIDUAL",
+      "name": "sample"
+    },
+    "AccountCreateResponse": {
+      "account": {
+        "accountId": "0192e00c-84dd-71d7-8a8a-e76daa6f713d",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "01921c4a-f6a9-70af-8214-f32183ae9203",
+        "members": [
+          {
+            "partyId": "0192b596-8677-7a95-8c57-1bcc24c6d4a7",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
+    },
+    "AccountGetResponse": {
+      "account": {
+        "accountId": "0192cd64-82dc-778d-863f-729ae823038e",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "01928765-c0be-7598-8f42-81420e3643dc",
+        "members": [
+          {
+            "partyId": "01924dca-81c2-70dd-8ecc-ac7a20adfcbb",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
+    },
+    "AccountMemberView": {
+      "partyId": "01929a9c-757d-7785-808f-276308cdeaf0",
+      "memberRole": "SAMPLE_CODE",
+      "addedOn": "2026-10-07"
+    },
     "AccountMergeRequest": {
       "source": "unspecified",
       "target": "unspecified",
@@ -584,6 +758,29 @@
     },
     "AccountMergeResponse": {
       "request": "unspecified"
+    },
+    "AccountRemoveMemberRequest": {
+      "accountId": "0192bee0-e371-79cf-86d6-3dde19ee5894",
+      "partyId": "01922dc5-72c4-7ea0-88e1-2eb9a35b7acd"
+    },
+    "AccountRemoveMemberResponse": {
+      "account": {
+        "accountId": "019298f1-161a-72b4-8107-d6c2d158212e",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "019246cc-e20b-7200-82c9-0684ab4ff40a",
+        "members": [
+          {
+            "partyId": "019230e0-966d-73ce-8ec6-08a7f9587eb4",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "AccountRequestPolicyMoveRequest": {
       "source": "unspecified",
@@ -593,14 +790,52 @@
     "AccountRequestPolicyMoveResponse": {
       "request": "unspecified"
     },
+    "AccountSearchItem": {
+      "accountId": "019272fa-5a4a-7ba8-812a-9894a3c09f78",
+      "accountNumber": "SAMPLE-000001",
+      "accountType": "INDIVIDUAL",
+      "name": "sample",
+      "status": "PENDING",
+      "holderPartyId": "019225b0-3ba7-7250-8b8c-02a3fcd3fa84",
+      "memberCount": 1
+    },
     "AccountSearchPage": {
       "items": [
         {
-          "key": "value"
+          "accountId": "0192f614-99e9-7d04-8849-16f5452c76c6",
+          "accountNumber": "SAMPLE-000001",
+          "accountType": "INDIVIDUAL",
+          "name": "sample",
+          "status": "PENDING",
+          "holderPartyId": "01927039-1dfa-7203-845e-499c06be0aa8",
+          "memberCount": 1
         }
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "AccountSetHolderRequest": {
+      "accountId": "0192484f-ef74-73d1-8ab1-bc2a520b5815",
+      "holderPartyId": "0192ae69-87f6-7cf9-87aa-ac2b4f5e4f3e"
+    },
+    "AccountSetHolderResponse": {
+      "account": {
+        "accountId": "0192087c-f690-76e1-8a58-4fc58237b7df",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "0192aebb-d4c7-77d9-8857-a3a4f4bd5e68",
+        "members": [
+          {
+            "partyId": "0192c2b4-f4e6-7ed3-86f7-d0b8e427ce34",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "AccountSplitRequest": {
       "source": "unspecified",
@@ -609,6 +844,46 @@
     },
     "AccountSplitResponse": {
       "request": "unspecified"
+    },
+    "AccountView": {
+      "accountId": "019284e4-26e4-7472-8a57-f299217006ad",
+      "accountNumber": "SAMPLE-000001",
+      "accountType": "INDIVIDUAL",
+      "name": "sample",
+      "status": "PENDING",
+      "holderPartyId": "01924ac2-6bbc-7580-8249-7ff6debcac49",
+      "members": [
+        {
+          "partyId": "0192cdb7-ed62-7efe-8cdf-d25b54c7b1ab",
+          "memberRole": "SAMPLE_CODE",
+          "addedOn": "2026-10-07"
+        }
+      ],
+      "withdrawnOn": "2026-10-07",
+      "withdrawReason": "sample"
+    },
+    "AccountWithdrawRequest": {
+      "accountId": "01924644-1d4a-755a-8381-267a59526135",
+      "reason": "sample"
+    },
+    "AccountWithdrawResponse": {
+      "account": {
+        "accountId": "01924bf8-9b58-79d8-8aed-51c45c95b0f8",
+        "accountNumber": "SAMPLE-000001",
+        "accountType": "INDIVIDUAL",
+        "name": "sample",
+        "status": "PENDING",
+        "holderPartyId": "0192c894-473a-70ce-84ef-cf883f7e7225",
+        "members": [
+          {
+            "partyId": "0192ec3d-919e-72be-8198-56f0d2262043",
+            "memberRole": "SAMPLE_CODE",
+            "addedOn": "2026-10-07"
+          }
+        ],
+        "withdrawnOn": "2026-10-07",
+        "withdrawReason": "sample"
+      }
     },
     "AddressFields": {
       "street": "sample",

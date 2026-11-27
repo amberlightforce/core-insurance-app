@@ -129,8 +129,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/users/search
 CONTRACT_NOT_SERVED GET /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
 CONTRACT_NOT_SERVED GET /api/pol/v1/jobs
-CONTRACT_NOT_SERVED GET /api/pty/v1/accounts/search
-CONTRACT_NOT_SERVED GET /api/pty/v1/accounts/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/commission-agreements/compare
 CONTRACT_NOT_SERVED GET /api/pty/v1/commission-agreements/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
@@ -606,14 +604,9 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/renewals/decline
 CONTRACT_NOT_SERVED POST /api/pol/v1/renewals/non-renew
 CONTRACT_NOT_SERVED POST /api/pol/v1/rewrites
 CONTRACT_NOT_SERVED POST /api/pol/v1/suspensions
-CONTRACT_NOT_SERVED POST /api/pty/v1/accounts
-CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/add-member
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/merge
-CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/remove-member
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/request-policy-move
-CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/set-holder
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/split
-CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/withdraw
 CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/approve
 CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/create-version
 CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/resolve
