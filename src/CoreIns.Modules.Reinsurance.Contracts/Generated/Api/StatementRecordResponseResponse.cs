@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Statement.recordResponse result. PRD outputs: "statement"</summary>
+/// <summary>ri.Statement.recordResponse result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record StatementRecordResponseResponse
 {
-    /// <summary>PRD: "statement"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'statement'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("statement")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Statement { get; init; }
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.StatementView Statement { get; init; }
 }

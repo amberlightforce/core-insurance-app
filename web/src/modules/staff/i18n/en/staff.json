@@ -67,7 +67,8 @@
       "FIN-ERR-UNBALANCED": "The journal does not balance: debits must equal credits.",
       "FIN-ERR-EVIDENCE-REQUIRED": "A manual journal needs an evidence reference.",
       "FIN-ERR-TEMPLATE-ACCOUNT": "An account is not allowed for this journal template.",
-      "FIN-ERR-PERIOD-LOCKED": "The accounting period is locked and refuses postings."
+      "FIN-ERR-PERIOD-LOCKED": "The accounting period is locked and refuses postings.",
+      "BIL-ERR-SUSPENSE-STATE": "This receipt is not in the OPEN state any more. Reload the list."
     }
   },
   "noPermission": {

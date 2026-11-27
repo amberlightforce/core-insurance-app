@@ -8,6 +8,7 @@ using CoreIns.Modules.Migration.Persistence;
 using CoreIns.Modules.Migration.Services;
 using CoreIns.Modules.Migration.Services.Reconciliation;
 using CoreIns.Modules.Migration.Services.SignOff;
+using CoreIns.Modules.Migration.Services.Mapping;
 using CoreIns.Modules.Migration.Services.Quality;
 using CoreIns.Modules.Migration.Services.Staging;
 using CoreIns.Platform;
@@ -50,6 +51,7 @@ public static class MigrationModule
         services.AddMigrationAuthorityTypes();
         services.AddOwnerDecidedApprovalType(BatchApproval.Type);
         services.AddOwnerDecidedApprovalType(SignOffApproval.Type);
+        services.AddOwnerDecidedApprovalType(MappingApproval.Type);
         services.AddScoped<BatchRunner>();
         services.AddOptions<MigrationBatchOptions>().Bind(configuration.GetSection(MigrationBatchOptions.Section));
         services.AddScoped<BatchProcessor>();
@@ -97,6 +99,10 @@ public static class MigrationModule
         services.AddScoped<DataQualityService>();
         services.AddCommand<RunProfile, DqRunView, RunProfileHandler>(CommandDescriptor.For("mig.Profile.run"));
         services.AddCommand<WaiveFinding, DqWaiverView, WaiveFindingHandler>(CommandDescriptor.For("mig.Dq.waive"));
+
+        services.AddScoped<MappingService>();
+        services.AddCommand<CreateMappingSpec, MappingSpecView, CreateMappingSpecHandler>(CommandDescriptor.For("mig.Mapping.create"));
+        services.AddCommand<PublishMappingSpec, MappingSpecView, PublishMappingSpecHandler>(CommandDescriptor.For("mig.Mapping.publish"));
 
         services.AddScoped<IMigrationXrefService, MigrationXrefService>();
         services.AddScoped<IMigrationRoutingService, MigrationRoutingService>();

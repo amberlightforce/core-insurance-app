@@ -8,11 +8,11 @@ namespace CoreIns.Modules.Claims.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClaimMergeResponse
 {
-    /// <summary>PRD: "claim"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("claim")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Claim { get; init; }
+    /// <summary>Contract member 'survivor'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("survivor")]
+    public required global::CoreIns.Modules.Claims.Contracts.Api.ClaimSummary Survivor { get; init; }
+
+    /// <summary>Contract member 'duplicate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("duplicate")]
+    public required global::CoreIns.Modules.Claims.Contracts.Api.ClaimSummary Duplicate { get; init; }
 }

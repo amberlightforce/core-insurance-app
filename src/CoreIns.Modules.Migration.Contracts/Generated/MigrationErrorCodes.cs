@@ -22,7 +22,7 @@ public static class MigrationErrorCodes
 
     /// <summary>MIG-ERR-BATCH-STATE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): mig.Signoff.approve, mig.Signoff.reject, mig.Signoff.request.</para>
+    /// <para>Declared by 5 operation(s): mig.Mapping.preview, mig.Mapping.publish, mig.Signoff.approve, mig.Signoff.reject, mig.Signoff.request.</para>
     /// </remarks>
     public const string BatchState = "MIG-ERR-BATCH-STATE";
 
@@ -40,7 +40,7 @@ public static class MigrationErrorCodes
 
     /// <summary>MIG-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 23 operation(s): mig.Archive.erase, mig.Archive.rectificationNote, mig.Archive.restrict, mig.Archive.subjectExport, mig.Batch.approve, mig.Batch.create, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start, mig.Dq.waive, ….</para>
+    /// <para>Declared by 25 operation(s): mig.Archive.erase, mig.Archive.rectificationNote, mig.Archive.restrict, mig.Archive.subjectExport, mig.Batch.approve, mig.Batch.create, mig.Batch.pause, mig.Batch.redrive, mig.Batch.resume, mig.Batch.reverse, mig.Batch.start, mig.Dq.waive, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "MIG-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -58,7 +58,7 @@ public static class MigrationErrorCodes
 
     /// <summary>MIG-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): mig.Dq.findings, mig.Dq.waive, mig.Profile.run, mig.Signoff.approve, mig.Signoff.reject, mig.Signoff.request, mig.Signoff.waive, mig.Xref.resolve.</para>
+    /// <para>Declared by 11 operation(s): mig.Dq.findings, mig.Dq.waive, mig.Mapping.get, mig.Mapping.preview, mig.Mapping.publish, mig.Profile.run, mig.Signoff.approve, mig.Signoff.reject, mig.Signoff.request, mig.Signoff.waive, mig.Xref.resolve.</para>
     /// </remarks>
     public const string NotFound = "MIG-ERR-NOT-FOUND";
 
@@ -82,7 +82,7 @@ public static class MigrationErrorCodes
 
     /// <summary>MIG-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 13 operation(s): mig.Dq.findings, mig.Dq.waive, mig.Profile.run, mig.Recon.loadControlTotals, mig.Recon.results, mig.Recon.run, mig.Signoff.approve, mig.Signoff.reject, mig.Signoff.request, mig.Signoff.status, mig.Signoff.waive, mig.Staging.load, ….</para>
+    /// <para>Declared by 17 operation(s): mig.Dq.findings, mig.Dq.waive, mig.Mapping.create, mig.Mapping.list, mig.Mapping.preview, mig.Mapping.publish, mig.Profile.run, mig.Recon.loadControlTotals, mig.Recon.results, mig.Recon.run, mig.Signoff.approve, mig.Signoff.reject, ….</para>
     /// </remarks>
     public const string Validation = "MIG-ERR-VALIDATION";
 

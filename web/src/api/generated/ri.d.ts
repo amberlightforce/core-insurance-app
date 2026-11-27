@@ -1739,11 +1739,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Statements
-         * @description Statements
-         *
-         *     PRD inputs: contract/counterparty, period, currency
-         *     PRD outputs: statement
+         * Generate a reinsurer statement
+         * @description Generate a reinsurer statement (BO-RI-14)
          */
         post: operations["ri.Statement.generate"];
         delete?: never;
@@ -1762,11 +1759,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Statements
-         * @description Statements
-         *
-         *     PRD inputs: contract/counterparty, period, currency
-         *     PRD outputs: statement
+         * Submit a statement for approval
+         * @description Submit a statement for approval (BO-RI-14)
          */
         post: operations["ri.Statement.submit"];
         delete?: never;
@@ -1785,11 +1779,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Statements
-         * @description Statements
-         *
-         *     PRD inputs: contract/counterparty, period, currency
-         *     PRD outputs: statement
+         * Approve a statement
+         * @description Approve a statement (BO-RI-14)
          */
         post: operations["ri.Statement.approve"];
         delete?: never;
@@ -1808,11 +1799,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Statements
-         * @description Statements
-         *
-         *     PRD inputs: contract/counterparty, period, currency
-         *     PRD outputs: statement
+         * Issue a statement
+         * @description Issue a statement (BO-RI-14)
          */
         post: operations["ri.Statement.issue"];
         delete?: never;
@@ -1831,11 +1819,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Statements
-         * @description Statements
-         *
-         *     PRD inputs: contract/counterparty, period, currency
-         *     PRD outputs: statement
+         * Record the reinsurer response
+         * @description Record the reinsurer response (BO-RI-14)
          */
         post: operations["ri.Statement.recordResponse"];
         delete?: never;
@@ -1854,11 +1839,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Statements
-         * @description Statements
-         *
-         *     PRD inputs: contract/counterparty, period, currency
-         *     PRD outputs: statement
+         * Reissue a statement as a new version
+         * @description Reissue a statement as a new version (BO-RI-14)
          */
         post: operations["ri.Statement.reissue"];
         delete?: never;
@@ -3984,89 +3966,108 @@ export interface components {
             /** @description PRD: "bordereau" */
             bordereau?: components["schemas"]["Unspecified"];
         };
-        /** @description ri.Statement.generate request. PRD inputs: "contract/counterparty, period, currency" */
+        /** @description One account item on a statement, copied at generation (BO-RI-14). Positive is payable to the reinsurer. */
+        StatementLine: {
+            itemId: components["schemas"]["Uuid"];
+            contractId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            kind: "CEDED_PREMIUM" | "DEPOSIT_INSTALMENT" | "PREMIUM_ADJUSTMENT" | "COMMISSION" | "RECOVERY";
+            sourceKind: components["schemas"]["Text"];
+            sourceId: components["schemas"]["Text"];
+            itemDate: components["schemas"]["LocalDate"];
+            amount: components["schemas"]["Money"];
+        };
+        /** @description Account statement of one reinsurer for one period and currency (BO-RI-14), built from the technical account items. Its lines, totals and content hash are sealed at generation; only the workflow fields change. A correction is a reversal or adjustment item followed by a reissue, which creates the next version and supersedes this one. */
+        StatementView: {
+            statementId: components["schemas"]["Uuid"];
+            reinsurerPartyId: components["schemas"]["Uuid"];
+            /** @description Accounting period, yyyy-MM */
+            period: components["schemas"]["Text"];
+            currency: components["schemas"]["Text"];
+            version: number;
+            previousStatementId?: components["schemas"]["Uuid"] | null;
+            /** @enum {string} */
+            status: "DRAFT" | "SUBMITTED" | "APPROVED" | "ISSUED" | "AGREED" | "DISPUTED" | "SUPERSEDED";
+            /** @description Balance of the earlier periods */
+            opening: components["schemas"]["Money"];
+            premium: components["schemas"]["Money"];
+            commission: components["schemas"]["Money"];
+            recoveries: components["schemas"]["Money"];
+            movement: components["schemas"]["Money"];
+            /** @description Opening plus movement; equals the closing of ri.Balance.report for the period */
+            closing: components["schemas"]["Money"];
+            /** @description SHA-256 of the sealed content (hex) */
+            contentHash: components["schemas"]["Text"];
+            lines: components["schemas"]["StatementLine"][];
+            createdAt: components["schemas"]["Instant"];
+            createdBy: components["schemas"]["Text"];
+            submittedAt?: components["schemas"]["Instant"] | null;
+            submittedBy?: components["schemas"]["Text"] | null;
+            approvedAt?: components["schemas"]["Instant"] | null;
+            approvedBy?: components["schemas"]["Text"] | null;
+            issuedAt?: components["schemas"]["Instant"] | null;
+            issuedBy?: components["schemas"]["Text"] | null;
+            response?: ("AGREED" | "DISPUTED") | null;
+            responseReason?: components["schemas"]["Text"] | null;
+            respondedAt?: components["schemas"]["Instant"] | null;
+            respondedBy?: components["schemas"]["Text"] | null;
+            supersededBy?: components["schemas"]["Uuid"] | null;
+        };
+        /** @description ri.Statement.generate request. One statement per reinsurer, period and currency; an existing one is replaced only by a reissue. */
         StatementGenerateRequest: {
-            /** @description PRD: "contract/counterparty" */
-            contractCounterparty?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
+            reinsurerPartyId: components["schemas"]["Uuid"];
+            /** @description yyyy-MM */
+            period: components["schemas"]["Text"];
+            /** @description EUR when omitted */
+            currency?: components["schemas"]["CurrencyCode"] | null;
         };
-        /** @description ri.Statement.generate result. PRD outputs: "statement" */
+        /** @description ri.Statement.generate result */
         StatementGenerateResponse: {
-            /** @description PRD: "statement" */
-            statement?: components["schemas"]["Unspecified"];
+            statement: components["schemas"]["StatementView"];
         };
-        /** @description ri.Statement.submit request. PRD inputs: "contract/counterparty, period, currency" */
+        /** @description ri.Statement.submit request. A DRAFT statement goes to the checker. */
         StatementSubmitRequest: {
-            /** @description PRD: "contract/counterparty" */
-            contractCounterparty?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
+            statementId: components["schemas"]["Uuid"];
         };
-        /** @description ri.Statement.submit result. PRD outputs: "statement" */
+        /** @description ri.Statement.submit result */
         StatementSubmitResponse: {
-            /** @description PRD: "statement" */
-            statement?: components["schemas"]["Unspecified"];
+            statement: components["schemas"]["StatementView"];
         };
-        /** @description ri.Statement.approve request. PRD inputs: "contract/counterparty, period, currency" */
+        /** @description ri.Statement.approve request. The checker is not the person who generated or submitted it (RI-ERR-SOD). */
         StatementApproveRequest: {
-            /** @description PRD: "contract/counterparty" */
-            contractCounterparty?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
+            statementId: components["schemas"]["Uuid"];
         };
-        /** @description ri.Statement.approve result. PRD outputs: "statement" */
+        /** @description ri.Statement.approve result */
         StatementApproveResponse: {
-            /** @description PRD: "statement" */
-            statement?: components["schemas"]["Unspecified"];
+            statement: components["schemas"]["StatementView"];
         };
-        /** @description ri.Statement.issue request. PRD inputs: "contract/counterparty, period, currency" */
+        /** @description ri.Statement.issue request. An APPROVED statement is issued once; the content stays sealed. */
         StatementIssueRequest: {
-            /** @description PRD: "contract/counterparty" */
-            contractCounterparty?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
+            statementId: components["schemas"]["Uuid"];
         };
-        /** @description ri.Statement.issue result. PRD outputs: "statement" */
+        /** @description ri.Statement.issue result */
         StatementIssueResponse: {
-            /** @description PRD: "statement" */
-            statement?: components["schemas"]["Unspecified"];
+            statement: components["schemas"]["StatementView"];
         };
-        /** @description ri.Statement.recordResponse request. PRD inputs: "contract/counterparty, period, currency" */
+        /** @description ri.Statement.recordResponse request. The reinsurer agrees or disputes an ISSUED statement; both are audited with the reason. */
         StatementRecordResponseRequest: {
-            /** @description PRD: "contract/counterparty" */
-            contractCounterparty?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
+            statementId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            response: "AGREED" | "DISPUTED";
+            reason: components["schemas"]["Text"];
         };
-        /** @description ri.Statement.recordResponse result. PRD outputs: "statement" */
+        /** @description ri.Statement.recordResponse result */
         StatementRecordResponseResponse: {
-            /** @description PRD: "statement" */
-            statement?: components["schemas"]["Unspecified"];
+            statement: components["schemas"]["StatementView"];
         };
-        /** @description ri.Statement.reissue request. PRD inputs: "contract/counterparty, period, currency" */
+        /** @description ri.Statement.reissue request. After a reversal or adjustment item, builds the next version from the current items, supersedes the issued or disputed one and links back to it. Refused when nothing changed. */
         StatementReissueRequest: {
-            /** @description PRD: "contract/counterparty" */
-            contractCounterparty?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
+            statementId: components["schemas"]["Uuid"];
+            reason: components["schemas"]["Text"];
         };
-        /** @description ri.Statement.reissue result. PRD outputs: "statement" */
+        /** @description ri.Statement.reissue result */
         StatementReissueResponse: {
-            /** @description PRD: "statement" */
-            statement?: components["schemas"]["Unspecified"];
+            statement: components["schemas"]["StatementView"];
         };
         /** @description ri.CashCall.raise request. PRD inputs: "occurrence, amounts" */
         CashCallRaiseRequest: {
@@ -8318,14 +8319,7 @@ export interface operations {
     };
     "ri.Statement.generate": {
         parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
+            query?: never;
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -8369,14 +8363,7 @@ export interface operations {
     };
     "ri.Statement.submit": {
         parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
+            query?: never;
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -8420,14 +8407,7 @@ export interface operations {
     };
     "ri.Statement.approve": {
         parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
+            query?: never;
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -8471,14 +8451,7 @@ export interface operations {
     };
     "ri.Statement.issue": {
         parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
+            query?: never;
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -8522,14 +8495,7 @@ export interface operations {
     };
     "ri.Statement.recordResponse": {
         parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
+            query?: never;
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -8573,14 +8539,7 @@ export interface operations {
     };
     "ri.Statement.reissue": {
         parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
+            query?: never;
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner

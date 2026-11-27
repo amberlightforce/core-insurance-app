@@ -111,8 +111,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/users/search
 CONTRACT_NOT_SERVED GET /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
 CONTRACT_NOT_SERVED GET /api/pol/v1/jobs
-CONTRACT_NOT_SERVED GET /api/pty/v1/commission-agreements/compare
-CONTRACT_NOT_SERVED GET /api/pty/v1/commission-agreements/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/producer-of-records/{}
 CONTRACT_NOT_SERVED GET /api/pty/v1/screening/case-get
@@ -265,8 +263,6 @@ CONTRACT_NOT_SERVED POST /api/chn/v1/webhooks/verify
 CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/assemble
 CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/issue
 CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/request
-CONTRACT_NOT_SERVED POST /api/clm/v1/claims/merge
-CONTRACT_NOT_SERVED POST /api/clm/v1/claims/reopen
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/schedule
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/send
 CONTRACT_NOT_SERVED POST /api/clm/v1/coverage/decide
@@ -274,7 +270,6 @@ CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/purge
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/rectify
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/restrict
-CONTRACT_NOT_SERVED POST /api/clm/v1/fnol/save-draft
 CONTRACT_NOT_SERVED POST /api/clm/v1/fraud/score
 CONTRACT_NOT_SERVED POST /api/clm/v1/import/claim
 CONTRACT_NOT_SERVED POST /api/clm/v1/import/convert-currency
@@ -519,11 +514,8 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/suspensions
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/request-policy-move
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/split
-CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/approve
-CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/create-version
 CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/resolve
 CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/simulate
-CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/submit
 CONTRACT_NOT_SERVED POST /api/pty/v1/communication-preferences/resolve
 CONTRACT_NOT_SERVED POST /api/pty/v1/communication-preferences/set
 CONTRACT_NOT_SERVED POST /api/pty/v1/consents/record
@@ -631,12 +623,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/approve
 CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/propose
 CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/record-manual
 CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/release
-CONTRACT_NOT_SERVED POST /api/ri/v1/statements/approve
-CONTRACT_NOT_SERVED POST /api/ri/v1/statements/generate
-CONTRACT_NOT_SERVED POST /api/ri/v1/statements/issue
-CONTRACT_NOT_SERVED POST /api/ri/v1/statements/record-response
-CONTRACT_NOT_SERVED POST /api/ri/v1/statements/reissue
-CONTRACT_NOT_SERVED POST /api/ri/v1/statements/submit
 CONTRACT_NOT_SERVED POST /api/uw/v1/accumulation/check
 CONTRACT_NOT_SERVED POST /api/uw/v1/contingencies
 CONTRACT_NOT_SERVED POST /api/uw/v1/contingencies/apply-consequence

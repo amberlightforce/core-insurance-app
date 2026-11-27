@@ -122,6 +122,18 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string LossDate = "CLM-ERR-LOSS-DATE";
 
+    /// <summary>CLM-ERR-MERGE-FINANCIALS (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): clm.Claim.merge.</para>
+    /// </remarks>
+    public const string MergeFinancials = "CLM-ERR-MERGE-FINANCIALS";
+
+    /// <summary>CLM-ERR-MERGE-NOT-DUPLICATE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): clm.Claim.merge.</para>
+    /// </remarks>
+    public const string MergeNotDuplicate = "CLM-ERR-MERGE-NOT-DUPLICATE";
+
     /// <summary>CLM-ERR-MTPL-CLOCKS-REQUIRED (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 1 operation(s): clm.Exposure.create.</para>
@@ -136,7 +148,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 31 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.close, clm.Exposure.create, clm.Exposure.reopen, clm.Exposure.update, clm.Financials.get, clm.Fnol.get, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.evaluate, ….</para>
+    /// <para>Declared by 35 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.close, clm.Exposure.create, clm.Exposure.reopen, clm.Exposure.update, clm.Financials.get, clm.Fnol.get, ….</para>
     /// </remarks>
     public const string NotFound = "CLM-ERR-NOT-FOUND";
 
@@ -226,7 +238,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 12 operation(s): clm.Claim.close, clm.Claim.update, clm.Exposure.close, clm.Exposure.create, clm.Exposure.reopen, clm.Exposure.update, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.openOwnSettlement, clm.FriendlySettlement.submit, clm.Recovery.demand, clm.Recovery.recordMilestone, clm.Recovery.writeOff.</para>
+    /// <para>Declared by 15 operation(s): clm.Claim.close, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Exposure.close, clm.Exposure.create, clm.Exposure.reopen, clm.Exposure.update, clm.Fnol.saveDraft, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.openOwnSettlement, clm.FriendlySettlement.submit, ….</para>
     /// </remarks>
     public const string Stale = "CLM-ERR-STALE";
 
@@ -240,7 +252,7 @@ public static class ClaimsErrorCodes
     public const string Prefix = "CLM-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Allocation, Authority, CertRequester, CloseGuard, ContactProhibited, CoverageInQuestion, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, FsDisabled, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, MtplClocksRequired, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, RecoveryState, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Allocation, Authority, CertRequester, CloseGuard, ContactProhibited, CoverageInQuestion, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, FsDisabled, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, MergeFinancials, MergeNotDuplicate, MtplClocksRequired, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, RecoveryState, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -264,6 +276,8 @@ public static class ClaimsErrorCodes
         [ImportValidation] = 422,
         [InvoiceDuplicate] = 409,
         [LossDate] = 422,
+        [MergeFinancials] = 422,
+        [MergeNotDuplicate] = 422,
         [MtplClocksRequired] = 422,
         [NoConsent] = 422,
         [NotFound] = 404,

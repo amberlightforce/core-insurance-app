@@ -43,10 +43,16 @@ const routes: RouteObject[] = [
   // NX-UI-14c: billing operations screens (billing roles).
   {
     path: 'billing/suspense',
-    element: <RequireRole roles={billingRoles} />,
+    element: <RequireRole roles={[...billingRoles, 'Platform.Admin']} />,
     children: [
       {
         index: true,
+        lazy: async () => ({
+          Component: (await import('../billing/ops/SuspensePage')).SuspensePage,
+        }),
+      },
+      {
+        path: ':suspenseItemId',
         lazy: async () => ({
           Component: (await import('../billing/ops/SuspensePage')).SuspensePage,
         }),

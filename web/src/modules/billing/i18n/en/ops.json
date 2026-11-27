@@ -35,6 +35,85 @@
       "submit": "Allocate {total}",
       "done": "Receipt allocated",
       "failed": "The allocation failed"
+    },
+    "filter": "State",
+    "moveRoleNote": "Transferring and refunding to the sender need a billing role",
+    "states": {
+      "OPEN": "Open",
+      "REFUND_PENDING": "Refund pending",
+      "ALLOCATED": "Allocated",
+      "REFUNDED": "Refunded"
+    },
+    "closedNote": {
+      "REFUND_PENDING": "A refund to the sender is waiting for a second approver on the refunds screen.",
+      "ALLOCATED": "This receipt has been applied to invoices.",
+      "REFUNDED": "This receipt was paid back to the sender."
+    },
+    "detail": {
+      "title": "Receipt {number}",
+      "state": "State",
+      "payer": "Account and payer",
+      "recorded": "Recorded",
+      "account": "Open billing account",
+      "refund": "Open refund",
+      "notFoundTitle": "Suspense item not found",
+      "notFoundBody": "It may belong to another legal entity or no longer exist."
+    },
+    "suggest": {
+      "title": "Suggested matches",
+      "hint": "Ranks the open invoices of the account against this payment. A suggestion only; nothing is allocated.",
+      "run": "Suggest matches",
+      "failed": "Suggesting matches failed",
+      "noneTitle": "No candidate invoice",
+      "noneBody": "No open invoice looks like this payment.",
+      "rank": "{rank}. Invoice {invoice}",
+      "exact": "Exact amount, score {score}",
+      "partial": "Score {score}"
+    },
+    "transfer": {
+      "title": "Transfer to another account",
+      "hint": "Moves the unapplied cash to another active account of the same currency. The item stays open there.",
+      "target": "Target billing account ID",
+      "targetHelp": "The ID of the account that should hold the cash",
+      "comment": "Comment",
+      "invalid": "Enter a valid account ID",
+      "same": "This is the account that already holds the cash",
+      "lookupFailed": "The target account could not be loaded",
+      "accountFacts": "Target account",
+      "accountNumber": "Account number",
+      "currency": "Currency",
+      "accountStatus": "Status",
+      "status": {
+        "ACTIVE": "Active",
+        "SUSPENDED": "Suspended",
+        "CLOSING": "Closing",
+        "CLOSED": "Closed"
+      },
+      "currencyMismatch": "The target account has a different currency",
+      "notActive": "The target account is not active",
+      "submit": "Transfer…",
+      "confirmTitle": "Transfer the receipt?",
+      "confirm": "Transfer",
+      "confirmBody": "Receipt {number} moves to account {account}. This posts a ledger move.",
+      "failed": "The transfer failed",
+      "done": "Receipt transferred"
+    },
+    "refund": {
+      "title": "Refund to sender",
+      "hint": "Pays the cash back to the sender. A second approver must decide the refund on the refunds screen before it is paid.",
+      "payee": "Payee account ID",
+      "payeeHelp": "A verified REFUND payee account of the sender; capture one above or paste an existing ID",
+      "payeeRequired": "Enter the payee account ID",
+      "reason": "Reason",
+      "accountFailed": "The account of the receipt could not be loaded",
+      "submit": "Refund to sender…",
+      "confirmTitle": "Refund the receipt to the sender?",
+      "confirm": "Create refund",
+      "confirmBody": "A refund for receipt {number} is created and waits for a second approver.",
+      "failed": "The refund could not be created",
+      "done": "Refund created, waiting for approval",
+      "approvalNote": "A second approver must decide this refund on the refunds screen before the money is paid.",
+      "open": "Open the refund"
     }
   },
   "plans": {
@@ -74,8 +153,13 @@
       "status": "Status",
       "origin": "Origin"
     },
-    "status": { "ACTIVE": "Active", "CANCELLED": "Cancelled" },
-    "origin": { "MIGRATION": "Migrated" }
+    "status": {
+      "ACTIVE": "Active",
+      "CANCELLED": "Cancelled"
+    },
+    "origin": {
+      "MIGRATION": "Migrated"
+    }
   },
   "accountCurrents": {
     "title": "Account-currents",
