@@ -218,7 +218,6 @@ CONTRACT_NOT_SERVED PATCH /api/mkt/v1/config-change-requests/{}
 CONTRACT_NOT_SERVED PATCH /api/pfc/v1/pogs/{}
 CONTRACT_NOT_SERVED PATCH /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED PATCH /api/pty/v1/locations/{}
-CONTRACT_NOT_SERVED PATCH /api/pty/v1/parties/{}
 CONTRACT_NOT_SERVED PATCH /api/ri/v1/programmes/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/contingencies/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
@@ -664,7 +663,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/evaluate-erasure
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/lift-restriction
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/restrict
-CONTRACT_NOT_SERVED POST /api/pty/v1/identifiers/verify
 CONTRACT_NOT_SERVED POST /api/pty/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/intermediaries/import-register
 CONTRACT_NOT_SERVED POST /api/pty/v1/intermediaries/suspend
@@ -676,7 +674,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/locations/add
 CONTRACT_NOT_SERVED POST /api/pty/v1/locations/remove
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/unmerge
-CONTRACT_NOT_SERVED POST /api/pty/v1/parties/validate
 CONTRACT_NOT_SERVED POST /api/pty/v1/party-roles/assign
 CONTRACT_NOT_SERVED POST /api/pty/v1/party-roles/end
 CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/bulk-transfer
