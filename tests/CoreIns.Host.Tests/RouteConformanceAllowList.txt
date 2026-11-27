@@ -78,8 +78,6 @@ CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17-groups/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17/movements
 CONTRACT_NOT_SERVED GET /api/fin/v1/levy-returns
 CONTRACT_NOT_SERVED GET /api/fin/v1/levy-returns/{}
-CONTRACT_NOT_SERVED GET /api/fin/v1/manual-journals
-CONTRACT_NOT_SERVED GET /api/fin/v1/manual-journals/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/periods/status
 CONTRACT_NOT_SERVED GET /api/fin/v1/reconciliation/breaks
 CONTRACT_NOT_SERVED GET /api/fin/v1/reconciliation/detail
@@ -467,10 +465,8 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/recalculate
 CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/record-filing
 CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/request-payment
 CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/transition
-CONTRACT_NOT_SERVED POST /api/fin/v1/manual-journals
 CONTRACT_NOT_SERVED POST /api/fin/v1/manual-journals/decide
 CONTRACT_NOT_SERVED POST /api/fin/v1/manual-journals/submit
-CONTRACT_NOT_SERVED POST /api/fin/v1/manual-journals/withdraw
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/compile
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/decide
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/draft
