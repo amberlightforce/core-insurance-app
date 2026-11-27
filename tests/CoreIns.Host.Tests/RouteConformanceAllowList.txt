@@ -141,7 +141,6 @@ CONTRACT_NOT_SERVED GET /api/ri/v1/data-products/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/ifrs17-links/query
-CONTRACT_NOT_SERVED GET /api/ri/v1/items
 CONTRACT_NOT_SERVED GET /api/ri/v1/line-tables/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/security-rules/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/approval/history
@@ -598,7 +597,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/estimate
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/export-oed
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/import-model-results
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/set-capacity
-CONTRACT_NOT_SERVED POST /api/ri/v1/balances/report
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/approve
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/generate
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/issue

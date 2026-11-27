@@ -46,7 +46,7 @@ public static class ReinsuranceErrorCodes
 
     /// <summary>RI-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 83 operation(s): ri.Accumulation.exportOed, ri.Accumulation.importModelResults, ri.Accumulation.setCapacity, ri.Adjustment.approve, ri.Adjustment.calculate, ri.Bordereau.approve, ri.Bordereau.generate, ri.Bordereau.issue, ri.Bordereau.submit, ri.CashCall.cancel, ri.CashCall.issue, ri.CashCall.raise, ….</para>
+    /// <para>Declared by 85 operation(s): ri.Accumulation.exportOed, ri.Accumulation.importModelResults, ri.Accumulation.setCapacity, ri.Adjustment.approve, ri.Adjustment.calculate, ri.Bordereau.approve, ri.Bordereau.generate, ri.Bordereau.issue, ri.Bordereau.submit, ri.CashCall.cancel, ri.CashCall.issue, ri.CashCall.raise, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "RI-ERR-IDEMPOTENCY-MISMATCH";
 

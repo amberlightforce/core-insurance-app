@@ -27,6 +27,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chn/v1/portal-identities/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Portal identity link
+         * @description Links a customer sign-in identity (external subject) to exactly one party after verification (BO-CHN-01). Staff only; a customer cannot link themselves. A subject linked to another party is refused (CHN-ERR-IDENTITY-LINKED); relink needs an explicit unlink first.
+         */
+        post: operations["chn.PortalIdentity.link"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal-identities/unlink": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Portal identity link
+         * @description Unlinks a customer sign-in identity from its party (audited).
+         */
+        post: operations["chn.PortalIdentity.unlink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal-identities/{subject}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Portal identity link
+         * @description The link of a customer sign-in identity, or 404.
+         */
+        get: operations["chn.PortalIdentity.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chn/v1/permission-matrices/create-draft": {
         parameters: {
             query?: never;
@@ -2067,6 +2127,34 @@ export interface components {
             /** @description PRD: "diff" */
             diff?: components["schemas"]["Unspecified"];
         };
+        /** @description chn.PortalIdentity.link request (BO-CHN-01). */
+        PortalIdentityLinkRequest: {
+            /** @description The external subject of the sign-in identity (token sub / dev user id) */
+            subject: string;
+            partyId: components["schemas"]["Uuid"];
+            /** @description How the person was verified (recorded in the audit) */
+            verification: string;
+        };
+        /** @description chn.PortalIdentity.unlink request (BO-CHN-01). */
+        PortalIdentityUnlinkRequest: {
+            subject: string;
+            reason: string;
+        };
+        /** @description A customer sign-in identity and the one party it is linked to. */
+        PortalIdentityView: {
+            subject: string;
+            partyId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "LINKED" | "UNLINKED";
+            linkedAt: components["schemas"]["Instant"];
+            linkedBy: string;
+            unlinkedAt?: components["schemas"]["Instant"];
+            unlinkedBy?: string;
+        };
+        /** @description chn.PortalIdentity.link/unlink/get result */
+        PortalIdentityLinkResponse: {
+            identity: components["schemas"]["PortalIdentityView"];
+        };
         /** @description chn.Journey.start request. PRD inputs: "journey type, context" */
         JourneyStartRequest: {
             /** @description PRD: "journey type" */
@@ -2954,6 +3042,11 @@ export interface components {
         };
         /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
         Uuid: string;
+        /**
+         * Format: date-time
+         * @description RFC 3339 timestamp in UTC (suffix Z).
+         */
+        Instant: string;
         /** Format: date */
         LocalDate: string;
         /** @description Decimal number as a string (no binary floating point for money or rates). */
@@ -2967,11 +3060,6 @@ export interface components {
         };
         /** @description Business number issued through PLT numbering (NumberingScheme); format is configuration. */
         BusinessNumber: string;
-        /**
-         * Format: date-time
-         * @description RFC 3339 timestamp in UTC (suffix Z).
-         */
-        Instant: string;
         /** @description Code value from a configured code list. Values are owned by configuration, not by this schema. */
         Code: string;
         /** @description Cursor page (contract §3.5.5). Lists are filtered by the caller's legal entity and ABAC scope. */
@@ -3030,8 +3118,8 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
-        /** @description Idempotency mismatch (`<MOD>-ERR-IDEMPOTENCY-MISMATCH`), stale version, lock or state conflict. */
-        Conflict: {
+        /** @description Object not found in the caller's scope. */
+        NotFound: {
             headers: {
                 [name: string]: unknown;
             };
@@ -3039,8 +3127,8 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
-        /** @description Object not found in the caller's scope. */
-        NotFound: {
+        /** @description Idempotency mismatch (`<MOD>-ERR-IDEMPOTENCY-MISMATCH`), stale version, lock or state conflict. */
+        Conflict: {
             headers: {
                 [name: string]: unknown;
             };
@@ -3138,6 +3226,133 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalIdentity.link": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortalIdentityLinkRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalIdentityLinkResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalIdentity.unlink": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PortalIdentityUnlinkRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalIdentityLinkResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.PortalIdentity.get": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description The external subject of the sign-in identity */
+                subject: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalIdentityLinkResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };

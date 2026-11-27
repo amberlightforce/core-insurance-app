@@ -19,6 +19,8 @@ internal sealed class ChannelsDbContext(DbContextOptions<ChannelsDbContext> opti
 
     public DbSet<PermissionMatrixEntryRow> PermissionMatrixEntries => Set<PermissionMatrixEntryRow>();
 
+    public DbSet<PortalIdentityRow> PortalIdentities => Set<PortalIdentityRow>();
+
     protected override string Schema => ChannelsModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -87,6 +89,32 @@ internal sealed class ChannelsDbContext(DbContextOptions<ChannelsDbContext> opti
             entity.Property(e => e.DecidedBy).HasColumnName("decided_by");
             entity.Property(e => e.ExecutedCommandRef).HasColumnName("executed_command_ref");
             entity.HasIndex(e => new { e.LegalEntityId, e.Status }).HasDatabaseName("ix_ticket_status");
+        });
+
+        modelBuilder.Entity<PortalIdentityRow>(entity =>
+        {
+            entity.ToTable("portal_identity", table =>
+            {
+                var states = string.Join(", ", PortalIdentityStatuses.All.Select(s => $"'{s}'"));
+                table.HasCheckConstraint("ck_portal_identity_status", $"status IN ({states})");
+                table.HasCheckConstraint("ck_portal_identity_unlinked", "status = 'LINKED' OR (unlinked_at IS NOT NULL AND unlinked_by IS NOT NULL)");
+            });
+            entity.HasKey(e => e.PortalIdentityId).HasName("pk_portal_identity");
+            entity.Property(e => e.PortalIdentityId).HasColumnName("portal_identity_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Subject).HasColumnName("subject");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.Verification).HasColumnName("verification");
+            entity.Property(e => e.LinkedAt).HasColumnName("linked_at").HasColumnType("timestamptz");
+            entity.Property(e => e.LinkedBy).HasColumnName("linked_by");
+            entity.Property(e => e.UnlinkedAt).HasColumnName("unlinked_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UnlinkedBy).HasColumnName("unlinked_by");
+            entity.Property(e => e.UnlinkReason).HasColumnName("unlink_reason");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            // One live link per sign-in identity and per party: fails closed when two staff link at once.
+            entity.HasIndex(e => new { e.LegalEntityId, e.Subject }).IsUnique().HasFilter("status = 'LINKED'").HasDatabaseName("ux_portal_identity_subject");
+            entity.HasIndex(e => new { e.LegalEntityId, e.PartyId }).IsUnique().HasFilter("status = 'LINKED'").HasDatabaseName("ux_portal_identity_party");
         });
 
         modelBuilder.Entity<PermissionMatrixRow>(entity =>
