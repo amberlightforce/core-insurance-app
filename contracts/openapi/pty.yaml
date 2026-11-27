@@ -6377,6 +6377,18 @@ components:
         recordVersion:
           type: integer
           minimum: 1
+        parentIntermediaryId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: Hierarchy parent (REQ-PTY-193)
+        cpdStatus:
+          type: string
+          enum:
+          - COMPLIANT
+          - AT_RISK
+          - NON_COMPLIANT
+          description: Computed from the CPD hours table (REQ-PTY-191)
       required:
       - intermediaryId
       - partyId
@@ -6426,28 +6438,103 @@ components:
       - intermediary
     IntermediarySuspendRequest:
       type: object
-      description: 'pty.Intermediary.suspend request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Intermediary.suspend request (REQ-PTY-198, REQ-PTY-190): Active to Suspended; validate then refuses the producer codes.'
+      properties:
+        intermediaryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - intermediaryId
+      - expectedRecordVersion
+      - reason
     IntermediarySuspendResponse:
       type: object
-      description: 'pty.Intermediary.suspend result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Intermediary.suspend result.'
+      properties:
+        intermediary:
+          $ref: '#/components/schemas/IntermediaryView'
+      required:
+      - intermediary
     IntermediaryTerminateRequest:
       type: object
-      description: 'pty.Intermediary.terminate request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Intermediary.terminate request (REQ-PTY-198, REQ-PTY-202): ends every producer code of the intermediary on the effective date.'
+      properties:
+        intermediaryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+        effectiveDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Last-day boundary of the producer codes (defaults to today)
+      required:
+      - intermediaryId
+      - expectedRecordVersion
+      - reason
     IntermediaryTerminateResponse:
       type: object
-      description: 'pty.Intermediary.terminate result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Intermediary.terminate result.'
+      properties:
+        intermediary:
+          $ref: '#/components/schemas/IntermediaryView'
+        terminatedProducerCodes:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - intermediary
+      - terminatedProducerCodes
     IntermediaryImportRegisterRequest:
       type: object
-      description: 'pty.Intermediary.importRegister request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.Intermediary.importRegister request. A register extract (CSV with header, or JSON array) matched to intermediaries by register number; re-importing the same file changes nothing.'
+      properties:
+        format:
+          type: string
+          enum:
+          - CSV
+          - JSON
+        content:
+          type: string
+          maxLength: 5000000
+          description: 'Rows with registerNumber, registerStatus (ACTIVE, SUSPENDED, DELETED), optional registerName, chamber, registrationCategory, cpdYear, cpdHours, parentRegisterNumber'
+      required:
+      - format
+      - content
     IntermediaryImportRegisterResponse:
       type: object
-      description: 'pty.Intermediary.importRegister result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.Intermediary.importRegister result.'
+      properties:
+        processed:
+          type: integer
+        updated:
+          type: integer
+        unchanged:
+          type: integer
+        unmatchedRegisterNumbers:
+          type: array
+          items:
+            type: string
+        rejectedRows:
+          type: array
+          items:
+            type: string
+          description: 'Row number and reason of each invalid row'
+      required:
+      - processed
+      - updated
+      - unchanged
+      - unmatchedRegisterNumbers
+      - rejectedRows
     ProducerOfRecordGetResponse:
       type: object
       description: 'pty.ProducerOfRecord.get result. PRD outputs: "PoR"'

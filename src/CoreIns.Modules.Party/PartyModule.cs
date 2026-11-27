@@ -70,6 +70,15 @@ public static class PartyModule
         services.AddCommandAuditor<CreateIntermediary, IntermediaryCreateResponse, IntermediaryAuditor>();
         services.AddCommand<CreateIntermediary, IntermediaryCreateResponse, CreateIntermediaryHandler>(CommandDescriptor.For("pty.Intermediary.create"));
 
+        services.AddScoped<IValidator<SuspendIntermediary>, SuspendIntermediaryValidator>();
+        services.AddScoped<IValidator<TerminateIntermediary>, TerminateIntermediaryValidator>();
+        services.AddScoped<IValidator<ImportIntermediaryRegister>, ImportIntermediaryRegisterValidator>();
+        services.AddCommandAuditor<SuspendIntermediary, IntermediarySuspendResponse, IntermediaryLifecycleAuditor>();
+        services.AddCommandAuditor<TerminateIntermediary, IntermediaryTerminateResponse, IntermediaryLifecycleAuditor>();
+        services.AddCommandAuditor<ImportIntermediaryRegister, IntermediaryImportRegisterResponse, IntermediaryLifecycleAuditor>();
+        services.AddCommand<SuspendIntermediary, IntermediarySuspendResponse, SuspendIntermediaryHandler>(CommandDescriptor.For("pty.Intermediary.suspend"));
+        services.AddCommand<TerminateIntermediary, IntermediaryTerminateResponse, TerminateIntermediaryHandler>(CommandDescriptor.For("pty.Intermediary.terminate"));
+        services.AddCommand<ImportIntermediaryRegister, IntermediaryImportRegisterResponse, ImportIntermediaryRegisterHandler>(CommandDescriptor.For("pty.Intermediary.importRegister"));
         services.AddScoped<IValidator<UpdateIntermediary>, UpdateIntermediaryValidator>();
         services.AddCommandAuditor<UpdateIntermediary, IntermediaryUpdateResponse, IntermediaryAuditor>();
         services.AddCommand<UpdateIntermediary, IntermediaryUpdateResponse, UpdateIntermediaryHandler>(CommandDescriptor.For("pty.Intermediary.update"));

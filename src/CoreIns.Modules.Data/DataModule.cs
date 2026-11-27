@@ -7,6 +7,7 @@ using CoreIns.Modules.Data.Services;
 using CoreIns.Platform;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Errors;
+using CoreIns.Platform.Events;
 using CoreIns.Platform.Persistence;
 using CoreIns.SharedKernel.Identifiers;
 using FluentValidation;
@@ -65,6 +66,19 @@ public static class DataModule
         services.AddCommand<RegisterModel, ModelRegisterResponse, RegisterModelHandler>(CommandDescriptor.For("dat.Model.register") with { SupportsDryRun = true });
         services.AddCommand<RunBiasTest, BiasTestRunResponse, RunBiasTestHandler>(CommandDescriptor.For("dat.BiasTest.run") with { SupportsDryRun = true });
 
+        // BO-DAT-01: data-contract registry and raw-layer ingestion (rpt_raw.event_ledger / quarantine).
+        services.AddScoped<EventIngestion>();
+        services.AddScoped<DataContractReader>();
+        services.AddCommand<RegisterDataContract, DataContractRegisterResponse, RegisterDataContractHandler>(CommandDescriptor.For("dat.DataContract.register") with { SupportsDryRun = true });
+        services.AddCommand<ReplayIngestion, IngestionReplayResponse, ReplayIngestionHandler>(CommandDescriptor.For("dat.Ingestion.replay") with { SupportsDryRun = true });
+        services.AddCommand<ReleaseQuarantine, QuarantineReleaseResponse, ReleaseQuarantineHandler>(CommandDescriptor.For("dat.Quarantine.release") with { SupportsDryRun = true });
+        foreach (var (producer, eventType) in EventIngestion.ReportRelevant)
+        {
+            services.AddEventHandler<System.Text.Json.Nodes.JsonObject, IngestEventsHandler>(
+                new EventDescriptor(producer, EventTypeName.Parse(eventType), "1.0", [], DataClassification.P0),
+                $"DAT.Ingest.{producer}.{eventType}", ModuleCode.DAT);
+        }
+
         services.AddScoped<DataInProcessServices>();
         services.AddScoped<IDataSubjectService>(sp => sp.GetRequiredService<DataInProcessServices>());
         services.AddScoped<IDataErasureService>(sp => sp.GetRequiredService<DataInProcessServices>());
@@ -83,6 +97,10 @@ public static class DataModule
             .Describe("Η εγγραφή δεν υπάρχει.", "The record does not exist."),
         ErrorDefinition.For(ModuleCode.DAT, "060", 422, "Το υποκείμενο βρίσκεται υπό περιορισμό", "The subject is under restriction")
             .Describe("Η διαγραφή απορρίπτεται όσο ισχύει ο περιορισμός.", "Erasure is refused while the restriction stands."),
+        ErrorDefinition.For(ModuleCode.DAT, "001", 422, "Αλλαγή που σπάει το συμβόλαιο δεδομένων", "Breaking data-contract change")
+            .Describe("Η αλλαγή αφαιρεί ή αλλάζει πεδίο ή το καθιστά υποχρεωτικό χωρίς νέα κύρια έκδοση.", "The change removes or retypes a field, or makes one required, without a new major version."),
+        ErrorDefinition.For(ModuleCode.DAT, "002", 422, "Η εμβέλεια επανάληψης είναι πολύ μεγάλη", "The replay scope is too broad")
+            .Describe("Περιορίστε το χρονικό διάστημα.", "Narrow the time window."),
         ErrorDefinition.For(ModuleCode.DAT, "IDEMPOTENCY-MISMATCH", 409, "Το αναγνωριστικό αιτήματος χρησιμοποιήθηκε ήδη", "The request id was already used")
             .Describe("Το αναγνωριστικό αιτήματος αφορά άλλο υποκείμενο.", "The request id belongs to another subject."),
     ];
