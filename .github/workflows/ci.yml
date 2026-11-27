@@ -110,7 +110,7 @@ jobs:
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm test
+      - run: npm test -- --coverage
       - run: npm run build
 
       - name: Typecheck end-to-end tests
