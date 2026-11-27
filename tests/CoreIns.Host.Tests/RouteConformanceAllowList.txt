@@ -53,9 +53,6 @@ CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/trend
 CONTRACT_NOT_SERVED GET /api/dat/v1/coverage/status
 CONTRACT_NOT_SERVED GET /api/dat/v1/feature-store/get-online
 CONTRACT_NOT_SERVED GET /api/dat/v1/lineage/trace
-CONTRACT_NOT_SERVED GET /api/dat/v1/marts/compare
-CONTRACT_NOT_SERVED GET /api/dat/v1/marts/figure
-CONTRACT_NOT_SERVED GET /api/dat/v1/marts/{}
 CONTRACT_NOT_SERVED GET /api/dat/v1/scr-results/{}
 CONTRACT_NOT_SERVED GET /api/doc/v1/archives/list-for-object
 CONTRACT_NOT_SERVED GET /api/doc/v1/forms/{}
@@ -378,7 +375,6 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/analytics/ask
 CONTRACT_NOT_SERVED POST /api/dat/v1/feature-store/build-training-set
 CONTRACT_NOT_SERVED POST /api/dat/v1/marts/adjust
 CONTRACT_NOT_SERVED POST /api/dat/v1/marts/export
-CONTRACT_NOT_SERVED POST /api/dat/v1/marts/run
 CONTRACT_NOT_SERVED POST /api/dat/v1/marts/sign-off
 CONTRACT_NOT_SERVED POST /api/dat/v1/models/approve
 CONTRACT_NOT_SERVED POST /api/dat/v1/models/record-validation

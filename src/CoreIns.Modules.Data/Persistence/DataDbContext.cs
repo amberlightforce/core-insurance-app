@@ -35,6 +35,10 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
 
     public DbSet<FactClaimMovementRow> FactClaimMovements => Set<FactClaimMovementRow>();
 
+    public DbSet<MartRunRow> MartRuns => Set<MartRunRow>();
+
+    public DbSet<MartFigureRow> MartFigures => Set<MartFigureRow>();
+
     protected override string Schema => DataModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -195,6 +199,8 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
             e.HasIndex(x => new { x.LegalEntity, x.InvoiceId, x.Category }).HasDatabaseName("ix_fact_premium_key");
         });
 
+        MapMarts(modelBuilder);
+
         modelBuilder.Entity<FactClaimMovementRow>(e =>
         {
             e.ToTable("fact_claim_movement", DataModule.ReportingConformedSchema);
@@ -207,6 +213,50 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
             e.Property(x => x.Currency).HasColumnName("currency");
             e.Property(x => x.PolicyTermId).HasColumnName("policy_term_id");
             e.HasIndex(x => new { x.LegalEntity, x.MovementKey }).HasDatabaseName("ix_fact_claim_movement_key");
+        });
+    }
+
+    private static void MapMarts(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<MartRunRow>(e =>
+        {
+            e.ToTable("mart_run", DataModule.ReportingMartSchema);
+            e.HasKey(x => x.RunId).HasName("pk_mart_run");
+            e.Property(x => x.RunId).HasColumnName("run_id");
+            e.Property(x => x.LegalEntity).HasColumnName("legal_entity");
+            e.Property(x => x.MartCode).HasColumnName("mart_code");
+            e.Property(x => x.Period).HasColumnName("period");
+            e.Property(x => x.ProductCode).HasColumnName("product_code");
+            e.Property(x => x.ValidAt).HasColumnName("valid_at").HasColumnType("timestamptz");
+            e.Property(x => x.KnownAt).HasColumnName("known_at").HasColumnType("timestamptz");
+            e.Property(x => x.Status).HasColumnName("status");
+            e.Property(x => x.DefinitionVersion).HasColumnName("definition_version");
+            e.Property(x => x.LegalStatus).HasColumnName("legal_status");
+            e.Property(x => x.SnapshotHash).HasColumnName("snapshot_hash");
+            e.Property(x => x.SnapshotKey).HasColumnName("snapshot_key");
+            e.Property(x => x.FigureCount).HasColumnName("figure_count");
+            e.Property(x => x.SourceRowCount).HasColumnName("source_row_count");
+            e.Property(x => x.CreatedBy).HasColumnName("created_by");
+            e.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            e.HasIndex(x => new { x.LegalEntity, x.MartCode, x.CreatedAt }).HasDatabaseName("ix_mart_run_entity_mart");
+        });
+
+        modelBuilder.Entity<MartFigureRow>(e =>
+        {
+            e.ToTable("mart_figure", DataModule.ReportingMartSchema);
+            e.HasKey(x => x.FigureId).HasName("pk_mart_figure");
+            e.Property(x => x.FigureId).HasColumnName("figure_id");
+            e.Property(x => x.RunId).HasColumnName("run_id");
+            e.Property(x => x.FigureKey).HasColumnName("figure_key");
+            e.Property(x => x.ProductCode).HasColumnName("product_code");
+            e.Property(x => x.PeriodMonth).HasColumnName("period_month");
+            e.Property(x => x.Dimension).HasColumnName("dimension");
+            e.Property(x => x.Metric).HasColumnName("metric");
+            e.Property(x => x.Value).HasColumnName("value").HasColumnType("numeric(20,4)");
+            e.Property(x => x.Unit).HasColumnName("unit");
+            e.Property(x => x.SourceCount).HasColumnName("source_count");
+            e.HasIndex(x => new { x.RunId, x.FigureKey }).IsUnique().HasDatabaseName("ux_mart_figure_run_key");
+            e.HasOne<MartRunRow>().WithMany().HasForeignKey(x => x.RunId).HasConstraintName("fk_mart_figure_run");
         });
     }
 
@@ -460,4 +510,64 @@ internal sealed class FactClaimMovementRow : ConformedFactRow
     public string Currency { get; set; } = string.Empty;
 
     public Guid? PolicyTermId { get; set; }
+}
+
+/// <summary>One mart run: the scope (entity, mart, period, as-of instants), the snapshot hash and the figure count (BO-DAT-03). Append-only.</summary>
+internal sealed class MartRunRow
+{
+    public Guid RunId { get; set; }
+
+    public string LegalEntity { get; set; } = string.Empty;
+
+    public string MartCode { get; set; } = string.Empty;
+
+    public string Period { get; set; } = string.Empty;
+
+    public string ProductCode { get; set; } = string.Empty;
+
+    public Instant ValidAt { get; set; }
+
+    public Instant KnownAt { get; set; }
+
+    public string Status { get; set; } = string.Empty;
+
+    public string DefinitionVersion { get; set; } = string.Empty;
+
+    public string LegalStatus { get; set; } = string.Empty;
+
+    public string SnapshotHash { get; set; } = string.Empty;
+
+    public string SnapshotKey { get; set; } = string.Empty;
+
+    public int FigureCount { get; set; }
+
+    public long SourceRowCount { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public Instant CreatedAt { get; set; }
+}
+
+/// <summary>One figure of a mart run; the key is mart-defined and unique within the run.</summary>
+internal sealed class MartFigureRow
+{
+    public Guid FigureId { get; set; }
+
+    public Guid RunId { get; set; }
+
+    public string FigureKey { get; set; } = string.Empty;
+
+    public string ProductCode { get; set; } = string.Empty;
+
+    public string PeriodMonth { get; set; } = string.Empty;
+
+    public string Dimension { get; set; } = string.Empty;
+
+    public string Metric { get; set; } = string.Empty;
+
+    public decimal Value { get; set; }
+
+    public string Unit { get; set; } = string.Empty;
+
+    public long SourceCount { get; set; }
 }
