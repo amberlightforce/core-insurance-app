@@ -1631,10 +1631,10 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
-        /** @description Contract addition (BO-RAT-04): lifecycle status derived from the activation rows. DRAFT = no activation yet (hidden from roles that may only see released artefacts). */
+        /** @description Contract addition (BO-RAT-04): lifecycle status derived from the activation rows. DRAFT, SUBMITTED and APPROVED = no activation yet (hidden from roles that may only see released artefacts). */
         RatingArtifactStatus: {
             /** @enum {string} */
-            lifecycle: "DRAFT" | "SCHEDULED" | "ACTIVE" | "SUPERSEDED" | "WITHDRAWN";
+            lifecycle: "DRAFT" | "SUBMITTED" | "APPROVED" | "SCHEDULED" | "ACTIVE" | "SUPERSEDED" | "WITHDRAWN";
             /** Format: date */
             effectiveFrom: string | null;
             /** Format: date */
@@ -1680,25 +1680,30 @@ export interface components {
             /** @description PRD: "compatibility records" */
             compatibilityRecords?: components["schemas"]["RatingArtifactCompatibilityRecord"][];
         };
-        /** @description rat.RatingChangeSet.create request. PRD inputs: "file or rows, mapping, change set" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingChangeSet.create request: a draft change set for one product version. The tables it points at are imported through rat.RateTable.import (or named here by hash). */
         RatingChangeSetCreateRequest: {
-            /** @description PRD: "file or rows" (optional) */
-            file?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file or rows" (optional) */
-            rows?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "mapping" */
-            mapping?: components["schemas"]["Unspecified"];
-            /** @description PRD: "change set" */
-            changeSet?: components["schemas"]["Unspecified"];
-        } & (unknown | unknown);
-        /** @description rat.RatingChangeSet.create result. PRD outputs: "table version, validation report, diff" */
+            productCode: string;
+            productVersion: string;
+            /** @description The artefact whose steps and tax plan are reused (default the one active for the product version). */
+            baseArtefactHash?: string | null;
+            /** @description Table slot to rate-table hash, overriding the base artefact's pins. */
+            tableHashes?: {
+                [key: string]: string;
+            } | null;
+            reason?: string;
+        };
+        /** @description Contract addition (BO-RAT-06): rat.RatingChangeSet.create result. */
         RatingChangeSetCreateResponse: {
-            /** @description PRD: "table version" */
-            tableVersion?: components["schemas"]["Unspecified"];
-            /** @description PRD: "validation report" */
-            validationReport?: components["schemas"]["Unspecified"];
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
+            changeSetId: components["schemas"]["Uuid"];
+            productCode: string;
+            productVersion: string;
+            baseArtefactHash: string | null;
+            /** @enum {string} */
+            status: "OPEN" | "BUILT";
+            tables: {
+                slot: string;
+                hash: string;
+            }[];
         };
         /** @description rat.RateTable.import request. PRD inputs: "file or rows, mapping, change set" */
         RateTableImportRequest: {
@@ -1749,113 +1754,101 @@ export interface components {
             /** @description PRD: "diff" */
             diff?: components["schemas"]["Unspecified"];
         };
-        /** @description rat.RatingArtifact.build request. PRD inputs: "change set; artefact; slot dates; reason" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingArtifact.build request: compile and pin the change set. dataStatus APPROVED re-stamps the pinned tables as approved data (still needs the checker approval of submit/schedule). */
         RatingArtifactBuildRequest: {
-            /** @description PRD: "change set" */
-            changeSet?: components["schemas"]["Unspecified"];
-            /** @description PRD: "artefact" */
-            artefact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "slot dates" */
-            slotDates?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            changeSetId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            dataStatus?: "ILLUSTRATIVE_TEST_DATA" | "APPROVED";
+            reason?: string;
         };
-        /** @description rat.RatingArtifact.build result. PRD outputs: "artefact status, governance bundle id" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingArtifact.build result. */
         RatingArtifactBuildResponse: {
-            /** @description PRD: "artefact status" */
-            artefactStatus?: components["schemas"]["Unspecified"];
-            /** @description PRD: "governance bundle id" */
-            governanceBundleId?: components["schemas"]["Uuid"];
+            artefactHash: components["schemas"]["Sha256"];
+            /** @enum {string} */
+            artefactStatus: "DRAFT" | "SUBMITTED" | "APPROVED" | "SCHEDULED" | "ACTIVE" | "SUPERSEDED" | "WITHDRAWN";
+            /** @description The release record (maker-checker bundle) of the artefact. */
+            governanceBundleId: components["schemas"]["Uuid"];
+            dataStatus?: string;
+            /** @description False when an identical artefact already existed (same inputs, same hash). */
+            created?: boolean;
         };
-        /** @description rat.RatingArtifact.submit request. PRD inputs: "change set; artefact; slot dates; reason" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingArtifact.submit request. */
         RatingArtifactSubmitRequest: {
-            /** @description PRD: "change set" */
-            changeSet?: components["schemas"]["Unspecified"];
-            /** @description PRD: "artefact" */
-            artefact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "slot dates" */
-            slotDates?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            artefactHash: components["schemas"]["Sha256"];
+            reason?: string;
         };
-        /** @description rat.RatingArtifact.submit result. PRD outputs: "artefact status, governance bundle id" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingArtifact.submit result. */
         RatingArtifactSubmitResponse: {
-            /** @description PRD: "artefact status" */
-            artefactStatus?: components["schemas"]["Unspecified"];
-            /** @description PRD: "governance bundle id" */
-            governanceBundleId?: components["schemas"]["Uuid"];
+            artefactHash: components["schemas"]["Sha256"];
+            /** @enum {string} */
+            artefactStatus: "DRAFT" | "SUBMITTED" | "APPROVED" | "SCHEDULED" | "ACTIVE" | "SUPERSEDED" | "WITHDRAWN";
+            /** @description The release record (maker-checker bundle) of the artefact. */
+            governanceBundleId: components["schemas"]["Uuid"];
+            approvalRequestId?: string | null;
         };
-        /** @description rat.RatingArtifact.return request. PRD inputs: "change set; artefact; slot dates; reason" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingArtifact.return request. */
         RatingArtifactReturnRequest: {
-            /** @description PRD: "change set" */
-            changeSet?: components["schemas"]["Unspecified"];
-            /** @description PRD: "artefact" */
-            artefact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "slot dates" */
-            slotDates?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            artefactHash: components["schemas"]["Sha256"];
+            reason: string;
         };
-        /** @description rat.RatingArtifact.return result. PRD outputs: "artefact status, governance bundle id" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingArtifact.return result. */
         RatingArtifactReturnResponse: {
-            /** @description PRD: "artefact status" */
-            artefactStatus?: components["schemas"]["Unspecified"];
-            /** @description PRD: "governance bundle id" */
-            governanceBundleId?: components["schemas"]["Uuid"];
+            artefactHash: components["schemas"]["Sha256"];
+            /** @enum {string} */
+            artefactStatus: "DRAFT" | "SUBMITTED" | "APPROVED" | "SCHEDULED" | "ACTIVE" | "SUPERSEDED" | "WITHDRAWN";
+            /** @description The release record (maker-checker bundle) of the artefact. */
+            governanceBundleId: components["schemas"]["Uuid"];
         };
-        /** @description rat.RatingArtifact.schedule request. PRD inputs: "change set; artefact; slot dates; reason" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingArtifact.schedule request. */
         RatingArtifactScheduleRequest: {
-            /** @description PRD: "change set" */
-            changeSet?: components["schemas"]["Unspecified"];
-            /** @description PRD: "artefact" */
-            artefact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "slot dates" */
-            slotDates?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            artefactHash: components["schemas"]["Sha256"];
+            reason?: string;
+            /**
+             * Format: date
+             * @description First day the artefact rates new business and renewals (not in the past; default today).
+             */
+            effectiveFrom?: string;
         };
-        /** @description rat.RatingArtifact.schedule result. PRD outputs: "artefact status, governance bundle id" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingArtifact.schedule result. */
         RatingArtifactScheduleResponse: {
-            /** @description PRD: "artefact status" */
-            artefactStatus?: components["schemas"]["Unspecified"];
-            /** @description PRD: "governance bundle id" */
-            governanceBundleId?: components["schemas"]["Uuid"];
+            artefactHash: components["schemas"]["Sha256"];
+            /** @enum {string} */
+            artefactStatus: "DRAFT" | "SUBMITTED" | "APPROVED" | "SCHEDULED" | "ACTIVE" | "SUPERSEDED" | "WITHDRAWN";
+            /** @description The release record (maker-checker bundle) of the artefact. */
+            governanceBundleId: components["schemas"]["Uuid"];
+            activationId?: string | null;
+            /** Format: date */
+            effectiveFrom?: string;
         };
-        /** @description rat.RatingArtifact.cancelSchedule request. PRD inputs: "change set; artefact; slot dates; reason" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingArtifact.cancelSchedule request. */
         RatingArtifactCancelScheduleRequest: {
-            /** @description PRD: "change set" */
-            changeSet?: components["schemas"]["Unspecified"];
-            /** @description PRD: "artefact" */
-            artefact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "slot dates" */
-            slotDates?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            artefactHash: components["schemas"]["Sha256"];
+            reason?: string;
         };
-        /** @description rat.RatingArtifact.cancelSchedule result. PRD outputs: "artefact status, governance bundle id" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingArtifact.cancelSchedule result. */
         RatingArtifactCancelScheduleResponse: {
-            /** @description PRD: "artefact status" */
-            artefactStatus?: components["schemas"]["Unspecified"];
-            /** @description PRD: "governance bundle id" */
-            governanceBundleId?: components["schemas"]["Uuid"];
+            artefactHash: components["schemas"]["Sha256"];
+            /** @enum {string} */
+            artefactStatus: "DRAFT" | "SUBMITTED" | "APPROVED" | "SCHEDULED" | "ACTIVE" | "SUPERSEDED" | "WITHDRAWN";
+            /** @description The release record (maker-checker bundle) of the artefact. */
+            governanceBundleId: components["schemas"]["Uuid"];
         };
-        /** @description rat.RatingArtifact.rollback request. PRD inputs: "change set; artefact; slot dates; reason" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingArtifact.rollback request: withdraw the artefact active for the product version and re-activate the one before it. History is kept; pinned worksheets are unaffected. */
         RatingArtifactRollbackRequest: {
-            /** @description PRD: "change set" */
-            changeSet?: components["schemas"]["Unspecified"];
-            /** @description PRD: "artefact" */
-            artefact?: components["schemas"]["Unspecified"];
-            /** @description PRD: "slot dates" */
-            slotDates?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            productCode: string;
+            productVersion: string;
+            reason: string;
         };
-        /** @description rat.RatingArtifact.rollback result. PRD outputs: "artefact status, governance bundle id" */
+        /** @description Contract addition (BO-RAT-06): rat.RatingArtifact.rollback result. */
         RatingArtifactRollbackResponse: {
-            /** @description PRD: "artefact status" */
-            artefactStatus?: components["schemas"]["Unspecified"];
-            /** @description PRD: "governance bundle id" */
-            governanceBundleId?: components["schemas"]["Uuid"];
+            withdrawnHash: components["schemas"]["Sha256"];
+            reactivatedHash: components["schemas"]["Sha256"];
+            /**
+             * @description Lifecycle of the reactivated artefact.
+             * @enum {string}
+             */
+            artefactStatus: "DRAFT" | "SUBMITTED" | "APPROVED" | "SCHEDULED" | "ACTIVE" | "SUPERSEDED" | "WITHDRAWN";
+            governanceBundleId: components["schemas"]["Uuid"];
         };
         /** @description rat.GoldenSuite.run request. PRD inputs: "slot, artefact, suites" */
         GoldenSuiteRunRequest: {

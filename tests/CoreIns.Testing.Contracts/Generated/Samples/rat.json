@@ -647,23 +647,24 @@
       "diff": "unspecified"
     },
     "RatingArtifactBuildRequest": {
-      "changeSet": "unspecified",
-      "artefact": "unspecified",
-      "slotDates": "unspecified",
-      "reason": "unspecified"
+      "changeSetId": "0192ee8e-1bd6-736e-8a28-e14ad7e8e909",
+      "dataStatus": "ILLUSTRATIVE_TEST_DATA",
+      "reason": "sample"
     },
     "RatingArtifactBuildResponse": {
-      "artefactStatus": "unspecified",
-      "governanceBundleId": "0192ab81-a027-7504-87df-d2d4868eecff"
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "artefactStatus": "DRAFT",
+      "governanceBundleId": "0192ab81-a027-7504-87df-d2d4868eecff",
+      "dataStatus": "sample",
+      "created": true
     },
     "RatingArtifactCancelScheduleRequest": {
-      "changeSet": "unspecified",
-      "artefact": "unspecified",
-      "slotDates": "unspecified",
-      "reason": "unspecified"
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "reason": "sample"
     },
     "RatingArtifactCancelScheduleResponse": {
-      "artefactStatus": "unspecified",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "artefactStatus": "DRAFT",
       "governanceBundleId": "0192c3bb-f9a7-758d-86d7-160112f3247d"
     },
     "RatingArtifactCompatibilityRecord": {
@@ -875,34 +876,36 @@
       "activationRecord": "unspecified"
     },
     "RatingArtifactReturnRequest": {
-      "changeSet": "unspecified",
-      "artefact": "unspecified",
-      "slotDates": "unspecified",
-      "reason": "unspecified"
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "reason": "sample"
     },
     "RatingArtifactReturnResponse": {
-      "artefactStatus": "unspecified",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "artefactStatus": "DRAFT",
       "governanceBundleId": "01922b70-47b9-7260-8539-7ea156837166"
     },
     "RatingArtifactRollbackRequest": {
-      "changeSet": "unspecified",
-      "artefact": "unspecified",
-      "slotDates": "unspecified",
-      "reason": "unspecified"
+      "productCode": "sample",
+      "productVersion": "sample",
+      "reason": "sample"
     },
     "RatingArtifactRollbackResponse": {
-      "artefactStatus": "unspecified",
+      "withdrawnHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "reactivatedHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "artefactStatus": "DRAFT",
       "governanceBundleId": "01920748-6366-7f52-87d0-e10fd7db9ed7"
     },
     "RatingArtifactScheduleRequest": {
-      "changeSet": "unspecified",
-      "artefact": "unspecified",
-      "slotDates": "unspecified",
-      "reason": "unspecified"
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "reason": "sample",
+      "effectiveFrom": "2026-10-07"
     },
     "RatingArtifactScheduleResponse": {
-      "artefactStatus": "unspecified",
-      "governanceBundleId": "01925bfe-399c-7999-8d94-94746fd25ce9"
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "artefactStatus": "DRAFT",
+      "governanceBundleId": "01925bfe-399c-7999-8d94-94746fd25ce9",
+      "activationId": "sample",
+      "effectiveFrom": "2026-10-07"
     },
     "RatingArtifactStatus": {
       "lifecycle": "DRAFT",
@@ -919,24 +922,36 @@
       ]
     },
     "RatingArtifactSubmitRequest": {
-      "changeSet": "unspecified",
-      "artefact": "unspecified",
-      "slotDates": "unspecified",
-      "reason": "unspecified"
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "reason": "sample"
     },
     "RatingArtifactSubmitResponse": {
-      "artefactStatus": "unspecified",
-      "governanceBundleId": "0192aad8-72d4-7fc7-898b-bd6cdd87d92a"
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "artefactStatus": "DRAFT",
+      "governanceBundleId": "0192aad8-72d4-7fc7-898b-bd6cdd87d92a",
+      "approvalRequestId": "sample"
     },
     "RatingChangeSetCreateRequest": {
-      "file": "unspecified",
-      "mapping": "unspecified",
-      "changeSet": "unspecified"
+      "productCode": "sample",
+      "productVersion": "sample",
+      "baseArtefactHash": "sample",
+      "tableHashes": {
+        "sample": "sample"
+      },
+      "reason": "sample"
     },
     "RatingChangeSetCreateResponse": {
-      "tableVersion": "unspecified",
-      "validationReport": "unspecified",
-      "diff": "unspecified"
+      "changeSetId": "01926313-38c8-7a37-8161-41c0f9a638f2",
+      "productCode": "sample",
+      "productVersion": "sample",
+      "baseArtefactHash": "sample",
+      "status": "OPEN",
+      "tables": [
+        {
+          "slot": "sample",
+          "hash": "sample"
+        }
+      ]
     },
     "ShadowRunGetResponse": {
       "runId": "019253f6-fe42-75f5-8bd2-35010c9c4a2d",

@@ -2288,37 +2288,56 @@ export interface components {
             recordedAt: components["schemas"]["Instant"];
             chargeDeltas?: components["schemas"]["ChargeLine"][];
         };
-        /** @description pol.Renewal.decline request. PRD inputs: "termId; offer; acceptance evidence; reason" */
+        /** @description pol.Renewal.decline request: the customer (or staff for them) declines an offered renewal (REQ-POL-009, REQ-POL-257). Declining after acceptance is refused. */
         RenewalDeclineRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "offer" */
-            offer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "acceptance evidence" */
-            acceptanceEvidence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description The renewal job */
+            jobId: components["schemas"]["Uuid"];
+            /** @description The expiring term */
+            termId: components["schemas"]["Uuid"];
+            /** @description Why the renewal was declined (required) */
+            reasonCode: components["schemas"]["Code"];
+            /** @description When the customer declined (business time) */
+            declinedAt: components["schemas"]["Instant"];
+            /** @description Evidence reference (document or message id); no personal data */
+            evidence?: components["schemas"]["Text"];
         };
-        /** @description pol.Renewal.decline result. PRD outputs: "job" */
+        /** @description pol.Renewal.decline result. The renewal job is closed (NOT_TAKEN once offered, WITHDRAWN while still a draft); the term simply expires. */
         RenewalDeclineResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            termId: components["schemas"]["Uuid"];
+            state: components["schemas"]["JobStateCode"];
+            reasonCode: components["schemas"]["Code"];
+            recordedAt: components["schemas"]["Instant"];
         };
-        /** @description pol.Renewal.nonRenew request. PRD inputs: "termId; offer; acceptance evidence; reason" */
+        /** @description pol.Renewal.nonRenew request: the insurer decides not to renew the term (REQ-POL-009). The reason code is required; the notice must be sent in time (POL-ERR-NOTICE-TOO-LATE). */
         RenewalNonRenewRequest: {
-            /** @description PRD: "termId" */
-            termId?: components["schemas"]["Uuid"];
-            /** @description PRD: "offer" */
-            offer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "acceptance evidence" */
-            acceptanceEvidence?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description The expiring term */
+            termId: components["schemas"]["Uuid"];
+            /** @description Why the insurer does not renew (required) */
+            reasonCode: components["schemas"]["Code"];
+            /** @description Free-text note; no personal data */
+            text?: components["schemas"]["Text"];
         };
-        /** @description pol.Renewal.nonRenew result. PRD outputs: "job" */
+        /** @description pol.Renewal.nonRenew result. PSR_REVIEW when the policyholder is vulnerable or unknown: nothing is sent until a person decides. */
         RenewalNonRenewResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
+            nonRenewalId: components["schemas"]["Uuid"];
+            termId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "NOTICE_REQUESTED" | "PSR_REVIEW";
+            reasonCode: components["schemas"]["Code"];
+            /** @description The term end, when the non-renewal takes effect */
+            effectiveAt: components["schemas"]["Instant"];
+            /** @description The latest moment the notice could be given (term end minus the notice period) */
+            noticeDeadline: components["schemas"]["Instant"];
+            noticeDays: number;
+            /**
+             * @description Legal status of the notice period value; Unverified and PendingOpinion are refused in Production (D-USR-19)
+             * @enum {string}
+             */
+            legalStatus: "Settled" | "Unverified" | "PendingOpinion";
+            /** @description The notice letter requested from DOC; absent while in PSR review or when DOC is not wired */
+            noticeDocumentId?: components["schemas"]["Uuid"];
+            recordedAt: components["schemas"]["Instant"];
         };
         /** @description pol.RenewalRun.start request. PRD inputs: "entity, product, window" */
         RenewalRunStartRequest: {

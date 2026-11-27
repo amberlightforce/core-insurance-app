@@ -4,39 +4,38 @@
 
 namespace CoreIns.Modules.Rating.Contracts.Api;
 
-/// <summary>rat.RatingArtifact.build request. PRD inputs: "change set; artefact; slot dates; reason"</summary>
+/// <summary>Contract addition (BO-RAT-06): rat.RatingArtifact.build request: compile and pin the change set. dataStatus APPROVED re-stamps the pinned tables as approved data (still needs the checker approval of submit/schedule).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RatingArtifactBuildRequest
 {
-    /// <summary>PRD: "change set"</summary>
+    /// <summary>Contract member 'changeSetId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'changeSetId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("changeSet")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ChangeSet { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("changeSetId")]
+    public required global::System.Guid ChangeSetId { get; init; }
 
-    /// <summary>PRD: "artefact"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("artefact")]
+    /// <summary>Contract member 'dataStatus'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dataStatus")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Artefact { get; init; }
+    public DataStatusValue? DataStatus { get; init; }
 
-    /// <summary>PRD: "slot dates"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("slotDates")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SlotDates { get; init; }
-
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'reason'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DataStatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DataStatusValue
+    {
+        /// <summary><c>ILLUSTRATIVE_TEST_DATA</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ILLUSTRATIVE_TEST_DATA")]
+        IllustrativeTestData,
+
+        /// <summary><c>APPROVED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVED")]
+        Approved,
+    }
 }
