@@ -1730,8 +1730,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Levy payment periods; IPT accrual totals only (tax payments are TAX_REMITTANCE disbursements requested by FIN)
-         * @description Levy payment periods; IPT accrual totals only (tax payments are `TAX_REMITTANCE` disbursements requested by FIN)
+         * Request the payment of one levy period to its authority
+         * @description Creates the payable of one levy type (levy authority) and period from the levy lines of the sub-ledger and requests its payment as a `BIL_LEVY` disbursement (SEPA credit transfer, EUR) to the authority's Active LEVY payee account (VoP matched). A payment request is created from a payable, never from free text: the amount is the net levy accrued in the period. One payable per levy authority and period; a repeat is `BIL-ERR-DUPLICATE`. The disbursement waits in PendingApproval for a second person (`bil.Disbursement.approveRelease`). A levy whose legal status is not settled is refused in Production (`BIL-ERR-LEVY-UNSETTLED`, D-USR-19).
          *
          *     PRD inputs: type, period
          *     PRD outputs: totals, detail
@@ -3487,26 +3487,65 @@ export interface components {
             /** @description PRD: "detail" */
             detail?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.TaxLevy.detail result. PRD outputs: "totals, detail" */
+        /** @description bil.TaxLevy.detail result. PRD outputs: "totals, detail". levies: the levy tracking per levy authority and period (BO-BIL-14) */
         TaxLevyDetailResponse: {
             /** @description PRD: "totals" */
             totals?: components["schemas"]["Unspecified"];
             /** @description PRD: "detail" */
             detail?: components["schemas"]["Unspecified"];
+            levies?: components["schemas"]["TaxLevyTrackingItem"][];
+        };
+        /** @description One levy authority in one month: collected, payable, requested, approved, paid and outstanding (exact amounts, shared rounding policy) */
+        TaxLevyTrackingItem: {
+            /** @description Levy type = levy authority code (the charge type of the levy lines) */
+            levyType: string;
+            /** @description Accounting month yyyy-MM (validated by the handler) */
+            period: string;
+            currency: components["schemas"]["Code"];
+            /** @description Levy collected on invoices, net of credits (the ledger payable accrual) */
+            collected: components["schemas"]["Money"];
+            /** @description Amount of the payable created for the period (zero until a payment is requested) */
+            payable: components["schemas"]["Money"];
+            /** @description Payable whose payment request is open (Requested, PendingApproval) */
+            requested: components["schemas"]["Money"];
+            /** @description Payable approved for release, not yet paid (Approved, Released) */
+            approved: components["schemas"]["Money"];
+            /** @description Payable paid (Issued, Cleared) */
+            paid: components["schemas"]["Money"];
+            /** @description Collected less the payable (what no payment request covers yet) */
+            outstanding: components["schemas"]["Money"];
+            /** @description Settled, or the weakest legal status behind the levy lines (PendingOpinion, Unverified); a not-settled levy is refused in Production */
+            legalStatus: string;
+            provisional: boolean;
+            payableId?: components["schemas"]["Uuid"];
+            disbursementId?: components["schemas"]["Uuid"];
+            disbursementStatus?: string;
         };
         /** @description bil.TaxLevy.requestLevyPayment request. PRD inputs: "type, period" */
         TaxLevyRequestLevyPaymentRequest: {
-            /** @description PRD: "type" */
-            type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            /** @description Levy type = levy authority code (an upper-snake charge type that has levy lines in the period) */
+            levyType: string;
+            /** @description Accounting month yyyy-MM (validated by the handler) */
+            period: string;
+            /** @description The authority as a party */
+            payeePartyId: components["schemas"]["Uuid"];
+            /** @description Active LEVY payee account of the authority, verification of payee matched */
+            payeeAccountId: components["schemas"]["Uuid"];
+            /** @description Extra duplicate key and payment reference */
+            statementReference?: string;
         };
-        /** @description bil.TaxLevy.requestLevyPayment result. PRD outputs: "totals, detail" */
+        /** @description bil.TaxLevy.requestLevyPayment result: the payable and its payment request (PendingApproval) */
         TaxLevyRequestLevyPaymentResponse: {
-            /** @description PRD: "totals" */
-            totals?: components["schemas"]["Unspecified"];
-            /** @description PRD: "detail" */
-            detail?: components["schemas"]["Unspecified"];
+            payableId: components["schemas"]["Uuid"];
+            levyType: string;
+            period: string;
+            amount: components["schemas"]["Money"];
+            legalStatus: string;
+            provisional: boolean;
+            disbursementId: components["schemas"]["Uuid"];
+            disbursementNumber?: components["schemas"]["BusinessNumber"];
+            /** @description Canonical disbursement state of the payment request */
+            status: string;
         };
         /** @description bil.Ledger.query result. PRD outputs: "entries, balances" */
         LedgerQueryItem: {

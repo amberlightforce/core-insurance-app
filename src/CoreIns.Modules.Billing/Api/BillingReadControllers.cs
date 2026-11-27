@@ -1,3 +1,6 @@
+using CoreIns.Modules.Billing.Commands;
+using CoreIns.Modules.Billing.Contracts.Api;
+using CoreIns.Platform.Commands;
 using CoreIns.Modules.Billing.Queries;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
@@ -16,10 +19,11 @@ internal static class BillingReadPermissions
 {
     public const string TaxLevyPeriods = "bil.TaxLevy.periods";
     public const string TaxLevyDetail = "bil.TaxLevy.detail";
+    public const string TaxLevyRequestLevyPayment = "bil.TaxLevy.requestLevyPayment";
     public const string MigratedRecordList = "bil.MigratedRecord.list";
 }
 
-/// <summary>REST facade of bil.TaxLevy reads (contracts/openapi/bil.yaml): IPT and levy payable accruals per month. <c>requestLevyPayment</c> is not served yet.</summary>
+/// <summary>REST facade of bil.TaxLevy reads (contracts/openapi/bil.yaml): IPT and levy payable accruals per month. <c>requestLevyPayment</c> (BO-BIL-14) creates the payable of a levy authority and month and requests its payment.</summary>
 [ApiController]
 [Route("api/bil/v1/tax-levy")]
 internal sealed class TaxLevyController : ControllerBase
@@ -39,6 +43,13 @@ internal sealed class TaxLevyController : ControllerBase
         period is not null && !TaxLevyReader.IsPeriod(period)
             ? BadPeriod()
             : Results.Ok(await reader.DetailAsync(LegalEntity(), period, cancellationToken).ConfigureAwait(false));
+
+    /// <summary>bil.TaxLevy.requestLevyPayment: creates the payable of one levy authority and month and requests its payment (PendingApproval).</summary>
+    [HttpPost("request-levy-payment")]
+    [Authorize(Policy = BillingReadPermissions.TaxLevyRequestLevyPayment)]
+    public async Task<IResult> RequestLevyPaymentAsync(
+        [FromBody] TaxLevyRequestLevyPaymentRequest request, [FromServices] ICommandHandler<RequestLevyPayment, TaxLevyRequestLevyPaymentResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new RequestLevyPayment(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
     private IResult BadPeriod() =>
         HttpResults.Problem(new DomainError(ErrorCode.For(ModuleCode.BIL, PlatformErrors.Validation), "period must be yyyy-MM."), HttpContext);

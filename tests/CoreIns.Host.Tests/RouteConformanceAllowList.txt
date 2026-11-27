@@ -204,7 +204,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/payment-plans/select
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/bank
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/fin
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/invariants
-CONTRACT_NOT_SERVED POST /api/bil/v1/tax-levy/request-levy-payment
 CONTRACT_NOT_SERVED POST /api/bil/v1/transfers/money
 CONTRACT_NOT_SERVED POST /api/bil/v1/write-offs/decide
 CONTRACT_NOT_SERVED POST /api/bil/v1/write-offs/post
