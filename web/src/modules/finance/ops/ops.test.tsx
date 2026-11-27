@@ -368,6 +368,64 @@ describe('PeriodClosePage', () => {
     await expectNoA11yViolations(container);
   });
 
+  it('shows the checklist of a period and offers sign-off while it is open', async () => {
+    const signed: unknown[] = [];
+    mockApi([
+      {
+        method: 'GET',
+        path: '/api/fin/v1/periods',
+        respond: () => ({
+          body: {
+            items: [{ period: '2026-10', state: 'OPEN', closedForPosting: false }],
+            nextCursor: null,
+          },
+        }),
+      },
+      {
+        method: 'GET',
+        path: '/api/fin/v1/close/tasks',
+        respond: () => ({
+          body: {
+            period: '2026-10',
+            state: 'OPEN',
+            closedForPosting: false,
+            tasks: [
+              {
+                task: 'INTAKE_EXCEPTIONS',
+                status: 'OPEN',
+                signOffRole: 'Staff.Finance',
+                blocker: null,
+              },
+              {
+                task: 'RECONCILIATIONS',
+                status: 'SIGNED_OFF',
+                signOffRole: 'Staff.Finance',
+                signedOffBy: 'ann',
+              },
+            ],
+          },
+        }),
+      },
+      {
+        method: 'POST',
+        path: '/api/fin/v1/close/sign-off',
+        respond: ({ body }) => {
+          signed.push(body);
+          return { body: {} };
+        },
+      },
+    ]);
+    const { user } = renderScreen(<PeriodClosePage />, {
+      path: '/finance/period-close',
+      url: '/finance/period-close',
+    });
+    await user.dblClick(await screen.findByText('2026-10'));
+    await user.click(await screen.findByRole('button', { name: 'Υπογραφή' }));
+    await waitFor(() => {
+      expect(signed).toEqual([{ period: '2026-10', task: 'INTAKE_EXCEPTIONS' }]);
+    });
+  });
+
   it('shows the no-permission banner on a 403', async () => {
     mockApi([
       {

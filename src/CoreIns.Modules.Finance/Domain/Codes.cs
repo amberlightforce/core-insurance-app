@@ -272,7 +272,9 @@ internal static class Sl4Entries
     /// Memo entries: the receivable is registered in the BIL sub-ledger but FIN books nothing, because the CLM RecoveryRecorded
     /// fact already debited the recovery clearing and the cash comes from the RECEIVABLE_COLLECTED entry (REQ-FIN-037).
     /// </summary>
-    public static readonly string[] Memo = [ReceivableRegistered];
+    // BO-BIL-08: SUSPENSE_TRANSFERRED (unapplied cash moves between billing accounts, LA-11 to LA-11 through LA-29: nothing changes in the GL) and
+    // SUSPENSE_REFUND_APPROVED (LA-11 to LA-12) are memo as well. TODO(hardening): book the second one with a versioned finance rule set.
+    public static readonly string[] Memo = [ReceivableRegistered, "SUSPENSE_TRANSFERRED", "SUSPENSE_REFUND_APPROVED"];
 
     /// <summary>Entry type and leg roles of a RI recoverable (REQ-FIN-164).</summary>
     public const string RiRecovery = "RECOVERY";

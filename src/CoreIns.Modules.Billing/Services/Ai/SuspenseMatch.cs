@@ -29,16 +29,24 @@ internal static class SuspenseMatching
 {
     public const string FeatureId = "AI-BIL-01";
 
-    public static JsonObject Build(SuspensePayment payment, IReadOnlyList<SuspenseCandidate> candidates)
-    {
-        var ranked = candidates
+    public const string Note = "Suggestion only; allocate manually.";
+
+    /// <summary>Up to three candidates with a positive score, best first (ties by invoice number).</summary>
+    public static IReadOnlyList<(SuspenseCandidate Candidate, int Score)> Rank(SuspensePayment payment, IReadOnlyList<SuspenseCandidate> candidates) =>
+    [
+        .. candidates
             .Select(c => (Candidate: c, Score: Score(payment, c)))
             .Where(x => x.Score > 0)
             .OrderByDescending(x => x.Score).ThenBy(x => x.Candidate.InvoiceNo, StringComparer.Ordinal)
-            .Take(3)
+            .Take(3),
+    ];
+
+    public static JsonObject Build(SuspensePayment payment, IReadOnlyList<SuspenseCandidate> candidates)
+    {
+        var ranked = Rank(payment, candidates)
             .Select(x => (JsonNode?)new JsonObject { ["invoiceNo"] = x.Candidate.InvoiceNo, ["score"] = x.Score, ["exactAmount"] = x.Candidate.OpenAmount == payment.Amount })
             .ToArray();
-        return new JsonObject { ["matches"] = new JsonArray(ranked), ["note"] = "Suggestion only; allocate manually." };
+        return new JsonObject { ["matches"] = new JsonArray(ranked), ["note"] = Note };
     }
 
     private static int Score(SuspensePayment p, SuspenseCandidate c)

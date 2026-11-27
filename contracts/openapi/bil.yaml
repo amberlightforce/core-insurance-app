@@ -2625,6 +2625,17 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: billingAccountId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: state
+        in: query
+        required: false
+        description: Default OPEN (the unapplied cash that still needs a decision)
+        schema:
+          $ref: '#/components/schemas/SuspenseState'
       responses:
         '200':
           description: Success
@@ -2701,6 +2712,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -2768,6 +2781,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -2835,6 +2850,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -7844,18 +7861,55 @@ components:
         allocations:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "allocations"'
+    SuspenseState:
+      type: string
+      description: 'State of a suspense item: OPEN (unapplied cash awaiting a decision), REFUND_PENDING (a refund to the sender waits for approval), ALLOCATED (applied to invoices), REFUNDED (paid back to the sender)'
+      enum:
+      - OPEN
+      - REFUND_PENDING
+      - ALLOCATED
+      - REFUNDED
     SuspenseListItem:
       type: object
-      description: 'bil.Suspense.list result. PRD outputs: "items, suggestions"'
+      description: 'An unmatched payment held in suspense (REQ-BIL-135): the receipt, its unapplied amount and why it could not be applied'
       properties:
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        suggestions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "suggestions"'
+        suspenseItemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        receiptId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        receiptNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Account holding the cash now (changes with a transfer)
+        state:
+          $ref: '#/components/schemas/SuspenseState'
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Why the receipt is unapplied, e.g. AMOUNT_MISMATCH, NO_OPEN_INVOICE, AMBIGUOUS_MATCH, CONCURRENT_ALLOCATION, TRANSFERRED
+        bankReference:
+          $ref: ../events/common.schema.json#/$defs/Text
+        valueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        refundId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The refund-to-sender of the item, when one was requested
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        resolvedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - suspenseItemId
+      - receiptId
+      - receiptNumber
+      - billingAccountId
+      - state
+      - amount
+      - reason
+      - valueDate
+      - recordedAt
     SuspenseListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7868,70 +7922,92 @@ components:
       description: Page of bil.Suspense.list results (cursor pagination, contract §3.5.5)
     SuspenseSuggestRequest:
       type: object
-      description: 'bil.Suspense.suggest request. PRD inputs: "filters, item"'
+      description: 'bil.Suspense.suggest request. The payment and the open invoices are loaded server-side from the item; nothing the client sends feeds the scoring.'
       properties:
-        filters:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "filters"'
-        item:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "item"'
+        suspenseItemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - suspenseItemId
+    SuspenseSuggestion:
+      type: object
+      description: One ranked invoice candidate (deterministic score; a suggestion only, allocation stays a manual action)
+      properties:
+        invoiceNo:
+          $ref: ../events/common.schema.json#/$defs/Text
+        score:
+          type: integer
+        exactAmount:
+          type: boolean
+      required:
+      - invoiceNo
+      - score
+      - exactAmount
     SuspenseSuggestResponse:
       type: object
-      description: 'bil.Suspense.suggest result. PRD outputs: "items, suggestions"'
+      description: 'bil.Suspense.suggest result: up to three ranked candidates'
       properties:
-        items:
+        item:
+          $ref: '#/components/schemas/SuspenseListItem'
+        suggestions:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        suggestions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "suggestions"'
+            $ref: '#/components/schemas/SuspenseSuggestion'
+        note:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - item
+      - suggestions
     SuspenseTransferRequest:
       type: object
-      description: 'bil.Suspense.transfer request. PRD inputs: "filters, item"'
+      description: 'bil.Suspense.transfer request: move the unapplied cash of an OPEN item to another billing account of the legal entity (same currency, Active). Posts a ledger move (SUSPENSE_TRANSFERRED) and keeps the item OPEN on the target account.'
       properties:
-        filters:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "filters"'
-        item:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "item"'
+        suspenseItemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        targetBillingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        comment:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - suspenseItemId
+      - targetBillingAccountId
     SuspenseTransferResponse:
       type: object
-      description: 'bil.Suspense.transfer result. PRD outputs: "items, suggestions"'
+      description: 'bil.Suspense.transfer result'
       properties:
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        suggestions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "suggestions"'
+        item:
+          $ref: '#/components/schemas/SuspenseListItem'
+        ledgerEntryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - item
     SuspenseRefundToSenderRequest:
       type: object
-      description: 'bil.Suspense.refundToSender request. PRD inputs: "filters, item"'
+      description: 'bil.Suspense.refundToSender request: pay the unapplied cash of an OPEN item back to the sender. The refund path applies: the payee is a verified REFUND payee account (VoP), sanctions screening, BIL.REFUND authority and a second approver (decided with bil.Refund.decide), then the disbursement. The IBAN never travels here.'
       properties:
-        filters:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "filters"'
-        item:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "item"'
+        suspenseItemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Verified payee account with purpose REFUND of the sender
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        comment:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - suspenseItemId
+      - payeeAccountId
+      - reasonCode
     SuspenseRefundToSenderResponse:
       type: object
-      description: 'bil.Suspense.refundToSender result. PRD outputs: "items, suggestions"'
+      description: 'bil.Suspense.refundToSender result: the item (REFUND_PENDING) and the refund waiting for approval'
       properties:
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        suggestions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "suggestions"'
+        item:
+          $ref: '#/components/schemas/SuspenseListItem'
+        refund:
+          $ref: '#/components/schemas/RefundView'
+      required:
+      - item
+      - refund
     IntermediaryCollectionReportRequest:
       type: object
       description: 'bil.IntermediaryCollection.report request. PRD inputs: "producer code, items, receipt data"'

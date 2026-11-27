@@ -2356,13 +2356,20 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: period
+        in: query
+        required: true
+        description: Calendar month, yyyy-MM
+        schema:
+          type: string
+          pattern: ^[0-9]{4}-(0[1-9]|1[0-2])$
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CloseTasksResponse'
+                $ref: '#/components/schemas/ClosePeriodView'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -2430,7 +2437,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CloseSignOffResponse'
+                $ref: '#/components/schemas/ClosePeriodView'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -2500,7 +2507,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CloseSoftCloseResponse'
+                $ref: '#/components/schemas/ClosePeriodView'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -2571,7 +2578,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CloseLockResponse'
+                $ref: '#/components/schemas/ClosePeriodView'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -2642,7 +2649,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CloseReopenResponse'
+                $ref: '#/components/schemas/ClosePeriodView'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -2712,7 +2719,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CloseAcceptBreakResponse'
+                $ref: '#/components/schemas/ClosePeriodView'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -7133,11 +7140,22 @@ components:
       description: 'Typed from REQ-FIN-232. PRD outputs: "state"'
     PeriodListItem:
       type: object
-      description: 'fin.Period.list result. PRD outputs: "state"'
+      description: 'fin.Period.list result: one accounting month and its close state.'
+      required:
+      - period
+      - state
+      - closedForPosting
       properties:
+        period:
+          type: string
         state:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "state"'
+          type: string
+          enum:
+          - OPEN
+          - SOFT_CLOSED
+          - LOCKED
+        closedForPosting:
+          type: boolean
     PeriodListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7148,149 +7166,159 @@ components:
             items:
               $ref: '#/components/schemas/PeriodListItem'
       description: Page of fin.Period.list results (cursor pagination, contract §3.5.5)
-    CloseTasksResponse:
-      type: object
-      description: 'fin.Close.tasks result. PRD outputs: "state, impact, pack"'
-      properties:
-        state:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "state"'
-        impact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "impact"'
-        pack:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack"'
     CloseSignOffRequest:
       type: object
-      description: 'fin.Close.signOff request. PRD inputs: "period, task, reason"'
+      description: 'fin.Close.signOff request: the person responsible for a close task confirms it is done; a task with a blocker cannot be signed off.'
+      required:
+      - period
+      - task
       properties:
         period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+          type: string
+          minLength: 7
+          maxLength: 7
+          description: Calendar month, yyyy-MM.
         task:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "task"'
+          $ref: '#/components/schemas/CloseTaskCode'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-    CloseSignOffResponse:
-      type: object
-      description: 'fin.Close.signOff result. PRD outputs: "state, impact, pack"'
-      properties:
-        state:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "state"'
-        impact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "impact"'
-        pack:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack"'
+          type: string
+          maxLength: 1000
+          description: Optional note kept with the sign-off.
     CloseSoftCloseRequest:
       type: object
-      description: 'fin.Close.softClose request. PRD inputs: "period, task, reason"'
+      description: 'fin.Close.softClose request: every task of the period must be signed off.'
+      required:
+      - period
+      - reason
       properties:
         period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        task:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "task"'
+          type: string
+          minLength: 7
+          maxLength: 7
+          description: Calendar month, yyyy-MM.
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-    CloseSoftCloseResponse:
-      type: object
-      description: 'fin.Close.softClose result. PRD outputs: "state, impact, pack"'
-      properties:
-        state:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "state"'
-        impact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "impact"'
-        pack:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack"'
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why the period is closed now.
     CloseLockRequest:
       type: object
-      description: 'fin.Close.lock request. PRD inputs: "period, task, reason"'
+      description: 'fin.Close.lock request: locks a soft-closed period; the person who soft-closed it cannot lock it (two people).'
+      required:
+      - period
+      - reason
       properties:
         period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        task:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "task"'
+          type: string
+          minLength: 7
+          maxLength: 7
+          description: Calendar month, yyyy-MM.
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-    CloseLockResponse:
-      type: object
-      description: 'fin.Close.lock result. PRD outputs: "state, impact, pack"'
-      properties:
-        state:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "state"'
-        impact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "impact"'
-        pack:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack"'
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why the period is locked.
     CloseReopenRequest:
       type: object
-      description: 'fin.Close.reopen request. PRD inputs: "period, task, reason"'
+      description: 'fin.Close.reopen request: the first call records the request and its reason; a different person repeating the call approves it and reopens the period.'
+      required:
+      - period
+      - reason
       properties:
         period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        task:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "task"'
+          type: string
+          minLength: 7
+          maxLength: 7
+          description: Calendar month, yyyy-MM.
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-    CloseReopenResponse:
-      type: object
-      description: 'fin.Close.reopen result. PRD outputs: "state, impact, pack"'
-      properties:
-        state:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "state"'
-        impact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "impact"'
-        pack:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack"'
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why the period is reopened (audited, sent to the approver).
     CloseAcceptBreakRequest:
       type: object
-      description: 'fin.Close.acceptBreak request. PRD inputs: "period, task, reason"'
+      description: 'fin.Close.acceptBreak request: accepts the open reconciliation breaks of the period with a reason; signs off the RECONCILIATIONS task.'
+      required:
+      - period
+      - reason
       properties:
         period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        task:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "task"'
+          type: string
+          minLength: 7
+          maxLength: 7
+          description: Calendar month, yyyy-MM.
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-    CloseAcceptBreakResponse:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why the breaks are accepted.
+    CloseTaskCode:
+      type: string
+      enum:
+      - INTAKE_EXCEPTIONS
+      - RECONCILIATIONS
+      - EARNING_RUN
+      - MANUAL_JOURNALS
+    CloseTaskView:
       type: object
-      description: 'fin.Close.acceptBreak result. PRD outputs: "state, impact, pack"'
+      required:
+      - task
+      - status
+      - signOffRole
       properties:
+        task:
+          $ref: '#/components/schemas/CloseTaskCode'
+        status:
+          type: string
+          enum:
+          - OPEN
+          - SIGNED_OFF
+        signOffRole:
+          type: string
+          description: Role that signs the task off.
+        blocker:
+          type: string
+          description: Why the task cannot be signed off yet, when it cannot.
+        signedOffBy:
+          type: string
+        signedOffAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        reason:
+          type: string
+    ClosePeriodView:
+      type: object
+      description: One accounting period with its close state and checklist.
+      required:
+      - period
+      - state
+      - closedForPosting
+      - tasks
+      properties:
+        period:
+          type: string
         state:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "state"'
-        impact:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "impact"'
-        pack:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack"'
+          type: string
+          enum:
+          - OPEN
+          - SOFT_CLOSED
+          - LOCKED
+        closedForPosting:
+          type: boolean
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloseTaskView'
+        softClosedBy:
+          type: string
+        lockedBy:
+          type: string
+        reopenRequestedBy:
+          type: string
+          description: Set while a reopen is waiting for a second person.
+        reopenRequestedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        reopenReason:
+          type: string
     CloseEvidencePackRequest:
       type: object
       description: 'fin.Close.evidencePack request. PRD inputs: "period, task, reason"'

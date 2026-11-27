@@ -127,14 +127,8 @@
       "balances": "unspecified"
     },
     "CloseAcceptBreakRequest": {
-      "period": "unspecified",
-      "task": "unspecified",
-      "reason": "unspecified"
-    },
-    "CloseAcceptBreakResponse": {
-      "state": "unspecified",
-      "impact": "unspecified",
-      "pack": "unspecified"
+      "period": "samplex",
+      "reason": "sample"
     },
     "CloseEvidencePackRequest": {
       "period": "unspecified",
@@ -147,49 +141,51 @@
       "pack": "unspecified"
     },
     "CloseLockRequest": {
-      "period": "unspecified",
-      "task": "unspecified",
-      "reason": "unspecified"
+      "period": "samplex",
+      "reason": "sample"
     },
-    "CloseLockResponse": {
-      "state": "unspecified",
-      "impact": "unspecified",
-      "pack": "unspecified"
+    "ClosePeriodView": {
+      "period": "sample",
+      "state": "OPEN",
+      "closedForPosting": true,
+      "tasks": [
+        {
+          "task": "INTAKE_EXCEPTIONS",
+          "status": "OPEN",
+          "signOffRole": "sample",
+          "blocker": "sample",
+          "signedOffBy": "sample",
+          "signedOffAt": "2026-10-07T09:00:00Z",
+          "reason": "sample"
+        }
+      ],
+      "softClosedBy": "sample",
+      "lockedBy": "sample",
+      "reopenRequestedBy": "sample",
+      "reopenRequestedAt": "2026-10-07T09:00:00Z",
+      "reopenReason": "sample"
     },
     "CloseReopenRequest": {
-      "period": "unspecified",
-      "task": "unspecified",
-      "reason": "unspecified"
-    },
-    "CloseReopenResponse": {
-      "state": "unspecified",
-      "impact": "unspecified",
-      "pack": "unspecified"
+      "period": "samplex",
+      "reason": "sample"
     },
     "CloseSignOffRequest": {
-      "period": "unspecified",
-      "task": "unspecified",
-      "reason": "unspecified"
-    },
-    "CloseSignOffResponse": {
-      "state": "unspecified",
-      "impact": "unspecified",
-      "pack": "unspecified"
+      "period": "samplex",
+      "task": "INTAKE_EXCEPTIONS",
+      "reason": "sample"
     },
     "CloseSoftCloseRequest": {
-      "period": "unspecified",
-      "task": "unspecified",
-      "reason": "unspecified"
+      "period": "samplex",
+      "reason": "sample"
     },
-    "CloseSoftCloseResponse": {
-      "state": "unspecified",
-      "impact": "unspecified",
-      "pack": "unspecified"
-    },
-    "CloseTasksResponse": {
-      "state": "unspecified",
-      "impact": "unspecified",
-      "pack": "unspecified"
+    "CloseTaskView": {
+      "task": "INTAKE_EXCEPTIONS",
+      "status": "OPEN",
+      "signOffRole": "sample",
+      "blocker": "sample",
+      "signedOffBy": "sample",
+      "signedOffAt": "2026-10-07T09:00:00Z",
+      "reason": "sample"
     },
     "DsarExportRequest": {
       "partyId": "01920977-c650-77fb-878a-7ebb21d9e00a"
@@ -1187,12 +1183,16 @@
       ]
     },
     "PeriodListItem": {
-      "state": "unspecified"
+      "period": "sample",
+      "state": "OPEN",
+      "closedForPosting": true
     },
     "PeriodListPage": {
       "items": [
         {
-          "state": "unspecified"
+          "period": "sample",
+          "state": "OPEN",
+          "closedForPosting": true
         }
       ],
       "nextCursor": "sample",

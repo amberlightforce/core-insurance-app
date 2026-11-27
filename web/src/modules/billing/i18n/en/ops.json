@@ -11,14 +11,16 @@
       "number": "Receipt",
       "amount": "Unapplied",
       "reason": "Reason",
-      "method": "Method",
+      "bankReference": "Bank reference",
       "valueDate": "Value date"
     },
     "reasons": {
       "AMOUNT_MISMATCH": "Amount does not match",
       "NO_OPEN_INVOICE": "No open invoice",
       "AMBIGUOUS_MATCH": "Ambiguous match",
-      "CONCURRENT_ALLOCATION": "Concurrent allocation"
+      "CONCURRENT_ALLOCATION": "Concurrent allocation",
+      "INVOICE_NOT_OPEN": "Invoice not open",
+      "TRANSFERRED": "Transferred from another account"
     },
     "match": {
       "title": "Match receipt {number}",
