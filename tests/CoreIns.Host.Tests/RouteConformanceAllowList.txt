@@ -180,9 +180,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/billing-preview/compute
 CONTRACT_NOT_SERVED POST /api/bil/v1/commission/dispute
 CONTRACT_NOT_SERVED POST /api/bil/v1/commission/run-payments
 CONTRACT_NOT_SERVED POST /api/bil/v1/commission/simulate
-CONTRACT_NOT_SERVED POST /api/bil/v1/disbursement-batches/approve-release
-CONTRACT_NOT_SERVED POST /api/bil/v1/disbursement-batches/prepare
-CONTRACT_NOT_SERVED POST /api/bil/v1/disbursement-batches/release
 CONTRACT_NOT_SERVED POST /api/bil/v1/down-payment/initiate
 CONTRACT_NOT_SERVED POST /api/bil/v1/dsar/erase
 CONTRACT_NOT_SERVED POST /api/bil/v1/dsar/export

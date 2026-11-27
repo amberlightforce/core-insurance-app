@@ -132,6 +132,7 @@ internal sealed partial class RequestDisbursementHandler(
     DisbursementReleaser releaser,
     IAuthorityService authority,
     IServiceProvider services,
+    PayeeScreener screener,
     ILogger<RequestDisbursementHandler> logger) : ICommandHandler<RequestDisbursement, DisbursementRequestResponse>
 {
     private static readonly string[] Live =
@@ -278,7 +279,7 @@ internal sealed partial class RequestDisbursementHandler(
 
         // 5. Sanctions screening of the payee (REQ-BIL-200), fail closed (REQ-BIL-214).
         var disbursementId = DisbursementId.New();
-        var screening = await ScreenAsync(payeePartyId, disbursementId, cancellationToken).ConfigureAwait(false);
+        var screening = await screener.ScreenAsync(payeePartyId, disbursementId, cancellationToken).ConfigureAwait(false);
         if (screening.IsFailure)
         {
             return screening.Error!;
@@ -411,36 +412,6 @@ internal sealed partial class RequestDisbursementHandler(
     [LoggerMessage(Level = LogLevel.Warning, Message = "SECURITY: disbursement approval verification refused ({Code}).")]
     private static partial void LogApprovalRefused(ILogger logger, string code);
 
-    /// <summary>Screens the payee; the list versions on Clear, else the fail-closed error.</summary>
-    private async Task<Result<string>> ScreenAsync(PartyId payee, DisbursementId disbursementId, CancellationToken cancellationToken)
-    {
-        if (services.GetService<IPartyScreeningService>() is not { } screening)
-        {
-            return DomainError.Of(ModuleCode.BIL, "SCREENING-UNAVAILABLE", "Sanctions screening is not available; the payment is not made (REQ-BIL-214).");
-        }
-
-        ScreeningScreenResponse response;
-        try
-        {
-            response = await screening.ScreenAsync(
-                new ScreeningScreenRequest { PartyId = payee, CallerRef = ObjectRef.For(ModuleCode.BIL, "Disbursement", disbursementId) },
-                CommandOptions.New(),
-                cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            LogScreeningFailed(logger, ex.GetType().Name);
-            return DomainError.Of(ModuleCode.BIL, "SCREENING-UNAVAILABLE", "Sanctions screening failed; the payment is not made (REQ-BIL-214).");
-        }
-
-        if (response.Result != ScreeningScreenResponse.ResultValue.Clear || response.PaymentBlock)
-        {
-            return DomainError.Of(ModuleCode.BIL, "PAYEE-BLOCKED", $"Sanctions screening of the payee returned {response.Result}{(response.PaymentBlock ? " with a payment block" : string.Empty)}; the payment is not made (REQ-BIL-200).");
-        }
-
-        return string.Join(",", response.ListVersions);
-    }
-
     /// <summary>
     /// The live disbursement with the same source object (claim payment id or refund id) or the same duplicate key: payee
     /// account, amount and source reference — the claim for CLM, the credit set for a refund (REQ-BIL-202). The database
@@ -468,9 +439,6 @@ internal sealed partial class RequestDisbursementHandler(
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Disbursement {DisbursementId} for {SourceType} {SourceId} is {State}.")]
     private static partial void LogRequested(ILogger logger, Guid disbursementId, string sourceType, string sourceId, string state);
-
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Sanctions screening failed ({ExceptionType}); the disbursement request is refused (fail closed).")]
-    private static partial void LogScreeningFailed(ILogger logger, string exceptionType);
 }
 
 /// <summary>Audit facts: the disbursement, its number, source and amount (no IBAN, no name).</summary>

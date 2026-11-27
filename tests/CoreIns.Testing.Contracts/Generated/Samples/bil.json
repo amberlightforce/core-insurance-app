@@ -1445,28 +1445,171 @@
       "decision": "APPROVE"
     },
     "DisbursementBatchApproveReleaseRequest": {
-      "bankAccount": "unspecified",
-      "valueDate": "2026-10-07"
+      "batchId": "019292f0-bd7a-768c-8df4-9806289a0182",
+      "fileHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     },
     "DisbursementBatchApproveReleaseResponse": {
-      "batch": "unspecified",
-      "fileRef": "unspecified"
+      "batch": {
+        "batchId": "0192cc39-99c0-71d5-811a-50238e472fb8",
+        "status": "Prepared",
+        "maskedBankAccount": "sample",
+        "valueDate": "2026-10-07",
+        "itemCount": 1,
+        "totalAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "fileHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "fileRef": "sample",
+        "preparedBy": "sample",
+        "preparedAt": "2026-10-07T09:00:00Z",
+        "releaseRequestedBy": "sample",
+        "releaseRequestedAt": "2026-10-07T09:00:00Z",
+        "releasedBy": "sample",
+        "releasedAt": "2026-10-07T09:00:00Z",
+        "items": [
+          {
+            "disbursementId": "01923f85-a7bb-7edd-83ab-8ae0df04f511",
+            "disbursementNumber": "SAMPLE-000001",
+            "sourceType": "BIL",
+            "sourceId": "sample",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "endToEndId": "sample",
+            "status": "sample"
+          }
+        ]
+      },
+      "fileRef": "sample"
+    },
+    "DisbursementBatchItem": {
+      "disbursementId": "0192fdde-e1cf-75f4-868f-f71851d822d6",
+      "disbursementNumber": "SAMPLE-000001",
+      "sourceType": "BIL",
+      "sourceId": "sample",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "endToEndId": "sample",
+      "status": "sample"
     },
     "DisbursementBatchPrepareRequest": {
-      "bankAccount": "unspecified",
-      "valueDate": "2026-10-07"
+      "bankAccount": "sample",
+      "valueDate": "2026-10-07",
+      "disbursementIds": [
+        "0192a0e0-ab21-744f-8ef2-c4bc7cd1b383"
+      ]
     },
     "DisbursementBatchPrepareResponse": {
-      "batch": "unspecified",
-      "fileRef": "unspecified"
+      "batch": {
+        "batchId": "0192739c-d41a-736f-8e03-8b35f52a84fa",
+        "status": "Prepared",
+        "maskedBankAccount": "sample",
+        "valueDate": "2026-10-07",
+        "itemCount": 1,
+        "totalAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "fileHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "fileRef": "sample",
+        "preparedBy": "sample",
+        "preparedAt": "2026-10-07T09:00:00Z",
+        "releaseRequestedBy": "sample",
+        "releaseRequestedAt": "2026-10-07T09:00:00Z",
+        "releasedBy": "sample",
+        "releasedAt": "2026-10-07T09:00:00Z",
+        "items": [
+          {
+            "disbursementId": "01923536-1f0f-76c8-8c1b-b0962aa9d752",
+            "disbursementNumber": "SAMPLE-000001",
+            "sourceType": "BIL",
+            "sourceId": "sample",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "endToEndId": "sample",
+            "status": "sample"
+          }
+        ]
+      },
+      "fileRef": "sample"
     },
     "DisbursementBatchReleaseRequest": {
-      "bankAccount": "unspecified",
-      "valueDate": "2026-10-07"
+      "batchId": "0192342d-81b6-7edc-8f56-fd0a1dcabcf2"
     },
     "DisbursementBatchReleaseResponse": {
-      "batch": "unspecified",
-      "fileRef": "unspecified"
+      "batch": {
+        "batchId": "019259b1-21d9-7540-8e45-e6c3964397ec",
+        "status": "Prepared",
+        "maskedBankAccount": "sample",
+        "valueDate": "2026-10-07",
+        "itemCount": 1,
+        "totalAmount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "fileHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "fileRef": "sample",
+        "preparedBy": "sample",
+        "preparedAt": "2026-10-07T09:00:00Z",
+        "releaseRequestedBy": "sample",
+        "releaseRequestedAt": "2026-10-07T09:00:00Z",
+        "releasedBy": "sample",
+        "releasedAt": "2026-10-07T09:00:00Z",
+        "items": [
+          {
+            "disbursementId": "019228fe-9de3-796d-80df-3a97115f97b3",
+            "disbursementNumber": "SAMPLE-000001",
+            "sourceType": "BIL",
+            "sourceId": "sample",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "endToEndId": "sample",
+            "status": "sample"
+          }
+        ]
+      },
+      "fileRef": "sample"
+    },
+    "DisbursementBatchView": {
+      "batchId": "01923aa8-bf31-7dd5-856c-613f92267462",
+      "status": "Prepared",
+      "maskedBankAccount": "sample",
+      "valueDate": "2026-10-07",
+      "itemCount": 1,
+      "totalAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "fileHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "fileRef": "sample",
+      "preparedBy": "sample",
+      "preparedAt": "2026-10-07T09:00:00Z",
+      "releaseRequestedBy": "sample",
+      "releaseRequestedAt": "2026-10-07T09:00:00Z",
+      "releasedBy": "sample",
+      "releasedAt": "2026-10-07T09:00:00Z",
+      "items": [
+        {
+          "disbursementId": "019241a0-715c-7e8a-8740-055e9eabd8e8",
+          "disbursementNumber": "SAMPLE-000001",
+          "sourceType": "BIL",
+          "sourceId": "sample",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "endToEndId": "sample",
+          "status": "sample"
+        }
+      ]
     },
     "DisbursementGetResponse": {
       "disbursement": {

@@ -30,7 +30,7 @@ internal sealed class DisbursementSlice : IAsyncDisposable
 {
     private readonly ApiHostFactory _host;
 
-    public DisbursementSlice(PostgresFixture database, bool screening = true, bool payeeVerifier = true, bool bankChannel = true, bool manualBank = false)
+    public DisbursementSlice(PostgresFixture database, bool screening = true, bool payeeVerifier = true, bool bankChannel = true, bool manualBank = false, bool bankFileStore = true)
     {
         Database = database;
         _host = new ApiHostFactory(database.AppConnectionString);
@@ -58,6 +58,11 @@ internal sealed class DisbursementSlice : IAsyncDisposable
                 if (!bankChannel)
                 {
                     services.RemoveAll<IBankChannel>();
+                }
+
+                if (!bankFileStore)
+                {
+                    services.RemoveAll<IBankFileStore>();
                 }
             });
         });

@@ -806,6 +806,135 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.ToTable("delinquency_contact", "bil");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DisbursementBatchItemRow", b =>
+                {
+                    b.Property<Guid>("DisbursementId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("disbursement_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<bool>("Dropped")
+                        .HasColumnType("boolean")
+                        .HasColumnName("dropped");
+
+                    b.HasKey("DisbursementId")
+                        .HasName("pk_disbursement_batch_item");
+
+                    b.HasIndex("BatchId")
+                        .HasDatabaseName("ix_disbursement_batch_item_batch");
+
+                    b.ToTable("disbursement_batch_item", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_disbursement_batch_item_amount", "amount > 0");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DisbursementBatchRow", b =>
+                {
+                    b.Property<Guid>("BatchId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<string>("BankAccount")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bank_account");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("FileHash")
+                        .IsRequired()
+                        .HasColumnType("char(64)")
+                        .HasColumnName("file_hash");
+
+                    b.Property<string>("FileRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("file_ref");
+
+                    b.Property<int>("ItemCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("item_count");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime>("PreparedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("prepared_at");
+
+                    b.Property<string>("PreparedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("prepared_by");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<DateTime?>("ReleaseRequestedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("release_requested_at");
+
+                    b.Property<string>("ReleaseRequestedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("release_requested_by");
+
+                    b.Property<DateTime?>("ReleasedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("released_at");
+
+                    b.Property<string>("ReleasedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("released_by");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("total_amount");
+
+                    b.Property<DateOnly>("ValueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("value_date");
+
+                    b.HasKey("BatchId")
+                        .HasName("pk_disbursement_batch");
+
+                    b.HasIndex("LegalEntityId", "FileHash")
+                        .IsUnique()
+                        .HasDatabaseName("ux_disbursement_batch_file");
+
+                    b.ToTable("disbursement_batch", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_disbursement_batch_currency", "currency ~ '^[A-Z]{3}$'");
+
+                            t.HasCheckConstraint("ck_disbursement_batch_hash", "file_hash ~ '^[0-9a-f]{64}$'");
+
+                            t.HasCheckConstraint("ck_disbursement_batch_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_disbursement_batch_state", "state IN ('PREPARED', 'RELEASE_REQUESTED', 'RELEASED')");
+
+                            t.HasCheckConstraint("ck_disbursement_batch_total", "total_amount > 0 AND item_count > 0");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DisbursementRow", b =>
                 {
                     b.Property<Guid>("DisbursementId")
@@ -2981,6 +3110,23 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_delinquency_contact_case");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DisbursementBatchItemRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.DisbursementBatchRow", null)
+                        .WithMany()
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_disbursement_batch_item_batch");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.DisbursementRow", null)
+                        .WithMany()
+                        .HasForeignKey("DisbursementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_disbursement_batch_item_disbursement");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DisbursementRow", b =>

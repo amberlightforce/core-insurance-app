@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.DisbursementBatch.prepare result. PRD outputs: "batch, file ref"</summary>
+/// <summary>bil.DisbursementBatch.prepare result: the batch (state Prepared) and the reference of its bank file.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DisbursementBatchPrepareResponse
 {
-    /// <summary>PRD: "batch"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'batch'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("batch")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Batch { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.DisbursementBatchView Batch { get; init; }
 
-    /// <summary>PRD: "file ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Reference of the pain.001 file in the bank-file store; the file itself is written when the release is approved.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("fileRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? FileRef { get; init; }
+    public required string FileRef { get; init; }
 }

@@ -88,6 +88,8 @@ public static class BillingPaymentAdapters
         {
             services.AddSingleton<IPayeeVerifier, StubPayeeVerifier>();
             services.AddSingleton<IBankChannel, StubBankChannel>();
+            services.AddSingleton<InMemoryBankFileStore>();
+            services.AddSingleton<IBankFileStore>(sp => sp.GetRequiredService<InMemoryBankFileStore>());
         }
 
         return services;

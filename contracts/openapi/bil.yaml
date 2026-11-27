@@ -4601,6 +4601,12 @@ paths:
       x-authority-source:
       - PRD-06 l.844
       x-error-codes:
+      - code: BIL-ERR-NOTHING-PAYABLE
+        note: no eligible Approved item for the value date
+        status: 422
+      - code: BIL-ERR-METHOD-UNAVAILABLE
+        note: no bank channel or bank-file store is bound (Production fails closed until a real adapter exists)
+        status: 503
       - code: BIL-ERR-HELD-ITEMS
         status: 422
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
@@ -4670,6 +4676,14 @@ paths:
       x-authority-source:
       - PRD-06 l.844
       x-error-codes:
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-APPROVAL-REQUIRED
+        note: the batch is not in a state that can be released
+        status: 422
+      - code: BIL-ERR-NOTHING-PAYABLE
+        note: every item was stopped since the preparation
+        status: 422
       - code: BIL-ERR-HELD-ITEMS
         status: 422
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
@@ -4739,6 +4753,25 @@ paths:
       x-authority-source:
       - PRD-06 l.844
       x-error-codes:
+      - code: BIL-ERR-SOD
+        note: the approver requested the release or requested an item of the batch
+        status: 403
+      - code: BIL-ERR-STALE
+        note: the file hash differs from the current file (an item changed); request the release again
+        status: 409
+      - code: BIL-ERR-APPROVAL-REQUIRED
+        note: the batch release has not been requested, or is already released
+        status: 422
+      - code: BIL-ERR-SCREENING-UNAVAILABLE
+        status: 503
+      - code: BIL-ERR-PAYEE-BLOCKED
+        note: sanctions screening at release returned a hit for a payee
+        status: 409
+      - code: BIL-ERR-VOP-HOLD
+        note: a payee account is no longer VoP-matched
+        status: 409
+      - code: BIL-ERR-METHOD-UNAVAILABLE
+        status: 503
       - code: BIL-ERR-HELD-ITEMS
         status: 422
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
@@ -9019,64 +9052,159 @@ components:
       - recordVersion
     DisbursementBatchPrepareRequest:
       type: object
-      description: 'bil.DisbursementBatch.prepare request. PRD inputs: "bank account, value date"'
+      description: 'bil.DisbursementBatch.prepare request (BO-BIL-10). Groups the Approved non-claim disbursements (BIL_COMMISSION, BIL_LEVY,
+        TAX_REMITTANCE, BIL_OTHER) that are not yet in a batch into one SEPA pain.001 credit-transfer file paid from the bank account
+        on the value date. Without disbursementIds every eligible Approved item with a requested value date on or before it is taken;
+        with them, an item that is not eligible (stopped, in a batch, payee not VoP-verified) refuses the call (BIL-ERR-HELD-ITEMS).'
       properties:
         bankAccount:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "bank account"'
+          type: string
+          description: The own bank account to debit, as an IBAN (electronic or print format).
         valueDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "value date"'
+          description: Execution date of the file; not before today.
+        disbursementIds:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Optional subset of Approved disbursements to batch.
+      required:
+      - bankAccount
+      - valueDate
     DisbursementBatchPrepareResponse:
       type: object
-      description: 'bil.DisbursementBatch.prepare result. PRD outputs: "batch, file ref"'
+      description: 'bil.DisbursementBatch.prepare result: the batch (state Prepared) and the reference of its bank file.'
       properties:
         batch:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "batch"'
+          $ref: '#/components/schemas/DisbursementBatchView'
         fileRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file ref"'
+          type: string
+          description: Reference of the pain.001 file in the bank-file store; the file itself is written when the release is approved.
+      required:
+      - batch
+      - fileRef
     DisbursementBatchReleaseRequest:
       type: object
-      description: 'bil.DisbursementBatch.release request. PRD inputs: "bank account, value date"'
+      description: 'bil.DisbursementBatch.release request (BO-BIL-10): the first person asks for the release. Items stopped since the
+        preparation are dropped and the file and its hash are rebuilt; the second person approves that exact hash.'
       properties:
-        bankAccount:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "bank account"'
-        valueDate:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "value date"'
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - batchId
     DisbursementBatchReleaseResponse:
       type: object
-      description: 'bil.DisbursementBatch.release result. PRD outputs: "batch, file ref"'
+      description: 'bil.DisbursementBatch.release result: the batch in state ReleaseRequested with the file hash the approver must confirm.'
       properties:
         batch:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "batch"'
+          $ref: '#/components/schemas/DisbursementBatchView'
         fileRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file ref"'
+          type: string
+      required:
+      - batch
+      - fileRef
     DisbursementBatchApproveReleaseRequest:
       type: object
-      description: 'bil.DisbursementBatch.approveRelease request. PRD inputs: "bank account, value date"'
+      description: 'bil.DisbursementBatch.approveRelease request (BO-BIL-10): the second person releases the batch to the bank. The approver
+        must hold Staff.BillingManager and must be neither the person who requested the release nor the requester of any item in the batch (BIL-ERR-SOD).'
       properties:
-        bankAccount:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "bank account"'
-        valueDate:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "value date"'
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        fileHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: The hash of the file as shown by release; a different current hash is BIL-ERR-STALE.
+      required:
+      - batchId
+      - fileHash
     DisbursementBatchApproveReleaseResponse:
       type: object
-      description: 'bil.DisbursementBatch.approveRelease result. PRD outputs: "batch, file ref"'
+      description: 'bil.DisbursementBatch.approveRelease result: the batch in state Released; every item is released to the bank
+        channel (DISBURSEMENT_RELEASED posted, and cleared too with the auto stub bank).'
       properties:
         batch:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "batch"'
+          $ref: '#/components/schemas/DisbursementBatchView'
         fileRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file ref"'
+          type: string
+      required:
+      - batch
+      - fileRef
+    DisbursementBatchView:
+      type: object
+      description: A disbursement batch as stored (BO-BIL-10). No IBAN or payee name; the file carries them, the API does not.
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+          enum:
+          - Prepared
+          - ReleaseRequested
+          - Released
+        maskedBankAccount:
+          type: string
+        valueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        itemCount:
+          type: integer
+        totalAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        fileHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        fileRef:
+          type: string
+        preparedBy:
+          type: string
+        preparedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        releaseRequestedBy:
+          type: string
+        releaseRequestedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        releasedBy:
+          type: string
+        releasedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DisbursementBatchItem'
+      required:
+      - batchId
+      - status
+      - maskedBankAccount
+      - valueDate
+      - itemCount
+      - totalAmount
+      - fileHash
+      - items
+    DisbursementBatchItem:
+      type: object
+      properties:
+        disbursementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        disbursementNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        sourceType:
+          $ref: ../events/common.schema.json#/$defs/DisbursementSourceType
+        sourceId:
+          type: string
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        endToEndId:
+          type: string
+          description: The EndToEndId in the file (the disbursement number).
+        status:
+          type: string
+          description: Canonical state of the disbursement now.
+      required:
+      - disbursementId
+      - disbursementNumber
+      - sourceType
+      - sourceId
+      - amount
+      - endToEndId
+      - status
     WriteOffProposeRequest:
       type: object
       description: 'bil.WriteOff.propose request. PRD inputs: "items, reason"'
