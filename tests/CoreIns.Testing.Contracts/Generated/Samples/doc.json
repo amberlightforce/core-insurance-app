@@ -132,13 +132,61 @@
   },
   "schemas": {
     "ArchiveAddRenditionRequest": {
-      "binaryStream": "unspecified",
+      "parentArchiveId": "0192f724-cade-7447-8f62-1a79d425cc51",
+      "binaryStream": "sample",
       "declaredHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "contentType": "sample",
+      "renditionKind": "sample",
       "metadata": "unspecified"
     },
     "ArchiveAddRenditionResponse": {
       "archiveId": "01921627-8b32-7143-8ace-d1d5626f5265",
       "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
+    "ArchiveCompletenessGap": {
+      "documentId": "019238ae-c991-75da-8104-51781dbe0f17",
+      "documentNumber": "sample",
+      "archiveId": "01924138-2227-7541-8aa8-4beff68d386b",
+      "kind": "MISSING_ARCHIVE"
+    },
+    "ArchiveCompletenessPeriod": {
+      "period": "sample",
+      "issued": 1,
+      "ok": 1,
+      "gaps": [
+        {
+          "documentId": "01926349-8a68-768d-859f-c089493f98de",
+          "documentNumber": "sample",
+          "archiveId": "0192265a-07e8-7beb-86a6-f32ff786d146",
+          "kind": "MISSING_ARCHIVE"
+        }
+      ],
+      "orphanArchiveIds": [
+        "0192b0fe-ca1e-7e28-8d72-ceb5fd3fd43d"
+      ]
+    },
+    "ArchiveCompletenessResponse": {
+      "from": "2026-10-07",
+      "to": "2026-10-07",
+      "periods": [
+        {
+          "period": "sample",
+          "issued": 1,
+          "ok": 1,
+          "gaps": [
+            {
+              "documentId": "0192e0ce-5d14-7521-89f9-cd7d072dce66",
+              "documentNumber": "sample",
+              "archiveId": "01927e66-359c-7a2f-8a4f-e72771918626",
+              "kind": "MISSING_ARCHIVE"
+            }
+          ],
+          "orphanArchiveIds": [
+            "0192011b-e014-7f20-8fa4-7ebfe2ce9405"
+          ]
+        }
+      ],
+      "truncated": true
     },
     "ArchiveGetResponse": {
       "archiveId": "0192b141-a9c5-7ee3-89a6-2c265c50af67",
@@ -146,26 +194,37 @@
     },
     "ArchiveListForObjectItem": {
       "archiveId": "01927d72-52b7-75e8-8f71-30a78da98158",
-      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "documentId": "0192956d-f113-7b0c-8fd8-2e18f894e8ee",
+      "contentType": "sample",
+      "parentArchiveId": "01922b24-4210-7afd-8bbb-a2df21563a6f",
+      "renditionKind": "sample",
+      "retentionClass": "sample",
+      "createdAt": "2026-10-07T09:00:00Z"
     },
     "ArchiveListForObjectPage": {
       "items": [
         {
           "archiveId": "01923aa3-76bb-7623-806e-3f7bc0defe44",
-          "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+          "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "documentId": "01925a53-1dc6-7f5e-80bc-13d42a40f60b",
+          "contentType": "sample",
+          "parentArchiveId": "019230fc-2b8c-785d-8592-a2becbb9bfa2",
+          "renditionKind": "sample",
+          "retentionClass": "sample",
+          "createdAt": "2026-10-07T09:00:00Z"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "ArchiveSetRetentionClassRequest": {
-      "binaryStream": "unspecified",
-      "declaredHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-      "metadata": "unspecified"
+      "archiveId": "0192a360-2dee-72f5-862c-48317e3dc015",
+      "retentionClass": "sample"
     },
     "ArchiveSetRetentionClassResponse": {
       "archiveId": "0192166a-5644-7157-8b7f-21dda5b0befe",
-      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      "retentionClass": "sample"
     },
     "ArchiveStoreRequest": {
       "binaryStream": "unspecified",
@@ -177,13 +236,13 @@
       "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     },
     "ArchiveVerifyRequest": {
-      "binaryStream": "unspecified",
-      "declaredHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-      "metadata": "unspecified"
+      "archiveId": "0192a913-a50c-7aab-8dbf-886f60ecb075"
     },
     "ArchiveVerifyResponse": {
       "archiveId": "01928e59-5049-7188-8466-e0300a253146",
-      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "computedHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "result": "OK"
     },
     "BindingResolveRequest": {
       "documentType": "sample",
@@ -501,10 +560,18 @@
     },
     "EvidencePackExportRequest": {
       "packId": "01925f46-ce3c-7d5b-8276-b07016710155",
-      "filters": "unspecified"
+      "subject": "sample",
+      "partyId": "0192cf63-3e74-7de9-8002-fd4c0f1cd8bb",
+      "createdFrom": "2026-10-07",
+      "createdTo": "2026-10-07",
+      "legalClaimReason": "sample"
     },
     "EvidencePackExportResponse": {
-      "sealedArchive": "unspecified"
+      "archiveId": "0192e7a7-9816-7b84-89d1-caef888bbb48",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "documentCount": 1,
+      "excludedCount": 1,
+      "entryCount": 1
     },
     "EvidencePackGetResponse": {
       "sealedArchive": "unspecified"

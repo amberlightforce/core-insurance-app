@@ -27,6 +27,10 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
 
     public DbSet<Services.SignOff.SignOffWaiverRow> SignOffWaivers => Set<Services.SignOff.SignOffWaiverRow>();
 
+    public DbSet<Services.Staging.StagingSnapshotRow> StagingSnapshots => Set<Services.Staging.StagingSnapshotRow>();
+
+    public DbSet<Services.Staging.StagingRecordRow> StagingRecords => Set<Services.Staging.StagingRecordRow>();
+
     protected override string Schema => MigrationModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -35,6 +39,7 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
         modelBuilder.MapDsarRestrictions();
         Services.Reconciliation.ReconciliationModel.Configure(modelBuilder);
         Services.SignOff.SignOffModel.Configure(modelBuilder);
+        Services.Staging.StagingModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BatchRow>(entity =>
         {

@@ -233,6 +233,8 @@ internal static class FinanceSql
         $"GRANT SELECT, INSERT ON fin.manual_journal_line TO {appRole}",
         $"GRANT SELECT, INSERT, UPDATE, DELETE ON fin.period_close_task TO {appRole}",
         $"GRANT SELECT, INSERT ON fin.earning_run, fin.earned_premium TO {appRole}",
+        $"GRANT SELECT, INSERT, UPDATE ON fin.recon_source_total, fin.recon_break TO {appRole}",
+        $"GRANT SELECT, INSERT ON fin.recon_run TO {appRole}",
         $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {FinanceModule.Schema} TO {appRole}",
     ];
 }

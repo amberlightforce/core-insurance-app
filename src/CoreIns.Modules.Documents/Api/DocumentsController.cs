@@ -38,6 +38,13 @@ internal static class DocumentsPermissions
     public const string BindingResolve = "doc.Binding.resolve";
     public const string DocumentPreview = "doc.Document.preview";
     public const string DocumentSearch = "doc.Document.search";
+    public const string ArchiveVerify = "doc.Archive.verify";
+    public const string ArchiveAddRendition = "doc.Archive.addRendition";
+    public const string ArchiveSetRetentionClass = "doc.Archive.setRetentionClass";
+    public const string ArchiveListForObject = "doc.Archive.listForObject";
+    public const string ArchiveCompleteness = "doc.Archive.completeness";
+    public const string ArchiveDownload = "doc.Archive.download";
+    public const string EvidencePackExport = "doc.EvidencePack.export";
 }
 
 /// <summary>REST facade of the SL6-DOC-CORE operations (contracts/openapi/doc.yaml).</summary>
@@ -125,8 +132,14 @@ internal sealed class DocumentsController : ControllerBase
             : Results.Ok(new { items = page.Value.Items.Select(ToSearchItem), nextCursor = page.Value.NextCursor, limit = page.Value.Limit });
     }
 
-    private static bool TryDate(string text, out DateOnly? date)
+    private static bool TryDate(string? text, out DateOnly? date)
     {
+        if (text is null)
+        {
+            date = null;
+            return false;
+        }
+
         var ok = DateOnly.TryParseExact(text, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsed);
         date = ok ? parsed : null;
         return ok;
@@ -224,6 +237,76 @@ internal sealed class DocumentsController : ControllerBase
     public async Task<IResult> StoreArchiveAsync(
         [FromBody] ArchiveStoreRequest request, [FromServices] ICommandHandler<StoreArchive, ArchiveStoreResponse> handler, CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new StoreArchive(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>doc.Archive.verify: recompute the hash of the stored bytes (OK or TAMPERED).</summary>
+    [HttpPost("archives/verify")]
+    [Authorize(Policy = DocumentsPermissions.ArchiveVerify)]
+    public async Task<IResult> VerifyArchiveAsync(
+        [FromBody] ArchiveVerifyRequest request, [FromServices] ICommandHandler<VerifyArchive, ArchiveVerifyResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new VerifyArchive(request.ArchiveId), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>doc.Archive.addRendition: another artefact (e.g. the PDF) of an archive entry.</summary>
+    [HttpPost("archives/add-rendition")]
+    [Authorize(Policy = DocumentsPermissions.ArchiveAddRendition)]
+    public async Task<IResult> AddRenditionAsync(
+        [FromBody] ArchiveAddRenditionRequest request, [FromServices] ICommandHandler<AddRendition, ArchiveAddRenditionResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new AddRendition(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>doc.Archive.setRetentionClass: class from the market pack list only.</summary>
+    [HttpPost("archives/set-retention-class")]
+    [Authorize(Policy = DocumentsPermissions.ArchiveSetRetentionClass)]
+    public async Task<IResult> SetRetentionClassAsync(
+        [FromBody] ArchiveSetRetentionClassRequest request, [FromServices] ICommandHandler<SetRetentionClass, ArchiveSetRetentionClassResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new SetRetentionClass(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>doc.Archive.listForObject (<c>objectRef</c> is <c>MOD/Type/id</c>).</summary>
+    [HttpGet("archives/list-for-object")]
+    [Authorize(Policy = DocumentsPermissions.ArchiveListForObject)]
+    public async Task<IResult> ListArchivesForObjectAsync([FromQuery] string objectRef, [FromServices] DocumentReader reader, CancellationToken cancellationToken)
+    {
+        if (!TryParseObjectRef(objectRef, out var subject))
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "objectRef must be MODULE/Type/id."));
+        }
+
+        var items = await reader.ListArchivesForObjectAsync(subject, 200, cancellationToken).ConfigureAwait(false);
+        return Results.Ok(new { items, nextCursor = (string?)null });
+    }
+
+    /// <summary>doc.Archive.completeness: read-only gaps report per UTC month (missing archive, hash mismatch, orphans).</summary>
+    [HttpGet("archives/completeness")]
+    [Authorize(Policy = DocumentsPermissions.ArchiveCompleteness)]
+    public async Task<IResult> CompletenessAsync([FromQuery] string? from, [FromQuery] string? to, [FromServices] ArchiveCompleteness completeness, CancellationToken cancellationToken)
+    {
+        if (!TryDate(from, out var start) || !TryDate(to, out var end) || start is null || end is null || end < start || end.Value.DayNumber - start.Value.DayNumber > 366)
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "from and to must be dates (yyyy-MM-dd), to not before from, at most 366 days apart."));
+        }
+
+        return Results.Ok(await completeness.ReportAsync(start.Value, end.Value, cancellationToken).ConfigureAwait(false));
+    }
+
+    /// <summary>doc.Archive.download: the stored bytes with their media type and hash.</summary>
+    [HttpGet("archives/{id}/content")]
+    [Authorize(Policy = DocumentsPermissions.ArchiveDownload)]
+    public async Task<IResult> DownloadArchiveAsync(string id, [FromServices] DocumentReader reader, CancellationToken cancellationToken)
+    {
+        var found = Guid.TryParse(id, out var guid) ? await reader.DownloadAsync(guid, cancellationToken).ConfigureAwait(false) : null;
+        if (found is null)
+        {
+            return NotFoundProblem("The archive does not exist in your legal entity.");
+        }
+
+        HttpContext.Response.Headers["X-Content-SHA256"] = found.Value.Hash;
+        return Results.File(found.Value.Content, found.Value.ContentType);
+    }
+
+    /// <summary>doc.EvidencePack.export: a deterministic zip with manifest and delivery evidence, stored as an archive entry.</summary>
+    [HttpPost("evidence-packs/export")]
+    [Authorize(Policy = DocumentsPermissions.EvidencePackExport)]
+    public async Task<IResult> ExportEvidencePackAsync(
+        [FromBody] EvidencePackExportRequest request, [FromServices] ICommandHandler<ExportEvidencePack, EvidencePackExportResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ExportEvidencePack(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
     /// <summary>doc.Archive.get.</summary>
     [HttpGet("archives/{id}")]

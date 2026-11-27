@@ -112,7 +112,7 @@ public static class DocumentsErrorCodes
 
     /// <summary>DOC-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): doc.Document.get, doc.Document.listForObject, doc.Ipid.get.</para>
+    /// <para>Declared by 4 operation(s): doc.Archive.download, doc.Document.get, doc.Document.listForObject, doc.Ipid.get.</para>
     /// </remarks>
     public const string NotFound = "DOC-ERR-NOT-FOUND";
 
@@ -124,7 +124,7 @@ public static class DocumentsErrorCodes
 
     /// <summary>DOC-ERR-PAYLOAD-INVALID (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): doc.Document.preview, doc.Document.request, doc.Document.search.</para>
+    /// <para>Declared by 4 operation(s): doc.Archive.completeness, doc.Document.preview, doc.Document.request, doc.Document.search.</para>
     /// </remarks>
     public const string PayloadInvalid = "DOC-ERR-PAYLOAD-INVALID";
 

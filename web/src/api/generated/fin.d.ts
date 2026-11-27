@@ -2684,71 +2684,113 @@ export interface components {
             /** @description PRD: "pack" */
             pack?: components["schemas"]["Unspecified"];
         };
-        /** @description fin.Reconciliation.exchange request. PRD inputs: "source, date, totals" */
+        /** @description Source and ledger totals of one currency in a reconciliation run (decimal strings with 2 places; counts are items). */
+        ReconCurrencyTotal: {
+            currency: string;
+            sourceAmount: string;
+            ledgerAmount: string;
+            /** @description Source minus ledger. */
+            difference: string;
+            /** @description Absent when the source reports no item count. */
+            sourceCount?: number;
+            ledgerCount: number;
+        };
+        /** @description One run of a reconciliation definition for a period; results are never edited, a rerun adds a run with the next number. */
+        ReconRunView: {
+            runId: components["schemas"]["Uuid"];
+            definition: string;
+            /** @description Calendar month, yyyy-MM. */
+            period: string;
+            runNo: number;
+            /** @enum {string} */
+            state: "CLEAN" | "BREAKS";
+            ranBy: string;
+            ranAt: components["schemas"]["Instant"];
+            openBreaks: number;
+            currencies: components["schemas"]["ReconCurrencyTotal"][];
+        };
+        /** @description A difference between a source and the ledger. OPEN until it is matched (RESOLVED), accepted for the close (ACCEPTED) or no longer found by a rerun (RESOLVED). */
+        ReconBreakView: {
+            breakId: components["schemas"]["Uuid"];
+            /** @description The run that first found the break. */
+            runId: components["schemas"]["Uuid"];
+            /** @description The latest run that still found it. */
+            lastRunId?: components["schemas"]["Uuid"];
+            definition: string;
+            period: string;
+            currency: string;
+            /** @enum {string} */
+            kind: "AMOUNT" | "COUNT" | "MISSING_SOURCE" | "MISSING_LEDGER";
+            /** @enum {string} */
+            state: "OPEN" | "ACCEPTED" | "RESOLVED";
+            sourceAmount: string;
+            ledgerAmount: string;
+            /** @description Source minus ledger. */
+            difference: string;
+            sourceCount?: number;
+            ledgerCount?: number;
+            createdAt?: components["schemas"]["Instant"];
+            /** @description Who accepted the break or matched it. */
+            decidedBy?: string;
+            decidedAt?: components["schemas"]["Instant"];
+            reason?: string;
+        };
+        /** @description A reconciliation definition (source against ledger accounts, per currency) with the state of its latest run in the period. */
+        ReconDefinitionView: {
+            code: string;
+            description: string;
+            sourceModule: string;
+            ledgerAccounts: string[];
+            latestRun?: components["schemas"]["ReconRunView"];
+            openBreaks: number;
+            acceptedBreaks: number;
+        };
+        ReconSourceTotal: {
+            currency: string;
+            /** @description Decimal with at most 2 places, in the source's natural sign (see the definition). */
+            amount: string;
+            count?: number;
+        };
+        /** @description fin.Reconciliation.exchange request: the daily control totals a source module (BIL, RI, CLM) pushes after its day close; the same source, date and currency replaces the earlier push. */
         ReconciliationExchangeRequest: {
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
-            /** @description PRD: "date" */
-            date?: components["schemas"]["LocalDate"];
-            /** @description PRD: "totals" */
-            totals?: components["schemas"]["Unspecified"];
+            /** @enum {string} */
+            source: "BIL" | "RI" | "CLM";
+            date: components["schemas"]["LocalDate"];
+            totals: components["schemas"]["ReconSourceTotal"][];
         };
-        /** @description fin.Reconciliation.exchange result. PRD outputs: "comparison result, break ids" */
+        /** @description fin.Reconciliation.exchange result: the totals are stored and the month of the date is compared with the ledger. */
         ReconciliationExchangeResponse: {
-            /** @description PRD: "comparison result" */
-            comparisonResult?: components["schemas"]["Unspecified"];
-            /** @description PRD: "break ids" */
-            breakIds?: components["schemas"]["Uuid"][];
+            /** @enum {string} */
+            comparisonResult: "MATCHED" | "BREAKS";
+            breakIds: components["schemas"]["Uuid"][];
         };
-        /** @description fin.Reconciliation.detail result. PRD outputs: "items, matches" */
+        /** @description fin.Reconciliation.detail result: every definition of the period with its latest run, and the run history of the definition asked for. */
         ReconciliationDetailResponse: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "matches" */
-            matches?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Reconciliation.breaks result. PRD outputs: "items, matches" */
-        ReconciliationBreaksItem: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "matches" */
-            matches?: components["schemas"]["Unspecified"];
+            period: string;
+            definitions: components["schemas"]["ReconDefinitionView"][];
+            /** @description All runs of the requested definition in the period, newest first (empty when no definition is asked for). */
+            runs: components["schemas"]["ReconRunView"][];
         };
         /** @description Page of fin.Reconciliation.breaks results (cursor pagination, contract §3.5.5) */
         ReconciliationBreaksPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["ReconciliationBreaksItem"][];
+            items?: components["schemas"]["ReconBreakView"][];
         };
-        /** @description fin.Reconciliation.match request. PRD inputs: "key, date, items" */
+        /** @description fin.Reconciliation.match request: an OPEN break is explained and cleared by hand, with a reason. */
         ReconciliationMatchRequest: {
-            /** @description PRD: "key" */
-            key?: components["schemas"]["Unspecified"];
-            /** @description PRD: "date" */
-            date?: components["schemas"]["LocalDate"];
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
+            breakId: components["schemas"]["Uuid"];
+            reason: string;
         };
-        /** @description fin.Reconciliation.match result. PRD outputs: "items, matches" */
         ReconciliationMatchResponse: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "matches" */
-            matches?: components["schemas"]["Unspecified"];
+            break: components["schemas"]["ReconBreakView"];
         };
-        /** @description fin.Reconciliation.run request. PRD inputs: "key, date, items" */
+        /** @description fin.Reconciliation.run request: runs one definition, or all of them when none is named, for a period. */
         ReconciliationRunRequest: {
-            /** @description PRD: "key" */
-            key?: components["schemas"]["Unspecified"];
-            /** @description PRD: "date" */
-            date?: components["schemas"]["LocalDate"];
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
+            /** @description Calendar month, yyyy-MM. */
+            period: string;
+            definition?: string;
         };
-        /** @description fin.Reconciliation.run result. PRD outputs: "items, matches" */
         ReconciliationRunResponse: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "matches" */
-            matches?: components["schemas"]["Unspecified"];
+            runs: components["schemas"]["ReconRunView"][];
         };
         /** @description fin.TaxReturn.list result. PRD outputs: "return, file, payment status" */
         TaxReturnListItem: {
@@ -5307,7 +5349,11 @@ export interface operations {
     };
     "fin.Reconciliation.detail": {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Calendar month, yyyy-MM */
+                period: string;
+                definition?: string;
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
@@ -5345,6 +5391,10 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description Calendar month, yyyy-MM */
+                period?: string;
+                definition?: string;
+                state?: "OPEN" | "ACCEPTED" | "RESOLVED";
             };
             header?: {
                 /**
@@ -5378,14 +5428,7 @@ export interface operations {
     };
     "fin.Reconciliation.match": {
         parameters: {
-            query?: {
-                /**
-                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
-                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
-                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
-                 */
-                dryRun?: components["parameters"]["DryRun"];
-            };
+            query?: never;
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner

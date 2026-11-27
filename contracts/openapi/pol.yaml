@@ -2446,6 +2446,9 @@ paths:
       - ui
       x-permission: pol.RenewalRun.start
       x-error-codes:
+      - code: POL-ERR-RUN-ACTIVE
+        note: a renewal run of this legal entity is already running or paused
+        status: 409
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -2507,6 +2510,10 @@ paths:
       - ui
       x-permission: pol.RenewalRun.retryItem
       x-error-codes:
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -2535,6 +2542,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -2568,6 +2577,10 @@ paths:
       - ui
       x-permission: pol.RenewalRun.pause
       x-error-codes:
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -2596,6 +2609,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -6232,64 +6247,159 @@ components:
       - recordedAt
     RenewalRunStartRequest:
       type: object
-      description: 'pol.RenewalRun.start request. PRD inputs: "entity, product, window"'
+      description: 'pol.RenewalRun.start request (REQ-POL-247): select the terms of the legal entity that end inside the renewal window and queue them for the batch worker. With resumeRunId a paused run is resumed instead (no other field is read). One run per legal entity at a time (POL-ERR-RUN-ACTIVE).'
       properties:
-        entity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entity"'
         product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product"'
-        window:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "window"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Only terms of this product code; absent means every product
+        windowDays:
+          type: integer
+          minimum: 1
+          maximum: 365
+          description: Select terms that end within this many Athens calendar days from today (and not yet); defaults to the configured pol.renewal.lead_days and cannot exceed it
+        dryRun:
+          type: boolean
+          description: Evaluate every term (skip rules, product availability) and record WOULD_CREATE without creating or offering any renewal
+        resumeRunId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Resume this PAUSED run
+    RenewalRunItemView:
+      type: object
+      description: One term of a renewal run and what happened to it.
+      properties:
+        itemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        seq:
+          type: integer
+          minimum: 1
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        outcome:
+          $ref: '#/components/schemas/RenewalRunItemOutcome'
+        errorCode:
+          type: string
+          description: Error code of a FAILED item (for example POL-ERR-PRODUCT-UNAVAILABLE)
+        detail:
+          type: string
+          description: Short reason; no personal data
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The renewal job created (or found) for the term
+        attempts:
+          type: integer
+          minimum: 0
+        updatedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - itemId
+      - seq
+      - termId
+      - policyId
+      - outcome
+      - attempts
+      - updatedAt
+    RenewalRunItemOutcome:
+      type: string
+      description: PENDING until the worker has handled the term; WOULD_CREATE only in a dry run; SKIPPED_VULNERABLE goes to the PSR queue (NX-HD-02).
+      enum:
+      - PENDING
+      - CREATED
+      - WOULD_CREATE
+      - SKIPPED_NON_RENEWED
+      - SKIPPED_VULNERABLE
+      - SKIPPED_EXISTING
+      - FAILED
+    RenewalRunView:
+      type: object
+      description: A renewal run with its counters and (up to 500) items, failed ones first.
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+          enum:
+          - RUNNING
+          - PAUSED
+          - COMPLETED
+          - COMPLETED_WITH_ERRORS
+        dryRun:
+          type: boolean
+        product:
+          $ref: ../events/common.schema.json#/$defs/Code
+        windowDays:
+          type: integer
+          minimum: 1
+        total:
+          type: integer
+          minimum: 0
+        counts:
+          $ref: ../events/common.schema.json#/$defs/Counts
+          description: Items per outcome
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RenewalRunItemView'
+        requestedBy:
+          type: string
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        finishedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - runId
+      - status
+      - dryRun
+      - windowDays
+      - total
+      - counts
+      - items
+      - requestedBy
+      - createdAt
     RenewalRunStartResponse:
       type: object
-      description: 'pol.RenewalRun.start result. PRD outputs: "run"'
+      description: 'pol.RenewalRun.start result: the run, RUNNING; the worker processes it.'
       properties:
         run:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "run"'
+          $ref: '#/components/schemas/RenewalRunView'
+      required:
+      - run
     RenewalRunRetryItemRequest:
       type: object
-      description: 'pol.RenewalRun.retryItem request. PRD inputs: "entity, product, window"'
+      description: 'pol.RenewalRun.retryItem request: a FAILED item goes back to PENDING and the run to RUNNING.'
       properties:
-        entity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entity"'
-        product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product"'
-        window:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "window"'
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        itemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - runId
+      - itemId
     RenewalRunRetryItemResponse:
       type: object
-      description: 'pol.RenewalRun.retryItem result. PRD outputs: "run"'
+      description: 'pol.RenewalRun.retryItem result: the run.'
       properties:
         run:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "run"'
+          $ref: '#/components/schemas/RenewalRunView'
+      required:
+      - run
     RenewalRunPauseRequest:
       type: object
-      description: 'pol.RenewalRun.pause request. PRD inputs: "entity, product, window"'
+      description: 'pol.RenewalRun.pause request: the worker stops after the chunk it is on; start with resumeRunId continues.'
       properties:
-        entity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entity"'
-        product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product"'
-        window:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "window"'
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - runId
     RenewalRunPauseResponse:
       type: object
-      description: 'pol.RenewalRun.pause result. PRD outputs: "run"'
+      description: 'pol.RenewalRun.pause result: the run.'
       properties:
         run:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "run"'
+          $ref: '#/components/schemas/RenewalRunView'
+      required:
+      - run
     PolicyMoveExecuteRequest:
       type: object
       description: 'pol.PolicyMove.execute request. PRD inputs: "policyIds, targetAccountId, requestRef"'

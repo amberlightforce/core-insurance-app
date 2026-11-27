@@ -87,6 +87,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chn/v1/portal/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Portal caller
+         * @description The signed-in customer: linked party and account ids, or 404 when the caller has no live portal link.
+         */
+        get: operations["chn.Portal.me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Portal dashboard
+         * @description Work left for the customer: renewals due, unpaid invoices. Policies are read from POL, invoices from BIL; nothing is copied into CHN.
+         */
+        get: operations["chn.Portal.dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal/policies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Portal policy list
+         * @description The signed-in customer own and household policies, newest policy number first.
+         */
+        get: operations["chn.Portal.policies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chn/v1/portal/policies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Portal policy detail
+         * @description One owned policy as of today, customer-visible fields only. A policy the caller does not own is 404.
+         */
+        get: operations["chn.Portal.policy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chn/v1/permission-matrices/create-draft": {
         parameters: {
             query?: never;
@@ -2155,6 +2235,85 @@ export interface components {
         PortalIdentityLinkResponse: {
             identity: components["schemas"]["PortalIdentityView"];
         };
+        /** @description chn.Portal.me result: the customer scope, ids only (no personal data). */
+        PortalMeResponse: {
+            subject: string;
+            partyId: components["schemas"]["Uuid"];
+            accountIds: components["schemas"]["Uuid"][];
+            /** @description Number of parties whose policies the customer sees, the customer included */
+            householdSize: number;
+        };
+        PortalPolicyListItem: {
+            policyId: components["schemas"]["Uuid"];
+            policyNumber: components["schemas"]["BusinessNumber"];
+            productCode: components["schemas"]["Code"];
+            /** @description Display status of the policy today */
+            status?: string;
+            termStart?: components["schemas"]["Instant"];
+            termEnd?: components["schemas"]["Instant"];
+            /**
+             * @description OWN when the customer is the policyholder, HOUSEHOLD when a member of the customer account is
+             * @enum {string}
+             */
+            ownership: "OWN" | "HOUSEHOLD";
+        };
+        /** @description Page of chn.Portal.policies results (cursor pagination) */
+        PortalPolicyListResponse: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["PortalPolicyListItem"][];
+        };
+        PortalCoverage: {
+            coverageCode: string;
+            selected: boolean;
+        };
+        PortalVehicle: {
+            plate: string;
+            make?: string;
+            model?: string;
+            firstRegistrationYear?: number;
+        };
+        PortalPremiumLine: {
+            category: string;
+            amount: components["schemas"]["Money"];
+        };
+        /** @description chn.Portal.policy result: customer-visible fields only (no UW data, no internal notes, no rating or rule trace). */
+        PortalPolicyDetailResponse: {
+            policyId: components["schemas"]["Uuid"];
+            policyNumber: components["schemas"]["BusinessNumber"];
+            productCode: components["schemas"]["Code"];
+            status?: string;
+            /** @enum {string} */
+            ownership: "OWN" | "HOUSEHOLD";
+            termNumber?: number;
+            termStart?: components["schemas"]["Instant"];
+            termEnd?: components["schemas"]["Instant"];
+            currency?: components["schemas"]["CurrencyCode"];
+            paymentPlan?: string;
+            coverages: components["schemas"]["PortalCoverage"][];
+            vehicles: components["schemas"]["PortalVehicle"][];
+            premium: components["schemas"]["PortalPremiumLine"][];
+        };
+        PortalRenewalDue: {
+            policyId: components["schemas"]["Uuid"];
+            policyNumber: components["schemas"]["BusinessNumber"];
+            productCode: components["schemas"]["Code"];
+            expiresAt: components["schemas"]["Instant"];
+            daysLeft: number;
+        };
+        PortalUnpaidInvoice: {
+            invoiceId: components["schemas"]["Uuid"];
+            invoiceNumber: components["schemas"]["BusinessNumber"];
+            policyId: components["schemas"]["Uuid"];
+            dueDate: components["schemas"]["LocalDate"];
+            open: components["schemas"]["Money"];
+            overdue: boolean;
+        };
+        /** @description chn.Portal.dashboard result. Open requests are not included yet (TODO(hardening) until BO-CHN-04 messages). */
+        PortalDashboardResponse: {
+            policyCount: number;
+            activePolicyCount: number;
+            renewalsDue: components["schemas"]["PortalRenewalDue"][];
+            unpaidInvoices: components["schemas"]["PortalUnpaidInvoice"][];
+        };
         /** @description chn.Journey.start request. PRD inputs: "journey type, context" */
         JourneyStartRequest: {
             /** @description PRD: "journey type" */
@@ -3047,6 +3206,10 @@ export interface components {
          * @description RFC 3339 timestamp in UTC (suffix Z).
          */
         Instant: string;
+        /** @description Business number issued through PLT numbering (NumberingScheme); format is configuration. */
+        BusinessNumber: string;
+        /** @description Code value from a configured code list. Values are owned by configuration, not by this schema. */
+        Code: string;
         /** Format: date */
         LocalDate: string;
         /** @description Decimal number as a string (no binary floating point for money or rates). */
@@ -3058,10 +3221,6 @@ export interface components {
             amount: components["schemas"]["Decimal"];
             currency: components["schemas"]["CurrencyCode"];
         };
-        /** @description Business number issued through PLT numbering (NumberingScheme); format is configuration. */
-        BusinessNumber: string;
-        /** @description Code value from a configured code list. Values are owned by configuration, not by this schema. */
-        Code: string;
         /** @description Cursor page (contract §3.5.5). Lists are filtered by the caller's legal entity and ABAC scope. */
         PageEnvelope: {
             items: unknown[];
@@ -3347,6 +3506,150 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PortalIdentityLinkResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.Portal.me": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalMeResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.Portal.dashboard": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalDashboardResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.Portal.policies": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page */
+                cursor?: string;
+                /** @description Page size, 1 to 100 (default 25) */
+                limit?: number;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalPolicyListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "chn.Portal.policy": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description The policy id */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalPolicyDetailResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];

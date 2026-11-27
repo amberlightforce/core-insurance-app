@@ -371,6 +371,50 @@
         "sample"
       ]
     },
+    "StagingLoadRequest": {
+      "source": "sample",
+      "snapshot": "sample",
+      "format": "JSON",
+      "content": "sample"
+    },
+    "StagingSnapshot": {
+      "snapshotId": "0192b3b8-cc26-72af-8c55-df54eb013763",
+      "source": "sample",
+      "snapshot": "sample",
+      "version": 1,
+      "status": "ACTIVE",
+      "format": "JSON",
+      "contentHash": "sample",
+      "recordCount": 1,
+      "counts": {
+        "sample": 1
+      },
+      "loadedBy": "sample",
+      "loadedAt": "2026-10-07T09:00:00Z",
+      "unchanged": true,
+      "supersededSnapshotId": "0192dbb5-9fee-74fb-8a34-62b98024f06f"
+    },
+    "StagingSnapshotList": {
+      "items": [
+        {
+          "snapshotId": "01923325-4c55-7168-8a1e-feed92a32f0e",
+          "source": "sample",
+          "snapshot": "sample",
+          "version": 1,
+          "status": "ACTIVE",
+          "format": "JSON",
+          "contentHash": "sample",
+          "recordCount": 1,
+          "counts": {
+            "sample": 1
+          },
+          "loadedBy": "sample",
+          "loadedAt": "2026-10-07T09:00:00Z",
+          "unchanged": true,
+          "supersededSnapshotId": "0192ba0f-6cc0-70de-8146-67f075783db8"
+        }
+      ]
+    },
     "XrefListItem": {
       "xrefId": "0192b4e4-42aa-77e2-82e3-a37def07dfd2",
       "source": "sample",

@@ -2903,6 +2903,18 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: period
+        in: query
+        required: true
+        description: Calendar month, yyyy-MM
+        schema:
+          type: string
+          pattern: ^[0-9]{4}-(0[1-9]|1[0-2])$
+      - name: definition
+        in: query
+        required: false
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -2956,6 +2968,24 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: period
+        in: query
+        required: false
+        description: Calendar month, yyyy-MM
+        schema:
+          type: string
+          pattern: ^[0-9]{4}-(0[1-9]|1[0-2])$
+      - name: definition
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [OPEN, ACCEPTED, RESOLVED]
       responses:
         '200':
           description: Success
@@ -2994,7 +3024,7 @@ paths:
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
+      x-dry-run: false
       x-dry-run-note: 'PRD dry-run: match; PRD idempotency: Yes'
       x-exposure:
       - ui
@@ -3011,7 +3041,6 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -7437,55 +7466,178 @@ components:
         pack:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "pack"'
+    ReconCurrencyTotal:
+      type: object
+      description: Source and ledger totals of one currency in a reconciliation run (decimal strings with 2 places; counts are items).
+      required: [currency, sourceAmount, ledgerAmount, difference, ledgerCount]
+      properties:
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        sourceAmount:
+          type: string
+        ledgerAmount:
+          type: string
+        difference:
+          type: string
+          description: Source minus ledger.
+        sourceCount:
+          type: integer
+          description: Absent when the source reports no item count.
+        ledgerCount:
+          type: integer
+    ReconRunView:
+      type: object
+      description: One run of a reconciliation definition for a period; results are never edited, a rerun adds a run with the next number.
+      required: [runId, definition, period, runNo, state, ranBy, ranAt, openBreaks, currencies]
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        definition:
+          type: string
+        period:
+          type: string
+          description: Calendar month, yyyy-MM.
+        runNo:
+          type: integer
+        state:
+          type: string
+          enum: [CLEAN, BREAKS]
+        ranBy:
+          type: string
+        ranAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        openBreaks:
+          type: integer
+        currencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReconCurrencyTotal'
+    ReconBreakView:
+      type: object
+      description: A difference between a source and the ledger. OPEN until it is matched (RESOLVED), accepted for the close (ACCEPTED) or no longer found by a rerun (RESOLVED).
+      required: [breakId, runId, definition, period, currency, kind, state, difference, sourceAmount, ledgerAmount]
+      properties:
+        breakId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The run that first found the break.
+        lastRunId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The latest run that still found it.
+        definition:
+          type: string
+        period:
+          type: string
+        currency:
+          type: string
+        kind:
+          type: string
+          enum: [AMOUNT, COUNT, MISSING_SOURCE, MISSING_LEDGER]
+        state:
+          type: string
+          enum: [OPEN, ACCEPTED, RESOLVED]
+        sourceAmount:
+          type: string
+        ledgerAmount:
+          type: string
+        difference:
+          type: string
+          description: Source minus ledger.
+        sourceCount:
+          type: integer
+        ledgerCount:
+          type: integer
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        decidedBy:
+          type: string
+          description: Who accepted the break or matched it.
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        reason:
+          type: string
+    ReconDefinitionView:
+      type: object
+      description: A reconciliation definition (source against ledger accounts, per currency) with the state of its latest run in the period.
+      required: [code, description, sourceModule, ledgerAccounts, openBreaks, acceptedBreaks]
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+        sourceModule:
+          type: string
+        ledgerAccounts:
+          type: array
+          items:
+            type: string
+        latestRun:
+          $ref: '#/components/schemas/ReconRunView'
+        openBreaks:
+          type: integer
+        acceptedBreaks:
+          type: integer
+    ReconSourceTotal:
+      type: object
+      required: [currency, amount]
+      properties:
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        amount:
+          type: string
+          description: Decimal with at most 2 places, in the source's natural sign (see the definition).
+        count:
+          type: integer
+          minimum: 0
     ReconciliationExchangeRequest:
       type: object
-      description: 'fin.Reconciliation.exchange request. PRD inputs: "source, date, totals"'
+      description: 'fin.Reconciliation.exchange request: the daily control totals a source module (BIL, RI, CLM) pushes after its day close; the same source, date and currency replaces the earlier push.'
+      required: [source, date, totals]
       properties:
         source:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "source"'
+          type: string
+          enum: [BIL, RI, CLM]
         date:
           $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
         totals:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "totals"'
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/ReconSourceTotal'
     ReconciliationExchangeResponse:
       type: object
-      description: 'fin.Reconciliation.exchange result. PRD outputs: "comparison result, break ids"'
+      description: 'fin.Reconciliation.exchange result: the totals are stored and the month of the date is compared with the ledger.'
+      required: [comparisonResult, breakIds]
       properties:
         comparisonResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "comparison result"'
+          type: string
+          enum: [MATCHED, BREAKS]
         breakIds:
           type: array
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "break ids"'
     ReconciliationDetailResponse:
       type: object
-      description: 'fin.Reconciliation.detail result. PRD outputs: "items, matches"'
+      description: 'fin.Reconciliation.detail result: every definition of the period with its latest run, and the run history of the definition asked for.'
+      required: [period, definitions, runs]
       properties:
-        items:
+        period:
+          type: string
+        definitions:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        matches:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "matches"'
-    ReconciliationBreaksItem:
-      type: object
-      description: 'fin.Reconciliation.breaks result. PRD outputs: "items, matches"'
-      properties:
-        items:
+            $ref: '#/components/schemas/ReconDefinitionView'
+        runs:
           type: array
+          description: All runs of the requested definition in the period, newest first (empty when no definition is asked for).
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        matches:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "matches"'
+            $ref: '#/components/schemas/ReconRunView'
     ReconciliationBreaksPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7494,62 +7646,45 @@ components:
           items:
             type: array
             items:
-              $ref: '#/components/schemas/ReconciliationBreaksItem'
+              $ref: '#/components/schemas/ReconBreakView'
       description: Page of fin.Reconciliation.breaks results (cursor pagination, contract §3.5.5)
     ReconciliationMatchRequest:
       type: object
-      description: 'fin.Reconciliation.match request. PRD inputs: "key, date, items"'
+      description: 'fin.Reconciliation.match request: an OPEN break is explained and cleared by hand, with a reason.'
+      required: [breakId, reason]
       properties:
-        key:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "key"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
+        breakId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
     ReconciliationMatchResponse:
       type: object
-      description: 'fin.Reconciliation.match result. PRD outputs: "items, matches"'
+      required: [break]
       properties:
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        matches:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "matches"'
+        break:
+          $ref: '#/components/schemas/ReconBreakView'
     ReconciliationRunRequest:
       type: object
-      description: 'fin.Reconciliation.run request. PRD inputs: "key, date, items"'
+      description: 'fin.Reconciliation.run request: runs one definition, or all of them when none is named, for a period.'
+      required: [period]
       properties:
-        key:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "key"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
+        period:
+          type: string
+          minLength: 7
+          maxLength: 7
+          description: Calendar month, yyyy-MM.
+        definition:
+          type: string
     ReconciliationRunResponse:
       type: object
-      description: 'fin.Reconciliation.run result. PRD outputs: "items, matches"'
+      required: [runs]
       properties:
-        items:
+        runs:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        matches:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "matches"'
+            $ref: '#/components/schemas/ReconRunView'
     TaxReturnListItem:
       type: object
       description: 'fin.TaxReturn.list result. PRD outputs: "return, file, payment status"'

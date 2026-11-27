@@ -174,6 +174,11 @@ internal sealed class DocumentsDbContext(DbContextOptions<DocumentsDbContext> op
             entity.Property(e => e.ContentHash).HasColumnName("content_hash").HasColumnType("char(64)");
             entity.Property(e => e.Metadata).HasColumnName("metadata").HasColumnType("jsonb");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ParentArchiveId).HasColumnName("parent_archive_id");
+            entity.Property(e => e.RenditionKind).HasColumnName("rendition_kind");
+            entity.Property(e => e.RetentionClass).HasColumnName("retention_class");
+            entity.HasIndex(e => e.ParentArchiveId).HasDatabaseName("ix_archive_parent");
+            entity.HasIndex(e => new { e.LegalEntityId, e.CreatedAt }).HasDatabaseName("ix_archive_created");
         });
     }
 }
@@ -287,6 +292,14 @@ internal sealed class ArchiveRow
     public string Metadata { get; set; } = "{}";
 
     public Instant CreatedAt { get; set; }
+
+    /// <summary>For a rendition (e.g. the PDF next to the HTML letter): the archive entry it belongs to (BO-DOC-04).</summary>
+    public Guid? ParentArchiveId { get; set; }
+
+    public string? RenditionKind { get; set; }
+
+    /// <summary>Retention class from the market pack list; null until set (durations are not invented, D-REG-07).</summary>
+    public string? RetentionClass { get; set; }
 }
 
 internal sealed class DocumentTypeRow
