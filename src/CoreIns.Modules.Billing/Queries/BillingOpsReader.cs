@@ -20,34 +20,6 @@ internal sealed record PlanInstanceView(
 /// </summary>
 internal sealed class BillingOpsReader(BillingDbContext db)
 {
-    /// <summary>Unapplied cash: receipts in state SUSPENSE, optionally for one account.</summary>
-    public async Task<OpsPage<ReceiptView>> SuspenseAsync(LegalEntityId legalEntity, Guid? billingAccountId, string? cursor, int? limit, CancellationToken cancellationToken)
-    {
-        var size = Math.Clamp(limit ?? 50, 1, 200);
-        var suspense = Codes.Of(PaymentState.Suspense);
-        var query = db.Receipts.AsNoTracking().Where(r => r.LegalEntityId == legalEntity && r.State == suspense);
-        if (billingAccountId is { } a)
-        {
-            var account = new BillingAccountId(a);
-            query = query.Where(r => r.BillingAccountId == account);
-        }
-
-        var rows = (await query.ToListAsync(cancellationToken).ConfigureAwait(false)).OrderBy(r => r.ReceiptId.Value).ToList();
-        if (Guid.TryParse(cursor, out var after))
-        {
-            rows = [.. rows.Where(r => r.ReceiptId.Value.CompareTo(after) > 0)];
-        }
-
-        var window = rows.Take(size + 1).ToList();
-        var page = window.Take(size).ToList();
-        var ids = page.Select(r => r.ReceiptId).ToList();
-        var allocated = await db.Allocations.AsNoTracking().Where(x => ids.Contains(x.ReceiptId)).GroupBy(x => x.ReceiptId)
-            .Select(g => new { g.Key, Sum = g.Sum(x => x.Amount) }).ToListAsync(cancellationToken).ConfigureAwait(false);
-        return new OpsPage<ReceiptView>(
-            [.. page.Select(r => BillingReader.Receipt(r, allocated.FirstOrDefault(x => x.Key == r.ReceiptId)?.Sum ?? 0m))],
-            window.Count > size ? page[^1].ReceiptId.Value.ToString("D") : null, size);
-    }
-
     /// <summary>Plan instances (one per attached policy term), optionally for one account or a policy-number prefix.</summary>
     public async Task<OpsPage<PlanInstanceView>> PlanInstancesAsync(
         LegalEntityId legalEntity, Guid? billingAccountId, string? search, string? cursor, int? limit, CancellationToken cancellationToken)

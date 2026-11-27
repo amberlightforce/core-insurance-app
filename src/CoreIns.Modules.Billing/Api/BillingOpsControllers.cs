@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace CoreIns.Modules.Billing.Api;
 
 /// <summary>
-/// Reads for the billing operations screens (NX-UI-14c): the suspense workbench list and plan instances. Not in
+/// Reads for the billing operations screens (NX-UI-14c): plan instances. Not in
 /// contracts/openapi (the contract types them loosely; allow-listed in RouteConformanceAllowList.txt).
 /// TODO(hardening): add these operations to bil.yaml and regenerate the contracts.
 /// </summary>
@@ -17,13 +17,6 @@ namespace CoreIns.Modules.Billing.Api;
 [Route("api/bil/v1/billing-ops")]
 internal sealed class BillingOpsController : ControllerBase
 {
-    /// <summary>Unapplied cash (receipts in SUSPENSE) with the reason it could not be applied.</summary>
-    [HttpGet("suspense")]
-    [Authorize(Policy = "bil.Suspense.list")]
-    public async Task<IResult> SuspenseAsync(
-        [FromQuery] Guid? billingAccountId, [FromQuery] string? cursor, [FromQuery] int? limit, [FromServices] BillingOpsReader reader, CancellationToken cancellationToken) =>
-        Results.Ok(await reader.SuspenseAsync(LegalEntity(), billingAccountId, cursor, limit, cancellationToken).ConfigureAwait(false));
-
     /// <summary>Plan instances of attached policy terms; <c>search</c> is a policy-number prefix.</summary>
     [HttpGet("plan-instances")]
     [Authorize(Policy = "bil.PlanInstance.list")]

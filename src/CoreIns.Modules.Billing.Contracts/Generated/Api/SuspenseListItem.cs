@@ -4,23 +4,61 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Suspense.list result. PRD outputs: "items, suggestions"</summary>
+/// <summary>An unmatched payment held in suspense (REQ-BIL-135): the receipt, its unapplied amount and why it could not be applied</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SuspenseListItem
 {
-    /// <summary>PRD: "items"</summary>
+    /// <summary>Contract member 'suspenseItemId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'suspenseItemId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Items { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("suspenseItemId")]
+    public required global::System.Guid SuspenseItemId { get; init; }
 
-    /// <summary>PRD: "suggestions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("suggestions")]
+    /// <summary>Contract member 'receiptId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receiptId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PaymentId ReceiptId { get; init; }
+
+    /// <summary>Contract member 'receiptNumber'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receiptNumber")]
+    public required global::CoreIns.SharedKernel.Identifiers.ReceiptNumber ReceiptNumber { get; init; }
+
+    /// <summary>Account holding the cash now (changes with a transfer)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("billingAccountId")]
+    public required global::CoreIns.SharedKernel.Identifiers.BillingAccountId BillingAccountId { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required global::CoreIns.Modules.Billing.Contracts.Api.SuspenseState State { get; init; }
+
+    /// <summary>Contract member 'amount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+    public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+
+    /// <summary>Why the receipt is unapplied, e.g. AMOUNT_MISMATCH, NO_OPEN_INVOICE, AMBIGUOUS_MATCH, CONCURRENT_ALLOCATION, TRANSFERRED</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
+
+    /// <summary>Contract member 'bankReference'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("bankReference")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Suggestions { get; init; }
+    public string? BankReference { get; init; }
+
+    /// <summary>Contract member 'valueDate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("valueDate")]
+    public required global::CoreIns.SharedKernel.BusinessDate ValueDate { get; init; }
+
+    /// <summary>The refund-to-sender of the item, when one was requested</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("refundId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.RefundId? RefundId { get; init; }
+
+    /// <summary>Contract member 'recordedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordedAt")]
+    public required global::CoreIns.SharedKernel.Instant RecordedAt { get; init; }
+
+    /// <summary>Contract member 'resolvedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("resolvedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? ResolvedAt { get; init; }
 }
