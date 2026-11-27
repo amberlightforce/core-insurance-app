@@ -3,7 +3,7 @@
 Greek-first, EU-ready P&C core insurance system (modular monolith, .NET 10 + React 19 + PostgreSQL 17 on Azure).
 
 - Specifications: `../core-insurance-prds` (PRDs, design guide) and `../core-insurance-infra` (stack and infrastructure).
-- Build orchestration: [`orchestration/`](orchestration/): PLAN.md, DECISIONS.md, STATUS.md, backlog.
+- Build orchestration: [`orchestration/README.md`](orchestration/README.md) is the start page: which plan is current (hardening `NEXT-STEPS.md`, build-out `orchestration/build-out/`), status, decisions.
 
 ## Repository layout
 

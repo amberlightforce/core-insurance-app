@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # SLICE PLAN 2 — claims thin slice (E2E-02a: FNOL → coverage → reserve → payment → ledger)
 
 **Approved by:** the user (D-USR-10, 2026-10-08). **Process:** as slice 1 (D-USR-04..09, D-PRG-15/17/18): Sonnet by

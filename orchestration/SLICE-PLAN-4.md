@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # SLICE PLAN 4 — finish claims (W7): full E2E-02 with recoveries and RI recovery, E2E-06 Friendly Settlement
 
 **Status:** planned 2026-10-08 (planner, from `SLICE-3-PLANNING-HANDOVER.md` §4–§6 and the W7 backlog).
