@@ -3021,52 +3021,478 @@
       "settlement": "unspecified"
     },
     "StatementApproveRequest": {
-      "contractCounterparty": "unspecified",
-      "period": "unspecified",
-      "currency": "EUR"
+      "statementId": "01921b1a-11a2-723f-83c2-0fed94e5cadd"
     },
     "StatementApproveResponse": {
-      "statement": "unspecified"
+      "statement": {
+        "statementId": "0192b235-ecf4-78c5-8781-bea0d1b75ef7",
+        "reinsurerPartyId": "01923c66-4dfc-7339-8744-a5250580aa55",
+        "period": "Sample text",
+        "currency": "Sample text",
+        "version": 1,
+        "previousStatementId": "01925473-f839-7859-8eae-3cf5a6a13931",
+        "status": "DRAFT",
+        "opening": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "commission": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveries": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "movement": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "closing": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "contentHash": "Sample text",
+        "lines": [
+          {
+            "itemId": "0192521a-8445-7d5e-8fc1-137be4e1b945",
+            "contractId": "01923620-3b12-7883-88a7-8ce49e1c79a0",
+            "kind": "CEDED_PREMIUM",
+            "sourceKind": "Sample text",
+            "sourceId": "Sample text",
+            "itemDate": "2026-10-07",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "Sample text",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "submittedBy": "Sample text",
+        "approvedAt": "2026-10-07T09:00:00Z",
+        "approvedBy": "Sample text",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "issuedBy": "Sample text",
+        "response": "AGREED",
+        "responseReason": "Sample text",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "respondedBy": "Sample text",
+        "supersededBy": "01928c63-6d2e-7ca5-8de8-4339996b4400"
+      }
     },
     "StatementGenerateRequest": {
-      "contractCounterparty": "unspecified",
-      "period": "unspecified",
+      "reinsurerPartyId": "0192ec33-e8ac-739b-8120-30b556eac425",
+      "period": "Sample text",
       "currency": "EUR"
     },
     "StatementGenerateResponse": {
-      "statement": "unspecified"
+      "statement": {
+        "statementId": "01922c58-fba7-7f9f-88a5-02bcac44be8d",
+        "reinsurerPartyId": "0192cc47-7f38-7a68-8341-d33a1d008fb5",
+        "period": "Sample text",
+        "currency": "Sample text",
+        "version": 1,
+        "previousStatementId": "0192a0f7-7bd5-7348-8ae1-7688d893df80",
+        "status": "DRAFT",
+        "opening": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "commission": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveries": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "movement": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "closing": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "contentHash": "Sample text",
+        "lines": [
+          {
+            "itemId": "01929dfb-a248-765a-81e1-aa4b750e694e",
+            "contractId": "019293e7-1e96-7a21-87c2-41635726dde7",
+            "kind": "CEDED_PREMIUM",
+            "sourceKind": "Sample text",
+            "sourceId": "Sample text",
+            "itemDate": "2026-10-07",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "Sample text",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "submittedBy": "Sample text",
+        "approvedAt": "2026-10-07T09:00:00Z",
+        "approvedBy": "Sample text",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "issuedBy": "Sample text",
+        "response": "AGREED",
+        "responseReason": "Sample text",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "respondedBy": "Sample text",
+        "supersededBy": "0192d863-d9ff-7328-8c24-777704fc795e"
+      }
     },
     "StatementIssueRequest": {
-      "contractCounterparty": "unspecified",
-      "period": "unspecified",
-      "currency": "EUR"
+      "statementId": "0192d2f3-753c-708b-8538-c32752063f00"
     },
     "StatementIssueResponse": {
-      "statement": "unspecified"
+      "statement": {
+        "statementId": "019244b8-b2e2-7fdd-84f4-8fca29b84462",
+        "reinsurerPartyId": "0192b734-2aff-7d4d-8f32-13757b0744d2",
+        "period": "Sample text",
+        "currency": "Sample text",
+        "version": 1,
+        "previousStatementId": "0192ea72-0d1c-783d-8e09-96332b64ed5f",
+        "status": "DRAFT",
+        "opening": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "commission": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveries": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "movement": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "closing": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "contentHash": "Sample text",
+        "lines": [
+          {
+            "itemId": "01922672-95ed-7c0e-887f-23acad69077f",
+            "contractId": "01929542-5a4e-770a-84b7-56318ab11c01",
+            "kind": "CEDED_PREMIUM",
+            "sourceKind": "Sample text",
+            "sourceId": "Sample text",
+            "itemDate": "2026-10-07",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "Sample text",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "submittedBy": "Sample text",
+        "approvedAt": "2026-10-07T09:00:00Z",
+        "approvedBy": "Sample text",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "issuedBy": "Sample text",
+        "response": "AGREED",
+        "responseReason": "Sample text",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "respondedBy": "Sample text",
+        "supersededBy": "0192c3d3-b7fe-7db9-8d7e-7db608841a76"
+      }
+    },
+    "StatementLine": {
+      "itemId": "01926e7b-c3e9-72d2-83e3-75638a428517",
+      "contractId": "01928061-717c-792f-8e66-6724505d8e62",
+      "kind": "CEDED_PREMIUM",
+      "sourceKind": "Sample text",
+      "sourceId": "Sample text",
+      "itemDate": "2026-10-07",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
     },
     "StatementRecordResponseRequest": {
-      "contractCounterparty": "unspecified",
-      "period": "unspecified",
-      "currency": "EUR"
+      "statementId": "019204e2-76c0-7e73-8276-965195341b8c",
+      "response": "AGREED",
+      "reason": "Sample text"
     },
     "StatementRecordResponseResponse": {
-      "statement": "unspecified"
+      "statement": {
+        "statementId": "0192ea7d-c952-7a45-8a6f-bc3a8859d8f3",
+        "reinsurerPartyId": "01920f0d-0109-7b15-8062-0d076e69a67a",
+        "period": "Sample text",
+        "currency": "Sample text",
+        "version": 1,
+        "previousStatementId": "0192083e-04b0-7e9b-8588-74d340abe7a7",
+        "status": "DRAFT",
+        "opening": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "commission": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveries": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "movement": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "closing": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "contentHash": "Sample text",
+        "lines": [
+          {
+            "itemId": "01924cbf-9ba1-7548-89f3-a69f83a89a13",
+            "contractId": "0192a874-598a-73de-811d-9f7642eac8fe",
+            "kind": "CEDED_PREMIUM",
+            "sourceKind": "Sample text",
+            "sourceId": "Sample text",
+            "itemDate": "2026-10-07",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "Sample text",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "submittedBy": "Sample text",
+        "approvedAt": "2026-10-07T09:00:00Z",
+        "approvedBy": "Sample text",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "issuedBy": "Sample text",
+        "response": "AGREED",
+        "responseReason": "Sample text",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "respondedBy": "Sample text",
+        "supersededBy": "0192bd99-7970-7cf4-834c-c226f7305b78"
+      }
     },
     "StatementReissueRequest": {
-      "contractCounterparty": "unspecified",
-      "period": "unspecified",
-      "currency": "EUR"
+      "statementId": "0192d678-0c3e-7ca1-809c-07c4a342275b",
+      "reason": "Sample text"
     },
     "StatementReissueResponse": {
-      "statement": "unspecified"
+      "statement": {
+        "statementId": "0192195b-3bed-7469-82d3-9ab6d493e863",
+        "reinsurerPartyId": "01927621-2cf2-7b69-8b68-bc952214309b",
+        "period": "Sample text",
+        "currency": "Sample text",
+        "version": 1,
+        "previousStatementId": "019270b3-97b5-7fa5-81ca-b065ae4d5228",
+        "status": "DRAFT",
+        "opening": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "commission": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveries": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "movement": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "closing": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "contentHash": "Sample text",
+        "lines": [
+          {
+            "itemId": "0192f422-b86d-77cf-8522-5fd56049bcae",
+            "contractId": "01926ca0-5922-78d9-8a48-c211b80a0994",
+            "kind": "CEDED_PREMIUM",
+            "sourceKind": "Sample text",
+            "sourceId": "Sample text",
+            "itemDate": "2026-10-07",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "Sample text",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "submittedBy": "Sample text",
+        "approvedAt": "2026-10-07T09:00:00Z",
+        "approvedBy": "Sample text",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "issuedBy": "Sample text",
+        "response": "AGREED",
+        "responseReason": "Sample text",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "respondedBy": "Sample text",
+        "supersededBy": "019260cc-b16d-7d31-8ef2-e271df3061b7"
+      }
     },
     "StatementSubmitRequest": {
-      "contractCounterparty": "unspecified",
-      "period": "unspecified",
-      "currency": "EUR"
+      "statementId": "0192a11d-dfd2-708e-8b4f-210908e0e89b"
     },
     "StatementSubmitResponse": {
-      "statement": "unspecified"
+      "statement": {
+        "statementId": "0192555d-c919-79e3-8dbf-6749ab36efde",
+        "reinsurerPartyId": "0192e6c7-71da-772b-87e1-aa71cc816de5",
+        "period": "Sample text",
+        "currency": "Sample text",
+        "version": 1,
+        "previousStatementId": "0192330f-d3d6-7bd8-8430-3288d6739903",
+        "status": "DRAFT",
+        "opening": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "premium": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "commission": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "recoveries": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "movement": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "closing": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "contentHash": "Sample text",
+        "lines": [
+          {
+            "itemId": "01924e8e-01c8-77ec-8264-1cfb7a566af7",
+            "contractId": "019249d8-1b2b-7074-8f1a-0f2f43cd7211",
+            "kind": "CEDED_PREMIUM",
+            "sourceKind": "Sample text",
+            "sourceId": "Sample text",
+            "itemDate": "2026-10-07",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "Sample text",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "submittedBy": "Sample text",
+        "approvedAt": "2026-10-07T09:00:00Z",
+        "approvedBy": "Sample text",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "issuedBy": "Sample text",
+        "response": "AGREED",
+        "responseReason": "Sample text",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "respondedBy": "Sample text",
+        "supersededBy": "0192c233-d16c-7a4a-8ba7-8307d040babe"
+      }
+    },
+    "StatementView": {
+      "statementId": "0192f281-14bb-71e2-85e5-fa11ccd5b4b1",
+      "reinsurerPartyId": "01929861-db6e-706a-81ed-562a713e22ca",
+      "period": "Sample text",
+      "currency": "Sample text",
+      "version": 1,
+      "previousStatementId": "0192f030-80d8-73e1-80c0-a8099beb2fba",
+      "status": "DRAFT",
+      "opening": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "commission": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "recoveries": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "movement": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "closing": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "contentHash": "Sample text",
+      "lines": [
+        {
+          "itemId": "01929f9f-16b4-7631-8eb2-4a2360f435e1",
+          "contractId": "01927b51-77f2-7923-88ae-8c3fec538827",
+          "kind": "CEDED_PREMIUM",
+          "sourceKind": "Sample text",
+          "sourceId": "Sample text",
+          "itemDate": "2026-10-07",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "createdAt": "2026-10-07T09:00:00Z",
+      "createdBy": "Sample text",
+      "submittedAt": "2026-10-07T09:00:00Z",
+      "submittedBy": "Sample text",
+      "approvedAt": "2026-10-07T09:00:00Z",
+      "approvedBy": "Sample text",
+      "issuedAt": "2026-10-07T09:00:00Z",
+      "issuedBy": "Sample text",
+      "response": "AGREED",
+      "responseReason": "Sample text",
+      "respondedAt": "2026-10-07T09:00:00Z",
+      "respondedBy": "Sample text",
+      "supersededBy": "0192487a-cdd9-7d08-87f7-da3a6f57c83c"
     }
   }
 }
