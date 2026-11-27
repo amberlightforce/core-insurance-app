@@ -59,3 +59,6 @@ export const reinsuranceRoles = [
 export function hasAnyRole(userRoles: readonly string[], allowed: readonly string[]): boolean {
   return userRoles.some((role) => allowed.includes(role));
 }
+
+/** Roles that work the finance operations screens: trial balance, manual journals, intake exceptions, period close, earning (fin.* grants). */
+export const financeRoles = ['Staff.Finance', 'Platform.Admin'] as const;
