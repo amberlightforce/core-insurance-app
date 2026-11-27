@@ -87,6 +87,13 @@ public static class UnderwritingModule
         services.AddCommandAuditor<DecideIssues, IssueDecideResponse, DecideIssuesAuditor>();
         services.AddCommand<DecideIssues, IssueDecideResponse, DecideIssuesHandler>(CommandDescriptor.For("uw.Issue.decide") with { SupportsDryRun = true });
         services.AddScoped<UnderwritingIssueQueries>();
+
+        // BO-UW-03: batch evaluation (no effect on jobs) and the issue reads.
+        services.AddScoped<IValidator<EvaluateRulesBatch>, EvaluateRulesBatchValidator>();
+        services.AddCommandAuditor<EvaluateRulesBatch, RulesEvaluateBatchResponse, EvaluateRulesBatchAuditor>();
+        services.AddCommand<EvaluateRulesBatch, RulesEvaluateBatchResponse, EvaluateRulesBatchHandler>(CommandDescriptor.For("uw.Rules.evaluateBatch") with { SupportsDryRun = true });
+        services.AddScoped<IssueReads>();
+        services.AddScoped<IssueReadQueries>();
         services.AddScoped<DecisionEligibility>();
         services.AddScoped<ReferralReads>();
 
@@ -160,6 +167,10 @@ public static class UnderwritingModule
             .Describe("Η άρση του κλειδώματος άλλου αναδόχου απαιτεί αιτιολογία.", "Breaking another underwriter's lock needs a reason."),
         ErrorDefinition.For(ModuleCode.UW, "AUTHORITY-DENIED", 403, "Δεν έχετε εξουσιοδότηση για την ενέργεια", "You are not authorised for this action")
             .Describe("Η ενέργεια επιτρέπεται μόνο στον αιτούντα ή σε διευθυντή ανάληψης.", "Only the requester or an underwriting manager may do this."),
+        ErrorDefinition.For(ModuleCode.UW, "LIMIT-EXCEEDED", 422, "Η παρτίδα είναι πολύ μεγάλη", "The batch is too large")
+            .Describe("Μια παρτίδα αξιολογεί έως 200 κινδύνους· χωρίστε την σε περισσότερα αιτήματα.", "A batch evaluates at most 200 risks; split it into several requests."),
+        ErrorDefinition.For(ModuleCode.UW, "ISSUE-NOT-FOUND", 404, "Δεν βρέθηκε το ζήτημα", "The issue was not found")
+            .Describe("Δεν υπάρχει ζήτημα με αυτό το αναγνωριστικό στη νομική οντότητά σας.", "There is no issue with this id in your legal entity."),
         ErrorDefinition.For(ModuleCode.UW, "STALE", 409, "Το ζήτημα άλλαξε στο μεταξύ", "The issue changed meanwhile")
             .Describe("Φορτώστε ξανά το ζήτημα και αποφασίστε πάλι.", "Reload the issue and decide again."),
     ];

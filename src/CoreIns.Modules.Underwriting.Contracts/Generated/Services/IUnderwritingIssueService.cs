@@ -32,5 +32,6 @@ public interface IUnderwritingIssueService
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueListForChannelPage> ListForChannelAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="jobRef">POL job id (the quote or policy job whose issues the channel shows)</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Underwriting.Contracts.Api.IssueListForChannelPage> ListForChannelAsync(global::CoreIns.SharedKernel.Identifiers.JobId jobRef, string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

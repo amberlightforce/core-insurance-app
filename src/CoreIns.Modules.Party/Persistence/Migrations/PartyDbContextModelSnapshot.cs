@@ -1446,6 +1446,104 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.ProducerOfRecordRow", b =>
+                {
+                    b.Property<Guid>("PorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("por_id");
+
+                    b.Property<string>("CommissionConsequence")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("commission_consequence");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("IntermediaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("intermediary_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("LetterReference")
+                        .HasColumnType("text")
+                        .HasColumnName("letter_reference");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<Guid>("PolicyTermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_term_id");
+
+                    b.Property<string>("ProducerCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("producer_code");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime>("RecordedFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_from");
+
+                    b.Property<DateTime?>("RecordedTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_to");
+
+                    b.Property<decimal?>("SplitShare")
+                        .HasColumnType("numeric(7,4)")
+                        .HasColumnName("split_share");
+
+                    b.Property<Guid?>("TransferId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transfer_id");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateOnly?>("ValidTo")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_to");
+
+                    b.HasKey("PorId")
+                        .HasName("pk_producer_of_record");
+
+                    b.HasIndex("IntermediaryId", "ValidFrom")
+                        .HasDatabaseName("ix_producer_of_record_intermediary");
+
+                    b.HasIndex("PolicyId", "ValidFrom")
+                        .IsUnique()
+                        .HasDatabaseName("ux_producer_of_record_current_start")
+                        .HasFilter("recorded_to IS NULL");
+
+                    b.ToTable("producer_of_record", "pty", t =>
+                        {
+                            t.HasCheckConstraint("ck_producer_of_record_consequence", "commission_consequence IN ('NEW_PRODUCER_FROM_DATE','OLD_PRODUCER_KEEPS_EARNED','OLD_PRODUCER_KEEPS_ALL')");
+
+                            t.HasCheckConstraint("ck_producer_of_record_recorded", "recorded_to IS NULL OR recorded_to > recorded_from");
+
+                            t.HasCheckConstraint("ck_producer_of_record_split", "split_share IS NULL OR (split_share > 0 AND split_share <= 100)");
+
+                            t.HasCheckConstraint("ck_producer_of_record_valid", "valid_to IS NULL OR valid_to > valid_from");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.VulnerabilityRow", b =>
                 {
                     b.Property<Guid>("PartyId")
@@ -1662,6 +1760,16 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_producer_code_intermediary");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.ProducerOfRecordRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.IntermediaryRow", null)
+                        .WithMany()
+                        .HasForeignKey("IntermediaryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_producer_of_record_intermediary");
                 });
 #pragma warning restore 612, 618
         }

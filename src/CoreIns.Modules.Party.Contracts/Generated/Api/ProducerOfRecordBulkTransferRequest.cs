@@ -4,28 +4,88 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.ProducerOfRecord.bulkTransfer request. PRD inputs: "term, date / change"</summary>
+/// <summary>pty.ProducerOfRecord.bulkTransfer request (BO-PTY-09): move the given policy terms to one producer code with the same rules as change, one result per term (a refused term does not stop the others). At most 500 terms. Supports dry-run.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProducerOfRecordBulkTransferRequest
 {
-    /// <summary>PRD: "term"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("term")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Term { get; init; }
+    /// <summary>Contract member 'terms'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("terms")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Party.Contracts.Api.ProducerOfRecordBulkTransferItem> Terms { get; init; }
 
-    /// <summary>PRD: "date"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("date")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? Date { get; init; }
+    /// <summary>Contract member 'producerCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("producerCode")]
+    public required string ProducerCode { get; init; }
 
-    /// <summary>PRD: "change"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("change")]
+    /// <summary>Contract member 'effectiveDate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveDate")]
+    public global::CoreIns.SharedKernel.BusinessDate? EffectiveDate { get; init; }
+
+    /// <summary>Contract member 'atRenewal'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("atRenewal")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Change { get; init; }
+    public bool? AtRenewal { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required ReasonValue Reason { get; init; }
+
+    /// <summary>Contract member 'note'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("note")]
+    public string? Note { get; init; }
+
+    /// <summary>Contract member 'commissionConsequence'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("commissionConsequence")]
+    public required CommissionConsequenceValue CommissionConsequence { get; init; }
+
+    /// <summary>Contract member 'letterReference'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("letterReference")]
+    public string? LetterReference { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ReasonValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ReasonValue
+    {
+        /// <summary><c>BROKER_OF_RECORD_LETTER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("BROKER_OF_RECORD_LETTER")]
+        BrokerOfRecordLetter,
+
+        /// <summary><c>INTERMEDIARY_LEFT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("INTERMEDIARY_LEFT")]
+        IntermediaryLeft,
+
+        /// <summary><c>CUSTOMER_REQUEST</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CUSTOMER_REQUEST")]
+        CustomerRequest,
+
+        /// <summary><c>PORTFOLIO_TRANSFER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PORTFOLIO_TRANSFER")]
+        PortfolioTransfer,
+
+        /// <summary><c>CORRECTION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CORRECTION")]
+        Correction,
+
+        /// <summary><c>OTHER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("OTHER")]
+        Other,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<CommissionConsequenceValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum CommissionConsequenceValue
+    {
+        /// <summary><c>NEW_PRODUCER_FROM_DATE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NEW_PRODUCER_FROM_DATE")]
+        NewProducerFromDate,
+
+        /// <summary><c>OLD_PRODUCER_KEEPS_EARNED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("OLD_PRODUCER_KEEPS_EARNED")]
+        OldProducerKeepsEarned,
+
+        /// <summary><c>OLD_PRODUCER_KEEPS_ALL</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("OLD_PRODUCER_KEEPS_ALL")]
+        OldProducerKeepsAll,
+    }
 }

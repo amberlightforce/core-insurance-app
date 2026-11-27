@@ -7,6 +7,12 @@
         "uw.Issue.blockingStatus": [ "Staff.Underwriter", "Staff.Billing" ],
         "uw.Issue.list": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Issue.decide": [ "Staff.UnderwritingManager" ],
+        // BO-UW-03: batch evaluation (no effect on jobs) and issue reads.
+        "uw.Rules.evaluateBatch": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Issue.get": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Issue.explain": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Issue.listForChannel": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Approval.history": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Referral.list": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Referral.get": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         // BO-UW-05: referral commands and the review lock. Deciding stays with uw.Issue.decide and the UW.ISSUE_APPROVAL authority.

@@ -54,6 +54,8 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
 
     public DbSet<CommissionRateLineRow> CommissionRateLines => Set<CommissionRateLineRow>();
 
+    public DbSet<ProducerOfRecordRow> ProducerOfRecords => Set<ProducerOfRecordRow>();
+
     protected override string Schema => PartyModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -125,6 +127,37 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
             entity.Property(e => e.RatePct).HasColumnName("rate_pct").HasColumnType("numeric(7,4)");
             entity.HasIndex(e => new { e.VersionId, e.LineNo }).IsUnique().HasDatabaseName("ux_commission_line_no");
             entity.HasOne<CommissionAgreementVersionRow>().WithMany().HasForeignKey(e => e.VersionId).HasConstraintName("fk_commission_line_version").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ProducerOfRecordRow>(entity =>
+        {
+            entity.ToTable("producer_of_record", table =>
+            {
+                BitemporalChecks(table, "producer_of_record");
+                table.HasCheckConstraint("ck_producer_of_record_consequence", "commission_consequence IN ('NEW_PRODUCER_FROM_DATE','OLD_PRODUCER_KEEPS_EARNED','OLD_PRODUCER_KEEPS_ALL')");
+                table.HasCheckConstraint("ck_producer_of_record_split", "split_share IS NULL OR (split_share > 0 AND split_share <= 100)");
+            });
+            entity.HasKey(e => e.PorId).HasName("pk_producer_of_record");
+            entity.Property(e => e.PorId).HasColumnName("por_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.PolicyTermId).HasColumnName("policy_term_id");
+            entity.Property(e => e.IntermediaryId).HasColumnName("intermediary_id");
+            entity.Property(e => e.ProducerCode).HasColumnName("producer_code");
+            entity.Property(e => e.ValidFrom).HasColumnName("valid_from");
+            entity.Property(e => e.ValidTo).HasColumnName("valid_to");
+            entity.Property(e => e.Reason).HasColumnName("reason");
+            entity.Property(e => e.Note).HasColumnName("note");
+            entity.Property(e => e.CommissionConsequence).HasColumnName("commission_consequence");
+            entity.Property(e => e.SplitShare).HasColumnName("split_share").HasColumnType("numeric(7,4)");
+            entity.Property(e => e.LetterReference).HasColumnName("letter_reference");
+            entity.Property(e => e.TransferId).HasColumnName("transfer_id");
+            entity.Property(e => e.RecordedFrom).HasColumnName("recorded_from").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordedTo).HasColumnName("recorded_to").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.HasIndex(e => new { e.PolicyId, e.ValidFrom }).IsUnique().HasFilter("recorded_to IS NULL").HasDatabaseName("ux_producer_of_record_current_start");
+            entity.HasIndex(e => new { e.IntermediaryId, e.ValidFrom }).HasDatabaseName("ix_producer_of_record_intermediary");
+            entity.HasOne<IntermediaryRow>().WithMany().HasForeignKey(e => e.IntermediaryId).HasConstraintName("fk_producer_of_record_intermediary").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<AccountRow>(entity =>
