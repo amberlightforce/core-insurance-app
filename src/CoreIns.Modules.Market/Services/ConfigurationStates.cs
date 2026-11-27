@@ -251,7 +251,7 @@ internal sealed partial class PersistedConfigurationStates : IConfigurationState
         }
     }
 
-    private static async Task RegisterAsync(
+    internal static async Task RegisterAsync(
         NpgsqlConnection connection, NpgsqlTransaction transaction, PackVersionContent content, Instant now, CancellationToken cancellationToken)
     {
         await using (var select = new NpgsqlCommand(

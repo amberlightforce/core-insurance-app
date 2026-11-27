@@ -8,6 +8,12 @@ namespace CoreIns.Modules.Market.Contracts;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public static class MarketErrorCodes
 {
+    /// <summary>MKT-ERR-CFG-VALIDATION (HTTP 400).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): mkt.ConfigChangeRequest.get, mkt.ConfigChangeRequest.list.</para>
+    /// </remarks>
+    public const string CfgValidation = "MKT-ERR-CFG-VALIDATION";
+
     /// <summary>MKT-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
     /// <para>Declared by 17 operation(s): mkt.ConfigChangeRequest.approve, mkt.ConfigChangeRequest.create, mkt.ConfigChangeRequest.import, mkt.ConfigChangeRequest.rebase, mkt.ConfigChangeRequest.reject, mkt.ConfigChangeRequest.schedule, mkt.ConfigChangeRequest.submit, mkt.ConfigChangeRequest.update, mkt.ConfigChangeRequest.withdraw, mkt.Pack.certify, mkt.Pack.deprecate, mkt.Pack.publish, ….</para>
@@ -54,11 +60,12 @@ public static class MarketErrorCodes
     public const string Prefix = "MKT-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [IdempotencyMismatch, PackActivationState, PackAlreadyActive, PackNotPublished, PackRollbackInstant, PackVersionUnknown, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [CfgValidation, IdempotencyMismatch, PackActivationState, PackAlreadyActive, PackNotPublished, PackRollbackInstant, PackVersionUnknown, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
     {
+        [CfgValidation] = 400,
         [IdempotencyMismatch] = 409,
         [PackActivationState] = 409,
         [PackAlreadyActive] = 409,
