@@ -2322,6 +2322,13 @@ export interface components {
             authorities: components["schemas"]["ProducerAuthorities"];
             validFrom: components["schemas"]["LocalDate"];
             recordVersion: number;
+            /** @description Hierarchy parent (REQ-PTY-193) */
+            parentIntermediaryId?: components["schemas"]["Uuid"] | null;
+            /**
+             * @description Computed from the CPD hours table (REQ-PTY-191)
+             * @enum {string}
+             */
+            cpdStatus?: "COMPLIANT" | "AT_RISK" | "NON_COMPLIANT";
         };
         /** @description pty.Intermediary.create result. Typed by SL-0. */
         IntermediaryCreateResponse: {
@@ -2338,18 +2345,45 @@ export interface components {
         IntermediaryUpdateResponse: {
             intermediary: components["schemas"]["IntermediaryView"];
         };
-        /** @description pty.Intermediary.suspend request. PRD inputs: "as named" */
-        IntermediarySuspendRequest: Record<string, never>;
-        /** @description pty.Intermediary.suspend result. PRD outputs: "—" */
-        IntermediarySuspendResponse: Record<string, never>;
-        /** @description pty.Intermediary.terminate request. PRD inputs: "as named" */
-        IntermediaryTerminateRequest: Record<string, never>;
-        /** @description pty.Intermediary.terminate result. PRD outputs: "—" */
-        IntermediaryTerminateResponse: Record<string, never>;
-        /** @description pty.Intermediary.importRegister request. PRD inputs: "as named" */
-        IntermediaryImportRegisterRequest: Record<string, never>;
-        /** @description pty.Intermediary.importRegister result. PRD outputs: "—" */
-        IntermediaryImportRegisterResponse: Record<string, never>;
+        /** @description pty.Intermediary.suspend request (REQ-PTY-198, REQ-PTY-190): Active to Suspended; validate then refuses the producer codes. */
+        IntermediarySuspendRequest: {
+            intermediaryId: components["schemas"]["Uuid"];
+            expectedRecordVersion: number;
+            reason: string;
+        };
+        /** @description pty.Intermediary.suspend result. */
+        IntermediarySuspendResponse: {
+            intermediary: components["schemas"]["IntermediaryView"];
+        };
+        /** @description pty.Intermediary.terminate request (REQ-PTY-198, REQ-PTY-202): ends every producer code of the intermediary on the effective date. */
+        IntermediaryTerminateRequest: {
+            intermediaryId: components["schemas"]["Uuid"];
+            expectedRecordVersion: number;
+            reason: string;
+            /** @description Last-day boundary of the producer codes (defaults to today) */
+            effectiveDate?: components["schemas"]["LocalDate"];
+        };
+        /** @description pty.Intermediary.terminate result. */
+        IntermediaryTerminateResponse: {
+            intermediary: components["schemas"]["IntermediaryView"];
+            terminatedProducerCodes: components["schemas"]["Code"][];
+        };
+        /** @description pty.Intermediary.importRegister request. A register extract (CSV with header, or JSON array) matched to intermediaries by register number; re-importing the same file changes nothing. */
+        IntermediaryImportRegisterRequest: {
+            /** @enum {string} */
+            format: "CSV" | "JSON";
+            /** @description Rows with registerNumber, registerStatus (ACTIVE, SUSPENDED, DELETED), optional registerName, chamber, registrationCategory, cpdYear, cpdHours, parentRegisterNumber */
+            content: string;
+        };
+        /** @description pty.Intermediary.importRegister result. */
+        IntermediaryImportRegisterResponse: {
+            processed: number;
+            updated: number;
+            unchanged: number;
+            unmatchedRegisterNumbers: string[];
+            /** @description Row number and reason of each invalid row */
+            rejectedRows: string[];
+        };
         /** @description pty.ProducerOfRecord.get result. PRD outputs: "PoR" */
         ProducerOfRecordGetResponse: {
             /** @description PRD: "PoR" */
