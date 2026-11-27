@@ -1,4 +1,5 @@
 using System.Data;
+using CoreIns.Modules.Party.Commands;
 using CoreIns.Modules.Party.Contracts.Api;
 using CoreIns.Modules.Party.Domain;
 using CoreIns.Modules.Party.Persistence;
@@ -22,10 +23,12 @@ internal sealed class IntermediaryQueries(DbSession session, RequestContext cont
                i.intermediary_type AS IntermediaryType, i.status AS Status, i.register_number AS RegisterNumber, i.register_status AS RegisterStatus,
                c.code AS ProducerCode, c.status AS ProducerCodeStatus, c.collect_premium AS CollectPremium, c.issue_cover_notes AS IssueCoverNotes,
                c.bind_within_authority AS BindWithinAuthority, c.service_only AS ServiceOnly, c.valid_from::text AS ValidFrom,
-               c.valid_to::text AS ValidTo, i.record_version AS RecordVersion
+               c.valid_to::text AS ValidTo, i.record_version AS RecordVersion,
+               i.parent_intermediary_id AS ParentIntermediaryId, cpd.hours AS CpdHours, cpd.required_hours AS CpdRequiredHours
           FROM pty.intermediary i
           JOIN pty.party p ON p.party_id = i.party_id
           JOIN pty.producer_code c ON c.intermediary_id = i.intermediary_id
+          LEFT JOIN LATERAL (SELECT d.hours, d.required_hours FROM pty.intermediary_cpd d WHERE d.intermediary_id = i.intermediary_id ORDER BY d.year DESC LIMIT 1) cpd ON true
           LEFT JOIN LATERAL (SELECT * FROM pty.party_name x WHERE x.party_id = i.party_id AND x.form = 'NATIVE' AND x.recorded_to IS NULL LIMIT 1) n ON true
         """;
 
@@ -65,6 +68,20 @@ internal sealed class IntermediaryQueries(DbSession session, RequestContext cont
         if (row.RegisterStatus != "ACTIVE")
         {
             reasons.Add(ProducerCodeReasons.RegisterInactive);
+        }
+
+        // Appointments by product: an intermediary with appointments may only trade the appointed products (none recorded = unrestricted).
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var appointments = (await connection.QueryAsync<(string ProductCode, bool InForce)>(new CommandDefinition(
+            """
+            SELECT product_code AS ProductCode, (valid_from <= @at::date AND (valid_to IS NULL OR valid_to > @at::date)) AS InForce
+              FROM pty.intermediary_appointment WHERE intermediary_id = @id
+            """,
+            new { id = row.IntermediaryId, at = validAt.Value.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) }, session.Transaction,
+            cancellationToken: cancellationToken)).ConfigureAwait(false)).ToList();
+        if (appointments.Count > 0 && !appointments.Any(a => a.InForce && a.ProductCode == request.Product))
+        {
+            reasons.Add(ProducerCodeReasons.ProductNotAppointed);
         }
 
         return new ProducerCodeValidateResponse
@@ -144,12 +161,14 @@ internal sealed class IntermediaryQueries(DbSession session, RequestContext cont
         },
         ValidFrom = BusinessDate.Parse(r.ValidFrom),
         RecordVersion = r.RecordVersion,
+        ParentIntermediaryId = r.ParentIntermediaryId,
+        CpdStatus = CpdRules.Status(r.CpdHours, r.CpdRequiredHours),
     };
 
     private sealed record Record(
         Guid IntermediaryId, Guid PartyId, string PartyNumber, string? Name, string IntermediaryType, string Status, string RegisterNumber,
         string RegisterStatus, string ProducerCode, string ProducerCodeStatus, bool CollectPremium, bool IssueCoverNotes, bool BindWithinAuthority,
-        bool ServiceOnly, string ValidFrom, string? ValidTo, int RecordVersion);
+        bool ServiceOnly, string ValidFrom, string? ValidTo, int RecordVersion, Guid? ParentIntermediaryId, decimal? CpdHours, decimal? CpdRequiredHours);
 }
 
 /// <summary>
@@ -161,5 +180,6 @@ internal static class ProducerCodeReasons
     public const string RegisterInactive = "REGISTER_INACTIVE";
     public const string IntermediaryNotActive = "INTERMEDIARY_NOT_ACTIVE";
     public const string CodeNotActive = "CODE_NOT_ACTIVE";
+    public const string ProductNotAppointed = "PRODUCT_NOT_APPOINTED";
     public const string UnknownCode = "UNKNOWN_CODE";
 }

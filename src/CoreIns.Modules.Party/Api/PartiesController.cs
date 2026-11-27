@@ -25,6 +25,9 @@ internal static class PartyPermissions
     public const string RevealP2 = "pty.Party.revealP2";
     public const string IntermediaryCreate = "pty.Intermediary.create";
     public const string IntermediaryUpdate = "pty.Intermediary.update";
+    public const string IntermediarySuspend = "pty.Intermediary.suspend";
+    public const string IntermediaryTerminate = "pty.Intermediary.terminate";
+    public const string IntermediaryImportRegister = "pty.Intermediary.importRegister";
     public const string ProducerCodeValidate = "pty.ProducerCode.validate";
     public const string ProducerCodeSearch = "pty.ProducerCode.search";
     public const string VulnerabilityQuery = "pty.Vulnerability.query";
