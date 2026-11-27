@@ -531,9 +531,6 @@ CONTRACT_NOT_SERVED POST /api/mkt/v1/terminology/approve
 CONTRACT_NOT_SERVED POST /api/mkt/v1/terminology/propose
 CONTRACT_NOT_SERVED POST /api/mkt/v1/translations/gate
 CONTRACT_NOT_SERVED POST /api/pfc/v1/availability/check
-CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets
-CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/abandon
-CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/edit
 CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/rebase
 CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/revert
 CONTRACT_NOT_SERVED POST /api/pfc/v1/impact-analysises/run
