@@ -78,6 +78,9 @@ public static class ReinsuranceModule
                 // BO-RI-14: statements move through their workflow (UPDATE; the content is sealed by a trigger), their lines are append-only.
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.statement TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.statement_line TO {appRole}",
+                // BO-RI-15: a cash call moves through its workflow and its lines count what was received (UPDATE; the call is sealed by a trigger), receipts are append-only.
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.cash_call, {Schema}.cash_call_line TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.cash_call_receipt TO {appRole}",
             ]),
     ];
 
@@ -178,6 +181,21 @@ public static class ReinsuranceModule
         services.AddScoped<IValidator<ReissueStatement>, ReissueStatementValidator>();
         services.AddCommandAuditor<ReissueStatement, StatementReissueResponse, ReissueStatementAuditor>();
         services.AddCommand<ReissueStatement, StatementReissueResponse, ReissueStatementHandler>(CommandDescriptor.For("ri.Statement.reissue"));
+
+        // BO-RI-15: cash calls (raised above the threshold, sent, settled by receipts, cancelled under maker-checker).
+        services.AddScoped<CashCallReader>();
+        services.AddScoped<IValidator<RaiseCashCall>, RaiseCashCallValidator>();
+        services.AddCommandAuditor<RaiseCashCall, CashCallRaiseResponse, RaiseCashCallAuditor>();
+        services.AddCommand<RaiseCashCall, CashCallRaiseResponse, RaiseCashCallHandler>(CommandDescriptor.For("ri.CashCall.raise"));
+        services.AddScoped<IValidator<IssueCashCall>, IssueCashCallValidator>();
+        services.AddCommandAuditor<IssueCashCall, CashCallIssueResponse, IssueCashCallAuditor>();
+        services.AddCommand<IssueCashCall, CashCallIssueResponse, IssueCashCallHandler>(CommandDescriptor.For("ri.CashCall.issue"));
+        services.AddScoped<IValidator<RecordCashCallReceipt>, RecordCashCallReceiptValidator>();
+        services.AddCommandAuditor<RecordCashCallReceipt, CashCallRecordReceiptResponse, RecordCashCallReceiptAuditor>();
+        services.AddCommand<RecordCashCallReceipt, CashCallRecordReceiptResponse, RecordCashCallReceiptHandler>(CommandDescriptor.For("ri.CashCall.recordReceipt"));
+        services.AddScoped<IValidator<CancelCashCall>, CancelCashCallValidator>();
+        services.AddCommandAuditor<CancelCashCall, CashCallCancelResponse, CancelCashCallAuditor>();
+        services.AddCommand<CancelCashCall, CashCallCancelResponse, CancelCashCallHandler>(CommandDescriptor.For("ri.CashCall.cancel"));
 
         // The scanner's per-contract command (internal, no HTTP; exactly-once by the row lock and the state it finds).
         services.AddCommandAuditor<ApplyDueLifecycle, string, ApplyDueLifecycleAuditor>();
