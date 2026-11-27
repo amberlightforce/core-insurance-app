@@ -18,7 +18,7 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("dat")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -71,6 +71,55 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                     b.ToTable("bias_report", "dat");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.DataContractRow", b =>
+                {
+                    b.Property<Guid>("ContractId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("contract_id");
+
+                    b.Property<string>("Compatibility")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("compatibility");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Document")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("document");
+
+                    b.Property<int>("Major")
+                        .HasColumnType("integer")
+                        .HasColumnName("major");
+
+                    b.Property<int>("Minor")
+                        .HasColumnType("integer")
+                        .HasColumnName("minor");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Producer")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("producer");
+
+                    b.HasKey("ContractId")
+                        .HasName("pk_data_contract");
+
+                    b.HasIndex("Name", "Major", "Minor")
+                        .IsUnique()
+                        .HasDatabaseName("ux_data_contract_version");
+
+                    b.ToTable("data_contract", "dat");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Data.Persistence.ErasureRequestRow", b =>
                 {
                     b.Property<string>("RequestId")
@@ -99,6 +148,79 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                         .HasName("pk_erasure_request");
 
                     b.ToTable("erasure_request", "dat");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.EventLedgerRow", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_id");
+
+                    b.Property<string>("AggregateId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("aggregate_id");
+
+                    b.Property<long>("AggregateSequence")
+                        .HasColumnType("bigint")
+                        .HasColumnName("aggregate_sequence");
+
+                    b.Property<string>("AggregateType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("aggregate_type");
+
+                    b.Property<string>("Envelope")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("envelope");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("event_type");
+
+                    b.Property<string>("LegalEntity")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_entity");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<string>("Origin")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("origin");
+
+                    b.Property<string>("Producer")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("producer");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("received_at");
+
+                    b.Property<string>("RegistryName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("registry_name");
+
+                    b.Property<string>("SchemaVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("schema_version");
+
+                    b.HasKey("EventId")
+                        .HasName("pk_event_ledger");
+
+                    b.HasIndex("RegistryName", "OccurredAt")
+                        .HasDatabaseName("ix_event_ledger_registry_occurred");
+
+                    b.ToTable("event_ledger", "rpt_raw");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Data.Persistence.ModelRow", b =>
@@ -146,6 +268,61 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                     b.ToTable("model", "dat", t =>
                         {
                             t.HasCheckConstraint("ck_model_status", "status IN ('ACTIVE','SUSPENDED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.QuarantineRow", b =>
+                {
+                    b.Property<Guid>("QuarantineId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("quarantine_id");
+
+                    b.Property<string>("Envelope")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("envelope");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_id");
+
+                    b.Property<string>("Reasons")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("reasons");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("received_at");
+
+                    b.Property<string>("RegistryName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("registry_name");
+
+                    b.Property<DateTime?>("ReleasedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("released_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("QuarantineId")
+                        .HasName("pk_quarantine");
+
+                    b.HasIndex("EventId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_quarantine_event");
+
+                    b.HasIndex("Status", "RegistryName")
+                        .HasDatabaseName("ix_quarantine_status");
+
+                    b.ToTable("quarantine", "rpt_raw", t =>
+                        {
+                            t.HasCheckConstraint("ck_quarantine_status", "status IN ('QUARANTINED','RELEASED')");
                         });
                 });
 

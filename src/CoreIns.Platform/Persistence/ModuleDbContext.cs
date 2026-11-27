@@ -178,20 +178,22 @@ public static class ModuleDbContextRegistration
         where TContext : DbContext
     {
         using var context = CreateForMigration<TContext>("Host=localhost;Database=design;Username=design", schema);
+        // A table mapped to another schema of the same module (DAT's rpt_raw layer) is granted and revoked there.
         var tables = context.Model.GetEntityTypes()
-            .Select(entity => Microsoft.EntityFrameworkCore.RelationalEntityTypeExtensions.GetTableName(entity))
-            .OfType<string>()
-            .Distinct(StringComparer.Ordinal)
-            .Order(StringComparer.Ordinal)
-            .Select(table => $"{schema}.{table}")
+            .Select(entity => (Table: Microsoft.EntityFrameworkCore.RelationalEntityTypeExtensions.GetTableName(entity), Schema: Microsoft.EntityFrameworkCore.RelationalEntityTypeExtensions.GetSchema(entity) ?? schema))
+            .Where(t => t.Table is not null)
+            .Select(t => (Table: t.Table!, t.Schema))
+            .Distinct()
+            .OrderBy(t => t.Schema, StringComparer.Ordinal).ThenBy(t => t.Table, StringComparer.Ordinal)
             .ToList();
-        var statements = new List<string> { $"REVOKE ALL ON ALL TABLES IN SCHEMA {schema} FROM {appRole}" };
+        var schemas = tables.Select(t => t.Schema).Append(schema).Distinct(StringComparer.Ordinal).ToList();
+        var statements = schemas.Select(s => $"REVOKE ALL ON ALL TABLES IN SCHEMA {s} FROM {appRole}").ToList();
         if (tables.Count > 0)
         {
-            statements.Add($"GRANT {privileges} ON {string.Join(", ", tables)} TO {appRole}");
+            statements.Add($"GRANT {privileges} ON {string.Join(", ", tables.Select(t => $"{t.Schema}.{t.Table}"))} TO {appRole}");
         }
 
-        statements.Add($"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {schema} TO {appRole}");
+        statements.AddRange(schemas.Select(s => $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {s} TO {appRole}"));
         return statements;
     }
 
