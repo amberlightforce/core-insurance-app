@@ -84,6 +84,7 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
             entity.Property(e => e.SnapshotRef).HasColumnName("snapshot_ref");
             entity.Property(e => e.SnapshotSegmentId).HasColumnName("snapshot_segment_id");
             entity.Property(e => e.PolicyTermId).HasColumnName("policy_term_id");
+            entity.HasIndex(e => e.PolicyTermId).HasDatabaseName("ix_claim_policy_term");
             entity.Property(e => e.SnapshotValidAt).HasColumnName("snapshot_valid_at").HasColumnType("timestamptz");
             entity.Property(e => e.SnapshotKnownAt).HasColumnName("snapshot_known_at").HasColumnType("timestamptz");
             entity.Property(e => e.SnapshotStatus).HasColumnName("snapshot_status");

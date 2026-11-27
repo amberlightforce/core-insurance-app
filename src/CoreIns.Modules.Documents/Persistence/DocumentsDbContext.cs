@@ -37,10 +37,12 @@ internal sealed class DocumentsDbContext(DbContextOptions<DocumentsDbContext> op
             entity.Property(e => e.SubjectType).HasColumnName("subject_type");
             entity.Property(e => e.SubjectId).HasColumnName("subject_id");
             entity.Property(e => e.RecipientPartyId).HasColumnName("recipient_party_id");
+            entity.HasIndex(e => e.RecipientPartyId).HasDatabaseName("ix_document_recipient_party");
             entity.Property(e => e.Language).HasColumnName("language").HasColumnType("char(2)");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.Medium).HasColumnName("medium");
             entity.Property(e => e.ArchiveId).HasColumnName("archive_id");
+            entity.HasIndex(e => e.ArchiveId).HasDatabaseName("ix_document_archive");
             entity.Property(e => e.ContentHash).HasColumnName("content_hash").HasColumnType("char(64)");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
@@ -63,6 +65,7 @@ internal sealed class DocumentsDbContext(DbContextOptions<DocumentsDbContext> op
             entity.Property(e => e.DeliveryId).HasColumnName("delivery_id");
             entity.Property(e => e.DocumentId).HasColumnName("document_id");
             entity.Property(e => e.RecipientPartyId).HasColumnName("recipient_party_id");
+            entity.HasIndex(e => e.RecipientPartyId).HasDatabaseName("ix_delivery_recipient_party");
             entity.Property(e => e.RecipientRole).HasColumnName("recipient_role");
             entity.Property(e => e.Channel).HasColumnName("channel");
             entity.Property(e => e.Medium).HasColumnName("medium");
@@ -82,6 +85,7 @@ internal sealed class DocumentsDbContext(DbContextOptions<DocumentsDbContext> op
             entity.HasKey(e => e.EvidenceId).HasName("pk_evidence");
             entity.Property(e => e.EvidenceId).HasColumnName("evidence_id");
             entity.Property(e => e.DeliveryId).HasColumnName("delivery_id");
+            entity.HasIndex(e => e.DeliveryId).HasDatabaseName("ix_evidence_delivery");
             entity.Property(e => e.DocumentId).HasColumnName("document_id");
             entity.Property(e => e.Provider).HasColumnName("provider");
             entity.Property(e => e.ProviderEventId).HasColumnName("provider_event_id");

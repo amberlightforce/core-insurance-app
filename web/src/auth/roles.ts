@@ -59,3 +59,15 @@ export const reinsuranceRoles = [
 export function hasAnyRole(userRoles: readonly string[], allowed: readonly string[]): boolean {
   return userRoles.some((role) => allowed.includes(role));
 }
+
+/** Roles that browse the product catalogue (permission pfc.Product.list). */
+export const productRoles = [
+  'Staff.Underwriter',
+  'Staff.Billing',
+  'Platform.Admin',
+  'Platform.ReleaseManager',
+  'Platform.DesignAuthority',
+] as const;
+
+/** Roles that work the finance operations screens: trial balance, manual journals, intake exceptions, period close, earning (fin.* grants). */
+export const financeRoles = ['Staff.Finance', 'Platform.Admin'] as const;

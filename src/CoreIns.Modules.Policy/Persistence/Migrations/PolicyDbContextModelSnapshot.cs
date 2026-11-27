@@ -151,6 +151,9 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                     b.HasKey("ChargeId")
                         .HasName("pk_charge_line");
 
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_charge_line_policy");
+
                     b.HasIndex("TermId")
                         .HasDatabaseName("ix_charge_line_term");
 
@@ -664,6 +667,9 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                     b.HasIndex("PolicyId")
                         .HasDatabaseName("ix_oos_correction_policy");
 
+                    b.HasIndex("TermId")
+                        .HasDatabaseName("ix_oos_correction_term");
+
                     b.HasIndex("TransactionId")
                         .IsUnique()
                         .HasDatabaseName("ux_oos_correction_transaction");
@@ -770,6 +776,9 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                     b.HasKey("ExceptionId")
                         .HasName("pk_pack_rollback_exception");
 
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_pack_rollback_exception_policy");
+
                     b.HasIndex("TransactionId");
 
                     b.HasIndex("ActivationId", "TransactionId")
@@ -842,6 +851,9 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
 
                     b.HasKey("PolicyId")
                         .HasName("pk_policy");
+
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_policy_account");
 
                     b.HasIndex("LegalEntityId", "PolicyNumber")
                         .IsUnique()
@@ -1090,6 +1102,9 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ux_policy_transaction_job");
 
+                    b.HasIndex("TermId")
+                        .HasDatabaseName("ix_policy_transaction_term");
+
                     b.HasIndex("PolicyId", "Sequence")
                         .IsUnique()
                         .HasDatabaseName("ux_policy_transaction_sequence");
@@ -1164,6 +1179,9 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                     b.HasIndex("NonPaymentId")
                         .IsUnique()
                         .HasDatabaseName("ux_psr_exception_nonpay");
+
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_psr_exception_policy");
 
                     b.HasIndex("LegalEntityId", "Status", "RaisedAt")
                         .HasDatabaseName("ix_psr_exception_queue");
@@ -1349,6 +1367,9 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                     b.HasKey("SegmentId")
                         .HasName("pk_segment");
 
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_segment_policy");
+
                     b.HasIndex("TermId")
                         .HasDatabaseName("ix_segment_term");
 
@@ -1417,6 +1438,9 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
 
                     b.HasKey("WithdrawalId")
                         .HasName("pk_withdrawal");
+
+                    b.HasIndex("TermId")
+                        .HasDatabaseName("ix_withdrawal_term");
 
                     b.HasIndex("PolicyId", "ChannelRef")
                         .IsUnique()

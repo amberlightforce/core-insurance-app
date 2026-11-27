@@ -18,7 +18,7 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("doc")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -131,6 +131,9 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                     b.HasIndex("DocumentId")
                         .HasDatabaseName("ix_delivery_document");
 
+                    b.HasIndex("RecipientPartyId")
+                        .HasDatabaseName("ix_delivery_recipient_party");
+
                     b.ToTable("delivery", "doc", t =>
                         {
                             t.HasCheckConstraint("ck_delivery_delivered_date", "status <> 'Delivered' OR notification_date IS NOT NULL");
@@ -223,6 +226,12 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
                     b.HasKey("DocumentId")
                         .HasName("pk_document");
 
+                    b.HasIndex("ArchiveId")
+                        .HasDatabaseName("ix_document_archive");
+
+                    b.HasIndex("RecipientPartyId")
+                        .HasDatabaseName("ix_document_recipient_party");
+
                     b.HasIndex("LegalEntityId", "DocumentNumber")
                         .IsUnique()
                         .HasDatabaseName("ux_document_number");
@@ -289,6 +298,9 @@ namespace CoreIns.Modules.Documents.Persistence.Migrations
 
                     b.HasKey("EvidenceId")
                         .HasName("pk_evidence");
+
+                    b.HasIndex("DeliveryId")
+                        .HasDatabaseName("ix_evidence_delivery");
 
                     b.HasIndex("DocumentId")
                         .HasDatabaseName("ix_evidence_document");

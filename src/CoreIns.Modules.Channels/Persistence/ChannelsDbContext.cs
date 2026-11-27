@@ -75,6 +75,7 @@ internal sealed class ChannelsDbContext(DbContextOptions<ChannelsDbContext> opti
             entity.Property(e => e.Arguments).HasColumnName("arguments").HasColumnType("jsonb");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.InteractionId).HasColumnName("interaction_id");
+            entity.HasIndex(e => e.InteractionId).HasDatabaseName("ix_ticket_interaction");
             entity.Property(e => e.RequestedBy).HasColumnName("requested_by");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.ExpiresAt).HasColumnName("expires_at").HasColumnType("timestamptz");

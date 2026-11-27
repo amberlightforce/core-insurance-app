@@ -96,8 +96,13 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
           env: env
           resources: { cpu: json(cpu), memory: memory }
           probes: probes
+          // NX-OT-13: /tmp is the only writable path the app needs (ASP.NET temp files, Data Protection fallback); an EmptyDir keeps it
+          // writable if the platform gets a read-only root filesystem. TODO(hardening): Container Apps has no readOnlyRootFilesystem
+          // setting in API 2024-03-01; enable securityContext.readOnlyRootFilesystem once it is generally available.
+          volumeMounts: [{ volumeName: 'tmp', mountPath: '/tmp' }]
         }
       ]
+      volumes: [{ name: 'tmp', storageType: 'EmptyDir' }]
       scale: { minReplicas: minReplicas, maxReplicas: maxReplicas }
     }
   }

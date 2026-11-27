@@ -87,15 +87,42 @@ internal sealed class AiKillSwitchAuditor : ICommandAuditor<AiKillSwitch, AiKill
 /// </summary>
 internal sealed record InvokeAi(AiInvokeRequest Request) : ICommand<AiInvokeResponse>;
 
+/// <summary>Per-feature allow-list of top-level input field names (PLT-220). A feature not listed here is checked for size and shape only.</summary>
+internal static class AllowedInputs
+{
+    private static readonly Dictionary<string, string[]> ByFeature = new(StringComparer.Ordinal)
+    {
+        ["AI-PTY-01"] = ["partyIdA", "partyIdB"],
+        ["AI-BIL-01"] = ["receiptId", "payment", "candidateCount"],
+        ["AI-UW-01"] = ["referralId", "reasonCount"],
+        ["AI-CLM-01"] = ["text"],
+        ["AI-CHN-02"] = ["method", "params"],
+    };
+
+    public static bool IsAllowed(string featureId, System.Text.Json.JsonElement inputs)
+    {
+        if (inputs.ValueKind != System.Text.Json.JsonValueKind.Object || !ByFeature.TryGetValue(featureId, out var allowed))
+        {
+            return true;
+        }
+
+        return inputs.EnumerateObject().All(p => allowed.Contains(p.Name, StringComparer.Ordinal));
+    }
+}
+
 internal sealed class InvokeAiValidator : AbstractValidator<InvokeAi>
 {
     public const int MaxInputBytes = 32 * 1024;
 
-    public InvokeAiValidator() =>
+    public InvokeAiValidator()
+    {
         RuleFor(c => c.Request.Inputs)
             .Must(i => i.ValueKind == JsonValueKind.Object && i.GetRawText().Length <= MaxInputBytes)
             .WithMessage("inputs must be a JSON object of at most 32 KB.");
-    // TODO(hardening): per-feature allow-list of input field names (PLT-220); only size and shape are checked now.
+        RuleFor(c => c.Request)
+            .Must(r => AllowedInputs.IsAllowed(r.FeatureId.Value, r.Inputs))
+            .WithMessage("inputs contain a field that the feature does not accept.");
+    }
 }
 
 internal sealed class InvokeAiHandler(

@@ -1,3 +1,5 @@
+> **HISTORICAL — do not plan from this file.** It records past work. Current plans and the document map: [`README.md`](README.md).
+
 # SLICE PLAN 5 — underwriting workbench and pack rollback (UW referral workbench, E2E-12)
 
 **Status:** planned 2026-10-08 (planner, following `SLICE-3-PLANNING-HANDOVER.md` §4 and §5). **Decisions:** proposed rows

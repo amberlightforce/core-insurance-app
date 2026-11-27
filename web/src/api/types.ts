@@ -21,6 +21,10 @@ export type PartyGetResponse = Pty['schemas']['PartyGetResponse'];
 // Product (pfc.yaml)
 export type ProductVersionResolveRequest = Pfc['schemas']['ProductVersionResolveRequest'];
 export type ProductVersionResolveResponse = Pfc['schemas']['ProductVersionResolveResponse'];
+export type ProductListPage = Pfc['schemas']['ProductListPage'];
+export type ProductListItem = Pfc['schemas']['ProductListItem'];
+export type ChargeTypeListPage = Pfc['schemas']['ChargeTypeListPage'];
+export type ChargeTypeListItem = Pfc['schemas']['ChargeTypeListItem'];
 export type CatalogueGetResponse = Pfc['schemas']['CatalogueGetResponse'];
 export type CatalogueCoverage = Pfc['schemas']['CatalogueCoverage'];
 export type QuestionSetGetResponse = Pfc['schemas']['QuestionSetGetResponse'];

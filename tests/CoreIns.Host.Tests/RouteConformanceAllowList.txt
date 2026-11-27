@@ -72,7 +72,6 @@ CONTRACT_NOT_SERVED GET /api/doc/v1/ipids/get
 CONTRACT_NOT_SERVED GET /api/doc/v1/signatures/{}
 CONTRACT_NOT_SERVED GET /api/doc/v1/templates
 CONTRACT_NOT_SERVED GET /api/fin/v1/actuarial-results/{}
-CONTRACT_NOT_SERVED GET /api/fin/v1/balances/trial-balance
 CONTRACT_NOT_SERVED GET /api/fin/v1/balances/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/close/tasks
 CONTRACT_NOT_SERVED GET /api/fin/v1/earning/status
@@ -84,12 +83,10 @@ CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17-groups/assignment
 CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17-groups/ri-held-assignment
 CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17-groups/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17/movements
-CONTRACT_NOT_SERVED GET /api/fin/v1/intake-exceptions
 CONTRACT_NOT_SERVED GET /api/fin/v1/levy-returns
 CONTRACT_NOT_SERVED GET /api/fin/v1/levy-returns/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/manual-journals
 CONTRACT_NOT_SERVED GET /api/fin/v1/manual-journals/{}
-CONTRACT_NOT_SERVED GET /api/fin/v1/periods
 CONTRACT_NOT_SERVED GET /api/fin/v1/periods/status
 CONTRACT_NOT_SERVED GET /api/fin/v1/reconciliation/breaks
 CONTRACT_NOT_SERVED GET /api/fin/v1/reconciliation/detail
