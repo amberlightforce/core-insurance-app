@@ -206,3 +206,70 @@ internal sealed class ChangeSetEditRow
 
     public Instant At { get; set; }
 }
+
+/// <summary>
+/// <c>pfc.release_request</c>: one pass of a change set through submit, sign-off and schedule (BO-PFC-04). Everything the approval
+/// binds (identity, version number, candidate artefact hash) is derived by the server at submit and bound into
+/// <see cref="PayloadHash"/>, the content hash of the in-process PLT approval (type PFC.Release). The version row is created and
+/// Locked only at the activation date, so a Locked version stays immutable and a schedule can be cancelled.
+/// </summary>
+internal sealed class ReleaseRequestRow
+{
+    public Guid ReleaseId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public string Jurisdiction { get; set; } = string.Empty;
+
+    public ProductId ProductId { get; set; }
+
+    public Guid ChangeSetId { get; set; }
+
+    public int NewMajor { get; set; }
+
+    public int NewMinor { get; set; }
+
+    public string Status { get; set; } = string.Empty;
+
+    public string PayloadHash { get; set; } = string.Empty;
+
+    /// <summary>The hash the compiled draft has as submitted (before the schedule sets the windows).</summary>
+    public string CandidateArtefactHash { get; set; } = string.Empty;
+
+    public Guid ApprovalRequestId { get; set; }
+
+    public string SubmittedBy { get; set; } = string.Empty;
+
+    /// <summary>The submitter's principal when the submitter is a service or AI agent acting for a person.</summary>
+    public string? SubmittedByPrincipal { get; set; }
+
+    public Instant SubmittedAt { get; set; }
+
+    public string? DecidedBy { get; set; }
+
+    public Instant? DecidedAt { get; set; }
+
+    public string? DecisionComment { get; set; }
+
+    public BusinessDate? ActivationDate { get; set; }
+
+    public BusinessDate? NewBusinessFrom { get; set; }
+
+    public BusinessDate? NewBusinessTo { get; set; }
+
+    public BusinessDate? RenewalFrom { get; set; }
+
+    public BusinessDate? RenewalTo { get; set; }
+
+    public string? ScheduledBy { get; set; }
+
+    public Instant? ScheduledAt { get; set; }
+
+    public string? ScheduleReason { get; set; }
+
+    public ProductVersionId? PublishedVersionId { get; set; }
+
+    public Instant? PublishedAt { get; set; }
+
+    public int RecordVersion { get; set; }
+}

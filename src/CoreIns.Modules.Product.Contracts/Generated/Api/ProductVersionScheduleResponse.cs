@@ -4,15 +4,15 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.ProductVersion.schedule result. PRD outputs: "schedule"</summary>
+/// <summary>pfc.ProductVersion.schedule result. On a dry run the windows are validated and nothing is stored.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProductVersionScheduleResponse
 {
-    /// <summary>PRD: "schedule"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'dryRun'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dryRun")]
+    public required bool DryRun { get; init; }
+
+    /// <summary>Contract member 'schedule'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("schedule")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Schedule { get; init; }
+    public required global::CoreIns.Modules.Product.Contracts.Api.ReleaseSchedule Schedule { get; init; }
 }

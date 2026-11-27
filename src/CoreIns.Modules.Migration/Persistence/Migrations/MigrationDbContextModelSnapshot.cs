@@ -313,6 +313,162 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Reconciliation.ControlTotalRow", b =>
+                {
+                    b.Property<Guid>("ControlTotalId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("control_total_id");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean")
+                        .HasColumnName("active");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<long>("Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("count");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime>("LoadedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("loaded_at");
+
+                    b.Property<string>("LoadedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("loaded_by");
+
+                    b.Property<string>("ModuleName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("module");
+
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("object_type");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope");
+
+                    b.HasKey("ControlTotalId")
+                        .HasName("pk_control_total");
+
+                    b.HasIndex("LegalEntityId", "Scope", "ModuleName", "ObjectType", "Key", "Currency")
+                        .IsUnique()
+                        .HasDatabaseName("ux_control_total_key");
+
+                    b.ToTable("control_total", "mig");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Reconciliation.ReconResultRow", b =>
+                {
+                    b.Property<Guid>("ResultId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("result_id");
+
+                    b.Property<Guid?>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<decimal>("CoreAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("core_amount");
+
+                    b.Property<long>("CoreCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("core_count");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key");
+
+                    b.Property<decimal>("LegacyAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("legacy_amount");
+
+                    b.Property<long>("LegacyCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("legacy_count");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("ModuleName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("module");
+
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("object_type");
+
+                    b.Property<DateTime>("RunAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("run_at");
+
+                    b.Property<string>("RunBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("run_by");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("ResultId")
+                        .HasName("pk_recon_result");
+
+                    b.HasIndex("LegalEntityId", "RunId")
+                        .HasDatabaseName("ix_recon_result_run");
+
+                    b.HasIndex("LegalEntityId", "Scope", "RunAt")
+                        .HasDatabaseName("ix_recon_result_scope");
+
+                    b.ToTable("recon_result", "mig", t =>
+                        {
+                            t.HasCheckConstraint("ck_recon_result_status", "status IN ('MATCH','VARIANCE','MISSING_CORE','MISSING_LEGACY')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Platform.Persistence.DsarRestrictionRow", b =>
                 {
                     b.Property<Guid>("RestrictionId")

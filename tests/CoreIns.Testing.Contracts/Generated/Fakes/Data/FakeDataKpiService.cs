@@ -14,5 +14,5 @@ public sealed class FakeDataKpiService : global::CoreIns.Testing.Contracts.FakeS
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.KpiGetResponse> GetAsync(string? kpiCode = null, string? filters = null, string? period = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Data.Contracts.Api.KpiGetResponse>("dat.Kpi.get", [kpiCode, filters, period], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.KpiGetResponse> GetAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, string? kpiCode = null, string? filters = null, string? period = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Data.Contracts.Api.KpiGetResponse>("dat.Kpi.get", [validAt, knownAt, kpiCode, filters, period], cancellationToken);
 }

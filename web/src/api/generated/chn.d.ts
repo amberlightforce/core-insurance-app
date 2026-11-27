@@ -1899,6 +1899,8 @@ export interface components {
     schemas: {
         /** @description chn.Permission.evaluate request. PRD inputs: "transactionType, channel, actor, onBehalfOf, objectRef, proposedValues" */
         PermissionEvaluateRequest: {
+            /** @description Contract addition (BO-CHN-05): raise a confirmation ticket when the outcome is REFER (default true; false for a pure what-if). */
+            raiseTicket?: boolean;
             /** @description PRD: "transactionType" */
             transactionType?: components["schemas"]["Unspecified"];
             /** @description PRD: "channel" */
@@ -1914,6 +1916,11 @@ export interface components {
         };
         /** @description chn.Permission.evaluate result. PRD outputs: "outcome, limits, entry, version, reasons, explanation key" */
         PermissionEvaluateResponse: {
+            /**
+             * Format: uuid
+             * @description Contract addition (BO-CHN-05): the confirmation ticket raised for a REFER outcome.
+             */
+            ticketId?: string;
             /** @description PRD: "outcome" */
             outcome?: components["schemas"]["Unspecified"];
             /** @description PRD: "limits" */
@@ -1947,6 +1954,11 @@ export interface components {
         };
         /** @description chn.PermissionMatrix.updateEntry request. PRD inputs: "version, entries, scenarios" */
         PermissionMatrixUpdateEntryRequest: {
+            /**
+             * Format: uuid
+             * @description Contract addition (BO-CHN-05): the matrix draft acted on.
+             */
+            matrixId?: string;
             /** @description PRD: "version" */
             version?: components["schemas"]["Unspecified"];
             /** @description PRD: "entries" */
@@ -1965,6 +1977,11 @@ export interface components {
         };
         /** @description chn.PermissionMatrix.runScenarios request. PRD inputs: "version, entries, scenarios" */
         PermissionMatrixRunScenariosRequest: {
+            /**
+             * Format: uuid
+             * @description Contract addition (BO-CHN-05): the matrix draft acted on.
+             */
+            matrixId?: string;
             /** @description PRD: "version" */
             version?: components["schemas"]["Unspecified"];
             /** @description PRD: "entries" */
@@ -1983,6 +2000,11 @@ export interface components {
         };
         /** @description chn.PermissionMatrix.submit request. PRD inputs: "version, entries, scenarios" */
         PermissionMatrixSubmitRequest: {
+            /**
+             * Format: uuid
+             * @description Contract addition (BO-CHN-05): the matrix draft acted on.
+             */
+            matrixId?: string;
             /** @description PRD: "version" */
             version?: components["schemas"]["Unspecified"];
             /** @description PRD: "entries" */
@@ -2001,6 +2023,16 @@ export interface components {
         };
         /** @description chn.PermissionMatrix.schedule request. PRD inputs: "version, entries, scenarios" */
         PermissionMatrixScheduleRequest: {
+            /**
+             * Format: date-time
+             * @description Contract addition (BO-CHN-05): activation instant; omitted = now.
+             */
+            effectiveFrom?: string;
+            /**
+             * Format: uuid
+             * @description Contract addition (BO-CHN-05): the matrix draft acted on.
+             */
+            matrixId?: string;
             /** @description PRD: "version" */
             version?: components["schemas"]["Unspecified"];
             /** @description PRD: "entries" */
@@ -3369,7 +3401,12 @@ export interface operations {
     };
     "chn.PermissionMatrix.diff": {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Contract addition (BO-CHN-05) - the matrix to compare */
+                id: string;
+                /** @description Contract addition (BO-CHN-05) - the matrix to compare against; omitted = the matrix in force now */
+                against?: string;
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
