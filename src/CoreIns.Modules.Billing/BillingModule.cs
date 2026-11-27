@@ -121,6 +121,7 @@ public static class BillingModule
         services.AddScoped<DisbursementReader>();
         services.AddScoped<TaxLevyReader>();
         services.AddScoped<MigratedRecordsReader>();
+        services.AddScoped<BillingOpsReader>();
         services.AddScoped<IValidator<CreatePayeeAccount>, CreatePayeeAccountValidator>();
         services.AddCommandAuditor<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountAuditor>();
         services.AddCommand<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountHandler>(

@@ -2,6 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import i18n from '../../../i18n';
+import { expectNoA11yViolations } from '../../../test/axe';
 import { mockApi, renderScreen } from '../../../test/mockApi';
 import { AiControlPage } from './AiControlPage';
 import { RequireRole } from '../../../auth/RequireRole';
@@ -68,6 +69,7 @@ describe('AI control page', () => {
     const api = mockApi(routes());
     const { user } = renderScreen(<AiControlPage />, { path: '/admin/ai', url: '/admin/ai' });
     const sw = await screen.findByRole('switch', { name: 'Enable AI-CLM-01' });
+    await expectNoA11yViolations();
     await waitFor(() => expect(sw).not.toBeDisabled());
     await user.click(sw);
     await waitFor(() => {

@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { ClaimView } from '../../../api/types';
+import { expectNoA11yViolations } from '../../../test/axe';
 import { mockApi, renderScreen, type MockRoute } from '../../../test/mockApi';
 import { ClaimViewPage } from '../ClaimViewPage';
 import type { FsCaseView } from './api';
@@ -134,6 +135,7 @@ describe('claim file friendly settlement', () => {
     );
     const { user } = view();
     expect(await screen.findByText('Εισπρακτέο από την αντίπαλη', {}, slow)).toBeInTheDocument();
+    await expectNoA11yViolations();
     expect(screen.getAllByText('Επιλέξιμη ✓').length).toBeGreaterThan(0);
     await user.click(screen.getByRole('button', { name: 'Άνοιγμα ιδίου διακανονισμού' }));
     await vi.waitFor(() => {

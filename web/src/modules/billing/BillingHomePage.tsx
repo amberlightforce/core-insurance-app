@@ -50,6 +50,18 @@ export function BillingHomePage() {
               <LinkButton variant="secondary" to="/billing/refunds">
                 {t('refunds.open')}
               </LinkButton>
+              <LinkButton variant="secondary" to="/billing/suspense">
+                {t('suspense.open')}
+              </LinkButton>
+              <LinkButton variant="secondary" to="/billing/plans">
+                {t('plans.open')}
+              </LinkButton>
+              <LinkButton variant="secondary" to="/billing/mandates">
+                {t('mandates.open')}
+              </LinkButton>
+              <LinkButton variant="secondary" to="/billing/account-currents">
+                {t('accountCurrents.open')}
+              </LinkButton>
             </>
           ) : undefined
         }

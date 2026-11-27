@@ -8,6 +8,7 @@ import {
   billingRoles,
   claimsRoles,
   complianceRoles,
+  fiscalRoles,
   dsarRoles,
   financeRoles,
   migrationRoles,
@@ -135,6 +136,56 @@ const moduleRoutes: RouteObject[] = [
         lazy: async () => ({
           Component: (await import('./modules/billing/receivables/ReceivableDetailPage'))
             .ReceivableDetailPage,
+        }),
+      },
+    ],
+  },
+  // NX-UI-14c: billing operations screens (billing roles).
+  {
+    path: 'billing/suspense',
+    element: <RequireRole roles={billingRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/ops/SuspensePage')).SuspensePage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'billing/plans',
+    element: <RequireRole roles={billingRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/ops/PlansPage')).PlansPage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'billing/mandates',
+    element: <RequireRole roles={billingRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/ops/MandatesPage')).MandatesPage,
+        }),
+      },
+    ],
+  },
+  {
+    path: 'billing/account-currents',
+    element: <RequireRole roles={billingRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('./modules/billing/ops/AccountCurrentsPage'))
+            .AccountCurrentsPage,
         }),
       },
     ],
@@ -476,6 +527,40 @@ moduleRoutes.push({
 });
 
 moduleRoutes.push({
+  // NX-UI-11: fiscal documents, reconciliation breaks and the AI-system register.
+  path: 'compliance/fiscal',
+  element: <RequireRole roles={fiscalRoles} />,
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/compliance/fiscal/FiscalListPage')).FiscalListPage,
+      }),
+    },
+    {
+      path: ':id',
+      lazy: async () => ({
+        Component: (await import('./modules/compliance/fiscal/FiscalDocumentPage'))
+          .FiscalDocumentPage,
+      }),
+    },
+  ],
+});
+
+moduleRoutes.push({
+  path: 'compliance/ai-systems',
+  element: <RequireRole roles={complianceRoles} />,
+  children: [
+    {
+      index: true,
+      lazy: async () => ({
+        Component: (await import('./modules/compliance/ai/AiRegisterPage')).AiRegisterPage,
+      }),
+    },
+  ],
+});
+
+moduleRoutes.push({
   path: 'compliance/dsar',
   element: <RequireRole roles={dsarRoles} />,
   children: [
@@ -531,6 +616,8 @@ const implemented = new Set([
   '/admin/migration',
   '/compliance',
   '/compliance/dsar',
+  '/compliance/fiscal',
+  '/compliance/ai-systems',
   '/channels/withdrawals',
   '/policies/pack-rollback',
   '/products',

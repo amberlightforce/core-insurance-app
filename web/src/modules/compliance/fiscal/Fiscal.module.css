@@ -1,0 +1,43 @@
+/* Fiscal documents and AI register: filter row, detail grid. */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3) var(--space-5);
+  margin: 0;
+}
+
+.grid dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption, 0.75rem);
+}
+
+.grid dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.codes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-inline-size: 640px;
+}

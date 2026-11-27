@@ -2,6 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { DevSession } from '../../../dev-auth/devAuth';
+import { expectNoA11yViolations } from '../../../test/axe';
 import { mockApi, problem, renderScreen } from '../../../test/mockApi';
 import type { DsarCase } from './api';
 import { DsarCasePage } from './DsarCasePage';
@@ -124,6 +125,7 @@ describe('DSAR console', () => {
     expect(screen.getAllByText('PTY').length).toBeGreaterThan(0);
     expect(screen.getByText('APPROVAL_REQUIRED')).toBeInTheDocument();
     expect(await screen.findByText('Revenue Authority')).toBeInTheDocument();
+    await expectNoA11yViolations();
   });
 
   it('approves an erasure with a reason and sends the action, never an approver', async () => {

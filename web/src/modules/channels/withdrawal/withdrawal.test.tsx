@@ -1,6 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { expectNoA11yViolations } from '../../../test/axe';
 import { mockApi, renderScreen } from '../../../test/mockApi';
 import { WithdrawalDeclarePage } from './WithdrawalDeclarePage';
 import { WithdrawalDetailPage } from './WithdrawalDetailPage';
@@ -119,8 +120,10 @@ describe('staff screens', () => {
         }),
       },
     ]);
-    renderScreen(<WithdrawalListPage />, { path: '/l', url: '/l' });
+    const { container } = renderScreen(<WithdrawalListPage />, { path: '/l', url: '/l' });
     await screen.findByText('WDR000000001');
+    // Scoped to the page: earlier tests leave toast/portal nodes outside the cleaned-up container.
+    await expectNoA11yViolations(container);
   });
 
   it('closes a confirmed request', async () => {

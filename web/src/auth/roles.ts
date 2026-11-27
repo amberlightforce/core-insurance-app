@@ -60,6 +60,8 @@ export function hasAnyRole(userRoles: readonly string[], allowed: readonly strin
   return userRoles.some((role) => allowed.includes(role));
 }
 
+/** Fiscal documents and reconciliation breaks (cmp.FiscalDocument.get/listBySource, cmp.FiscalReconciliation.breaks). */
+export const fiscalRoles = ['Staff.ComplianceOfficer', 'Staff.Billing', 'Platform.Admin'] as const;
 /** Roles that browse the product catalogue (permission pfc.Product.list). */
 export const productRoles = [
   'Staff.Underwriter',

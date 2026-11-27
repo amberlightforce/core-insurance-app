@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { expectNoA11yViolations } from '../../../test/axe';
 import { mockApi, renderScreen, type MockRoute } from '../../../test/mockApi';
 import type { DelinquencyCase } from './api';
 import { DelinquencyDetailPage } from './DelinquencyDetailPage';
@@ -54,6 +55,7 @@ describe('delinquency list', () => {
       url: '/billing/delinquency',
     });
     const grid = await screen.findByRole('grid', { name: 'Υποθέσεις καθυστέρησης' });
+    await expectNoA11yViolations();
     expect(within(grid).getByText('Τρέχει χρονόμετρο')).toBeInTheDocument();
     expect(within(grid).getByText('120,00 €')).toBeInTheDocument();
     expect(within(grid).getByText(/ημέρες απομένουν/)).toBeInTheDocument();
