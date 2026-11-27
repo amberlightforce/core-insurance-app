@@ -5,7 +5,10 @@
   "emptyTitle": "Nothing to report",
   "emptyBody": "There are no records yet.",
   "partial": "Summary of the first {count} records only; open the full list for the rest.",
-  "columns": { "status": "Status", "count": "Count" },
+  "columns": {
+    "status": "Status",
+    "count": "Count"
+  },
   "receivables": {
     "title": "Receivables",
     "source": "Billing",
@@ -35,13 +38,139 @@
     "title": "Detailed views",
     "open": "Open",
     "gap": "Trial balance, reinsurance and regulatory reports are not available through the API yet.",
-    "journals": { "name": "Finance journals by policy" },
-    "receivables": { "name": "Receivables register" },
-    "delinquency": { "name": "Delinquency cases" },
-    "releases": { "name": "Friendly settlement releases" },
-    "refunds": { "name": "Refunds" },
-    "approvals": { "name": "Claims approvals" },
-    "fsStatements": { "name": "Friendly settlement statements" },
-    "compliance": { "name": "Complaints and compliance" }
+    "journals": {
+      "name": "Finance journals by policy"
+    },
+    "receivables": {
+      "name": "Receivables register"
+    },
+    "delinquency": {
+      "name": "Delinquency cases"
+    },
+    "releases": {
+      "name": "Friendly settlement releases"
+    },
+    "refunds": {
+      "name": "Refunds"
+    },
+    "approvals": {
+      "name": "Claims approvals"
+    },
+    "fsStatements": {
+      "name": "Friendly settlement statements"
+    },
+    "compliance": {
+      "name": "Complaints and compliance"
+    }
+  },
+  "kpi": {
+    "title": "Key figures",
+    "gwp": "Gross written premium",
+    "claimsPaid": "Claims paid",
+    "openReserve": "Open reserve",
+    "lossRatio": "Loss ratio"
+  },
+  "catalogue": {
+    "title": "Management reports",
+    "source": "Data marts",
+    "period": "Period",
+    "periodHelp": "Optional: YYYY, YYYY-MM or from..to. Empty runs all periods.",
+    "failed": "The report could not be run",
+    "notRegulatory": "Management, not regulatory",
+    "lastRun": "Last run {when}",
+    "neverRun": "Not run from this browser yet",
+    "run": "Run report",
+    "open": "Open",
+    "marts": {
+      "PORTFOLIO_PREMIUM": {
+        "name": "Portfolio premium",
+        "description": "Written premium by product and month from the conformed premium facts."
+      },
+      "CLAIMS_EXPERIENCE": {
+        "name": "Claims experience",
+        "description": "Claims paid and reserves by product and month, with loss ratio inputs."
+      },
+      "RI_CESSION_SUMMARY": {
+        "name": "Reinsurance cessions",
+        "description": "Ceded premium and recoveries by treaty."
+      }
+    }
+  },
+  "run": {
+    "title": "Report run",
+    "period": "Period",
+    "allPeriods": "All periods",
+    "knownAt": "Data as known at",
+    "createdBy": "Run by",
+    "snapshotHash": "Snapshot hash",
+    "signedBy": "Signed off by",
+    "signOff": "Sign off",
+    "signedOff": "Run signed off",
+    "signOffMaker": "The person who ran the report cannot sign it off.",
+    "signOffAdjuster": "A person who adjusted a figure cannot sign off the run.",
+    "alreadySigned": "This run is already signed off.",
+    "signOffInvalid": "The sign-off is no longer valid: a figure was adjusted afterwards. Sign off again.",
+    "signOffFailed": "The run could not be signed off",
+    "exportCSV": "Export CSV",
+    "exportJSON": "Export JSON",
+    "exportFailed": "The export was refused",
+    "status": {
+      "COMPLETED": "Awaiting sign-off",
+      "SIGNED_OFF": "Signed off"
+    },
+    "of": "{mart}: run"
+  },
+  "figures": {
+    "title": "Figures",
+    "empty": "The run has no figures.",
+    "metric": "Metric",
+    "product": "Product",
+    "month": "Month",
+    "dimension": "Dimension",
+    "value": "Value",
+    "adjusted": "Adjusted value",
+    "key": "Figure",
+    "actions": "Actions",
+    "adjust": "Adjust",
+    "adjustFor": "Adjust figure {key}"
+  },
+  "adjust": {
+    "title": "Adjust figure",
+    "amount": "Adjustment (EUR)",
+    "amountHelp": "Signed amount added to the figure, up to four decimals, e.g. -250.00.",
+    "amountInvalid": "Enter an amount such as 100.00 or -250.50.",
+    "reason": "Reason",
+    "evidence": "Evidence reference",
+    "evidenceHelp": "Document or ticket id supporting the adjustment.",
+    "required": "This field is required.",
+    "submit": "Add adjustment",
+    "done": "Adjustment added",
+    "failed": "The adjustment was refused",
+    "list": "Adjustments",
+    "by": "Adjusted by"
+  },
+  "compare": {
+    "title": "Compare with another run",
+    "none": "Run the same report again to compare two runs.",
+    "against": "Compare with",
+    "summary": "{changed} of {compared} figures differ.",
+    "a": "This run",
+    "b": "Other run",
+    "delta": "Change",
+    "status": "Difference",
+    "state": {
+      "ADDED": "Added",
+      "REMOVED": "Removed",
+      "CHANGED": "Changed"
+    }
+  },
+  "history": {
+    "title": "Run history",
+    "empty": "No reports have been run from this browser yet.",
+    "note": "Shows the runs started from this browser; a server-side run list is not available yet.",
+    "mart": "Report",
+    "started": "Started",
+    "status": "Status",
+    "openRun": "Open {mart} run from {when}"
   }
 }

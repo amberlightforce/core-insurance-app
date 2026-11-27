@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { EmptyState, statusColumn, textColumn, type DataColumn } from '../../design-system';
@@ -10,6 +10,11 @@ import { QueryView } from '../staff/QueryView';
 import { SimpleTable } from '../staff/SimpleTable';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
+import { KpiStrip } from './KpiStrip';
+import { useRunHistory } from './martApi';
+import { MartCatalogue } from './MartCatalogue';
+import { RunDetail } from './RunDetail';
+import { RunHistory } from './RunHistory';
 import { groupByStatus, sumByCurrency, type StatusRow } from './summarise';
 
 /** Where the detailed operational views live; each target enforces its own role (a missing role shows «No permission»). */
@@ -139,6 +144,11 @@ function DelinquencySummary() {
 /** Reports landing: live summaries from the billing reads that exist, plus the way into the detailed operational views. */
 export function ReportsPage() {
   const { t } = useTranslation('reports');
+  const history = useRunHistory();
+  const [selected, setSelected] = useState<string | null>(null);
+  const select = (runId: string) => {
+    setSelected(runId);
+  };
   return (
     <div className={styles.page}>
       <PageHeader
@@ -147,6 +157,25 @@ export function ReportsPage() {
         overline={t('overline')}
         description={t('lead')}
       />
+      <KpiStrip />
+      <Section title={t('catalogue.title')} family="brand" meta={t('catalogue.source')}>
+        <MartCatalogue
+          runs={history.runs}
+          onStarted={(runId) => {
+            history.remember(runId);
+            select(runId);
+          }}
+          onSelect={select}
+        />
+      </Section>
+      {selected ? (
+        <Section title={t('run.title')} family="info">
+          <RunDetail runId={selected} history={history.runs} />
+        </Section>
+      ) : null}
+      <Section title={t('history.title')} family="plum" count={history.runs.length}>
+        <RunHistory runs={history.runs} selected={selected} onSelect={select} />
+      </Section>
       <div className={styles.grid}>
         <Section title={t('receivables.title')} family="teal" meta={t('receivables.source')}>
           <ReceivablesSummary />
