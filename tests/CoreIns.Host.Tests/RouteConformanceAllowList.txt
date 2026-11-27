@@ -142,9 +142,7 @@ CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/query
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/zone
 CONTRACT_NOT_SERVED GET /api/ri/v1/close/status
 CONTRACT_NOT_SERVED GET /api/ri/v1/collaterals
-CONTRACT_NOT_SERVED GET /api/ri/v1/commission/history
 CONTRACT_NOT_SERVED GET /api/ri/v1/data-products/{}
-CONTRACT_NOT_SERVED GET /api/ri/v1/deposit-schedules/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/ifrs17-links/query
@@ -183,7 +181,6 @@ CONTRACT_NOT_SERVED GET /api/wrk/v1/requests/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/teams/summary
 CONTRACT_NOT_SERVED PATCH /api/bil/v1/billing-accounts/{}
 CONTRACT_NOT_SERVED PATCH /api/clm/v1/services/{}
-CONTRACT_NOT_SERVED PATCH /api/mkt/v1/config-change-requests/{}
 CONTRACT_NOT_SERVED PATCH /api/pfc/v1/pogs/{}
 CONTRACT_NOT_SERVED PATCH /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED PATCH /api/pty/v1/locations/{}
@@ -449,15 +446,10 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/recalculate
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/record-filing
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/request-payment
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/transition
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/approve
 CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/import
 CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/preview
 CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/rebase
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/reject
 CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/schedule
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/submit
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/withdraw
 CONTRACT_NOT_SERVED POST /api/mkt/v1/configuration/export
 CONTRACT_NOT_SERVED POST /api/mkt/v1/cross-borders/check
 CONTRACT_NOT_SERVED POST /api/mkt/v1/currencies/convert-fixed
@@ -634,8 +626,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/estimate
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/export-oed
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/import-model-results
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/set-capacity
-CONTRACT_NOT_SERVED POST /api/ri/v1/adjustments/approve
-CONTRACT_NOT_SERVED POST /api/ri/v1/adjustments/calculate
 CONTRACT_NOT_SERVED POST /api/ri/v1/balances/report
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/approve
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/generate
@@ -658,13 +648,10 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/close/run
 CONTRACT_NOT_SERVED POST /api/ri/v1/collaterals
 CONTRACT_NOT_SERVED POST /api/ri/v1/collaterals/draw
 CONTRACT_NOT_SERVED POST /api/ri/v1/collaterals/release
-CONTRACT_NOT_SERVED POST /api/ri/v1/commission/adjust
-CONTRACT_NOT_SERVED POST /api/ri/v1/commission/approve
 CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/close
 CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/commute
 CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/expire
 CONTRACT_NOT_SERVED POST /api/ri/v1/contracts/simulate
-CONTRACT_NOT_SERVED POST /api/ri/v1/deposit-schedules/reschedule
 CONTRACT_NOT_SERVED POST /api/ri/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/ri/v1/dsar/restrict
 CONTRACT_NOT_SERVED POST /api/ri/v1/exchanges/receive

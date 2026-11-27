@@ -129,7 +129,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Configuration change requests
+         * @description Configuration change requests
+         *
+         *     Lists change requests, newest first. Filter: status.
+         */
+        get: operations["mkt.ConfigChangeRequest.list"];
         put?: never;
         /**
          * Change workflow
@@ -152,7 +158,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Configuration change request
+         * @description Configuration change request
+         *
+         *     One configuration change request with its items.
+         */
+        get: operations["mkt.ConfigChangeRequest.get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1213,40 +1225,54 @@ export interface components {
             /** @description PRD: "signed canonical JSON" */
             signedCanonicalJson?: components["schemas"]["Unspecified"];
         };
-        /** @description mkt.ConfigChangeRequest.create request. PRD inputs: "request body / decision" */
-        ConfigChangeRequestCreateRequest: Record<string, never>;
-        /** @description mkt.ConfigChangeRequest.create result. PRD outputs: "request" */
+        /** @description mkt.ConfigChangeRequest.create request (BO-MKT-01). A DRAFT change of country-layer configuration values; only keys of the key registry are accepted. */
+        ConfigChangeRequestCreateRequest: {
+            /** @description Why the change is made (maker). No personal data. */
+            reason: string;
+            items: components["schemas"]["ConfigChangeItemInput"][];
+        };
+        /** @description mkt.ConfigChangeRequest.create result: the request after the operation */
         ConfigChangeRequestCreateResponse: {
-            /** @description PRD: "request" */
-            request?: components["schemas"]["Unspecified"];
+            request: components["schemas"]["ConfigChangeRequestView"];
         };
-        /** @description mkt.ConfigChangeRequest.update request. PRD inputs: "request body / decision" */
-        ConfigChangeRequestUpdateRequest: Record<string, never>;
-        /** @description mkt.ConfigChangeRequest.update result. PRD outputs: "request" */
+        /** @description mkt.ConfigChangeRequest.update request: replaces reason and/or items of a DRAFT request (maker only). */
+        ConfigChangeRequestUpdateRequest: {
+            reason?: string;
+            items?: components["schemas"]["ConfigChangeItemInput"][];
+        };
+        /** @description mkt.ConfigChangeRequest.update result: the request after the operation */
         ConfigChangeRequestUpdateResponse: {
-            /** @description PRD: "request" */
-            request?: components["schemas"]["Unspecified"];
+            request: components["schemas"]["ConfigChangeRequestView"];
         };
-        /** @description mkt.ConfigChangeRequest.submit request. PRD inputs: "request body / decision" */
-        ConfigChangeRequestSubmitRequest: Record<string, never>;
-        /** @description mkt.ConfigChangeRequest.submit result. PRD outputs: "request" */
+        /** @description mkt.ConfigChangeRequest.submit request: freezes the DRAFT and asks for approval (maker only). */
+        ConfigChangeRequestSubmitRequest: {
+            requestId: components["schemas"]["Uuid"];
+            /** @description Reason of the maker or checker. No personal data. */
+            reason?: string;
+        };
+        /** @description mkt.ConfigChangeRequest.submit result: the request after the operation */
         ConfigChangeRequestSubmitResponse: {
-            /** @description PRD: "request" */
-            request?: components["schemas"]["Unspecified"];
+            request: components["schemas"]["ConfigChangeRequestView"];
         };
-        /** @description mkt.ConfigChangeRequest.approve request. PRD inputs: "request body / decision" */
-        ConfigChangeRequestApproveRequest: Record<string, never>;
-        /** @description mkt.ConfigChangeRequest.approve result. PRD outputs: "request" */
+        /** @description mkt.ConfigChangeRequest.approve request: a checker other than the maker approves; the change is applied in the same transaction. */
+        ConfigChangeRequestApproveRequest: {
+            requestId: components["schemas"]["Uuid"];
+            /** @description Reason of the maker or checker. No personal data. */
+            reason: string;
+        };
+        /** @description mkt.ConfigChangeRequest.approve result: the request after the operation */
         ConfigChangeRequestApproveResponse: {
-            /** @description PRD: "request" */
-            request?: components["schemas"]["Unspecified"];
+            request: components["schemas"]["ConfigChangeRequestView"];
         };
-        /** @description mkt.ConfigChangeRequest.reject request. PRD inputs: "request body / decision" */
-        ConfigChangeRequestRejectRequest: Record<string, never>;
-        /** @description mkt.ConfigChangeRequest.reject result. PRD outputs: "request" */
+        /** @description mkt.ConfigChangeRequest.reject request (checker). */
+        ConfigChangeRequestRejectRequest: {
+            requestId: components["schemas"]["Uuid"];
+            /** @description Reason of the maker or checker. No personal data. */
+            reason: string;
+        };
+        /** @description mkt.ConfigChangeRequest.reject result: the request after the operation */
         ConfigChangeRequestRejectResponse: {
-            /** @description PRD: "request" */
-            request?: components["schemas"]["Unspecified"];
+            request: components["schemas"]["ConfigChangeRequestView"];
         };
         /** @description mkt.ConfigChangeRequest.schedule request. PRD inputs: "request body / decision" */
         ConfigChangeRequestScheduleRequest: Record<string, never>;
@@ -1255,12 +1281,15 @@ export interface components {
             /** @description PRD: "request" */
             request?: components["schemas"]["Unspecified"];
         };
-        /** @description mkt.ConfigChangeRequest.withdraw request. PRD inputs: "request body / decision" */
-        ConfigChangeRequestWithdrawRequest: Record<string, never>;
-        /** @description mkt.ConfigChangeRequest.withdraw result. PRD outputs: "request" */
+        /** @description mkt.ConfigChangeRequest.withdraw request (maker only, DRAFT or PENDING_APPROVAL). */
+        ConfigChangeRequestWithdrawRequest: {
+            requestId: components["schemas"]["Uuid"];
+            /** @description Reason of the maker or checker. No personal data. */
+            reason: string;
+        };
+        /** @description mkt.ConfigChangeRequest.withdraw result: the request after the operation */
         ConfigChangeRequestWithdrawResponse: {
-            /** @description PRD: "request" */
-            request?: components["schemas"]["Unspecified"];
+            request: components["schemas"]["ConfigChangeRequestView"];
         };
         /** @description mkt.ConfigChangeRequest.rebase request. PRD inputs: "request body / decision" */
         ConfigChangeRequestRebaseRequest: Record<string, never>;
@@ -1766,6 +1795,61 @@ export interface components {
             /** @description Configuration hash of the state this activation recorded; null until then */
             resultingHash: components["schemas"]["Sha256"] | null;
         };
+        /** @description One configuration value to set at the country layer of the legal entity's pack. */
+        ConfigChangeItemInput: {
+            /** @description A key of the configuration key registry */
+            key: components["schemas"]["Code"];
+            /** @description The value as text (decimals as strings, JSON as its text) */
+            value: string;
+            /**
+             * @description Legal status (D-REG-01). Anything but Settled or NotRegulatory is refused when the environment is Production (D-REG-02).
+             * @enum {string}
+             */
+            legalStatus: "NotRegulatory" | "Settled" | "PendingOpinion" | "Verify" | "Unverified" | "Uncertain" | "MarketPractice" | "Draft";
+            /** @description Source of the value (required, D-REG-01) */
+            sourceRef: string;
+            motorPath?: boolean;
+            validFrom?: components["schemas"]["LocalDate"] | null;
+            /** @description First day the value no longer applies; null when open */
+            validTo?: components["schemas"]["LocalDate"] | null;
+            note?: string | null;
+        };
+        ConfigChangeItemView: {
+            key: components["schemas"]["Code"];
+            value: string;
+            legalStatus: string;
+            sourceRef: string;
+            motorPath: boolean;
+            validFrom: components["schemas"]["LocalDate"] | null;
+            validTo: components["schemas"]["LocalDate"] | null;
+            note: string | null;
+        };
+        /** @description One configuration change request (BO-MKT-01). */
+        ConfigChangeRequestView: {
+            id: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "DRAFT" | "PENDING_APPROVAL" | "APPLIED" | "REJECTED" | "WITHDRAWN";
+            reason: string;
+            /** @description Country layer the items apply to (from the legal entity's pack) */
+            country: string;
+            /** @description Configuration state the request was written against */
+            baseHash: components["schemas"]["Sha256"];
+            items: components["schemas"]["ConfigChangeItemView"][];
+            /** @description Maker, as an opaque principal reference */
+            createdBy: string;
+            decidedBy: string | null;
+            decisionReason: string | null;
+            approvalRequestId: components["schemas"]["Uuid"] | null;
+            /** @description Configuration hash of the state the applied change produced; null until applied */
+            resultingHash: components["schemas"]["Sha256"] | null;
+            appliedAt: components["schemas"]["Instant"] | null;
+            createdAt: components["schemas"]["Instant"];
+            recordVersion: number;
+        };
+        /** @description Page of mkt.ConfigChangeRequest.list results (cursor pagination, contract §3.5.5) */
+        ConfigChangeRequestListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["ConfigChangeRequestView"][];
+        };
         /** @description Page of mkt.PackActivation.list results (cursor pagination, contract §3.5.5) */
         PackActivationListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["PackActivationView"][];
@@ -1915,6 +1999,15 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
+        /** @description Object not found in the caller's scope. */
+        NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
         /** @description Idempotency mismatch (`<MOD>-ERR-IDEMPOTENCY-MISMATCH`), stale version, lock or state conflict. */
         Conflict: {
             headers: {
@@ -1926,15 +2019,6 @@ export interface components {
         };
         /** @description A typed precondition or business validation failed; the command had no effect (never partial). */
         UnprocessableContent: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["Problem"];
-            };
-        };
-        /** @description Object not found in the caller's scope. */
-        NotFound: {
             headers: {
                 [name: string]: unknown;
             };
@@ -1962,6 +2046,10 @@ export interface components {
          *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
          */
         KnownAt: components["schemas"]["Instant"];
+        /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+        Cursor: string;
+        /** @description Page size, at most 200 (contract §3.5.5). */
+        Limit: number;
         /**
          * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
          *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
@@ -1974,10 +2062,6 @@ export interface components {
          *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
          */
         DryRun: boolean;
-        /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
-        Cursor: string;
-        /** @description Page size, at most 200 (contract §3.5.5). */
-        Limit: number;
     };
     requestBodies: never;
     headers: never;
@@ -2177,6 +2261,46 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
+    "mkt.ConfigChangeRequest.list": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                /** @description Status filter */
+                status?: "DRAFT" | "PENDING_APPROVAL" | "APPLIED" | "REJECTED" | "WITHDRAWN";
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfigChangeRequestListPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
     "mkt.ConfigChangeRequest.create": {
         parameters: {
             query?: {
@@ -2225,6 +2349,42 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mkt.ConfigChangeRequest.get": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the ConfigChangeRequest */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfigChangeRequestView"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
         };
     };

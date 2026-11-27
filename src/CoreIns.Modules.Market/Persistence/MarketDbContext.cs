@@ -21,6 +21,10 @@ internal sealed class MarketDbContext(DbContextOptions<MarketDbContext> options)
 
     public DbSet<PackActivationRow> PackActivations => Set<PackActivationRow>();
 
+    public DbSet<ConfigChangeRequestRow> ConfigChangeRequests => Set<ConfigChangeRequestRow>();
+
+    public DbSet<ConfigChangeItemRow> ConfigChangeItems => Set<ConfigChangeItemRow>();
+
     protected override string Schema => MarketModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -75,7 +79,7 @@ internal sealed class MarketDbContext(DbContextOptions<MarketDbContext> options)
         {
             entity.ToTable("config_state", table =>
             {
-                table.HasCheckConstraint("ck_config_state_cause", "cause IN ('GENESIS', 'PACK_ACTIVATION', 'PACK_ROLLBACK')");
+                table.HasCheckConstraint("ck_config_state_cause", "cause IN ('GENESIS', 'PACK_ACTIVATION', 'PACK_ROLLBACK', 'CONFIG_CHANGE')");
                 table.HasCheckConstraint("ck_config_state_hash", "hash ~ '^[0-9a-f]{64}$'");
                 table.HasCheckConstraint("ck_config_state_parent", "(cause = 'GENESIS') = (parent_hash IS NULL)");
             });
@@ -130,6 +134,54 @@ internal sealed class MarketDbContext(DbContextOptions<MarketDbContext> options)
             entity.HasOne<PackVersionRow>().WithMany().HasForeignKey(e => new { e.PackId, e.Version }).HasConstraintName("fk_pack_activation_pack_version").OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<ConfigStateRow>().WithMany().HasForeignKey(e => e.ResultingHash).HasPrincipalKey(e => e.Hash).HasConstraintName("fk_pack_activation_state");
             entity.HasOne<PackActivationRow>().WithMany().HasForeignKey(e => e.SupersedesId).HasConstraintName("fk_pack_activation_supersedes");
+        });
+
+        // Configuration change requests (BO-MKT-01): maker-checker over country-layer values; an approved request is applied as an overlay pack version.
+        modelBuilder.Entity<ConfigChangeRequestRow>(entity =>
+        {
+            entity.ToTable("config_change_request", table =>
+            {
+                table.HasCheckConstraint("ck_config_change_request_status", "status IN ('DRAFT', 'PENDING_APPROVAL', 'APPLIED', 'REJECTED', 'WITHDRAWN')");
+                table.HasCheckConstraint("ck_config_change_request_base_hash", "base_hash ~ '^[0-9a-f]{64}$'");
+            });
+            entity.HasKey(e => e.Id).HasName("pk_config_change_request");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Country).HasColumnName("country").HasColumnType("char(2)");
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(24);
+            entity.Property(e => e.Reason).HasColumnName("reason").HasMaxLength(128);
+            entity.Property(e => e.BaseHash).HasColumnName("base_hash").HasColumnType("char(64)");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(200);
+            entity.Property(e => e.CreatedPrincipal).HasColumnName("created_principal").HasMaxLength(200);
+            entity.Property(e => e.DecidedBy).HasColumnName("decided_by").HasMaxLength(200);
+            entity.Property(e => e.DecisionReason).HasColumnName("decision_reason").HasMaxLength(128);
+            entity.Property(e => e.ApprovalRequestId).HasColumnName("approval_request_id");
+            entity.Property(e => e.ContentHash).HasColumnName("content_hash").HasColumnType("char(64)");
+            entity.Property(e => e.ResultingHash).HasColumnName("resulting_hash").HasColumnType("char(64)");
+            entity.Property(e => e.AppliedAt).HasColumnName("applied_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.LegalEntityId, e.Status }).HasDatabaseName("ix_config_change_request_entity_status");
+            entity.HasOne<LegalEntityRow>().WithMany().HasForeignKey(e => e.LegalEntityId).HasConstraintName("fk_config_change_request_legal_entity").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<ConfigStateRow>().WithMany().HasForeignKey(e => e.ResultingHash).HasPrincipalKey(e => e.Hash).HasConstraintName("fk_config_change_request_state");
+            entity.HasMany(e => e.Items).WithOne().HasForeignKey(i => i.RequestId).HasConstraintName("fk_config_change_item_request").OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ConfigChangeItemRow>(entity =>
+        {
+            entity.ToTable("config_change_item");
+            entity.HasKey(e => new { e.RequestId, e.LineNo }).HasName("pk_config_change_item");
+            entity.Property(e => e.RequestId).HasColumnName("request_id");
+            entity.Property(e => e.LineNo).HasColumnName("line_no");
+            entity.Property(e => e.Key).HasColumnName("key").HasMaxLength(128);
+            entity.Property(e => e.Value).HasColumnName("value");
+            entity.Property(e => e.LegalStatus).HasColumnName("legal_status").HasMaxLength(24);
+            entity.Property(e => e.SourceRef).HasColumnName("source_ref").HasMaxLength(512);
+            entity.Property(e => e.MotorPath).HasColumnName("motor_path");
+            entity.Property(e => e.ValidFrom).HasColumnName("valid_from").HasColumnType("date");
+            entity.Property(e => e.ValidTo).HasColumnName("valid_to").HasColumnType("date");
+            entity.Property(e => e.Note).HasColumnName("note").HasMaxLength(512);
         });
     }
 }
@@ -256,6 +308,72 @@ internal sealed class PackActivationRow
     public Guid? SupersedesId { get; set; }
 
     public Instant CreatedAt { get; set; }
+}
+
+/// <summary><c>mkt.config_change_request</c>: a maker-checker change of country-layer configuration values (BO-MKT-01).</summary>
+internal sealed class ConfigChangeRequestRow
+{
+    public Guid Id { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public string Country { get; set; } = string.Empty;
+
+    public string Status { get; set; } = string.Empty;
+
+    public string Reason { get; set; } = string.Empty;
+
+    /// <summary>The configuration state the request was written against.</summary>
+    public string BaseHash { get; set; } = string.Empty;
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public string? CreatedPrincipal { get; set; }
+
+    public string? DecidedBy { get; set; }
+
+    public string? DecisionReason { get; set; }
+
+    public Guid? ApprovalRequestId { get; set; }
+
+    /// <summary>Hash frozen at submit; the PLT approval is bound to it.</summary>
+    public string? ContentHash { get; set; }
+
+    public string? ResultingHash { get; set; }
+
+    public Instant? AppliedAt { get; set; }
+
+    public Instant CreatedAt { get; set; }
+
+    public Instant UpdatedAt { get; set; }
+
+    public int RecordVersion { get; set; } = 1;
+
+    public List<ConfigChangeItemRow> Items { get; set; } = [];
+}
+
+/// <summary><c>mkt.config_change_item</c>: one value of a change request.</summary>
+internal sealed class ConfigChangeItemRow
+{
+    public Guid RequestId { get; set; }
+
+    public int LineNo { get; set; }
+
+    public string Key { get; set; } = string.Empty;
+
+    public string Value { get; set; } = string.Empty;
+
+    public string LegalStatus { get; set; } = string.Empty;
+
+    public string SourceRef { get; set; } = string.Empty;
+
+    public bool MotorPath { get; set; }
+
+    public BusinessDate? ValidFrom { get; set; }
+
+    public BusinessDate? ValidTo { get; set; }
+
+    public string? Note { get; set; }
 }
 
 /// <summary>Design-time factory for <c>dotnet ef migrations add … --project src/CoreIns.Modules.Market</c> (no connection opened).</summary>

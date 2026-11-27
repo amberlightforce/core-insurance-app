@@ -10,6 +10,7 @@ using CoreIns.Platform.Errors;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Paging;
 using CoreIns.SharedKernel.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -36,6 +37,7 @@ internal static class DocumentsPermissions
     public const string ClauseGet = "doc.Clause.get";
     public const string BindingResolve = "doc.Binding.resolve";
     public const string DocumentPreview = "doc.Document.preview";
+    public const string DocumentSearch = "doc.Document.search";
 }
 
 /// <summary>REST facade of the SL6-DOC-CORE operations (contracts/openapi/doc.yaml).</summary>
@@ -95,6 +97,47 @@ internal sealed class DocumentsController : ControllerBase
         var found = Guid.TryParse(id, out var guid) ? await reader.GetAsync(new DocumentId(guid), cancellationToken).ConfigureAwait(false) : null;
         return found is null ? NotFoundProblem("The document does not exist in your legal entity.") : Results.Ok(found);
     }
+
+    /// <summary>doc.Document.search: the document library, newest first, keyset-paged; scoped to the caller's legal entity.</summary>
+    [HttpGet("documents/search")]
+    [Authorize(Policy = DocumentsPermissions.DocumentSearch)]
+    public async Task<IResult> SearchAsync(
+        [FromQuery] string? cursor, [FromQuery] int? limit, [FromQuery] string? templateKey, [FromQuery] string? status, [FromQuery] string? medium,
+        [FromQuery] string? subjectModule, [FromQuery] string? subjectType, [FromQuery] string? subjectId, [FromQuery] Guid? recipientPartyId,
+        [FromQuery] string? createdFrom, [FromQuery] string? createdTo, [FromQuery] string? q, [FromServices] DocumentReader reader, CancellationToken cancellationToken)
+    {
+        if (!KeysetPaging.TryTake(limit, KeysetPaging.DefaultPageSize, out var take))
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", $"limit must be between 1 and {KeysetPaging.MaxPageSize}."));
+        }
+
+        DateOnly? from = null;
+        DateOnly? to = null;
+        if ((createdFrom is { Length: > 0 } && !TryDate(createdFrom, out from)) || (createdTo is { Length: > 0 } && !TryDate(createdTo, out to)))
+        {
+            return Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "createdFrom and createdTo must be dates (yyyy-MM-dd)."));
+        }
+
+        var filter = new DocumentSearchFilter(templateKey, status, medium, subjectModule, subjectType, subjectId, recipientPartyId, from, to, q?.Trim());
+        var page = await reader.SearchAsync(filter, cursor, take, cancellationToken).ConfigureAwait(false);
+        return page is null
+            ? Problem(DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "The cursor is malformed."))
+            : Results.Ok(new { items = page.Value.Items.Select(ToSearchItem), nextCursor = page.Value.NextCursor, limit = page.Value.Limit });
+    }
+
+    private static bool TryDate(string text, out DateOnly? date)
+    {
+        var ok = DateOnly.TryParseExact(text, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsed);
+        date = ok ? parsed : null;
+        return ok;
+    }
+
+    private static object ToSearchItem(DocumentView d) => new
+    {
+        d.DocumentId, d.DocumentNumber, d.DocumentType, d.RequestNo, d.Subject, d.RecipientPartyId, d.Language, d.Status, d.Medium, d.ArchiveId, d.ContentHash, d.CreatedAt,
+        latestDeliveryStatus = d.Deliveries.Count == 0 ? null : d.Deliveries[^1].Status,
+        d.Deliveries,
+    };
 
     /// <summary>doc.Document.listForObject (<c>objectRef</c> is <c>MOD/Type/id</c>).</summary>
     [HttpGet("documents/list-for-object")]

@@ -54,7 +54,8 @@ public static class MarketModule
             appRole =>
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
-                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.legal_entity, {Schema}.pack_activation TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.legal_entity, {Schema}.pack_activation, {Schema}.config_change_request TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE, DELETE ON {Schema}.config_change_item TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.pack_version, {Schema}.config_state TO {appRole}",
                 $"GRANT UPDATE ON {Schema}.config_state_writer_lock TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
@@ -90,6 +91,25 @@ public static class MarketModule
             new LocalizedText("Ενεργοποίηση πακέτου", "Pack activation"),
             [new AuthorityDimensionDefinition("pack", DimensionKind.Code), new AuthorityDimensionDefinition("legalEntity", DimensionKind.Code)]));
         services.AddOwnerDecidedApprovalType(ActivationSupport.ApprovalType);
+
+        // Configuration change requests (BO-MKT-01): the owner requests approvals in process and decides them through its own operations.
+        services.AddScoped<ConfigChangeEngine>();
+        services.AddAuthorityType(new AuthorityTypeDefinition(AuthorityTypeCode.Parse(ConfigChangeSupport.Authority), ModuleCode.MKT,
+            new LocalizedText("Αλλαγή ρυθμίσεων", "Configuration change"),
+            [new AuthorityDimensionDefinition("legalEntity", DimensionKind.Code)]));
+        services.AddOwnerDecidedApprovalType(ConfigChangeSupport.ApprovalType);
+        services.AddCommandAuditor<CreateConfigChange, ConfigChangeRequestCreateResponse, CreateConfigChangeAuditor>();
+        services.AddCommand<CreateConfigChange, ConfigChangeRequestCreateResponse, CreateConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.create") with { SupportsDryRun = true });
+        services.AddCommandAuditor<UpdateConfigChange, ConfigChangeRequestUpdateResponse, UpdateConfigChangeAuditor>();
+        services.AddCommand<UpdateConfigChange, ConfigChangeRequestUpdateResponse, UpdateConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.update"));
+        services.AddCommandAuditor<SubmitConfigChange, ConfigChangeRequestSubmitResponse, SubmitConfigChangeAuditor>();
+        services.AddCommand<SubmitConfigChange, ConfigChangeRequestSubmitResponse, SubmitConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.submit"));
+        services.AddCommandAuditor<ApproveConfigChange, ConfigChangeRequestApproveResponse, ApproveConfigChangeAuditor>();
+        services.AddCommand<ApproveConfigChange, ConfigChangeRequestApproveResponse, ApproveConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.approve"));
+        services.AddCommandAuditor<RejectConfigChange, ConfigChangeRequestRejectResponse, RejectConfigChangeAuditor>();
+        services.AddCommand<RejectConfigChange, ConfigChangeRequestRejectResponse, RejectConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.reject"));
+        services.AddCommandAuditor<WithdrawConfigChange, ConfigChangeRequestWithdrawResponse, WithdrawConfigChangeAuditor>();
+        services.AddCommand<WithdrawConfigChange, ConfigChangeRequestWithdrawResponse, WithdrawConfigChangeHandler>(CommandDescriptor.For("mkt.ConfigChangeRequest.withdraw"));
         services.AddCommandAuditor<RequestPackRollback, PackRollbackResponse, RequestPackRollbackAuditor>();
         services.AddCommand<RequestPackRollback, PackRollbackResponse, RequestPackRollbackHandler>(CommandDescriptor.For("mkt.Pack.rollback") with { SupportsDryRun = true });
         services.AddCommandAuditor<RequestPackActivation, PackScheduleActivationResponse, RequestPackActivationAuditor>();
@@ -141,6 +161,8 @@ public static class MarketModule
             .Describe("Ελέγξτε τον τύπο συναλλαγής και την πηγή ακύρωσης.", "Check the transaction kind and the cancellation source."),
         ErrorDefinition.For(ModuleCode.MKT, "SPI-RULE-MISSING", 422, "Λείπει κανόνας SPI", "An SPI rule is missing")
             .Describe("Δεν υπάρχει κανόνας μεταχείρισης φόρου· η λειτουργία αποτυγχάνει κλειστά.", "No tax treatment rule exists; the operation fails closed."),
+        ErrorDefinition.For(ModuleCode.MKT, "CFG-REQUEST-NOT-FOUND", 404, "Άγνωστο αίτημα αλλαγής ρυθμίσεων", "Unknown configuration change request")
+            .Describe("Το αίτημα δεν υπάρχει για αυτή τη νομική οντότητα.", "The request does not exist for this legal entity."),
         ErrorDefinition.For(ModuleCode.MKT, "PACK-NOT-FOUND", 404, "Άγνωστο πακέτο χώρας", "Unknown pack")
             .Describe("Δεν υπάρχει καταχωρισμένο πακέτο με αυτό το αναγνωριστικό.", "No pack with this id is registered."),
         ErrorDefinition.For(ModuleCode.MKT, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
