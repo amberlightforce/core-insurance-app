@@ -36,6 +36,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
 import { displayName, humanizeRole, roleKeys } from '../app-shell/user';
+import { landingPathFor } from '../auth/roles';
 import { Avatar } from '../design-system/components/Avatar';
 import { Banner } from '../design-system/components/Banner';
 import { Kbd } from '../design-system/components/Kbd';
@@ -274,9 +275,10 @@ export function DevSignIn() {
     setPending(userId);
     setFailed(0);
     signIn(userId)
-      .then(() => {
+      .then((session) => {
         rememberUser(userId);
-        void navigate('/', { replace: true });
+        // A customer lands in the portal, staff on the home screen (BO-CHN-12).
+        void navigate(landingPathFor(session.user.roles), { replace: true });
       })
       .catch(() => {
         setPending(null);

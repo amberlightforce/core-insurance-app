@@ -65,6 +65,7 @@ public static class ChannelsModule
         services.AddCommand<ConfirmWithdrawal, WithdrawalConfirmResponse, ConfirmWithdrawalHandler>(CommandDescriptor.For("chn.Withdrawal.confirm"));
 
         services.AddScoped<PortalScope>();
+        services.AddScoped<PortalReader>();
         services.AddScoped<IValidator<LinkPortalIdentity>, LinkPortalIdentityValidator>();
         services.AddCommandAuditor<LinkPortalIdentity, PortalIdentityLinkResponse, LinkPortalIdentityAuditor>();
         services.AddCommand<LinkPortalIdentity, PortalIdentityLinkResponse, LinkPortalIdentityHandler>(CommandDescriptor.For("chn.PortalIdentity.link"));

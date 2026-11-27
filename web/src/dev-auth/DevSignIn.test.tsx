@@ -28,6 +28,7 @@ function renderPage(path = '/dev/sign-in') {
       <Routes>
         <Route path="/dev/sign-in" element={<DevSignIn />} />
         <Route path="/" element={<p>home page</p>} />
+        <Route path="/portal" element={<p>portal page</p>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -84,6 +85,29 @@ describe('DevSignIn', () => {
     await apiFetch('/api/pty/v1/parties/search?name=x');
     const headers = new Headers(fetchMock.mock.calls.at(-1)?.[1]?.headers);
     expect(headers.get('Authorization')).toBe('Bearer token-1');
+  });
+
+  it('sends a customer to the portal after sign-in (BO-CHN-12)', async () => {
+    const customer = {
+      id: 'customer',
+      name: 'Dev Customer (synthetic)',
+      roles: ['Customer.Portal'],
+    };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string, init?: RequestInit) =>
+        Promise.resolve(
+          url.endsWith('/dev/users')
+            ? json({ items: [customer] })
+            : init?.method === 'POST'
+              ? json({ accessToken: 'token-c', expiresAt: '2999-01-01T00:00:00Z', user: customer })
+              : json({}),
+        ),
+      ),
+    );
+    const { user } = renderPage();
+    await user.click(await screen.findByRole('option', { name: /^Customer/ }));
+    expect(await screen.findByText('portal page')).toBeInTheDocument();
   });
 
   it('filters personas by role and signs in with Enter', async () => {

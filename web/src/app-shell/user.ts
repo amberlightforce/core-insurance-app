@@ -37,6 +37,7 @@ export const roleKeys = {
   'Staff.ClaimsHandler': 'roles.claimsHandler',
   'Staff.ClaimsManager': 'roles.claimsManager',
   'Platform.Admin': 'roles.admin',
+  'Customer.Portal': 'roles.customerPortal',
 } as const;
 
 export type KnownRole = keyof typeof roleKeys;

@@ -6,7 +6,10 @@ namespace CoreIns.Modules.Data.Services.Marts;
 /// <summary>
 /// RI_CESSION_SUMMARY: ceded premium and ceding commission by RI contract and month, summed from the <c>ri.CessionCalculated</c> deltas of the raw
 /// layer (valid time = occurred_at, record time = received_at). There is no conformed RI fact yet.
-/// TODO(hardening): conform an RI fact with natural keys so a recomputed delta set replaces instead of adds; the product filter is not applied (RI keys on contract).
+/// Summing is correct and intentional: <c>ri.CessionCalculated</c> carries true incremental deltas, not restated totals (RI books
+/// "cession target minus booked" per delta set; a recomputation or POL reverse-and-reapply emits further, possibly negative, deltas with a new
+/// deltaSetId). The net of all deltas is the current cession, so latest-per-key would be wrong. Row order never affects the sum, so the snapshot hash stays deterministic.
+/// The product filter is not applied (RI keys on contract, the event has no product code).
 /// </summary>
 internal sealed class RiCessionSummaryMart(DataDbContext db) : IMartDefinition
 {

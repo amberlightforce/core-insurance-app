@@ -5,14 +5,7 @@ import { withdrawalRoles } from '../../auth/roles';
 import type { ModuleRoutes } from '../../app-shell/moduleRegistry';
 
 const routes: RouteObject[] = [
-  {
-    // Customer withdrawal declaration + confirmation (SL6-UI-CHN-WITHDRAW).
-    path: 'channels/withdrawal',
-    lazy: async () => ({
-      Component: (await import('../channels/withdrawal/WithdrawalDeclarePage'))
-        .WithdrawalDeclarePage,
-    }),
-  },
+  // The customer withdrawal declaration moved to /portal/withdrawal (BO-CHN-12); the root routes redirect the old path.
   {
     path: 'channels/withdrawals',
     element: <RequireRole roles={withdrawalRoles} />,

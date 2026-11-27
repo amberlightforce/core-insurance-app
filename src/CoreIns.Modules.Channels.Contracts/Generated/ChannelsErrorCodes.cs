@@ -70,7 +70,7 @@ public static class ChannelsErrorCodes
 
     /// <summary>CHN-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 11 operation(s): chn.Dsar.erase, chn.Dsar.export, chn.Dsar.restrict, chn.PortalIdentity.get, chn.PortalIdentity.link, chn.PortalIdentity.unlink, chn.Withdrawal.close, chn.Withdrawal.confirm, chn.Withdrawal.declare, chn.Withdrawal.get, chn.Withdrawal.list.</para>
+    /// <para>Declared by 15 operation(s): chn.Dsar.erase, chn.Dsar.export, chn.Dsar.restrict, chn.Portal.dashboard, chn.Portal.me, chn.Portal.policies, chn.Portal.policy, chn.PortalIdentity.get, chn.PortalIdentity.link, chn.PortalIdentity.unlink, chn.Withdrawal.close, chn.Withdrawal.confirm, ….</para>
     /// </remarks>
     public const string NotFound = "CHN-ERR-NOT-FOUND";
 
