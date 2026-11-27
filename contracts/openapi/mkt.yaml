@@ -3823,15 +3823,26 @@ components:
       - request
     ConfigChangeRequestScheduleRequest:
       type: object
-      description: 'mkt.ConfigChangeRequest.schedule request. PRD inputs: "request body / decision"'
-      x-status: minimal
+      description: 'mkt.ConfigChangeRequest.schedule request (BO-MKT-02). Sets the effective instant of a DRAFT request (maker only). The instant is part of what the checker approves (it is bound into the approval hash at submit); a request with an effective instant is applied by a sweeper when it is due, not at approval.'
+      properties:
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        effectiveAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+          description: The instant the change takes effect; must be in the future. Null clears it (apply at approval).
+      required:
+      - requestId
+      - effectiveAt
     ConfigChangeRequestScheduleResponse:
       type: object
-      description: 'mkt.ConfigChangeRequest.schedule result. PRD outputs: "request"'
+      description: 'mkt.ConfigChangeRequest.schedule result: the request after the operation'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/ConfigChangeRequestView'
+      required:
+      - request
     ConfigChangeRequestWithdrawRequest:
       type: object
       description: 'mkt.ConfigChangeRequest.withdraw request (maker only, DRAFT or PENDING_APPROVAL).'
@@ -3856,15 +3867,34 @@ components:
       - request
     ConfigChangeRequestRebaseRequest:
       type: object
-      description: 'mkt.ConfigChangeRequest.rebase request. PRD inputs: "request body / decision"'
-      x-status: minimal
+      description: 'mkt.ConfigChangeRequest.rebase request (BO-MKT-02, maker only). Re-bases a DRAFT, PENDING_APPROVAL or SCHEDULED request on the newest configuration state. Any approval is withdrawn and the request returns to DRAFT: the maker reviews the conflicts, edits if needed and submits again.'
+      properties:
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Reason of the maker or checker. No personal data.
+      required:
+      - requestId
+      - reason
     ConfigChangeRequestRebaseResponse:
       type: object
-      description: 'mkt.ConfigChangeRequest.rebase result. PRD outputs: "request"'
+      description: 'mkt.ConfigChangeRequest.rebase result: the DRAFT request on its new base and the keys that changed since the old base'
       properties:
         request:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "request"'
+          $ref: '#/components/schemas/ConfigChangeRequestView'
+        previousBaseHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        conflicts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigChangeConflict'
+      required:
+      - request
+      - previousBaseHash
+      - conflicts
     ConfigChangeRequestPreviewRequest:
       type: object
       description: 'mkt.ConfigChangeRequest.preview request. PRD inputs: "request id"'
@@ -3872,27 +3902,181 @@ components:
         requestId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "request id"'
+      required:
+      - requestId
     ConfigChangeRequestPreviewResponse:
       type: object
-      description: 'mkt.ConfigChangeRequest.preview result. PRD outputs: "preview run"'
+      description: 'mkt.ConfigChangeRequest.preview result (BO-MKT-02). Nothing is written.'
       properties:
         previewRun:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "preview run"'
+          $ref: '#/components/schemas/ConfigChangePreviewRun'
+      required:
+      - previewRun
     ConfigChangeRequestImportRequest:
       type: object
-      description: 'mkt.ConfigChangeRequest.import request. PRD inputs: "file"'
+      description: 'mkt.ConfigChangeRequest.import request (BO-MKT-02). Every key is validated against the key registry; a valid import creates a DRAFT request (cause IMPORT) that goes through the normal approval, it never applies directly. The same content imported twice returns the first request.'
       properties:
-        file:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file"'
+        reason:
+          type: string
+          minLength: 10
+          maxLength: 128
+        sourceLabel:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Name of the imported file or baseline (for example the migration baseline H0)
+        items:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/ConfigChangeItemInput'
+      required:
+      - reason
+      - sourceLabel
+      - items
     ConfigChangeRequestImportResponse:
       type: object
-      description: 'mkt.ConfigChangeRequest.import result. PRD outputs: "validation report"'
+      description: 'mkt.ConfigChangeRequest.import result: the validation report'
       properties:
         validationReport:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validation report"'
+          $ref: '#/components/schemas/ConfigChangeImportReport'
+      required:
+      - validationReport
+    ConfigChangeConflict:
+      type: object
+      description: A key whose value changed between the base state of a request and the newest state.
+      properties:
+        key:
+          $ref: ../events/common.schema.json#/$defs/Code
+        baseValue:
+          type:
+          - string
+          - 'null'
+          description: Resolved value in the base state (null when none)
+        currentValue:
+          type:
+          - string
+          - 'null'
+          description: Resolved value in the newest state (null when none)
+      required:
+      - key
+      - baseValue
+      - currentValue
+    ConfigChangePreviewItem:
+      type: object
+      properties:
+        key:
+          $ref: ../events/common.schema.json#/$defs/Code
+        legalStatus:
+          type: string
+        validFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+        referenceDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: The date the resolved values are shown for (the item's validFrom, else today)
+        before:
+          type:
+          - string
+          - 'null'
+          description: Resolved value in the newest state; null when none
+        after:
+          type:
+          - string
+          - 'null'
+          description: Resolved value once the request is applied on the newest state
+        changed:
+          type: boolean
+      required:
+      - key
+      - legalStatus
+      - validFrom
+      - referenceDate
+      - before
+      - after
+      - changed
+    ConfigChangePreviewRun:
+      type: object
+      description: Diff of a request against the newest state, with the hash the application would produce.
+      properties:
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        baseHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        currentHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        stale:
+          type: boolean
+          description: True when a key of the request changed since its base state (the request needs a rebase)
+        conflicts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigChangeConflict'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigChangePreviewItem'
+        resultingHash:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Sha256
+          - type: 'null'
+          description: Configuration hash the application on the newest state would give; null when the request cannot be applied (stale)
+        effectiveAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+      required:
+      - requestId
+      - baseHash
+      - currentHash
+      - stale
+      - conflicts
+      - items
+      - resultingHash
+      - effectiveAt
+    ConfigChangeImportIssue:
+      type: object
+      properties:
+        line:
+          type: integer
+          description: 1-based item number; 0 for an issue of the whole file
+        key:
+          type:
+          - string
+          - 'null'
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - line
+      - key
+      - code
+      - message
+    ConfigChangeImportReport:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        duplicate:
+          type: boolean
+          description: True when the same content was imported before; request is then the earlier one
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigChangeImportIssue'
+        request:
+          oneOf:
+          - $ref: '#/components/schemas/ConfigChangeRequestView'
+          - type: 'null'
+          description: The DRAFT request created (null when the import is not valid)
+      required:
+      - valid
+      - duplicate
+      - issues
+      - request
     SpiCatalogueResponse:
       type: object
       description: 'mkt.Spi.catalogue result. PRD outputs: "SPIs, status"'
@@ -4844,7 +5028,15 @@ components:
           $ref: ../events/common.schema.json#/$defs/Uuid
         status:
           type: string
-          enum: [DRAFT, PENDING_APPROVAL, APPLIED, REJECTED, WITHDRAWN]
+          enum: [DRAFT, PENDING_APPROVAL, SCHEDULED, APPLIED, REJECTED, WITHDRAWN]
+        cause:
+          type: string
+          enum: [MANUAL, IMPORT]
+        effectiveAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+          description: The instant a SCHEDULED (or about to be scheduled) change takes effect
         reason:
           type: string
         country:
@@ -4888,6 +5080,8 @@ components:
       required:
       - id
       - status
+      - cause
+      - effectiveAt
       - reason
       - country
       - baseHash

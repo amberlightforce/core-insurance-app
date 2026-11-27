@@ -27,6 +27,7 @@ tags:
 - name: Recon
 - name: Signoff
 - name: Staging
+- name: Quality
 paths:
   /api/mig/v1/xrefs/register:
     post:
@@ -2070,6 +2071,237 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/quality/profile/run:
+    post:
+      operationId: mig.Profile.run
+      summary: Profile a staged snapshot and run the DQ rules
+      description: |-
+        Profile a staged snapshot and run the DQ rules
+
+        Inputs: a snapshot id, or a source and snapshot label (the active snapshot is used). Outputs: the run with the rule-set version, finding counts by severity and a profile per object type (record count, null and blank rates, distinct counts, min and max of dates and amounts). Findings and the profile are stored insert-only per snapshot, rule-set version and run, and the run can be repeated; staging is only read.
+      tags:
+      - Quality
+      x-requirement:
+      - REQ-MIG-047..REQ-MIG-050
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-03: a run only writes its own findings; staging is read only'
+      x-exposure:
+      - ui
+      x-permission: mig.Profile.run
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-MIG-03
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileRunRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DqRun'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/quality/findings:
+    get:
+      operationId: mig.Dq.findings
+      summary: List data quality findings
+      description: |-
+        List data quality findings
+
+        Inputs: a run id (or a snapshot id, which means its latest run), optional rule code, severity, object type and whether to include waived findings. Outputs: the run and its findings, each OPEN or WAIVED. A waiver that has passed its expiry no longer counts, so the finding is OPEN again.
+      tags:
+      - Quality
+      x-requirement:
+      - REQ-MIG-047..REQ-MIG-050
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-maturity: pre-release
+      x-bounded: 'Findings of one run, capped at 1000 per call (limit and offset)'
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-03: a read'
+      x-exposure:
+      - ui
+      x-permission: mig.Dq.findings
+      x-error-codes:
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - BO-MIG-03
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: runId
+        in: query
+        required: false
+        description: The run; when absent the latest run of the snapshot is used.
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: snapshotId
+        in: query
+        required: false
+        description: The snapshot, when no run id is given.
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: ruleCode
+        in: query
+        required: false
+        description: Rule code.
+        schema:
+          type: string
+      - name: severity
+        in: query
+        required: false
+        description: ERROR or WARNING.
+        schema:
+          type: string
+          enum: [ERROR, WARNING]
+      - name: objectType
+        in: query
+        required: false
+        description: Object type of the staged record.
+        schema:
+          type: string
+      - name: includeWaived
+        in: query
+        required: false
+        description: Include waived findings (default true).
+        schema:
+          type: boolean
+      - name: limit
+        in: query
+        required: false
+        description: Page size, 1 to 1000 (default 200).
+        schema:
+          type: integer
+      - name: offset
+        in: query
+        required: false
+        description: Findings to skip.
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DqFindingList'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/quality/waive:
+    post:
+      operationId: mig.Dq.waive
+      summary: Waive a data quality finding
+      description: |-
+        Waive a data quality finding
+
+        Inputs: finding id, reason and an expiry date (at most one year ahead). Outputs: the waiver. Only a data steward can waive. A waiver covers the same rule on the same legacy record of the same source in later runs until it expires, then the finding is OPEN again; waivers are never edited or deleted.
+      tags:
+      - Quality
+      x-requirement:
+      - REQ-MIG-047..REQ-MIG-050
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-03: a waiver is recorded or refused, never previewed'
+      x-exposure:
+      - ui
+      x-permission: mig.Dq.waive
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-SIGNOFF-SOD
+        status: 403
+      x-source:
+      - BO-MIG-03
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DqWaiveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DqWaiver'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
 x-operation-families:
 - family: mig.Wave.*
   summary: Plan and run waves and cohorts
@@ -2927,6 +3159,172 @@ components:
           items:
             $ref: '#/components/schemas/StagingSnapshot'
       required: [items]
+    ProfileRunRequest:
+      type: object
+      properties:
+        snapshotId:
+          description: A specific snapshot; when absent give source and snapshot.
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        source:
+          type: [string, 'null']
+        snapshot:
+          type: [string, 'null']
+          description: Snapshot label; the active snapshot of the source and label is used.
+    DqFieldProfile:
+      type: object
+      properties:
+        field:
+          type: string
+        present:
+          type: integer
+          description: Records with a non-null value.
+        nullCount:
+          type: integer
+          description: Records without the field or with a null value.
+        blankCount:
+          type: integer
+          description: Records whose value is an empty or whitespace-only string.
+        nullRate:
+          type: string
+          description: (null + blank) / records as a decimal string with 4 places.
+        distinct:
+          type: integer
+        min:
+          type: [string, 'null']
+          description: Smallest value, for fields that are dates or amounts.
+        max:
+          type: [string, 'null']
+      required: [field, present, nullCount, blankCount, nullRate, distinct]
+    DqObjectProfile:
+      type: object
+      properties:
+        objectType:
+          type: string
+        recordCount:
+          type: integer
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/DqFieldProfile'
+      required: [objectType, recordCount, fields]
+    DqRun:
+      type: object
+      properties:
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        snapshotId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        source:
+          type: string
+        snapshot:
+          type: string
+        ruleSetVersion:
+          type: integer
+        recordCount:
+          type: integer
+        errorCount:
+          type: integer
+        warningCount:
+          type: integer
+        findingsByRule:
+          type: object
+          additionalProperties:
+            type: integer
+        profile:
+          type: array
+          items:
+            $ref: '#/components/schemas/DqObjectProfile'
+        runBy:
+          type: string
+        runAt:
+          type: string
+          format: date-time
+      required: [runId, snapshotId, source, snapshot, ruleSetVersion, recordCount, errorCount, warningCount, findingsByRule, profile, runBy, runAt]
+    DqFinding:
+      type: object
+      properties:
+        findingId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        runId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        snapshotId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        recordId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        objectType:
+          type: string
+        legacyKey:
+          type: string
+        ruleCode:
+          type: string
+        severity:
+          type: string
+          enum: [ERROR, WARNING]
+        field:
+          type: [string, 'null']
+        message:
+          type: string
+        status:
+          type: string
+          enum: [OPEN, WAIVED]
+        waiverId:
+          description: The waiver in force, when the finding is WAIVED.
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        waivedUntil:
+          type: [string, 'null']
+          format: date
+      required: [findingId, runId, snapshotId, recordId, objectType, legacyKey, ruleCode, severity, message, status]
+    DqFindingList:
+      type: object
+      properties:
+        run:
+          $ref: '#/components/schemas/DqRun'
+        total:
+          type: integer
+          description: Findings matching the filter, before limit and offset.
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DqFinding'
+      required: [run, total, items]
+    DqWaiveRequest:
+      type: object
+      properties:
+        findingId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+        expiresOn:
+          type: string
+          format: date
+          description: Last day the waiver holds; after it the finding is OPEN again. At most one year ahead.
+      required: [findingId, reason, expiresOn]
+    DqWaiver:
+      type: object
+      properties:
+        waiverId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        findingId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        source:
+          type: string
+        objectType:
+          type: string
+        legacyKey:
+          type: string
+        ruleCode:
+          type: string
+        reason:
+          type: string
+        expiresOn:
+          type: string
+          format: date
+        waivedBy:
+          type: string
+        waivedAt:
+          type: string
+          format: date-time
+      required: [waiverId, findingId, source, objectType, legacyKey, ruleCode, reason, expiresOn, waivedBy, waivedAt]
     SignoffRequestRequest:
       type: object
       properties:

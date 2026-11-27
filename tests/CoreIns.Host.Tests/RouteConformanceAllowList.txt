@@ -340,9 +340,6 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/run
 CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/supersede
 CONTRACT_NOT_SERVED POST /api/dat/v1/analytics/ask
 CONTRACT_NOT_SERVED POST /api/dat/v1/feature-store/build-training-set
-CONTRACT_NOT_SERVED POST /api/dat/v1/marts/adjust
-CONTRACT_NOT_SERVED POST /api/dat/v1/marts/export
-CONTRACT_NOT_SERVED POST /api/dat/v1/marts/sign-off
 CONTRACT_NOT_SERVED POST /api/dat/v1/models/approve
 CONTRACT_NOT_SERVED POST /api/dat/v1/models/record-validation
 CONTRACT_NOT_SERVED POST /api/dat/v1/models/retire
@@ -419,10 +416,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/recalculate
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/record-filing
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/request-payment
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/transition
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/import
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/preview
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/rebase
-CONTRACT_NOT_SERVED POST /api/mkt/v1/config-change-requests/schedule
 CONTRACT_NOT_SERVED POST /api/mkt/v1/configuration/export
 CONTRACT_NOT_SERVED POST /api/mkt/v1/cross-borders/check
 CONTRACT_NOT_SERVED POST /api/mkt/v1/currencies/convert-fixed

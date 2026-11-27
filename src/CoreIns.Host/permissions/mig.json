@@ -33,7 +33,10 @@
         "mig.Signoff.reject": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ],
         "mig.Signoff.status": [ "Staff.MigrationManager", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ],
         "mig.Staging.load": [ "Staff.MigrationManager", "Platform.Admin" ],
-        "mig.Staging.snapshots": [ "Staff.MigrationManager", "Platform.Admin" ]
+        "mig.Staging.snapshots": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Profile.run": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Dq.findings": [ "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin" ],
+        "mig.Dq.waive": [ "Staff.DataSteward", "Platform.Admin" ]
       }
     },
     "Authority": {
