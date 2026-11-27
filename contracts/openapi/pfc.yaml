@@ -1092,6 +1092,10 @@ paths:
       - ui
       x-permission: pfc.ChangeSet.create
       x-error-codes:
+      - code: PFC-ERR-UNKNOWN-PRODUCT
+        status: 422
+      - code: PFC-ERR-NO-VERSION
+        status: 422
       - code: PFC-ERR-CONFLICT
         status: 409
       - code: PFC-ERR-FORBIDDEN
@@ -1157,6 +1161,14 @@ paths:
       - ui
       x-permission: pfc.ChangeSet.edit
       x-error-codes:
+      - code: PFC-ERR-CHANGE-SET-NOT-FOUND
+        status: 404
+      - code: PFC-ERR-CHANGE-SET-STATE
+        status: 409
+      - code: PFC-ERR-STALE
+        status: 409
+      - code: PFC-ERR-INVALID-EDIT
+        status: 422
       - code: PFC-ERR-CONFLICT
         status: 409
       - code: PFC-ERR-FORBIDDEN
@@ -1352,6 +1364,12 @@ paths:
       - ui
       x-permission: pfc.ChangeSet.abandon
       x-error-codes:
+      - code: PFC-ERR-CHANGE-SET-NOT-FOUND
+        status: 404
+      - code: PFC-ERR-CHANGE-SET-STATE
+        status: 409
+      - code: PFC-ERR-STALE
+        status: 409
       - code: PFC-ERR-CONFLICT
         status: 409
       - code: PFC-ERR-FORBIDDEN
@@ -3700,50 +3718,138 @@ components:
           description: 'PRD: "errors[] (level, rule, path, message key, GR/EN message, severity)"'
     ChangeSetCreateRequest:
       type: object
-      description: 'pfc.ChangeSet.create request. PRD inputs: "product, base, edits"'
+      description: pfc.ChangeSet.create request (BO-PFC-01). Copies the named Locked version into a new draft.
       properties:
-        product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product"'
-        base:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "base"'
-        edits:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "edits"'
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        baseVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+      required:
+      - productCode
+      - baseVersion
     ChangeSetCreateResponse:
       type: object
-      description: 'pfc.ChangeSet.create result. PRD outputs: "change set state, validation"'
+      description: 'pfc.ChangeSet.create result: the draft and its lint findings'
       properties:
         changeSetState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set state"'
+          $ref: '#/components/schemas/ChangeSetState'
         validation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validation"'
+          $ref: '#/components/schemas/ChangeSetValidation'
+      required:
+      - changeSetState
+      - validation
+    ChangeSetState:
+      type: object
+      description: A change set (draft of a product version) with its optimistic-concurrency token
+      properties:
+        changeSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        baseVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        status:
+          type: string
+          enum:
+          - OPEN
+          - ABANDONED
+          - SUBMITTED
+        recordVersion:
+          type: integer
+          minimum: 1
+          description: Send back as recordVersion on the next edit; a stale value gives PFC-ERR-STALE (409)
+        editCount:
+          type: integer
+          minimum: 0
+        draft:
+          $ref: '#/components/schemas/ProductArtefact'
+      required:
+      - changeSetId
+      - productCode
+      - baseVersion
+      - status
+      - recordVersion
+      - editCount
+      - draft
+    ChangeSetValidation:
+      type: object
+      description: Lint result of the draft. Findings never block saving a draft; they block submitting it.
+      properties:
+        clean:
+          type: boolean
+        findings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeSetFinding'
+      required:
+      - clean
+      - findings
+    ChangeSetFinding:
+      type: object
+      properties:
+        path:
+          type: string
+        code:
+          type: string
+          description: PFC-LINT-* code
+        messageKey:
+          type: string
+        message:
+          type: string
+      required:
+      - path
+      - code
+      - messageKey
+      - message
+    ChangeSetPatchOperation:
+      type: object
+      description: One JSON-pointer (RFC 6901) patch operation on the draft
+      properties:
+        op:
+          type: string
+          enum:
+          - add
+          - replace
+          - remove
+        path:
+          type: string
+          description: 'JSON pointer into the draft, e.g. /elements/0/parent'
+        value:
+          description: New value (add, replace)
+      required:
+      - op
+      - path
     ChangeSetEditRequest:
       type: object
-      description: 'pfc.ChangeSet.edit request. PRD inputs: "product, base, edits"'
+      description: pfc.ChangeSet.edit request (BO-PFC-01)
       properties:
-        product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product"'
-        base:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "base"'
+        changeSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        recordVersion:
+          type: integer
+          minimum: 1
+          description: The change-set record version the editor saw (optimistic concurrency)
         edits:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "edits"'
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ChangeSetPatchOperation'
+      required:
+      - changeSetId
+      - recordVersion
+      - edits
     ChangeSetEditResponse:
       type: object
-      description: 'pfc.ChangeSet.edit result. PRD outputs: "change set state, validation"'
+      description: 'pfc.ChangeSet.edit result: the draft after the edit and its lint findings'
       properties:
         changeSetState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set state"'
+          $ref: '#/components/schemas/ChangeSetState'
         validation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validation"'
+          $ref: '#/components/schemas/ChangeSetValidation'
+      required:
+      - changeSetState
+      - validation
     ChangeSetRevertRequest:
       type: object
       description: 'pfc.ChangeSet.revert request. PRD inputs: "product, base, edits"'
@@ -3792,27 +3898,27 @@ components:
           description: 'PRD: "validation"'
     ChangeSetAbandonRequest:
       type: object
-      description: 'pfc.ChangeSet.abandon request. PRD inputs: "product, base, edits"'
+      description: pfc.ChangeSet.abandon request (BO-PFC-01)
       properties:
-        product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product"'
-        base:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "base"'
-        edits:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "edits"'
+        changeSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - changeSetId
+      - recordVersion
     ChangeSetAbandonResponse:
       type: object
-      description: 'pfc.ChangeSet.abandon result. PRD outputs: "change set state, validation"'
+      description: 'pfc.ChangeSet.abandon result'
       properties:
         changeSetState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set state"'
+          $ref: '#/components/schemas/ChangeSetState'
         validation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validation"'
+          $ref: '#/components/schemas/ChangeSetValidation'
+      required:
+      - changeSetState
+      - validation
     ProductVersionSubmitRequest:
       type: object
       description: 'pfc.ProductVersion.submit request. PRD inputs: "change set id"'

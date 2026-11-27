@@ -247,6 +247,55 @@ internal sealed class IntermediaryRow
     public string CreatedBy { get; set; } = string.Empty;
 
     public Instant UpdatedAt { get; set; }
+
+    /// <summary>Hierarchy parent (REQ-PTY-193).</summary>
+    public IntermediaryId? ParentIntermediaryId { get; set; }
+}
+
+/// <summary><c>pty.intermediary_cpd</c>: CPD hours per calendar year (REQ-PTY-191).</summary>
+internal sealed class IntermediaryCpdRow
+{
+    public IntermediaryId IntermediaryId { get; set; }
+
+    public int Year { get; set; }
+
+    public decimal Hours { get; set; }
+
+    public decimal RequiredHours { get; set; }
+
+    public Instant RecordedAt { get; set; }
+}
+
+/// <summary><c>pty.intermediary_appointment</c>: product appointment of an intermediary.</summary>
+internal sealed class IntermediaryAppointmentRow
+{
+    public Guid AppointmentId { get; set; }
+
+    public IntermediaryId IntermediaryId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public string ProductCode { get; set; } = string.Empty;
+
+    public BusinessDate ValidFrom { get; set; }
+
+    public BusinessDate? ValidTo { get; set; }
+}
+
+/// <summary><c>pty.intermediary_conflict_of_interest</c>: declared conflicts of interest.</summary>
+internal sealed class IntermediaryConflictRow
+{
+    public Guid ConflictId { get; set; }
+
+    public IntermediaryId IntermediaryId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public string Description { get; set; } = string.Empty;
+
+    public BusinessDate DeclaredOn { get; set; }
+
+    public string Status { get; set; } = string.Empty;
 }
 
 /// <summary><c>pty.producer_code</c>: a producer code with its authorities (REQ-PTY-204, REQ-PTY-205).</summary>

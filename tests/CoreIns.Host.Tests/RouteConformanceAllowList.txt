@@ -51,8 +51,6 @@ CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/footprint
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/snapshot
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/trend
 CONTRACT_NOT_SERVED GET /api/dat/v1/coverage/status
-CONTRACT_NOT_SERVED GET /api/dat/v1/data-contracts
-CONTRACT_NOT_SERVED GET /api/dat/v1/data-contracts/{}
 CONTRACT_NOT_SERVED GET /api/dat/v1/feature-store/get-online
 CONTRACT_NOT_SERVED GET /api/dat/v1/kpis/get
 CONTRACT_NOT_SERVED GET /api/dat/v1/lineage/trace
@@ -397,9 +395,7 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/input-set
 CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/run
 CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/supersede
 CONTRACT_NOT_SERVED POST /api/dat/v1/analytics/ask
-CONTRACT_NOT_SERVED POST /api/dat/v1/data-contracts/register
 CONTRACT_NOT_SERVED POST /api/dat/v1/feature-store/build-training-set
-CONTRACT_NOT_SERVED POST /api/dat/v1/ingestion/replay
 CONTRACT_NOT_SERVED POST /api/dat/v1/marts/adjust
 CONTRACT_NOT_SERVED POST /api/dat/v1/marts/export
 CONTRACT_NOT_SERVED POST /api/dat/v1/marts/run
@@ -413,7 +409,6 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/populations/sample
 CONTRACT_NOT_SERVED POST /api/dat/v1/purpose-grants/decide
 CONTRACT_NOT_SERVED POST /api/dat/v1/purpose-grants/request
 CONTRACT_NOT_SERVED POST /api/dat/v1/purpose-grants/revoke
-CONTRACT_NOT_SERVED POST /api/dat/v1/quarantine/release
 CONTRACT_NOT_SERVED POST /api/dat/v1/scr-results/accept
 CONTRACT_NOT_SERVED POST /api/dat/v1/scr-results/submit
 CONTRACT_NOT_SERVED POST /api/dat/v1/synthetic/generate
@@ -525,9 +520,6 @@ CONTRACT_NOT_SERVED POST /api/mkt/v1/terminology/approve
 CONTRACT_NOT_SERVED POST /api/mkt/v1/terminology/propose
 CONTRACT_NOT_SERVED POST /api/mkt/v1/translations/gate
 CONTRACT_NOT_SERVED POST /api/pfc/v1/availability/check
-CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets
-CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/abandon
-CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/edit
 CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/rebase
 CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/revert
 CONTRACT_NOT_SERVED POST /api/pfc/v1/impact-analysises/run

@@ -1421,37 +1421,60 @@ export interface components {
             /** @description PRD: "errors[] (level, rule, path, message key, GR/EN message, severity)" */
             errors?: components["schemas"]["Unspecified"][];
         };
-        /** @description pfc.ChangeSet.create request. PRD inputs: "product, base, edits" */
+        /** @description pfc.ChangeSet.create request (BO-PFC-01). Copies the named Locked version into a new draft. */
         ChangeSetCreateRequest: {
-            /** @description PRD: "product" */
-            product?: components["schemas"]["Unspecified"];
-            /** @description PRD: "base" */
-            base?: components["schemas"]["Unspecified"];
-            /** @description PRD: "edits" */
-            edits?: components["schemas"]["Unspecified"];
+            productCode: components["schemas"]["Code"];
+            baseVersion: components["schemas"]["ProductVersionNumber"];
         };
-        /** @description pfc.ChangeSet.create result. PRD outputs: "change set state, validation" */
+        /** @description pfc.ChangeSet.create result: the draft and its lint findings */
         ChangeSetCreateResponse: {
-            /** @description PRD: "change set state" */
-            changeSetState?: components["schemas"]["Unspecified"];
-            /** @description PRD: "validation" */
-            validation?: components["schemas"]["Unspecified"];
+            changeSetState: components["schemas"]["ChangeSetState"];
+            validation: components["schemas"]["ChangeSetValidation"];
         };
-        /** @description pfc.ChangeSet.edit request. PRD inputs: "product, base, edits" */
+        /** @description A change set (draft of a product version) with its optimistic-concurrency token */
+        ChangeSetState: {
+            changeSetId: components["schemas"]["Uuid"];
+            productCode: components["schemas"]["Code"];
+            baseVersion: components["schemas"]["ProductVersionNumber"];
+            /** @enum {string} */
+            status: "OPEN" | "ABANDONED" | "SUBMITTED";
+            /** @description Send back as recordVersion on the next edit; a stale value gives PFC-ERR-STALE (409) */
+            recordVersion: number;
+            editCount: number;
+            draft: components["schemas"]["ProductArtefact"];
+        };
+        /** @description Lint result of the draft. Findings never block saving a draft; they block submitting it. */
+        ChangeSetValidation: {
+            clean: boolean;
+            findings: components["schemas"]["ChangeSetFinding"][];
+        };
+        ChangeSetFinding: {
+            path: string;
+            /** @description PFC-LINT-* code */
+            code: string;
+            messageKey: string;
+            message: string;
+        };
+        /** @description One JSON-pointer (RFC 6901) patch operation on the draft */
+        ChangeSetPatchOperation: {
+            /** @enum {string} */
+            op: "add" | "replace" | "remove";
+            /** @description JSON pointer into the draft, e.g. /elements/0/parent */
+            path: string;
+            /** @description New value (add, replace) */
+            value?: unknown;
+        };
+        /** @description pfc.ChangeSet.edit request (BO-PFC-01) */
         ChangeSetEditRequest: {
-            /** @description PRD: "product" */
-            product?: components["schemas"]["Unspecified"];
-            /** @description PRD: "base" */
-            base?: components["schemas"]["Unspecified"];
-            /** @description PRD: "edits" */
-            edits?: components["schemas"]["Unspecified"];
+            changeSetId: components["schemas"]["Uuid"];
+            /** @description The change-set record version the editor saw (optimistic concurrency) */
+            recordVersion: number;
+            edits: components["schemas"]["ChangeSetPatchOperation"][];
         };
-        /** @description pfc.ChangeSet.edit result. PRD outputs: "change set state, validation" */
+        /** @description pfc.ChangeSet.edit result: the draft after the edit and its lint findings */
         ChangeSetEditResponse: {
-            /** @description PRD: "change set state" */
-            changeSetState?: components["schemas"]["Unspecified"];
-            /** @description PRD: "validation" */
-            validation?: components["schemas"]["Unspecified"];
+            changeSetState: components["schemas"]["ChangeSetState"];
+            validation: components["schemas"]["ChangeSetValidation"];
         };
         /** @description pfc.ChangeSet.revert request. PRD inputs: "product, base, edits" */
         ChangeSetRevertRequest: {
@@ -1485,21 +1508,15 @@ export interface components {
             /** @description PRD: "validation" */
             validation?: components["schemas"]["Unspecified"];
         };
-        /** @description pfc.ChangeSet.abandon request. PRD inputs: "product, base, edits" */
+        /** @description pfc.ChangeSet.abandon request (BO-PFC-01) */
         ChangeSetAbandonRequest: {
-            /** @description PRD: "product" */
-            product?: components["schemas"]["Unspecified"];
-            /** @description PRD: "base" */
-            base?: components["schemas"]["Unspecified"];
-            /** @description PRD: "edits" */
-            edits?: components["schemas"]["Unspecified"];
+            changeSetId: components["schemas"]["Uuid"];
+            recordVersion: number;
         };
-        /** @description pfc.ChangeSet.abandon result. PRD outputs: "change set state, validation" */
+        /** @description pfc.ChangeSet.abandon result */
         ChangeSetAbandonResponse: {
-            /** @description PRD: "change set state" */
-            changeSetState?: components["schemas"]["Unspecified"];
-            /** @description PRD: "validation" */
-            validation?: components["schemas"]["Unspecified"];
+            changeSetState: components["schemas"]["ChangeSetState"];
+            validation: components["schemas"]["ChangeSetValidation"];
         };
         /** @description pfc.ProductVersion.submit request. PRD inputs: "change set id" */
         ProductVersionSubmitRequest: {
