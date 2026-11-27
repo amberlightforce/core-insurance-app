@@ -66,6 +66,15 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
     {
         var currency = Currency.FromCode(receipt.Currency);
         var receiptState = Codes.Parse<PaymentState>(receipt.State);
+
+        // BO-BIL-08: cash promised back to its sender (a refund waits for approval) is not applied to invoices meanwhile.
+        var suspenseItem = receiptState == PaymentState.Suspense
+            ? await db.SuspenseItems.SingleOrDefaultAsync(i => i.ReceiptId == receipt.ReceiptId, cancellationToken).ConfigureAwait(false)
+            : null;
+        if (suspenseItem is { State: SuspenseStates.RefundPending })
+        {
+            return DomainError.Of(ModuleCode.BIL, "SUSPENSE-STATE", "A refund to the sender of this receipt waits for approval; decide it before applying the cash.");
+        }
         var alreadyAllocated = await db.Allocations.Where(a => a.ReceiptId == receipt.ReceiptId).SumAsync(a => (decimal?)a.Amount, cancellationToken).ConfigureAwait(false) ?? 0m;
         var unallocated = new Money(receipt.Amount - alreadyAllocated, currency);
         var requested = Money.Sum(lines.Select(l => l.Amount), currency);
@@ -187,6 +196,14 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
         receipt.State = Codes.Of(next.Value);
         receipt.SuspenseReason = null;
         receipt.RecordVersion++;
+        if (suspenseItem is not null)
+        {
+            // The receipt leaves suspense: the workbench item is resolved (a partial application leaves the rest as unapplied cash on the receipt).
+            suspenseItem.State = SuspenseStates.Allocated;
+            suspenseItem.ResolvedAt = now;
+            suspenseItem.ResolvedBy = context.Actor.ToString();
+            suspenseItem.RecordVersion++;
+        }
         db.Allocations.AddRange(rows);
         try
         {

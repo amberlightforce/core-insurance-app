@@ -4,23 +4,26 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Suspense.transfer request. PRD inputs: "filters, item"</summary>
+/// <summary>bil.Suspense.transfer request: move the unapplied cash of an OPEN item to another billing account of the legal entity (same currency, Active). Posts a ledger move (SUSPENSE_TRANSFERRED) and keeps the item OPEN on the target account.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SuspenseTransferRequest
 {
-    /// <summary>PRD: "filters"</summary>
+    /// <summary>Contract member 'suspenseItemId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'suspenseItemId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("filters")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Filters { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("suspenseItemId")]
+    public required global::System.Guid SuspenseItemId { get; init; }
 
-    /// <summary>PRD: "item"</summary>
+    /// <summary>Contract member 'targetBillingAccountId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'targetBillingAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("item")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("targetBillingAccountId")]
+    public required global::System.Guid TargetBillingAccountId { get; init; }
+
+    /// <summary>Contract member 'comment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Item { get; init; }
+    public string? Comment { get; init; }
 }
