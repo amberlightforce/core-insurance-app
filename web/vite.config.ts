@@ -51,5 +51,21 @@ export default defineConfig({
     // Heavy jsdom screens (forms, grids, overlays) also slow down when the whole machine is busy (parallel gates).
     testTimeout: 30_000,
     hookTimeout: 30_000,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.test.{ts,tsx}',
+        'src/test/**',
+        'src/**/fixtures.ts',
+        'src/**/*.d.ts',
+        'src/main.tsx',
+      ],
+      reporter: ['text-summary', 'json-summary'],
+      reportOnFailure: true,
+      // NX-TST-09: conservative initial floor (the full run was too slow under load to measure exactly);
+      // TODO(hardening): raise to just below the coverage CI prints.
+      thresholds: { lines: 60, statements: 60, functions: 55, branches: 50 },
+    },
   },
 });
