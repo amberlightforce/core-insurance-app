@@ -164,6 +164,11 @@ paths:
       - MCP tool claim_report_draft
       x-permission: clm.Fnol.saveDraft
       x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-STALE
+        note: the draft changed meanwhile or was already submitted
+        status: 409
       - code: CLM-ERR-FNOL-001
         note: missing field
         status: 422
@@ -203,6 +208,69 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '429':
           $ref: common.yaml#/components/responses/TooManyRequests
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/clm/v1/fnol/drafts/{draftId}:
+    get:
+      operationId: clm.Fnol.getDraft
+      summary: FNOL for all channels
+      description: |-
+        FNOL for all channels
+
+        PRD inputs: FNOL payload
+        PRD outputs: claim, exposures, checklist, assignment
+      tags:
+      - Fnol
+      x-requirement:
+      - REQ-CLM-001
+      x-anchor:
+      - REQ-CLM-001
+      x-wave: W7
+      x-work-packages:
+      - W7-CLM-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 4
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD: Yes'
+      x-exposure:
+      - ui
+      x-permission: clm.Fnol.getDraftDraft
+      x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-07 §9.1 l.1466
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: draftId
+        in: path
+        required: true
+        description: Identifier of the FNOL draft
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FnolDraftGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/clm/v1/fnol/{id}:
@@ -619,6 +687,11 @@ paths:
       x-authority-source:
       - PRD-07 l.504
       x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-STALE
+        note: the claim changed meanwhile (record version)
+        status: 409
       - code: CLM-ERR-ILLEGAL-TRANSITION
         status: 422
       - code: CLM-ERR-CLOSE-GUARD
@@ -691,6 +764,17 @@ paths:
       x-authority-source:
       - PRD-07 l.504
       x-error-codes:
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-STALE
+        note: the claim changed meanwhile (record version)
+        status: 409
+      - code: CLM-ERR-MERGE-NOT-DUPLICATE
+        note: the claims differ in policy or loss date, are the same claim, or one is not open
+        status: 422
+      - code: CLM-ERR-MERGE-FINANCIALS
+        note: the duplicate has a financial transaction, payment, transaction set or open recovery; errors carry the reason codes
+        status: 422
       - code: CLM-ERR-ILLEGAL-TRANSITION
         status: 422
       - code: CLM-ERR-CLOSE-GUARD
@@ -5476,6 +5560,11 @@ components:
         liabilityFacts:
           $ref: '#/components/schemas/LiabilityFacts'
           description: Optional liability facts captured at FNOL (D-SL4-17)
+        draftId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The saved draft (clm.Fnol.saveDraft) this submit completes; the draft is marked SUBMITTED in the same transaction (BO-CLM-02)
       description: 'Mandatory: lineOfBusiness, policyId, lossAt, lossCause, lossLocation, description, channel; they are not schema-required so that
         a missing one is CLM-ERR-FNOL-001 naming the field (REQ-CLM-030), not a parse error. Typed from REQ-CLM-001, REQ-CLM-030, REQ-CLM-036, REQ-CLM-041,
         REQ-CLM-065 (SL2-CLM-CORE). PRD inputs: "FNOL payload". A missing required field is CLM-ERR-FNOL-001 naming the field.'
@@ -5648,27 +5737,70 @@ components:
       description: 'Typed from REQ-CLM-001 (SL2-CLM-CORE). PRD outputs: "claim, exposures, checklist, assignment". Holds no free text (stored by the idempotency store).'
     FnolSaveDraftRequest:
       type: object
-      description: 'clm.Fnol.saveDraft request. PRD inputs: "FNOL payload"'
+      description: 'clm.Fnol.saveDraft request (BO-CLM-02, D-SL2-11). Stores an incomplete FNOL for later; no claim number, no clocks, no events. The payload may miss any mandatory field. Omit draftId to start a draft; send it with expectedRecordVersion to update one.'
       properties:
+        draftId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The draft to update; null starts a new one
+        expectedRecordVersion:
+          oneOf:
+          - type: integer
+            minimum: 1
+          - type: 'null'
+          description: The draft's recordVersion the user saw (required with draftId); a different current version is CLM-ERR-STALE
         fnolPayload:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "FNOL payload"'
+          $ref: '#/components/schemas/FnolSubmitRequest'
+          description: The FNOL so far (stored encrypted, P2)
+      required:
+      - fnolPayload
     FnolSaveDraftResponse:
       type: object
-      description: 'clm.Fnol.saveDraft result. PRD outputs: "claim, exposures, checklist, assignment"'
+      description: 'clm.Fnol.saveDraft result (BO-CLM-02). Holds no FNOL content.'
       properties:
-        claim:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "claim"'
-        exposures:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposures"'
-        checklist:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checklist"'
-        assignment:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "assignment"'
+        draftId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        recordVersion:
+          type: integer
+          minimum: 1
+        savedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - draftId
+      - recordVersion
+      - savedAt
+    FnolDraftGetResponse:
+      type: object
+      description: 'clm.Fnol.getDraft result (BO-CLM-02): the draft to resume. Only its creator reads it.'
+      properties:
+        draftId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        recordVersion:
+          type: integer
+          minimum: 1
+        status:
+          type: string
+          enum:
+          - DRAFT
+          - SUBMITTED
+          - DISCARDED
+        savedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        claimId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The claim the draft became when it was submitted
+        fnolPayload:
+          $ref: '#/components/schemas/FnolSubmitRequest'
+      required:
+      - draftId
+      - recordVersion
+      - status
+      - savedAt
+      - claimId
+      - fnolPayload
     FnolGetResponse:
       type: object
       description: 'clm.Fnol.get result: the immutable FNOL snapshot as submitted (REQ-CLM-044). Typed by SL2-CLM-CORE.'
@@ -6176,48 +6308,58 @@ components:
       - exposureIds
     ClaimReopenRequest:
       type: object
-      description: 'clm.Claim.reopen request. PRD inputs: "ids, changes, reason"'
+      description: 'clm.Claim.reopen request (BO-CLM-02, REQ-CLM-074). Closed to Open(InProgress) with a coded reason; the exposures closed together with the claim reopen with it and their statutory clocks resume or start afresh (BO-CLM-05).'
       properties:
-        ids:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "ids"'
-        changes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "changes"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - claimId
+      - expectedRecordVersion
+      - reasonCode
     ClaimReopenResponse:
       type: object
       description: 'clm.Claim.reopen result. PRD outputs: "claim"'
       properties:
         claim:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "claim"'
+          $ref: '#/components/schemas/ClaimSummary'
+      required:
+      - claim
     ClaimMergeRequest:
       type: object
-      description: 'clm.Claim.merge request. PRD inputs: "ids, changes, reason"'
+      description: 'clm.Claim.merge request (BO-CLM-02). Two open claims of one policy and loss date; the duplicate closes as DUPLICATE with a pointer to the survivor and keeps its claim number. Refused while the duplicate has any financial transaction, payment, transaction set or open recovery (nothing moves, nothing is counted twice).'
       properties:
-        ids:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "ids"'
-        changes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "changes"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+        survivorClaimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        duplicateClaimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The duplicate claim's recordVersion the user saw; a different current version is CLM-ERR-STALE
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - survivorClaimId
+      - duplicateClaimId
+      - expectedRecordVersion
+      - reasonCode
     ClaimMergeResponse:
       type: object
       description: 'clm.Claim.merge result. PRD outputs: "claim"'
       properties:
-        claim:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "claim"'
+        survivor:
+          $ref: '#/components/schemas/ClaimSummary'
+        duplicate:
+          $ref: '#/components/schemas/ClaimSummary'
+      required:
+      - survivor
+      - duplicate
     ClaimSearchCriteria:
       type: object
       description: 'Body of clm.Claim.searchByCriteria (D-SLC-05, REQ-CLM-011 subset). At least one criterion; criteria combine with AND.'

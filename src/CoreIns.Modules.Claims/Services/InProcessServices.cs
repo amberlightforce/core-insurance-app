@@ -32,8 +32,9 @@ internal static class InProcess
         new(DomainError.Of(ModuleCode.CLM, "NOT-AVAILABLE", $"{operation} is not built yet (SL2-CLM-CORE builds FNOL submit/validate/get, claim get/search/close and exposure create)."));
 }
 
-/// <summary>The in-process contract <see cref="IClaimsFnolService"/>: submit and validate; saveDraft is CLM-ERR-NOT-AVAILABLE (REQ-CLM-039, later).</summary>
-internal sealed class ClaimsFnolService(RequestContext context, ICommandHandler<SubmitFnol, FnolSubmitResponse> submit, FnolValidation validation) : IClaimsFnolService
+/// <summary>The in-process contract <see cref="IClaimsFnolService"/>: submit, validate and saveDraft (BO-CLM-02).</summary>
+internal sealed class ClaimsFnolService(
+    RequestContext context, ICommandHandler<SubmitFnol, FnolSubmitResponse> submit, ICommandHandler<SaveFnolDraft, FnolSaveDraftResponse> saveDraft, FnolValidation validation) : IClaimsFnolService
 {
     public Task<FnolSubmitResponse> SubmitAsync(FnolSubmitRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         InProcess.RunAsync(context, submit, new SubmitFnol(request), options, cancellationToken);
@@ -42,7 +43,7 @@ internal sealed class ClaimsFnolService(RequestContext context, ICommandHandler<
         validation.ValidateAsync(request, cancellationToken);
 
     public Task<FnolSaveDraftResponse> SaveDraftAsync(FnolSaveDraftRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw InProcess.NotAvailable("clm.Fnol.saveDraft");
+        InProcess.RunAsync(context, saveDraft, new SaveFnolDraft(request), options, cancellationToken);
 }
 
 /// <summary>The in-process contract <see cref="IClaimsClaimService"/>: get and search.</summary>

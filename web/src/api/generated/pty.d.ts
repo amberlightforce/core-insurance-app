@@ -2023,35 +2023,60 @@ export interface components {
             /** @description PRD: "request" */
             request?: components["schemas"]["Unspecified"];
         };
-        /** @description pty.Location.add request. PRD inputs: "location" */
+        /**
+         * @description Whether a location is a postal address or a contact point (phone, email, secure inbox)
+         * @enum {string}
+         */
+        LocationKind: "ADDRESS" | "CONTACT_POINT";
+        /** @description pty.Location.add request (BO-PTY-02). Gives a party one address or one contact point (exactly one of address / contactPoint), effective from validFrom (default today). The first location of a type becomes primary; a new primary replaces the previous primary of that type. The previous primary stays in the history. Phones are normalised to E.164, emails lower-cased, Greek postcodes checked. */
         LocationAddRequest: {
-            /** @description PRD: "location" */
-            location?: components["schemas"]["Unspecified"];
+            partyId: components["schemas"]["Uuid"];
+            address?: components["schemas"]["AddressInput"] | null;
+            contactPoint?: components["schemas"]["ContactPointInput"] | null;
+            /** @description First day the location applies; default today; not before the party was created */
+            validFrom?: components["schemas"]["LocalDate"] | null;
+            /** @description Optimistic concurrency on the party; when given, a stale value is refused with PTY-ERR-STALE */
+            expectedRecordVersion?: number | null;
         };
-        /** @description pty.Location.add result. PRD outputs: "location" */
+        /** @description pty.Location.add result (BO-PTY-02). */
         LocationAddResponse: {
-            /** @description PRD: "location" */
-            location?: components["schemas"]["Unspecified"];
+            locationId: components["schemas"]["Uuid"];
+            kind: components["schemas"]["LocationKind"];
+            address?: components["schemas"]["PartyAddressView"] | null;
+            contactPoint?: components["schemas"]["ContactPointView"] | null;
+            /** @description The party record version after the change */
+            recordVersion: number;
         };
-        /** @description pty.Location.update request. PRD inputs: "location" */
+        /** @description pty.Location.update request (BO-PTY-02). Replaces the CURRENT address or contact point named by the path id (the one the party view shows) with new values from validFrom (default today); the old values stay as history. Give the field set matching the location (address or contactPoint). The result carries the id of the new version. */
         LocationUpdateRequest: {
-            /** @description PRD: "location" */
-            location?: components["schemas"]["Unspecified"];
+            address?: components["schemas"]["AddressInput"] | null;
+            contactPoint?: components["schemas"]["ContactPointInput"] | null;
+            /** @description First day the new values apply; default today */
+            validFrom?: components["schemas"]["LocalDate"] | null;
+            /** @description Optimistic concurrency on the party; when given, a stale value is refused with PTY-ERR-STALE */
+            expectedRecordVersion?: number | null;
         };
-        /** @description pty.Location.update result. PRD outputs: "location" */
+        /** @description pty.Location.update result (BO-PTY-02). */
         LocationUpdateResponse: {
-            /** @description PRD: "location" */
-            location?: components["schemas"]["Unspecified"];
+            locationId: components["schemas"]["Uuid"];
+            kind: components["schemas"]["LocationKind"];
+            address?: components["schemas"]["PartyAddressView"] | null;
+            contactPoint?: components["schemas"]["ContactPointView"] | null;
+            recordVersion: number;
         };
-        /** @description pty.Location.remove request. PRD inputs: "location" */
+        /** @description pty.Location.remove request (BO-PTY-02). Ends the address or contact point from validTo (default today); the history is kept. Ending a primary location promotes the oldest remaining location of the same type. */
         LocationRemoveRequest: {
-            /** @description PRD: "location" */
-            location?: components["schemas"]["Unspecified"];
+            locationId: components["schemas"]["Uuid"];
+            /** @description Day the location stops applying (exclusive); default today */
+            validTo?: components["schemas"]["LocalDate"] | null;
+            expectedRecordVersion?: number | null;
         };
-        /** @description pty.Location.remove result. PRD outputs: "location" */
+        /** @description pty.Location.remove result (BO-PTY-02). */
         LocationRemoveResponse: {
-            /** @description PRD: "location" */
-            location?: components["schemas"]["Unspecified"];
+            locationId: components["schemas"]["Uuid"];
+            kind: components["schemas"]["LocationKind"];
+            validTo: components["schemas"]["LocalDate"];
+            recordVersion: number;
         };
         /** @description pty.LifeEvent.start request. PRD inputs: "type, party, data" */
         LifeEventStartRequest: {

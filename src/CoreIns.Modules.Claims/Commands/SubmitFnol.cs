@@ -108,6 +108,23 @@ internal sealed class SubmitFnolHandler(
             return error;
         }
 
+        // BO-CLM-02: a draft being completed must be the caller's own and still open (checked before any number is drawn).
+        FnolDraftRow? draft = null;
+        if (request.DraftId is { } draftId)
+        {
+            var actorName = context.Actor.ToString();
+            draft = await db.FnolDrafts.SingleOrDefaultAsync(d => d.DraftId == draftId && d.LegalEntityId == legalEntity && d.CreatedBy == actorName, cancellationToken).ConfigureAwait(false);
+            if (draft is null)
+            {
+                return ClaimSupport.NotFound("FNOL draft");
+            }
+
+            if (draft.Status != FnolDraftRow.Draft)
+            {
+                return DomainError.Of(ModuleCode.CLM, "STALE", "The draft was already submitted.");
+            }
+        }
+
         var snapshot = assessed.Snapshot!;
         var settings = options.Value;
         var jurisdiction = (context.Jurisdiction ?? throw new InvalidOperationException("The request context has no jurisdiction.")).Value;
@@ -208,6 +225,14 @@ internal sealed class SubmitFnolHandler(
         db.Claimants.Add(insured);
         db.Incidents.AddRange(incidents);
         db.FnolSnapshots.Add(fnol);
+        if (draft is not null)
+        {
+            draft.Status = FnolDraftRow.Submitted;
+            draft.ClaimId = claimId;
+            draft.UpdatedAt = now;
+            draft.RecordVersion++;
+        }
+
         db.Exposures.AddRange(exposures);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

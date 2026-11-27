@@ -4,15 +4,28 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.PayeeAccount.verify request. PRD inputs: "payee_account_id (or IBAN + name for a pre-check)"</summary>
+/// <summary>bil.PayeeAccount.verify request (BO-BIL-09). PRD inputs: "payee_account_id (or IBAN + name for a pre-check)". Either an existing account is (re-)verified and the result recorded on it, or an IBAN and holder name are pre-checked with nothing stored. The IBAN is P2: never returned, logged or published.</summary>
+/// <remarks>
+/// <para>Exactly one of: payeeAccountId | iban + holderName.</para>
+/// </remarks>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PayeeAccountVerifyRequest
 {
-    /// <summary>PRD: "payee_account_id (or IBAN + name for a pre-check)"</summary>
+    /// <summary>Existing payee account to (re-)verify; its stored IBAN and holder name are checked</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'payeeAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("payeeAccountId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Guid? PayeeAccountId { get; init; }
+
+    /// <summary>IBAN for a pre-check (ISO 13616, mod-97 checked; spaces allowed). P2.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("iban")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Iban { get; init; }
+
+    /// <summary>Holder name for a pre-check</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("holderName")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? HolderName { get; init; }
 }

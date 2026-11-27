@@ -61,6 +61,7 @@ public static class ClaimsModule
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.dsar_restriction TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.migration_import TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.fnol_snapshot TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.fnol_draft TO {appRole}",
 
                 // Claim financials (SL2-CLM-MONEY, D-ARC-34): the ledger lines are insert-only; the set header, line flags,
                 // payments and the payee read model move.
@@ -184,6 +185,16 @@ public static class ClaimsModule
         services.AddScoped<IValidator<CreateExposure>, CreateExposureValidator>();
         services.AddCommandAuditor<CreateExposure, ExposureCreateResponse, CreateExposureAuditor>();
         services.AddCommand<CreateExposure, ExposureCreateResponse, CreateExposureHandler>(CommandDescriptor.For("clm.Exposure.create") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ReopenClaim>, ReopenClaimValidator>();
+        services.AddCommandAuditor<ReopenClaim, ClaimReopenResponse, ReopenClaimAuditor>();
+        services.AddCommand<ReopenClaim, ClaimReopenResponse, ReopenClaimHandler>(CommandDescriptor.For("clm.Claim.reopen") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<MergeClaims>, MergeClaimsValidator>();
+        services.AddCommandAuditor<MergeClaims, ClaimMergeResponse, MergeClaimsAuditor>();
+        services.AddCommand<MergeClaims, ClaimMergeResponse, MergeClaimsHandler>(CommandDescriptor.For("clm.Claim.merge"));
+        services.AddScoped<IValidator<SaveFnolDraft>, SaveFnolDraftValidator>();
+        services.AddCommandAuditor<SaveFnolDraft, FnolSaveDraftResponse, SaveFnolDraftAuditor>();
+        services.AddCommand<SaveFnolDraft, FnolSaveDraftResponse, SaveFnolDraftHandler>(CommandDescriptor.For("clm.Fnol.saveDraft") with { SupportsDryRun = true });
+        services.AddScoped<FnolDraftReader>();
         services.AddScoped<ExposureLifecycleSupport>();
         services.AddScoped<ExposureClocks>();
         services.AddScoped<IValidator<UpdateExposure>, UpdateExposureValidator>();
@@ -281,6 +292,10 @@ public static class ClaimsModule
             .Describe("Η κατάσταση της ζημίας δεν επιτρέπει αυτή την ενέργεια.", "The claim's state does not allow this action."),
         ErrorDefinition.For(ModuleCode.CLM, "CLOSE-GUARD", 422, "Η ζημία δεν μπορεί να κλείσει ακόμη", "The claim cannot close yet")
             .Describe("Υπάρχει ανοιχτό απόθεμα ή εκκρεμής πληρωμή σε έκθεση· αποδεσμεύστε ή τακτοποιήστε πρώτα.", "An exposure has an open reserve or a pending payment; release or settle it first."),
+        ErrorDefinition.For(ModuleCode.CLM, "MERGE-NOT-DUPLICATE", 422, "Οι ζημίες δεν μπορούν να συγχωνευθούν", "The claims cannot be merged")
+            .Describe("Μόνο δύο ανοιχτές ζημίες του ίδιου ασφαλιστηρίου και της ίδιας ημερομηνίας ζημίας συγχωνεύονται.", "Only two open claims of the same policy and loss date can be merged."),
+        ErrorDefinition.For(ModuleCode.CLM, "MERGE-FINANCIALS", 422, "Η διπλή ζημία έχει οικονομική κίνηση", "The duplicate claim has financial activity")
+            .Describe("Η διπλή ζημία έχει κινήσεις, πληρωμές ή ανακτήσεις· τακτοποιήστε τις πρώτα (δείτε το errors[]).", "The duplicate has transactions, payments or recoveries; settle them first (see errors[])."),
         ErrorDefinition.For(ModuleCode.CLM, "EXPOSURE-DUPLICATE", 409, "Υπάρχει ήδη ανοιχτή έκθεση ζημίας", "An open exposure already exists")
             .Describe("Ίδια κάλυψη, αιτών και συμβάν· δώστε αιτιολογία για δεύτερη έκθεση.", "Same coverage, claimant and incident; give a reason to add a second exposure."),
         ErrorDefinition.For(ModuleCode.CLM, "SEARCH-CRITERIA", 422, "Ανεπαρκή κριτήρια αναζήτησης", "Insufficient search criteria")

@@ -227,3 +227,172 @@ internal static class PayeeAccountMapping
         _ => PayeeVerificationStatus.Confirmed,
     };
 }
+
+/// <summary><c>bil.PayeeAccount.verify</c>: runs or re-runs verification of payee (REQ-BIL-344, BO-BIL-09).</summary>
+internal sealed record VerifyPayeeAccount(PayeeAccountVerifyRequest Request) : ICommand<PayeeAccountVerifyResponse>;
+
+/// <summary>Exactly one of an existing account, or an IBAN with a holder name for a pre-check.</summary>
+internal sealed class VerifyPayeeAccountValidator : AbstractValidator<VerifyPayeeAccount>
+{
+    public VerifyPayeeAccountValidator()
+    {
+        RuleFor(c => c.Request).Must(r => (r.PayeeAccountId is not null) != (r.Iban is not null || r.HolderName is not null))
+            .WithErrorCode("ACCOUNT_OR_PRECHECK").WithMessage("Give either a payee account or an IBAN with a holder name, not both.");
+        When(c => c.Request.PayeeAccountId is null, () =>
+        {
+            RuleFor(c => c.Request.Iban).NotEmpty().WithErrorCode("IBAN_REQUIRED").WithMessage("The IBAN is required for a pre-check.");
+            RuleFor(c => c.Request.HolderName).NotEmpty().MaximumLength(140);
+        });
+    }
+}
+
+/// <summary>
+/// Re-runs the bound verifier. For an account it decrypts the stored IBAN for the bank call only, records the new result
+/// (status, VoP outcome, suggested name, check time; never overwritten without a newer check, enforced by the database) and
+/// stays idempotent: repeating it just records a newer identical result. A pre-check (IBAN and holder name) stores nothing.
+/// No verifier bound, or one that fails, is <c>BIL-ERR-VOP-UNAVAILABLE</c> (503): fail closed, never a guessed outcome
+/// (REQ-BIL-214). The IBAN is never in the response, the audit record or a log; only the masked form.
+/// </summary>
+internal sealed partial class VerifyPayeeAccountHandler(
+    BillingDbContext db,
+    RequestContext context,
+    IClock clock,
+    PayeeProtection protection,
+    IServiceProvider services,
+    ILogger<VerifyPayeeAccountHandler> logger) : ICommandHandler<VerifyPayeeAccount, PayeeAccountVerifyResponse>
+{
+    public async Task<Result<PayeeAccountVerifyResponse>> HandleAsync(VerifyPayeeAccount command, CancellationToken cancellationToken)
+    {
+        var request = command.Request;
+        if (request.PayeeAccountId is not { } accountId)
+        {
+            return await PreCheckAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        var legalEntity = protection.Current(context);
+        var row = await db.PayeeAccounts.SingleOrDefaultAsync(a => a.PayeeAccountId == accountId && a.LegalEntityId == legalEntity, cancellationToken).ConfigureAwait(false);
+        if (row is null)
+        {
+            return BillingErrors.NotFound("payee account");
+        }
+
+        if (row.Status != Codes.Of(PayeeAccountStatus.Active))
+        {
+            return DomainError.Of(ModuleCode.BIL, "PAYEE-ACCOUNT", "Only an Active payee account is verified; a superseded or revoked one is never paid.");
+        }
+
+        var iban = await protection.DecryptAsync(row.PayeeAccountId, row.IbanEncrypted, cancellationToken).ConfigureAwait(false);
+        var check = await CheckAsync(iban, row.HolderName, cancellationToken).ConfigureAwait(false);
+        if (check is null)
+        {
+            return Unavailable();
+        }
+
+        var now = clock.Now;
+        if (row.VopCheckedAt is { } previous && now <= previous)
+        {
+            now = previous.Plus(TimeSpan.FromMilliseconds(1)); // the database accepts a result only with a newer check time
+        }
+
+        row.VerificationStatus = Codes.Of(PayeeAccountMapping.StatusOf(check.Outcome));
+        row.VopResult = Codes.Of(check.Outcome);
+        row.VopSuggestedName = check.SuggestedName;
+        row.VopCheckedAt = now;
+        row.RecordVersion++;
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return DomainError.Of(ModuleCode.BIL, "STALE", "The payee account changed meanwhile; load it and try again.");
+        }
+
+        LogVerified(logger, row.PayeeAccountId, row.VopResult, row.VerificationStatus);
+        return Respond(check, now, IbanMask.Mask(row.IbanLast4), row.PayeeAccountId, PayeeAccountMapping.Api(Codes.Parse<PayeeVerification>(row.VerificationStatus)), preCheck: false);
+    }
+
+    private async Task<Result<PayeeAccountVerifyResponse>> PreCheckAsync(PayeeAccountVerifyRequest request, CancellationToken cancellationToken)
+    {
+        if (!Iban.TryParse(request.Iban!, out var iban))
+        {
+            return DomainError.Of(ModuleCode.BIL, "IBAN-INVALID", "The IBAN is not valid (ISO 13616 structure or check digits).");
+        }
+
+        var holderName = request.HolderName!.Trim();
+        if (holderName.Length == 0 || holderName.Any(char.IsControl))
+        {
+            return DomainError.Of(ModuleCode.BIL, "CHARSET", "The holder name contains characters a bank transfer cannot carry.");
+        }
+
+        var check = await CheckAsync(iban.Value, holderName, cancellationToken).ConfigureAwait(false);
+        return check is null
+            ? Unavailable()
+            : Respond(check, clock.Now, IbanMask.Mask(IbanMask.Last4(iban)), null, null, preCheck: true);
+    }
+
+    private static PayeeAccountVerifyResponse Respond(VopCheck check, Instant checkedAt, string maskedIban, Guid? accountId, PayeeVerificationStatus? status, bool preCheck) => new()
+    {
+        Outcome = Codes.Api<PayeeAccountVerifyResponse.OutcomeValue>(check.Outcome),
+        SuggestedName = check.SuggestedName,
+        CheckedAt = checkedAt,
+        PayeeAccountId = accountId,
+        VerificationStatus = status,
+        MaskedIban = maskedIban,
+        PreCheck = preCheck,
+    };
+
+    /// <summary>The answer of the bank; null when no verifier is bound, it fails or it reports NotAvailable (REQ-BIL-214).</summary>
+    private async Task<VopCheck?> CheckAsync(string iban, string holderName, CancellationToken cancellationToken)
+    {
+        if (services.GetService<IPayeeVerifier>() is not { } verifier)
+        {
+            return null;
+        }
+
+        try
+        {
+            var check = await verifier.VerifyAsync(iban, holderName, cancellationToken).ConfigureAwait(false);
+            return check.Outcome == VopOutcome.NotAvailable ? null : check;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            LogVopUnavailable(logger, ex.GetType().Name);
+            return null;
+        }
+    }
+
+    private static DomainError Unavailable() =>
+        DomainError.Of(ModuleCode.BIL, "VOP-UNAVAILABLE", "Verification of payee is not available; try again later. Nothing is paid without it (REQ-BIL-214).");
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Payee account {PayeeAccountId} re-verified: VoP {VopResult}, status {Status}.")]
+    private static partial void LogVerified(ILogger logger, Guid payeeAccountId, string? vopResult, string status);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Verification of payee failed ({ExceptionType}); the verify call is refused.")]
+    private static partial void LogVopUnavailable(ILogger logger, string exceptionType);
+}
+
+/// <summary>Audit facts of a verification: the account, the outcome and its masked IBAN; never the IBAN or the holder name.</summary>
+internal sealed class VerifyPayeeAccountAuditor : ICommandAuditor<VerifyPayeeAccount, PayeeAccountVerifyResponse>
+{
+    public CommandAuditFacts Describe(VerifyPayeeAccount command, Result<PayeeAccountVerifyResponse>? result)
+    {
+        var id = command.Request.PayeeAccountId;
+        var keys = id is { } account ? BusinessKeys.Empty.With("payeeAccountId", account.ToString()) : BusinessKeys.Empty;
+        var objectRef = id is { } a ? new ObjectRef(ModuleCode.BIL, "PayeeAccount", a.ToString("D")) : new ObjectRef(ModuleCode.BIL, "PayeeAccount", "pre-check");
+        return result is { IsSuccess: true } ok
+            ? new CommandAuditFacts
+            {
+                ObjectRef = objectRef,
+                BusinessKeys = keys,
+                Changes = AuditDiff.Compute(null, new
+                {
+                    outcome = ok.Value.Outcome.ToString(),
+                    maskedIban = ok.Value.MaskedIban,
+                    verificationStatus = ok.Value.VerificationStatus?.ToString(),
+                    preCheck = ok.Value.PreCheck,
+                }),
+            }
+            : new CommandAuditFacts { ObjectRef = objectRef, BusinessKeys = keys };
+    }
+}

@@ -1,4 +1,5 @@
 using CoreIns.Modules.Billing.Commands;
+using CoreIns.Modules.Billing.Contracts;
 using CoreIns.Modules.Billing.Contracts.Api;
 using CoreIns.Modules.Billing.Queries;
 using CoreIns.Platform.Commands;
@@ -20,6 +21,9 @@ internal static class DisbursementPermissions
 {
     public const string PayeeAccountCreate = "bil.PayeeAccount.create";
     public const string PayeeAccountGet = "bil.PayeeAccount.get";
+    public const string PayeeAccountList = "bil.PayeeAccount.list";
+    public const string PayeeAccountVerify = "bil.PayeeAccount.verify";
+    public const string DisbursementRequest = "bil.Disbursement.request";
     public const string DisbursementGet = "bil.Disbursement.get";
     public const string DisbursementList = "bil.Disbursement.list";
     public const string DisbursementApproveRelease = "bil.Disbursement.approveRelease";
@@ -30,8 +34,10 @@ internal static class DisbursementPermissions
 
 /// <summary>
 /// REST facade of payee accounts and disbursements (SL2-BIL-DISB). The IBAN travels only in the create request body,
-/// never in a path or query (D-SLC-05), and responses carry the masked IBAN. <c>bil.Disbursement.request</c> has no
-/// REST endpoint in the slice: sources call it in process after their own approval (CLM transaction-set approval).
+/// never in a path or query (D-SLC-05), and responses carry the masked IBAN. <c>bil.Disbursement.request</c> is served over REST
+/// only for the non-claim sources BIL gates itself (BO-BIL-09: commission, levy, tax remittance, other); the sources that
+/// carry their own approval (CLM claim payment, BIL refund, FS clearing) are called in process only, so a REST caller can
+/// never supply a self-made approval hash for them.
 /// </summary>
 [ApiController]
 [Route("api/bil/v1")]
@@ -48,6 +54,71 @@ internal sealed class DisbursementController : ControllerBase
         return result.IsSuccess
             ? Results.Created($"/api/bil/v1/payee-accounts/{result.Value.PayeeAccountId:D}", result.Value)
             : HttpResults.Problem(result.Error!, HttpContext);
+    }
+
+    /// <summary>bil.PayeeAccount.list (masked IBAN in every item): by party and purpose, optionally as valid on <c>validAt</c>.</summary>
+    [HttpGet("payee-accounts")]
+    [Authorize(Policy = DisbursementPermissions.PayeeAccountList)]
+    public async Task<IResult> ListPayeeAccountsAsync(
+        [FromQuery] string? cursor, [FromQuery] int? limit, [FromQuery] string? validAt, [FromQuery] Guid? partyId, [FromQuery] string? purpose,
+        [FromServices] DisbursementReader reader, [FromServices] IOptions<BillingOptions> options, CancellationToken cancellationToken)
+    {
+        if (cursor is not null && !int.TryParse(cursor, out _))
+        {
+            return HttpResults.Problem(new DomainError(ErrorCode.For(ModuleCode.BIL, PlatformErrors.Validation), "Invalid cursor."), HttpContext);
+        }
+
+        if (!FilterCode.IsValid(purpose))
+        {
+            return HttpResults.Problem(new DomainError(ErrorCode.For(ModuleCode.BIL, PlatformErrors.Validation), "purpose must be an upper-snake code."), HttpContext);
+        }
+
+        BusinessDate? validOn = null;
+        if (validAt is not null)
+        {
+            if (BusinessDate.TryParse(validAt, out var date))
+            {
+                validOn = date;
+            }
+            else if (Instant.TryParse(validAt, out var instant))
+            {
+                validOn = instant.ToBusinessDate(options.Value.Zone);
+            }
+            else
+            {
+                return HttpResults.Problem(new DomainError(ErrorCode.For(ModuleCode.BIL, PlatformErrors.Validation), "validAt must be a date or an RFC 3339 instant."), HttpContext);
+            }
+        }
+
+        return Results.Ok(await reader.ListPayeeAccountsAsync(LegalEntity(), partyId, purpose, validOn, cursor, limit, cancellationToken).ConfigureAwait(false));
+    }
+
+    /// <summary>bil.PayeeAccount.verify: re-runs verification of payee on an account (result recorded) or pre-checks an IBAN and name (nothing stored).</summary>
+    [HttpPost("payee-accounts/verify")]
+    [Authorize(Policy = DisbursementPermissions.PayeeAccountVerify)]
+    public async Task<IResult> VerifyPayeeAccountAsync(
+        [FromBody] PayeeAccountVerifyRequest request, [FromServices] ICommandHandler<VerifyPayeeAccount, PayeeAccountVerifyResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new VerifyPayeeAccount(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>
+    /// bil.Disbursement.request for the non-claim sources (BO-BIL-09): the requester needs BIL.DISBURSEMENT authority over the amount and a
+    /// second person approves with bil.Disbursement.approveRelease. Other sources are BIL-ERR-SOURCE here (they are called in process).
+    /// </summary>
+    [HttpPost("disbursements/request")]
+    [Authorize(Policy = DisbursementPermissions.DisbursementRequest)]
+    public async Task<IResult> RequestDisbursementAsync(
+        [FromBody] DisbursementRequestRequest request, [FromServices] ICommandHandler<RequestDisbursement, DisbursementRequestResponse> handler,
+        CancellationToken cancellationToken)
+    {
+        if (!DisbursementCodes.IsGeneric(request.SourceType))
+        {
+            return HttpResults.Problem(
+                DomainError.Of(ModuleCode.BIL, "SOURCE", $"Source type {request.SourceType} is not requested over REST; the REST facade serves BIL_COMMISSION, BIL_LEVY, TAX_REMITTANCE and BIL_OTHER."),
+                HttpContext);
+        }
+
+        return (await handler.HandleAsync(new RequestDisbursement(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
     }
 
     /// <summary>bil.PayeeAccount.get (masked IBAN), optionally as valid on <c>validAt</c> and for a purpose.</summary>

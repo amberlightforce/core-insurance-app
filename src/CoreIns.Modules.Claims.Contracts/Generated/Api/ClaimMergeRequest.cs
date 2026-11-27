@@ -4,31 +4,29 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Claim.merge request. PRD inputs: "ids, changes, reason"</summary>
+/// <summary>clm.Claim.merge request (BO-CLM-02). Two open claims of one policy and loss date; the duplicate closes as DUPLICATE with a pointer to the survivor and keeps its claim number. Refused while the duplicate has any financial transaction, payment, transaction set or open recovery (nothing moves, nothing is counted twice).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClaimMergeRequest
 {
-    /// <summary>PRD: "ids"</summary>
+    /// <summary>Contract member 'survivorClaimId'.</summary>
     /// <remarks>
-    /// <para>Untyped id: no SharedKernel id type is mapped for 'id' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'survivorClaimId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("ids")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? Ids { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("survivorClaimId")]
+    public required global::System.Guid SurvivorClaimId { get; init; }
 
-    /// <summary>PRD: "changes"</summary>
+    /// <summary>Contract member 'duplicateClaimId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'duplicateClaimId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("changes")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Changes { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("duplicateClaimId")]
+    public required global::System.Guid DuplicateClaimId { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    /// <summary>The duplicate claim's recordVersion the user saw; a different current version is CLM-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
+
+    /// <summary>Contract member 'reasonCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
+    public required string ReasonCode { get; init; }
 }

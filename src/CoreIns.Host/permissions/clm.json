@@ -40,7 +40,11 @@
         "clm.Recovery.recordMilestone": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
         "clm.Recovery.demand": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
         "clm.Recovery.writeOff": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
-        "clm.Claim.update": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
+        "clm.Claim.update": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Claim.reopen": [ "Staff.ClaimsManager" ],
+        "clm.Claim.merge": [ "Staff.ClaimsManager" ],
+        "clm.Fnol.saveDraft": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Fnol.getDraft": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
       }
     },
     "Authority": {

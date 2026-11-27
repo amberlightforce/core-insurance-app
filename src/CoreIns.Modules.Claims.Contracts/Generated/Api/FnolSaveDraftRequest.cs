@@ -4,15 +4,22 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Fnol.saveDraft request. PRD inputs: "FNOL payload"</summary>
+/// <summary>clm.Fnol.saveDraft request (BO-CLM-02, D-SL2-11). Stores an incomplete FNOL for later; no claim number, no clocks, no events. The payload may miss any mandatory field. Omit draftId to start a draft; send it with expectedRecordVersion to update one.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FnolSaveDraftRequest
 {
-    /// <summary>PRD: "FNOL payload"</summary>
+    /// <summary>The draft to update; null starts a new one</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'draftId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("draftId")]
+    public global::System.Guid? DraftId { get; init; }
+
+    /// <summary>The draft's recordVersion the user saw (required with draftId); a different current version is CLM-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public int? ExpectedRecordVersion { get; init; }
+
+    /// <summary>The FNOL so far (stored encrypted, P2)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("fnolPayload")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? FnolPayload { get; init; }
+    public required global::CoreIns.Modules.Claims.Contracts.Api.FnolSubmitRequest FnolPayload { get; init; }
 }

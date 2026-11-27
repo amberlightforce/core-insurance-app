@@ -4,15 +4,22 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Location.remove request. PRD inputs: "location"</summary>
+/// <summary>pty.Location.remove request (BO-PTY-02). Ends the address or contact point from validTo (default today); the history is kept. Ending a primary location promotes the oldest remaining location of the same type.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record LocationRemoveRequest
 {
-    /// <summary>PRD: "location"</summary>
+    /// <summary>Contract member 'locationId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'locationId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("location")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Location { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("locationId")]
+    public required global::System.Guid LocationId { get; init; }
+
+    /// <summary>Day the location stops applying (exclusive); default today</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validTo")]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidTo { get; init; }
+
+    /// <summary>Contract member 'expectedRecordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public int? ExpectedRecordVersion { get; init; }
 }

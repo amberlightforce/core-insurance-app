@@ -12,7 +12,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/down-payment/status
 CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/balance
 CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/query
 CONTRACT_NOT_SERVED GET /api/bil/v1/mandates/{}
-CONTRACT_NOT_SERVED GET /api/bil/v1/payee-accounts
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-instruments
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-plans
 CONTRACT_NOT_SERVED GET /api/bil/v1/receipts
@@ -168,7 +167,6 @@ CONTRACT_NOT_SERVED PATCH /api/bil/v1/billing-accounts/{}
 CONTRACT_NOT_SERVED PATCH /api/clm/v1/services/{}
 CONTRACT_NOT_SERVED PATCH /api/pfc/v1/pogs/{}
 CONTRACT_NOT_SERVED PATCH /api/plt/v1/users/{}
-CONTRACT_NOT_SERVED PATCH /api/pty/v1/locations/{}
 CONTRACT_NOT_SERVED PATCH /api/ri/v1/programmes/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/contingencies/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
@@ -189,7 +187,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/commission/simulate
 CONTRACT_NOT_SERVED POST /api/bil/v1/disbursement-batches/approve-release
 CONTRACT_NOT_SERVED POST /api/bil/v1/disbursement-batches/prepare
 CONTRACT_NOT_SERVED POST /api/bil/v1/disbursement-batches/release
-CONTRACT_NOT_SERVED POST /api/bil/v1/disbursements/request
 CONTRACT_NOT_SERVED POST /api/bil/v1/down-payment/initiate
 CONTRACT_NOT_SERVED POST /api/bil/v1/dsar/erase
 CONTRACT_NOT_SERVED POST /api/bil/v1/dsar/export
@@ -204,7 +201,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/mandates
 CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/amend
 CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/cancel
 CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/sign
-CONTRACT_NOT_SERVED POST /api/bil/v1/payee-accounts/verify
 CONTRACT_NOT_SERVED POST /api/bil/v1/payment-instruments/add
 CONTRACT_NOT_SERVED POST /api/bil/v1/payment-instruments/remove
 CONTRACT_NOT_SERVED POST /api/bil/v1/payment-plans/change
@@ -266,8 +262,6 @@ CONTRACT_NOT_SERVED POST /api/chn/v1/webhooks/verify
 CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/assemble
 CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/issue
 CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/request
-CONTRACT_NOT_SERVED POST /api/clm/v1/claims/merge
-CONTRACT_NOT_SERVED POST /api/clm/v1/claims/reopen
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/schedule
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/send
 CONTRACT_NOT_SERVED POST /api/clm/v1/coverage/decide
@@ -275,7 +269,6 @@ CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/purge
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/rectify
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/restrict
-CONTRACT_NOT_SERVED POST /api/clm/v1/fnol/save-draft
 CONTRACT_NOT_SERVED POST /api/clm/v1/fraud/score
 CONTRACT_NOT_SERVED POST /api/clm/v1/import/claim
 CONTRACT_NOT_SERVED POST /api/clm/v1/import/convert-currency
@@ -534,8 +527,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/complete
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/start
-CONTRACT_NOT_SERVED POST /api/pty/v1/locations/add
-CONTRACT_NOT_SERVED POST /api/pty/v1/locations/remove
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/parties/unmerge
 CONTRACT_NOT_SERVED POST /api/pty/v1/producer-of-records/bulk-transfer
@@ -571,10 +562,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/approve
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/generate
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/issue
 CONTRACT_NOT_SERVED POST /api/ri/v1/bordereaus/submit
-CONTRACT_NOT_SERVED POST /api/ri/v1/cash-calls/cancel
-CONTRACT_NOT_SERVED POST /api/ri/v1/cash-calls/issue
-CONTRACT_NOT_SERVED POST /api/ri/v1/cash-calls/raise
-CONTRACT_NOT_SERVED POST /api/ri/v1/cash-calls/record-receipt
 CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/confirm
 CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/estimate
 CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/propose

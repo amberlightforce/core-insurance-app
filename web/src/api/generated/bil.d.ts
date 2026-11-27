@@ -2542,23 +2542,34 @@ export interface components {
          * @enum {string}
          */
         PayeeVerificationStatus: "Unverified" | "VoPMatched" | "VoPCloseMatch" | "VoPNoMatch" | "VoPNotAvailable" | "Confirmed";
-        /** @description bil.PayeeAccount.verify request. PRD inputs: "payee_account_id (or IBAN + name for a pre-check)" */
+        /** @description bil.PayeeAccount.verify request (BO-BIL-09). PRD inputs: "payee_account_id (or IBAN + name for a pre-check)". Either an existing account is (re-)verified and the result recorded on it, or an IBAN and holder name are pre-checked with nothing stored. The IBAN is P2: never returned, logged or published. */
         PayeeAccountVerifyRequest: {
-            /** @description PRD: "payee_account_id (or IBAN + name for a pre-check)" */
+            /** @description Existing payee account to (re-)verify; its stored IBAN and holder name are checked */
             payeeAccountId?: components["schemas"]["Uuid"];
-        };
-        /** @description bil.PayeeAccount.verify result. PRD outputs: "Match / CloseMatch (suggested name) / NoMatch / NotAvailable, checked at" */
+            /** @description IBAN for a pre-check (ISO 13616, mod-97 checked; spaces allowed). P2. */
+            iban?: string;
+            /** @description Holder name for a pre-check */
+            holderName?: string;
+        } & (unknown | unknown);
+        /** @description bil.PayeeAccount.verify result (BO-BIL-09). PRD outputs: "Match / CloseMatch (suggested name) / NoMatch / NotAvailable, checked at". When no verifier is bound or it fails, the call is refused with BIL-ERR-VOP-UNAVAILABLE (503). */
         PayeeAccountVerifyResponse: {
-            /** @description PRD: "Match" */
-            match?: components["schemas"]["Unspecified"];
-            /** @description PRD: "CloseMatch (suggested name)" */
-            closeMatch?: components["schemas"]["Unspecified"];
-            /** @description PRD: "NoMatch" */
-            noMatch?: components["schemas"]["Unspecified"];
-            /** @description PRD: "NotAvailable" */
-            notAvailable?: components["schemas"]["Unspecified"];
+            /**
+             * @description Verification-of-payee outcome (REQ-BIL-203)
+             * @enum {string}
+             */
+            outcome: "Match" | "CloseMatch" | "NoMatch" | "NotAvailable";
+            /** @description The bank's suggested holder name on a CloseMatch */
+            suggestedName?: string | null;
             /** @description PRD: "checked at" */
-            checkedAt?: components["schemas"]["Instant"];
+            checkedAt: components["schemas"]["Instant"];
+            /** @description The account that was verified; null for a pre-check */
+            payeeAccountId?: components["schemas"]["Uuid"] | null;
+            /** @description Verification status now recorded on the account; null for a pre-check */
+            verificationStatus?: components["schemas"]["PayeeVerificationStatus"] | null;
+            /** @description IBAN masked except the last four characters */
+            maskedIban: string;
+            /** @description True when nothing was stored (IBAN and holder name were given instead of an account) */
+            preCheck: boolean;
         };
         /** @description Typed from REQ-BIL-345 (SL2-BIL-DISB). PRD outputs: "accounts with periods, verification, cooling-off". The IBAN is masked except the last four characters; revealing it (P2 permission plus purpose) is not built yet. */
         PayeeAccountGetResponse: {
@@ -2583,18 +2594,9 @@ export interface components {
             /** @description True when the account superseded another account of the party for the purpose */
             change: boolean;
         };
-        /** @description bil.PayeeAccount.list result. PRD outputs: "accounts with periods, verification, cooling-off" */
-        PayeeAccountListItem: {
-            /** @description PRD: "accounts with periods" */
-            accountsPeriods?: components["schemas"]["Unspecified"];
-            /** @description PRD: "verification" */
-            verification?: components["schemas"]["Unspecified"];
-            /** @description PRD: "cooling-off" */
-            coolingOff?: components["schemas"]["Unspecified"];
-        };
         /** @description Page of bil.PayeeAccount.list results (cursor pagination, contract §3.5.5) */
         PayeeAccountListPage: components["schemas"]["PageEnvelope"] & {
-            items?: components["schemas"]["PayeeAccountListItem"][];
+            items?: components["schemas"]["PayeeAccountGetResponse"][];
         };
         /** @description bil.Mandate.create request. PRD inputs: "account, instrument, signature evidence" */
         MandateCreateRequest: {
@@ -3088,7 +3090,7 @@ export interface components {
         };
         /** @description Typed from REQ-BIL-009, REQ-BIL-197, REQ-BIL-198. PRD inputs: "source type and id, payee, amount, method, approval evidence, statement or return reference". SL2-BIL-DISB serves source type CLM_CLAIM_PAYMENT (method SEPA_CT, EUR, payeePartyId with payeeAccountId); other sources are refused with BIL-ERR-SOURCE. */
         DisbursementRequestRequest: {
-            /** @description Open code (D-CON-24), registered in the source register (REQ-BIL-354). Served: CLM_CLAIM_PAYMENT (SEPA_CT) and FS_CLEARING (method CLEARING only, D-SL4-02); others are refused with BIL-ERR-SOURCE */
+            /** @description Open code (D-CON-24), registered in the source register (REQ-BIL-354). Served: CLM_CLAIM_PAYMENT (SEPA_CT) and FS_CLEARING (method CLEARING only, D-SL4-02); BO-BIL-09 adds BIL_COMMISSION, BIL_LEVY, TAX_REMITTANCE and BIL_OTHER (SEPA_CT, public REST facade); others are refused with BIL-ERR-SOURCE */
             sourceType: components["schemas"]["DisbursementSourceType"];
             /** @description Id of the source object */
             sourceId: string;

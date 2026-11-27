@@ -17,6 +17,8 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
 
     public DbSet<FnolSnapshotRow> FnolSnapshots => Set<FnolSnapshotRow>();
 
+    public DbSet<FnolDraftRow> FnolDrafts => Set<FnolDraftRow>();
+
     public DbSet<ClaimantRow> Claimants => Set<ClaimantRow>();
 
     public DbSet<IncidentRow> Incidents => Set<IncidentRow>();
@@ -136,6 +138,25 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
             entity.Property(e => e.SubmittedAt).HasColumnName("submitted_at").HasColumnType("timestamptz");
             entity.HasIndex(e => e.ClaimId).IsUnique().HasDatabaseName("ux_fnol_snapshot_claim");
             entity.HasOne<ClaimRow>().WithMany().HasForeignKey(e => e.ClaimId).HasConstraintName("fk_fnol_snapshot_claim").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<FnolDraftRow>(entity =>
+        {
+            entity.ToTable("fnol_draft", table =>
+            {
+                CommonChecks(table, "fnol_draft");
+                table.HasCheckConstraint("ck_fnol_draft_status", "status IN ('DRAFT', 'SUBMITTED', 'DISCARDED')");
+                table.HasCheckConstraint("ck_fnol_draft_claim_shape", "(status = 'SUBMITTED') = (claim_id IS NOT NULL)");
+            });
+            entity.HasKey(e => e.DraftId).HasName("pk_fnol_draft");
+            entity.Property(e => e.DraftId).HasColumnName("draft_id");
+            MapCommon(entity);
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.PayloadEncrypted).HasColumnName("payload_encrypted");
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.LegalEntityId, e.CreatedBy, e.Status }).HasDatabaseName("ix_fnol_draft_owner");
+            entity.HasOne<ClaimRow>().WithMany().HasForeignKey(e => e.ClaimId).HasConstraintName("fk_fnol_draft_claim").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<ClaimantRow>(entity =>

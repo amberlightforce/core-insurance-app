@@ -38,10 +38,10 @@ public interface IBillingPayeeAccountService
     /// <remarks>
     /// <para>Operation bil.PayeeAccount.verify (command; HTTP POST /api/bil/v1/payee-accounts/verify).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W7.</para>
+    /// <para>Status: full; fully typed from BO-BIL-09: REQ-BIL-344, REQ-BIL-214 (VoP unavailable fails closed). Wave W7.</para>
     /// <para>Exposure: ui; consumers: CHN, CLM.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
-    /// <para>Errors: BIL-ERR-VOP-UNAVAILABLE (503), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: BIL-ERR-NOT-FOUND (404), BIL-ERR-IBAN-INVALID (422), BIL-ERR-VOP-UNAVAILABLE (503), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.PayeeAccountVerifyResponse> VerifyAsync(global::CoreIns.Modules.Billing.Contracts.Api.PayeeAccountVerifyRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

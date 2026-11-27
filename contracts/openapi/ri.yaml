@@ -5548,28 +5548,89 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/ri/v1/cash-calls:
+    get:
+      operationId: ri.CashCall.list
+      summary: Cash calls with aging
+      description: |-
+        Cash calls with their outstanding amount and aging (BO-RI-15)
+      tags:
+      - CashCall
+      x-requirement:
+      - REQ-RI-187
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'Query'
+      x-exposure:
+      - ui
+      x-permission: ri.CashCall.list
+      x-error-codes: []
+      x-source:
+      - PRD-08 §9.1 l.1525
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: contractId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        description: RAISED, SENT, PARTIALLY_SETTLED, SETTLED or CANCELLED
+        schema:
+          type: string
+      - name: openOnly
+        in: query
+        required: false
+        description: true lists only calls with an outstanding amount
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashCallListResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/ri/v1/cash-calls/raise:
     post:
       operationId: ri.CashCall.raise
-      summary: Cash calls
+      summary: Raise a cash call
       description: |-
-        Cash calls
-
-        PRD inputs: occurrence, amounts
-        PRD outputs: cash call
+        BO-RI-15: raise a cash call when the paid recoveries of one claim exceed the threshold
       tags:
       - CashCall
       x-requirement:
       - REQ-RI-187
       - REQ-RI-188
-      x-wave: unscheduled
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
       x-status: full
       x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Cash call lifecycle writes'
       x-exposure:
       - ui
       x-permission: ri.CashCall.raise
@@ -5612,25 +5673,24 @@ paths:
   /api/ri/v1/cash-calls/issue:
     post:
       operationId: ri.CashCall.issue
-      summary: Cash calls
+      summary: Issue a cash call
       description: |-
-        Cash calls
-
-        PRD inputs: occurrence, amounts
-        PRD outputs: cash call
+        BO-RI-15: send a RAISED cash call to the reinsurers
       tags:
       - CashCall
       x-requirement:
       - REQ-RI-187
       - REQ-RI-188
-      x-wave: unscheduled
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
       x-status: full
       x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Cash call lifecycle writes'
       x-exposure:
       - ui
       x-permission: ri.CashCall.issue
@@ -5673,25 +5733,24 @@ paths:
   /api/ri/v1/cash-calls/record-receipt:
     post:
       operationId: ri.CashCall.recordReceipt
-      summary: Cash calls
+      summary: Record a cash call receipt
       description: |-
-        Cash calls
-
-        PRD inputs: occurrence, amounts
-        PRD outputs: cash call
+        BO-RI-15: record cash received from one reinsurer, idempotent on the bank reference
       tags:
       - CashCall
       x-requirement:
       - REQ-RI-187
       - REQ-RI-188
-      x-wave: unscheduled
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
       x-status: full
       x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Cash call lifecycle writes'
       x-exposure:
       - ui
       x-permission: ri.CashCall.recordReceipt
@@ -5734,25 +5793,24 @@ paths:
   /api/ri/v1/cash-calls/cancel:
     post:
       operationId: ri.CashCall.cancel
-      summary: Cash calls
+      summary: Cancel a cash call
       description: |-
-        Cash calls
-
-        PRD inputs: occurrence, amounts
-        PRD outputs: cash call
+        BO-RI-15: cancel a cash call that has no receipt, by someone other than the raiser
       tags:
       - CashCall
       x-requirement:
       - REQ-RI-187
       - REQ-RI-188
-      x-wave: unscheduled
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
       x-status: full
       x-maturity: pre-release
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Cash call lifecycle writes'
       x-exposure:
       - ui
       x-permission: ri.CashCall.cancel
@@ -10627,82 +10685,254 @@ components:
           $ref: '#/components/schemas/StatementView'
       required:
       - statement
+    CashCallLine:
+      type: object
+      description: The share of one reinsurer in a cash call; the shares sum exactly to the total (NX-EC-06)
+      properties:
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        received:
+          $ref: ../events/common.schema.json#/$defs/Money
+        outstanding:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - reinsurerPartyId
+      - amount
+      - received
+      - outstanding
+    CashCallReceipt:
+      type: object
+      description: Cash received on a cash call; posted as a positive RECOVERY account item that appears on the next statement
+      properties:
+        receiptId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        bankReference:
+          $ref: ../events/common.schema.json#/$defs/Text
+        receivedOn:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        itemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        createdBy:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - receiptId
+      - reinsurerPartyId
+      - amount
+      - bankReference
+      - receivedOn
+      - itemId
+      - createdAt
+      - createdBy
+    CashCallView:
+      type: object
+      description: A cash call on the reinsurers for the paid recoveries of one claim above the threshold (BO-RI-15)
+      properties:
+        cashCallId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        occurrence:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: The claim the recoveries belong to (the idempotency key of the call)
+        status:
+          type: string
+          enum:
+          - RAISED
+          - SENT
+          - PARTIALLY_SETTLED
+          - SETTLED
+          - CANCELLED
+        total:
+          $ref: ../events/common.schema.json#/$defs/Money
+        threshold:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: The threshold the call was raised against
+        received:
+          $ref: ../events/common.schema.json#/$defs/Money
+        outstanding:
+          $ref: ../events/common.schema.json#/$defs/Money
+        dueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        daysOverdue:
+          type: integer
+          description: Days past the due date while an amount is outstanding; 0 otherwise
+        agingBucket:
+          type: string
+          enum:
+          - NOT_DUE
+          - D1_30
+          - D31_60
+          - D61_90
+          - D90_PLUS
+          - CLOSED
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/CashCallLine'
+        receipts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CashCallReceipt'
+        raisedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        raisedBy:
+          $ref: ../events/common.schema.json#/$defs/Text
+        sentAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        sentBy:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        cancelledAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        cancelledBy:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        cancelReason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        settledAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+      required:
+      - cashCallId
+      - contractId
+      - occurrence
+      - status
+      - total
+      - threshold
+      - received
+      - outstanding
+      - dueDate
+      - daysOverdue
+      - agingBucket
+      - lines
+      - receipts
+      - raisedAt
+      - raisedBy
+    CashCallListResponse:
+      type: object
+      description: ri.CashCall.list result, newest first
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CashCallView'
+      required:
+      - items
     CashCallRaiseRequest:
       type: object
-      description: 'ri.CashCall.raise request. PRD inputs: "occurrence, amounts"'
+      description: ri.CashCall.raise request. Raised when the paid recoveries of the claim on the contract exceed the call threshold; raising it again returns the call.
       properties:
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         occurrence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "occurrence"'
-        amounts:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amounts"'
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: The claim id the recoveries belong to
+        dueDate:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: The configured number of days from today when omitted
+      required:
+      - contractId
+      - occurrence
     CashCallRaiseResponse:
       type: object
-      description: 'ri.CashCall.raise result. PRD outputs: "cash call"'
+      description: ri.CashCall.raise result
       properties:
         cashCall:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "cash call"'
+          $ref: '#/components/schemas/CashCallView'
+        replayed:
+          type: boolean
+          description: true when the call already existed
+      required:
+      - cashCall
+      - replayed
     CashCallIssueRequest:
       type: object
-      description: 'ri.CashCall.issue request. PRD inputs: "occurrence, amounts"'
+      description: ri.CashCall.issue request. A RAISED call is sent to the reinsurers.
       properties:
-        occurrence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "occurrence"'
-        amounts:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amounts"'
+        cashCallId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - cashCallId
     CashCallIssueResponse:
       type: object
-      description: 'ri.CashCall.issue result. PRD outputs: "cash call"'
+      description: ri.CashCall.issue result
       properties:
         cashCall:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "cash call"'
+          $ref: '#/components/schemas/CashCallView'
+      required:
+      - cashCall
     CashCallRecordReceiptRequest:
       type: object
-      description: 'ri.CashCall.recordReceipt request. PRD inputs: "occurrence, amounts"'
+      description: ri.CashCall.recordReceipt request. Idempotent on the bank reference per reinsurer; a partial receipt keeps the call open.
       properties:
-        occurrence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "occurrence"'
-        amounts:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amounts"'
+        cashCallId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        bankReference:
+          $ref: ../events/common.schema.json#/$defs/Text
+        receivedOn:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Today when omitted
+      required:
+      - cashCallId
+      - reinsurerPartyId
+      - amount
+      - bankReference
     CashCallRecordReceiptResponse:
       type: object
-      description: 'ri.CashCall.recordReceipt result. PRD outputs: "cash call"'
+      description: ri.CashCall.recordReceipt result
       properties:
         cashCall:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "cash call"'
+          $ref: '#/components/schemas/CashCallView'
+        replayed:
+          type: boolean
+          description: true when the bank reference was recorded before and nothing changed
+      required:
+      - cashCall
+      - replayed
     CashCallCancelRequest:
       type: object
-      description: 'ri.CashCall.cancel request. PRD inputs: "occurrence, amounts"'
+      description: ri.CashCall.cancel request. Maker-checker (the person who raised the call cannot cancel it); refused once cash was received.
       properties:
-        occurrence:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "occurrence"'
-        amounts:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amounts"'
+        cashCallId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - cashCallId
+      - reason
     CashCallCancelResponse:
       type: object
-      description: 'ri.CashCall.cancel result. PRD outputs: "cash call"'
+      description: ri.CashCall.cancel result
       properties:
         cashCall:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "cash call"'
+          $ref: '#/components/schemas/CashCallView'
+      required:
+      - cashCall
     SettlementProposeRequest:
       type: object
       description: 'ri.Settlement.propose request. PRD inputs: "counterparty, statements, items"'

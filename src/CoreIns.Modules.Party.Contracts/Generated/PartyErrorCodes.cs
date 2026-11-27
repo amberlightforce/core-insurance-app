@@ -86,6 +86,12 @@ public static class PartyErrorCodes
     /// </remarks>
     public const string MergeCrossEntity = "PTY-ERR-MERGE-CROSS-ENTITY";
 
+    /// <summary>PTY-ERR-MERGED (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): pty.Location.add, pty.Location.remove, pty.Location.update.</para>
+    /// </remarks>
+    public const string Merged = "PTY-ERR-MERGED";
+
     /// <summary>PTY-ERR-NO-EMAIL (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 2 operation(s): pty.CommunicationPreference.resolve, pty.CommunicationPreference.set.</para>
@@ -122,6 +128,12 @@ public static class PartyErrorCodes
     /// </remarks>
     public const string Overlap = "PTY-ERR-OVERLAP";
 
+    /// <summary>PTY-ERR-POSTCODE-FORMAT (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): pty.Location.add, pty.Location.remove, pty.Location.update.</para>
+    /// </remarks>
+    public const string PostcodeFormat = "PTY-ERR-POSTCODE-FORMAT";
+
     /// <summary>PTY-ERR-PROOF-REQUIRED (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 3 operation(s): pty.Consent.query, pty.Consent.record, pty.Consent.withdraw.</para>
@@ -154,7 +166,7 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-RESTRICTED (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): pty.Party.update.</para>
+    /// <para>Declared by 4 operation(s): pty.Location.add, pty.Location.remove, pty.Location.update, pty.Party.update.</para>
     /// </remarks>
     public const string Restricted = "PTY-ERR-RESTRICTED";
 
@@ -196,7 +208,7 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): pty.Party.create, pty.Party.update.</para>
+    /// <para>Declared by 5 operation(s): pty.Location.add, pty.Location.remove, pty.Location.update, pty.Party.create, pty.Party.update.</para>
     /// </remarks>
     public const string Stale = "PTY-ERR-STALE";
 
@@ -216,7 +228,7 @@ public static class PartyErrorCodes
     public const string Prefix = "PTY-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AccountHasJobs, ActivationIncomplete, Backdate, DuplicateIdentifier, EvidenceRequired, IdCheckdigit, IdempotencyMismatch, IntermediaryNotActive, LiveDependant, LocationInUse, MandateMissing, MemberInUse, MergeCrossEntity, NoEmail, NotAvailable, NotFound, NotMigrated, OpenJob, Overlap, ProofRequired, QueryTooShort, RateAboveMax, RegistryUnavailable, RelationshipCycle, Restricted, RoleDataMissing, RoleDuplicate, RoleType, ScreenInput, SelfApproval, SplitSum, Stale, State, WindowClosed];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AccountHasJobs, ActivationIncomplete, Backdate, DuplicateIdentifier, EvidenceRequired, IdCheckdigit, IdempotencyMismatch, IntermediaryNotActive, LiveDependant, LocationInUse, MandateMissing, MemberInUse, MergeCrossEntity, Merged, NoEmail, NotAvailable, NotFound, NotMigrated, OpenJob, Overlap, PostcodeFormat, ProofRequired, QueryTooShort, RateAboveMax, RegistryUnavailable, RelationshipCycle, Restricted, RoleDataMissing, RoleDuplicate, RoleType, ScreenInput, SelfApproval, SplitSum, Stale, State, WindowClosed];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -234,12 +246,14 @@ public static class PartyErrorCodes
         [MandateMissing] = 422,
         [MemberInUse] = 422,
         [MergeCrossEntity] = 422,
+        [Merged] = 409,
         [NoEmail] = 422,
         [NotAvailable] = 501,
         [NotFound] = 404,
         [NotMigrated] = 404,
         [OpenJob] = 422,
         [Overlap] = 422,
+        [PostcodeFormat] = 422,
         [ProofRequired] = 422,
         [QueryTooShort] = 422,
         [RateAboveMax] = 422,
