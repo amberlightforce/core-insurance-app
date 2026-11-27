@@ -639,9 +639,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/lift-restriction
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/restrict
 CONTRACT_NOT_SERVED POST /api/pty/v1/import/reverse
-CONTRACT_NOT_SERVED POST /api/pty/v1/intermediaries/import-register
-CONTRACT_NOT_SERVED POST /api/pty/v1/intermediaries/suspend
-CONTRACT_NOT_SERVED POST /api/pty/v1/intermediaries/terminate
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/complete
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/start
