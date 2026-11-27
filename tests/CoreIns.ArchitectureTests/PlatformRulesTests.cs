@@ -84,10 +84,23 @@ public sealed class PlatformRulesTests
         {
             using var context = database.CreateForMigration("Host=localhost;Database=design;Username=design");
             var schemas = context.Model.GetEntityTypes().Select(entity => entity.GetSchema()).Distinct().ToList();
-            schemas.ShouldBe([database.Schema], $"{database.Module} maps only schema {database.Schema}");
+            var extra = ExtraOwnedSchemas.TryGetValue(database.Schema, out var owned) ? owned : [];
+            schemas.ShouldContain(database.Schema, $"{database.Module} maps its own schema {database.Schema}");
+            schemas.Except([database.Schema, .. extra]).ShouldBeEmpty($"{database.Module} maps only schema {database.Schema} (plus its declared extra schemas)");
             ModuleCatalog.Schemas.ShouldContain(database.Schema);
+            foreach (var schema in extra)
+            {
+                ModuleCatalog.Databases.Select(other => other.Schema).ShouldNotContain(schema, $"{schema} must not be another module's schema");
+                ModuleCatalog.Schemas.ShouldContain(schema);
+            }
         }
     }
+
+    // Schemas a module owns besides its main one. DAT owns the reporting layers (raw, conformed, marts), BO-DAT-01..03.
+    private static readonly Dictionary<string, string[]> ExtraOwnedSchemas = new()
+    {
+        ["dat"] = ["rpt_raw", "rpt_conformed", "rpt_mart"],
+    };
 
     [Theory]
     [MemberData(nameof(ProductionAssemblies))]

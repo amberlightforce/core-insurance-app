@@ -101,6 +101,15 @@ public static class ReinsuranceModule
         services.AddCommandAuditor<ApproveContract, ContractApproveResponse, ApproveContractAuditor>();
         services.AddCommand<ApproveContract, ContractApproveResponse, ApproveContractHandler>(
             CommandDescriptor.For("ri.Contract.approve") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<EndorseContract>, EndorseContractValidator>();
+        services.AddCommandAuditor<EndorseContract, ContractEndorseResponse, EndorseContractAuditor>();
+        services.AddCommand<EndorseContract, ContractEndorseResponse, EndorseContractHandler>(
+            CommandDescriptor.For("ri.Contract.endorse") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ApproveEndorsement>, ApproveEndorsementValidator>();
+        services.AddCommandAuditor<ApproveEndorsement, ContractApproveEndorsementResponse, ApproveEndorsementAuditor>();
+        services.AddCommand<ApproveEndorsement, ContractApproveEndorsementResponse, ApproveEndorsementHandler>(
+            CommandDescriptor.For("ri.Contract.approveEndorsement") with { SupportsDryRun = true });
+        services.AddScoped<ContractVersionQuery>();
 
         // The scanner's per-contract command (internal, no HTTP; exactly-once by the row lock and the state it finds).
         services.AddCommandAuditor<ApplyDueLifecycle, string, ApplyDueLifecycleAuditor>();

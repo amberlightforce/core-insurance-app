@@ -15,17 +15,17 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [POL](#pol) | 58 | 54 | 4 | 40 | 18 | 8 | 10 | 0 |
 | [BIL](#bil) | 90 | 90 | 0 | 56 | 34 | 6 | 5 | 1 |
 | [CLM](#clm) | 73 | 73 | 0 | 53 | 20 | 10 | 9 | 5 |
-| [RI](#ri) | 116 | 110 | 6 | 82 | 34 | 9 | 0 | 0 |
+| [RI](#ri) | 117 | 111 | 6 | 83 | 34 | 9 | 0 | 0 |
 | [FIN](#fin) | 88 | 80 | 8 | 55 | 33 | 10 | 0 | 3 |
 | [DOC](#doc) | 44 | 42 | 2 | 27 | 17 | 4 | 12 | 0 |
 | [CMP](#cmp) | 90 | 53 | 37 | 69 | 21 | 21 | 0 | 3 |
 | [CHN](#chn) | 86 | 62 | 24 | 58 | 28 | 3 | 25 | 2 |
 | [WRK](#wrk) | 58 | 23 | 35 | 40 | 18 | 9 | 3 | 14 |
-| [PLT](#plt) | 101 | 67 | 34 | 63 | 38 | 26 | 0 | 10 |
+| [PLT](#plt) | 101 | 67 | 34 | 63 | 38 | 25 | 0 | 10 |
 | [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
 | [MIG](#mig) | 25 | 25 | 0 | 16 | 9 | 5 | 0 | 13 |
 | [MKT](#mkt) | 48 | 36 | 12 | 17 | 31 | 1 | 0 | 5 |
-| **Total** | 1154 | 942 | 212 | 750 | 404 | 129 | 69 | 65 |
+| **Total** | 1155 | 943 | 212 | 751 | 404 | 128 | 69 | 65 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -613,6 +613,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `ri.Commission.history` | GET `/api/ri/v1/commission/history` | Q |  | ui |  | unscheduled | full | REQ-RI-160..REQ-RI-166 |
 | `ri.Contract.applicable` | GET `/api/ri/v1/contracts/applicable` | Q |  | ui | CLM, FIN | W7 | full | REQ-RI-001 |
 | `ri.Contract.approve` | POST `/api/ri/v1/contracts/approve` | C | yes | ui |  | W7 | full | REQ-RI-031..REQ-RI-065 |
+| `ri.Contract.approveEndorsement` | POST `/api/ri/v1/contracts/approve-endorsement` | C | yes | ui |  | W7 | full | REQ-RI-031..REQ-RI-065 |
 | `ri.Contract.close` | POST `/api/ri/v1/contracts/close` | C | yes | ui |  | W7 | full | REQ-RI-031..REQ-RI-065 |
 | `ri.Contract.commute` | POST `/api/ri/v1/contracts/commute` | C | yes | ui |  | W7 | full | REQ-RI-031..REQ-RI-065 |
 | `ri.Contract.create` | POST `/api/ri/v1/contracts` | C | yes | ui |  | W7 | full | REQ-RI-031..REQ-RI-065 |
@@ -1149,7 +1150,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `plt.Approval.request` | POST `/api/plt/v1/approval/request` | C |  | internal | BIL, CHN, CLM, CMP, DOC, FIN, MIG, MKT, PFC, PTY, RAT, UW | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
 | `plt.Approval.verifyForExecution` | POST `/api/plt/v1/approval/verify-for-execution` | Q |  | internal | BIL, CLM, MIG, MKT, PFC, PTY | W1 | full | REQ-PLT-117 |
 | `plt.Approval.withdraw` | POST `/api/plt/v1/approval/withdraw` | C |  | internal | CLM | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
-| `plt.ApprovalType.register` | POST `/api/plt/v1/approval-types/register` | C |  | internal | MKT | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
+| `plt.ApprovalType.register` | POST `/api/plt/v1/approval-types/register` | C |  | internal |  | W1 | full | REQ-PLT-004, REQ-PLT-113..REQ-PLT-121 |
 | `plt.Audit.append` | POST `/api/plt/v1/audit/append` | C |  | internal | BIL, CHN, CLM, CMP, DOC, FIN, MIG, MKT, PFC, PTY, RAT | W1 | minimal | REQ-PLT-002, REQ-PLT-124 |
 | `plt.Audit.export` | POST `/api/plt/v1/audit/export` | C |  | ui | CLM | W1 | full | REQ-PLT-128..REQ-PLT-131 |
 | `plt.Audit.query` | GET `/api/plt/v1/audit/query` | Q |  | ui | CLM | W1 | full | REQ-PLT-128..REQ-PLT-131 |
