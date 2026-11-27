@@ -140,6 +140,12 @@ public static class PartyErrorCodes
     /// </remarks>
     public const string RegistryUnavailable = "PTY-ERR-REGISTRY-UNAVAILABLE";
 
+    /// <summary>PTY-ERR-RESTRICTED (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): pty.Party.update.</para>
+    /// </remarks>
+    public const string Restricted = "PTY-ERR-RESTRICTED";
+
     /// <summary>PTY-ERR-ROLE-DATA-MISSING (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 3 operation(s): pty.PartyRole.assign, pty.PartyRole.end, pty.PartyRole.query.</para>
@@ -180,7 +186,7 @@ public static class PartyErrorCodes
     public const string Prefix = "PTY-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AccountHasJobs, ActivationIncomplete, Backdate, DuplicateIdentifier, EvidenceRequired, IdCheckdigit, IdempotencyMismatch, LiveDependant, LocationInUse, MandateMissing, MemberInUse, MergeCrossEntity, NoEmail, NotAvailable, NotFound, NotMigrated, OpenJob, Overlap, ProofRequired, QueryTooShort, RateAboveMax, RegistryUnavailable, RoleDataMissing, ScreenInput, SelfApproval, SplitSum, Stale, WindowClosed];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AccountHasJobs, ActivationIncomplete, Backdate, DuplicateIdentifier, EvidenceRequired, IdCheckdigit, IdempotencyMismatch, LiveDependant, LocationInUse, MandateMissing, MemberInUse, MergeCrossEntity, NoEmail, NotAvailable, NotFound, NotMigrated, OpenJob, Overlap, ProofRequired, QueryTooShort, RateAboveMax, RegistryUnavailable, Restricted, RoleDataMissing, ScreenInput, SelfApproval, SplitSum, Stale, WindowClosed];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -207,6 +213,7 @@ public static class PartyErrorCodes
         [QueryTooShort] = 422,
         [RateAboveMax] = 422,
         [RegistryUnavailable] = 503,
+        [Restricted] = 409,
         [RoleDataMissing] = 422,
         [ScreenInput] = 422,
         [SelfApproval] = 403,

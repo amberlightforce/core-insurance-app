@@ -151,3 +151,58 @@ internal sealed class ArtifactRow
 
     public Instant StoredAt { get; set; }
 }
+
+/// <summary>
+/// <c>pfc.change_set</c>: an editable draft of a product version (BO-PFC-01, REQ-PFC-182..188). The base version stays Locked and
+/// untouched; the draft is a copy of its artefact as JSON, changed only through the edit command.
+/// </summary>
+internal sealed class ChangeSetRow
+{
+    public Guid ChangeSetId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public string Jurisdiction { get; set; } = string.Empty;
+
+    public ProductId ProductId { get; set; }
+
+    public ProductVersionId BaseVersionId { get; set; }
+
+    public string Status { get; set; } = string.Empty;
+
+    public string DraftJson { get; set; } = string.Empty;
+
+    public int RecordVersion { get; set; }
+
+    public Instant CreatedAt { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public Instant UpdatedAt { get; set; }
+
+    public string UpdatedBy { get; set; } = string.Empty;
+}
+
+/// <summary><c>pfc.change_set_edit</c>: the append-only operation log of a change set (one row per patch operation).</summary>
+internal sealed class ChangeSetEditRow
+{
+    public Guid EditId { get; set; }
+
+    public Guid ChangeSetId { get; set; }
+
+    public int Seq { get; set; }
+
+    public string Op { get; set; } = string.Empty;
+
+    public string Path { get; set; } = string.Empty;
+
+    /// <summary>JSON of the value before the operation; null when the path did not exist.</summary>
+    public string? OldJson { get; set; }
+
+    /// <summary>JSON of the value after the operation; null for a removal.</summary>
+    public string? NewJson { get; set; }
+
+    public string Actor { get; set; } = string.Empty;
+
+    public Instant At { get; set; }
+}

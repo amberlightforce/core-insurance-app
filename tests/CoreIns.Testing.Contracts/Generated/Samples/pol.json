@@ -101,9 +101,10 @@
       "key": "value"
     },
     "pol.EffectiveDate.limits": {
-      "earliest": "unspecified",
-      "latest": "unspecified",
-      "overrideAvailable": "unspecified"
+      "earliest": "2026-10-07T09:00:00Z",
+      "latest": "2026-10-07T09:00:00Z",
+      "backdateDays": 1,
+      "overrideAvailable": true
     },
     "pol.Import.convertCurrency": {
       "conversionReport": "unspecified"
@@ -769,7 +770,177 @@
       ]
     },
     "pol.Policy.getMany": {
-      "policies": "unspecified"
+      "policies": [
+        {
+          "policy": {
+            "policyId": "0192a412-87e2-73eb-8c45-c5554fbd5c8b",
+            "policyNumber": "SAMPLE-000001",
+            "productCode": "SAMPLE_CODE",
+            "policyholderPartyId": "0192e6d7-d23c-7b51-82b0-1567ec323a54",
+            "accountId": "01920bbf-3831-79f3-85df-b73e9912201b",
+            "legalEntity": "SAMPLE_CODE",
+            "jurisdiction": "GR",
+            "status": "SCHEDULED",
+            "recordedAt": "2026-10-07T09:00:00Z"
+          },
+          "term": {
+            "termId": "0192dca0-e55c-7544-8eae-98ce4aed67b0",
+            "termNumber": 1,
+            "period": {
+              "from": "2026-01-01T00:00:00Z",
+              "to": "2027-01-01T00:00:00Z"
+            },
+            "state": "SCHEDULED",
+            "productVersion": "1.0",
+            "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "currency": "EUR",
+            "producerCode": "SAMPLE_CODE",
+            "paymentPlanRef": "Sample text",
+            "writtenDate": "2026-10-07",
+            "recordedAt": "2026-10-07T09:00:00Z"
+          },
+          "segment": {
+            "segmentId": "01929b31-9e5c-7c1c-8c1b-2b91e425e856",
+            "transactionId": "01924044-14f7-7505-8fa2-676ccdce13fc",
+            "validPeriod": {
+              "from": "2026-01-01T00:00:00Z",
+              "to": "2027-01-01T00:00:00Z"
+            },
+            "recordedPeriod": {
+              "from": "2026-01-01T00:00:00Z",
+              "to": "2027-01-01T00:00:00Z"
+            },
+            "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+          },
+          "riskTree": {
+            "vehicles": [
+              {
+                "locator": "Sample text",
+                "plate": "Sample text",
+                "plateNormalised": "Sample text",
+                "vin": "Sample text",
+                "make": "Sample text",
+                "model": "Sample text",
+                "firstRegistrationYear": 1900,
+                "engineCapacityCc": 1,
+                "use": "SAMPLE_CODE",
+                "value": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                },
+                "fields": {
+                  "note": "sample"
+                }
+              }
+            ],
+            "drivers": [
+              {
+                "locator": "Sample text",
+                "partyId": "01928c28-56e8-7334-8cf0-c1e884173ddd",
+                "driverType": "MAIN",
+                "yearFirstLicensed": 1900,
+                "vehicleLocator": "Sample text",
+                "usagePercent": 1,
+                "claimsLast5Years": 1,
+                "fields": {
+                  "note": "sample"
+                }
+              }
+            ],
+            "coverages": [
+              {
+                "coverageCode": "SAMPLE_CODE",
+                "elementLocator": "Sample text",
+                "selected": true,
+                "options": {
+                  "note": "sample"
+                }
+              }
+            ],
+            "questionSets": [
+              {
+                "questionSetCode": "SAMPLE_CODE",
+                "questionSetVersion": "Sample text",
+                "answers": {
+                  "note": "sample"
+                }
+              }
+            ]
+          },
+          "transactions": [
+            {
+              "transactionId": "0192f552-07ae-72a2-8853-8096b91738a9",
+              "kind": "SAMPLE_CODE",
+              "sequence": 1,
+              "jobId": "019207b9-c2e3-7319-80cc-488acd25107d",
+              "effectiveAt": "2026-10-07T09:00:00Z",
+              "recordedAt": "2026-10-07T09:00:00Z",
+              "premium": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "taxes": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "total": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ],
+          "charges": [
+            {
+              "chargeId": "019288a6-d401-75ae-8a6c-dca4c67669ef",
+              "transactionId": "0192b781-be13-73a4-8f02-f14a0f3725db",
+              "elementLocator": "Sample text",
+              "coverageCode": "SAMPLE_CODE",
+              "chargeType": "SAMPLE_CODE",
+              "chargeCategory": "SAMPLE_CODE",
+              "annualRate": "12.50",
+              "amount": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "legalStatus": "SAMPLE_CODE",
+              "provisional": true,
+              "transactionKind": "NEW_BUSINESS",
+              "cancellationSource": "Policyholder",
+              "treatmentAction": "APPLY",
+              "treatmentRuleId": "SAMPLE_CODE",
+              "treatmentRuleVersion": "SAMPLE_CODE"
+            }
+          ],
+          "effectiveKnownAt": "2026-10-07T09:00:00Z",
+          "terms": [
+            {
+              "termId": "0192f905-d9fa-78b9-8341-c6f71c48fba1",
+              "termNumber": 1,
+              "period": {
+                "from": "2026-01-01T00:00:00Z",
+                "to": "2027-01-01T00:00:00Z"
+              },
+              "state": "SCHEDULED",
+              "productVersion": "1.0",
+              "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              "currency": "EUR",
+              "producerCode": "SAMPLE_CODE",
+              "paymentPlanRef": "Sample text",
+              "writtenDate": "2026-10-07",
+              "recordedAt": "2026-10-07T09:00:00Z"
+            }
+          ]
+        }
+      ],
+      "notFound": [
+        "0192b141-b9a6-7220-86a0-0824757546bf"
+      ]
     },
     "pol.Policy.search": {
       "items": [
@@ -1034,7 +1205,17 @@
     "pol.Segment.changes": {
       "items": [
         {
-          "segmentVersions": "unspecified"
+          "segmentId": "0192f48e-234c-7bf9-8cf5-c47b379a75a2",
+          "termId": "01925301-6c7f-7ae1-8f26-7d3fb1bb0f4a",
+          "policyId": "0192ac84-3909-7f0c-813d-270f37c84f5a",
+          "transactionId": "01929ed7-cd1b-75f7-8a1d-6596bf49ab9c",
+          "validFrom": "2026-10-07T09:00:00Z",
+          "validTo": "2026-10-07T09:00:00Z",
+          "recordedFrom": "2026-10-07T09:00:00Z",
+          "recordedTo": "2026-10-07T09:00:00Z",
+          "changedAt": "2026-10-07T09:00:00Z",
+          "snapshotHash": "sample",
+          "worksheetId": "sample"
         }
       ],
       "nextCursor": "sample",
@@ -1702,9 +1883,10 @@
       "termId": "019221c7-717e-77d5-80bd-794a05a87fbc"
     },
     "EffectiveDateLimitsResponse": {
-      "earliest": "unspecified",
-      "latest": "unspecified",
-      "overrideAvailable": "unspecified"
+      "earliest": "2026-10-07T09:00:00Z",
+      "latest": "2026-10-07T09:00:00Z",
+      "backdateDays": 1,
+      "overrideAvailable": true
     },
     "ImportConvertCurrencyRequest": {
       "planId": "019228a4-5863-7822-8662-9a324d95f112"
@@ -2575,7 +2757,177 @@
       "baseTransactionId": "0192ded7-c6aa-7acf-8e29-993c0c952f7f"
     },
     "PolicyGetManyResponse": {
-      "policies": "unspecified"
+      "policies": [
+        {
+          "policy": {
+            "policyId": "0192e2b0-4478-7269-8f70-399649d2a8b1",
+            "policyNumber": "SAMPLE-000001",
+            "productCode": "SAMPLE_CODE",
+            "policyholderPartyId": "0192fc73-00cc-7962-8854-5c629d57c114",
+            "accountId": "0192140a-5add-7937-87e1-3edc34bedd97",
+            "legalEntity": "SAMPLE_CODE",
+            "jurisdiction": "GR",
+            "status": "SCHEDULED",
+            "recordedAt": "2026-10-07T09:00:00Z"
+          },
+          "term": {
+            "termId": "0192e984-bc8b-7ede-8bfa-9607fcc020df",
+            "termNumber": 1,
+            "period": {
+              "from": "2026-01-01T00:00:00Z",
+              "to": "2027-01-01T00:00:00Z"
+            },
+            "state": "SCHEDULED",
+            "productVersion": "1.0",
+            "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "currency": "EUR",
+            "producerCode": "SAMPLE_CODE",
+            "paymentPlanRef": "Sample text",
+            "writtenDate": "2026-10-07",
+            "recordedAt": "2026-10-07T09:00:00Z"
+          },
+          "segment": {
+            "segmentId": "0192d54e-5c01-794e-8819-1ff3458c4f3d",
+            "transactionId": "0192bbf6-599c-7744-8a1e-638892cfb9c0",
+            "validPeriod": {
+              "from": "2026-01-01T00:00:00Z",
+              "to": "2027-01-01T00:00:00Z"
+            },
+            "recordedPeriod": {
+              "from": "2026-01-01T00:00:00Z",
+              "to": "2027-01-01T00:00:00Z"
+            },
+            "snapshotHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+          },
+          "riskTree": {
+            "vehicles": [
+              {
+                "locator": "Sample text",
+                "plate": "Sample text",
+                "plateNormalised": "Sample text",
+                "vin": "Sample text",
+                "make": "Sample text",
+                "model": "Sample text",
+                "firstRegistrationYear": 1900,
+                "engineCapacityCc": 1,
+                "use": "SAMPLE_CODE",
+                "value": {
+                  "amount": "120.50",
+                  "currency": "EUR"
+                },
+                "fields": {
+                  "note": "sample"
+                }
+              }
+            ],
+            "drivers": [
+              {
+                "locator": "Sample text",
+                "partyId": "01925d03-281c-7fff-8611-87ce18e60af4",
+                "driverType": "MAIN",
+                "yearFirstLicensed": 1900,
+                "vehicleLocator": "Sample text",
+                "usagePercent": 1,
+                "claimsLast5Years": 1,
+                "fields": {
+                  "note": "sample"
+                }
+              }
+            ],
+            "coverages": [
+              {
+                "coverageCode": "SAMPLE_CODE",
+                "elementLocator": "Sample text",
+                "selected": true,
+                "options": {
+                  "note": "sample"
+                }
+              }
+            ],
+            "questionSets": [
+              {
+                "questionSetCode": "SAMPLE_CODE",
+                "questionSetVersion": "Sample text",
+                "answers": {
+                  "note": "sample"
+                }
+              }
+            ]
+          },
+          "transactions": [
+            {
+              "transactionId": "01926063-af56-74f9-84c9-3ed145a8e52b",
+              "kind": "SAMPLE_CODE",
+              "sequence": 1,
+              "jobId": "0192e069-199a-7d80-8013-4399b86035fe",
+              "effectiveAt": "2026-10-07T09:00:00Z",
+              "recordedAt": "2026-10-07T09:00:00Z",
+              "premium": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "taxes": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "total": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ],
+          "charges": [
+            {
+              "chargeId": "0192808d-0407-7d8b-8834-5b15b9bccfba",
+              "transactionId": "01926107-76b8-7376-8790-e8098a45b1d2",
+              "elementLocator": "Sample text",
+              "coverageCode": "SAMPLE_CODE",
+              "chargeType": "SAMPLE_CODE",
+              "chargeCategory": "SAMPLE_CODE",
+              "annualRate": "12.50",
+              "amount": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "legalStatus": "SAMPLE_CODE",
+              "provisional": true,
+              "transactionKind": "NEW_BUSINESS",
+              "cancellationSource": "Policyholder",
+              "treatmentAction": "APPLY",
+              "treatmentRuleId": "SAMPLE_CODE",
+              "treatmentRuleVersion": "SAMPLE_CODE"
+            }
+          ],
+          "effectiveKnownAt": "2026-10-07T09:00:00Z",
+          "terms": [
+            {
+              "termId": "0192eac5-7e8a-73e7-8667-afff771112f7",
+              "termNumber": 1,
+              "period": {
+                "from": "2026-01-01T00:00:00Z",
+                "to": "2027-01-01T00:00:00Z"
+              },
+              "state": "SCHEDULED",
+              "productVersion": "1.0",
+              "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              "resolutionHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              "currency": "EUR",
+              "producerCode": "SAMPLE_CODE",
+              "paymentPlanRef": "Sample text",
+              "writtenDate": "2026-10-07",
+              "recordedAt": "2026-10-07T09:00:00Z"
+            }
+          ]
+        }
+      ],
+      "notFound": [
+        "0192472e-509a-7148-8a10-005a25f0861a"
+      ]
     },
     "PolicyGetResponse": {
       "policy": {
@@ -3312,12 +3664,32 @@
       ]
     },
     "SegmentChangesItem": {
-      "segmentVersions": "unspecified"
+      "segmentId": "0192fe62-df6c-788b-820f-1ef241a3a0a1",
+      "termId": "019282dd-e84d-7c4f-8f0f-f75aa4d3fc1f",
+      "policyId": "0192a93a-b1cb-7fa0-8211-dc27a0e268bc",
+      "transactionId": "01929e6f-ed51-7cb1-8317-5d2d259da5a4",
+      "validFrom": "2026-10-07T09:00:00Z",
+      "validTo": "2026-10-07T09:00:00Z",
+      "recordedFrom": "2026-10-07T09:00:00Z",
+      "recordedTo": "2026-10-07T09:00:00Z",
+      "changedAt": "2026-10-07T09:00:00Z",
+      "snapshotHash": "sample",
+      "worksheetId": "sample"
     },
     "SegmentChangesPage": {
       "items": [
         {
-          "segmentVersions": "unspecified"
+          "segmentId": "01920c2d-db9f-754e-87de-b7adc7d4169a",
+          "termId": "01922a5a-1f29-789f-83ab-26b91187c3ed",
+          "policyId": "01923232-4d4b-7db9-8eb4-83cd125dab29",
+          "transactionId": "0192348e-3ca9-7f51-87c3-49aff41be2af",
+          "validFrom": "2026-10-07T09:00:00Z",
+          "validTo": "2026-10-07T09:00:00Z",
+          "recordedFrom": "2026-10-07T09:00:00Z",
+          "recordedTo": "2026-10-07T09:00:00Z",
+          "changedAt": "2026-10-07T09:00:00Z",
+          "snapshotHash": "sample",
+          "worksheetId": "sample"
         }
       ],
       "nextCursor": "sample",
@@ -3641,7 +4013,51 @@
       "supersededAt": "2026-10-07T09:00:00Z"
     },
     "StatusModelGetResponse": {
-      "table": "unspecified"
+      "table": [
+        {
+          "entity": "sample",
+          "states": [
+            "sample"
+          ],
+          "initialStates": [
+            "sample"
+          ],
+          "terminalStates": [
+            "sample"
+          ],
+          "transitions": [
+            {
+              "from": "sample",
+              "trigger": "sample",
+              "to": "sample"
+            }
+          ]
+        }
+      ]
+    },
+    "StatusModelTable": {
+      "entity": "sample",
+      "states": [
+        "sample"
+      ],
+      "initialStates": [
+        "sample"
+      ],
+      "terminalStates": [
+        "sample"
+      ],
+      "transitions": [
+        {
+          "from": "sample",
+          "trigger": "sample",
+          "to": "sample"
+        }
+      ]
+    },
+    "StatusModelTransition": {
+      "from": "sample",
+      "trigger": "sample",
+      "to": "sample"
     },
     "SubmissionCreateRequest": {
       "accountId": "0192e866-20dd-78e2-85c0-3a2fc619e6a6",

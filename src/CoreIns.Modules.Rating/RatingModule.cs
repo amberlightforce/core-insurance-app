@@ -38,6 +38,7 @@ public static class RatingModule
         services.AddOptions<RatingOptions>().Bind(configuration.GetSection(RatingOptions.Section));
         services.AddModuleDbContext<RatingDbContext>(Schema);
         services.AddScoped<RatingStore>();
+        services.AddScoped<RateTableImportService>();
         services.AddEventHandler<ProductVersionPublishedV1, ProductVersionFallbackHandler>(
             EventDescriptor.From(ProductVersionPublishedV1.Descriptor), "RAT.ProductVersionPublished.Fallback", ModuleCode.RAT);
 
@@ -84,6 +85,8 @@ public static class RatingModule
             .Describe("Η παραμετροποίηση της αγοράς δεν έδωσε συντελεστή· η τιμολόγηση σταματά.", "Market configuration gave no rate; rating stops (fail closed)."),
         ErrorDefinition.For(ModuleCode.RAT, "DATA-UNAVAILABLE", 503, "Η λειτουργία δεν είναι διαθέσιμη", "The operation is not available")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών ή μια εξάρτηση δεν απάντησε.", "The operation belongs to a later work package or a dependency did not answer."),
+        ErrorDefinition.For(ModuleCode.RAT, "IMPORT-INVALID", 422, "Ο πίνακας τιμών δεν είναι έγκυρος", "The rate table is not valid")
+            .Describe("Το αρχείο ή οι γραμμές δεν περνούν τον έλεγχο τύπων, κελιών ή ζωνών· το μήνυμα κατονομάζει τα σφάλματα.", "The file or rows fail the type, cell or band checks; the message names the errors."),
         ErrorDefinition.For(ModuleCode.RAT, "WORKSHEET-NOT-FOUND", 404, "Δεν βρέθηκε το φύλλο τιμολόγησης", "Worksheet not found")
             .Describe("Το φύλλο δεν υπάρχει στη νομική σας οντότητα.", "The worksheet does not exist in your legal entity."),
     ];

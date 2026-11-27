@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Party.validate result. PRD outputs: "issues, candidates"</summary>
+/// <summary>pty.Party.validate result (BO-PTY-01): rule violations of the create rules (none = valid) and possible duplicates.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PartyValidateResponse
 {
-    /// <summary>PRD: "issues"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'issues'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("issues")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Issues { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Party.Contracts.Api.PartyValidationIssue> Issues { get; init; }
 
-    /// <summary>PRD: "candidates"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'candidates'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("candidates")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Candidates { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Party.Contracts.Api.PartySearchItem> Candidates { get; init; }
 }

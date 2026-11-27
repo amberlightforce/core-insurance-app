@@ -395,6 +395,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/pol/v1/policy-changes/out-of-sequence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start out-of-sequence change
+         * @description Start a mid-term change whose effective time is earlier than the term's latest bound transaction. The job is edited, quoted and bound
+         *     like any change; the bind reverses the later segments, applies this change and re-applies the later ones (re-rated under the term's pinned
+         *     artefacts) in one transaction (REQ-POL-006, D-SL6-10). Mode NET (default, final for P1-P2) emits one net delta set; a finance month that is
+         *     locked is never booked into: the correction books in the first open period with correctionOf set (G5, REQ-POL-108).
+         */
+        post: operations["pol.Change.createOutOfSequence"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/pol/v1/cancellations": {
         parameters: {
             query?: never;
@@ -1193,6 +1216,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/pol/v1/psr-exceptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * PSR exception queue
+         * @description PSR exception queue
+         *
+         *     Non-payment cancellations that a vulnerable-customer flag, a hold or a missing notice reference stopped (D-SL6-04, REQ-POL-210). Filters: status. Oldest first.
+         */
+        get: operations["pol.Psr.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pol/v1/psr-exceptions/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Decide a PSR exception
+         * @description Decide a PSR exception
+         *
+         *     A staff member decides a PENDING exception: PROCEED runs the non-payment cancellation now (pro-rata), HOLD keeps the policy in force. Audited.
+         *     Idempotency-Key required.
+         */
+        post: operations["pol.Psr.decide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/pol/v1/pack-rollback-exceptions": {
         parameters: {
             query?: never;
@@ -1958,6 +2026,19 @@ export interface components {
             /** @description Free-text description of the change; no personal data */
             description?: components["schemas"]["Text"];
         };
+        /** @description pol.Change.createOutOfSequence request (REQ-POL-006). The effective time may be earlier than the latest bound transaction of the term; the effective-date limits still apply. Mode NET is the default and final for P1-P2 (D-SL6-10); GROSS is refused. */
+        ChangeCreateOutOfSequenceRequest: {
+            policyId: components["schemas"]["Uuid"];
+            /** @description Effective time of the change (valid time) */
+            effectiveAt: components["schemas"]["Instant"];
+            /** @description Free-text description of the change; no personal data */
+            description?: components["schemas"]["Text"];
+            /**
+             * @description Delta mode of the correction set; NET when absent
+             * @enum {string}
+             */
+            mode?: "NET" | "GROSS";
+        };
         /** @description pol.PolicyChange.create result. PRD outputs: "jobId". The job is the change draft; it is edited with updateDraft, priced with quote and bound with bind. */
         PolicyChangeCreateResponse: {
             jobId: components["schemas"]["Uuid"];
@@ -2035,23 +2116,41 @@ export interface components {
             /** @description PRD: "refund preview" */
             refundPreview?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Withdrawal.submit request. PRD inputs: "policyId, right (WITHDRAWAL, OBJECTION), receivedAt, channelRef" */
+        /**
+         * @description The statutory right exercised (REQ-POL-307, REQ-POL-308): WITHDRAWAL from a distance contract, or OBJECTION. Both void the term ab initio.
+         * @enum {string}
+         */
+        WithdrawalRight: "WITHDRAWAL" | "OBJECTION";
+        /** @description pol.Withdrawal.submit request. PRD inputs: "policyId, right (WITHDRAWAL, OBJECTION), receivedAt, channelRef". The right window is checked from receivedAt, not from the time of the call. Exactly once per (policyId, channelRef): a replay returns the first result. */
         WithdrawalSubmitRequest: {
             /** @description PRD: "policyId" */
-            policyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "right (WITHDRAWAL, OBJECTION)" */
-            right?: components["schemas"]["Unspecified"];
-            /** @description PRD: "receivedAt" */
-            receivedAt?: components["schemas"]["Instant"];
-            /** @description PRD: "channelRef" */
-            channelRef?: components["schemas"]["Unspecified"];
+            policyId: components["schemas"]["Uuid"];
+            right: components["schemas"]["WithdrawalRight"];
+            /** @description When the customer declared the right (the channel receipt time), PRD: "receivedAt" */
+            receivedAt: components["schemas"]["Instant"];
+            /** @description Channel reference of the declaration (CHN withdrawal id or message id); no personal data. The exactly-once key with policyId, PRD: "channelRef" */
+            channelRef: components["schemas"]["Text"];
         };
-        /** @description pol.Withdrawal.submit result. PRD outputs: "void job, refund preview" */
+        /** @description pol.Withdrawal.submit result. PRD outputs: "void job, refund preview". The refund is the whole premium paid including IPT and levies, with no cost-of-cover deduction (D-SL6-02). */
         WithdrawalSubmitResponse: {
-            /** @description PRD: "void job" */
-            voidJob?: components["schemas"]["Unspecified"];
-            /** @description PRD: "refund preview" */
-            refundPreview?: components["schemas"]["Unspecified"];
+            voidJob: components["schemas"]["WithdrawalVoidJob"];
+            refundPreview: components["schemas"]["ServicingPreview"];
+            /** @description True when this is the stored first result of the same (policyId, channelRef) */
+            replayed: boolean;
+        };
+        /** @description The void job of a withdrawal. */
+        WithdrawalVoidJob: {
+            jobId: components["schemas"]["Uuid"];
+            state: components["schemas"]["JobStateCode"];
+            termId: components["schemas"]["Uuid"];
+            transactionId: components["schemas"]["Uuid"];
+            /** @description The cover start of the voided term */
+            effectiveAt: components["schemas"]["Instant"];
+            right: components["schemas"]["WithdrawalRight"];
+            /** @description Equals the total premium paid including IPT and levies */
+            refundDue: components["schemas"]["Money"];
+            /** @description Always 0.00 (D-SL6-02) */
+            costOfCoverDeduction: components["schemas"]["Money"];
         };
         /** @description pol.Reinstatement.create request. PRD inputs: "termId, type, effectiveAt, reason" */
         ReinstatementCreateRequest: {
@@ -2328,10 +2427,10 @@ export interface components {
             drivers: components["schemas"]["Driver"][];
             coverages: components["schemas"]["CoverageSelection"][];
         };
-        /** @description pol.Policy.getMany result. PRD outputs: "policies" */
+        /** @description pol.Policy.getMany result. Policies are answered as pol.Policy.get does (same legal-entity scoping); an id that did not exist in the caller's legal entity is listed in notFound, never distinguished from an out-of-scope one */
         PolicyGetManyResponse: {
-            /** @description PRD: "policies" */
-            policies?: components["schemas"]["Unspecified"];
+            policies?: components["schemas"]["PolicyGetResponse"][];
+            notFound?: components["schemas"]["Uuid"][];
         };
         /** @description pol.Policy.search result row (REQ-POL-014 subset: policy number and insured party) */
         PolicySearchItem: {
@@ -2375,28 +2474,52 @@ export interface components {
             /** @description PRD: "differences" */
             differences?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Segment.changes result. PRD outputs: "segment versions" */
+        /** @description pol.Segment.changes result: one segment version, ordered by the instant it last changed (recordedTo when closed, else recordedFrom) */
         SegmentChangesItem: {
-            /** @description PRD: "segment versions" */
-            segmentVersions?: components["schemas"]["Unspecified"];
+            segmentId: components["schemas"]["Uuid"];
+            termId: components["schemas"]["Uuid"];
+            policyId: components["schemas"]["Uuid"];
+            transactionId: components["schemas"]["Uuid"];
+            validFrom: components["schemas"]["Instant"];
+            validTo: components["schemas"]["Instant"];
+            recordedFrom: components["schemas"]["Instant"];
+            /** @description Set once the version was superseded or reversed */
+            recordedTo: components["schemas"]["Instant"] | null;
+            /** @description recordedTo when closed, else recordedFrom */
+            changedAt: components["schemas"]["Instant"];
+            snapshotHash: string;
+            worksheetId?: string | null;
         };
         /** @description Page of pol.Segment.changes results (cursor pagination, contract §3.5.5) */
         SegmentChangesPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["SegmentChangesItem"][];
         };
-        /** @description pol.StatusModel.get result. PRD outputs: "table" */
+        /** @description pol.StatusModel.get result: the canonical state tables (job, quote, term) as built into the module */
         StatusModelGetResponse: {
-            /** @description PRD: "table" */
-            table?: components["schemas"]["Unspecified"];
+            table?: components["schemas"]["StatusModelTable"][];
         };
-        /** @description pol.EffectiveDate.limits result. PRD outputs: "earliest, latest, override available" */
+        /** @description One state machine */
+        StatusModelTable: {
+            /** @description Job, Quote or PolicyTerm */
+            entity?: string;
+            states?: string[];
+            initialStates?: string[];
+            terminalStates?: string[];
+            transitions?: components["schemas"]["StatusModelTransition"][];
+        };
+        StatusModelTransition: {
+            from?: string;
+            trigger?: string;
+            to?: string;
+        };
+        /** @description pol.EffectiveDate.limits result: the range an effective date may take for the policy's term at the effective time of the call */
         EffectiveDateLimitsResponse: {
-            /** @description PRD: "earliest" */
-            earliest?: components["schemas"]["Unspecified"];
-            /** @description PRD: "latest" */
-            latest?: components["schemas"]["Unspecified"];
-            /** @description PRD: "override available" */
-            overrideAvailable?: components["schemas"]["Unspecified"];
+            earliest: components["schemas"]["Instant"];
+            latest: components["schemas"]["Instant"];
+            /** @description Days back the role (the most permissive of the caller's, or the role query) may change */
+            backdateDays: number;
+            /** @description Always false until a limit-override permission exists */
+            overrideAvailable: boolean;
         };
         /** @description pol.Import.policy request. PRD inputs: "legacy payload, sourceKey" */
         ImportPolicyRequest: {
@@ -2467,6 +2590,40 @@ export interface components {
             restrictionStatus?: components["schemas"]["Unspecified"];
             /** @description PRD: "retention conflicts" */
             retentionConflicts?: components["schemas"]["Unspecified"];
+        };
+        /** @enum {string} */
+        PsrExceptionStatus: "PENDING" | "PROCEED" | "HOLD" | "RESCINDED";
+        /** @description One PSR queue entry of a non-payment cancellation that was not run automatically (D-SL6-04). */
+        PsrExceptionView: {
+            exceptionId: components["schemas"]["Uuid"];
+            policyId: components["schemas"]["Uuid"];
+            policyNumber: components["schemas"]["BusinessNumber"];
+            termId: components["schemas"]["Uuid"];
+            /** @description BIL's cancellation request id (its delinquency case) */
+            requestId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            reason: "VULNERABLE_CUSTOMER" | "HOLD" | "NOTICE_REFERENCE_MISSING";
+            status: components["schemas"]["PsrExceptionStatus"];
+            /** @description The cancellation's effective time as BIL asked for it */
+            effectiveAt: components["schemas"]["Instant"];
+            raisedAt: components["schemas"]["Instant"];
+            decidedBy: components["schemas"]["Text"] | null;
+            decidedAt: components["schemas"]["Instant"] | null;
+            decisionNote: components["schemas"]["Text"] | null;
+            /** @description The cancellation job when the decision was PROCEED */
+            jobId: components["schemas"]["Uuid"] | null;
+        };
+        /** @description Page of pol.Psr.list results (cursor pagination, contract §3.5.5) */
+        PsrExceptionListPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["PsrExceptionView"][];
+        };
+        /** @description pol.Psr.decide request */
+        PsrDecideRequest: {
+            exceptionId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "PROCEED" | "HOLD";
+            /** @description The reason for the decision. No personal data. */
+            note: string;
         };
         /** @enum {string} */
         PackRollbackExceptionStatus: "OPEN" | "REVIEWED";
@@ -3559,6 +3716,59 @@ export interface operations {
             500: components["responses"]["InternalError"];
         };
     };
+    "pol.Change.createOutOfSequence": {
+        parameters: {
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeCreateOutOfSequenceRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyChangeCreateResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalError"];
+        };
+    };
     "pol.Cancellation.create": {
         parameters: {
             query?: {
@@ -4622,7 +4832,7 @@ export interface operations {
                  *     PRD wording such as "as of record time". Query parameter only (D-API-09). Default now.
                  */
                 knownAt?: components["parameters"]["KnownAt"];
-                /** @description PRD: "ids (≤ 200)" */
+                /** @description Policy ids (at most 50, comma-separated or repeated); a malformed id or more than 50 is a 400 */
                 ids?: string[];
             };
             header?: {
@@ -4835,6 +5045,10 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description Only segment versions that changed at or after this instant (ignored when a cursor is given) */
+                since?: components["schemas"]["Instant"];
+                /** @description Only segment versions that changed at or after the recording of this transaction (ignored when a cursor is given) */
+                sinceTransactionId?: components["schemas"]["Uuid"];
             };
             header?: {
                 /**
@@ -4900,9 +5114,9 @@ export interface operations {
     };
     "pol.EffectiveDate.limits": {
         parameters: {
-            query?: {
+            query: {
                 /** @description PRD: "policyId" */
-                policyId?: components["schemas"]["Uuid"];
+                policyId: components["schemas"]["Uuid"];
                 /** @description PRD: "txnType" */
                 txnType?: string;
                 /** @description PRD: "role" */
@@ -5226,6 +5440,90 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pol.Psr.list": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                /** @description Exception status filter */
+                status?: "PENDING" | "PROCEED" | "HOLD" | "RESCINDED";
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PsrExceptionListPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pol.Psr.decide": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PsrDecideRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PsrExceptionView"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];

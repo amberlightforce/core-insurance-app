@@ -4,15 +4,57 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Template.list result. PRD outputs: "objects"</summary>
+/// <summary>doc.Template.list result: one template version (BO-DOC-05).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TemplateListItem
 {
-    /// <summary>PRD: "objects"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("objects")]
+    /// <summary>Contract member 'templateId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("templateId")]
+    public required global::CoreIns.SharedKernel.Identifiers.TemplateId TemplateId { get; init; }
+
+    /// <summary>Contract member 'documentType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("documentType")]
+    public required string DocumentType { get; init; }
+
+    /// <summary>Contract member 'version'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    public required int Version { get; init; }
+
+    /// <summary>DRAFT or APPROVED.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required string Status { get; init; }
+
+    /// <summary>Contract member 'validFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validFrom")]
+    public required global::CoreIns.SharedKernel.BusinessDate ValidFrom { get; init; }
+
+    /// <summary>Contract member 'validTo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validTo")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Objects { get; init; }
+    public global::CoreIns.SharedKernel.BusinessDate? ValidTo { get; init; }
+
+    /// <summary>Contract member 'productCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productCode")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ProductCode { get; init; }
+
+    /// <summary>Contract member 'lineOfBusiness'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lineOfBusiness")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LineOfBusiness { get; init; }
+
+    /// <summary>Contract member 'jurisdiction'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jurisdiction")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Jurisdiction { get; init; }
+
+    /// <summary>Contract member 'titleEl'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("titleEl")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? TitleEl { get; init; }
+
+    /// <summary>Contract member 'titleEn'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("titleEn")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? TitleEn { get; init; }
 }

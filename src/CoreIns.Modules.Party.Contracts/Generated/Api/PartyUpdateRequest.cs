@@ -4,23 +4,27 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Party.update request. PRD inputs: "party data, reason"</summary>
+/// <summary>pty.Party.update request (BO-PTY-01). Name, birth date and language change of a party; omitted parts stay as they are. The name change is bitemporal (effective today, history kept) and the search keys are rebuilt.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PartyUpdateRequest
 {
-    /// <summary>PRD: "party data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("partyData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PartyData { get; init; }
+    /// <summary>Optimistic concurrency (REQ-PTY-043); a stale value is refused with PTY-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'person'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("person")]
+    public global::CoreIns.Modules.Party.Contracts.Api.PersonUpdateInput? Person { get; init; }
+
+    /// <summary>Contract member 'organisation'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("organisation")]
+    public global::CoreIns.Modules.Party.Contracts.Api.OrganisationInput? Organisation { get; init; }
+
+    /// <summary>Contract member 'preferredLanguage'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("preferredLanguage")]
+    public string? PreferredLanguage { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Reason { get; init; }
 }
