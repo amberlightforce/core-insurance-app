@@ -145,9 +145,6 @@ CONTRACT_NOT_SERVED GET /api/rat/v1/pricing-modifications
 CONTRACT_NOT_SERVED GET /api/rat/v1/pricing-modifications/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/rates/get-batch
 CONTRACT_NOT_SERVED GET /api/rat/v1/rates/get-batch-results
-CONTRACT_NOT_SERVED GET /api/rat/v1/rating-artifacts
-CONTRACT_NOT_SERVED GET /api/rat/v1/rating-artifacts/compatibility
-CONTRACT_NOT_SERVED GET /api/rat/v1/rating-artifacts/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/shadow-runs/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/statements/get
 CONTRACT_NOT_SERVED GET /api/rat/v1/worksheets/explain
