@@ -124,7 +124,7 @@ public static class DocumentsErrorCodes
 
     /// <summary>DOC-ERR-PAYLOAD-INVALID (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): doc.Document.preview, doc.Document.request.</para>
+    /// <para>Declared by 3 operation(s): doc.Document.preview, doc.Document.request, doc.Document.search.</para>
     /// </remarks>
     public const string PayloadInvalid = "DOC-ERR-PAYLOAD-INVALID";
 

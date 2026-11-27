@@ -1,38 +1,31 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiRequest } from '../../api/client';
+import type { components } from '../../api/generated/doc';
 
-/**
- * Shapes of the DOC read model (DocumentReader). doc.yaml types the list items and the reprint link as untyped
- * (PRD wording), so these are hand-written from DocumentReader and DocumentsController.
- * TODO(hardening): move to the generated types once doc.yaml types the document view.
- */
-export interface DeliveryView {
-  deliveryId: string;
-  channel: string;
-  medium: string;
-  status: string;
-  proofLevel?: string | null;
-  notificationDate?: string | null;
-  failureReason?: string | null;
-  isReprint: boolean;
-}
+type Schemas = components['schemas'];
 
-export interface DocumentView {
-  documentId: string;
-  documentNumber: string;
-  documentType: string;
-  requestNo: string;
-  /** MODULE/Type/id of the object the document is about. */
-  subject: string;
-  recipientPartyId: string;
-  language: string;
-  status: string;
-  medium: string;
-  archiveId: string;
-  contentHash: string;
-  createdAt: string;
-  deliveries: DeliveryView[];
+/** Delivery of a document (generated from doc.yaml). */
+export type DeliveryView = Schemas['DocumentDeliverySummary'];
+
+/** A document with its deliveries: the `get`, `listForObject` and `search` item shape. */
+export type DocumentView = Schemas['DocumentSearchItem'];
+
+/** One page of the library search. */
+export type DocumentSearchPage = Schemas['DocumentSearchPage'];
+
+/** Filters of doc.Document.search (all optional). Dates are yyyy-MM-dd. */
+export interface DocumentSearchFilters {
+  templateKey?: string;
+  status?: string;
+  medium?: string;
+  subjectModule?: string;
+  subjectType?: string;
+  subjectId?: string;
+  recipientPartyId?: string;
+  createdFrom?: string;
+  createdTo?: string;
+  q?: string;
 }
 
 export interface EvidenceView {
@@ -60,6 +53,21 @@ export function useSubjectDocuments(objectRef: string) {
     queryFn: ({ signal }) =>
       apiRequest<{ items: DocumentView[] }>(`${base}/documents/list-for-object`, {
         query: { objectRef },
+        signal,
+      }),
+  });
+}
+
+/**
+ * doc.Document.search: the document library, newest first. `cursor` is the opaque `nextCursor` of the previous page
+ * (keyset). BO-DOC-12 builds the filterable library UI on this.
+ */
+export function useDocumentSearch(filters: DocumentSearchFilters, cursor?: string, limit = 50) {
+  return useQuery({
+    queryKey: ['doc', 'search', filters, cursor ?? null, limit],
+    queryFn: ({ signal }) =>
+      apiRequest<DocumentSearchPage>(`${base}/documents/search`, {
+        query: { ...filters, cursor, limit },
         signal,
       }),
   });

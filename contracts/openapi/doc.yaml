@@ -191,6 +191,115 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/search:
+    get:
+      operationId: doc.Document.search
+      summary: Document library search
+      description: |-
+        Cross-object document library search (BO-DOC-01). Newest first (created, then document number), keyset-paged
+        (platform helper, NX-HD-12), scoped to the caller's legal entity. Each item carries its deliveries; `latestDeliveryStatus`
+        is the status of the newest one. `q` matches the document number or request number (prefix, case-insensitive).
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-008
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD idempotency: —'
+      x-exposure:
+      - ui
+      x-permission: doc.Document.search
+      x-error-codes:
+      - code: DOC-ERR-PAYLOAD-INVALID
+        status: 422
+      x-source:
+      - BO-DOC-01
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: templateKey
+        in: query
+        required: false
+        description: Document type (template key), e.g. DT-REFUND-ADVICE
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        description: Document status (Requested, Rendering, Rendered, Failed, Superseded)
+        schema:
+          type: string
+      - name: medium
+        in: query
+        required: false
+        description: Delivery medium of the document
+        schema:
+          type: string
+      - name: subjectModule
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: subjectType
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: subjectId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: recipientPartyId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: createdFrom
+        in: query
+        required: false
+        description: First creation date (UTC date, inclusive)
+        schema:
+          type: string
+          format: date
+      - name: createdTo
+        in: query
+        required: false
+        description: Last creation date (UTC date, inclusive)
+        schema:
+          type: string
+          format: date
+      - name: q
+        in: query
+        required: false
+        description: Document number or request number prefix
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentSearchPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/doc/v1/documents/preview:
     post:
       operationId: doc.Document.preview
@@ -3189,6 +3298,75 @@ components:
             items:
               $ref: '#/components/schemas/DocumentGetItem'
       description: Page of doc.Document.get results (cursor pagination, contract §3.5.5)
+    DocumentDeliverySummary:
+      type: object
+      description: One delivery of a document.
+      properties:
+        deliveryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        channel:
+          type: string
+        medium:
+          type: string
+        status:
+          type: string
+        proofLevel:
+          type: [string, 'null']
+        notificationDate:
+          type: [string, 'null']
+          format: date
+        failureReason:
+          type: [string, 'null']
+        isReprint:
+          type: boolean
+      required: [deliveryId, channel, medium, status, isReprint]
+    DocumentSearchItem:
+      type: object
+      description: One document of the library, with its deliveries (same shape as doc.Document.get).
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        documentNumber:
+          type: string
+        documentType:
+          type: string
+        requestNo:
+          type: string
+        subject:
+          type: string
+          description: MODULE/Type/id
+        recipientPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        language:
+          type: string
+        status:
+          type: string
+        medium:
+          type: string
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        contentHash:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        latestDeliveryStatus:
+          type: [string, 'null']
+        deliveries:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentDeliverySummary'
+      required: [documentId, documentNumber, documentType, requestNo, subject, recipientPartyId, language, status, medium, archiveId, contentHash, createdAt, deliveries]
+    DocumentSearchPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/DocumentSearchItem'
+      description: Page of doc.Document.search results (cursor pagination, contract §3.5.5)
     DocumentListForObjectItem:
       type: object
       description: 'doc.Document.listForObject result. PRD outputs: "documents with statuses"'
@@ -3204,7 +3382,7 @@ components:
           items:
             type: array
             items:
-              $ref: '#/components/schemas/DocumentListForObjectItem'
+              $ref: '#/components/schemas/DocumentSearchItem'
       description: Page of doc.Document.listForObject results (cursor pagination, contract §3.5.5)
     DocumentReprintRequest:
       type: object

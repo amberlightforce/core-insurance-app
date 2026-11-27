@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Market.Contracts.Api;
 
-/// <summary>mkt.ConfigChangeRequest.submit result. PRD outputs: "request"</summary>
+/// <summary>mkt.ConfigChangeRequest.submit result: the request after the operation</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConfigChangeRequestSubmitResponse
 {
-    /// <summary>PRD: "request"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'request'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("request")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Request { get; init; }
+    public required global::CoreIns.Modules.Market.Contracts.Api.ConfigChangeRequestView Request { get; init; }
 }

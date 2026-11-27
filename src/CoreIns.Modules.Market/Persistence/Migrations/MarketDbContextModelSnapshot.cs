@@ -18,10 +18,165 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("mkt")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("CoreIns.Modules.Market.Persistence.ConfigChangeItemRow", b =>
+                {
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("request_id");
+
+                    b.Property<int>("LineNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("line_no");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("key");
+
+                    b.Property<string>("LegalStatus")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)")
+                        .HasColumnName("legal_status");
+
+                    b.Property<bool>("MotorPath")
+                        .HasColumnType("boolean")
+                        .HasColumnName("motor_path");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("note");
+
+                    b.Property<string>("SourceRef")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("source_ref");
+
+                    b.Property<DateOnly?>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateOnly?>("ValidTo")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_to");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("value");
+
+                    b.HasKey("RequestId", "LineNo")
+                        .HasName("pk_config_change_item");
+
+                    b.ToTable("config_change_item", "mkt");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Market.Persistence.ConfigChangeRequestRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("AppliedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("applied_at");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<string>("BaseHash")
+                        .IsRequired()
+                        .HasColumnType("char(64)")
+                        .HasColumnName("base_hash");
+
+                    b.Property<string>("ContentHash")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("content_hash");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("country");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("CreatedPrincipal")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_principal");
+
+                    b.Property<string>("DecidedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionReason")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("decision_reason");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("reason");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("ResultingHash")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("resulting_hash");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_config_change_request");
+
+                    b.HasIndex("ResultingHash");
+
+                    b.HasIndex("LegalEntityId", "Status")
+                        .HasDatabaseName("ix_config_change_request_entity_status");
+
+                    b.ToTable("config_change_request", "mkt", t =>
+                        {
+                            t.HasCheckConstraint("ck_config_change_request_base_hash", "base_hash ~ '^[0-9a-f]{64}$'");
+
+                            t.HasCheckConstraint("ck_config_change_request_status", "status IN ('DRAFT', 'PENDING_APPROVAL', 'APPLIED', 'REJECTED', 'WITHDRAWN')");
+                        });
+                });
 
             modelBuilder.Entity("CoreIns.Modules.Market.Persistence.ConfigStateRow", b =>
                 {
@@ -72,7 +227,7 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
 
                     b.ToTable("config_state", "mkt", t =>
                         {
-                            t.HasCheckConstraint("ck_config_state_cause", "cause IN ('GENESIS', 'PACK_ACTIVATION', 'PACK_ROLLBACK')");
+                            t.HasCheckConstraint("ck_config_state_cause", "cause IN ('GENESIS', 'PACK_ACTIVATION', 'PACK_ROLLBACK', 'CONFIG_CHANGE')");
 
                             t.HasCheckConstraint("ck_config_state_hash", "hash ~ '^[0-9a-f]{64}$'");
 
@@ -177,6 +332,10 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("approval_request_id");
 
+                    b.Property<string>("ContentHash")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("content_hash");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
@@ -185,6 +344,23 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionReason")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("decision_reason");
+
+                    b.Property<string>("FromVersion")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("from_version");
+
+                    b.PrimitiveCollection<string[]>("HashesIssued")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text[]")
+                        .HasColumnName("hashes_issued")
+                        .HasDefaultValueSql("ARRAY[]::text[]");
 
                     b.Property<string>("Kind")
                         .IsRequired()
@@ -202,11 +378,35 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("pack_id");
 
+                    b.Property<string>("ParentHash")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("parent_hash");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasDefaultValue("")
+                        .HasColumnName("reason");
+
+                    b.Property<long>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(1L)
+                        .HasColumnName("record_version");
+
                     b.Property<string>("RequestedBy")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("requested_by");
+
+                    b.Property<string>("RequestedPrincipal")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("requested_principal");
 
                     b.Property<string>("ResultingHash")
                         .HasColumnType("char(64)")
@@ -222,48 +422,15 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("supersedes_id");
 
+                    b.Property<string>("TargetDigest")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("target_digest");
+
                     b.Property<string>("Version")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
                         .HasColumnName("version");
-
-                    b.Property<string>("FromVersion")
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("from_version");
-
-                    b.Property<string>("ParentHash")
-                        .HasColumnType("char(64)")
-                        .HasColumnName("parent_hash");
-
-                    b.Property<string>("TargetDigest")
-                        .HasColumnType("char(64)")
-                        .HasColumnName("target_digest");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .ValueGeneratedOnAdd()
-                        .HasDefaultValue("")
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("reason");
-
-                    b.Property<string>("RequestedPrincipal")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("requested_principal");
-
-                    b.Property<string>("ContentHash")
-                        .HasColumnType("char(64)")
-                        .HasColumnName("content_hash");
-
-                    b.Property<long>("RecordVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAdd()
-                        .HasDefaultValue(1L)
-                        .HasColumnType("bigint")
-                        .HasColumnName("record_version");
 
                     b.Property<DateTime?>("WindowFrom")
                         .HasColumnType("timestamptz")
@@ -272,18 +439,6 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                     b.Property<DateTime?>("WindowTo")
                         .HasColumnType("timestamptz")
                         .HasColumnName("window_to");
-
-                    b.Property<string[]>("HashesIssued")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasDefaultValueSql("ARRAY[]::text[]")
-                        .HasColumnType("text[]")
-                        .HasColumnName("hashes_issued");
-
-                    b.Property<string>("DecisionReason")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("decision_reason");
 
                     b.HasKey("Id")
                         .HasName("pk_pack_activation");
@@ -300,6 +455,7 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                     b.ToTable("pack_activation", "mkt", t =>
                         {
                             t.HasCheckConstraint("ck_pack_activation_kind", "kind IN ('ACTIVATE', 'ROLLBACK')");
+
                             t.HasCheckConstraint("ck_pack_activation_status", "status IN ('REQUESTED', 'PENDING_APPROVAL', 'SCHEDULED', 'ACTIVE', 'SUPERSEDED', 'WITHDRAWN', 'REJECTED')");
                         });
                 });
@@ -353,6 +509,31 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Market.Persistence.ConfigChangeItemRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Market.Persistence.ConfigChangeRequestRow", null)
+                        .WithMany("Items")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_config_change_item_request");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Market.Persistence.ConfigChangeRequestRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Market.Persistence.LegalEntityRow", null)
+                        .WithMany()
+                        .HasForeignKey("LegalEntityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_config_change_request_legal_entity");
+
+                    b.HasOne("CoreIns.Modules.Market.Persistence.ConfigStateRow", null)
+                        .WithMany()
+                        .HasForeignKey("ResultingHash")
+                        .HasConstraintName("fk_config_change_request_state");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Market.Persistence.ConfigStateRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Market.Persistence.ConfigStateRow", null)
@@ -386,6 +567,11 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_pack_activation_pack_version");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Market.Persistence.ConfigChangeRequestRow", b =>
+                {
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

@@ -45,7 +45,31 @@
     "doc.Document.listForObject": {
       "items": [
         {
-          "documentsStatuses": "unspecified"
+          "documentId": "0192740b-8ea0-783e-841e-cf2a1e9b8467",
+          "documentNumber": "sample",
+          "documentType": "sample",
+          "requestNo": "sample",
+          "subject": "sample",
+          "recipientPartyId": "01920c7a-59ea-788f-8b8a-4629c60fc004",
+          "language": "sample",
+          "status": "sample",
+          "medium": "sample",
+          "archiveId": "01926ddb-6261-7901-8e66-c0225fc579da",
+          "contentHash": "sample",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "latestDeliveryStatus": "sample",
+          "deliveries": [
+            {
+              "deliveryId": "01928e23-3f89-7851-8df0-d7f2a7d9e221",
+              "channel": "sample",
+              "medium": "sample",
+              "status": "sample",
+              "proofLevel": "sample",
+              "notificationDate": "2026-10-07",
+              "failureReason": "sample",
+              "isReprint": true
+            }
+          ]
         }
       ],
       "nextCursor": "sample",
@@ -198,6 +222,16 @@
     "DocumentDeleteDraftResponse": {
       "status": "unspecified"
     },
+    "DocumentDeliverySummary": {
+      "deliveryId": "0192e88b-f9fa-7d19-817d-c16072942b67",
+      "channel": "sample",
+      "medium": "sample",
+      "status": "sample",
+      "proofLevel": "sample",
+      "notificationDate": "2026-10-07",
+      "failureReason": "sample",
+      "isReprint": true
+    },
     "DocumentGetItem": {
       "documentsStatuses": "unspecified"
     },
@@ -236,7 +270,31 @@
     "DocumentListForObjectPage": {
       "items": [
         {
-          "documentsStatuses": "unspecified"
+          "documentId": "01927689-8f49-71c4-87ba-8adb1467f183",
+          "documentNumber": "sample",
+          "documentType": "sample",
+          "requestNo": "sample",
+          "subject": "sample",
+          "recipientPartyId": "01921fa7-37be-7a53-8f01-3d1c04647e1c",
+          "language": "sample",
+          "status": "sample",
+          "medium": "sample",
+          "archiveId": "01925091-ca74-76fa-8d0f-a2c6edda87e1",
+          "contentHash": "sample",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "latestDeliveryStatus": "sample",
+          "deliveries": [
+            {
+              "deliveryId": "01927821-9465-77f9-8e36-f4e82ab76f58",
+              "channel": "sample",
+              "medium": "sample",
+              "status": "sample",
+              "proofLevel": "sample",
+              "notificationDate": "2026-10-07",
+              "failureReason": "sample",
+              "isReprint": true
+            }
+          ]
         }
       ],
       "nextCursor": "sample",
@@ -333,6 +391,66 @@
     },
     "DocumentResendResponse": {
       "deliveryId": "01929bc4-f5e4-739f-878c-b204a376a83f"
+    },
+    "DocumentSearchItem": {
+      "documentId": "0192d7b1-695c-7de5-801e-489c2a712b13",
+      "documentNumber": "sample",
+      "documentType": "sample",
+      "requestNo": "sample",
+      "subject": "sample",
+      "recipientPartyId": "0192497f-1b4c-7601-8390-07554bf39d1c",
+      "language": "sample",
+      "status": "sample",
+      "medium": "sample",
+      "archiveId": "019284b9-2f2e-74b1-8a57-855ce54e1b15",
+      "contentHash": "sample",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "latestDeliveryStatus": "sample",
+      "deliveries": [
+        {
+          "deliveryId": "0192a448-424d-7916-8a53-696bd33be23f",
+          "channel": "sample",
+          "medium": "sample",
+          "status": "sample",
+          "proofLevel": "sample",
+          "notificationDate": "2026-10-07",
+          "failureReason": "sample",
+          "isReprint": true
+        }
+      ]
+    },
+    "DocumentSearchPage": {
+      "items": [
+        {
+          "documentId": "01924d46-a15c-7bf1-8c2b-2f11fd47f006",
+          "documentNumber": "sample",
+          "documentType": "sample",
+          "requestNo": "sample",
+          "subject": "sample",
+          "recipientPartyId": "019245ce-fb46-7627-8434-0dfb32edb70f",
+          "language": "sample",
+          "status": "sample",
+          "medium": "sample",
+          "archiveId": "01923e61-0107-7b82-8f98-64271d719211",
+          "contentHash": "sample",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "latestDeliveryStatus": "sample",
+          "deliveries": [
+            {
+              "deliveryId": "01924059-5621-70ab-8b1e-9706bad4ff62",
+              "channel": "sample",
+              "medium": "sample",
+              "status": "sample",
+              "proofLevel": "sample",
+              "notificationDate": "2026-10-07",
+              "failureReason": "sample",
+              "isReprint": true
+            }
+          ]
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
     },
     "DocumentSupersedeRequest": {
       "documentId": "01924cd1-5c04-7eaf-8068-d7c63059362b",
