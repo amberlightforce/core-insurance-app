@@ -2677,7 +2677,7 @@ export interface components {
             autoAllocate: boolean;
             /** @description Payment reference of a receivable (D-SL4-06): matches the cash to the receivable instead of an invoice. billingAccountId must be the receivable's account; a reference that matches no receivable of the account is BIL-ERR-NOT-FOUND */
             paymentReference?: string;
-            /** @description Receivable the payer referenced (alternative to paymentReference); the amount must equal its open amount (BIL-ERR-AMOUNT-MISMATCH, REQ-BIL-135) */
+            /** @description Receivable the payer referenced (alternative to paymentReference); partial receipts leave the remainder open and surplus remains unapplied on the account (REQ-BIL-130, -133, -356) */
             receivableId?: components["schemas"]["Uuid"];
         };
         /** @description Typed from REQ-BIL-004, REQ-BIL-129, REQ-BIL-135. PRD outputs: "receipt or link, allocation preview". An amount that does not equal the matched invoice's open amount is never allocated: it stays as unapplied cash in suspense with a reason (REQ-BIL-135). */
@@ -3227,10 +3227,10 @@ export interface components {
             reversalEntries?: components["schemas"]["Unspecified"][];
             sourcePayableRestored?: components["schemas"]["Money"];
         };
-        /** @description bil.Receivable.register request (REQ-BIL-346, -356). Typed by SL4-CONTRACTS. Missing source-specific members are BIL-ERR-VALIDATION; the counterparty account is created on first use. Idempotent on the Idempotency-Key and on (sourceType, sourceId). */
+        /** @description bil.Receivable.register request (REQ-BIL-346, -356). Typed by SL4-CONTRACTS. Missing source-specific members are BIL-ERR-VALIDATION; the counterparty account is created on first use. Idempotent on the Idempotency-Key. The duplicate business key is (sourceType, sourceId, purpose, counterpartyPartyId, amount); a new key for an existing business key is BIL-ERR-DUPLICATE (SL4-BIL-RECV). */
         ReceivableRegisterRequest: {
             sourceType: components["schemas"]["ReceivableSourceType"];
-            /** @description Id of the source object; with sourceType it is the duplicate key (BIL-ERR-DUPLICATE) */
+            /** @description Id of the source object; participates in the extended receivable duplicate business key (BIL-ERR-DUPLICATE) */
             sourceId: string;
             /** @description PTY party that owes the money */
             counterpartyPartyId: components["schemas"]["Uuid"];

@@ -11,6 +11,9 @@ internal static class ClockLegalStatus
     public const string Verified = "VERIFIED";
     public const string SecondarySource = "SECONDARY_SOURCE";
     public const string Illustrative = "ILLUSTRATIVE";
+
+    /// <summary>A value taken from a PRD as stated (D-REG-04) that is not legally confirmed (OQ-008); Production refuses to rely on it.</summary>
+    public const string Unverified = "UNVERIFIED";
 }
 
 /// <summary>An ISO 8601 calendar period (<c>PnYnMnWnD</c>); the length of a clock.</summary>
@@ -81,6 +84,10 @@ internal static class ClockDefinitions
     public const string ClmFsCounterpartyReply = "CLM_FS_COUNTERPARTY_REPLY";
     public const string ClmOpenClaimResponse = "CLM_OPEN_CLAIM_RESPONSE";
     public const string ComplaintReply = "CMP_COMPLAINT_REPLY";
+    public const string ClmMtplOffer = "CLM_MTPL_OFFER";
+    public const string ClmMtplAssessment = "CLM_MTPL_ASSESSMENT";
+    public const string ClmMtplPayment = "CLM_MTPL_PAYMENT";
+    public const string ClmMtplRepair = "CLM_MTPL_REPAIR";
 
     public static IReadOnlyList<ClockDefinition> All { get; } =
     [
@@ -104,6 +111,17 @@ internal static class ClockDefinitions
         // TODO(hardening): CMP_COMPLAINT_ACK (5 business days, UNVERIFIED, OI-CMP-06) is not defined: fail closed, no invented value.
         new(ComplaintReply, "Complaint reply deadline", StatutoryClockKind.Deadline, "P50D", "GR",
             ClockLegalStatus.SecondarySource, "BoG Executive Committee Act 88/5.4.2016 (PRD-11 OBL-COMP, OI-CMP-06)", WarnBefore: "P7D"),
+
+        // MTPL third-party exposure clocks (BO-CLM-05, D-REG-04, D7). Values as stated in PRD-07; OQ-008: not legally confirmed, so UNVERIFIED
+        // and refused by CLM in Production. TODO(hardening): the assessment length is 15 or 25 days by case; the longer one is seeded.
+        new(ClmMtplOffer, "MTPL reasoned offer deadline", StatutoryClockKind.Deadline, "P3M", "GR",
+            ClockLegalStatus.Unverified, "PRD-07 / D-REG-04: 3 months from the claim notice (OQ-008)", WarnBefore: "P14D"),
+        new(ClmMtplAssessment, "MTPL damage assessment deadline", StatutoryClockKind.Deadline, "P25D", "GR",
+            ClockLegalStatus.Unverified, "PRD-07 / D-REG-04: 15/25 days (OQ-008)", WarnBefore: "P5D"),
+        new(ClmMtplPayment, "MTPL payment deadline", StatutoryClockKind.Deadline, "P10D", "GR",
+            ClockLegalStatus.Unverified, "PRD-07 / D-REG-04: 10 days from proven offer delivery (OQ-008); started by the statutory offer", WarnBefore: "P2D"),
+        new(ClmMtplRepair, "MTPL repair in kind deadline", StatutoryClockKind.Deadline, "P20D", "GR",
+            ClockLegalStatus.Unverified, "PRD-07 / D7: 20 days (OQ-008); started by the statutory offer", WarnBefore: "P3D"),
     ];
 
     public static ClockDefinition? Find(string code) => All.FirstOrDefault(d => string.Equals(d.Code, code, StringComparison.Ordinal));

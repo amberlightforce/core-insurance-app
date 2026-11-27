@@ -45,6 +45,7 @@ internal sealed class CreateExposureHandler(
     IEventPublisher events,
     ClaimProtection protection,
     ClaimReader reader,
+    ExposureClocks exposureClocks,
     IOptions<ClaimsOptions> options,
     Microsoft.Extensions.Hosting.IHostEnvironment environment) : ICommandHandler<CreateExposure, ExposureCreateResponse>
 {
@@ -81,11 +82,13 @@ internal sealed class CreateExposureHandler(
         var actor = context.Actor.ToString();
         var partyId = request.ClaimantPartyId ?? claim.InsuredPartyId;
 
-        // D-SL4-09: MTPL exposures of third parties have no statutory clocks yet (statutory_clocks = NOT_TRACKED); Production refuses them.
-        if (request.Kind is ExposureKind.MtplPd or ExposureKind.MtplBi && partyId != claim.InsuredPartyId
-            && Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsProduction(environment))
+        // BO-CLM-05: a third-party MTPL exposure runs its offer and assessment clocks in CMP. Their values are UNVERIFIED (D-REG-04, OQ-008),
+        // so Production refuses to open one until the clock definitions are Verified or SecondarySource (D-USR-19).
+        var tracked = ExposureClocks.Applies(request.Kind, partyId != claim.InsuredPartyId);
+        if (tracked && Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsProduction(environment)
+            && await exposureClocks.HasUnconfirmedValueAsync(cancellationToken).ConfigureAwait(false))
         {
-            return DomainError.Of(ModuleCode.CLM, "MTPL-CLOCKS-REQUIRED", "Third-party MTPL exposures need statutory clocks, which are not available yet.");
+            return DomainError.Of(ModuleCode.CLM, "MTPL-CLOCKS-REQUIRED", "Third-party MTPL exposures need statutory clocks whose values are legally confirmed.");
         }
         var claimant = await db.Claimants.SingleOrDefaultAsync(c => c.ClaimId == claim.ClaimId && c.PartyId == partyId, cancellationToken).ConfigureAwait(false);
         if (claimant is null)
@@ -114,6 +117,13 @@ internal sealed class CreateExposureHandler(
         var exposure = SubmitFnolHandler.NewExposure(
             claim, claim.LastExposureSequence, Codes.Of(request.Kind), request.CoverageCode, claimant.ClaimantId, request.IncidentId, request.DuplicateReason,
             indication, now, actor);
+        if (tracked)
+        {
+            // The clocks run from the claim notice (D-REG-04); the exposure id keys them, so a retry finds the same instances.
+            exposure.StatutoryClocks = await exposureClocks.StartAsync(
+                exposure.ExposureId, claim.NoticeOn.StartOfDayIn(options.Value.Zone), "create", cancellationToken).ConfigureAwait(false);
+        }
+
         db.Exposures.Add(exposure);
 
         (claim.Status, claim.SubStatus) = ClaimStates.ToColumns(next.Value);

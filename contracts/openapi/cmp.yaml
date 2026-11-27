@@ -7296,7 +7296,7 @@ components:
           type: string
         legalStatus:
           type: string
-          description: 'VERIFIED, SECONDARY_SOURCE or ILLUSTRATIVE'
+          description: 'VERIFIED, SECONDARY_SOURCE, ILLUSTRATIVE or UNVERIFIED'
         source:
           type: string
           description: 'Legal or PRD source'
@@ -7340,7 +7340,7 @@ components:
           type: string
         legalStatus:
           type: string
-          description: 'VERIFIED, SECONDARY_SOURCE or ILLUSTRATIVE'
+          description: 'VERIFIED, SECONDARY_SOURCE, ILLUSTRATIVE or UNVERIFIED'
         source:
           type: string
           description: 'Legal or PRD source'
