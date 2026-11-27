@@ -606,6 +606,125 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                     b.ToTable("signoff_waiver", "mig");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Staging.StagingRecordRow", b =>
+                {
+                    b.Property<Guid>("RecordId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("record_id");
+
+                    b.Property<string>("LegacyKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legacy_key");
+
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("object_type");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.Property<string>("RowHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("row_hash");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer")
+                        .HasColumnName("seq");
+
+                    b.Property<Guid>("SnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("snapshot_id");
+
+                    b.HasKey("RecordId")
+                        .HasName("pk_staging_record");
+
+                    b.HasIndex("SnapshotId", "Seq")
+                        .IsUnique()
+                        .HasDatabaseName("ux_staging_record_seq");
+
+                    b.HasIndex("SnapshotId", "ObjectType", "LegacyKey")
+                        .HasDatabaseName("ix_staging_record_key");
+
+                    b.ToTable("staging_record", "mig");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Staging.StagingSnapshotRow", b =>
+                {
+                    b.Property<Guid>("SnapshotId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("snapshot_id");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content_hash");
+
+                    b.Property<string>("Counts")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("counts");
+
+                    b.Property<string>("Format")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("format");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime>("LoadedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("loaded_at");
+
+                    b.Property<string>("LoadedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("loaded_by");
+
+                    b.Property<int>("RecordCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("record_count");
+
+                    b.Property<string>("Snapshot")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("snapshot");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("SnapshotId")
+                        .HasName("pk_staging_snapshot");
+
+                    b.HasIndex("LegalEntityId", "Source", "Snapshot", "Version")
+                        .IsUnique()
+                        .HasDatabaseName("ux_staging_snapshot_version");
+
+                    b.ToTable("staging_snapshot", "mig", t =>
+                        {
+                            t.HasCheckConstraint("ck_staging_snapshot_status", "status IN ('ACTIVE','SUPERSEDED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Platform.Persistence.DsarRestrictionRow", b =>
                 {
                     b.Property<Guid>("RestrictionId")
@@ -659,6 +778,16 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_signoff_signatory_signoff");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Staging.StagingRecordRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Migration.Services.Staging.StagingSnapshotRow", null)
+                        .WithMany()
+                        .HasForeignKey("SnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_staging_record_snapshot");
                 });
 #pragma warning restore 612, 618
         }

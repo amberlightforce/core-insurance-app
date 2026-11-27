@@ -8,6 +8,7 @@ using CoreIns.Modules.Migration.Persistence;
 using CoreIns.Modules.Migration.Services;
 using CoreIns.Modules.Migration.Services.Reconciliation;
 using CoreIns.Modules.Migration.Services.SignOff;
+using CoreIns.Modules.Migration.Services.Staging;
 using CoreIns.Platform;
 using CoreIns.Platform.Approvals;
 using CoreIns.Platform.Commands;
@@ -88,6 +89,9 @@ public static class MigrationModule
         services.AddCommand<RequestSignOff, SignOffStatusView, RequestSignOffHandler>(CommandDescriptor.For("mig.Signoff.request"));
         services.AddCommand<ApproveSignOff, SignOffStatusView, SignOffDecisionHandler>(CommandDescriptor.For("mig.Signoff.approve"));
         services.AddCommand<RejectSignOff, SignOffStatusView, SignOffDecisionHandler>(CommandDescriptor.For("mig.Signoff.reject"));
+
+        services.AddScoped<LegacyStaging>();
+        services.AddCommand<LoadStaging, StagingSnapshotView, LoadStagingHandler>(CommandDescriptor.For("mig.Staging.load"));
 
         services.AddScoped<IMigrationXrefService, MigrationXrefService>();
         services.AddScoped<IMigrationRoutingService, MigrationRoutingService>();
