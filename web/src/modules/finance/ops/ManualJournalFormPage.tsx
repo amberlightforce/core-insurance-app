@@ -20,7 +20,7 @@ import { PageHeader, Section } from '../../staff/PageHeader';
 import { ProblemBanner } from '../../staff/ProblemBanner';
 import styles from '../../staff/staff.module.css';
 import { useFormat } from '../../staff/useFormat';
-import { useSubmitManualJournal } from './api';
+import { useCreateManualJournal } from './api';
 import { lineTotals } from './journalMath';
 import type { ManualJournalSubmitRequest } from './types';
 
@@ -34,8 +34,8 @@ interface DraftLine {
 const currency = 'EUR';
 
 /**
- * New manual journal (fin.ManualJournal.submit). The maker proposes balanced lines with an evidence reference; the
- * journal posts only when a second user approves it (four-eyes). Unbalanced or evidence-less input is stopped here
+ * New manual journal (fin.ManualJournal.create). The maker saves balanced lines with an evidence reference as a draft; the
+ * journal posts only after it is submitted and a second user approves it (four-eyes, BO-FIN-01b). Unbalanced or evidence-less input is stopped here
  * and again by the server (FIN-ERR-UNBALANCED, FIN-ERR-EVIDENCE-REQUIRED).
  */
 export function ManualJournalFormPage() {
@@ -54,7 +54,7 @@ export function ManualJournalFormPage() {
   ]);
   const [submitted, setSubmitted] = useState(0);
 
-  const mutation = useSubmitManualJournal((response) => {
+  const mutation = useCreateManualJournal((response) => {
     release();
     announce(t('ops.manual.form.submitted'));
     void navigate(`/finance/manual-journals/${encodeURIComponent(response.manualJournal.id)}`);

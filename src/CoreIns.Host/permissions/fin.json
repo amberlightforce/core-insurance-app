@@ -8,7 +8,11 @@
         "fin.Balance.trialBalance": [ "Staff.Finance", "Platform.Admin" ],
         "fin.IntakeException.list": [ "Staff.Finance", "Platform.Admin" ],
         "fin.Period.list": [ "Staff.Finance", "Platform.Admin" ],
-        "fin.Period.devLock": [ "Staff.Finance", "Platform.Admin" ]
+        "fin.Period.devLock": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.ManualJournal.create": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.ManualJournal.list": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.ManualJournal.get": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.ManualJournal.withdraw": [ "Staff.Finance", "Platform.Admin" ]
       }
     }
   }
