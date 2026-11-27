@@ -9,7 +9,13 @@
       "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     },
     "doc.Clause.get": {
-      "objects": "unspecified"
+      "clauseId": "0192d226-8b4f-7da6-8358-db1544e504ce",
+      "code": "sample",
+      "titleEl": "sample",
+      "textEl": "sample",
+      "titleEn": "sample",
+      "textEn": "sample",
+      "status": "sample"
     },
     "doc.Delivery.evidenceFor": {
       "statuses": "unspecified",
@@ -150,16 +156,26 @@
       "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     },
     "BindingResolveRequest": {
-      "productVersion": "unspecified",
-      "form": "unspecified",
-      "language": "el",
-      "channel": "unspecified"
+      "documentType": "sample",
+      "productCode": "sample",
+      "lineOfBusiness": "sample",
+      "jurisdiction": "sample",
+      "language": "el"
     },
     "BindingResolveResponse": {
-      "templateVersion": "unspecified"
+      "templateId": "01929beb-cd29-720a-878c-7267e62d27a6",
+      "documentType": "sample",
+      "version": 1,
+      "language": "el"
     },
     "ClauseGetResponse": {
-      "objects": "unspecified"
+      "clauseId": "019209e6-36f2-7ac3-8ee5-a09f0bac1dca",
+      "code": "sample",
+      "titleEl": "sample",
+      "textEl": "sample",
+      "titleEn": "sample",
+      "textEn": "sample",
+      "status": "sample"
     },
     "DeliveryEvidenceForResponse": {
       "statuses": "unspecified",
@@ -303,12 +319,24 @@
       "status": "unspecified"
     },
     "DocumentTypeListItem": {
-      "types": "unspecified"
+      "documentType": "sample",
+      "defaultMedium": "sample",
+      "titleEl": "sample",
+      "titleEn": "sample",
+      "requiredFields": [
+        "sample"
+      ]
     },
     "DocumentTypeListPage": {
       "items": [
         {
-          "types": "unspecified"
+          "documentType": "sample",
+          "defaultMedium": "sample",
+          "titleEl": "sample",
+          "titleEn": "sample",
+          "requiredFields": [
+            "sample"
+          ]
         }
       ],
       "nextCursor": "sample",
@@ -463,12 +491,32 @@
       "perItemOutcomes": "unspecified"
     },
     "TemplateListItem": {
-      "objects": "unspecified"
+      "templateId": "0192b5cf-2b5d-7961-88b2-80208abaf928",
+      "documentType": "sample",
+      "version": 1,
+      "status": "sample",
+      "validFrom": "2026-10-07",
+      "validTo": "2026-10-07",
+      "productCode": "sample",
+      "lineOfBusiness": "sample",
+      "jurisdiction": "sample",
+      "titleEl": "sample",
+      "titleEn": "sample"
     },
     "TemplateListPage": {
       "items": [
         {
-          "objects": "unspecified"
+          "templateId": "01921bb7-8c8c-7b39-8342-5cb015edeac4",
+          "documentType": "sample",
+          "version": 1,
+          "status": "sample",
+          "validFrom": "2026-10-07",
+          "validTo": "2026-10-07",
+          "productCode": "sample",
+          "lineOfBusiness": "sample",
+          "jurisdiction": "sample",
+          "titleEl": "sample",
+          "titleEn": "sample"
         }
       ],
       "nextCursor": "sample",

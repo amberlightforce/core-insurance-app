@@ -20,11 +20,17 @@ namespace CoreIns.Modules.Party.Api;
 internal static class PartyPermissions
 {
     public const string Create = "pty.Party.create";
+    public const string Update = "pty.Party.update";
+    public const string Validate = "pty.Party.validate";
+    public const string IdentifierVerify = "pty.Identifier.verify";
     public const string Get = "pty.Party.get";
     public const string Search = "pty.Party.search";
     public const string RevealP2 = "pty.Party.revealP2";
     public const string IntermediaryCreate = "pty.Intermediary.create";
     public const string IntermediaryUpdate = "pty.Intermediary.update";
+    public const string IntermediarySuspend = "pty.Intermediary.suspend";
+    public const string IntermediaryTerminate = "pty.Intermediary.terminate";
+    public const string IntermediaryImportRegister = "pty.Intermediary.importRegister";
     public const string ProducerCodeValidate = "pty.ProducerCode.validate";
     public const string ProducerCodeSearch = "pty.ProducerCode.search";
     public const string VulnerabilityQuery = "pty.Vulnerability.query";
@@ -51,6 +57,31 @@ internal sealed class PartiesController : ControllerBase
         return result.IsSuccess
             ? Results.Created($"/api/pty/v1/parties/{result.Value.Party.PartyId.Value}", result.Value)
             : HttpResults.Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>pty.Party.update (PATCH): name, birth date, language; optimistic <c>expectedRecordVersion</c>, dry-run supported.</summary>
+    [HttpPatch("{id}")]
+    [Authorize(Policy = PartyPermissions.Update)]
+    public async Task<IResult> UpdateAsync(
+        string id, [FromBody] PartyUpdateRequest request, [FromServices] ICommandHandler<UpdateParty, PartyUpdateResponse> handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new UpdateParty(id, request), cancellationToken).ConfigureAwait(false);
+        return result.ToHttpResult(HttpContext);
+    }
+
+    /// <summary>pty.Party.validate: the create rules, identifier checks and duplicate candidates without saving; personal data stays in the body.</summary>
+    [HttpPost("validate")]
+    [SkipIdempotency]
+    [Authorize(Policy = PartyPermissions.Validate)]
+    public async Task<IResult> ValidateAsync(
+        [FromBody] PartyValidateRequest request, [FromServices] PartyValidationService service, CancellationToken cancellationToken)
+    {
+        if (request.PartyData is null)
+        {
+            return HttpResults.Problem(DomainError.Of(ModuleCode.PTY, "VALIDATION", "partyData is required."), HttpContext);
+        }
+
+        return (await service.ValidateAsync(request, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
     }
 
     /// <summary>pty.Party.get (by id, or by number with <c>partyNumber</c>); P2 masked unless <c>revealPurpose</c> is given.</summary>
@@ -155,4 +186,20 @@ internal static class HttpResults
 {
     public static IResult Problem(DomainError error, HttpContext http) =>
         http.RequestServices.GetRequiredService<ProblemDetailsMapper>().ToResult(error, http);
+}
+
+/// <summary>REST facade of <c>pty.Identifier.*</c>.</summary>
+[ApiController]
+[Route("api/pty/v1/identifiers")]
+internal sealed class IdentifiersController : ControllerBase
+{
+    /// <summary>pty.Identifier.verify: re-checks a party's identifier and records the outcome.</summary>
+    [HttpPost("verify")]
+    [Authorize(Policy = PartyPermissions.IdentifierVerify)]
+    public async Task<IResult> VerifyAsync(
+        [FromBody] IdentifierVerifyRequest request, [FromServices] ICommandHandler<VerifyIdentifier, IdentifierVerifyResponse> handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new VerifyIdentifier(request), cancellationToken).ConfigureAwait(false);
+        return result.ToHttpResult(HttpContext);
+    }
 }

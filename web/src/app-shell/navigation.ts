@@ -1,16 +1,5 @@
-import {
-  aiAdminRoles,
-  claimsRoles,
-  complianceRoles,
-  dsarRoles,
-  migrationRoles,
-  packRoles,
-  productRoles,
-  reinsuranceRoles,
-  underwritingRoles,
-  withdrawalRoles,
-} from '../auth/roles';
 import type { ModuleIconName } from '../design-system/icons';
+import { collectModules, type ModuleNav } from './moduleRegistry';
 
 /** A rail destination. The label comes from `shell:nav.<id>`; the icon from the fixed module icons. */
 export interface NavItem {
@@ -36,69 +25,13 @@ export {
   withdrawalRoles,
 } from '../auth/roles';
 
-/** Default staff navigation (role-configured order arrives with PLT; Part 1 §3.4). */
-export const defaultNavItems: NavItem[] = [
-  { id: 'home', to: '/' },
-  { id: 'work', to: '/work' },
-  { id: 'parties', to: '/parties' },
-  { id: 'policies', to: '/policies' },
-  { id: 'underwriting', to: '/underwriting', roles: underwritingRoles },
-  {
-    id: 'policies',
-    to: '/policies/pack-rollback',
-    label: 'packRollback',
-    icon: 'packRollback',
-    roles: underwritingRoles,
-  },
-  {
-    id: 'policies',
-    to: '/channels/withdrawals',
-    label: 'withdrawals',
-    icon: 'withdrawals',
-    roles: withdrawalRoles,
-  },
-  { id: 'claims', to: '/claims', roles: claimsRoles },
-  {
-    id: 'claims',
-    to: '/claims/fs-statements',
-    label: 'fsStatements',
-    icon: 'fsStatements',
-    roles: claimsRoles,
-  },
-  { id: 'billing', to: '/billing' },
-  {
-    id: 'reinsurance',
-    to: '/reinsurance',
-    roles: reinsuranceRoles,
-  },
-  { id: 'finance', to: '/finance' },
-  { id: 'documents', to: '/documents' },
-  { id: 'compliance', to: '/compliance', roles: complianceRoles },
-  {
-    id: 'compliance',
-    to: '/compliance/dsar',
-    label: 'dsar',
-    icon: 'dsar',
-    roles: dsarRoles,
-  },
-  { id: 'reports', to: '/reports' },
-  { id: 'products', to: '/products', roles: productRoles },
-  { id: 'admin', to: '/admin/packs', label: 'packs', icon: 'packs', roles: packRoles },
-  {
-    id: 'admin',
-    to: '/admin/migration',
-    label: 'migration',
-    icon: 'migration',
-    roles: migrationRoles,
-  },
-  {
-    id: 'admin',
-    to: '/admin/ai',
-    label: 'aiControl',
-    icon: 'aiControl',
-    roles: aiAdminRoles,
-  },
-];
+/**
+ * Default staff navigation, collected from every `modules/<mod>/nav.ts` and ordered by its `order`
+ * (role-configured order arrives with PLT; Part 1 §3.4).
+ */
+export const defaultNavItems: NavItem[] = collectModules(
+  import.meta.glob<{ default: ModuleNav }>('../modules/*/nav.ts', { eager: true }),
+).flatMap((module) => module.items);
 
 /** Entries without a `roles` restriction are visible to everyone; restricted ones need one of their roles. */
 export function visibleNavItems(items: NavItem[], userRoles: readonly string[]): NavItem[] {
