@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useIdempotencyKey } from '../../api/idempotency';
-import { Banner, Button, Checkbox, KeyValueList, announce } from '../../design-system';
+import { Banner, Button, Checkbox, KeyValueList, announce, cx } from '../../design-system';
 import { PortalProblem, PortalSection } from '../ui/PortalUi';
 import { usePortalFormat } from '../ui/hooks';
 import { useCodeLabel } from '../ui/labels';
+import rows from '../ui/pages.module.css';
 import styles from '../ui/portal.module.css';
 import {
   confirmChange,
@@ -107,7 +108,7 @@ export function ChangeCoverageSection({ policy }: { policy: PortalPolicy }) {
       {policy.coverages.length === 0 ? (
         <p className={styles.muted}>{t('chg.noCoverages')}</p>
       ) : (
-        <fieldset className={styles.stack} disabled={offer !== undefined}>
+        <fieldset className={cx(styles.stack, rows.fieldset)} disabled={offer !== undefined}>
           <legend className={styles.muted}>{t('chg.coverages')}</legend>
           {policy.coverages.map((c) => (
             <Checkbox
