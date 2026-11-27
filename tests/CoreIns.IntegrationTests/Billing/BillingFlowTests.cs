@@ -304,7 +304,7 @@ public sealed class BillingFlowTests(PostgresFixture database) : IClassFixture<P
         {
             var payload = (JsonObject)Retarget(deltas[i], term, transaction).Payload.DeepClone();
             payload["chargeId"] = Guid.CreateVersion7().ToString();
-            var delta = Retarget(deltas[i], term, transaction) with { Payload = payload, Set = new EventSet(Guid.Parse(transaction), i + 1, deltas.Count) };
+            var delta = Retarget(deltas[i], term, transaction) with { Payload = payload, Set = new EventSet(Guid.Parse(transaction), deltas.Count, i + 1) };
             (await _slice.InvokeAsync("BIL.ChargeDeltaEmitted.Intake", delta)).ShouldBeTrue();
         }
 
