@@ -560,8 +560,6 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/reinstatements
 CONTRACT_NOT_SERVED POST /api/pol/v1/renewal-runs/pause
 CONTRACT_NOT_SERVED POST /api/pol/v1/renewal-runs/retry-item
 CONTRACT_NOT_SERVED POST /api/pol/v1/renewal-runs/start
-CONTRACT_NOT_SERVED POST /api/pol/v1/renewals/decline
-CONTRACT_NOT_SERVED POST /api/pol/v1/renewals/non-renew
 CONTRACT_NOT_SERVED POST /api/pol/v1/rewrites
 CONTRACT_NOT_SERVED POST /api/pol/v1/suspensions
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/merge
