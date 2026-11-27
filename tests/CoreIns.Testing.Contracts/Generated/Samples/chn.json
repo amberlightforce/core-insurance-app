@@ -461,6 +461,36 @@
       "results": "unspecified",
       "diff": "unspecified"
     },
+    "PortalCoverage": {
+      "coverageCode": "sample",
+      "selected": true
+    },
+    "PortalDashboardResponse": {
+      "policyCount": 1,
+      "activePolicyCount": 1,
+      "renewalsDue": [
+        {
+          "policyId": "0192977d-a166-7512-895d-a794f51ea2e1",
+          "policyNumber": "SAMPLE-000001",
+          "productCode": "SAMPLE_CODE",
+          "expiresAt": "2026-10-07T09:00:00Z",
+          "daysLeft": 1
+        }
+      ],
+      "unpaidInvoices": [
+        {
+          "invoiceId": "019238ca-6523-7034-8288-f1a9563fa333",
+          "invoiceNumber": "SAMPLE-000001",
+          "policyId": "01928797-36ba-799f-87ba-735a1b7c747d",
+          "dueDate": "2026-10-07",
+          "open": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "overdue": true
+        }
+      ]
+    },
     "PortalIdentityLinkRequest": {
       "subject": "sample",
       "partyId": "0192d71d-2643-7250-8e46-b7789f8eb880",
@@ -489,6 +519,104 @@
       "linkedBy": "sample",
       "unlinkedAt": "2026-10-07T09:00:00Z",
       "unlinkedBy": "sample"
+    },
+    "PortalMeResponse": {
+      "subject": "sample",
+      "partyId": "0192f76d-4b37-7e5b-8f76-42dbc58bf8f6",
+      "accountIds": [
+        "0192200f-1646-7bca-8053-96cdb96bbc99"
+      ],
+      "householdSize": 1
+    },
+    "PortalPolicyDetailResponse": {
+      "policyId": "0192776f-7489-79d7-8ac5-3772711ec29b",
+      "policyNumber": "SAMPLE-000001",
+      "productCode": "SAMPLE_CODE",
+      "status": "sample",
+      "ownership": "OWN",
+      "termNumber": 1,
+      "termStart": "2026-10-07T09:00:00Z",
+      "termEnd": "2026-10-07T09:00:00Z",
+      "currency": "EUR",
+      "paymentPlan": "sample",
+      "coverages": [
+        {
+          "coverageCode": "sample",
+          "selected": true
+        }
+      ],
+      "vehicles": [
+        {
+          "plate": "sample",
+          "make": "sample",
+          "model": "sample",
+          "firstRegistrationYear": 1
+        }
+      ],
+      "premium": [
+        {
+          "category": "sample",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
+    },
+    "PortalPolicyListItem": {
+      "policyId": "01921e65-f552-7a5b-8da6-170bdc7d390e",
+      "policyNumber": "SAMPLE-000001",
+      "productCode": "SAMPLE_CODE",
+      "status": "sample",
+      "termStart": "2026-10-07T09:00:00Z",
+      "termEnd": "2026-10-07T09:00:00Z",
+      "ownership": "OWN"
+    },
+    "PortalPolicyListResponse": {
+      "items": [
+        {
+          "policyId": "01923cd3-c48b-7382-80e8-11e220efc936",
+          "policyNumber": "SAMPLE-000001",
+          "productCode": "SAMPLE_CODE",
+          "status": "sample",
+          "termStart": "2026-10-07T09:00:00Z",
+          "termEnd": "2026-10-07T09:00:00Z",
+          "ownership": "OWN"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "PortalPremiumLine": {
+      "category": "sample",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "PortalRenewalDue": {
+      "policyId": "019239e6-e961-7bd3-891a-b1e533778eee",
+      "policyNumber": "SAMPLE-000001",
+      "productCode": "SAMPLE_CODE",
+      "expiresAt": "2026-10-07T09:00:00Z",
+      "daysLeft": 1
+    },
+    "PortalUnpaidInvoice": {
+      "invoiceId": "01922784-59d6-7e61-87cd-6d6c58a49026",
+      "invoiceNumber": "SAMPLE-000001",
+      "policyId": "01921cb5-b47c-7a66-8a95-c0dbf472d54f",
+      "dueDate": "2026-10-07",
+      "open": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "overdue": true
+    },
+    "PortalVehicle": {
+      "plate": "sample",
+      "make": "sample",
+      "model": "sample",
+      "firstRegistrationYear": 1
     },
     "PurchaseConfirmRequest": {
       "jobRef": "unspecified",
