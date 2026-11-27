@@ -895,6 +895,8 @@ CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/submit
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/to-complaint
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/withdraw
 CONTRACT_NOT_SERVED POST /api/wrk/v1/search/global
+SERVED_NOT_IN_CONTRACT GET /api/bil/v1/billing-ops/plan-instances
+SERVED_NOT_IN_CONTRACT GET /api/bil/v1/billing-ops/suspense
 SERVED_NOT_IN_CONTRACT GET /api/bil/v1/migrated-records/mandates
 SERVED_NOT_IN_CONTRACT GET /api/bil/v1/migrated-records/receivables
 SERVED_NOT_IN_CONTRACT GET /api/mkt/v1/pack-activations

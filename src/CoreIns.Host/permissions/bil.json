@@ -39,7 +39,10 @@
         // NX-HD-08c: levy/IPT accrual reads (finance + billing manager) and the migrated-records inspection lists (billing staff).
         "bil.TaxLevy.periods": [ "Staff.Finance", "Staff.BillingManager", "Platform.Admin" ],
         "bil.TaxLevy.detail": [ "Staff.Finance", "Staff.BillingManager", "Platform.Admin" ],
-        "bil.MigratedRecord.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ]
+        "bil.MigratedRecord.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        // NX-UI-14c: suspense workbench list and plan instances for the billing operations screens.
+        "bil.Suspense.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.PlanInstance.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ]
       }
     },
     "Authority": {
