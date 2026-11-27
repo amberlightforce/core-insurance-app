@@ -9,6 +9,9 @@ using CoreIns.Platform.Contracts;
 using CoreIns.Platform.Contracts.Api;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Time;
+using CoreIns.Modules.Migration.Services.Mapping;
+using CoreIns.Modules.Migration.Services.Waves;
+using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
 using FluentValidation;
@@ -54,6 +57,49 @@ internal static class BatchContent
         Sha256Hash.ComputeUtf8(Canonical(items.OrderBy(i => i.Seq).Select(i => (i.ModuleName, i.ObjectType, i.LegacyId, i.Payload)), batch.BaselineHash)).Value;
 }
 
+/// <summary>Builds the rows of a new DRAFT batch: its ordered items, the baseline configuration hash H0 and the content hash (shared by mig.Batch.create and the wave conversion).</summary>
+internal static class BatchBuilder
+{
+    public static async Task<BatchRow> AddAsync(
+        MigrationDbContext db, IServiceProvider services, LegalEntityId legalEntity, string name, IReadOnlyList<(string Module, string ObjectType, string LegacyId, string Payload)> items,
+        Instant now, Guid? mappingSpecId, string? mappingContentHash, CancellationToken cancellationToken)
+    {
+        // H0: the configuration state the migrated transactions reference (SL5 MKT state history).
+        string? baseline = null;
+        if (services.GetService<IMarketConfigurationService>() is { } market)
+        {
+            baseline = (await market.CurrentHashAsync(cancellationToken).ConfigureAwait(false)).Hash?.Value;
+        }
+
+        var batch = new BatchRow
+        {
+            BatchId = Guid.CreateVersion7(),
+            LegalEntityId = legalEntity,
+            Name = name,
+            Status = BatchStatus.Draft,
+            BaselineHash = baseline,
+            ContentHash = Sha256Hash.ComputeUtf8(BatchContent.Canonical(items, baseline)).Value,
+            MappingSpecId = mappingSpecId,
+            MappingContentHash = mappingContentHash,
+            CreatedAt = now,
+            UpdatedAt = now,
+            RecordVersion = 1,
+        };
+        db.Batches.Add(batch);
+        var seq = 0;
+        foreach (var item in items)
+        {
+            db.Items.Add(new BatchItemRow
+            {
+                ItemId = Guid.CreateVersion7(), BatchId = batch.BatchId, Seq = ++seq, ModuleName = item.Module, ObjectType = item.ObjectType,
+                LegacyId = item.LegacyId, Payload = item.Payload, Outcome = ItemOutcome.Pending,
+            });
+        }
+
+        return batch;
+    }
+}
+
 /// <summary>mig.Batch.create: stores the ordered items of a batch and records the baseline configuration hash H0.</summary>
 internal sealed record CreateBatch(CreateBatchRequest Request) : ICommand<BatchResponse>;
 
@@ -88,38 +134,9 @@ internal sealed class CreateBatchHandler(
             return DomainError.Of(ModuleCode.MIG, MigrationErrors.Validation, $"Legacy id {dup.Key.Module}/{dup.Key.ObjectType}/{dup.Key.LegacyId} appears twice in the batch.");
         }
 
-        // H0: the configuration state the migrated transactions reference (SL5 MKT state history).
-        string? baseline = null;
-        if (services.GetService<IMarketConfigurationService>() is { } market)
-        {
-            baseline = (await market.CurrentHashAsync(cancellationToken).ConfigureAwait(false)).Hash?.Value;
-        }
-
-        var canonical = string.Join('\n', items.Select(i => $"{i.Module}|{i.ObjectType}|{i.LegacyId}|{i.Payload.GetRawText()}")) + "\n" + baseline;
-        var now = clock.Now;
-        var batch = new BatchRow
-        {
-            BatchId = Guid.CreateVersion7(),
-            LegalEntityId = legalEntity,
-            Name = request.Name,
-            Status = BatchStatus.Draft,
-            BaselineHash = baseline,
-            ContentHash = Sha256Hash.ComputeUtf8(canonical).Value,
-            CreatedAt = now,
-            UpdatedAt = now,
-            RecordVersion = 1,
-        };
-        db.Batches.Add(batch);
-        var seq = 0;
-        foreach (var item in items)
-        {
-            db.Items.Add(new BatchItemRow
-            {
-                ItemId = Guid.CreateVersion7(), BatchId = batch.BatchId, Seq = ++seq, ModuleName = item.Module, ObjectType = item.ObjectType,
-                LegacyId = item.LegacyId, Payload = item.Payload.GetRawText(), Outcome = ItemOutcome.Pending,
-            });
-        }
-
+        var batch = await BatchBuilder.AddAsync(
+            db, services, legalEntity, request.Name, [.. items.Select(i => (i.Module, i.ObjectType, i.LegacyId, i.Payload.GetRawText()))], clock.Now, null, null, cancellationToken)
+            .ConfigureAwait(false);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return await Batches.ResponseAsync(db, batch, cancellationToken).ConfigureAwait(false);
     }
@@ -129,7 +146,7 @@ internal sealed class CreateBatchHandler(
 /// Dispatches batch items to the module importers. Idempotent: an item whose legacy id has an active xref is
 /// SKIPPED_EXISTING and the importer is not called.
 /// </summary>
-internal sealed class BatchRunner(MigrationDbContext db, IEnumerable<IMigrationImporter> importers, RequestContext context, IClock clock)
+internal sealed class BatchRunner(MigrationDbContext db, IEnumerable<IMigrationImporter> importers, RequestContext context, IClock clock, WaveConversion waves)
 {
     public async Task<List<OutcomeView>> RunAsync(BatchRow batch, IReadOnlyList<BatchItemRow> items, bool dryRun, CancellationToken cancellationToken)
     {
@@ -139,9 +156,23 @@ internal sealed class BatchRunner(MigrationDbContext db, IEnumerable<IMigrationI
         context.Origin = EventOrigin.Migration;
         try
         {
+            // A batch built by a wave converts policy terms: a term that is no longer offered is not imported, and an imported term flips its routing to CORE in the same save (BO-MIG-07).
+            var wave = dryRun ? null : await waves.LoadAsync(batch.BatchId, cancellationToken).ConfigureAwait(false);
             foreach (var item in items.OrderBy(i => i.Seq))
             {
+                if (wave is not null && WaveConversion.Refuse(wave, item) is { } refusal)
+                {
+                    Set(item, ItemOutcome.Failed, null, "MIG-ERR-BATCH-STATE", refusal);
+                    results.Add(Batches.Outcome(item));
+                    continue;
+                }
+
                 await RunItemAsync(batch, item, importContext, dryRun, cancellationToken).ConfigureAwait(false);
+                if (wave is not null)
+                {
+                    await waves.AfterItemAsync(wave, item, cancellationToken).ConfigureAwait(false);
+                }
+
                 results.Add(Batches.Outcome(item));
             }
         }
@@ -217,7 +248,7 @@ internal sealed class BatchRunner(MigrationDbContext db, IEnumerable<IMigrationI
 internal sealed record StartBatch(StartBatchRequest Request) : ICommand<BatchResponse>;
 
 internal sealed class StartBatchHandler(
-    MigrationDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, BatchRunner runner, IServiceProvider services)
+    MigrationDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, BatchRunner runner, MappingService mappings, IServiceProvider services)
     : ICommandHandler<StartBatch, BatchResponse>
 {
     public async Task<Result<BatchResponse>> HandleAsync(StartBatch command, CancellationToken cancellationToken)
@@ -256,6 +287,12 @@ internal sealed class StartBatchHandler(
         if (batch.DryRunHash != batch.ContentHash)
         {
             return DomainError.Of(ModuleCode.MIG, "DRYRUN-REQUIRED", "Run the batch dry before the real run.");
+        }
+
+        if (batch.MappingSpecId is { } startSpec
+            && await mappings.LoadApprovedAsync(startSpec, batch.MappingContentHash, cancellationToken).ConfigureAwait(false) is { IsSuccess: false } startStale)
+        {
+            return startStale.Error;
         }
 
         // A content change after the dry run invalidates it (NX-EC-09): the approval must cover what was dry-run.
@@ -309,7 +346,7 @@ internal sealed record ApproveBatch(ApproveBatchRequest Request) : ICommand<Batc
 
 internal sealed class ApproveBatchHandler(
     MigrationDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, BatchProcessor processor,
-    IOptions<MigrationBatchOptions> options, IServiceProvider services)
+    IOptions<MigrationBatchOptions> options, MappingService mappings, IServiceProvider services)
     : ICommandHandler<ApproveBatch, BatchResponse>
 {
     public async Task<Result<BatchResponse>> HandleAsync(ApproveBatch command, CancellationToken cancellationToken)
@@ -338,6 +375,13 @@ internal sealed class ApproveBatchHandler(
         if (BatchContent.CurrentHash(batch, storedItems) != batch.ContentHash)
         {
             return DomainError.Of(ModuleCode.MIG, "APPROVAL-STALE", "The batch content changed after the dry run and the approval request; run it dry and request approval again.");
+        }
+
+        // The spec the items were mapped with must still be the approved one (BO-MIG-07).
+        if (!reject && batch.MappingSpecId is { } approveSpec
+            && await mappings.LoadApprovedAsync(approveSpec, batch.MappingContentHash, cancellationToken).ConfigureAwait(false) is { IsSuccess: false } approveStale)
+        {
+            return approveStale.Error;
         }
 
         var approvals = services.GetRequiredService<IPlatformApprovalService>();

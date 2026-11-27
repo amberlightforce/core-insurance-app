@@ -27,6 +27,7 @@ import {
   type MartDetail,
   type MartFigure,
   type MartRun,
+  type MartRunSummary,
 } from './martApi';
 import local from './reports.module.css';
 import { RunPill } from './RunPill';
@@ -131,7 +132,7 @@ function AdjustDialog({
   );
 }
 
-function Compare({ run, others }: { run: MartRun; others: MartRun[] }) {
+function Compare({ run, others }: { run: MartRun; others: MartRunSummary[] }) {
   const { t } = useTranslation('reports');
   const fmt = useFormat();
   const [other, setOther] = useState<string | null>(null);
@@ -201,7 +202,7 @@ function Compare({ run, others }: { run: MartRun; others: MartRun[] }) {
   );
 }
 
-function Detail({ detail, history }: { detail: MartDetail; history: MartRun[] }) {
+function Detail({ detail, history }: { detail: MartDetail; history: MartRunSummary[] }) {
   const { t } = useTranslation('reports');
   const fmt = useFormat();
   const session = useDevSession();
@@ -405,7 +406,7 @@ function Detail({ detail, history }: { detail: MartDetail; history: MartRun[] })
 }
 
 /** The selected run: header, figures with adjusted values, adjustments, sign-off, export and compare. */
-export function RunDetail({ runId, history }: { runId: string; history: MartRun[] }) {
+export function RunDetail({ runId, history }: { runId: string; history: MartRunSummary[] }) {
   const query = useRunDetail(runId);
   return (
     <QueryView query={query}>{(detail) => <Detail detail={detail} history={history} />}</QueryView>
