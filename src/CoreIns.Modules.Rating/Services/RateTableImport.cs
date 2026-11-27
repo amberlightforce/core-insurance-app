@@ -666,7 +666,7 @@ internal static partial class RateTableAnalyzer
 }
 
 /// <summary>Reads and writes <c>rat.rate_table_version</c> for the authoring operations; the only write is a content-hash insert (write-once).</summary>
-internal sealed class RateTableImportService(DbSession session, IClock clock, RequestContext context)
+internal sealed class RateTableImportService(DbSession session, IClock clock, RequestContext context, ILegalEntityDirectory legalEntities)
 {
     public async Task<RateTableValidateResponse> ValidateAsync(RateTableValidateRequest request, CancellationToken cancellationToken)
     {
@@ -724,6 +724,7 @@ internal sealed class RateTableImportService(DbSession session, IClock clock, Re
                     actor = context.Actor.ToString(),
                 }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
             created = inserted == 1;
+            await LinkChangeSetAsync(connection, request.ChangeSet, dto.Code, compiled.Hash, cancellationToken).ConfigureAwait(false);
         }
 
         var diff = latest is null || latest.Value.Hash == compiled.Hash
@@ -735,6 +736,42 @@ internal sealed class RateTableImportService(DbSession session, IClock clock, Re
             ValidationReport = Report(analysis),
             Diff = diff is null ? null : JsonSerializer.SerializeToElement(diff, ArtefactJson.Options),
         };
+    }
+
+    /// <summary>
+    /// Links the imported table to the open change set the request names (<c>changeSet</c>: the id, or <c>{ "changeSetId": id }</c>), so the artefact build
+    /// pins this hash for the table's slot. An unknown or non-open change set of the caller's legal entity is refused; no change set named means no link.
+    /// </summary>
+    private async Task LinkChangeSetAsync(System.Data.IDbConnection connection, JsonElement? changeSet, string slot, string hash, CancellationToken cancellationToken)
+    {
+        var text = changeSet switch
+        {
+            { ValueKind: JsonValueKind.String } s => s.GetString(),
+            { ValueKind: JsonValueKind.Object } o when o.TryGetProperty("changeSetId", out var id) && id.ValueKind == JsonValueKind.String => id.GetString(),
+            _ => null,
+        };
+        if (text is null)
+        {
+            return;
+        }
+
+        if (!Guid.TryParse(text, out var changeSetId))
+        {
+            throw new DomainException(DomainError.Of(ModuleCode.RAT, "IMPORT-INVALID", "changeSet must be the id of a rating change set."));
+        }
+
+        var legalEntity = context.LegalEntity is { } code ? legalEntities.Resolve(code).Value : throw new InvalidOperationException("The request context has no legal entity.");
+        var linked = await connection.ExecuteAsync(new CommandDefinition(
+            """
+            UPDATE rat.change_set SET tables = tables || jsonb_build_object(@slot::text, @hash::text), record_version = record_version + 1, updated_at = @now, updated_by = @actor
+             WHERE change_set_id = @id AND legal_entity_id = @legalEntity AND status = 'OPEN'
+            """,
+            new { id = changeSetId, legalEntity, slot, hash, now = clock.Now.ToUtcDateTime(), actor = context.Actor.ToString() }, session.Transaction,
+            cancellationToken: cancellationToken)).ConfigureAwait(false);
+        if (linked == 0)
+        {
+            throw new DomainException(DomainError.Of(ModuleCode.RAT, "IMPORT-INVALID", "The change set does not exist or is no longer open."));
+        }
     }
 
     public async Task<RateTableDiffResponse> DiffAsync(string? from, string? to, CancellationToken cancellationToken)

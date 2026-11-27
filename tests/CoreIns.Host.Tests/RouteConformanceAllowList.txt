@@ -635,13 +635,6 @@ CONTRACT_NOT_SERVED POST /api/rat/v1/pricing-modifications/propose
 CONTRACT_NOT_SERVED POST /api/rat/v1/pricing-modifications/withdraw
 CONTRACT_NOT_SERVED POST /api/rat/v1/rates/cancel-batch
 CONTRACT_NOT_SERVED POST /api/rat/v1/rates/rate-batch
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/build
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/cancel-schedule
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/return
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/rollback
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/schedule
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-artifacts/submit
-CONTRACT_NOT_SERVED POST /api/rat/v1/rating-change-sets
 CONTRACT_NOT_SERVED POST /api/rat/v1/shadow-runs/start
 CONTRACT_NOT_SERVED POST /api/rat/v1/shadow-runs/stop
 CONTRACT_NOT_SERVED POST /api/rat/v1/worksheets/attach
