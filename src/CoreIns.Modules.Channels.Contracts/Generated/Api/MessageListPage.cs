@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>Page of chn.Message.list results (cursor pagination, contract §3.5.5)</summary>
+/// <summary>Threads, latest activity first; messages inside a thread oldest first. A customer sees only their own threads; staff see all.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MessageListPage
 {

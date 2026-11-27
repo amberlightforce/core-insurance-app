@@ -61,6 +61,7 @@ public static class DocumentsModule
         services.AddCommand<ExportEvidencePack, EvidencePackExportResponse, ExportEvidencePackHandler>(CommandDescriptor.For("doc.EvidencePack.export"));
 
         services.AddScoped<IDocumentRequestService, DocumentRequestService>();
+        services.AddScoped<IDocumentContentService, DocumentContentService>();
 
         services.AddErrorDefinitions(Errors);
         return services;

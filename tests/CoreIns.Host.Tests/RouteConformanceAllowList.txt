@@ -25,8 +25,6 @@ CONTRACT_NOT_SERVED GET /api/chn/v1/book/changes
 CONTRACT_NOT_SERVED GET /api/chn/v1/claims/{}/tracking
 CONTRACT_NOT_SERVED GET /api/chn/v1/commission-statements
 CONTRACT_NOT_SERVED GET /api/chn/v1/languages/{}
-CONTRACT_NOT_SERVED GET /api/chn/v1/messages
-CONTRACT_NOT_SERVED GET /api/chn/v1/notifications
 CONTRACT_NOT_SERVED GET /api/chn/v1/policies/{}
 CONTRACT_NOT_SERVED GET /api/chn/v1/policies/{}/cover-note
 CONTRACT_NOT_SERVED GET /api/chn/v1/products/{}/describe
@@ -249,9 +247,6 @@ CONTRACT_NOT_SERVED POST /api/chn/v1/journeys/resume
 CONTRACT_NOT_SERVED POST /api/chn/v1/journeys/save
 CONTRACT_NOT_SERVED POST /api/chn/v1/journeys/start
 CONTRACT_NOT_SERVED POST /api/chn/v1/languages/set
-CONTRACT_NOT_SERVED POST /api/chn/v1/messages/send
-CONTRACT_NOT_SERVED POST /api/chn/v1/notification-subscriptions/set
-CONTRACT_NOT_SERVED POST /api/chn/v1/notifications/mark-read
 CONTRACT_NOT_SERVED POST /api/chn/v1/partners/register
 CONTRACT_NOT_SERVED POST /api/chn/v1/policies/{}/cancellation-requests
 CONTRACT_NOT_SERVED POST /api/chn/v1/policies/{}/changes

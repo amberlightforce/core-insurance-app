@@ -4,15 +4,93 @@
 
 namespace CoreIns.Modules.Channels.Contracts.Api;
 
-/// <summary>chn.Notification.list result. PRD outputs: "items"</summary>
+/// <summary>chn.Notification.list result (BO-CHN-04): in-app notification of the customer. No personal data in the item; the page renders the text from the kind.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record NotificationListItem
 {
-    /// <summary>PRD: "items"</summary>
+    /// <summary>Contract member 'notificationId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'notificationId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("notificationId")]
+    public required global::System.Guid NotificationId { get; init; }
+
+    /// <summary>Contract member 'kind'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("kind")]
+    public required KindValue Kind { get; init; }
+
+    /// <summary>Contract member 'notificationClass'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("notificationClass")]
+    public required NotificationClassValue NotificationClass { get; init; }
+
+    /// <summary>POLICY, INVOICE, CLAIM, DOCUMENT or MESSAGE_THREAD</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("subjectType")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Items { get; init; }
+    public string? SubjectType { get; init; }
+
+    /// <summary>Contract member 'subjectId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("subjectId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? SubjectId { get; init; }
+
+    /// <summary>Contract member 'createdAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("createdAt")]
+    public required global::CoreIns.SharedKernel.Instant CreatedAt { get; init; }
+
+    /// <summary>Contract member 'readAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("readAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? ReadAt { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<KindValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum KindValue
+    {
+        /// <summary><c>RENEWAL_OFFERED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RENEWAL_OFFERED")]
+        RenewalOffered,
+
+        /// <summary><c>INVOICE_ISSUED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("INVOICE_ISSUED")]
+        InvoiceIssued,
+
+        /// <summary><c>CLAIM_UPDATED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CLAIM_UPDATED")]
+        ClaimUpdated,
+
+        /// <summary><c>DOCUMENT_READY</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DOCUMENT_READY")]
+        DocumentReady,
+
+        /// <summary><c>MESSAGE_REPLY</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MESSAGE_REPLY")]
+        MessageReply,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<NotificationClassValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum NotificationClassValue
+    {
+        /// <summary><c>RENEWAL</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RENEWAL")]
+        Renewal,
+
+        /// <summary><c>BILLING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("BILLING")]
+        Billing,
+
+        /// <summary><c>CLAIM</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CLAIM")]
+        Claim,
+
+        /// <summary><c>DOCUMENT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DOCUMENT")]
+        Document,
+
+        /// <summary><c>MESSAGE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MESSAGE")]
+        Message,
+    }
 }

@@ -267,59 +267,173 @@
       "resolvedLanguage": "unspecified",
       "source": "unspecified"
     },
+    "MessageItem": {
+      "messageId": "01924449-5575-74e4-8a2a-bd61fc7614ed",
+      "direction": "CUSTOMER",
+      "text": "sample",
+      "sentAt": "2026-10-07T09:00:00Z"
+    },
     "MessageListItem": {
-      "thread": "unspecified"
+      "thread": {
+        "threadId": "019233ed-da0c-75d9-8a5e-f32a67caa7db",
+        "topic": "GENERAL",
+        "policyId": "0192b317-e02f-7ab3-8eb3-1edb64a7adc9",
+        "partyId": "0192a462-e2c4-706f-807b-684e1c4ee395",
+        "lastMessageAt": "2026-10-07T09:00:00Z",
+        "awaitingStaff": true,
+        "messages": [
+          {
+            "messageId": "01929098-d275-7b7b-8f03-6c490db34d69",
+            "direction": "CUSTOMER",
+            "text": "sample",
+            "sentAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      }
     },
     "MessageListPage": {
       "items": [
         {
-          "thread": "unspecified"
+          "thread": {
+            "threadId": "01928a02-3c59-7f1c-8da9-cd53380bb85a",
+            "topic": "GENERAL",
+            "policyId": "019278b2-7702-737b-831a-f110b77dea49",
+            "partyId": "019237e6-1422-74d7-85ce-186513ed8d1a",
+            "lastMessageAt": "2026-10-07T09:00:00Z",
+            "awaitingStaff": true,
+            "messages": [
+              {
+                "messageId": "01927ecf-e116-7dad-8a68-d60dde6b8f33",
+                "direction": "CUSTOMER",
+                "text": "sample",
+                "sentAt": "2026-10-07T09:00:00Z"
+              }
+            ]
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
+    "MessageReplyRequest": {
+      "threadId": "0192cd23-9736-7dc1-8015-45d79e209dba",
+      "text": "sample"
+    },
+    "MessageReplyResponse": {
+      "thread": {
+        "threadId": "0192d7f7-c890-7e5d-8b51-50b4045ecd4f",
+        "topic": "GENERAL",
+        "policyId": "01927d25-18f4-7987-8933-b46099da6407",
+        "partyId": "01926464-bc44-7c6c-8b3f-12c6e4083480",
+        "lastMessageAt": "2026-10-07T09:00:00Z",
+        "awaitingStaff": true,
+        "messages": [
+          {
+            "messageId": "019299cd-d11d-7914-893c-5d28c014464d",
+            "direction": "CUSTOMER",
+            "text": "sample",
+            "sentAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      }
+    },
     "MessageSendRequest": {
-      "topic": "unspecified",
-      "object": "unspecified",
-      "text": "unspecified",
-      "files": "unspecified"
+      "topic": "GENERAL",
+      "policyId": "0192b7c8-0dc3-7522-8bd8-49d281044dff",
+      "threadId": "0192defa-ba28-7fa0-8d32-6f28a2ba34b1",
+      "text": "sample"
     },
     "MessageSendResponse": {
-      "thread": "unspecified"
+      "thread": {
+        "threadId": "01921ebe-6ffc-7a0a-82c9-c35d40e7b449",
+        "topic": "GENERAL",
+        "policyId": "0192bcdf-d705-7675-8b12-be7068288611",
+        "partyId": "0192b793-242a-733f-8ba3-88000b3ea0a8",
+        "lastMessageAt": "2026-10-07T09:00:00Z",
+        "awaitingStaff": true,
+        "messages": [
+          {
+            "messageId": "0192dca8-d9c9-7eef-8f77-f151caf88456",
+            "direction": "CUSTOMER",
+            "text": "sample",
+            "sentAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      }
+    },
+    "MessageThread": {
+      "threadId": "01929536-26a6-70a0-8752-989fc6303bdf",
+      "topic": "GENERAL",
+      "policyId": "01921799-93e8-73b0-85be-76faa869bf79",
+      "partyId": "0192c91e-5533-7ed7-8357-1e5123765e0f",
+      "lastMessageAt": "2026-10-07T09:00:00Z",
+      "awaitingStaff": true,
+      "messages": [
+        {
+          "messageId": "0192193e-5a16-7ffd-8434-72c5100849b9",
+          "direction": "CUSTOMER",
+          "text": "sample",
+          "sentAt": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "NotificationListItem": {
-      "items": [
-        "unspecified"
-      ]
+      "notificationId": "01928b23-4d20-777d-855f-300839d2d7de",
+      "kind": "RENEWAL_OFFERED",
+      "notificationClass": "RENEWAL",
+      "subjectType": "sample",
+      "subjectId": "sample",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "readAt": "2026-10-07T09:00:00Z"
     },
     "NotificationListPage": {
       "items": [
         {
-          "items": [
-            "unspecified"
-          ]
+          "notificationId": "0192a6c8-ccb0-7ba2-8d57-cc05e58db7bc",
+          "kind": "RENEWAL_OFFERED",
+          "notificationClass": "RENEWAL",
+          "subjectType": "sample",
+          "subjectId": "sample",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "readAt": "2026-10-07T09:00:00Z"
         }
       ],
       "nextCursor": "sample",
-      "limit": 1
+      "limit": 1,
+      "unreadCount": 1
     },
     "NotificationMarkReadRequest": {
-      "identity": "unspecified",
-      "classes": "unspecified"
+      "notificationIds": [
+        "0192e40e-888d-79ae-8d4e-95fe2bf95f3d"
+      ],
+      "all": true
     },
     "NotificationMarkReadResponse": {
-      "items": [
-        "unspecified"
+      "updated": 1,
+      "unreadCount": 1
+    },
+    "NotificationSubscriptionItem": {
+      "notificationClass": "RENEWAL",
+      "enabled": true
+    },
+    "NotificationSubscriptionListResponse": {
+      "subscriptions": [
+        {
+          "notificationClass": "RENEWAL",
+          "enabled": true
+        }
       ]
     },
     "NotificationSubscriptionSetRequest": {
-      "identity": "unspecified",
-      "classes": "unspecified"
+      "notificationClass": "RENEWAL",
+      "enabled": true
     },
     "NotificationSubscriptionSetResponse": {
-      "items": [
-        "unspecified"
+      "subscriptions": [
+        {
+          "notificationClass": "RENEWAL",
+          "enabled": true
+        }
       ]
     },
     "PartnerBookChangesPage": {
@@ -461,6 +575,54 @@
       "results": "unspecified",
       "diff": "unspecified"
     },
+    "PortalBillingAccountBalance": {
+      "billingAccountId": "01923016-e5a5-7637-8ed7-5bbdedd2a10a",
+      "accountNumber": "SAMPLE-000001",
+      "currency": "sample",
+      "billed": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "overdue": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "unapplied": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "credit": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "PortalBillingSummary": {
+      "accounts": [
+        {
+          "billingAccountId": "0192168a-b1b6-7071-883d-66759961cf52",
+          "accountNumber": "SAMPLE-000001",
+          "currency": "sample",
+          "billed": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "overdue": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "unapplied": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "credit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "openInvoiceCount": 1,
+      "overdueInvoiceCount": 1
+    },
     "PortalCoverage": {
       "coverageCode": "sample",
       "selected": true
@@ -489,7 +651,41 @@
           },
           "overdue": true
         }
+      ],
+      "unreadNotificationCount": 1,
+      "openRequests": [
+        {
+          "threadId": "019284cd-bbf4-7637-8e1b-850be38948fe",
+          "topic": "GENERAL",
+          "lastMessageAt": "2026-10-07T09:00:00Z"
+        }
       ]
+    },
+    "PortalDocument": {
+      "documentId": "0192ee34-d87c-7654-8e3d-7414bf7c505a",
+      "documentNumber": "SAMPLE-000001",
+      "documentType": "sample",
+      "policyId": "01926c7b-6463-7d58-8bfc-2b2e88fba464",
+      "language": "sample",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "firstOpenedAt": "2026-10-07T09:00:00Z",
+      "openCount": 1
+    },
+    "PortalDocumentListPage": {
+      "items": [
+        {
+          "documentId": "0192fb01-3734-7ddc-8572-cbc22f0bfa96",
+          "documentNumber": "SAMPLE-000001",
+          "documentType": "sample",
+          "policyId": "0192690f-76cc-7a19-8e01-bfd34ac2f023",
+          "language": "sample",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "firstOpenedAt": "2026-10-07T09:00:00Z",
+          "openCount": 1
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
     },
     "PortalIdentityLinkRequest": {
       "subject": "sample",
@@ -520,6 +716,58 @@
       "unlinkedAt": "2026-10-07T09:00:00Z",
       "unlinkedBy": "sample"
     },
+    "PortalInvoice": {
+      "invoiceId": "019226f1-9d24-7b90-8a46-f29238ddf848",
+      "invoiceNumber": "SAMPLE-000001",
+      "policyId": "0192871c-3003-7991-84f7-054e771c6efb",
+      "policyNumber": "SAMPLE-000001",
+      "issueDate": "2026-10-07",
+      "dueDate": "2026-10-07",
+      "state": "sample",
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "paid": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "open": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "overdue": true,
+      "payable": true
+    },
+    "PortalInvoiceListPage": {
+      "items": [
+        {
+          "invoiceId": "0192198f-8696-7fbe-8ea0-478a7677b2ad",
+          "invoiceNumber": "SAMPLE-000001",
+          "policyId": "0192d18f-bda7-7361-856e-3ef555e97d05",
+          "policyNumber": "SAMPLE-000001",
+          "issueDate": "2026-10-07",
+          "dueDate": "2026-10-07",
+          "state": "sample",
+          "total": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paid": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "open": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "overdue": true,
+          "payable": true
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
     "PortalMeResponse": {
       "subject": "sample",
       "partyId": "0192f76d-4b37-7e5b-8f76-42dbc58bf8f6",
@@ -527,6 +775,20 @@
         "0192200f-1646-7bca-8053-96cdb96bbc99"
       ],
       "householdSize": 1
+    },
+    "PortalOpenRequest": {
+      "threadId": "0192086e-50f4-730c-861b-6e006f30b0d5",
+      "topic": "GENERAL",
+      "lastMessageAt": "2026-10-07T09:00:00Z"
+    },
+    "PortalPayNowResponse": {
+      "invoiceId": "0192db54-98e0-761a-896b-9fab4e6cd464",
+      "decision": "ALLOW",
+      "payable": true,
+      "payUrl": "sample",
+      "reasons": [
+        "sample"
+      ]
     },
     "PortalPolicyDetailResponse": {
       "policyId": "0192776f-7489-79d7-8ac5-3772711ec29b",
@@ -593,6 +855,30 @@
         "amount": "120.50",
         "currency": "EUR"
       }
+    },
+    "PortalRefund": {
+      "refundId": "01927a9a-2dcd-7a27-8c55-d03c16a36df0",
+      "state": "sample",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "proposedAt": "2026-10-07T09:00:00Z",
+      "decidedAt": "2026-10-07T09:00:00Z"
+    },
+    "PortalRefundListResponse": {
+      "items": [
+        {
+          "refundId": "01926368-7c97-7a0e-8e21-99f44357739d",
+          "state": "sample",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "proposedAt": "2026-10-07T09:00:00Z",
+          "decidedAt": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "PortalRenewalDue": {
       "policyId": "019239e6-e961-7bd3-891a-b1e533778eee",
