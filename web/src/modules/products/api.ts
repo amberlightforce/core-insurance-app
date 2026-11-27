@@ -1,7 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { apiRequest } from '../../api/client';
-import type { CatalogueGetResponse, ChargeTypeListPage, ProductListPage } from '../../api/types';
+import type {
+  CatalogueGetResponse,
+  ChargeTypeListPage,
+  ProductDescribeResponse,
+  ProductListPage,
+} from '../../api/types';
 
 const pfc = '/api/pfc/v1';
 
@@ -19,7 +24,7 @@ export function useProducts() {
           signal,
           query: { limit: 200, ...(cursor ? { cursor } : {}) },
         });
-        items.push(...(last.items ?? []));
+        items.push(...last.items);
         cursor = last.nextCursor;
       } while (cursor);
       return { ...last, items };
@@ -49,6 +54,20 @@ export function useChargeTypes(hash: string | undefined) {
       apiRequest<ChargeTypeListPage>(`${pfc}/charge-types`, {
         signal,
         query: { hash: String(hash), limit: 200 },
+      }),
+  });
+}
+
+/** pfc.Product.describe by artefact hash (BO-PFC-05): terms, windows, risk structure, coverages, questions, payment plans. */
+export function useDescribe(hash: string | undefined) {
+  return useQuery({
+    queryKey: ['pfc', 'describe', hash],
+    enabled: hash !== undefined,
+    queryFn: ({ signal }) =>
+      apiRequest<ProductDescribeResponse>(`${pfc}/products/describe`, {
+        method: 'POST',
+        body: { hash },
+        signal,
       }),
   });
 }
