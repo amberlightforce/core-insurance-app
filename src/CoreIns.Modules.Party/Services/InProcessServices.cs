@@ -127,3 +127,44 @@ internal sealed class PartyVulnerabilityService(VulnerabilityQueries queries, Pa
         return new VulnerabilityQueryPage { Items = item is null ? [] : [item], NextCursor = null, Limit = limit };
     }
 }
+
+/// <summary>
+/// The in-process contract <see cref="IPartyLocationService"/> (BO-PTY-02): change a party's addresses and contact points without HTTP, for the portal
+/// customer's own contact update (BO-CHN-03, permission <c>contact.update</c> checked by the caller). Commands run through the same pipeline as HTTP
+/// with the caller's <see cref="CommandOptions"/>; a failure is thrown as a <see cref="DomainException"/> carrying the PTY-ERR code.
+/// </summary>
+internal sealed class PartyLocationService(
+    RequestContext context,
+    ICommandHandler<AddLocation, LocationAddResponse> add,
+    ICommandHandler<UpdateLocation, LocationUpdateResponse> update,
+    ICommandHandler<RemoveLocation, LocationRemoveResponse> remove) : IPartyLocationService
+{
+    public async Task<LocationAddResponse> AddAsync(LocationAddRequest request, CommandOptions options, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        using (context.Use(options.IdempotencyKey, options.DryRun))
+        {
+            return Unwrap(await add.HandleAsync(new AddLocation(request), cancellationToken).ConfigureAwait(false));
+        }
+    }
+
+    public async Task<LocationUpdateResponse> UpdateAsync(string id, LocationUpdateRequest request, CommandOptions options, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        using (context.Use(options.IdempotencyKey, options.DryRun))
+        {
+            return Unwrap(await update.HandleAsync(new UpdateLocation(id, request), cancellationToken).ConfigureAwait(false));
+        }
+    }
+
+    public async Task<LocationRemoveResponse> RemoveAsync(LocationRemoveRequest request, CommandOptions options, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        using (context.Use(options.IdempotencyKey, options.DryRun))
+        {
+            return Unwrap(await remove.HandleAsync(new RemoveLocation(request), cancellationToken).ConfigureAwait(false));
+        }
+    }
+
+    private static T Unwrap<T>(Result<T> result) => result.IsSuccess ? result.Value : throw new DomainException(result.Error);
+}

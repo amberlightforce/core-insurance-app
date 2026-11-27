@@ -4,15 +4,30 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Location.update result. PRD outputs: "location"</summary>
+/// <summary>pty.Location.update result (BO-PTY-02).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record LocationUpdateResponse
 {
-    /// <summary>PRD: "location"</summary>
+    /// <summary>Contract member 'locationId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'locationId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("location")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Location { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("locationId")]
+    public required global::System.Guid LocationId { get; init; }
+
+    /// <summary>Contract member 'kind'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("kind")]
+    public required global::CoreIns.Modules.Party.Contracts.Api.LocationKind Kind { get; init; }
+
+    /// <summary>Contract member 'address'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("address")]
+    public global::CoreIns.Modules.Party.Contracts.Api.PartyAddressView? Address { get; init; }
+
+    /// <summary>Contract member 'contactPoint'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contactPoint")]
+    public global::CoreIns.Modules.Party.Contracts.Api.ContactPointView? ContactPoint { get; init; }
+
+    /// <summary>Contract member 'recordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    public required int RecordVersion { get; init; }
 }

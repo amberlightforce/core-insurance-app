@@ -1859,9 +1859,20 @@ paths:
       x-dry-run-note: 'PRD dry-run: —'
       x-exposure:
       - ui
+      x-consumers:
+      - CHN
       x-permission: pty.Location.add
       x-error-codes:
       - code: PTY-ERR-LOCATION-IN-USE
+        status: 422
+      - code: PTY-ERR-STALE
+        status: 409
+      - code: PTY-ERR-RESTRICTED
+        status: 409
+        note: the party record is restricted by a DSAR
+      - code: PTY-ERR-MERGED
+        status: 409
+      - code: PTY-ERR-POSTCODE-FORMAT
         status: 422
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -1927,9 +1938,20 @@ paths:
       x-dry-run-note: 'PRD dry-run: —'
       x-exposure:
       - ui
+      x-consumers:
+      - CHN
       x-permission: pty.Location.update
       x-error-codes:
       - code: PTY-ERR-LOCATION-IN-USE
+        status: 422
+      - code: PTY-ERR-STALE
+        status: 409
+      - code: PTY-ERR-RESTRICTED
+        status: 409
+        note: the party record is restricted by a DSAR
+      - code: PTY-ERR-MERGED
+        status: 409
+      - code: PTY-ERR-POSTCODE-FORMAT
         status: 422
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -1998,9 +2020,20 @@ paths:
       x-dry-run-note: 'PRD dry-run: —'
       x-exposure:
       - ui
+      x-consumers:
+      - CHN
       x-permission: pty.Location.remove
       x-error-codes:
       - code: PTY-ERR-LOCATION-IN-USE
+        status: 422
+      - code: PTY-ERR-STALE
+        status: 409
+      - code: PTY-ERR-RESTRICTED
+        status: 409
+        note: the party record is restricted by a DSAR
+      - code: PTY-ERR-MERGED
+        status: 409
+      - code: PTY-ERR-POSTCODE-FORMAT
         status: 422
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -6017,48 +6050,145 @@ components:
         request:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "request"'
+    LocationKind:
+      type: string
+      enum:
+      - ADDRESS
+      - CONTACT_POINT
+      description: Whether a location is a postal address or a contact point (phone, email, secure inbox)
     LocationAddRequest:
       type: object
-      description: 'pty.Location.add request. PRD inputs: "location"'
+      description: 'pty.Location.add request (BO-PTY-02). Gives a party one address or one contact point (exactly one of address / contactPoint), effective from validFrom (default today). The first location of a type becomes primary; a new primary replaces the previous primary of that type. The previous primary stays in the history. Phones are normalised to E.164, emails lower-cased, Greek postcodes checked.'
       properties:
-        location:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "location"'
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        address:
+          oneOf:
+          - $ref: '#/components/schemas/AddressInput'
+          - type: 'null'
+        contactPoint:
+          oneOf:
+          - $ref: '#/components/schemas/ContactPointInput'
+          - type: 'null'
+        validFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: First day the location applies; default today; not before the party was created
+        expectedRecordVersion:
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+          description: Optimistic concurrency on the party; when given, a stale value is refused with PTY-ERR-STALE
+      required:
+      - partyId
     LocationAddResponse:
       type: object
-      description: 'pty.Location.add result. PRD outputs: "location"'
+      description: 'pty.Location.add result (BO-PTY-02).'
       properties:
-        location:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "location"'
+        locationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          $ref: '#/components/schemas/LocationKind'
+        address:
+          oneOf:
+          - $ref: '#/components/schemas/PartyAddressView'
+          - type: 'null'
+        contactPoint:
+          oneOf:
+          - $ref: '#/components/schemas/ContactPointView'
+          - type: 'null'
+        recordVersion:
+          type: integer
+          minimum: 1
+          description: The party record version after the change
+      required:
+      - locationId
+      - kind
+      - recordVersion
     LocationUpdateRequest:
       type: object
-      description: 'pty.Location.update request. PRD inputs: "location"'
+      description: 'pty.Location.update request (BO-PTY-02). Replaces the CURRENT address or contact point named by the path id (the one the party view shows) with new values from validFrom (default today); the old values stay as history. Give the field set matching the location (address or contactPoint). The result carries the id of the new version.'
       properties:
-        location:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "location"'
+        address:
+          oneOf:
+          - $ref: '#/components/schemas/AddressInput'
+          - type: 'null'
+        contactPoint:
+          oneOf:
+          - $ref: '#/components/schemas/ContactPointInput'
+          - type: 'null'
+        validFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: First day the new values apply; default today
+        expectedRecordVersion:
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+          description: Optimistic concurrency on the party; when given, a stale value is refused with PTY-ERR-STALE
     LocationUpdateResponse:
       type: object
-      description: 'pty.Location.update result. PRD outputs: "location"'
+      description: 'pty.Location.update result (BO-PTY-02).'
       properties:
-        location:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "location"'
+        locationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          $ref: '#/components/schemas/LocationKind'
+        address:
+          oneOf:
+          - $ref: '#/components/schemas/PartyAddressView'
+          - type: 'null'
+        contactPoint:
+          oneOf:
+          - $ref: '#/components/schemas/ContactPointView'
+          - type: 'null'
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - locationId
+      - kind
+      - recordVersion
     LocationRemoveRequest:
       type: object
-      description: 'pty.Location.remove request. PRD inputs: "location"'
+      description: 'pty.Location.remove request (BO-PTY-02). Ends the address or contact point from validTo (default today); the history is kept. Ending a primary location promotes the oldest remaining location of the same type.'
       properties:
-        location:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "location"'
+        locationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Day the location stops applying (exclusive); default today
+        expectedRecordVersion:
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+      required:
+      - locationId
     LocationRemoveResponse:
       type: object
-      description: 'pty.Location.remove result. PRD outputs: "location"'
+      description: 'pty.Location.remove result (BO-PTY-02).'
       properties:
-        location:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "location"'
+        locationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          $ref: '#/components/schemas/LocationKind'
+        validTo:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - locationId
+      - kind
+      - validTo
+      - recordVersion
     LifeEventStartRequest:
       type: object
       description: 'pty.LifeEvent.start request. PRD inputs: "type, party, data"'
