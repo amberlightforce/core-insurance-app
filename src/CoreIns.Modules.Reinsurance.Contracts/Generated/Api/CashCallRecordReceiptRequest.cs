@@ -4,20 +4,30 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.CashCall.recordReceipt request. PRD inputs: "occurrence, amounts"</summary>
+/// <summary>ri.CashCall.recordReceipt request. Idempotent on the bank reference per reinsurer; a partial receipt keeps the call open.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CashCallRecordReceiptRequest
 {
-    /// <summary>PRD: "occurrence"</summary>
+    /// <summary>Contract member 'cashCallId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'cashCallId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("occurrence")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Occurrence { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("cashCallId")]
+    public required global::System.Guid CashCallId { get; init; }
 
-    /// <summary>PRD: "amounts"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("amounts")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Money>? Amounts { get; init; }
+    /// <summary>Contract member 'reinsurerPartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reinsurerPartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId ReinsurerPartyId { get; init; }
+
+    /// <summary>Contract member 'amount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+    public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+
+    /// <summary>Contract member 'bankReference'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("bankReference")]
+    public required string BankReference { get; init; }
+
+    /// <summary>Today when omitted</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receivedOn")]
+    public global::CoreIns.SharedKernel.BusinessDate? ReceivedOn { get; init; }
 }

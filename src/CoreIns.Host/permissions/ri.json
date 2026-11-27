@@ -46,6 +46,12 @@
         "ri.Statement.issue": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "ri.Statement.recordResponse": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "ri.Statement.reissue": [ "Staff.ReinsuranceAccountant" ],
+        // Cash calls (BO-RI-15): the accountant raises, sends and records receipts; the manager cancels (maker-checker on cancel).
+        "ri.CashCall.raise": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
+        "ri.CashCall.issue": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
+        "ri.CashCall.recordReceipt": [ "Staff.ReinsuranceAccountant" ],
+        "ri.CashCall.cancel": [ "Staff.ReinsuranceManager" ],
+        "ri.CashCall.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         // BO-RI-08: restatement, occurrences, adjustments and the aggregate tracker. The adjustment's real gate is the RI.RECOVERY_ADJUSTMENT authority.
         "ri.Recovery.recalculate": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Occurrence.link": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],

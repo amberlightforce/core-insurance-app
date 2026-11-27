@@ -4,15 +4,27 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Location.add request. PRD inputs: "location"</summary>
+/// <summary>pty.Location.add request (BO-PTY-02). Gives a party one address or one contact point (exactly one of address / contactPoint), effective from validFrom (default today). The first location of a type becomes primary; a new primary replaces the previous primary of that type. The previous primary stays in the history. Phones are normalised to E.164, emails lower-cased, Greek postcodes checked.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record LocationAddRequest
 {
-    /// <summary>PRD: "location"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("location")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Location { get; init; }
+    /// <summary>Contract member 'partyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PartyId { get; init; }
+
+    /// <summary>Contract member 'address'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("address")]
+    public global::CoreIns.Modules.Party.Contracts.Api.AddressInput? Address { get; init; }
+
+    /// <summary>Contract member 'contactPoint'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contactPoint")]
+    public global::CoreIns.Modules.Party.Contracts.Api.ContactPointInput? ContactPoint { get; init; }
+
+    /// <summary>First day the location applies; default today; not before the party was created</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validFrom")]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidFrom { get; init; }
+
+    /// <summary>Optimistic concurrency on the party; when given, a stale value is refused with PTY-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public int? ExpectedRecordVersion { get; init; }
 }

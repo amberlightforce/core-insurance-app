@@ -596,6 +596,188 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.CashCallLineRow", b =>
+                {
+                    b.Property<Guid>("CashCallId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cash_call_id");
+
+                    b.Property<Guid>("ReinsurerPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reinsurer_party_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<decimal>("Received")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("received");
+
+                    b.HasKey("CashCallId", "ReinsurerPartyId")
+                        .HasName("pk_cash_call_line");
+
+                    b.ToTable("cash_call_line", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_cash_call_line_received", "received >= 0 AND received <= amount");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.CashCallReceiptRow", b =>
+                {
+                    b.Property<Guid>("ReceiptId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("receipt_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("BankReference")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bank_reference");
+
+                    b.Property<Guid>("CashCallId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("cash_call_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateOnly>("ReceivedOn")
+                        .HasColumnType("date")
+                        .HasColumnName("received_on");
+
+                    b.Property<Guid>("ReinsurerPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reinsurer_party_id");
+
+                    b.HasKey("ReceiptId")
+                        .HasName("pk_cash_call_receipt");
+
+                    b.HasIndex("CashCallId")
+                        .HasDatabaseName("ix_cash_call_receipt_call");
+
+                    b.HasIndex("LegalEntityId", "ReinsurerPartyId", "BankReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_cash_call_receipt_reference");
+
+                    b.ToTable("cash_call_receipt", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_cash_call_receipt_amount", "amount > 0");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.CashCallRow", b =>
+                {
+                    b.Property<Guid>("CashCallId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("cash_call_id");
+
+                    b.Property<string>("CancelReason")
+                        .HasColumnType("text")
+                        .HasColumnName("cancel_reason");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("cancelled_at");
+
+                    b.Property<string>("CancelledBy")
+                        .HasColumnType("text")
+                        .HasColumnName("cancelled_by");
+
+                    b.Property<Guid>("ContractId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("contract_id");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateOnly>("DueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime>("RaisedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("raised_at");
+
+                    b.Property<string>("RaisedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("raised_by");
+
+                    b.Property<DateTime?>("SentAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("sent_at");
+
+                    b.Property<string>("SentBy")
+                        .HasColumnType("text")
+                        .HasColumnName("sent_by");
+
+                    b.Property<DateTime?>("SettledAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("settled_at");
+
+                    b.Property<string>("SourceKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source_key");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<decimal>("Threshold")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("threshold");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("total");
+
+                    b.HasKey("CashCallId")
+                        .HasName("pk_cash_call");
+
+                    b.HasIndex("ContractId", "SourceKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_cash_call_live")
+                        .HasFilter("status <> 'CANCELLED'");
+
+                    b.HasIndex("LegalEntityId", "Status")
+                        .HasDatabaseName("ix_cash_call_status");
+
+                    b.ToTable("cash_call", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_cash_call_status", "status IN ('RAISED', 'SENT', 'PARTIALLY_SETTLED', 'SETTLED', 'CANCELLED')");
+
+                            t.HasCheckConstraint("ck_cash_call_total", "total > 0");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ClaimAmountRow", b =>
                 {
                     b.Property<Guid>("ClaimId")
@@ -1991,6 +2173,36 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_adjustment_schedule");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.CashCallLineRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.CashCallRow", null)
+                        .WithMany()
+                        .HasForeignKey("CashCallId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_cash_call_line_call");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.CashCallReceiptRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.CashCallRow", null)
+                        .WithMany()
+                        .HasForeignKey("CashCallId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_cash_call_receipt_call");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.CashCallRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Reinsurance.Persistence.ContractRow", null)
+                        .WithMany()
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_cash_call_contract");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.ClauseRow", b =>

@@ -712,52 +712,458 @@
       "bordereau": "unspecified"
     },
     "CashCallCancelRequest": {
-      "occurrence": "unspecified",
-      "amounts": [
-        {
-          "amount": "120.50",
-          "currency": "EUR"
-        }
-      ]
+      "cashCallId": "0192457b-096c-7655-827e-d0154e559374",
+      "reason": "Sample text"
     },
     "CashCallCancelResponse": {
-      "cashCall": "unspecified"
+      "cashCall": {
+        "cashCallId": "0192eaa9-268d-7a1d-8684-3333a7a91ad5",
+        "contractId": "01923082-93c4-726d-8627-10eaf07db091",
+        "occurrence": "Sample text",
+        "status": "RAISED",
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "threshold": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "received": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "outstanding": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "dueDate": "2026-10-07",
+        "daysOverdue": 1,
+        "agingBucket": "NOT_DUE",
+        "lines": [
+          {
+            "reinsurerPartyId": "019253e0-2dfb-731a-8c0e-83a58648ac83",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "received": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "outstanding": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "receipts": [
+          {
+            "receiptId": "019290c5-baa9-7562-8d36-c4e81bd10a20",
+            "reinsurerPartyId": "0192c5e7-9af6-7ea3-8fb4-8af571dfa299",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "bankReference": "Sample text",
+            "receivedOn": "2026-10-07",
+            "itemId": "019241b7-0c8e-7649-8d72-230c98b141e5",
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
+        ],
+        "raisedAt": "2026-10-07T09:00:00Z",
+        "raisedBy": "Sample text",
+        "sentAt": "2026-10-07T09:00:00Z",
+        "sentBy": "Sample text",
+        "cancelledAt": "2026-10-07T09:00:00Z",
+        "cancelledBy": "Sample text",
+        "cancelReason": "Sample text",
+        "settledAt": "2026-10-07T09:00:00Z"
+      }
     },
     "CashCallIssueRequest": {
-      "occurrence": "unspecified",
-      "amounts": [
-        {
-          "amount": "120.50",
-          "currency": "EUR"
-        }
-      ]
+      "cashCallId": "01929dac-cbb8-7c09-856a-7a1c075f166a"
     },
     "CashCallIssueResponse": {
-      "cashCall": "unspecified"
+      "cashCall": {
+        "cashCallId": "0192299b-0b60-724b-8888-75f0f560a630",
+        "contractId": "0192a0ea-2ddd-7f6e-8887-2727a4852314",
+        "occurrence": "Sample text",
+        "status": "RAISED",
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "threshold": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "received": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "outstanding": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "dueDate": "2026-10-07",
+        "daysOverdue": 1,
+        "agingBucket": "NOT_DUE",
+        "lines": [
+          {
+            "reinsurerPartyId": "019231a0-bfe5-7def-8541-82db11502555",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "received": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "outstanding": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "receipts": [
+          {
+            "receiptId": "0192aa08-d856-7d78-82eb-1c68100976be",
+            "reinsurerPartyId": "0192ea5a-742d-70f5-8481-6e25dfa0da6a",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "bankReference": "Sample text",
+            "receivedOn": "2026-10-07",
+            "itemId": "0192ee32-1009-7821-84c2-03b32462e18e",
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
+        ],
+        "raisedAt": "2026-10-07T09:00:00Z",
+        "raisedBy": "Sample text",
+        "sentAt": "2026-10-07T09:00:00Z",
+        "sentBy": "Sample text",
+        "cancelledAt": "2026-10-07T09:00:00Z",
+        "cancelledBy": "Sample text",
+        "cancelReason": "Sample text",
+        "settledAt": "2026-10-07T09:00:00Z"
+      }
+    },
+    "CashCallLine": {
+      "reinsurerPartyId": "0192e7c2-cf47-7606-850b-be6e0374a144",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "received": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "outstanding": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "CashCallListResponse": {
+      "items": [
+        {
+          "cashCallId": "019266e4-02ee-74b0-8674-7745c62974e1",
+          "contractId": "0192960a-aa9e-7ba5-83f0-342462e4da27",
+          "occurrence": "Sample text",
+          "status": "RAISED",
+          "total": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "threshold": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "received": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "outstanding": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "dueDate": "2026-10-07",
+          "daysOverdue": 1,
+          "agingBucket": "NOT_DUE",
+          "lines": [
+            {
+              "reinsurerPartyId": "0192cfcf-7ebc-7434-865c-3a718e294695",
+              "amount": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "received": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "outstanding": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ],
+          "receipts": [
+            {
+              "receiptId": "0192a5c1-cee5-771a-8a5b-ea96f5b77a78",
+              "reinsurerPartyId": "01928526-a2b4-7db2-85ac-a5abacd608b3",
+              "amount": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "bankReference": "Sample text",
+              "receivedOn": "2026-10-07",
+              "itemId": "01923f18-fae7-7f20-8cf2-6270fdaf6aec",
+              "createdAt": "2026-10-07T09:00:00Z",
+              "createdBy": "Sample text"
+            }
+          ],
+          "raisedAt": "2026-10-07T09:00:00Z",
+          "raisedBy": "Sample text",
+          "sentAt": "2026-10-07T09:00:00Z",
+          "sentBy": "Sample text",
+          "cancelledAt": "2026-10-07T09:00:00Z",
+          "cancelledBy": "Sample text",
+          "cancelReason": "Sample text",
+          "settledAt": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "CashCallRaiseRequest": {
-      "occurrence": "unspecified",
-      "amounts": [
-        {
-          "amount": "120.50",
-          "currency": "EUR"
-        }
-      ]
+      "contractId": "01920dbe-2a8b-7fc8-850b-6a53d367aa79",
+      "occurrence": "Sample text",
+      "dueDate": "2026-10-07"
     },
     "CashCallRaiseResponse": {
-      "cashCall": "unspecified"
-    },
-    "CashCallRecordReceiptRequest": {
-      "occurrence": "unspecified",
-      "amounts": [
-        {
+      "cashCall": {
+        "cashCallId": "01929015-49e1-7119-86e6-eb8d6d3c87d4",
+        "contractId": "01923515-b5ea-73e8-8461-901b09542c80",
+        "occurrence": "Sample text",
+        "status": "RAISED",
+        "total": {
           "amount": "120.50",
           "currency": "EUR"
-        }
-      ]
+        },
+        "threshold": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "received": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "outstanding": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "dueDate": "2026-10-07",
+        "daysOverdue": 1,
+        "agingBucket": "NOT_DUE",
+        "lines": [
+          {
+            "reinsurerPartyId": "01928990-9f14-7493-8fba-53cd80491f3b",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "received": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "outstanding": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "receipts": [
+          {
+            "receiptId": "01921105-1b4b-7f7d-8f03-4cacd01d44b8",
+            "reinsurerPartyId": "01929925-e216-794b-8bfd-f01beca9d99c",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "bankReference": "Sample text",
+            "receivedOn": "2026-10-07",
+            "itemId": "0192bd1e-13d0-70bc-82ad-d7464e99e72d",
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
+        ],
+        "raisedAt": "2026-10-07T09:00:00Z",
+        "raisedBy": "Sample text",
+        "sentAt": "2026-10-07T09:00:00Z",
+        "sentBy": "Sample text",
+        "cancelledAt": "2026-10-07T09:00:00Z",
+        "cancelledBy": "Sample text",
+        "cancelReason": "Sample text",
+        "settledAt": "2026-10-07T09:00:00Z"
+      },
+      "replayed": true
+    },
+    "CashCallReceipt": {
+      "receiptId": "0192bc00-e522-7374-8fbb-c924c54e10bc",
+      "reinsurerPartyId": "0192f54a-6777-76df-8038-90f898df2497",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "bankReference": "Sample text",
+      "receivedOn": "2026-10-07",
+      "itemId": "01929633-f91f-7591-870a-e8e810398973",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "createdBy": "Sample text"
+    },
+    "CashCallRecordReceiptRequest": {
+      "cashCallId": "0192925e-8629-725e-84bb-21fc6a99cb95",
+      "reinsurerPartyId": "01924756-9201-707d-8a67-5dabdd8f3499",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "bankReference": "Sample text",
+      "receivedOn": "2026-10-07"
     },
     "CashCallRecordReceiptResponse": {
-      "cashCall": "unspecified"
+      "cashCall": {
+        "cashCallId": "019288c3-1b10-7f68-872b-aa0266109e2d",
+        "contractId": "0192d1e0-5940-759d-8443-1d9a4144cdef",
+        "occurrence": "Sample text",
+        "status": "RAISED",
+        "total": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "threshold": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "received": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "outstanding": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "dueDate": "2026-10-07",
+        "daysOverdue": 1,
+        "agingBucket": "NOT_DUE",
+        "lines": [
+          {
+            "reinsurerPartyId": "0192d237-05c3-7910-8e85-c160bc6cef7f",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "received": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "outstanding": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "receipts": [
+          {
+            "receiptId": "01920a8d-22fd-7b98-8514-1fb9c94b5c42",
+            "reinsurerPartyId": "01921729-4099-7da9-844f-baec6aea7659",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "bankReference": "Sample text",
+            "receivedOn": "2026-10-07",
+            "itemId": "019263d6-8665-7e13-836f-43f85cc5d628",
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
+        ],
+        "raisedAt": "2026-10-07T09:00:00Z",
+        "raisedBy": "Sample text",
+        "sentAt": "2026-10-07T09:00:00Z",
+        "sentBy": "Sample text",
+        "cancelledAt": "2026-10-07T09:00:00Z",
+        "cancelledBy": "Sample text",
+        "cancelReason": "Sample text",
+        "settledAt": "2026-10-07T09:00:00Z"
+      },
+      "replayed": true
+    },
+    "CashCallView": {
+      "cashCallId": "01929fd5-3d89-71ea-8613-6d227b95215f",
+      "contractId": "0192231d-6ccc-7069-8f45-91ebf6cce63a",
+      "occurrence": "Sample text",
+      "status": "RAISED",
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "threshold": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "received": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "outstanding": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "dueDate": "2026-10-07",
+      "daysOverdue": 1,
+      "agingBucket": "NOT_DUE",
+      "lines": [
+        {
+          "reinsurerPartyId": "019247a0-126a-7383-862b-a89c15a684ad",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "received": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "outstanding": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "receipts": [
+        {
+          "receiptId": "0192a13d-72c5-7913-85f8-0bc6444ed018",
+          "reinsurerPartyId": "01924f50-2149-7b56-8899-1aef6967411e",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "bankReference": "Sample text",
+          "receivedOn": "2026-10-07",
+          "itemId": "01923a67-f7d0-71e0-87ae-2368da4617fd",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "createdBy": "Sample text"
+        }
+      ],
+      "raisedAt": "2026-10-07T09:00:00Z",
+      "raisedBy": "Sample text",
+      "sentAt": "2026-10-07T09:00:00Z",
+      "sentBy": "Sample text",
+      "cancelledAt": "2026-10-07T09:00:00Z",
+      "cancelledBy": "Sample text",
+      "cancelReason": "Sample text",
+      "settledAt": "2026-10-07T09:00:00Z"
     },
     "CatOccurrenceConfirmRequest": {
       "catCode": "unspecified",

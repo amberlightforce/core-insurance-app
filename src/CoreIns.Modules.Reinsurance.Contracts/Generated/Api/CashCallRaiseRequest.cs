@@ -4,20 +4,19 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.CashCall.raise request. PRD inputs: "occurrence, amounts"</summary>
+/// <summary>ri.CashCall.raise request. Raised when the paid recoveries of the claim on the contract exceed the call threshold; raising it again returns the call.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CashCallRaiseRequest
 {
-    /// <summary>PRD: "occurrence"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("occurrence")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Occurrence { get; init; }
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
 
-    /// <summary>PRD: "amounts"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("amounts")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Money>? Amounts { get; init; }
+    /// <summary>The claim id the recoveries belong to</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("occurrence")]
+    public required string Occurrence { get; init; }
+
+    /// <summary>The configured number of days from today when omitted</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dueDate")]
+    public global::CoreIns.SharedKernel.BusinessDate? DueDate { get; init; }
 }

@@ -6,6 +6,7 @@ using CoreIns.Platform.Errors;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
+using CoreIns.SharedKernel.Paging;
 using CoreIns.SharedKernel.Results;
 using Microsoft.EntityFrameworkCore;
 
@@ -170,6 +171,67 @@ internal sealed class MartEngine(DataDbContext db, IClock clock, AnalyticsReader
 
         var state = await MartGovernance.StateAsync(db, loaded.Run, ct).ConfigureAwait(false);
         return new MartFigureResponse { Figures = Ser(new[] { FigureJson(figure, state) }), LineagePointer = Ser(Lineage(loaded.Run, figure)), Diff = Ser(Array.Empty<object>()) };
+    }
+
+    // ---- Mart.list ---------------------------------------------------------------------------------------------------------
+
+    /// <summary>Runs of the legal entity, newest first (run ids are UUIDv7, so id order is creation order), keyset-paged on the run id.</summary>
+    public async Task<Result<MartRunListPage>> ListAsync(string legalEntity, string? mart, string? cursor, int? limit, CancellationToken ct)
+    {
+        if (mart is not null && !Codes.Contains(mart, StringComparer.Ordinal))
+        {
+            return DomainError.Of(ModuleCode.DAT, PlatformErrors.Validation, $"mart must be one of {string.Join(", ", Codes)}.");
+        }
+
+        if (!KeysetPaging.TryTake(limit, KeysetPaging.DefaultPageSize, out var take) || !KeysetPaging.TryDecode(cursor, 1, out var parts)
+            || (parts is not null && !Guid.TryParse(parts[0], out _)))
+        {
+            return DomainError.Of(ModuleCode.DAT, PlatformErrors.Validation, "cursor and limit (1..200) must be well formed.");
+        }
+
+        Guid? after = parts is null ? null : Guid.Parse(parts[0]);
+        var query = db.MartRuns.AsNoTracking().Where(r => r.LegalEntity == legalEntity);
+        if (mart is not null)
+        {
+            query = query.Where(r => r.MartCode == mart);
+        }
+
+        if (after is { } last)
+        {
+            query = query.Where(r => r.RunId.CompareTo(last) < 0);
+        }
+
+        var rows = await query.OrderByDescending(r => r.RunId).Take(take + 1).ToListAsync(ct).ConfigureAwait(false);
+        var (page, next) = KeysetPaging.Slice(rows, take, r => KeysetPaging.Encode(r.RunId.ToString("D")));
+        var items = new List<MartRunListItem>();
+        foreach (var run in page)
+        {
+            // TODO(hardening): one state read per run (at most 200 per page); fold into a joined query if the list gets hot.
+            var state = await MartGovernance.StateAsync(db, run, ct).ConfigureAwait(false);
+            items.Add(new MartRunListItem
+            {
+                RunId = run.RunId,
+                Mart = run.MartCode switch
+                {
+                    ClaimsExperienceMart.MartCode => MartRunListItem.MartValue.ClaimsExperience,
+                    RiCessionSummaryMart.MartCode => MartRunListItem.MartValue.RiCessionSummary,
+                    _ => MartRunListItem.MartValue.PortfolioPremium,
+                },
+                Period = run.Period,
+                ProductCode = run.ProductCode,
+                Status = state.SignedOff ? MartRunListItem.StatusValue.SignedOff : MartRunListItem.StatusValue.Completed,
+                LegalStatus = run.LegalStatus,
+                FigureCount = run.FigureCount,
+                SnapshotHash = run.SnapshotHash,
+                CreatedBy = run.CreatedBy,
+                CreatedAt = AnalyticsReader.Iso(run.CreatedAt.ToUtcDateTime()),
+                SignOff = state.SignOff is { } so
+                    ? new MartRunListItem.SignOffDetail { SignedBy = so.SignedBy, SignedAt = AnalyticsReader.Iso(so.SignedAt.ToUtcDateTime()), Valid = state.SignedOff }
+                    : null,
+            });
+        }
+
+        return new MartRunListPage { Items = items, NextCursor = next, Limit = take };
     }
 
     // ---- Mart.compare ------------------------------------------------------------------------------------------------------
