@@ -57,13 +57,14 @@ internal sealed class AdjustRecoveryHandler(
         }
 
         await LinkOccurrenceHandler.LockAsync(db, contract.ContractId.Value, cancellationToken).ConfigureAwait(false);
-        var version = await db.Versions.AsNoTracking().SingleAsync(v => v.ContractId == contract.ContractId && v.KnownTo == null, cancellationToken).ConfigureAwait(false);
+        var version = await db.Versions.AsNoTracking().SingleAsync(v => v.ContractId == contract.ContractId && v.VersionNo == 1, cancellationToken).ConfigureAwait(false);
         var layer = await db.Layers.AsNoTracking().SingleOrDefaultAsync(l => l.LayerId == request.LayerId.Value && l.VersionId == version.VersionId && l.Rev == version.ContentRev, cancellationToken).ConfigureAwait(false);
         if (layer is null)
         {
             return RiErrors.Validation("layerId", "LAYER", "The layer does not belong to the contract.");
         }
 
+        // TODO(hardening): use ContractVersions.InForceAsync at the loss date once endorsed layers matter (like RecoveryBooker, version 1 for now).
         // The claim must be one the contract covers; a linked claim is booked on the occurrence's representative claim.
         var claim = request.ClaimId.Value;
         if (!await db.ClaimExposures.AnyAsync(e => e.ClaimId == claim && e.ContractId == contract.ContractId.Value, cancellationToken).ConfigureAwait(false))
@@ -147,7 +148,7 @@ internal sealed class AggregateTrackerReader(ReinsuranceDbContext db, RequestCon
         var contractIds = contracts.Select(c => c.ContractId).ToList();
         var layers = await (from l in db.Layers.AsNoTracking()
                             join v in db.Versions.AsNoTracking() on l.VersionId equals v.VersionId
-                            where contractIds.Contains(v.ContractId) && v.KnownTo == null && l.Rev == v.ContentRev
+                            where contractIds.Contains(v.ContractId) && v.VersionNo == 1 && l.Rev == v.ContentRev
                             select new { v.ContractId, l.LayerId, l.LayerNo, l.Aal }).ToListAsync(cancellationToken).ConfigureAwait(false);
         if (!string.IsNullOrWhiteSpace(layer))
         {
