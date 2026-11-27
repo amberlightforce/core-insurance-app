@@ -4,15 +4,41 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Exposure.close request. PRD inputs: "exposure data"</summary>
+/// <summary>clm.Exposure.close request (BO-CLM-01, D-CON-04). The close guard needs zero open reserve, no payment pending and every statutory clock Met, Cancelled or Breached-and-acknowledged.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ExposureCloseRequest
 {
-    /// <summary>PRD: "exposure data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exposureData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ExposureData { get; init; }
+    /// <summary>Contract member 'exposureId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("exposureId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ExposureId ExposureId { get; init; }
+
+    /// <summary>The claim's recordVersion the user saw; a different current version is CLM-ERR-STALE</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
+
+    /// <summary>Closure outcome of the exposure</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    public required OutcomeValue Outcome { get; init; }
+
+    /// <summary>Closure outcome of the exposure</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum OutcomeValue
+    {
+        /// <summary><c>COMPLETED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("COMPLETED")]
+        Completed,
+
+        /// <summary><c>WITHDRAWN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("WITHDRAWN")]
+        Withdrawn,
+
+        /// <summary><c>DUPLICATE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DUPLICATE")]
+        Duplicate,
+
+        /// <summary><c>NO_PAYMENT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NO_PAYMENT")]
+        NoPayment,
+    }
 }

@@ -157,3 +157,76 @@ internal sealed class ClaimEventRow
 
     public Instant AppliedAt { get; set; }
 }
+
+/// <summary><c>ri.occurrence</c>: a group of claims treated as one occurrence for the per-occurrence layers of a contract (REQ-RI-115, BO-RI-08).</summary>
+internal sealed class OccurrenceRow
+{
+    public Guid OccurrenceId { get; set; }
+
+    public Guid LegalEntityId { get; set; }
+
+    public Guid ContractId { get; set; }
+
+    public int ContractYear { get; set; }
+
+    public string Reason { get; set; } = string.Empty;
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public Instant CreatedAt { get; set; }
+
+    /// <summary>Set once fewer than two claims remain linked.</summary>
+    public Instant? DissolvedAt { get; set; }
+}
+
+/// <summary><c>ri.occurrence_claim</c>: membership of a claim in an occurrence; unlinking stamps the row, a claim is in at most one active occurrence.</summary>
+internal sealed class OccurrenceClaimRow
+{
+    public Guid OccurrenceId { get; set; }
+
+    public Guid ClaimId { get; set; }
+
+    public Guid LegalEntityId { get; set; }
+
+    public Instant LinkedAt { get; set; }
+
+    public Instant? UnlinkedAt { get; set; }
+
+    public string? UnlinkReason { get; set; }
+}
+
+/// <summary>
+/// <c>ri.recovery_adjustment</c>: a manual adjustment, one sealed delta row per participant (BO-RI-08). Kept apart from
+/// <c>ri.recovery</c> so a later recalculation never reverses it; the aggregate tracker adds both.
+/// </summary>
+internal sealed class RecoveryAdjustmentRow
+{
+    public Guid AdjustmentRowId { get; set; }
+
+    /// <summary>The adjustment (item) this row belongs to; one item has one row per participant.</summary>
+    public Guid AdjustmentId { get; set; }
+
+    public Guid LegalEntityId { get; set; }
+
+    public Guid ContractId { get; set; }
+
+    public int ContractYear { get; set; }
+
+    public Guid ClaimId { get; set; }
+
+    public Guid LayerId { get; set; }
+
+    public int LayerNo { get; set; }
+
+    public Guid ParticipantPartyId { get; set; }
+
+    public decimal IncurredDelta { get; set; }
+
+    public string Reason { get; set; } = string.Empty;
+
+    public string RecordedBy { get; set; } = string.Empty;
+
+    public Guid? AuthorityCheckId { get; set; }
+
+    public Instant RecordedAt { get; set; }
+}

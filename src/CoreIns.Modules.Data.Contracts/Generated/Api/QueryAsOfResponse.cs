@@ -8,6 +8,10 @@ namespace CoreIns.Modules.Data.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record QueryAsOfResponse
 {
+    /// <summary>Cursor of the next page, or null on the last page (BO-DAT-02 contract addition).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("nextCursor")]
+    public string? NextCursor { get; init; }
+
     /// <summary>PRD: "rows"</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
