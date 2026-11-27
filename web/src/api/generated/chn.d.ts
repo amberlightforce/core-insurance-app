@@ -2529,6 +2529,7 @@ export interface components {
         /** @description chn.Portal.policy result: customer-visible fields only (no UW data, no internal notes, no rating or rule trace). */
         PortalPolicyDetailResponse: {
             policyId: components["schemas"]["Uuid"];
+            renewalJobId?: components["schemas"]["Uuid"];
             policyNumber: components["schemas"]["BusinessNumber"];
             productCode: components["schemas"]["Code"];
             status?: string;
@@ -2549,6 +2550,7 @@ export interface components {
             productCode: components["schemas"]["Code"];
             expiresAt: components["schemas"]["Instant"];
             daysLeft: number;
+            renewalJobId?: components["schemas"]["Uuid"];
         };
         PortalUnpaidInvoice: {
             invoiceId: components["schemas"]["Uuid"];

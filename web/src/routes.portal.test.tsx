@@ -105,17 +105,48 @@ describe('PortalGuard', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows the coming-soon stub for areas BO-CHN-13 has not built and a not-found page', async () => {
+  it('mounts the real portal pages (not stubs) and a not-found page', async () => {
     signInAs(customer);
+    mockApi([
+      {
+        method: 'GET',
+        path: '/api/chn/v1/portal/policies',
+        respond: () => ({ body: { items: [], nextCursor: null } }),
+      },
+      { method: 'GET', path: /.*/, respond: () => ({ status: 404 }) },
+    ]);
     const first = renderApp('/portal/policies');
     expect(
-      await screen.findByRole('heading', { name: 'Η ενότητα «Ασφαλιστήρια» έρχεται σύντομα' }),
+      await screen.findByRole('heading', { level: 1, name: 'Τα ασφαλιστήριά σας' }),
     ).toBeInTheDocument();
     first.unmount();
     renderApp('/portal/nope');
     expect(
       await screen.findByRole('heading', { name: 'Η σελίδα δεν υπάρχει' }),
     ).toBeInTheDocument();
+  });
+
+  it('shows the unread count of the dashboard on the bell', async () => {
+    signInAs(customer);
+    mockApi([
+      {
+        method: 'GET',
+        path: '/api/chn/v1/portal/dashboard',
+        respond: () => ({
+          body: {
+            policyCount: 0,
+            activePolicyCount: 0,
+            renewalsDue: [],
+            unpaidInvoices: [],
+            unreadNotificationCount: 4,
+            openRequests: [],
+          },
+        }),
+      },
+      { method: 'GET', path: /.*/, respond: () => ({ status: 404 }) },
+    ]);
+    renderApp('/portal');
+    expect(await screen.findByRole('button', { name: /Ειδοποιήσεις, 4/ })).toBeInTheDocument();
   });
 });
 

@@ -7621,6 +7621,8 @@ components:
       properties:
         policyId:
           $ref: ../events/common.schema.json#/$defs/Uuid
+        renewalJobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         policyNumber:
           $ref: ../events/common.schema.json#/$defs/BusinessNumber
         productCode:
@@ -7675,6 +7677,8 @@ components:
           $ref: ../events/common.schema.json#/$defs/Instant
         daysLeft:
           type: integer
+        renewalJobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       required:
       - policyId
       - policyNumber

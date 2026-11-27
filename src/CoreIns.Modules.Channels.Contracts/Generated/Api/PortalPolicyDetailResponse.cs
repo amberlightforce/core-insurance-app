@@ -12,6 +12,14 @@ public sealed record PortalPolicyDetailResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
     public required global::CoreIns.SharedKernel.Identifiers.PolicyId PolicyId { get; init; }
 
+    /// <summary>Contract member 'renewalJobId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'renewalJobId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("renewalJobId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? RenewalJobId { get; init; }
+
     /// <summary>Contract member 'policyNumber'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("policyNumber")]
     public required global::CoreIns.SharedKernel.Identifiers.PolicyNumber PolicyNumber { get; init; }

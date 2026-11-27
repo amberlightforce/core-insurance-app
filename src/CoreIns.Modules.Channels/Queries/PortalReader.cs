@@ -93,6 +93,7 @@ internal sealed class PortalReader(PortalScope scope, PortalBillingScope billing
             // Plate, make, model and year only: no VIN, no value, no free-form risk fields.
             Vehicles = [.. vehicles.Select(v => new PortalVehicle { Plate = v.Plate, Make = v.Make, Model = v.Model, FirstRegistrationYear = v.FirstRegistrationYear })],
             // Totals per category only: no rates, rule ids or treatment details.
+            RenewalJobId = await OfferedRenewalJobAsync(guid, cancellationToken).ConfigureAwait(false),
             Premium = [.. response.Charges.GroupBy(c => (c.ChargeCategory, c.Amount.Currency))
                 .Select(g => new PortalPremiumLine { Category = g.Key.ChargeCategory, Amount = new Money(g.Sum(c => c.Amount.Amount), g.Key.Currency) })],
         };
@@ -108,19 +109,21 @@ internal sealed class PortalReader(PortalScope scope, PortalBillingScope billing
         var policies = await scope.MyPoliciesAsync(cancellationToken).ConfigureAwait(false);
         var now = clock.Now;
         var today = now.UtcDate;
-        var renewals = policies
+        var due = policies
             .Where(p => p.Status == TermStateCode.InForce && p.TermPeriod is { End: { } end } && end > now && end.UtcDate.DaysSince(today) <= RenewalWindowDays)
-            .Select(p =>
-            {
-                var end = p.TermPeriod!.Value.End!.Value;
-                return new PortalRenewalDue
-                {
-                    PolicyId = p.PolicyId, PolicyNumber = p.PolicyNumber, ProductCode = p.ProductCode, ExpiresAt = end,
-                    DaysLeft = end.UtcDate.DaysSince(today),
-                };
-            })
-            .OrderBy(r => r.ExpiresAt)
+            .OrderBy(p => p.TermPeriod!.Value.End!.Value)
             .ToList();
+        var renewals = new List<PortalRenewalDue>();
+        foreach (var p in due)
+        {
+            var end = p.TermPeriod!.Value.End!.Value;
+            renewals.Add(new PortalRenewalDue
+            {
+                PolicyId = p.PolicyId, PolicyNumber = p.PolicyNumber, ProductCode = p.ProductCode, ExpiresAt = end,
+                DaysLeft = end.UtcDate.DaysSince(today),
+                RenewalJobId = await OfferedRenewalJobAsync(p.PolicyId.Value, cancellationToken).ConfigureAwait(false),
+            });
+        }
 
         return new PortalDashboardResponse
         {
@@ -131,6 +134,38 @@ internal sealed class PortalReader(PortalScope scope, PortalBillingScope billing
             UnreadNotificationCount = await inbox.UnreadCountAsync(caller.PartyId, cancellationToken).ConfigureAwait(false),
             OpenRequests = await inbox.OpenRequestsAsync(caller.PartyId, cancellationToken).ConfigureAwait(false),
         };
+    }
+
+    /// <summary>
+    /// The policy's offered renewal (a QUOTED job of type RENEWAL; the only state <c>portal/renewals/accept</c> and <c>decline</c> can act on), or null.
+    /// The caller has already been shown to own the policy. Read failures degrade to "no offer yet", never to an error on the dashboard.
+    /// </summary>
+    private async Task<Guid?> OfferedRenewalJobAsync(Guid policyId, CancellationToken cancellationToken)
+    {
+        if (services.GetService<IPolicyJobService>() is not { } jobs)
+        {
+            return null;
+        }
+
+        try
+        {
+            var page = await jobs.ListAsync(policy: policyId.ToString("D"), state: "QUOTED", cancellationToken: cancellationToken).ConfigureAwait(false);
+            foreach (var item in page.Items)
+            {
+                if (item.Jobs is { ValueKind: System.Text.Json.JsonValueKind.Object } job
+                    && job.TryGetProperty("jobType", out var type) && type.GetString() == "RENEWAL"
+                    && job.TryGetProperty("jobId", out var id) && id.TryGetGuid(out var jobId))
+                {
+                    return jobId;
+                }
+            }
+        }
+        catch (DomainException)
+        {
+            // TODO(hardening): log; a POL read failure must not break the portal dashboard.
+        }
+
+        return null;
     }
 
     private async Task<IReadOnlyList<PortalUnpaidInvoice>> UnpaidInvoicesAsync(BusinessDate today, CancellationToken cancellationToken)
