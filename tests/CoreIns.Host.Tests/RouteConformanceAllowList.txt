@@ -28,8 +28,6 @@ CONTRACT_NOT_SERVED GET /api/chn/v1/commission-statements
 CONTRACT_NOT_SERVED GET /api/chn/v1/languages/{}
 CONTRACT_NOT_SERVED GET /api/chn/v1/messages
 CONTRACT_NOT_SERVED GET /api/chn/v1/notifications
-CONTRACT_NOT_SERVED GET /api/chn/v1/permission-matrices/diff
-CONTRACT_NOT_SERVED GET /api/chn/v1/permission-matrices/{}
 CONTRACT_NOT_SERVED GET /api/chn/v1/policies/{}
 CONTRACT_NOT_SERVED GET /api/chn/v1/policies/{}/cover-note
 CONTRACT_NOT_SERVED GET /api/chn/v1/products/{}/describe
@@ -289,12 +287,6 @@ CONTRACT_NOT_SERVED POST /api/chn/v1/messages/send
 CONTRACT_NOT_SERVED POST /api/chn/v1/notification-subscriptions/set
 CONTRACT_NOT_SERVED POST /api/chn/v1/notifications/mark-read
 CONTRACT_NOT_SERVED POST /api/chn/v1/partners/register
-CONTRACT_NOT_SERVED POST /api/chn/v1/permission-matrices/create-draft
-CONTRACT_NOT_SERVED POST /api/chn/v1/permission-matrices/run-scenarios
-CONTRACT_NOT_SERVED POST /api/chn/v1/permission-matrices/schedule
-CONTRACT_NOT_SERVED POST /api/chn/v1/permission-matrices/submit
-CONTRACT_NOT_SERVED POST /api/chn/v1/permission-matrices/update-entry
-CONTRACT_NOT_SERVED POST /api/chn/v1/permissions/evaluate
 CONTRACT_NOT_SERVED POST /api/chn/v1/policies/{}/cancellation-requests
 CONTRACT_NOT_SERVED POST /api/chn/v1/policies/{}/changes
 CONTRACT_NOT_SERVED POST /api/chn/v1/purchases/confirm
