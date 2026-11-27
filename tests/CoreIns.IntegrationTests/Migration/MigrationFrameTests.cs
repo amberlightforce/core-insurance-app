@@ -12,11 +12,12 @@ using static CoreIns.IntegrationTests.Party.PartyApi;
 namespace CoreIns.IntegrationTests.Migration;
 
 /// <summary>SL6-MIG-FRAME: dry run, idempotent import through a stub importer, maker-checker, routing overlap, reverse (D-SL6-05).</summary>
+// Stub importers use fictitious module keys (TST, TSU) so they never collide with the real module importers (PTY, UW, ...).
 public sealed class MigrationFrameTests(PostgresFixture database) : IClassFixture<PostgresFixture>, IAsyncDisposable
 {
     private const string Roles = "Platform.Admin,Staff.MigrationManager";
-    private readonly StubModule _pty = new("PTY");
-    private readonly StubModule _uw = new("UW");
+    private readonly StubModule _pty = new("TST");
+    private readonly StubModule _uw = new("TSU");
     private ApiHostFactory? _root;
     private WebApplicationFactory<Program>? _factory;
     private HttpClient? _client;
@@ -42,7 +43,7 @@ public sealed class MigrationFrameTests(PostgresFixture database) : IClassFixtur
         _root = new ApiHostFactory(database.AppConnectionString);
         _factory = _root.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
         {
-            // The PTY stub can also reverse; the UW stub only imports (no reverser).
+            // The TST stub can also reverse; the TSU stub only imports (no reverser).
             services.AddSingleton<IMigrationImporter>(_pty);
             services.AddSingleton<IMigrationReverser>(_pty);
             services.AddSingleton<IMigrationImporter>(_uw);
@@ -105,7 +106,7 @@ public sealed class MigrationFrameTests(PostgresFixture database) : IClassFixtur
     [Fact]
     public async Task A_dry_run_writes_nothing_and_a_real_run_twice_skips_existing_the_second_time()
     {
-        var batch = await CreateBatchAsync(Item("PTY", $"L-{Guid.NewGuid():N}-1"), Item("PTY", $"L-{Guid.NewGuid():N}-2"));
+        var batch = await CreateBatchAsync(Item("TST", $"L-{Guid.NewGuid():N}-1"), Item("TST", $"L-{Guid.NewGuid():N}-2"));
 
         // A real run needs a prior dry run.
         (await StartAsync(batch, dryRun: false, HttpStatusCode.UnprocessableEntity)).Text("code").ShouldContain("DRYRUN-REQUIRED");
@@ -130,14 +131,14 @@ public sealed class MigrationFrameTests(PostgresFixture database) : IClassFixtur
 
         // Same legacy ids again: every item is SKIPPED_EXISTING and the importer is not called.
         var items = (await SendAsync(HttpMethod.Get, $"/api/mig/v1/batches/outcomes?batchId={batch}", null, "alice")).Body!["items"]!.AsArray();
-        var again = await CreateBatchAsync([.. items.Select(i => Item("PTY", i.Text("legacyId")))]);
+        var again = await CreateBatchAsync([.. items.Select(i => Item("TST", i.Text("legacyId")))]);
         await StartAsync(again, dryRun: true);
         await StartAsync(again, dryRun: false);
         var second = (await ApproveAsync(again, "bob")).Body;
         Outcomes(second).ShouldBe(["SKIPPED_EXISTING", "SKIPPED_EXISTING"]);
         _pty.Imported.Count.ShouldBe(2);
 
-        var resolved = await SendAsync(HttpMethod.Post, "/api/mig/v1/xrefs/resolve", new { objectType = "Party", source = "PTY", legacyKey = items[0].Text("legacyId") }, "alice");
+        var resolved = await SendAsync(HttpMethod.Post, "/api/mig/v1/xrefs/resolve", new { objectType = "Party", source = "TST", legacyKey = items[0].Text("legacyId") }, "alice");
         resolved.Body.Text("coreId").ShouldBe(items[0].Text("coreId"));
     }
 
@@ -152,13 +153,13 @@ public sealed class MigrationFrameTests(PostgresFixture database) : IClassFixtur
         }
 
         // Changed between the dry run and the real run request: the dry run no longer covers the content.
-        var early = await CreateBatchAsync(Item("PTY", $"T-{Guid.NewGuid():N}-1"));
+        var early = await CreateBatchAsync(Item("TST", $"T-{Guid.NewGuid():N}-1"));
         await StartAsync(early, dryRun: true);
         await TamperAsync(early);
         (await StartAsync(early, dryRun: false, HttpStatusCode.UnprocessableEntity)).Text("code").ShouldContain("DRYRUN-REQUIRED");
 
         // Changed after the approval was requested: the approval does not run the changed content.
-        var late = await CreateBatchAsync(Item("PTY", $"T-{Guid.NewGuid():N}-2"));
+        var late = await CreateBatchAsync(Item("TST", $"T-{Guid.NewGuid():N}-2"));
         await StartAsync(late, dryRun: true);
         (await StartAsync(late, dryRun: false)).Text("batch.status").ShouldBe("PENDING_APPROVAL");
         await TamperAsync(late);
@@ -199,7 +200,7 @@ public sealed class MigrationFrameTests(PostgresFixture database) : IClassFixtur
     [Fact]
     public async Task Reverse_refuses_objects_with_activity_per_object_and_a_module_without_reverser_makes_the_batch_not_reversible()
     {
-        var batch = await RunAsync(await CreateBatchAsync(Item("PTY", $"R-{Guid.NewGuid():N}-1"), Item("PTY", $"R-{Guid.NewGuid():N}-2", flag: "ACTIVITY")));
+        var batch = await RunAsync(await CreateBatchAsync(Item("TST", $"R-{Guid.NewGuid():N}-1"), Item("TST", $"R-{Guid.NewGuid():N}-2", flag: "ACTIVITY")));
 
         var (response, reversed) = await SendAsync(HttpMethod.Post, "/api/mig/v1/batches/reverse", new { batchId = batch, dryRun = false }, "alice");
         response.StatusCode.ShouldBe(HttpStatusCode.OK, reversed?.ToJsonString());
@@ -207,7 +208,7 @@ public sealed class MigrationFrameTests(PostgresFixture database) : IClassFixtur
         Outcomes(reversed).ShouldBe(["REVERSED", "REVERSAL_BLOCKED"]);
         reversed!["outcomes"]![1].Text("errorCode").ShouldBe("MIG-ERR-REVERSAL-BLOCKED");
 
-        var uwBatch = await RunAsync(await CreateBatchAsync(Item("UW", $"U-{Guid.NewGuid():N}")));
+        var uwBatch = await RunAsync(await CreateBatchAsync(Item("TSU", $"U-{Guid.NewGuid():N}")));
         var (_, notReversible) = await SendAsync(HttpMethod.Post, "/api/mig/v1/batches/reverse", new { batchId = uwBatch, dryRun = false }, "alice");
         notReversible.Text("batch.status").ShouldBe("NOT_REVERSIBLE");
     }
