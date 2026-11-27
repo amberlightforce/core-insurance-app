@@ -18,7 +18,7 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("pfc")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -50,6 +50,136 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
                             t.HasCheckConstraint("ck_artifact_hash", "artefact_hash ~ '^[0-9a-f]{64}$'");
 
                             t.HasCheckConstraint("ck_artifact_size", "size_bytes > 0");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Product.Persistence.ChangeSetEditRow", b =>
+                {
+                    b.Property<Guid>("EditId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("edit_id");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actor");
+
+                    b.Property<DateTime>("At")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("at");
+
+                    b.Property<Guid>("ChangeSetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("change_set_id");
+
+                    b.Property<string>("NewJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("new_json");
+
+                    b.Property<string>("OldJson")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("old_json");
+
+                    b.Property<string>("Op")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("op");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("path");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer")
+                        .HasColumnName("seq");
+
+                    b.HasKey("EditId")
+                        .HasName("pk_change_set_edit");
+
+                    b.HasIndex("ChangeSetId", "Seq")
+                        .IsUnique()
+                        .HasDatabaseName("ux_change_set_edit_seq");
+
+                    b.ToTable("change_set_edit", "pfc", t =>
+                        {
+                            t.HasCheckConstraint("ck_change_set_edit_op", "op IN ('add', 'replace', 'remove')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Product.Persistence.ChangeSetRow", b =>
+                {
+                    b.Property<Guid>("ChangeSetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("change_set_id");
+
+                    b.Property<Guid>("BaseVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("base_version_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DraftJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("draft_json");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("ChangeSetId")
+                        .HasName("pk_change_set");
+
+                    b.HasIndex("BaseVersionId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("LegalEntityId", "ProductId", "Status")
+                        .HasDatabaseName("ix_change_set_product");
+
+                    b.ToTable("change_set", "pfc", t =>
+                        {
+                            t.HasCheckConstraint("ck_change_set_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_change_set_status", "status IN ('OPEN', 'ABANDONED', 'SUBMITTED')");
                         });
                 });
 
@@ -400,6 +530,33 @@ namespace CoreIns.Modules.Product.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_product_version_substate_locked", "(status = 'LOCKED') = (lifecycle_substate IS NOT NULL)");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Product.Persistence.ChangeSetEditRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Product.Persistence.ChangeSetRow", null)
+                        .WithMany()
+                        .HasForeignKey("ChangeSetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_change_set_edit_change_set");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Product.Persistence.ChangeSetRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Product.Persistence.ProductVersionRow", null)
+                        .WithMany()
+                        .HasForeignKey("BaseVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_change_set_base_version");
+
+                    b.HasOne("CoreIns.Modules.Product.Persistence.ProductRow", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_change_set_product");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Product.Persistence.FallbackRequestRow", b =>

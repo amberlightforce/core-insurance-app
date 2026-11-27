@@ -4,23 +4,19 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.IntakeException.rerun request. PRD inputs: "filters, item ids"</summary>
+/// <summary>fin.IntakeException.rerun request: the suspended business events to act on; an optional reason is audited.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record IntakeExceptionRerunRequest
 {
-    /// <summary>PRD: "filters"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("filters")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Filters { get; init; }
-
-    /// <summary>PRD: "item ids"</summary>
+    /// <summary>Business event ids from the intake exception queue.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'itemId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("itemIds")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::System.Guid> ItemIds { get; init; }
+
+    /// <summary>Why the events are re-run.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? ItemIds { get; init; }
+    public string? Reason { get; init; }
 }

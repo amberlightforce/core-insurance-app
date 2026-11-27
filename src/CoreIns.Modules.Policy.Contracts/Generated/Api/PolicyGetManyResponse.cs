@@ -4,15 +4,20 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Policy.getMany result. PRD outputs: "policies"</summary>
+/// <summary>pol.Policy.getMany result. Policies are answered as pol.Policy.get does (same legal-entity scoping); an id that did not exist in the caller's legal entity is listed in notFound, never distinguished from an out-of-scope one</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PolicyGetManyResponse
 {
-    /// <summary>PRD: "policies"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'policies'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("policies")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Policies { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Policy.Contracts.Api.PolicyGetResponse>? Policies { get; init; }
+
+    /// <summary>Contract member 'notFound'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'notFound' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("notFound")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? NotFound { get; init; }
 }

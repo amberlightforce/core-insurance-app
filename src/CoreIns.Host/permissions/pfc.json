@@ -5,6 +5,10 @@
         "pfc.ProductVersion.resolve": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pfc.Product.list": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
         "pfc.ProductVersion.import": [ "Platform.Admin" ],
+        // BO-PFC-01 authoring (roles are illustrative): drafting product changes.
+        "pfc.ChangeSet.create": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        "pfc.ChangeSet.edit": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        "pfc.ChangeSet.abandon": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
         "pfc.Artifact.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pfc.Catalogue.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pfc.Catalogue.getItem": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],

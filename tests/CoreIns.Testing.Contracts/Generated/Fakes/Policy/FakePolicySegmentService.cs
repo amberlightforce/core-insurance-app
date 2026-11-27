@@ -14,5 +14,5 @@ public sealed class FakePolicySegmentService : global::CoreIns.Testing.Contracts
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.SegmentChangesPage> ChangesAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Policy.Contracts.Api.SegmentChangesPage>("pol.Segment.changes", [cursor, limit], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.SegmentChangesPage> ChangesAsync(string? cursor = null, int? limit = null, global::CoreIns.SharedKernel.Instant? since = null, global::System.Guid? sinceTransactionId = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Policy.Contracts.Api.SegmentChangesPage>("pol.Segment.changes", [cursor, limit, since, sinceTransactionId], cancellationToken);
 }

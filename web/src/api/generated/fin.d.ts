@@ -2347,33 +2347,49 @@ export interface components {
         IntakeExceptionListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["IntakeExceptionListItem"][];
         };
-        /** @description fin.IntakeException.rerun request. PRD inputs: "filters, item ids" */
+        /** @description fin.IntakeException.rerun request: the suspended business events to act on; an optional reason is audited. */
         IntakeExceptionRerunRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
-            /** @description PRD: "item ids" */
-            itemIds?: components["schemas"]["Uuid"][];
+            /** @description Business event ids from the intake exception queue. */
+            itemIds: components["schemas"]["Uuid"][];
+            /** @description Why the events are re-run. */
+            reason?: string;
         };
-        /** @description fin.IntakeException.rerun result. PRD outputs: "outcomes" */
-        IntakeExceptionRerunResponse: Record<string, never>;
-        /** @description fin.IntakeException.markDuplicate request. PRD inputs: "filters, item ids" */
+        /** @description fin.IntakeException.rerun result: one outcome per requested event. */
+        IntakeExceptionRerunResponse: {
+            outcomes: components["schemas"]["IntakeExceptionOutcome"][];
+        };
+        IntakeExceptionOutcome: {
+            eventId: components["schemas"]["Uuid"];
+            /**
+             * @description NO_OP when the event is not in the exception queue any more (already posted, duplicate or rejected).
+             * @enum {string}
+             */
+            outcome: "POSTED" | "WAITING" | "STILL_SUSPENDED" | "NO_OP" | "NOT_FOUND" | "MARKED_DUPLICATE" | "REJECTED";
+            /** @description Why the event is still suspended, when it is. */
+            detail?: string;
+        };
+        /** @description fin.IntakeException.markDuplicate request: the suspended business events to act on; a reason is required and audited. */
         IntakeExceptionMarkDuplicateRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
-            /** @description PRD: "item ids" */
-            itemIds?: components["schemas"]["Uuid"][];
+            /** @description Business event ids from the intake exception queue. */
+            itemIds: components["schemas"]["Uuid"][];
+            /** @description Why the events are duplicates. */
+            reason: string;
         };
-        /** @description fin.IntakeException.markDuplicate result. PRD outputs: "outcomes" */
-        IntakeExceptionMarkDuplicateResponse: Record<string, never>;
-        /** @description fin.IntakeException.reject request. PRD inputs: "filters, item ids" */
+        /** @description fin.IntakeException.markDuplicate result: one outcome per requested event. */
+        IntakeExceptionMarkDuplicateResponse: {
+            outcomes: components["schemas"]["IntakeExceptionOutcome"][];
+        };
+        /** @description fin.IntakeException.reject request: the suspended business events to act on; a reason is required and audited. */
         IntakeExceptionRejectRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
-            /** @description PRD: "item ids" */
-            itemIds?: components["schemas"]["Uuid"][];
+            /** @description Business event ids from the intake exception queue. */
+            itemIds: components["schemas"]["Uuid"][];
+            /** @description Why the events are rejected. */
+            reason: string;
         };
-        /** @description fin.IntakeException.reject result. PRD outputs: "outcomes" */
-        IntakeExceptionRejectResponse: Record<string, never>;
+        /** @description fin.IntakeException.reject result: one outcome per requested event. */
+        IntakeExceptionRejectResponse: {
+            outcomes: components["schemas"]["IntakeExceptionOutcome"][];
+        };
         /** @description fin.ManualJournal.create request. PRD inputs: "template, lines, evidence" */
         ManualJournalCreateRequest: {
             /** @description PRD: "template" */

@@ -20,6 +20,10 @@ internal sealed class ProductDbContext(DbContextOptions<ProductDbContext> option
 
     public DbSet<FallbackRequestRow> Fallbacks => Set<FallbackRequestRow>();
 
+    public DbSet<ChangeSetRow> ChangeSets => Set<ChangeSetRow>();
+
+    public DbSet<ChangeSetEditRow> ChangeSetEdits => Set<ChangeSetEditRow>();
+
     protected override string Schema => ProductModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -143,6 +147,51 @@ internal sealed class ProductDbContext(DbContextOptions<ProductDbContext> option
             entity.HasOne<ProductVersionRow>().WithMany().HasForeignKey(e => e.DefectiveVersionId).HasConstraintName("fk_fallback_defective").OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<ProductVersionRow>().WithMany().HasForeignKey(e => e.SourceVersionId).HasConstraintName("fk_fallback_source").OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<ProductVersionRow>().WithMany().HasForeignKey(e => e.NewVersionId).HasConstraintName("fk_fallback_new_version").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ChangeSetRow>(entity =>
+        {
+            entity.ToTable("change_set", table =>
+            {
+                table.HasCheckConstraint("ck_change_set_status", "status IN ('OPEN', 'ABANDONED', 'SUBMITTED')");
+                table.HasCheckConstraint("ck_change_set_record_version", "record_version >= 1");
+            });
+            entity.HasKey(e => e.ChangeSetId).HasName("pk_change_set");
+            entity.Property(e => e.ChangeSetId).HasColumnName("change_set_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Jurisdiction).HasColumnName("jurisdiction").HasColumnType("char(2)");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.BaseVersionId).HasColumnName("base_version_id");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.DraftJson).HasColumnName("draft_json").HasColumnType("jsonb");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+            entity.HasIndex(e => new { e.LegalEntityId, e.ProductId, e.Status }).HasDatabaseName("ix_change_set_product");
+            entity.HasOne<ProductRow>().WithMany().HasForeignKey(e => e.ProductId).HasConstraintName("fk_change_set_product").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<ProductVersionRow>().WithMany().HasForeignKey(e => e.BaseVersionId).HasConstraintName("fk_change_set_base_version").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ChangeSetEditRow>(entity =>
+        {
+            entity.ToTable("change_set_edit", table =>
+            {
+                table.HasCheckConstraint("ck_change_set_edit_op", "op IN ('add', 'replace', 'remove')");
+            });
+            entity.HasKey(e => e.EditId).HasName("pk_change_set_edit");
+            entity.Property(e => e.EditId).HasColumnName("edit_id");
+            entity.Property(e => e.ChangeSetId).HasColumnName("change_set_id");
+            entity.Property(e => e.Seq).HasColumnName("seq");
+            entity.Property(e => e.Op).HasColumnName("op");
+            entity.Property(e => e.Path).HasColumnName("path");
+            entity.Property(e => e.OldJson).HasColumnName("old_json").HasColumnType("jsonb");
+            entity.Property(e => e.NewJson).HasColumnName("new_json").HasColumnType("jsonb");
+            entity.Property(e => e.Actor).HasColumnName("actor");
+            entity.Property(e => e.At).HasColumnName("at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.ChangeSetId, e.Seq }).IsUnique().HasDatabaseName("ux_change_set_edit_seq");
+            entity.HasOne<ChangeSetRow>().WithMany().HasForeignKey(e => e.ChangeSetId).HasConstraintName("fk_change_set_edit_change_set").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<ArtifactRow>(entity =>

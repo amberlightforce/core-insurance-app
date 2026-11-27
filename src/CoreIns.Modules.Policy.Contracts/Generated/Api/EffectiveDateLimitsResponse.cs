@@ -4,31 +4,23 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.EffectiveDate.limits result. PRD outputs: "earliest, latest, override available"</summary>
+/// <summary>pol.EffectiveDate.limits result: the range an effective date may take for the policy's term at the effective time of the call</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record EffectiveDateLimitsResponse
 {
-    /// <summary>PRD: "earliest"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'earliest'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("earliest")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Earliest { get; init; }
+    public required global::CoreIns.SharedKernel.Instant Earliest { get; init; }
 
-    /// <summary>PRD: "latest"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'latest'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("latest")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Latest { get; init; }
+    public required global::CoreIns.SharedKernel.Instant Latest { get; init; }
 
-    /// <summary>PRD: "override available"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Days back the role (the most permissive of the caller's, or the role query) may change</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("backdateDays")]
+    public required int BackdateDays { get; init; }
+
+    /// <summary>Always false until a limit-override permission exists</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("overrideAvailable")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? OverrideAvailable { get; init; }
+    public required bool OverrideAvailable { get; init; }
 }

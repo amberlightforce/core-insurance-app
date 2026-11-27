@@ -14,5 +14,5 @@ public sealed class FakePolicyEffectiveDateService : global::CoreIns.Testing.Con
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.EffectiveDateLimitsResponse> LimitsAsync(global::CoreIns.SharedKernel.Identifiers.PolicyId? policyId = null, string? txnType = null, string? role = null, string? channel = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Policy.Contracts.Api.EffectiveDateLimitsResponse>("pol.EffectiveDate.limits", [policyId, txnType, role, channel], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.EffectiveDateLimitsResponse> LimitsAsync(global::CoreIns.SharedKernel.Identifiers.PolicyId policyId, string? txnType = null, string? role = null, string? channel = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Policy.Contracts.Api.EffectiveDateLimitsResponse>("pol.EffectiveDate.limits", [policyId, txnType, role, channel], cancellationToken);
 }

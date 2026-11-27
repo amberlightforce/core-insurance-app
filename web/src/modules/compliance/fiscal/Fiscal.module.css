@@ -15,7 +15,7 @@
 
 .grid dt {
   color: var(--color-text-muted);
-  font-size: var(--font-size-caption, 0.75rem);
+  font: var(--type-caption);
 }
 
 .grid dd {
