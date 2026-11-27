@@ -10,7 +10,7 @@
         "pty.Party.get": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pty.Party.search": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pty.Screening.screen": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
-        "pty.Party.revealP2": [ "Staff.Underwriter" ],
+        "pty.Party.revealP2": [ "Staff.Underwriter", "Service.RenewalRun" ],
         "pty.Intermediary.create": [ "Staff.Underwriter", "Platform.Admin" ],
         "pty.Intermediary.update": [ "Staff.Underwriter", "Platform.Admin" ],
         "pty.Intermediary.suspend": [ "Staff.Underwriter", "Platform.Admin" ],

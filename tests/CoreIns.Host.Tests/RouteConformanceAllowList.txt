@@ -66,8 +66,6 @@ CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17/movements
 CONTRACT_NOT_SERVED GET /api/fin/v1/levy-returns
 CONTRACT_NOT_SERVED GET /api/fin/v1/levy-returns/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/periods/status
-CONTRACT_NOT_SERVED GET /api/fin/v1/reconciliation/breaks
-CONTRACT_NOT_SERVED GET /api/fin/v1/reconciliation/detail
 CONTRACT_NOT_SERVED GET /api/fin/v1/tax-returns
 CONTRACT_NOT_SERVED GET /api/fin/v1/tax-returns/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/written-premium/query
@@ -415,9 +413,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/draft
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/preview-impact
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/submit
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/test
-CONTRACT_NOT_SERVED POST /api/fin/v1/reconciliation/exchange
-CONTRACT_NOT_SERVED POST /api/fin/v1/reconciliation/match
-CONTRACT_NOT_SERVED POST /api/fin/v1/reconciliation/run
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/add-adjustment
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/generate-file
 CONTRACT_NOT_SERVED POST /api/fin/v1/tax-returns/recalculate
@@ -534,9 +529,6 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/resolve-conflicts
 CONTRACT_NOT_SERVED POST /api/pol/v1/policy-moves/execute
 CONTRACT_NOT_SERVED POST /api/pol/v1/reactivations
 CONTRACT_NOT_SERVED POST /api/pol/v1/reinstatements
-CONTRACT_NOT_SERVED POST /api/pol/v1/renewal-runs/pause
-CONTRACT_NOT_SERVED POST /api/pol/v1/renewal-runs/retry-item
-CONTRACT_NOT_SERVED POST /api/pol/v1/renewal-runs/start
 CONTRACT_NOT_SERVED POST /api/pol/v1/rewrites
 CONTRACT_NOT_SERVED POST /api/pol/v1/suspensions
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/merge

@@ -3601,29 +3601,148 @@
         "provisional": true
       }
     },
+    "RenewalRunItemView": {
+      "itemId": "0192bd79-5849-7c63-8db1-5e560a20656d",
+      "seq": 1,
+      "termId": "0192951a-6edc-7a0c-8e14-3370bc405042",
+      "policyId": "01924d0d-ac39-78fc-8f69-89171f13217c",
+      "outcome": "PENDING",
+      "errorCode": "sample",
+      "detail": "sample",
+      "jobId": "01926a93-15c4-7b0f-8e6d-3ccf1b35b3fa",
+      "attempts": 1,
+      "updatedAt": "2026-10-07T09:00:00Z"
+    },
     "RenewalRunPauseRequest": {
-      "entity": "unspecified",
-      "product": "unspecified",
-      "window": "unspecified"
+      "runId": "0192b8c6-cd25-781e-825b-8b85765211aa"
     },
     "RenewalRunPauseResponse": {
-      "run": "unspecified"
+      "run": {
+        "runId": "0192eb8c-255e-77fe-81ff-5169ac754e63",
+        "status": "RUNNING",
+        "dryRun": true,
+        "product": "SAMPLE_CODE",
+        "windowDays": 1,
+        "total": 1,
+        "counts": {
+          "total": 1
+        },
+        "items": [
+          {
+            "itemId": "0192fe9f-db35-7fe0-8b32-4e9599fffdcf",
+            "seq": 1,
+            "termId": "019240e8-0590-7942-8b94-d273830c5449",
+            "policyId": "0192a79c-c392-7284-8ee2-59bdad505bd5",
+            "outcome": "PENDING",
+            "errorCode": "sample",
+            "detail": "sample",
+            "jobId": "01929d91-3565-7d5d-8d14-5c290799e711",
+            "attempts": 1,
+            "updatedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "requestedBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "finishedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "RenewalRunRetryItemRequest": {
-      "entity": "unspecified",
-      "product": "unspecified",
-      "window": "unspecified"
+      "runId": "01924180-c7eb-74b9-8e32-7b6c5bb4ff0a",
+      "itemId": "0192c1cd-450d-7dfd-86fe-142d6595fff7"
     },
     "RenewalRunRetryItemResponse": {
-      "run": "unspecified"
+      "run": {
+        "runId": "0192a561-f238-70a3-808b-362b7c664a04",
+        "status": "RUNNING",
+        "dryRun": true,
+        "product": "SAMPLE_CODE",
+        "windowDays": 1,
+        "total": 1,
+        "counts": {
+          "total": 1
+        },
+        "items": [
+          {
+            "itemId": "01927183-b226-7b12-8148-3e3ab1bc4c3b",
+            "seq": 1,
+            "termId": "01927bf0-e37d-7bba-82ef-66507c14bfa7",
+            "policyId": "0192d910-237b-7aa2-82ff-720a1963803f",
+            "outcome": "PENDING",
+            "errorCode": "sample",
+            "detail": "sample",
+            "jobId": "0192a477-6934-7fc3-88e7-6ff5d1fe9410",
+            "attempts": 1,
+            "updatedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "requestedBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "finishedAt": "2026-10-07T09:00:00Z"
+      }
     },
     "RenewalRunStartRequest": {
-      "entity": "unspecified",
-      "product": "unspecified",
-      "window": "unspecified"
+      "product": "SAMPLE_CODE",
+      "windowDays": 1,
+      "dryRun": true,
+      "resumeRunId": "01925bf8-8a5b-7009-82c7-228a77e2d080"
     },
     "RenewalRunStartResponse": {
-      "run": "unspecified"
+      "run": {
+        "runId": "01923025-092b-731a-854d-a5b1728eb7b7",
+        "status": "RUNNING",
+        "dryRun": true,
+        "product": "SAMPLE_CODE",
+        "windowDays": 1,
+        "total": 1,
+        "counts": {
+          "total": 1
+        },
+        "items": [
+          {
+            "itemId": "0192beca-8c10-7398-859a-d487dd914459",
+            "seq": 1,
+            "termId": "01927fec-e0be-7f2a-8db4-f040d4cb70e6",
+            "policyId": "01925030-7a6b-746e-8465-8184cdeaf634",
+            "outcome": "PENDING",
+            "errorCode": "sample",
+            "detail": "sample",
+            "jobId": "0192f311-b998-7e0f-88c0-9cab5085d4a2",
+            "attempts": 1,
+            "updatedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "requestedBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "finishedAt": "2026-10-07T09:00:00Z"
+      }
+    },
+    "RenewalRunView": {
+      "runId": "01920cd2-2a2f-7d18-8ac2-4b24b17096e6",
+      "status": "RUNNING",
+      "dryRun": true,
+      "product": "SAMPLE_CODE",
+      "windowDays": 1,
+      "total": 1,
+      "counts": {
+        "total": 1
+      },
+      "items": [
+        {
+          "itemId": "0192f6dc-fceb-7b51-815c-5b08d9e90599",
+          "seq": 1,
+          "termId": "01922a12-070a-7de2-82ea-b4af2c483765",
+          "policyId": "01924b5e-1d51-7f76-8889-bda7052a5fe3",
+          "outcome": "PENDING",
+          "errorCode": "sample",
+          "detail": "sample",
+          "jobId": "0192dbe0-c4f9-7ea5-8e5b-93d4bd8c28f3",
+          "attempts": 1,
+          "updatedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "requestedBy": "sample",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "finishedAt": "2026-10-07T09:00:00Z"
     },
     "RewriteCreateRequest": {
       "termId": "01929019-0f3b-7532-8af5-3f590c828f63",

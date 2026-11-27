@@ -21,7 +21,7 @@ public sealed class EventSchemaValidatorTests
         """)!.AsObject();
 
     [Fact]
-    public void Finds_every_catalogued_event_schema() => Validator.SchemaCount.ShouldBe(304);
+    public void Finds_every_catalogued_event_schema() => Validator.SchemaCount.ShouldBe(306);
 
     [Fact]
     public void A_conforming_event_is_valid() => Validator.Validate(ClaimClosed()).ShouldBeEmpty();

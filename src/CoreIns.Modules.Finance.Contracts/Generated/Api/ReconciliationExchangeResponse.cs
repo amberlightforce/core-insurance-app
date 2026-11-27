@@ -4,23 +4,32 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.Reconciliation.exchange result. PRD outputs: "comparison result, break ids"</summary>
+/// <summary>fin.Reconciliation.exchange result: the totals are stored and the month of the date is compared with the ledger.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReconciliationExchangeResponse
 {
-    /// <summary>PRD: "comparison result"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'comparisonResult'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("comparisonResult")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ComparisonResult { get; init; }
+    public required ComparisonResultValue ComparisonResult { get; init; }
 
-    /// <summary>PRD: "break ids"</summary>
+    /// <summary>Contract member 'breakIds'.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'breakId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("breakIds")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? BreakIds { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::System.Guid> BreakIds { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ComparisonResultValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ComparisonResultValue
+    {
+        /// <summary><c>MATCHED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MATCHED")]
+        Matched,
+
+        /// <summary><c>BREAKS</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("BREAKS")]
+        Breaks,
+    }
 }

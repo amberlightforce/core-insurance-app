@@ -41,6 +41,10 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
 
     public DbSet<NonRenewalRow> NonRenewals => Set<NonRenewalRow>();
 
+    public DbSet<RenewalRunRow> RenewalRuns => Set<RenewalRunRow>();
+
+    public DbSet<RenewalRunItemRow> RenewalRunItems => Set<RenewalRunItemRow>();
+
     public DbSet<OosCorrectionRow> OosCorrections => Set<OosCorrectionRow>();
 
     public DbSet<MigrationImportRow> MigrationImports => Set<MigrationImportRow>();
@@ -457,6 +461,62 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
             entity.HasIndex(e => e.TermId).IsUnique().HasDatabaseName("ux_non_renewal_term");
             entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_non_renewal_policy");
+        });
+
+        modelBuilder.Entity<RenewalRunRow>(entity =>
+        {
+            entity.ToTable("renewal_run", table =>
+            {
+                table.HasCheckConstraint("ck_renewal_run_status", "status IN ('RUNNING', 'PAUSED', 'COMPLETED', 'COMPLETED_WITH_ERRORS')");
+            });
+            entity.HasKey(e => e.RunId).HasName("pk_renewal_run");
+            entity.Property(e => e.RunId).HasColumnName("run_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.DryRun).HasColumnName("dry_run");
+            entity.Property(e => e.ProductCode).HasColumnName("product_code");
+            entity.Property(e => e.WindowDays).HasColumnName("window_days");
+            entity.Property(e => e.SelectedAt).HasColumnName("selected_at").HasColumnType("timestamptz");
+            entity.Property(e => e.Total).HasColumnName("total");
+            entity.Property(e => e.Cursor).HasColumnName("cursor");
+            entity.Property(e => e.LeaseUntil).HasColumnName("lease_until").HasColumnType("timestamptz");
+            entity.Property(e => e.RequestedBy).HasColumnName("requested_by");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.FinishedAt).HasColumnName("finished_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            // One live run per legal entity: the database refuses a second RUNNING or PAUSED one.
+            entity.HasIndex(e => e.LegalEntityId).IsUnique().HasDatabaseName("ux_renewal_run_active")
+                .HasFilter("status IN ('RUNNING', 'PAUSED')");
+            entity.HasIndex(e => new { e.LegalEntityId, e.CreatedAt }).HasDatabaseName("ix_renewal_run_entity");
+        });
+
+        modelBuilder.Entity<RenewalRunItemRow>(entity =>
+        {
+            entity.ToTable("renewal_run_item", table =>
+            {
+                table.HasCheckConstraint(
+                    "ck_renewal_run_item_outcome",
+                    "outcome IN ('PENDING', 'CREATED', 'WOULD_CREATE', 'SKIPPED_NON_RENEWED', 'SKIPPED_VULNERABLE', 'SKIPPED_EXISTING', 'FAILED')");
+            });
+            entity.HasKey(e => e.ItemId).HasName("pk_renewal_run_item");
+            entity.Property(e => e.ItemId).HasColumnName("item_id");
+            entity.Property(e => e.RunId).HasColumnName("run_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Seq).HasColumnName("seq");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.Outcome).HasColumnName("outcome");
+            entity.Property(e => e.ErrorCode).HasColumnName("error_code");
+            entity.Property(e => e.Detail).HasColumnName("detail");
+            entity.Property(e => e.JobId).HasColumnName("job_id");
+            entity.Property(e => e.Attempts).HasColumnName("attempts");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.RunId, e.TermId }).IsUnique().HasDatabaseName("ux_renewal_run_item_term");
+            entity.HasIndex(e => new { e.RunId, e.Outcome, e.Seq }).HasDatabaseName("ix_renewal_run_item_outcome");
+            entity.HasOne<RenewalRunRow>().WithMany().HasForeignKey(e => e.RunId)
+                .HasConstraintName("fk_renewal_run_item_run").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<PackRollbackExceptionRow>(entity =>

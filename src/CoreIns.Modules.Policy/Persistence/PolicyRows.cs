@@ -681,3 +681,74 @@ internal sealed class NonRenewalRow
 
     public int RecordVersion { get; set; } = 1;
 }
+
+/// <summary>
+/// <c>pol.renewal_run</c>: one batch renewal run of a legal entity (BO-POL-10, REQ-POL-247). At most one RUNNING or PAUSED run per legal
+/// entity (partial unique index). The worker owns a RUNNING run through <see cref="LeaseUntil"/>; <see cref="Cursor"/> is the last item
+/// sequence handled. Dry runs record outcomes without changing any policy.
+/// </summary>
+internal sealed class RenewalRunRow
+{
+    public Guid RunId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    /// <summary>RUNNING, PAUSED, COMPLETED or COMPLETED_WITH_ERRORS.</summary>
+    public string Status { get; set; } = "RUNNING";
+
+    public bool DryRun { get; set; }
+
+    public string? ProductCode { get; set; }
+
+    public int WindowDays { get; set; }
+
+    /// <summary>The business moment the selection was made.</summary>
+    public Instant SelectedAt { get; set; }
+
+    public int Total { get; set; }
+
+    public int Cursor { get; set; }
+
+    public Instant? LeaseUntil { get; set; }
+
+    public string RequestedBy { get; set; } = string.Empty;
+
+    public Instant CreatedAt { get; set; }
+
+    public Instant UpdatedAt { get; set; }
+
+    public Instant? FinishedAt { get; set; }
+
+    public int RecordVersion { get; set; } = 1;
+}
+
+/// <summary><c>pol.renewal_run_item</c>: one term of a renewal run and its outcome (unique per run and term).</summary>
+internal sealed class RenewalRunItemRow
+{
+    public Guid ItemId { get; set; }
+
+    public Guid RunId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public int Seq { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    public PolicyId PolicyId { get; set; }
+
+    /// <summary>PENDING, CREATED, WOULD_CREATE, SKIPPED_NON_RENEWED, SKIPPED_VULNERABLE, SKIPPED_EXISTING or FAILED.</summary>
+    public string Outcome { get; set; } = "PENDING";
+
+    public string? ErrorCode { get; set; }
+
+    public string? Detail { get; set; }
+
+    public JobId? JobId { get; set; }
+
+    public int Attempts { get; set; }
+
+    public Instant UpdatedAt { get; set; }
+
+    public int RecordVersion { get; set; } = 1;
+}

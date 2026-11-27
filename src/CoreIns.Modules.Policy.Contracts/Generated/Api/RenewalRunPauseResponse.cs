@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.RenewalRun.pause result. PRD outputs: "run"</summary>
+/// <summary>pol.RenewalRun.pause result: the run.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RenewalRunPauseResponse
 {
-    /// <summary>PRD: "run"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'run'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("run")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Run { get; init; }
+    public required global::CoreIns.Modules.Policy.Contracts.Api.RenewalRunView Run { get; init; }
 }

@@ -30,7 +30,7 @@ public sealed partial class GeneratedContractTests
     {
         var catalog = JsonNode.Parse(File.ReadAllText(Path.Combine(Repo.Root, "contracts", "events", "catalog.json")))!;
         var entries = catalog["events"]!.AsArray().Select(e => e!.AsObject()).ToList();
-        entries.Count.ShouldBe(304);
+        entries.Count.ShouldBe(306);
 
         var keys = entries.Select(e => $"{e["producer"]!.GetValue<string>().ToLowerInvariant()}.{e["name"]}.v{e["version"]!.GetValue<string>().Split('.')[0]}").ToList();
         PayloadTypes.Keys.Order(StringComparer.Ordinal).ShouldBe(keys.Order(StringComparer.Ordinal));
@@ -106,7 +106,7 @@ public sealed partial class GeneratedContractTests
         }
 
         problems.ShouldBeEmpty();
-        count.ShouldBe(608, "a maximal and a minimal sample per event");
+        count.ShouldBe(612, "a maximal and a minimal sample per event");
     }
 
     [Fact]

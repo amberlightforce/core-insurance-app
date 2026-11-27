@@ -1396,6 +1396,162 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.RenewalRunItemRow", b =>
+                {
+                    b.Property<Guid>("ItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<string>("Detail")
+                        .HasColumnType("text")
+                        .HasColumnName("detail");
+
+                    b.Property<string>("ErrorCode")
+                        .HasColumnType("text")
+                        .HasColumnName("error_code");
+
+                    b.Property<Guid?>("JobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("job_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("outcome");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer")
+                        .HasColumnName("seq");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ItemId")
+                        .HasName("pk_renewal_run_item");
+
+                    b.HasIndex("RunId", "TermId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_renewal_run_item_term");
+
+                    b.HasIndex("RunId", "Outcome", "Seq")
+                        .HasDatabaseName("ix_renewal_run_item_outcome");
+
+                    b.ToTable("renewal_run_item", "pol", t =>
+                        {
+                            t.HasCheckConstraint("ck_renewal_run_item_outcome", "outcome IN ('PENDING', 'CREATED', 'WOULD_CREATE', 'SKIPPED_NON_RENEWED', 'SKIPPED_VULNERABLE', 'SKIPPED_EXISTING', 'FAILED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.RenewalRunRow", b =>
+                {
+                    b.Property<Guid>("RunId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("Cursor")
+                        .HasColumnType("integer")
+                        .HasColumnName("cursor");
+
+                    b.Property<bool>("DryRun")
+                        .HasColumnType("boolean")
+                        .HasColumnName("dry_run");
+
+                    b.Property<DateTime?>("FinishedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("finished_at");
+
+                    b.Property<DateTime?>("LeaseUntil")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("lease_until");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("ProductCode")
+                        .HasColumnType("text")
+                        .HasColumnName("product_code");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("RequestedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("requested_by");
+
+                    b.Property<DateTime>("SelectedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("selected_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<int>("Total")
+                        .HasColumnType("integer")
+                        .HasColumnName("total");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("WindowDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("window_days");
+
+                    b.HasKey("RunId")
+                        .HasName("pk_renewal_run");
+
+                    b.HasIndex("LegalEntityId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_renewal_run_active")
+                        .HasFilter("status IN ('RUNNING', 'PAUSED')");
+
+                    b.HasIndex("LegalEntityId", "CreatedAt")
+                        .HasDatabaseName("ix_renewal_run_entity");
+
+                    b.ToTable("renewal_run", "pol", t =>
+                        {
+                            t.HasCheckConstraint("ck_renewal_run_status", "status IN ('RUNNING', 'PAUSED', 'COMPLETED', 'COMPLETED_WITH_ERRORS')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.SegmentRow", b =>
                 {
                     b.Property<Guid>("SegmentId")
@@ -1604,6 +1760,16 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_quote_version_job");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.RenewalRunItemRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Policy.Persistence.RenewalRunRow", null)
+                        .WithMany()
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_renewal_run_item_run");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.SegmentRow", b =>
