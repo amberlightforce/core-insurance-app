@@ -22,5 +22,5 @@ public interface IPolicyEffectiveDateService
     /// <param name="txnType">PRD: "txnType"</param>
     /// <param name="role">PRD: "role"</param>
     /// <param name="channel">PRD: "channel"</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.EffectiveDateLimitsResponse> LimitsAsync(global::CoreIns.SharedKernel.Identifiers.PolicyId? policyId = null, string? txnType = null, string? role = null, string? channel = null, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.EffectiveDateLimitsResponse> LimitsAsync(global::CoreIns.SharedKernel.Identifiers.PolicyId policyId, string? txnType = null, string? role = null, string? channel = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

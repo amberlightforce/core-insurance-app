@@ -275,7 +275,7 @@ paths:
           $ref: common.yaml#/components/responses/InternalError
     patch:
       operationId: pty.Party.update
-      summary: Create or update party
+      summary: Update party
       description: |-
         Create or update party
 
@@ -318,6 +318,9 @@ paths:
         status: 409
       - code: PTY-ERR-DUPLICATE-IDENTIFIER
         status: 409
+      - code: PTY-ERR-RESTRICTED
+        status: 409
+        note: the party record is restricted by a DSAR
       - code: PTY-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -5277,46 +5280,114 @@ components:
       description: Page of pty.Party.search results (cursor pagination, contract §3.5.5)
     PartyUpdateRequest:
       type: object
-      description: 'pty.Party.update request. PRD inputs: "party data, reason"'
+      description: 'pty.Party.update request (BO-PTY-01). Name, birth date and language change of a party; omitted parts stay as they are. The name change is bitemporal (effective today, history kept) and the search keys are rebuilt.'
       properties:
-        partyData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party data"'
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: Optimistic concurrency (REQ-PTY-043); a stale value is refused with PTY-ERR-STALE
+        person:
+          oneOf:
+          - $ref: '#/components/schemas/PersonUpdateInput'
+          - type: 'null'
+        organisation:
+          oneOf:
+          - $ref: '#/components/schemas/OrganisationInput'
+          - type: 'null'
+        preferredLanguage:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LanguageCode
+          - type: 'null'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type:
+          - string
+          - 'null'
+          maxLength: 64
+      required:
+      - expectedRecordVersion
+    PersonUpdateInput:
+      type: object
+      description: 'Person changes of pty.Party.update. givenNames and familyName are given together (a new name replaces the old); birthDate alone changes only the birth date.'
+      properties:
+        givenNames:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+        familyName:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+        fatherName:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+        motherName:
+          type:
+          - string
+          - 'null'
+          maxLength: 200
+        birthDate:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
     PartyUpdateResponse:
       type: object
-      description: 'pty.Party.update result. PRD outputs: "party, duplicate suggestions, missing data"'
+      description: 'pty.Party.update result (BO-PTY-01): the party after the change, with possible duplicates of the new name.'
       properties:
         party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
+          $ref: '#/components/schemas/PartyView'
         duplicateSuggestions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "duplicate suggestions"'
+          type: array
+          items:
+            $ref: '#/components/schemas/PartySearchItem'
         missingData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "missing data"'
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - party
+      - duplicateSuggestions
+      - missingData
     PartyValidateRequest:
       type: object
-      description: 'pty.Party.validate request. PRD inputs: "party data"'
+      description: 'pty.Party.validate request (BO-PTY-01): the data of a would-be pty.Party.create, checked without saving.'
       properties:
         partyData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party data"'
+          $ref: '#/components/schemas/PartyCreateRequest'
+      required:
+      - partyData
     PartyValidateResponse:
       type: object
-      description: 'pty.Party.validate result. PRD outputs: "issues, candidates"'
+      description: 'pty.Party.validate result (BO-PTY-01): rule violations of the create rules (none = valid) and possible duplicates.'
       properties:
         issues:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issues"'
+            $ref: '#/components/schemas/PartyValidationIssue'
         candidates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "candidates"'
+          type: array
+          items:
+            $ref: '#/components/schemas/PartySearchItem'
+      required:
+      - issues
+      - candidates
+    PartyValidationIssue:
+      type: object
+      description: One rule violation of pty.Party.validate.
+      properties:
+        field:
+          type: string
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        message:
+          type: string
+      required:
+      - field
+      - code
+      - message
     PartyMergeRequest:
       type: object
       description: 'pty.Party.merge request. PRD inputs: "candidates, survivorship decisions"'
@@ -5359,24 +5430,37 @@ components:
           description: 'PRD: "approval request"'
     IdentifierVerifyRequest:
       type: object
-      description: 'pty.Identifier.verify request. PRD inputs: "party_id, scheme"'
+      description: 'pty.Identifier.verify request (BO-PTY-01): re-checks the current identifier of a scheme with the bound IdValidator.'
       properties:
         partyId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "party_id"'
         scheme:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "scheme"'
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - partyId
+      - scheme
     IdentifierVerifyResponse:
       type: object
-      description: 'pty.Identifier.verify result. PRD outputs: "status, suggestions"'
+      description: 'pty.Identifier.verify result (BO-PTY-01). valid = the IdValidator accepts the value (format and check digit). No registry or VIES adapter is bound yet, so a valid value stays SELF_DECLARED (source ID_VALIDATOR) and an invalid one becomes VERIFICATION_FAILED.'
       properties:
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum:
+          - SELF_DECLARED
+          - DOCUMENT_VERIFIED
+          - REGISTRY_VERIFIED
+          - VERIFICATION_FAILED
+          - EXPIRED
+        valid:
+          type: boolean
         suggestions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "suggestions"'
+          type: array
+          items:
+            type: string
+      required:
+      - status
+      - valid
+      - suggestions
     PartyRoleAssignRequest:
       type: object
       description: 'pty.PartyRole.assign request. PRD inputs: "party, role, context, period"'

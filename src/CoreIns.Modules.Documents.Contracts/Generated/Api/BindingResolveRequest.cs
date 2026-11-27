@@ -4,36 +4,31 @@
 
 namespace CoreIns.Modules.Documents.Contracts.Api;
 
-/// <summary>doc.Binding.resolve request. PRD inputs: "product version, form, language, channel, date"</summary>
+/// <summary>doc.Binding.resolve request (BO-DOC-05): the document type plus optional product, line and jurisdiction; the date is the validAt query parameter.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BindingResolveRequest
 {
-    /// <summary>PRD: "product version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("productVersion")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ProductVersion { get; init; }
+    /// <summary>Contract member 'documentType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("documentType")]
+    public required string DocumentType { get; init; }
 
-    /// <summary>PRD: "form"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("form")]
+    /// <summary>Contract member 'productCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productCode")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Form { get; init; }
+    public string? ProductCode { get; init; }
 
-    /// <summary>PRD: "language"</summary>
+    /// <summary>Contract member 'lineOfBusiness'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lineOfBusiness")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? LineOfBusiness { get; init; }
+
+    /// <summary>Contract member 'jurisdiction'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jurisdiction")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Jurisdiction { get; init; }
+
+    /// <summary>Contract member 'language'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("language")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? Language { get; init; }
-
-    /// <summary>PRD: "channel"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Channel { get; init; }
 }

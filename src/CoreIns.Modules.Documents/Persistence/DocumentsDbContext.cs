@@ -17,6 +17,12 @@ internal sealed class DocumentsDbContext(DbContextOptions<DocumentsDbContext> op
 
     public DbSet<ArchiveRow> Archives => Set<ArchiveRow>();
 
+    public DbSet<DocumentTypeRow> DocumentTypes => Set<DocumentTypeRow>();
+
+    public DbSet<TemplateRow> Templates => Set<TemplateRow>();
+
+    public DbSet<ClauseRow> Clauses => Set<ClauseRow>();
+
     protected override string Schema => DocumentsModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -32,6 +38,7 @@ internal sealed class DocumentsDbContext(DbContextOptions<DocumentsDbContext> op
             entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
             entity.Property(e => e.DocumentNumber).HasColumnName("document_number");
             entity.Property(e => e.TemplateKey).HasColumnName("template_key");
+            entity.Property(e => e.TemplateVersion).HasColumnName("template_version");
             entity.Property(e => e.RequestNo).HasColumnName("request_no");
             entity.Property(e => e.SubjectModule).HasColumnName("subject_module");
             entity.Property(e => e.SubjectType).HasColumnName("subject_type");
@@ -99,6 +106,58 @@ internal sealed class DocumentsDbContext(DbContextOptions<DocumentsDbContext> op
             entity.HasIndex(e => e.DocumentId).HasDatabaseName("ix_evidence_document");
         });
 
+        modelBuilder.Entity<DocumentTypeRow>(entity =>
+        {
+            entity.ToTable("document_type");
+            entity.HasKey(e => e.DocumentType).HasName("pk_document_type");
+            entity.Property(e => e.DocumentType).HasColumnName("document_type");
+            entity.Property(e => e.DefaultMedium).HasColumnName("default_medium");
+            entity.Property(e => e.TitleEl).HasColumnName("title_el");
+            entity.Property(e => e.TitleEn).HasColumnName("title_en");
+            entity.Property(e => e.RequiredFields).HasColumnName("required_fields").HasColumnType("text[]");
+        });
+
+        // Versioned letter templates (BO-DOC-05). A NULL scope column is a wildcard; only APPROVED versions are ever resolved.
+        modelBuilder.Entity<TemplateRow>(entity =>
+        {
+            entity.ToTable("template", t =>
+            {
+                t.HasCheckConstraint("ck_template_status", "status IN ('DRAFT','APPROVED')");
+                t.HasCheckConstraint("ck_template_valid", "valid_to IS NULL OR valid_to >= valid_from");
+            });
+            entity.HasKey(e => e.TemplateId).HasName("pk_template");
+            entity.Property(e => e.TemplateId).HasColumnName("template_id");
+            entity.Property(e => e.DocumentType).HasColumnName("document_type");
+            entity.Property(e => e.Version).HasColumnName("version");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.ValidFrom).HasColumnName("valid_from");
+            entity.Property(e => e.ValidTo).HasColumnName("valid_to");
+            entity.Property(e => e.ProductCode).HasColumnName("product_code");
+            entity.Property(e => e.LineOfBusiness).HasColumnName("line_of_business");
+            entity.Property(e => e.Jurisdiction).HasColumnName("jurisdiction");
+            entity.Property(e => e.TitleEl).HasColumnName("title_el");
+            entity.Property(e => e.BodyEl).HasColumnName("body_el");
+            entity.Property(e => e.TitleEn).HasColumnName("title_en");
+            entity.Property(e => e.BodyEn).HasColumnName("body_en");
+            entity.Property(e => e.ApprovedAt).HasColumnName("approved_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ApprovedBy).HasColumnName("approved_by");
+            entity.HasIndex(e => new { e.DocumentType, e.Version }).IsUnique().HasDatabaseName("ux_template_version");
+        });
+
+        modelBuilder.Entity<ClauseRow>(entity =>
+        {
+            entity.ToTable("clause", t => t.HasCheckConstraint("ck_clause_status", "status IN ('DRAFT','APPROVED')"));
+            entity.HasKey(e => e.ClauseId).HasName("pk_clause");
+            entity.Property(e => e.ClauseId).HasColumnName("clause_id");
+            entity.Property(e => e.Code).HasColumnName("code");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.TitleEl).HasColumnName("title_el");
+            entity.Property(e => e.TextEl).HasColumnName("text_el");
+            entity.Property(e => e.TitleEn).HasColumnName("title_en");
+            entity.Property(e => e.TextEn).HasColumnName("text_en");
+            entity.HasIndex(e => e.Code).IsUnique().HasDatabaseName("ux_clause_code");
+        });
+
         modelBuilder.Entity<ArchiveRow>(entity =>
         {
             entity.ToTable("archive", t => t.HasCheckConstraint("ck_archive_hash", "content_hash ~ '^[0-9a-f]{64}$'"));
@@ -123,6 +182,9 @@ internal sealed class DocumentRow
     public string DocumentNumber { get; set; } = string.Empty;
 
     public string TemplateKey { get; set; } = string.Empty;
+
+    /// <summary>The template version the document was rendered from (BO-DOC-05); null for documents before the catalogue.</summary>
+    public int? TemplateVersion { get; set; }
 
     public string RequestNo { get; set; } = string.Empty;
 
@@ -220,6 +282,70 @@ internal sealed class ArchiveRow
     public string Metadata { get; set; } = "{}";
 
     public Instant CreatedAt { get; set; }
+}
+
+internal sealed class DocumentTypeRow
+{
+    public string DocumentType { get; set; } = string.Empty;
+
+    public string DefaultMedium { get; set; } = string.Empty;
+
+    public string TitleEl { get; set; } = string.Empty;
+
+    public string TitleEn { get; set; } = string.Empty;
+
+    public string[] RequiredFields { get; set; } = [];
+}
+
+internal sealed class TemplateRow
+{
+    public Guid TemplateId { get; set; }
+
+    public string DocumentType { get; set; } = string.Empty;
+
+    public int Version { get; set; }
+
+    /// <summary>DRAFT or APPROVED.</summary>
+    public string Status { get; set; } = "DRAFT";
+
+    public DateOnly ValidFrom { get; set; }
+
+    public DateOnly? ValidTo { get; set; }
+
+    public string? ProductCode { get; set; }
+
+    public string? LineOfBusiness { get; set; }
+
+    public string? Jurisdiction { get; set; }
+
+    public string TitleEl { get; set; } = string.Empty;
+
+    public string BodyEl { get; set; } = string.Empty;
+
+    public string TitleEn { get; set; } = string.Empty;
+
+    public string BodyEn { get; set; } = string.Empty;
+
+    public Instant? ApprovedAt { get; set; }
+
+    public string? ApprovedBy { get; set; }
+}
+
+internal sealed class ClauseRow
+{
+    public Guid ClauseId { get; set; }
+
+    public string Code { get; set; } = string.Empty;
+
+    public string Status { get; set; } = "DRAFT";
+
+    public string TitleEl { get; set; } = string.Empty;
+
+    public string TextEl { get; set; } = string.Empty;
+
+    public string TitleEn { get; set; } = string.Empty;
+
+    public string TextEn { get; set; } = string.Empty;
 }
 
 /// <summary>Design-time factory for <c>dotnet ef migrations add</c> on this project.</summary>

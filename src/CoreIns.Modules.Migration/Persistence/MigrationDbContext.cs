@@ -39,6 +39,11 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
             entity.Property(e => e.DryRunAt).HasColumnName("dry_run_at").HasColumnType("timestamptz");
             entity.Property(e => e.StartedBy).HasColumnName("started_by");
             entity.Property(e => e.ApprovalRequestId).HasColumnName("approval_request_id");
+            entity.Property(e => e.Cursor).HasColumnName("cursor").HasDefaultValue(0);
+            entity.Property(e => e.ProcessedCount).HasColumnName("processed_count").HasDefaultValue(0);
+            entity.Property(e => e.FailedCount).HasColumnName("failed_count").HasDefaultValue(0);
+            entity.Property(e => e.LeaseUntil).HasColumnName("lease_until").HasColumnType("timestamptz");
+            entity.HasIndex(e => e.Status).HasDatabaseName("ix_batch_status");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
             entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
@@ -129,6 +134,18 @@ internal sealed class BatchRow
     public string? StartedBy { get; set; }
 
     public Guid? ApprovalRequestId { get; set; }
+
+    /// <summary>Seq of the last item the worker processed (BO-MIG-01).</summary>
+    public int Cursor { get; set; }
+
+    /// <summary>Items with an outcome other than PENDING.</summary>
+    public int ProcessedCount { get; set; }
+
+    /// <summary>Items with outcome FAILED.</summary>
+    public int FailedCount { get; set; }
+
+    /// <summary>Until when a worker owns the run; an expired lease is taken over (crash recovery).</summary>
+    public Instant? LeaseUntil { get; set; }
 
     public Instant CreatedAt { get; set; }
 
