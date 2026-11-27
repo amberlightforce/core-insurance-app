@@ -148,13 +148,14 @@ public sealed class WithdrawApprovalTests(PostgresFixture database) : IClassFixt
     }
 
     [Fact]
-    public async Task Decided_request_cannot_be_withdrawn_and_no_REST_route_exists()
+    public async Task Decided_request_cannot_be_withdrawn_and_REST_withdraw_refuses_a_non_maker()
     {
         var row = await CreateAsync();
         (await DecideAsync(row)).Status.ShouldBe(HttpStatusCode.OK);
         (await WithdrawAsync(row)).Error!.Code.Value.ShouldBe("PLT-ERR-APPROVAL-STALE");
         var route = await SendAsync(HttpMethod.Post, "/api/plt/v1/approval/withdraw", new { approvalRequestId = row.RequestId, reason = "cancel" });
-        route.Status.ShouldBeOneOf(HttpStatusCode.NotFound, HttpStatusCode.MethodNotAllowed);
+        // BO-PLT-02: the REST route exists for the maker only; any other caller (here without the permission or not the maker) is refused.
+        route.Status.ShouldBe(HttpStatusCode.Forbidden);
     }
 
     [Fact]

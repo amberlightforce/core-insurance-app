@@ -886,9 +886,10 @@ paths:
   /api/ri/v1/contracts/endorse:
     post:
       operationId: ri.Contract.endorse
-      summary: Contract lifecycle
+      summary: Endorse an Active contract
       description: |-
-        Contract lifecycle
+        Endorse an Active contract from an effective date. Creates the next contract version (valid from the effective date, recorded now)
+        and opens a PLT approval; approved versions stay unchanged. ri.Contract.approveEndorsement decides it.
 
         PRD inputs: contract, section, layer, clause data; reason
         PRD outputs: contract version
@@ -916,9 +917,17 @@ paths:
         status: 422
       - code: RI-ERR-CONTRACT-CLOSED
         status: 422
+      - code: RI-ERR-STATE
+        note: the contract is not Active, or another endorsement is still pending
+        status: 422
+      - code: RI-ERR-STALE
+        status: 409
+      - code: RI-ERR-NOT-FOUND
+        status: 404
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      x-typed: 'BO-RI-03: contract versions (endorse, versionAt); REQ-RI-001, REQ-RI-031..REQ-RI-065'
       x-source:
       - PRD-08 §9.1 l.1502
       parameters:
@@ -945,6 +954,89 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/ri/v1/contracts/approve-endorsement:
+    post:
+      operationId: ri.Contract.approveEndorsement
+      summary: Decide an endorsement
+      description: |-
+        Decide a pending endorsement (APPROVE or REJECT) as the checker. The endorser cannot decide it (RI-ERR-SOD).
+
+        PRD inputs: contract, section, layer, clause data; reason
+        PRD outputs: contract version
+      tags:
+      - Contract
+      x-requirement:
+      - REQ-RI-031..REQ-RI-065
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 8
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: true
+      x-dry-run-note: 'PRD: Key; DR'
+      x-exposure:
+      - ui
+      x-permission: ri.Contract.approveEndorsement
+      x-error-codes:
+      - code: RI-ERR-VALIDATION
+        status: 422
+      - code: RI-ERR-REINSURER-ID
+        status: 422
+      - code: RI-ERR-CONTRACT-CLOSED
+        status: 422
+      - code: RI-ERR-STATE
+        note: the endorsement is not pending
+        status: 422
+      - code: RI-ERR-SOD
+        note: the approver is the endorser (maker-checker)
+        status: 403
+      - code: RI-ERR-STALE
+        status: 409
+      - code: RI-ERR-NOT-FOUND
+        status: 404
+      - code: RI-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-typed: 'BO-RI-03: contract versions (endorse, versionAt); REQ-RI-001, REQ-RI-031..REQ-RI-065'
+      x-source:
+      - PRD-08 §9.1 l.1502
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContractApproveEndorsementRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractApproveEndorsementResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -1346,12 +1438,25 @@ paths:
       x-consumers:
       - FIN
       x-permission: ri.Contract.versionAt
-      x-error-codes: []
+      x-error-codes:
+      - code: RI-ERR-NOT-FOUND
+        note: no approved version of the contract is in force at that valid and record time
+        status: 404
+      - code: RI-ERR-VALIDATION
+        status: 422
+      x-typed: 'BO-RI-03: contract versions (endorse, versionAt); REQ-RI-001, REQ-RI-031..REQ-RI-065'
       x-source:
       - PRD-08 §9.1 l.1503
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/ValidAt
+      - $ref: common.yaml#/components/parameters/KnownAt
+      - name: contractId
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -1365,6 +1470,10 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/ri/v1/contracts/applicable:
@@ -7897,7 +8006,7 @@ components:
         versionNo:
           type: integer
           minimum: 1
-          description: Contract version row number; always 1 in slice 4 (endorsement is later, D-SL4-04)
+          description: Contract version row number (1 = the original, 2 and up = endorsements)
         validFrom:
           $ref: ../events/common.schema.json#/$defs/Instant
           description: Start of the version row valid period
@@ -7987,30 +8096,88 @@ components:
       - contract
     ContractEndorseRequest:
       type: object
-      description: 'ri.Contract.endorse request. PRD inputs: "contract, section, layer, clause data; reason"'
+      description: 'ri.Contract.endorse request. The endorsed content is the in-force content with the members named here replaced; the treaty period cannot change.'
       properties:
-        contract:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract"'
-        section:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "section"'
-        layer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "layer"'
-        clauseData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "clause data"'
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The recordVersion the user saw; a different current version is RI-ERR-STALE
+        effectiveFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: First day (Europe/Athens) the endorsed terms apply; inside the treaty period and after the in-force version's own start
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Why the contract is endorsed (audit; required)
+        scope:
+          $ref: '#/components/schemas/RiContractScope'
+        clause:
+          $ref: '#/components/schemas/RiContractClause'
+        layers:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/RiLayer
+          minItems: 1
+        participations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiParticipationInput'
+          minItems: 1
+        placedPct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+      required:
+      - contractId
+      - expectedRecordVersion
+      - effectiveFrom
+      - reason
     ContractEndorseResponse:
       type: object
-      description: 'ri.Contract.endorse result. PRD outputs: "contract version"'
+      description: ri.Contract.endorse result; the contract view is the endorsed (pending) version
       properties:
-        contractVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contract version"'
+        contract:
+          $ref: '#/components/schemas/RiContractView'
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - contract
+      - approvalRequestId
+    ContractApproveEndorsementRequest:
+      type: object
+      description: ri.Contract.approveEndorsement request. The checker must not be the endorser (RI-ERR-SOD).
+      properties:
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        versionNo:
+          type: integer
+          minimum: 2
+          description: The pending endorsement version
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Reason; required for REJECT
+      required:
+      - contractId
+      - versionNo
+      - decision
+    ContractApproveEndorsementResponse:
+      type: object
+      description: ri.Contract.approveEndorsement result
+      properties:
+        contract:
+          $ref: '#/components/schemas/RiContractView'
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+      required:
+      - contract
+      - decision
     ContractSubmitRequest:
       type: object
       description: 'ri.Contract.submit request: Draft -> PendingApproval; opens the PLT approval RI.CONTRACT_APPROVE (enterer is the maker).'
@@ -8206,14 +8373,22 @@ components:
       description: Page of ri.Contract.list results (cursor pagination, contract §3.5.5)
     ContractVersionAtResponse:
       type: object
-      description: 'ri.Contract.versionAt result. PRD outputs: "contracts, versions"'
+      description: 'ri.Contract.versionAt result: the contract version in force at validAt as known at knownAt'
       properties:
-        contracts:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "contracts"'
-        versions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versions"'
+        contract:
+          $ref: '#/components/schemas/RiContractView'
+        validAt:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        knownAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        knownFrom:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: When the returned version became known (creation for version 1, approval for an endorsement)
+      required:
+      - contract
+      - validAt
+      - knownAt
+      - knownFrom
     ContractApplicableResponse:
       type: object
       description: ri.Contract.applicable result (REQ-RI-001, REQ-RI-116)

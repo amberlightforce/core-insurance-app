@@ -70,6 +70,23 @@ export function useManualJournal(id: string) {
   });
 }
 
+/** fin.ManualJournal.create: stores a balanced, evidenced DRAFT; nothing is posted (submit and decide are BO-FIN-01b). */
+export function useCreateManualJournal(onDone: (r: ManualJournalEnvelope) => void) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ request, key }: { request: ManualJournalSubmitRequest; key: string }) =>
+      apiRequest<ManualJournalEnvelope>(`${base}/manual-journals`, {
+        method: 'POST',
+        body: request,
+        idempotencyKey: key,
+      }),
+    onSuccess: (response) => {
+      void client.invalidateQueries({ queryKey: ['fin', 'manual-journals'] });
+      onDone(response);
+    },
+  });
+}
+
 /** fin.ManualJournal.submit: the maker proposes the journal; it posts only after another user approves it. */
 export function useSubmitManualJournal(onDone: (r: ManualJournalEnvelope) => void) {
   const client = useQueryClient();
@@ -125,27 +142,43 @@ export function useWithdrawManualJournal(onDone: (r: ManualJournalEnvelope) => v
 
 export type IntakeAction = 'rerun' | 'mark-duplicate' | 'reject';
 
+export type IntakeOutcomeCode =
+  | 'POSTED'
+  | 'WAITING'
+  | 'STILL_SUSPENDED'
+  | 'NO_OP'
+  | 'NOT_FOUND'
+  | 'MARKED_DUPLICATE'
+  | 'REJECTED';
+
+/** One outcome per requested event (fin.IntakeException.* response). */
+export interface IntakeActionResponse {
+  outcomes: { eventId: string; outcome: IntakeOutcomeCode; detail?: string }[];
+}
+
 /** fin.IntakeException.rerun / markDuplicate / reject for the selected events. */
-export function useIntakeAction(onDone: () => void) {
+export function useIntakeAction(onDone: (response: IntakeActionResponse) => void) {
   const client = useQueryClient();
   return useMutation({
     mutationFn: ({
       action,
       itemIds,
+      reason,
       key,
     }: {
       action: IntakeAction;
       itemIds: string[];
+      reason?: string;
       key: string;
     }) =>
-      apiRequest<unknown>(`${base}/intake-exceptions/${action}`, {
+      apiRequest<IntakeActionResponse>(`${base}/intake-exceptions/${action}`, {
         method: 'POST',
-        body: { itemIds },
+        body: reason ? { itemIds, reason } : { itemIds },
         idempotencyKey: key,
       }),
-    onSuccess: () => {
+    onSuccess: (response) => {
       void client.invalidateQueries({ queryKey: ['fin', 'intake-exceptions'] });
-      onDone();
+      onDone(response);
     },
   });
 }

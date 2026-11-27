@@ -63,6 +63,17 @@ public static class ProductModule
         services.AddCommandAuditor<DecideFallback, ProductVersionDecideFallbackResponse, DecideFallbackAuditor>();
         services.AddCommand<DecideFallback, ProductVersionDecideFallbackResponse, DecideFallbackHandler>(CommandDescriptor.For("pfc.ProductVersion.decideFallback"));
 
+        // BO-PFC-01: draft and change-set store (create from a Locked version, edit by JSON pointer with lint, abandon).
+        services.AddScoped<IValidator<CreateChangeSet>, CreateChangeSetValidator>();
+        services.AddCommandAuditor<CreateChangeSet, ChangeSetCreateResponse, CreateChangeSetAuditor>();
+        services.AddCommand<CreateChangeSet, ChangeSetCreateResponse, CreateChangeSetHandler>(CommandDescriptor.For("pfc.ChangeSet.create"));
+        services.AddScoped<IValidator<EditChangeSet>, EditChangeSetValidator>();
+        services.AddCommandAuditor<EditChangeSet, ChangeSetEditResponse, EditChangeSetAuditor>();
+        services.AddCommand<EditChangeSet, ChangeSetEditResponse, EditChangeSetHandler>(CommandDescriptor.For("pfc.ChangeSet.edit"));
+        services.AddScoped<IValidator<AbandonChangeSet>, AbandonChangeSetValidator>();
+        services.AddCommandAuditor<AbandonChangeSet, ChangeSetAbandonResponse, AbandonChangeSetAuditor>();
+        services.AddCommand<AbandonChangeSet, ChangeSetAbandonResponse, AbandonChangeSetHandler>(CommandDescriptor.For("pfc.ChangeSet.abandon"));
+
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IProductProductVersionService, ProductProductVersionService>();
         services.AddScoped<IProductCatalogueService, ProductCatalogueService>();
@@ -105,6 +116,12 @@ public static class ProductModule
             .Describe("Η έγκριση δεν δεσμεύει το περιεχόμενο αυτής της επαναφοράς ή δεν δόθηκε με την απαιτούμενη εξουσιοδότηση.", "The approval does not bind this fall-back's content or was not decided under the required authority."),
         ErrorDefinition.For(ModuleCode.PFC, "STALE", 409, "Το προϊόν άλλαξε", "The product changed")
             .Describe("Το προϊόν τροποποιήθηκε ταυτόχρονα. Φορτώστε ξανά και δοκιμάστε πάλι.", "The product was changed concurrently. Reload and retry."),
+        ErrorDefinition.For(ModuleCode.PFC, "CHANGE-SET-NOT-FOUND", 404, "Άγνωστο σύνολο αλλαγών", "Unknown change set")
+            .Describe("Το σύνολο αλλαγών δεν υπάρχει για τη νομική σας οντότητα.", "The change set does not exist for your legal entity."),
+        ErrorDefinition.For(ModuleCode.PFC, "CHANGE-SET-STATE", 409, "Το σύνολο αλλαγών δεν είναι ανοιχτό", "The change set is not open")
+            .Describe("Μόνο ανοιχτό σύνολο αλλαγών μπορεί να τροποποιηθεί ή να εγκαταλειφθεί.", "Only an open change set can be edited or abandoned."),
+        ErrorDefinition.For(ModuleCode.PFC, "INVALID-EDIT", 422, "Μη έγκυρη επεξεργασία", "Invalid edit")
+            .Describe("Η διαδρομή ή η τιμή της επεξεργασίας δεν ταιριάζει με το προσχέδιο.", "The edit's path or value does not fit the draft."),
         ErrorDefinition.For(ModuleCode.PFC, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

@@ -22,7 +22,7 @@ public static class ReinsuranceErrorCodes
 
     /// <summary>RI-ERR-CONTRACT-CLOSED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): ri.Contract.approve, ri.Contract.close, ri.Contract.commute, ri.Contract.create, ri.Contract.endorse, ri.Contract.expire, ri.Contract.submit, ri.Contract.update.</para>
+    /// <para>Declared by 9 operation(s): ri.Contract.approve, ri.Contract.approveEndorsement, ri.Contract.close, ri.Contract.commute, ri.Contract.create, ri.Contract.endorse, ri.Contract.expire, ri.Contract.submit, ri.Contract.update.</para>
     /// </remarks>
     public const string ContractClosed = "RI-ERR-CONTRACT-CLOSED";
 
@@ -46,7 +46,7 @@ public static class ReinsuranceErrorCodes
 
     /// <summary>RI-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 82 operation(s): ri.Accumulation.exportOed, ri.Accumulation.importModelResults, ri.Accumulation.setCapacity, ri.Adjustment.approve, ri.Adjustment.calculate, ri.Bordereau.approve, ri.Bordereau.generate, ri.Bordereau.issue, ri.Bordereau.submit, ri.CashCall.cancel, ri.CashCall.issue, ri.CashCall.raise, ….</para>
+    /// <para>Declared by 83 operation(s): ri.Accumulation.exportOed, ri.Accumulation.importModelResults, ri.Accumulation.setCapacity, ri.Adjustment.approve, ri.Adjustment.calculate, ri.Bordereau.approve, ri.Bordereau.generate, ri.Bordereau.issue, ri.Bordereau.submit, ri.CashCall.cancel, ri.CashCall.issue, ri.CashCall.raise, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "RI-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -58,7 +58,7 @@ public static class ReinsuranceErrorCodes
 
     /// <summary>RI-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): ri.Contract.approve, ri.Contract.create, ri.Contract.get, ri.Contract.submit, ri.Contract.update, ri.Programme.get, ri.Programme.list, ri.Recovery.trace.</para>
+    /// <para>Declared by 11 operation(s): ri.Contract.approve, ri.Contract.approveEndorsement, ri.Contract.create, ri.Contract.endorse, ri.Contract.get, ri.Contract.submit, ri.Contract.update, ri.Contract.versionAt, ri.Programme.get, ri.Programme.list, ri.Recovery.trace.</para>
     /// </remarks>
     public const string NotFound = "RI-ERR-NOT-FOUND";
 
@@ -82,7 +82,7 @@ public static class ReinsuranceErrorCodes
 
     /// <summary>RI-ERR-REINSURER-ID (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): ri.Contract.approve, ri.Contract.close, ri.Contract.commute, ri.Contract.create, ri.Contract.endorse, ri.Contract.expire, ri.Contract.submit, ri.Contract.update.</para>
+    /// <para>Declared by 9 operation(s): ri.Contract.approve, ri.Contract.approveEndorsement, ri.Contract.close, ri.Contract.commute, ri.Contract.create, ri.Contract.endorse, ri.Contract.expire, ri.Contract.submit, ri.Contract.update.</para>
     /// </remarks>
     public const string ReinsurerId = "RI-ERR-REINSURER-ID";
 
@@ -124,25 +124,25 @@ public static class ReinsuranceErrorCodes
 
     /// <summary>RI-ERR-SOD (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): ri.Contract.approve.</para>
+    /// <para>Declared by 2 operation(s): ri.Contract.approve, ri.Contract.approveEndorsement.</para>
     /// </remarks>
     public const string Sod = "RI-ERR-SOD";
 
     /// <summary>RI-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): ri.Contract.approve, ri.Contract.submit, ri.Contract.update.</para>
+    /// <para>Declared by 5 operation(s): ri.Contract.approve, ri.Contract.approveEndorsement, ri.Contract.endorse, ri.Contract.submit, ri.Contract.update.</para>
     /// </remarks>
     public const string Stale = "RI-ERR-STALE";
 
     /// <summary>RI-ERR-STATE (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): ri.Contract.approve, ri.Contract.submit, ri.Contract.update.</para>
+    /// <para>Declared by 5 operation(s): ri.Contract.approve, ri.Contract.approveEndorsement, ri.Contract.endorse, ri.Contract.submit, ri.Contract.update.</para>
     /// </remarks>
     public const string State = "RI-ERR-STATE";
 
     /// <summary>RI-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 16 operation(s): ri.Contract.applicable, ri.Contract.approve, ri.Contract.close, ri.Contract.commute, ri.Contract.create, ri.Contract.endorse, ri.Contract.expire, ri.Contract.submit, ri.Contract.update, ri.Programme.approve, ri.Programme.create, ri.Programme.renew, ….</para>
+    /// <para>Declared by 18 operation(s): ri.Contract.applicable, ri.Contract.approve, ri.Contract.approveEndorsement, ri.Contract.close, ri.Contract.commute, ri.Contract.create, ri.Contract.endorse, ri.Contract.expire, ri.Contract.submit, ri.Contract.update, ri.Contract.versionAt, ri.Programme.approve, ….</para>
     /// </remarks>
     public const string Validation = "RI-ERR-VALIDATION";
 

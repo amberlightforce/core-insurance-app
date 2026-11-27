@@ -20,44 +20,19 @@ internal static class Media
     public static bool IsStubProvider(string provider) => provider is StubPost or StubEmail;
 }
 
-/// <summary>A letter template: HTML body per language with <c>{{placeholder}}</c> markers.</summary>
-internal sealed record LetterTemplate(string Key, string DefaultMedium, string[] Required, string TitleEl, string BodyEl, string TitleEn, string BodyEn);
+/// <summary>A resolved letter template version: HTML body per language with <c>{{placeholder}}</c> markers.</summary>
+internal sealed record LetterTemplate(string Key, int Version, string DefaultMedium, string[] Required, string TitleEl, string BodyEl, string TitleEn, string BodyEn);
 
-/// <summary>The four SL6 templates (D-SL6-12): HTML, el and en. Texts are illustrative drafts, not approved legal wording.</summary>
+/// <summary>
+/// Template keys and rendering. The templates themselves live in the <c>doc.template</c> catalogue (BO-DOC-05); the four
+/// SL6 templates (D-SL6-12) are seeded by migration. Texts are illustrative drafts, not approved legal wording.
+/// </summary>
 internal static class Templates
 {
     public const string NonPayNotice = "DT-NONPAY-NOTICE";
     public const string WithdrawalAck = "DT-WITHDRAWAL-ACK";
     public const string CancellationNotice = "DT-CANCELLATION-NOTICE";
     public const string RefundAdvice = "DT-REFUND-ADVICE";
-
-    private static readonly LetterTemplate[] All =
-    [
-        new(NonPayNotice, Media.RegisteredPost, ["customerName", "policyNo", "amountDue", "dueDate"],
-            "Ειδοποίηση μη πληρωμής ασφαλίστρου",
-            "<p>Αγαπητέ/ή {{customerName}},</p><p>Για το ασφαλιστήριο {{policyNo}} δεν έχει εξοφληθεί το ποσό {{amountDue}} που έληγε στις {{dueDate}}. "
-            + "Εάν δεν εξοφληθεί εντός της νόμιμης προθεσμίας από την κοινοποίηση της παρούσας, η ασφάλιση καταγγέλλεται.</p>",
-            "Notice of non-payment of premium",
-            "<p>Dear {{customerName}},</p><p>For policy {{policyNo}} the amount {{amountDue}} due on {{dueDate}} has not been paid. "
-            + "If it is not paid within the statutory period from notification of this letter, the cover will be cancelled.</p>"),
-        new(WithdrawalAck, Media.Email, ["customerName", "policyNo", "withdrawalDate"],
-            "Επιβεβαίωση υπαναχώρησης",
-            "<p>Αγαπητέ/ή {{customerName}},</p><p>Παραλάβαμε τη δήλωση υπαναχώρησής σας για το ασφαλιστήριο {{policyNo}} στις {{withdrawalDate}}.</p>",
-            "Withdrawal acknowledgement",
-            "<p>Dear {{customerName}},</p><p>We received your withdrawal from policy {{policyNo}} on {{withdrawalDate}}.</p>"),
-        new(CancellationNotice, Media.Email, ["customerName", "policyNo", "effectiveDate"],
-            "Ειδοποίηση ακύρωσης ασφαλιστηρίου",
-            "<p>Αγαπητέ/ή {{customerName}},</p><p>Το ασφαλιστήριο {{policyNo}} ακυρώνεται με ισχύ από {{effectiveDate}}.</p>",
-            "Notice of policy cancellation",
-            "<p>Dear {{customerName}},</p><p>Policy {{policyNo}} is cancelled with effect from {{effectiveDate}}.</p>"),
-        new(RefundAdvice, Media.Email, ["customerName", "policyNo", "refundAmount"],
-            "Ενημέρωση επιστροφής χρημάτων",
-            "<p>Αγαπητέ/ή {{customerName}},</p><p>Θα επιστραφεί το ποσό {{refundAmount}} για το ασφαλιστήριο {{policyNo}}.</p>",
-            "Refund advice",
-            "<p>Dear {{customerName}},</p><p>The amount {{refundAmount}} will be refunded for policy {{policyNo}}.</p>"),
-    ];
-
-    public static LetterTemplate? Find(string key) => Array.Find(All, t => string.Equals(t.Key, key, StringComparison.Ordinal));
 
     public static bool IsLanguage(string language) => language is "el" or "en";
 

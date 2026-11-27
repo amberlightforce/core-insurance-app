@@ -8,7 +8,15 @@
         "uw.Issue.list": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Issue.decide": [ "Staff.UnderwritingManager" ],
         "uw.Referral.list": [ "Staff.UnderwritingManager", "Platform.Admin" ],
-        "uw.Referral.get": [ "Staff.UnderwritingManager", "Platform.Admin" ]
+        "uw.Referral.get": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.RuleSet.create": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.RuleSet.draft": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.RuleSet.edit": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.RuleSet.validate": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.RuleSet.test": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.RuleSet.simulate": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.RuleSet.export": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.RuleSet.import": [ "Staff.UnderwritingManager", "Platform.Admin" ]
       }
     },
     "Authority": {
