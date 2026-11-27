@@ -32,6 +32,10 @@ internal static class WorkCatalog
 {
     public const string PsrQueue = "PSR";
     public const string PackRollbackQueue = "PACK-ROLLBACK-REVIEW";
+    public const string UwReferralQueue = "UW-REFERRAL";
+
+    public const string UwReferralInformation = "WRK-UW-REFERRAL-INFORMATION";
+    public const string UwReferralReferUp = "WRK-UW-REFERRAL-REFER-UP";
 
     public const string PackRollbackReview = "WRK-MKT-PACK-ROLLBACK-REVIEW";
     public const string PsrException = "WRK-POL-NONPAY-PSR-EXCEPTION";
@@ -46,12 +50,18 @@ internal static class WorkCatalog
         new(PsrQueue, "Policy service representative review", PsrRoles),
         // Only the UW manager may review a pack rollback in POL (pol.PackRollbackException.review); the queue is no wider.
         new(PackRollbackQueue, "Pack rollback review", ["Staff.UnderwritingManager", "Platform.Admin"]),
+        // BO-UW-05: referral follow-ups (information requested, referred up) are for the underwriters.
+        new(UwReferralQueue, "Underwriting referral follow-up", ["Staff.UnderwritingManager", "Staff.Underwriter", "Platform.Admin"]),
     ];
 
     public static IReadOnlyList<ActivityPattern> Patterns { get; } =
     [
         new(PackRollbackReview, "1", "Review transactions recorded under a rolled-back pack version", "REVIEW", "HIGH", PackRollbackQueue, "WRK-SLA-PACK-ROLLBACK",
             TargetMinutes: 2 * 24 * 60, EscalationMinutes: 3 * 24 * 60, GateBlocking: false, [ModuleCode.MKT, ModuleCode.POL]),
+        new(UwReferralInformation, "1", "Underwriting referral waits for information", "REVIEW", "NORMAL", UwReferralQueue, "WRK-SLA-UW-REFERRAL",
+            TargetMinutes: 3 * 24 * 60, EscalationMinutes: 5 * 24 * 60, GateBlocking: false, [ModuleCode.UW]),
+        new(UwReferralReferUp, "1", "Underwriting referral referred up to a higher authority", "REVIEW", "HIGH", UwReferralQueue, "WRK-SLA-UW-REFERRAL",
+            TargetMinutes: 24 * 60, EscalationMinutes: 2 * 24 * 60, GateBlocking: false, [ModuleCode.UW]),
         new(PsrException, "1", "Decide a non-payment cancellation held for the PSR", "REVIEW", "HIGH", PsrQueue, "WRK-SLA-PSR",
             TargetMinutes: 24 * 60, EscalationMinutes: 2 * 24 * 60, GateBlocking: false, [ModuleCode.POL]),
         new(PsrHold, "1", "Vulnerable-customer hold on a delinquency case", "REVIEW", "HIGH", PsrQueue, "WRK-SLA-PSR",

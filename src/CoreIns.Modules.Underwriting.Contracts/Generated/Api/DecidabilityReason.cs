@@ -40,4 +40,12 @@ public enum DecidabilityReason
     /// <summary><c>NEEDS_REEVALUATION</c></summary>
     [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NEEDS_REEVALUATION")]
     NeedsReevaluation,
+
+    /// <summary><c>LOCKED_BY_OTHER</c></summary>
+    [global::System.Text.Json.Serialization.JsonStringEnumMemberName("LOCKED_BY_OTHER")]
+    LockedByOther,
+
+    /// <summary><c>REFERRED_UP</c></summary>
+    [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REFERRED_UP")]
+    ReferredUp,
 }

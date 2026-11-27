@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Review.lock result. PRD outputs: "lock"</summary>
+/// <summary>uw.Review.lock result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReviewLockResponse
 {
-    /// <summary>PRD: "lock"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("lock")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Lock { get; init; }
+    /// <summary>Contract member 'referral'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("referral")]
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.ReferralState Referral { get; init; }
 }

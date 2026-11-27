@@ -9,6 +9,13 @@
         "uw.Issue.decide": [ "Staff.UnderwritingManager" ],
         "uw.Referral.list": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Referral.get": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        // BO-UW-05: referral commands and the review lock. Deciding stays with uw.Issue.decide and the UW.ISSUE_APPROVAL authority.
+        "uw.Referral.request": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Referral.withdraw": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Referral.referUp": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Referral.requestInformation": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Review.lock": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Review.release": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.RuleSet.create": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.RuleSet.draft": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.RuleSet.edit": [ "Staff.UnderwritingManager", "Platform.Admin" ],
