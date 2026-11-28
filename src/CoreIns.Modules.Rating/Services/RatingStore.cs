@@ -281,6 +281,39 @@ internal sealed class RatingStore(DbSession session, IClock clock, RequestContex
             new { worksheetId, legalEntity }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Links a stored worksheet to a policy transaction (BO-RAT-02): appends an ATTACHED <c>worksheet_index</c> row that keeps the quote and job
+    /// lineage of the latest row. False when the worksheet is already attached to that transaction (a replay changes nothing).
+    /// </summary>
+    public async Task<bool> AttachWorksheetAsync(string worksheetId, Guid legalEntity, Guid transactionId, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var already = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+            "SELECT EXISTS (SELECT 1 FROM rat.worksheet_index WHERE worksheet_id = @worksheetId AND legal_entity_id = @legalEntity AND transaction_id = @transactionId)",
+            new { worksheetId, legalEntity, transactionId }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        if (already)
+        {
+            return false;
+        }
+
+        var latest = await connection.QueryFirstOrDefaultAsync<LatestIndex>(new CommandDefinition(
+            """
+            SELECT quote_id AS QuoteId, job_id AS JobId, mode AS Mode FROM rat.worksheet_index
+            WHERE worksheet_id = @worksheetId AND legal_entity_id = @legalEntity ORDER BY index_id DESC LIMIT 1
+            """,
+            new { worksheetId, legalEntity }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        await connection.ExecuteAsync(new CommandDefinition(
+            """
+            INSERT INTO rat.worksheet_index (worksheet_id, legal_entity_id, quote_id, job_id, transaction_id, mode, retention_state, created_at)
+            VALUES (@worksheetId, @legalEntity, @quote, @job, @transactionId, @mode, 'ATTACHED', @now)
+            """,
+            new { worksheetId, legalEntity, quote = latest?.QuoteId, job = latest?.JobId, transactionId, mode = latest?.Mode ?? "FULL", now = clock.Now.ToUtcDateTime() },
+            session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        return true;
+    }
+
+    private sealed record LatestIndex(Guid? QuoteId, Guid? JobId, string? Mode);
+
     private static SeedBundle Build(string productCode, string productVersion)
     {
         var tables = BuiltInArtefacts.Tables().Select(t => CompiledArtefact.CompileTable(t)).ToList();
