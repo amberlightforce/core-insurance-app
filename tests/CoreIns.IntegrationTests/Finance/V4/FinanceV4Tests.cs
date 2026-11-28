@@ -660,6 +660,6 @@ public sealed class FinanceV4Tests(PostgresFixture database) : IClassFixture<Pos
         await _slice.DrainAsync();
         (await StatusAsync(envelope)).ShouldBe("POSTED");
         (await ScalarAsync<int>(_db, $"SELECT rule_set_version FROM fin.journal_entry WHERE journal_id IN (SELECT journal_id FROM fin.journal_line WHERE claim_id = '{claim}')")).ShouldBe(2);
-        (await ScalarAsync<string>(_db, "SELECT string_agg(version_no::text || ':' || status, ',' ORDER BY version_no) FROM fin.posting_rule_set")).ShouldBe("1:SUPERSEDED,2:ACTIVE,3:ACTIVE,4:ACTIVE,5:ACTIVE,6:ACTIVE,7:ACTIVE,8:ACTIVE");
+        (await ScalarAsync<string>(_db, "SELECT string_agg(version_no::text || ':' || status, ',' ORDER BY version_no) FROM fin.posting_rule_set")).ShouldBe("1:SUPERSEDED,2:ACTIVE,3:ACTIVE,4:ACTIVE,5:ACTIVE,6:ACTIVE,7:ACTIVE,8:ACTIVE,9:ACTIVE");
     }
 }
