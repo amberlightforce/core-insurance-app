@@ -990,11 +990,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bulk and case management
-         * @description Bulk and case management
-         *
-         *     PRD inputs: list
-         *     PRD outputs: job id; decision → case
+         * Bulk screening
+         * @description BO-PTY-07. Screens up to 500 existing parties; each hit opens a screening case and a WRK review task.
          */
         post: operations["pty.Screening.bulk"];
         delete?: never;
@@ -1013,11 +1010,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bulk and case management
-         * @description Bulk and case management
-         *
-         *     PRD inputs: list
-         *     PRD outputs: job id; decision → case
+         * Decide a screening case
+         * @description BO-PTY-07. Maker-checker: one person proposes Clear or TrueMatch with a rationale, a different person approves or rejects. A true match blocks payment and bind of the party.
          */
         post: operations["pty.Screening.caseDecide"];
         delete?: never;
@@ -1034,11 +1028,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Bulk and case management
-         * @description Bulk and case management
-         *
-         *     PRD inputs: list
-         *     PRD outputs: job id; decision → case
+         * Screening case queue
+         * @description BO-PTY-07. Lists screening cases (newest first), by status, party or case id.
          */
         get: operations["pty.Screening.caseGet"];
         put?: never;
@@ -2424,36 +2415,76 @@ export interface components {
             /** @description Payment block */
             paymentBlock: boolean;
         };
-        /** @description pty.Screening.bulk request. PRD inputs: "list" */
+        /** @description A screening case (pty.screening_case, BO-PTY-07): the review of a potential sanctions hit. Status OPEN (waiting for a proposal), PENDING_APPROVAL (a decision is proposed and waits for a second person), CLEARED or TRUE_MATCH (final). */
+        ScreeningCaseView: {
+            caseId: components["schemas"]["Uuid"];
+            caseNumber: string;
+            /** @enum {string} */
+            status: "OPEN" | "PENDING_APPROVAL" | "CLEARED" | "TRUE_MATCH";
+            partyId?: components["schemas"]["Uuid"] | null;
+            /** @description Name that was screened (personal data; the case queue is for compliance roles) */
+            subjectName?: string | null;
+            country?: string | null;
+            listVersions: string[];
+            evidence: {
+                listName: string;
+                matchedName: string;
+                score: number;
+                reason?: string | null;
+            }[];
+            callerRef: components["schemas"]["ObjectRef"];
+            createdAt: components["schemas"]["Instant"];
+            /** @enum {string|null} */
+            proposedDecision?: "CLEAR" | "TRUE_MATCH" | null;
+            proposedBy?: string | null;
+            proposedAt?: components["schemas"]["Instant"] | null;
+            proposalComment?: string | null;
+            approvalRequestId?: components["schemas"]["Uuid"] | null;
+            decidedBy?: string | null;
+            decidedAt?: components["schemas"]["Instant"] | null;
+            decisionComment?: string | null;
+        };
+        /** @description pty.Screening.bulk request (BO-PTY-07): screens up to 500 existing parties in one call; every hit opens a case. */
         ScreeningBulkRequest: {
-            /** @description PRD: "list" */
-            list?: components["schemas"]["Unspecified"];
+            partyIds: components["schemas"]["Uuid"][];
+            /** @description Calling object (for example the migration batch) */
+            callerRef: components["schemas"]["ObjectRef"];
         };
-        /** @description pty.Screening.bulk result. PRD outputs: "job id; decision → case" */
+        /** @description pty.Screening.bulk result: one outcome per party, in request order. The run is synchronous, so there is no job to poll. */
         ScreeningBulkResponse: {
-            /** @description PRD: "job id" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "decision → case" */
-            decisionCase?: components["schemas"]["Unspecified"];
+            screened: number;
+            clear: number;
+            hits: number;
+            results: {
+                partyId: components["schemas"]["Uuid"];
+                /** @enum {string} */
+                result?: "Clear" | "PotentialHit" | "Blocked";
+                caseNumber?: string | null;
+                paymentBlock: boolean;
+                /** @description Error code when this party could not be screened */
+                error?: string | null;
+            }[];
         };
-        /** @description pty.Screening.caseDecide request. PRD inputs: "list" */
+        /** @description pty.Screening.caseDecide request (BO-PTY-07, maker-checker): PROPOSE a decision (needs decision), then a different person APPROVEs or REJECTs the proposal. The maker cannot approve (PLT-ERR-SELF-APPROVAL). */
         ScreeningCaseDecideRequest: {
-            /** @description PRD: "list" */
-            list?: components["schemas"]["Unspecified"];
+            caseId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            action: "PROPOSE" | "APPROVE" | "REJECT";
+            /**
+             * @description Required for PROPOSE
+             * @enum {string|null}
+             */
+            decision?: "CLEAR" | "TRUE_MATCH" | null;
+            /** @description Required for PROPOSE (the rationale) and REJECT */
+            comment?: string | null;
         };
-        /** @description pty.Screening.caseDecide result. PRD outputs: "job id; decision → case" */
+        /** @description pty.Screening.caseDecide result: the case after the step. */
         ScreeningCaseDecideResponse: {
-            /** @description PRD: "job id" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "decision → case" */
-            decisionCase?: components["schemas"]["Unspecified"];
+            case: components["schemas"]["ScreeningCaseView"];
         };
-        /** @description pty.Screening.caseGet result. PRD outputs: "job id; decision → case" */
-        ScreeningCaseGetResponse: {
-            /** @description PRD: "job id" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "decision → case" */
-            decisionCase?: components["schemas"]["Unspecified"];
+        /** @description Page of pty.Screening.caseGet results (the case queue, newest first) */
+        ScreeningCaseGetResponse: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["ScreeningCaseView"][];
         };
         /** @description Typed from REQ-PTY-008. PRD inputs: "code, product, transaction type, date, acting person" */
         ProducerCodeValidateRequest: {
@@ -5301,8 +5332,8 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Accepted; result or job reference */
-            202: {
+            /** @description Success */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5320,7 +5351,15 @@ export interface operations {
     };
     "pty.Screening.caseGet": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                status?: "OPEN" | "PENDING_APPROVAL" | "CLEARED" | "TRUE_MATCH";
+                partyId?: components["schemas"]["Uuid"];
+                caseId?: components["schemas"]["Uuid"];
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key

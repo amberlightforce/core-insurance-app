@@ -1,5 +1,7 @@
 using System.Text.Json;
 using CoreIns.Modules.Market.Contracts;
+using CoreIns.Modules.Party.Contracts;
+using CoreIns.Modules.Party.Contracts.Api;
 using CoreIns.Modules.Policy.Commands.Change;
 using CoreIns.Modules.Policy.Contracts;
 using CoreIns.Modules.Policy.Contracts.Api;
@@ -66,6 +68,7 @@ internal sealed class BindJobHandler(
     Dependency<IUnderwritingRulesService> underwriting,
     RatingInput ratingInput,
     Dependency<IMarketConfigurationService> marketConfiguration,
+    Dependency<IPartyScreeningService> screening,
     ChangeBindService changeBind,
     IOptions<PolicyOptions> options) : ICommandHandler<BindJob, JobBindResponse>
 {
@@ -157,6 +160,8 @@ internal sealed class BindJobHandler(
         var (evaluation, issues) = uw.Value;
         var uwBlocked = evaluation.Outcome == RulesEvaluateResponse.OutcomeValue.Decline || issues.Any(i => UwOutcome.Blocks(i, BlockingPoint.PreBind));
         gates.Add(Gate("UW_ISSUES", !uwBlocked, evaluation.Outcome == RulesEvaluateResponse.OutcomeValue.Decline ? "UW_DECLINE" : "UW_ISSUES_OPEN"));
+        // Sanctions screening of the policyholder (BO-PTY-07): a potential hit (case open) or a true match blocks the bind; an unavailable screening fails closed.
+        gates.Add(Gate("SANCTIONS_SCREENING", await PolicyholderClearAsync(job, cancellationToken).ConfigureAwait(false), "SANCTIONS_HIT"));
         job.Referred = uwBlocked;
         version.Issues = JobSupport.Json(issues);
         job.RecordVersion++;
@@ -317,6 +322,27 @@ internal sealed class BindJobHandler(
             return pg.SqlState == PostgresErrorCodes.ExclusionViolation || pg.TableName is "segment" or "policy_term"
                 ? DomainError.Of(ModuleCode.POL, "SEGMENT-INVARIANT", $"The bind would break the policy timeline ({pg.ConstraintName}).")
                 : JobSupport.Stale();
+        }
+    }
+
+    private async Task<bool> PolicyholderClearAsync(JobRow job, CancellationToken cancellationToken)
+    {
+        if (screening.TryValue is not { } service)
+        {
+            return false;
+        }
+
+        try
+        {
+            var response = await service.ScreenAsync(
+                new ScreeningScreenRequest { PartyId = job.PolicyholderPartyId, CallerRef = ObjectRef.For(ModuleCode.POL, "Job", job.JobId) },
+                CommandOptions.New(),
+                cancellationToken).ConfigureAwait(false);
+            return response.Result == ScreeningScreenResponse.ResultValue.Clear && !response.PaymentBlock;
+        }
+        catch (DomainException)
+        {
+            return false;
         }
     }
 

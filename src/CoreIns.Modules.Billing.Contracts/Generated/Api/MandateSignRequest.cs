@@ -4,31 +4,23 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Mandate.sign request. PRD inputs: "account, instrument, signature evidence"</summary>
+/// <summary>bil.Mandate.sign request (BO-BIL-06a). Needs a consent evidence id.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MandateSignRequest
 {
-    /// <summary>PRD: "account"</summary>
+    /// <summary>Contract member 'mandateId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'mandateId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("account")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Account { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("mandateId")]
+    public required global::System.Guid MandateId { get; init; }
 
-    /// <summary>PRD: "instrument"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("instrument")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Instrument { get; init; }
+    /// <summary>Reference of the captured consent evidence (signature, e-mandate log or document id)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("signatureEvidenceId")]
+    public required string SignatureEvidenceId { get; init; }
 
-    /// <summary>PRD: "signature evidence"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("signatureEvidence")]
+    /// <summary>Date the payer signed; defaults to today, never in the future</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("signatureDate")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SignatureEvidence { get; init; }
+    public global::CoreIns.SharedKernel.BusinessDate? SignatureDate { get; init; }
 }

@@ -201,3 +201,27 @@ internal static class PaymentPlans
         return [.. Enumerable.Range(1, count).Select(no => (no, DueDateOf(planRef, termFrom, no, dueDay) is var due && due.CompareTo(today) < 0 ? today : due))];
     }
 }
+
+/// <summary>Mandate states (BO-BIL-06a): Draft → Active → Cancelled; Draft → Cancelled. Cancelled is final.</summary>
+internal enum MandateStatus
+{
+    Draft,
+    Active,
+    Cancelled,
+}
+
+/// <summary>SEPA sequence types (pain.008 SeqTp): the first collection after signing or amending is FRST, later ones RCUR.</summary>
+internal enum MandateSequence
+{
+    Frst,
+    Rcur,
+    Ooff,
+    Fnal,
+}
+
+/// <summary>States of a payer instrument.</summary>
+internal enum InstrumentStatus
+{
+    Active,
+    Removed,
+}

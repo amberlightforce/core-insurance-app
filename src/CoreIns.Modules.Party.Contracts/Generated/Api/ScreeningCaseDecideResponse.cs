@@ -4,20 +4,11 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Screening.caseDecide result. PRD outputs: "job id; decision → case"</summary>
+/// <summary>pty.Screening.caseDecide result: the case after the step.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ScreeningCaseDecideResponse
 {
-    /// <summary>PRD: "job id"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
-
-    /// <summary>PRD: "decision → case"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("decisionCase")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DecisionCase { get; init; }
+    /// <summary>Contract member 'case'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("case")]
+    public required global::CoreIns.Modules.Party.Contracts.Api.ScreeningCaseView Case { get; init; }
 }

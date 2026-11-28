@@ -17,6 +17,15 @@
         "bil.PaymentPlan.select": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.PaymentPlan.change": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.BillingPreview.compute": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        // BO-BIL-06a: payer instruments and SEPA mandates; reads for billing staff, writes for billing staff and managers.
+        "bil.PaymentInstrument.add": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.PaymentInstrument.remove": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.PaymentInstrument.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.Mandate.create": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Mandate.sign": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Mandate.amend": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Mandate.cancel": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Mandate.get": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
         // BO-BIL-07: receipt list for billing staff; unallocate/reallocate need BIL.ALLOCATION_REVERSE authority over the amount (checked again by the handler).
         "bil.Receipt.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
         "bil.Allocation.unallocate": [ "Staff.Billing", "Staff.BillingManager" ],

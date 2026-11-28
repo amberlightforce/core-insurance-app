@@ -10,7 +10,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace CoreIns.Host.Tests;
 
-/// <summary>D-SL2-05: the PTY sanctions-screening stub is never bound in Production (as the fiscal stub); Production fails closed.</summary>
+/// <summary>D-SL2-05: the PTY sanctions-screening demo provider is never bound in Production (as the fiscal stub); Production fails closed.</summary>
 public sealed class ScreeningStubBindingTests
 {
     [Theory]
@@ -22,7 +22,8 @@ public sealed class ScreeningStubBindingTests
         var services = new ServiceCollection();
         services.AddPartyScreening(new Environment(environment));
 
-        services.Single(d => d.ServiceType == typeof(IPartyScreeningService)).ImplementationType!.Name.ShouldBe("StubPartyScreeningService");
+        services.Single(d => d.ServiceType == typeof(IPartyScreeningService)).ImplementationType!.Name.ShouldBe("PartyScreeningService");
+        services.Single(d => d.ServiceType.Name == "IScreeningProvider").ImplementationType!.Name.ShouldBe("DemoScreeningProvider");
     }
 
     [Fact]
@@ -36,7 +37,8 @@ public sealed class ScreeningStubBindingTests
         var services = new ServiceCollection();
         services.AddPartyScreening(production);
         services.Single(d => d.ServiceType == typeof(IPartyScreeningService)).ImplementationType!.Name.ShouldBe("UnavailablePartyScreeningService");
-        services.ShouldNotContain(d => d.ServiceType.GenericTypeArguments.Any(t => t.Name == "ScreenStub"));
+        services.ShouldNotContain(d => d.ServiceType.Name == "IScreeningProvider");
+        services.ShouldNotContain(d => d.ServiceType.GenericTypeArguments.Any(t => t.Name == "ScreenParty"));
 
         await using var provider = services.BuildServiceProvider();
         await using var scope = provider.CreateAsyncScope();

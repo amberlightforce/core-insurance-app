@@ -4,23 +4,38 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.PaymentInstrument.add result. PRD outputs: "instrument (masked), VoP result"</summary>
+/// <summary>bil.PaymentInstrument.add result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PaymentInstrumentAddResponse
 {
-    /// <summary>PRD: "instrument (masked)"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'instrument'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("instrument")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Instrument { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.PaymentInstrumentView Instrument { get; init; }
 
-    /// <summary>PRD: "VoP result"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Verification of payee outcome recorded when the instrument was added</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("vopResult")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? VopResult { get; init; }
+    public VopResultValue? VopResult { get; init; }
+
+    /// <summary>Verification of payee outcome recorded when the instrument was added</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<VopResultValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum VopResultValue
+    {
+        /// <summary><c>MATCH</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MATCH")]
+        Match,
+
+        /// <summary><c>CLOSE_MATCH</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CLOSE_MATCH")]
+        CloseMatch,
+
+        /// <summary><c>NO_MATCH</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NO_MATCH")]
+        NoMatch,
+
+        /// <summary><c>NOT_AVAILABLE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NOT_AVAILABLE")]
+        NotAvailable,
+    }
 }

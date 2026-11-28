@@ -11,8 +11,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/commission/statements
 CONTRACT_NOT_SERVED GET /api/bil/v1/down-payment/status
 CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/balance
 CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/query
-CONTRACT_NOT_SERVED GET /api/bil/v1/mandates/{}
-CONTRACT_NOT_SERVED GET /api/bil/v1/payment-instruments
 CONTRACT_NOT_SERVED GET /api/chn/v1/account-current
 CONTRACT_NOT_SERVED GET /api/chn/v1/agent-logs/query
 CONTRACT_NOT_SERVED GET /api/chn/v1/api-products
@@ -66,12 +64,7 @@ CONTRACT_NOT_SERVED GET /api/mkt/v1/l10n/bundle
 CONTRACT_NOT_SERVED GET /api/mkt/v1/l10n/case-map
 CONTRACT_NOT_SERVED GET /api/mkt/v1/l10n/format
 CONTRACT_NOT_SERVED GET /api/mkt/v1/l10n/search-keys
-CONTRACT_NOT_SERVED GET /api/mkt/v1/regime-codes
-CONTRACT_NOT_SERVED GET /api/mkt/v1/regime-codes/crosswalk
-CONTRACT_NOT_SERVED GET /api/mkt/v1/regime-codes/{}
 CONTRACT_NOT_SERVED GET /api/mkt/v1/spis/catalogue
-CONTRACT_NOT_SERVED GET /api/mkt/v1/statutory-clock-sets
-CONTRACT_NOT_SERVED GET /api/mkt/v1/statutory-clock-sets/{}
 CONTRACT_NOT_SERVED GET /api/mkt/v1/terminology
 CONTRACT_NOT_SERVED GET /api/pfc/v1/legacy-xrefs/get
 CONTRACT_NOT_SERVED GET /api/pfc/v1/pogs/get
@@ -98,7 +91,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/time/now
 CONTRACT_NOT_SERVED GET /api/plt/v1/transfers
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
-CONTRACT_NOT_SERVED GET /api/pty/v1/screening/case-get
 CONTRACT_NOT_SERVED GET /api/rat/v1/breakdowns/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/change-explanations/get
 CONTRACT_NOT_SERVED GET /api/rat/v1/impact-analysises/{}
@@ -167,12 +159,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/intermediary-collections/report
 CONTRACT_NOT_SERVED POST /api/bil/v1/intermediary-collections/report-file
 CONTRACT_NOT_SERVED POST /api/bil/v1/invoices/dispute
 CONTRACT_NOT_SERVED POST /api/bil/v1/invoices/send-copy
-CONTRACT_NOT_SERVED POST /api/bil/v1/mandates
-CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/amend
-CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/cancel
-CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/sign
-CONTRACT_NOT_SERVED POST /api/bil/v1/payment-instruments/add
-CONTRACT_NOT_SERVED POST /api/bil/v1/payment-instruments/remove
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/bank
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/fin
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/invariants
@@ -280,11 +266,6 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/run
 CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/supersede
 CONTRACT_NOT_SERVED POST /api/dat/v1/analytics/ask
 CONTRACT_NOT_SERVED POST /api/dat/v1/feature-store/build-training-set
-CONTRACT_NOT_SERVED POST /api/dat/v1/models/approve
-CONTRACT_NOT_SERVED POST /api/dat/v1/models/record-validation
-CONTRACT_NOT_SERVED POST /api/dat/v1/models/retire
-CONTRACT_NOT_SERVED POST /api/dat/v1/models/submit-validation
-CONTRACT_NOT_SERVED POST /api/dat/v1/monitor/metrics
 CONTRACT_NOT_SERVED POST /api/dat/v1/populations/sample
 CONTRACT_NOT_SERVED POST /api/dat/v1/purpose-grants/decide
 CONTRACT_NOT_SERVED POST /api/dat/v1/purpose-grants/request
@@ -352,7 +333,6 @@ CONTRACT_NOT_SERVED POST /api/mkt/v1/l10n-ui-languages/resolve
 CONTRACT_NOT_SERVED POST /api/mkt/v1/packs/certify
 CONTRACT_NOT_SERVED POST /api/mkt/v1/packs/deprecate
 CONTRACT_NOT_SERVED POST /api/mkt/v1/packs/publish
-CONTRACT_NOT_SERVED POST /api/mkt/v1/regime-codes/validate
 CONTRACT_NOT_SERVED POST /api/mkt/v1/risk-locations/resolve
 CONTRACT_NOT_SERVED POST /api/mkt/v1/spis/bind
 CONTRACT_NOT_SERVED POST /api/mkt/v1/spis/suspend
@@ -457,8 +437,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/complete
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/start
-CONTRACT_NOT_SERVED POST /api/pty/v1/screening/bulk
-CONTRACT_NOT_SERVED POST /api/pty/v1/screening/case-decide
 CONTRACT_NOT_SERVED POST /api/rat/v1/bonus-malus/transition
 CONTRACT_NOT_SERVED POST /api/rat/v1/comparisons/compare-versions
 CONTRACT_NOT_SERVED POST /api/rat/v1/day-count/year-fraction

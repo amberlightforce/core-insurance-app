@@ -18,7 +18,11 @@
         "pty.Identifier.verify": [ "Staff.Underwriter", "Staff.Billing" ],
         "pty.Party.get": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pty.Party.search": [ "Staff.Underwriter", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
-        "pty.Screening.screen": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "pty.Screening.screen": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.ComplianceOfficer" ],
+        // Screening cases (BO-PTY-07): the compliance officer reviews; a different compliance officer or admin approves (PLT PTY.SCREENING_DECISION).
+        "pty.Screening.bulk": [ "Staff.ComplianceOfficer", "Staff.MigrationManager", "Platform.Admin" ],
+        "pty.Screening.caseGet": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "pty.Screening.caseDecide": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
         "pty.Party.revealP2": [ "Staff.Underwriter", "Service.RenewalRun" ],
         "pty.Intermediary.create": [ "Staff.Underwriter", "Platform.Admin" ],
         "pty.Intermediary.update": [ "Staff.Underwriter", "Platform.Admin" ],
@@ -68,6 +72,12 @@
         },
         {
           "Id": "pty-admin-party-merge-illustrative", "Role": "Platform.Admin", "Type": "PTY.PARTY_MERGE", "Illustrative": true
+        },
+        {
+          "Id": "pty-compliance-screening-decision-illustrative", "Role": "Staff.ComplianceOfficer", "Type": "PTY.SCREENING_DECISION", "Illustrative": true
+        },
+        {
+          "Id": "pty-admin-screening-decision-illustrative", "Role": "Platform.Admin", "Type": "PTY.SCREENING_DECISION", "Illustrative": true
         },
         {
           "Id": "pty-underwriter-commission-illustrative", "Role": "Staff.Underwriter", "Type": "PTY.COMMISSION_AGREEMENT", "Illustrative": true,

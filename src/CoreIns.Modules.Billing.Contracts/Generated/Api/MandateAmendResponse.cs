@@ -4,12 +4,11 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Mandate.amend result. PRD outputs: "mandate"</summary>
+/// <summary>bil.Mandate.amend result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MandateAmendResponse
 {
-    /// <summary>PRD: "mandate"</summary>
+    /// <summary>Contract member 'mandate'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("mandate")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? Mandate { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.MandateView Mandate { get; init; }
 }

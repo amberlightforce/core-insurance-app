@@ -1650,6 +1650,142 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.ScreeningCaseRow", b =>
+                {
+                    b.Property<Guid>("CaseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("case_id");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<string>("CallerId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("caller_id");
+
+                    b.Property<string>("CallerModule")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("caller_module");
+
+                    b.Property<string>("CallerType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("caller_type");
+
+                    b.Property<string>("CaseNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("case_number");
+
+                    b.Property<string>("ContentHash")
+                        .HasColumnType("text")
+                        .HasColumnName("content_hash");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("text")
+                        .HasColumnName("country");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionComment")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_comment");
+
+                    b.Property<string>("Evidence")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("evidence");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("ListVersions")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("list_versions");
+
+                    b.Property<string>("MatchFingerprint")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("match_fingerprint");
+
+                    b.Property<Guid?>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<string>("ProposalComment")
+                        .HasColumnType("text")
+                        .HasColumnName("proposal_comment");
+
+                    b.Property<DateTime?>("ProposedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("proposed_at");
+
+                    b.Property<string>("ProposedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("proposed_by");
+
+                    b.Property<string>("ProposedDecision")
+                        .HasColumnType("text")
+                        .HasColumnName("proposed_decision");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("SubjectKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("subject_key");
+
+                    b.Property<string>("SubjectName")
+                        .HasColumnType("text")
+                        .HasColumnName("subject_name");
+
+                    b.HasKey("CaseId")
+                        .HasName("pk_screening_case");
+
+                    b.HasIndex("CaseNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ux_screening_case_number");
+
+                    b.HasIndex("PartyId");
+
+                    b.HasIndex("LegalEntityId", "Status", "CreatedAt")
+                        .HasDatabaseName("ix_screening_case_status");
+
+                    b.HasIndex("LegalEntityId", "SubjectKey", "CreatedAt")
+                        .HasDatabaseName("ix_screening_case_subject");
+
+                    b.ToTable("screening_case", "pty", t =>
+                        {
+                            t.HasCheckConstraint("ck_screening_case_proposed", "proposed_decision IS NULL OR proposed_decision IN ('CLEAR','TRUE_MATCH')");
+
+                            t.HasCheckConstraint("ck_screening_case_status", "status IN ('OPEN','PENDING_APPROVAL','CLEARED','TRUE_MATCH')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.VulnerabilityRow", b =>
                 {
                     b.Property<Guid>("PartyId")
@@ -1893,6 +2029,15 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_producer_of_record_intermediary");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.ScreeningCaseRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.PartyRow", null)
+                        .WithMany()
+                        .HasForeignKey("PartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_screening_case_party");
                 });
 #pragma warning restore 612, 618
         }
