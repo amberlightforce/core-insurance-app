@@ -1197,33 +1197,96 @@ export interface components {
             /** @description PRD: "activated_at" */
             activatedAt?: components["schemas"]["Instant"];
         };
-        /** @description mkt.Configuration.explain result. PRD outputs: "layer contributions, merge steps, CR and approvers" */
-        ConfigurationExplainResponse: {
-            /** @description PRD: "layer contributions" */
-            layerContributions?: components["schemas"]["Unspecified"];
-            /** @description PRD: "merge steps" */
-            mergeSteps?: components["schemas"]["Unspecified"];
-            /** @description PRD: "CR and approvers" */
-            cr?: components["schemas"]["Unspecified"];
-            /** @description PRD: "CR and approvers" */
-            approvers?: components["schemas"]["Unspecified"];
+        /** @description One stored version of the explained key at a layer node. */
+        ConfigurationLayerContribution: {
+            /** @description Layer node, for example core or country:GR */
+            node: string;
+            /** @enum {string} */
+            layer: "Core" | "Country";
+            value: string;
+            legalStatus: string;
+            sourceRef: string;
+            packId: string | null;
+            packVersion: string | null;
+            validFrom: components["schemas"]["LocalDate"] | null;
+            validTo: components["schemas"]["LocalDate"] | null;
+            /** @description True when the version is valid on the explained date and belongs to the entity jurisdiction */
+            applies: boolean;
+            /** @description True for the version that supplies the resolved value */
+            winning: boolean;
         };
-        /** @description mkt.Configuration.compare result. PRD outputs: "changes" */
+        /** @description The approved configuration change request that produced the winning value. */
+        ConfigurationExplainChangeRequest: {
+            requestId: components["schemas"]["Uuid"];
+            reason: string;
+            requestedBy: string;
+            appliedAt: components["schemas"]["Instant"] | null;
+            resultingHash: components["schemas"]["Sha256"] | null;
+        };
+        /** @description mkt.Configuration.explain result (BO-MKT-03), which layer supplied the value of a key, with the pack version, the merge steps and the change request. */
+        ConfigurationExplainResponse: {
+            key: string;
+            hash: components["schemas"]["Sha256"];
+            validAt: components["schemas"]["LocalDate"];
+            legalEntity: string;
+            jurisdiction: string;
+            /** @description False when no layer holds a value valid on the date */
+            found: boolean;
+            value: string | null;
+            /** @description Node that supplied the value */
+            layer: string | null;
+            legalStatus: string | null;
+            packId: string | null;
+            packVersion: string | null;
+            sourceRef: string | null;
+            layerContributions: components["schemas"]["ConfigurationLayerContribution"][];
+            mergeSteps: string[];
+            cr: components["schemas"]["ConfigurationExplainChangeRequest"] | null;
+            approvers: string[];
+        };
+        ConfigurationValueSummary: {
+            value: string;
+            legalStatus: string;
+            sourceRef: string;
+            packVersion: string | null;
+            validFrom: components["schemas"]["LocalDate"] | null;
+            validTo: components["schemas"]["LocalDate"] | null;
+        };
+        ConfigurationChange: {
+            key: string;
+            node: string;
+            /** @enum {string} */
+            change: "Added" | "Removed" | "Changed";
+            before: components["schemas"]["ConfigurationValueSummary"] | null;
+            after: components["schemas"]["ConfigurationValueSummary"] | null;
+        };
+        /** @description mkt.Configuration.compare result (BO-MKT-03), empty changes when the two sides are the same. */
         ConfigurationCompareResponse: {
-            /** @description PRD: "changes" */
-            changes?: components["schemas"]["Unspecified"];
+            hashA: components["schemas"]["Sha256"];
+            hashB: components["schemas"]["Sha256"];
+            validAtA: components["schemas"]["LocalDate"] | null;
+            validAtB: components["schemas"]["LocalDate"] | null;
+            changes: components["schemas"]["ConfigurationChange"][];
         };
         /** @description mkt.Configuration.export request. PRD inputs: "hash, optional context" */
         ConfigurationExportRequest: {
-            /** @description PRD: "hash" */
-            hash?: components["schemas"]["Sha256"];
-            /** @description PRD: "optional context" (optional) */
-            context?: components["schemas"]["Unspecified"];
+            /** @description The state to export (default current) */
+            hash?: components["schemas"]["Sha256"] | null;
+            /** @description Legal entity code; when given, only the core and that entity country layer are exported */
+            context?: string | null;
         };
-        /** @description mkt.Configuration.export result. PRD outputs: "signed canonical JSON" */
+        /** @description mkt.Configuration.export result (BO-MKT-03), the state as canonical JSON with its hash. */
         ConfigurationExportResponse: {
-            /** @description PRD: "signed canonical JSON" */
-            signedCanonicalJson?: components["schemas"]["Unspecified"];
+            hash: components["schemas"]["Sha256"];
+            activatedAt: components["schemas"]["Instant"];
+            cause: string;
+            parentHash: components["schemas"]["Sha256"] | null;
+            /** @description RFC 8785 canonical JSON of the export document (manifest and values) */
+            canonicalJson: string;
+            /** @description SHA-256 of canonicalJson */
+            documentDigest: components["schemas"]["Sha256"];
+            /** @description Always null until export signing keys exist */
+            signature: string | null;
         };
         /** @description mkt.ConfigChangeRequest.create request (BO-MKT-01). A DRAFT change of country-layer configuration values; only keys of the key registry are accepted. */
         ConfigChangeRequestCreateRequest: {
@@ -2211,11 +2274,15 @@ export interface operations {
     };
     "mkt.Configuration.explain": {
         parameters: {
-            query?: {
-                /** @description PRD: "key" */
-                key?: string;
-                /** @description PRD: "context" */
+            query: {
+                /** @description A key of the configuration key registry */
+                key: string;
+                /** @description Legal entity code whose jurisdiction selects the country layer (default the first legal entity of the registry) */
                 context?: string;
+                /** @description Business date to explain (default today in the legal entity time zone) */
+                validAt?: components["schemas"]["LocalDate"];
+                /** @description Explain on this recorded configuration state (default the current state) */
+                hash?: components["schemas"]["Sha256"];
             };
             header?: {
                 /**
@@ -2249,11 +2316,15 @@ export interface operations {
     "mkt.Configuration.compare": {
         parameters: {
             query?: {
-                /** @description PRD: "hash A" */
+                /** @description Hash compare, state A (also the state of a date compare; default current) */
                 hash?: components["schemas"]["Sha256"];
-                /** @description PRD: "hash B" */
+                /** @description Hash compare, state B (default current) */
                 hashB?: components["schemas"]["Sha256"];
-                /** @description PRD: "filter" */
+                /** @description Date compare, first business date (with validAtB), on the state given by hash (default current) */
+                validAt?: components["schemas"]["LocalDate"];
+                /** @description Date compare, second business date */
+                validAtB?: components["schemas"]["LocalDate"];
+                /** @description Key prefix; only keys starting with it are compared */
                 filter?: string;
             };
             header?: {
