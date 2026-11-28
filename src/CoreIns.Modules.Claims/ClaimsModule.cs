@@ -1,3 +1,5 @@
+using CoreIns.Modules.Claims.MigrationImport;
+using CoreIns.Modules.Claims.Services.Dsar;
 using CoreIns.Modules.Claims.Authority;
 using CoreIns.Modules.Migration.Contracts.Spi;
 using CoreIns.Modules.Claims.Commands;
@@ -298,6 +300,14 @@ public static class ClaimsModule
         services.AddScoped<IClaimsFinancialsService, ClaimsFinancialsService>();
         services.AddScoped<IClaimsTransactionSetService, ClaimsTransactionSetService>();
 
+        services.AddCommand<ImportClaim, ImportClaimResponse, ImportClaimHandler>(CommandDescriptor.For("clm.Import.claim") with { SupportsDryRun = true });
+        services.AddCommand<ImportFinancialHistory, ImportFinancialHistoryResponse, ImportFinancialHistoryHandler>(CommandDescriptor.For("clm.Import.financialHistory") with { SupportsDryRun = true });
+        services.AddCommand<ImportConvertCurrency, ImportConvertCurrencyResponse, ImportConvertCurrencyHandler>(CommandDescriptor.For("clm.Import.convertCurrency") with { SupportsDryRun = true });
+        services.AddCommand<ImportReverse, ImportReverseResponse, ImportReverseHandler>(CommandDescriptor.For("clm.Import.reverse") with { SupportsDryRun = true });
+        services.AddCommand<DsarExport, DsarExportResponse, DsarExportHandler>(CommandDescriptor.For("clm.Dsar.export") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddCommand<DsarRectify, DsarRectifyResponse, DsarRectifyHandler>(CommandDescriptor.For("clm.Dsar.rectify"));
+        services.AddCommand<DsarRestrict, DsarRestrictResponse, DsarRestrictHandler>(CommandDescriptor.For("clm.Dsar.restrict"));
+        services.AddCommand<DsarPurge, DsarPurgeResponse, DsarPurgeHandler>(CommandDescriptor.For("clm.Dsar.purge"));
         services.AddErrorDefinitions(Errors);
         return services;
     }
@@ -375,5 +385,9 @@ public static class ClaimsModule
             .Describe("Η εντολή έχει ήδη εκτελεστεί ή εκκαθαριστεί στην τράπεζα· δεν ακυρώνεται. Αναμείνατε επιστροφή ή ξεκινήστε ανάκτηση.", "The disbursement has been executed or cleared; it cannot be stopped. Wait for a return or start a recovery."),
         ErrorDefinition.For(ModuleCode.CLM, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
+        ErrorDefinition.For(ModuleCode.CLM, "IMPORT-VALIDATION", 422, "Μη έγκυρη εισαγωγή από το παλιό σύστημα", "The legacy import is not valid")
+            .Describe("Η εγγραφή του παλιού συστήματος δεν περνά τους ίδιους ελέγχους με τη ζωντανή καταχώριση.", "The legacy record fails the same checks as a live entry; see the detail."),
+        ErrorDefinition.For(ModuleCode.CLM, "REVERSE-LIVE-ACTIVITY", 422, "Η αναίρεση της δέσμης μπλοκάρεται από δραστηριότητα", "Live activity blocks the batch reversal")
+            .Describe("Μια εισαγμένη ζημία έχει κίνηση από την εισαγωγή· δεν αφαιρείται τίποτα.", "An imported claim has activity since the import; nothing is removed."),
     ];
 }
