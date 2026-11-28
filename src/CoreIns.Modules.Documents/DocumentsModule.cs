@@ -65,6 +65,7 @@ public static class DocumentsModule
 
         services.AddScoped<IDocumentRequestService, DocumentRequestService>();
         services.AddScoped<IDocumentContentService, DocumentContentService>();
+        services.AddScoped<IDocumentArchiveService, DocumentArchiveService>();
         services.AddScoped<IDocumentEvidenceService, DocumentEvidenceService>();
 
         services.AddErrorDefinitions(Errors);

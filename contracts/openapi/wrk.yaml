@@ -2368,6 +2368,18 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: state
+        in: query
+        required: false
+        description: QUARANTINED, CLEAN, INFECTED, VERIFIED, REJECTED or SPLIT
+        schema:
+          type: string
+      - name: objectRef
+        in: query
+        required: false
+        description: Linked business object as MOD/Type/id
+        schema:
+          type: string
       responses:
         '200':
           description: Success
