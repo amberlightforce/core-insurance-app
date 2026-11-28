@@ -1196,6 +1196,135 @@
       ],
       "description": "sample"
     },
+    "AgencyUserChangeRoleRequest": {
+      "agencyUserId": "01924998-b7bd-7564-87b4-258941afeeef",
+      "role": "AGENCY_ADMIN"
+    },
+    "AgencyUserCreateRequest": {
+      "intermediaryId": "01927f3d-eeb6-7a65-8c5b-c6703a64d95d",
+      "externalSubject": "sample",
+      "displayName": "sample",
+      "role": "AGENCY_ADMIN",
+      "producerCodes": [
+        "SAMPLE_CODE"
+      ]
+    },
+    "AgencyUserGrantAccessRequest": {
+      "agencyUserId": "01925528-4b13-76e5-8b05-eea80ec36249",
+      "producerCodes": [
+        "SAMPLE_CODE"
+      ]
+    },
+    "AgencyUserListResponse": {
+      "intermediaryId": "01926f84-824b-74c0-8582-090f9bf1d6de",
+      "users": [
+        {
+          "agencyUserId": "0192dba1-6902-7a99-8c49-8a915fbab855",
+          "intermediaryId": "01920d1b-1abf-7ef1-86d0-903baeb725ae",
+          "externalSubject": "sample",
+          "displayName": "sample",
+          "role": "AGENCY_ADMIN",
+          "status": "ACTIVE",
+          "statusReason": "sample",
+          "producerCodes": [
+            "SAMPLE_CODE"
+          ],
+          "createdAt": "2026-10-07T09:00:00Z"
+        }
+      ]
+    },
+    "AgencyUserReactivateRequest": {
+      "agencyUserId": "0192c688-9070-7547-8afe-38659ba0c222",
+      "reason": "sample"
+    },
+    "AgencyUserRemoveProducerRequest": {
+      "agencyUserId": "0192d2dd-9b3a-7535-88cd-5d01cd70ff4c",
+      "reassignToProducerCode": "SAMPLE_CODE",
+      "reason": "sample"
+    },
+    "AgencyUserRemoveProducerResponse": {
+      "removed": true,
+      "user": {
+        "agencyUserId": "0192c118-cf81-78de-84f8-e848a49f5c40",
+        "intermediaryId": "0192f516-a960-73fa-8368-bb4c434d2bf1",
+        "externalSubject": "sample",
+        "displayName": "sample",
+        "role": "AGENCY_ADMIN",
+        "status": "ACTIVE",
+        "statusReason": "sample",
+        "producerCodes": [
+          "SAMPLE_CODE"
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "transferId": "01925409-16e2-7bba-8501-92b6df6b3a1a",
+      "transferred": 1,
+      "refused": 1,
+      "results": [
+        {
+          "termId": "0192e921-9d10-7c6a-8463-94e56e67920c",
+          "outcome": "TRANSFERRED",
+          "errorCode": "sample",
+          "message": "sample",
+          "entry": {
+            "porId": "019203b4-86f1-71ec-834b-aac9e605d66b",
+            "policyId": "01929a31-416a-750c-8ee5-86c594765753",
+            "policyTermId": "0192e173-f725-73d3-8b0c-a90838ac89d1",
+            "intermediaryId": "01929eb8-72a9-798c-8303-b5acd36f6016",
+            "producerCode": "SAMPLE_CODE",
+            "validFrom": "2026-10-07",
+            "validTo": "2026-10-07",
+            "reason": "BROKER_OF_RECORD_LETTER",
+            "note": "sample",
+            "commissionConsequence": "NEW_PRODUCER_FROM_DATE",
+            "splitShare": "12.50",
+            "letterReference": "sample",
+            "transferId": "01927232-1cd5-7c51-8154-b24fcf2e9e1d",
+            "status": "CURRENT",
+            "recordedAt": "2026-10-07T09:00:00Z",
+            "recordedBy": "sample"
+          }
+        }
+      ]
+    },
+    "AgencyUserResponse": {
+      "user": {
+        "agencyUserId": "01926ace-0097-74fb-801a-56932878ad12",
+        "intermediaryId": "0192009e-2460-72c1-8e7d-c62a874ee690",
+        "externalSubject": "sample",
+        "displayName": "sample",
+        "role": "AGENCY_ADMIN",
+        "status": "ACTIVE",
+        "statusReason": "sample",
+        "producerCodes": [
+          "SAMPLE_CODE"
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      }
+    },
+    "AgencyUserRevokeAccessRequest": {
+      "agencyUserId": "0192f394-dfbc-7d5a-8660-f0b57a9934f1",
+      "producerCodes": [
+        "SAMPLE_CODE"
+      ]
+    },
+    "AgencyUserSuspendRequest": {
+      "agencyUserId": "0192f3f9-949b-7fa4-8f71-b3663935b859",
+      "reason": "sample"
+    },
+    "AgencyUserView": {
+      "agencyUserId": "01925239-a67b-718f-8ed2-875cef5381a7",
+      "intermediaryId": "0192ed32-b282-7d74-8a37-02ae03dad409",
+      "externalSubject": "sample",
+      "displayName": "sample",
+      "role": "AGENCY_ADMIN",
+      "status": "ACTIVE",
+      "statusReason": "sample",
+      "producerCodes": [
+        "SAMPLE_CODE"
+      ],
+      "createdAt": "2026-10-07T09:00:00Z"
+    },
     "CommissionAgreementApproveRequest": {
       "versionId": "01922210-7777-766f-82e9-ce13d3b954c6",
       "decision": "APPROVE",
