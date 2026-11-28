@@ -1949,6 +1949,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ri/v1/settlements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Settlements
+         * @description Settlements, newest first (BO-RI-16)
+         */
+        get: operations["ri.Settlement.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ri/v1/settlements/propose": {
         parameters: {
             query?: never;
@@ -1959,11 +1979,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Settlements
-         * @description Settlements
-         *
-         *     PRD inputs: counterparty, statements, items
-         *     PRD outputs: settlement
+         * Propose a settlement
+         * @description BO-RI-16: net the balance of one reinsurer to a settlement proposal (D-CON-13)
          */
         post: operations["ri.Settlement.propose"];
         delete?: never;
@@ -1982,11 +1999,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Settlements
-         * @description Settlements
-         *
-         *     PRD inputs: counterparty, statements, items
-         *     PRD outputs: settlement
+         * Approve a settlement
+         * @description BO-RI-16: approve a proposed settlement under RI.SETTLEMENT (maker is not checker, amount authority)
          */
         post: operations["ri.Settlement.approve"];
         delete?: never;
@@ -2005,11 +2019,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Settlements
-         * @description Settlements
-         *
-         *     PRD inputs: counterparty, statements, items
-         *     PRD outputs: settlement
+         * Release a settlement
+         * @description BO-RI-16: release an approved settlement once, posting the movement to the technical account
          */
         post: operations["ri.Settlement.release"];
         delete?: never;
@@ -2028,11 +2039,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Settlements
-         * @description Settlements
-         *
-         *     PRD inputs: counterparty, statements, items
-         *     PRD outputs: settlement
+         * Record a manual settlement
+         * @description BO-RI-16: record an off-system movement of an approved settlement with its evidence
          */
         post: operations["ri.Settlement.recordManual"];
         delete?: never;
@@ -4276,61 +4284,84 @@ export interface components {
         CashCallCancelResponse: {
             cashCall: components["schemas"]["CashCallView"];
         };
-        /** @description ri.Settlement.propose request. PRD inputs: "counterparty, statements, items" */
+        /** @description A settlement of the net balance of one reinsurer, proposed, approved and then released or recorded off-system (BO-RI-16) */
+        SettlementView: {
+            settlementId: components["schemas"]["Uuid"];
+            reinsurerPartyId: components["schemas"]["Uuid"];
+            currency: components["schemas"]["Text"];
+            /** @description The statement period the net runs through (yyyy-MM) */
+            period: components["schemas"]["Text"];
+            statementId?: components["schemas"]["Uuid"] | null;
+            /** @description Closing balance of the statement of that period */
+            statementClosing?: components["schemas"]["Money"] | null;
+            /** @description Signed balance. Positive is payable to the reinsurer, negative is receivable from the reinsurer */
+            net: components["schemas"]["Money"];
+            /** @description Absolute value of the net, the amount that moves */
+            amount: components["schemas"]["Money"];
+            /** @enum {string} */
+            direction: "PAY" | "RECEIVE";
+            /** @enum {string} */
+            status: "PROPOSED" | "APPROVED" | "RELEASED" | "RECORDED" | "SUPERSEDED";
+            proposedAt: components["schemas"]["Instant"];
+            proposedBy: components["schemas"]["Text"];
+            approvedAt?: components["schemas"]["Instant"] | null;
+            approvedBy?: components["schemas"]["Text"] | null;
+            settledAt?: components["schemas"]["Instant"] | null;
+            settledBy?: components["schemas"]["Text"] | null;
+            valueDate?: components["schemas"]["LocalDate"] | null;
+            bankReference?: components["schemas"]["Text"] | null;
+            evidenceRef?: components["schemas"]["Text"] | null;
+            itemId?: components["schemas"]["Uuid"] | null;
+            /** @description Reference of the BIL disbursement or receipt; a placeholder until BIL serves the RI_SETTLEMENT source */
+            bilReference?: components["schemas"]["Text"] | null;
+        };
+        /** @description ri.Settlement.list result, newest first */
+        SettlementListResponse: {
+            items: components["schemas"]["SettlementView"][];
+        };
+        /** @description ri.Settlement.propose request. Nets the balance of the reinsurer through the period; one live proposal per reinsurer and currency. */
         SettlementProposeRequest: {
-            /** @description PRD: "counterparty" */
-            counterparty?: components["schemas"]["Unspecified"];
-            /** @description PRD: "statements" */
-            statements?: components["schemas"]["Unspecified"];
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
+            reinsurerPartyId: components["schemas"]["Uuid"];
+            /** @description EUR, the only currency settled for now */
+            currency: components["schemas"]["Text"];
+            /** @description The month of today when omitted (yyyy-MM) */
+            period?: components["schemas"]["Text"] | null;
         };
-        /** @description ri.Settlement.propose result. PRD outputs: "settlement" */
+        /** @description ri.Settlement.propose result */
         SettlementProposeResponse: {
-            /** @description PRD: "settlement" */
-            settlement?: components["schemas"]["Unspecified"];
+            settlement: components["schemas"]["SettlementView"];
         };
-        /** @description ri.Settlement.approve request. PRD inputs: "counterparty, statements, items" */
+        /** @description ri.Settlement.approve request. Maker-checker (the proposer cannot approve) under the RI.SETTLEMENT amount authority. */
         SettlementApproveRequest: {
-            /** @description PRD: "counterparty" */
-            counterparty?: components["schemas"]["Unspecified"];
-            /** @description PRD: "statements" */
-            statements?: components["schemas"]["Unspecified"];
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
+            settlementId: components["schemas"]["Uuid"];
+            comment?: components["schemas"]["Text"] | null;
         };
-        /** @description ri.Settlement.approve result. PRD outputs: "settlement" */
+        /** @description ri.Settlement.approve result */
         SettlementApproveResponse: {
-            /** @description PRD: "settlement" */
-            settlement?: components["schemas"]["Unspecified"];
+            settlement: components["schemas"]["SettlementView"];
         };
-        /** @description ri.Settlement.release request. PRD inputs: "counterparty, statements, items" */
+        /** @description ri.Settlement.release request. An approved settlement is released once, when the balance still equals the net. */
         SettlementReleaseRequest: {
-            /** @description PRD: "counterparty" */
-            counterparty?: components["schemas"]["Unspecified"];
-            /** @description PRD: "statements" */
-            statements?: components["schemas"]["Unspecified"];
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
+            settlementId: components["schemas"]["Uuid"];
+            valueDate?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description ri.Settlement.release result. PRD outputs: "settlement" */
+        /** @description ri.Settlement.release result */
         SettlementReleaseResponse: {
-            /** @description PRD: "settlement" */
-            settlement?: components["schemas"]["Unspecified"];
+            settlement: components["schemas"]["SettlementView"];
         };
-        /** @description ri.Settlement.recordManual request. PRD inputs: "counterparty, statements, items" */
+        /** @description ri.Settlement.recordManual request. Records the off-system movement of an approved settlement; the evidence and the bank reference are mandatory. */
         SettlementRecordManualRequest: {
-            /** @description PRD: "counterparty" */
-            counterparty?: components["schemas"]["Unspecified"];
-            /** @description PRD: "statements" */
-            statements?: components["schemas"]["Unspecified"];
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
+            settlementId: components["schemas"]["Uuid"];
+            /** @description Must equal the amount of the settlement */
+            amount: components["schemas"]["Money"];
+            bankReference: components["schemas"]["Text"];
+            /** @description Reference of the evidence document (bank advice, SWIFT message) */
+            evidenceRef: components["schemas"]["Text"];
+            valueDate?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description ri.Settlement.recordManual result. PRD outputs: "settlement" */
+        /** @description ri.Settlement.recordManual result */
         SettlementRecordManualResponse: {
-            /** @description PRD: "settlement" */
-            settlement?: components["schemas"]["Unspecified"];
+            settlement: components["schemas"]["SettlementView"];
         };
         /** @description ri.Collateral.create request. PRD inputs: "instrument data" */
         CollateralCreateRequest: {
@@ -8981,6 +9012,44 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "ri.Settlement.list": {
+        parameters: {
+            query?: {
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                reinsurerPartyId?: string;
+                /** @description PROPOSED, APPROVED, RELEASED, RECORDED or SUPERSEDED */
+                status?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettlementListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             500: components["responses"]["InternalError"];
         };
     };

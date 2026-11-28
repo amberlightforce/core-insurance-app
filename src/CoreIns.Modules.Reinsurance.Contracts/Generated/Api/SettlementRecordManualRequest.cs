@@ -4,31 +4,30 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Settlement.recordManual request. PRD inputs: "counterparty, statements, items"</summary>
+/// <summary>ri.Settlement.recordManual request. Records the off-system movement of an approved settlement; the evidence and the bank reference are mandatory.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SettlementRecordManualRequest
 {
-    /// <summary>PRD: "counterparty"</summary>
+    /// <summary>Contract member 'settlementId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'settlementId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("counterparty")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Counterparty { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("settlementId")]
+    public required global::System.Guid SettlementId { get; init; }
 
-    /// <summary>PRD: "statements"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("statements")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Statements { get; init; }
+    /// <summary>Must equal the amount of the settlement</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+    public required global::CoreIns.SharedKernel.Money Amount { get; init; }
 
-    /// <summary>PRD: "items"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Items { get; init; }
+    /// <summary>Contract member 'bankReference'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("bankReference")]
+    public required string BankReference { get; init; }
+
+    /// <summary>Reference of the evidence document (bank advice, SWIFT message)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("evidenceRef")]
+    public required string EvidenceRef { get; init; }
+
+    /// <summary>Contract member 'valueDate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("valueDate")]
+    public global::CoreIns.SharedKernel.BusinessDate? ValueDate { get; init; }
 }

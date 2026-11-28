@@ -66,6 +66,10 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
     public DbSet<DisbursementBatchItemRow> DisbursementBatchItems => Set<DisbursementBatchItemRow>();
 
+    public DbSet<BankStatementRow> BankStatements => Set<BankStatementRow>();
+
+    public DbSet<BankStatementLineRow> BankStatementLines => Set<BankStatementLineRow>();
+
     public DbSet<ReceivableRow> Receivables => Set<ReceivableRow>();
 
     public DbSet<ReceivableAllocationRow> ReceivableAllocations => Set<ReceivableAllocationRow>();
@@ -88,6 +92,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
         SuspenseModel.Configure(modelBuilder);
         LevyModel.Configure(modelBuilder);
         DisbursementBatchModel.Configure(modelBuilder);
+        BankStatementModel.Configure(modelBuilder);
         MigrationImport.BillingMigrationModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BillingAccountRow>(entity =>

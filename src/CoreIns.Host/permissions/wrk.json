@@ -70,6 +70,8 @@
           "Staff.BillingManager",
           "Platform.Admin"
         ],
+        "wrk.Pattern.list": [ "Platform.Admin" ],
+        "wrk.Pattern.upsert": [ "Platform.Admin" ],
         "wrk.Assignment.simulate": [
           "Staff.UnderwritingManager",
           "Staff.BillingManager",

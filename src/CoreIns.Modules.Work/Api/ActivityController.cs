@@ -24,6 +24,8 @@ internal sealed class ActivityController : ControllerBase
     public const string BlockingPermission = "wrk.Activity.blockingStatus";
     public const string GetNextPermission = "wrk.Queue.getNext";
     public const string SimulatePermission = "wrk.Assignment.simulate";
+    public const string PatternListPermission = "wrk.Pattern.list";
+    public const string PatternUpsertPermission = "wrk.Pattern.upsert";
 
     /// <summary>wrk.Activity.list: my tasks (default), the unassigned queue or the team's work.</summary>
     [HttpGet("activities")]
@@ -93,4 +95,17 @@ internal sealed class ActivityController : ControllerBase
     public async Task<IResult> SimulateAsync(
         [FromBody] AssignmentSimulateRequest request, [FromServices] AssignmentSimulator simulator, CancellationToken cancellationToken) =>
         (await simulator.SimulateAsync(request, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>wrk.Pattern.list: the queue and pattern catalogue (Platform.Admin).</summary>
+    [HttpGet("admin/patterns")]
+    [Authorize(Policy = PatternListPermission)]
+    public async Task<IResult> ListPatternsAsync([FromServices] PatternCatalogueReader reader, CancellationToken cancellationToken) =>
+        (await reader.ListAsync(cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>wrk.Pattern.upsert: create or replace queues and patterns by code (Platform.Admin).</summary>
+    [HttpPut("admin/patterns")]
+    [Authorize(Policy = PatternUpsertPermission)]
+    public async Task<IResult> UpsertPatternsAsync(
+        [FromBody] PatternUpsertRequest request, [FromServices] ICommandHandler<UpsertPatterns, PatternCatalogue> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new UpsertPatterns(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 }
