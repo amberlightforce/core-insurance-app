@@ -178,25 +178,55 @@
       "key": "value"
     },
     "plt.Audit.export": {
-      "page": "unspecified",
-      "exportJob": "unspecified",
-      "verificationResult": "unspecified"
+      "fileName": "sample",
+      "contentType": "sample",
+      "rowCount": 1,
+      "truncated": true,
+      "csv": "sample"
     },
     "plt.Audit.query": {
       "items": [
         {
-          "page": "unspecified",
-          "exportJob": "unspecified",
-          "verificationResult": "unspecified"
+          "auditId": "0192f380-f271-7488-8043-981543435372",
+          "chainDate": "2026-10-07",
+          "sequence": 1,
+          "hash": "sample",
+          "occurredAt": "2026-10-07T09:00:00Z",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "actorKind": "sample",
+          "actorId": "sample",
+          "onBehalfOf": "sample",
+          "roles": [
+            "sample"
+          ],
+          "operation": "sample",
+          "outcome": "sample",
+          "errorCode": "sample",
+          "objectModule": "sample",
+          "objectType": "sample",
+          "objectId": "sample",
+          "objectNumber": "sample",
+          "changes": "unspecified",
+          "reason": "sample",
+          "channel": "sample",
+          "correlationId": "sample",
+          "origin": "sample"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "plt.Audit.verify": {
-      "page": "unspecified",
-      "exportJob": "unspecified",
-      "verificationResult": "unspecified"
+      "allValid": true,
+      "days": [
+        {
+          "chainDate": "2026-10-07",
+          "records": 1,
+          "isValid": true,
+          "brokenAtSequence": 1,
+          "problem": "sample"
+        }
+      ]
     },
     "plt.Authority.attachDecision": {
       "key": "value"
@@ -886,37 +916,102 @@
     "AuditAppendRequest": {
       "auditEvent": "unspecified"
     },
+    "AuditChainVerification": {
+      "chainDate": "2026-10-07",
+      "records": 1,
+      "isValid": true,
+      "brokenAtSequence": 1,
+      "problem": "sample"
+    },
     "AuditExportRequest": {
-      "filters": "unspecified"
+      "entityType": "sample",
+      "entityId": "sample",
+      "actor": "sample",
+      "action": "sample",
+      "correlationId": "sample",
+      "from": "2026-10-07T09:00:00Z",
+      "to": "2026-10-07T09:00:00Z"
     },
     "AuditExportResponse": {
-      "page": "unspecified",
-      "exportJob": "unspecified",
-      "verificationResult": "unspecified"
+      "fileName": "sample",
+      "contentType": "sample",
+      "rowCount": 1,
+      "truncated": true,
+      "csv": "sample"
     },
     "AuditQueryItem": {
-      "page": "unspecified",
-      "exportJob": "unspecified",
-      "verificationResult": "unspecified"
+      "auditId": "01929736-15bb-7595-83ca-1bad37fecc4e",
+      "chainDate": "2026-10-07",
+      "sequence": 1,
+      "hash": "sample",
+      "occurredAt": "2026-10-07T09:00:00Z",
+      "recordedAt": "2026-10-07T09:00:00Z",
+      "actorKind": "sample",
+      "actorId": "sample",
+      "onBehalfOf": "sample",
+      "roles": [
+        "sample"
+      ],
+      "operation": "sample",
+      "outcome": "sample",
+      "errorCode": "sample",
+      "objectModule": "sample",
+      "objectType": "sample",
+      "objectId": "sample",
+      "objectNumber": "sample",
+      "changes": "unspecified",
+      "reason": "sample",
+      "channel": "sample",
+      "correlationId": "sample",
+      "origin": "sample"
     },
     "AuditQueryPage": {
       "items": [
         {
-          "page": "unspecified",
-          "exportJob": "unspecified",
-          "verificationResult": "unspecified"
+          "auditId": "019202ed-13c0-7c88-85fe-988dfe8c4720",
+          "chainDate": "2026-10-07",
+          "sequence": 1,
+          "hash": "sample",
+          "occurredAt": "2026-10-07T09:00:00Z",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "actorKind": "sample",
+          "actorId": "sample",
+          "onBehalfOf": "sample",
+          "roles": [
+            "sample"
+          ],
+          "operation": "sample",
+          "outcome": "sample",
+          "errorCode": "sample",
+          "objectModule": "sample",
+          "objectType": "sample",
+          "objectId": "sample",
+          "objectNumber": "sample",
+          "changes": "unspecified",
+          "reason": "sample",
+          "channel": "sample",
+          "correlationId": "sample",
+          "origin": "sample"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "AuditVerifyRequest": {
-      "filters": "unspecified"
+      "from": "2026-10-07",
+      "to": "2026-10-07"
     },
     "AuditVerifyResponse": {
-      "page": "unspecified",
-      "exportJob": "unspecified",
-      "verificationResult": "unspecified"
+      "allValid": true,
+      "days": [
+        {
+          "chainDate": "2026-10-07",
+          "records": 1,
+          "isValid": true,
+          "brokenAtSequence": 1,
+          "problem": "sample"
+        }
+      ]
     },
     "AuthorityAttachDecisionRequest": {
       "checkId": "0192c5c4-f8eb-789a-8e7f-abd164528b26",

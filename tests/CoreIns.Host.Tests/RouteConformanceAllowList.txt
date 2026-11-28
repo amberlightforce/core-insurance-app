@@ -68,7 +68,6 @@ CONTRACT_NOT_SERVED GET /api/pfc/v1/pogs/get
 CONTRACT_NOT_SERVED GET /api/pfc/v1/product-versions/diff
 CONTRACT_NOT_SERVED GET /api/pfc/v1/reference-tables/get
 CONTRACT_NOT_SERVED GET /api/pfc/v1/regulatory-mappings/{}
-CONTRACT_NOT_SERVED GET /api/plt/v1/audit/query
 CONTRACT_NOT_SERVED GET /api/plt/v1/authorities/who-can-approve
 CONTRACT_NOT_SERVED GET /api/plt/v1/calendars/add-business-days
 CONTRACT_NOT_SERVED GET /api/plt/v1/calendars/business-days-between
@@ -322,9 +321,8 @@ CONTRACT_NOT_SERVED POST /api/pfc/v1/product-imports/import
 CONTRACT_NOT_SERVED POST /api/pfc/v1/renewal-conversions/convert
 CONTRACT_NOT_SERVED POST /api/plt/v1/adapters/invoke
 CONTRACT_NOT_SERVED POST /api/plt/v1/approval/request
+# plt.Audit.append is in-process only (IAuditWriter, D-ARC-16): deliberately no REST route (BO-PLT-01).
 CONTRACT_NOT_SERVED POST /api/plt/v1/audit/append
-CONTRACT_NOT_SERVED POST /api/plt/v1/audit/export
-CONTRACT_NOT_SERVED POST /api/plt/v1/audit/verify
 CONTRACT_NOT_SERVED POST /api/plt/v1/authorities/attach-decision
 CONTRACT_NOT_SERVED POST /api/plt/v1/authorities/check
 CONTRACT_NOT_SERVED POST /api/plt/v1/authority-types/register

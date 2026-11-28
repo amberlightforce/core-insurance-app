@@ -4,31 +4,15 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Audit.verify result. PRD outputs: "page; export job; verification result"</summary>
+/// <summary>plt.Audit.verify result: one entry per day, and whether all of them verify.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AuditVerifyResponse
 {
-    /// <summary>PRD: "page"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("page")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Page { get; init; }
+    /// <summary>Contract member 'allValid'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("allValid")]
+    public required bool AllValid { get; init; }
 
-    /// <summary>PRD: "export job"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exportJob")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ExportJob { get; init; }
-
-    /// <summary>PRD: "verification result"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("verificationResult")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? VerificationResult { get; init; }
+    /// <summary>Contract member 'days'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("days")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Platform.Contracts.Api.AuditChainVerification> Days { get; init; }
 }
