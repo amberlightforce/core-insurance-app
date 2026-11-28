@@ -40,7 +40,7 @@ public static class ChannelsErrorCodes
 
     /// <summary>CHN-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 65 operation(s): chn.Agent.mcp, chn.Aggregator.quote, chn.ApiProduct.create, chn.ApiProduct.deprecate, chn.ApiProduct.publish, chn.ApiProduct.retire, chn.Change.confirm, chn.Change.refer, chn.Client.approve, chn.Client.request, chn.Client.revoke, chn.Client.suspend, ….</para>
+    /// <para>Declared by 66 operation(s): chn.Agent.mcp, chn.Aggregator.quote, chn.ApiProduct.create, chn.ApiProduct.deprecate, chn.ApiProduct.publish, chn.ApiProduct.retire, chn.Change.confirm, chn.Change.preview, chn.Change.refer, chn.Client.approve, chn.Client.request, chn.Client.revoke, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "CHN-ERR-IDEMPOTENCY-MISMATCH";
 

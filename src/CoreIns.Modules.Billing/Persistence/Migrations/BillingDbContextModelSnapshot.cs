@@ -1362,6 +1362,90 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DownPaymentRow", b =>
+                {
+                    b.Property<Guid>("DownPaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("down_payment_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<decimal>("ClearedAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("cleared_amount");
+
+                    b.Property<DateTime?>("ClearedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("cleared_at");
+
+                    b.Property<string>("ClearedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("cleared_by");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("job_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("method");
+
+                    b.Property<string>("PaymentReference")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payment_reference");
+
+                    b.Property<string>("PlanCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("plan_code");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.HasKey("DownPaymentId")
+                        .HasName("pk_down_payment");
+
+                    b.HasIndex("PaymentReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_down_payment_reference");
+
+                    b.HasIndex("LegalEntityId", "JobId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_down_payment_job");
+
+                    b.ToTable("down_payment", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_down_payment_amount", "amount > 0 AND cleared_amount >= 0");
+
+                            t.HasCheckConstraint("ck_down_payment_record_version", "record_version >= 1");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DsarRestrictionRow", b =>
                 {
                     b.Property<Guid>("RestrictionId")

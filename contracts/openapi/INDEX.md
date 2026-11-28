@@ -9,23 +9,23 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | Module | Operations | Full | Minimal | Commands | Queries | In-process only | Partner-facing | Unexpanded families |
 |---|---|---|---|---|---|---|---|---|
 | [PTY](#pty) | 79 | 62 | 17 | 55 | 24 | 5 | 0 | 4 |
-| [PFC](#pfc) | 34 | 31 | 3 | 17 | 17 | 1 | 1 | 0 |
+| [PFC](#pfc) | 35 | 32 | 3 | 17 | 18 | 1 | 1 | 0 |
 | [RAT](#rat) | 47 | 47 | 0 | 24 | 23 | 3 | 2 | 0 |
 | [UW](#uw) | 82 | 58 | 24 | 57 | 25 | 3 | 2 | 4 |
 | [POL](#pol) | 58 | 54 | 4 | 40 | 18 | 8 | 10 | 0 |
-| [BIL](#bil) | 90 | 90 | 0 | 56 | 34 | 6 | 5 | 1 |
+| [BIL](#bil) | 91 | 91 | 0 | 57 | 34 | 6 | 5 | 1 |
 | [CLM](#clm) | 77 | 77 | 0 | 55 | 22 | 10 | 9 | 5 |
-| [RI](#ri) | 120 | 114 | 6 | 85 | 35 | 9 | 0 | 0 |
+| [RI](#ri) | 121 | 115 | 6 | 85 | 36 | 9 | 0 | 0 |
 | [FIN](#fin) | 88 | 80 | 8 | 55 | 33 | 10 | 0 | 3 |
 | [DOC](#doc) | 47 | 46 | 1 | 27 | 20 | 4 | 12 | 0 |
 | [CMP](#cmp) | 93 | 62 | 31 | 69 | 24 | 21 | 0 | 3 |
-| [CHN](#chn) | 106 | 62 | 44 | 67 | 39 | 3 | 25 | 2 |
+| [CHN](#chn) | 106 | 62 | 44 | 66 | 40 | 3 | 25 | 2 |
 | [WRK](#wrk) | 60 | 25 | 35 | 41 | 19 | 9 | 3 | 14 |
 | [PLT](#plt) | 101 | 67 | 34 | 63 | 38 | 25 | 0 | 10 |
-| [DAT](#dat) | 47 | 47 | 0 | 28 | 19 | 5 | 0 | 0 |
+| [DAT](#dat) | 47 | 47 | 0 | 28 | 19 | 4 | 0 | 0 |
 | [MIG](#mig) | 49 | 49 | 0 | 33 | 16 | 5 | 0 | 12 |
-| [MKT](#mkt) | 50 | 38 | 12 | 17 | 33 | 1 | 0 | 5 |
-| **Total** | 1228 | 1009 | 219 | 789 | 439 | 128 | 69 | 63 |
+| [MKT](#mkt) | 50 | 41 | 9 | 17 | 33 | 1 | 0 | 5 |
+| **Total** | 1231 | 1015 | 216 | 789 | 442 | 127 | 69 | 63 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -153,6 +153,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `pfc.ProductVersion.cancelSchedule` | POST `/api/pfc/v1/product-versions/cancel-schedule` | C |  | ui |  | W2 | full | REQ-PFC-211..REQ-PFC-213 |
 | `pfc.ProductVersion.decideFallback` | POST `/api/pfc/v1/product-versions/decide-fallback` | C |  | ui |  | W2 | full | REQ-PFC-213 |
 | `pfc.ProductVersion.diff` | GET `/api/pfc/v1/product-versions/diff` | Q |  | ui |  | W2 | full | REQ-PFC-200 |
+| `pfc.ProductVersion.export` | GET `/api/pfc/v1/product-versions/export` | Q |  | ui |  | W2 | full | REQ-PFC-240 |
 | `pfc.ProductVersion.fallback` | POST `/api/pfc/v1/product-versions/fallback` | C | yes | ui |  | W2 | full | REQ-PFC-213 |
 | `pfc.ProductVersion.import` | POST `/api/pfc/v1/product-versions/import` | C |  | ui |  | W2 | full | REQ-PFC-031, REQ-PFC-032, REQ-PFC-162 |
 | `pfc.ProductVersion.resolve` | POST `/api/pfc/v1/product-versions/resolve` | Q |  | ui | DOC, MIG, MKT, POL, RAT | W2 | full | REQ-PFC-001, REQ-PFC-167, REQ-PFC-221 |
@@ -459,7 +460,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `bil.Receivable.get` | GET `/api/bil/v1/receivables/{id}` | Q |  | ui | CLM | W7 | full | REQ-BIL-346, REQ-BIL-354, REQ-BIL-355 … |
 | `bil.Receivable.list` | GET `/api/bil/v1/receivables` | Q |  | ui | CLM | W7 | full | REQ-BIL-346, REQ-BIL-354, REQ-BIL-355 … |
 | `bil.Receivable.register` | POST `/api/bil/v1/receivables/register` | C | yes | ui | CLM, RI | W7 | full | REQ-BIL-346, REQ-BIL-349, REQ-BIL-354 … |
-| `bil.Reconciliation.bank` | POST `/api/bil/v1/reconciliation/bank` | Q |  | ui |  | W5 | full | REQ-BIL-302..REQ-BIL-312, REQ-BIL-317..REQ-BIL-321 |
+| `bil.Reconciliation.bank` | POST `/api/bil/v1/reconciliation/bank` | C |  | ui |  | W5 | full | REQ-BIL-302..REQ-BIL-312, REQ-BIL-317..REQ-BIL-321 |
 | `bil.Reconciliation.fin` | POST `/api/bil/v1/reconciliation/fin` | Q |  | internal | FIN | W5 | full | REQ-BIL-011, REQ-BIL-314 |
 | `bil.Reconciliation.invariants` | POST `/api/bil/v1/reconciliation/invariants` | Q |  | ui |  | W5 | full | REQ-BIL-302..REQ-BIL-312, REQ-BIL-317..REQ-BIL-321 |
 | `bil.Refund.decide` | POST `/api/bil/v1/refunds/decide` | C | yes | ui | WRK | W6 | full | REQ-BIL-007, REQ-BIL-181..REQ-BIL-196, REQ-BIL-188 … |
@@ -476,6 +477,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `bil.TaxLevy.requestLevyPayment` | POST `/api/bil/v1/tax-levy/request-levy-payment` | C | yes | ui |  | W5 | full | REQ-BIL-269..REQ-BIL-278 |
 | `bil.Transfer.money` | POST `/api/bil/v1/transfers/money` | C | yes | ui |  | W6 | full | REQ-BIL-225..REQ-BIL-227 |
 | `bil.WriteOff.decide` | POST `/api/bil/v1/write-offs/decide` | C | yes | ui |  | W6 | full | REQ-BIL-217..REQ-BIL-220 |
+| `bil.WriteOff.list` | GET `/api/bil/v1/write-offs` | Q |  | ui |  | W6 | full | REQ-BIL-217..REQ-BIL-220 |
 | `bil.WriteOff.post` | POST `/api/bil/v1/write-offs/post` | C | yes | ui |  | W6 | full | REQ-BIL-217..REQ-BIL-220 |
 | `bil.WriteOff.propose` | POST `/api/bil/v1/write-offs/propose` | C | yes | ui |  | W6 | full | REQ-BIL-217..REQ-BIL-220 |
 
@@ -695,10 +697,11 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `ri.Security.report` | POST `/api/ri/v1/securities/report` | Q |  | ui |  | W7 | full | REQ-RI-050, REQ-RI-053 |
 | `ri.SecurityRules.get` | GET `/api/ri/v1/security-rules/{id}` | Q |  | ui |  | W7 | full | REQ-RI-050, REQ-RI-053 |
 | `ri.SecurityRules.set` | POST `/api/ri/v1/security-rules/set` | C | yes | ui |  | W7 | full | REQ-RI-050, REQ-RI-053 |
-| `ri.Settlement.approve` | POST `/api/ri/v1/settlements/approve` | C | yes | ui |  | W7 | full | REQ-RI-189..REQ-RI-196 |
-| `ri.Settlement.propose` | POST `/api/ri/v1/settlements/propose` | C | yes | ui |  | W7 | full | REQ-RI-189..REQ-RI-196 |
-| `ri.Settlement.recordManual` | POST `/api/ri/v1/settlements/record-manual` | C | yes | ui |  | W7 | full | REQ-RI-189..REQ-RI-196 |
-| `ri.Settlement.release` | POST `/api/ri/v1/settlements/release` | C | yes | ui |  | W7 | full | REQ-RI-189..REQ-RI-196 |
+| `ri.Settlement.approve` | POST `/api/ri/v1/settlements/approve` | C |  | ui |  | W7 | full | REQ-RI-189..REQ-RI-196 |
+| `ri.Settlement.list` | GET `/api/ri/v1/settlements` | Q |  | ui |  | W7 | full | REQ-RI-189..REQ-RI-196 |
+| `ri.Settlement.propose` | POST `/api/ri/v1/settlements/propose` | C |  | ui |  | W7 | full | REQ-RI-189..REQ-RI-196 |
+| `ri.Settlement.recordManual` | POST `/api/ri/v1/settlements/record-manual` | C |  | ui |  | W7 | full | REQ-RI-189..REQ-RI-196 |
+| `ri.Settlement.release` | POST `/api/ri/v1/settlements/release` | C |  | ui |  | W7 | full | REQ-RI-189..REQ-RI-196 |
 | `ri.Statement.approve` | POST `/api/ri/v1/statements/approve` | C |  | ui |  | W7 | full | REQ-RI-006, REQ-RI-176..REQ-RI-179 |
 | `ri.Statement.generate` | POST `/api/ri/v1/statements/generate` | C |  | ui |  | W7 | full | REQ-RI-006, REQ-RI-176..REQ-RI-179 |
 | `ri.Statement.issue` | POST `/api/ri/v1/statements/issue` | C |  | ui |  | W7 | full | REQ-RI-006, REQ-RI-176..REQ-RI-179 |
@@ -764,10 +767,10 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `fin.Journal.query` | GET `/api/fin/v1/journals/query` | Q |  | ui |  | W5 | full | REQ-FIN-078 |
 | `fin.Journal.reverse` | POST `/api/fin/v1/journals/reverse` | C | yes | ui |  | W5 | full | REQ-FIN-002, REQ-FIN-072, REQ-FIN-073 |
 | `fin.LevyReturn.addAdjustment` | POST `/api/fin/v1/levy-returns/add-adjustment` | C |  | ui |  | W5 | full | REQ-FIN-005, REQ-FIN-189..REQ-FIN-196 |
-| `fin.LevyReturn.generateFile` | POST `/api/fin/v1/levy-returns/generate-file` | C |  | ui |  | W5 | full | REQ-FIN-005, REQ-FIN-189..REQ-FIN-196 |
+| `fin.LevyReturn.generateFile` | POST `/api/fin/v1/levy-returns/generate-file` | C | yes | ui |  | W5 | full | REQ-FIN-005, REQ-FIN-189..REQ-FIN-196 |
 | `fin.LevyReturn.get` | GET `/api/fin/v1/levy-returns/{id}` | Q |  | ui |  | W5 | full | REQ-FIN-005, REQ-FIN-189..REQ-FIN-196 |
 | `fin.LevyReturn.list` | GET `/api/fin/v1/levy-returns` | Q |  | ui |  | W5 | full | REQ-FIN-005, REQ-FIN-189..REQ-FIN-196 |
-| `fin.LevyReturn.recalculate` | POST `/api/fin/v1/levy-returns/recalculate` | C |  | ui |  | W5 | full | REQ-FIN-005, REQ-FIN-189..REQ-FIN-196 |
+| `fin.LevyReturn.recalculate` | POST `/api/fin/v1/levy-returns/recalculate` | C | yes | ui |  | W5 | full | REQ-FIN-005, REQ-FIN-189..REQ-FIN-196 |
 | `fin.LevyReturn.recordFiling` | POST `/api/fin/v1/levy-returns/record-filing` | C |  | ui |  | W5 | full | REQ-FIN-005, REQ-FIN-189..REQ-FIN-196 |
 | `fin.LevyReturn.requestPayment` | POST `/api/fin/v1/levy-returns/request-payment` | C |  | ui |  | W5 | full | REQ-FIN-005, REQ-FIN-189..REQ-FIN-196 |
 | `fin.LevyReturn.transition` | POST `/api/fin/v1/levy-returns/transition` | Q |  | ui |  | W5 | full | REQ-FIN-005, REQ-FIN-189..REQ-FIN-196 |
@@ -1051,7 +1054,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `chn.Portal.policies` | GET `/api/chn/v1/portal/policies` | Q |  | ui |  | W6 | minimal | REQ-CHN-305 |
 | `chn.Portal.policy` | GET `/api/chn/v1/portal/policies/{id}` | Q |  | ui |  | W6 | minimal | REQ-CHN-305 |
 | `chn.PortalBilling.invoices` | GET `/api/chn/v1/portal/billing/invoices` | Q |  | ui |  | W6 | minimal | REQ-CHN-305 |
-| `chn.PortalBilling.payNow` | POST `/api/chn/v1/portal/billing/invoices/{id}/pay-now` | C |  | ui |  | W6 | minimal | REQ-CHN-305 |
+| `chn.PortalBilling.payNow` | POST `/api/chn/v1/portal/billing/invoices/{id}/pay-now` | Q |  | ui |  | W6 | minimal | REQ-CHN-305 |
 | `chn.PortalBilling.refunds` | GET `/api/chn/v1/portal/billing/refunds` | Q |  | ui |  | W6 | minimal | REQ-CHN-305 |
 | `chn.PortalBilling.summary` | GET `/api/chn/v1/portal/billing/summary` | Q |  | ui |  | W6 | minimal | REQ-CHN-305 |
 | `chn.PortalCancellation.submit` | POST `/api/chn/v1/portal/cancellations/request` | C |  | ui |  | W6 | minimal | REQ-CHN-004, REQ-CHN-005, REQ-CHN-047 |
@@ -1386,7 +1389,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `mig.Mapping.create` | POST `/api/mig/v1/mapping/specs` | C |  | ui |  | W9 | full | REQ-MIG-054..REQ-MIG-062 |
 | `mig.Mapping.get` | GET `/api/mig/v1/mapping/specs/{id}` | Q |  | ui |  | W9 | full | REQ-MIG-054..REQ-MIG-062 |
 | `mig.Mapping.list` | GET `/api/mig/v1/mapping/specs` | Q |  | ui |  | W9 | full | REQ-MIG-054..REQ-MIG-062 |
-| `mig.Mapping.preview` | POST `/api/mig/v1/mapping/preview` | Q | yes | ui |  | W9 | full | REQ-MIG-054..REQ-MIG-062 |
+| `mig.Mapping.preview` | POST `/api/mig/v1/mapping/preview` | Q |  | ui |  | W9 | full | REQ-MIG-054..REQ-MIG-062 |
 | `mig.Mapping.publish` | POST `/api/mig/v1/mapping/publish` | C |  | ui |  | W9 | full | REQ-MIG-054..REQ-MIG-062 |
 | `mig.Profile.run` | POST `/api/mig/v1/quality/profile/run` | C |  | ui |  | W9 | full | REQ-MIG-047..REQ-MIG-050 |
 | `mig.Recon.loadControlTotals` | POST `/api/mig/v1/reconciliation/control-totals/load` | C |  | ui |  | W9 | full | REQ-MIG-171..REQ-MIG-177 |
@@ -1461,11 +1464,11 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `mkt.L10n.format` | GET `/api/mkt/v1/l10n/format` | Q |  | ui | CHN, DOC | W1 | full | REQ-MKT-005, REQ-MKT-189 |
 | `mkt.L10n.searchKeys` | GET `/api/mkt/v1/l10n/search-keys` | Q |  | ui |  | W1 | full | REQ-MKT-005, REQ-MKT-178, REQ-MKT-340 |
 | `mkt.L10nUiLanguage.resolve` | POST `/api/mkt/v1/l10n-ui-languages/resolve` | Q |  | ui |  | W1 | full | REQ-MKT-005, REQ-MKT-333 |
-| `mkt.Pack.certify` | POST `/api/mkt/v1/packs/certify` | C |  | ui |  | W1 | minimal | REQ-MKT-003, REQ-MKT-144 |
-| `mkt.Pack.deprecate` | POST `/api/mkt/v1/packs/deprecate` | C |  | ui |  | W1 | minimal | REQ-MKT-003, REQ-MKT-144 |
+| `mkt.Pack.certify` | POST `/api/mkt/v1/packs/certify` | C |  | ui |  | W1 | full | REQ-MKT-003, REQ-MKT-144 |
+| `mkt.Pack.deprecate` | POST `/api/mkt/v1/packs/deprecate` | C |  | ui |  | W1 | full | REQ-MKT-003, REQ-MKT-144 |
 | `mkt.Pack.get` | GET `/api/mkt/v1/packs/{id}` | Q |  | ui |  | W1 | full | REQ-MKT-003, REQ-MKT-144 |
 | `mkt.Pack.list` | GET `/api/mkt/v1/packs` | Q |  | ui |  | W1 | full | REQ-MKT-003, REQ-MKT-144 |
-| `mkt.Pack.publish` | POST `/api/mkt/v1/packs/publish` | C |  | ui |  | W1 | minimal | REQ-MKT-003, REQ-MKT-144 |
+| `mkt.Pack.publish` | POST `/api/mkt/v1/packs/publish` | C |  | ui |  | W1 | full | REQ-MKT-003, REQ-MKT-144 |
 | `mkt.Pack.rollback` | POST `/api/mkt/v1/packs/rollback` | C | yes | ui |  | W1 | full | REQ-MKT-003, REQ-MKT-144 |
 | `mkt.Pack.scheduleActivation` | POST `/api/mkt/v1/packs/schedule-activation` | C | yes | ui |  | W1 | full | REQ-MKT-003, REQ-MKT-144 |
 | `mkt.RegimeCode.crosswalk` | GET `/api/mkt/v1/regime-codes/crosswalk` | Q |  | ui |  | W1 | full | REQ-MKT-007, REQ-MKT-208 |

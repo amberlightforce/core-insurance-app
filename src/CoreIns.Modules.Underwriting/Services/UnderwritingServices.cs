@@ -32,7 +32,7 @@ internal sealed class UnderwritingRulesService(RequestContext context, ICommandH
 }
 
 /// <summary><c>uw.Issue.blockingStatus</c> (REQ-UW-002): the gate POL asks before quote, bind and issue.</summary>
-internal sealed class UnderwritingIssueService(UnderwritingStore store, RequestContext context, ILegalEntityDirectory legalEntities, IssueReadQueries reads) : IUnderwritingIssueService
+internal sealed class UnderwritingIssueService(UnderwritingStore store, ContingencyStore contingencies, RequestContext context, ILegalEntityDirectory legalEntities, IssueReadQueries reads) : IUnderwritingIssueService
 {
     public async Task<IssueBlockingStatusResponse> BlockingStatusAsync(JobId jobRef, BlockingPoint blockingPoint, CancellationToken cancellationToken = default)
     {
@@ -45,9 +45,19 @@ internal sealed class UnderwritingIssueService(UnderwritingStore store, RequestC
             _ => throw new DomainException(DomainError.Of(ModuleCode.UW, "VALIDATION", "Ask for PRE_QUOTE, PRE_BIND or PRE_ISSUE.")),
         };
         var issues = await store.BlockingAsync(legalEntity.Value, jobRef.Value, point, cancellationToken).ConfigureAwait(false);
+        var open = await contingencies.BlockingAsync(legalEntity.Value, jobRef.Value, point, cancellationToken).ConfigureAwait(false);
+        var today = contingencies.Today;
         return new IssueBlockingStatusResponse
         {
-            Blocked = issues.Count > 0,
+            Blocked = issues.Count > 0 || open.Count > 0,
+            Contingencies = [.. open.Select(c => new IssueBlockingStatusResponse.ContingencyItem
+            {
+                ContingencyId = c.ContingencyId,
+                ContingencyType = c.ContingencyType,
+                BlockingPoint = ContingencySupport.Item(c, today).BlockingPoint,
+                DueDate = new BusinessDate(c.Due),
+                Overdue = c.Due < today,
+            })],
             Issues = [.. issues.Select(i => new IssueBlockingStatusResponse.IssueItem
             {
                 IssueId = new UwIssueId(i.IssueId),

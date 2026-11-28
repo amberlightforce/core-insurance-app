@@ -22,6 +22,12 @@ internal sealed class UnderwritingOptions
 
     /// <summary>Hours from a referral request to its SLA due time until BO-UW-06 derives it from rule-set metadata and the working calendar.</summary>
     public int ReferralSlaHours { get; set; } = 48;
+
+    /// <summary>Seconds between passes of the contingency due-date job (BO-UW-08, worker role only).</summary>
+    public int ContingencySweepIntervalSeconds { get; set; } = 3600;
+
+    /// <summary>Turns the contingency due-date job off.</summary>
+    public bool ContingencySweepEnabled { get; set; } = true;
 }
 
 /// <summary>A stored rule set version as read.</summary>
