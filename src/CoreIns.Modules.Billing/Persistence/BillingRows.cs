@@ -60,6 +60,9 @@ internal sealed class PlanInstanceRow
 
     public string Method { get; set; } = string.Empty;
 
+    /// <summary>Day of month the instalments after the first fall due (BO-BIL-03, REQ-BIL-052); null keeps the term-start day.</summary>
+    public int? DueDay { get; set; }
+
     public BusinessDate TermFrom { get; set; }
 
     public BusinessDate TermTo { get; set; }

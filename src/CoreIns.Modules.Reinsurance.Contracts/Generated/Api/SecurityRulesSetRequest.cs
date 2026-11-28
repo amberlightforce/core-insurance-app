@@ -4,20 +4,25 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.SecurityRules.set request. PRD inputs: "rules; date"</summary>
+/// <summary>ri.SecurityRules.set request (BO-RI-05). A new rule set from a date; earlier sets stay as history.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SecurityRulesSetRequest
 {
-    /// <summary>PRD: "rules"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("rules")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Rules { get; init; }
+    /// <summary>Contract member 'effectiveFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveFrom")]
+    public required global::CoreIns.SharedKernel.BusinessDate EffectiveFrom { get; init; }
 
-    /// <summary>PRD: "date"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("date")]
+    /// <summary>Contract member 'ratingFloor'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ratingFloor")]
+    public string? RatingFloor { get; init; }
+
+    /// <summary>Contract member 'maxSharePct'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("maxSharePct")]
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::CoreIns.Platform.Contracts.DecimalStringJsonConverter))]
+    public decimal? MaxSharePct { get; init; }
+
+    /// <summary>Contract member 'ratings'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ratings")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? Date { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.RiSecurityRating>? Ratings { get; init; }
 }

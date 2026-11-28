@@ -106,7 +106,7 @@ public static class ReinsuranceErrorCodes
 
     /// <summary>RI-ERR-SECURITY (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 10 operation(s): ri.Fac.bind, ri.Fac.cancel, ri.Fac.decline, ri.Fac.generateSlip, ri.Fac.get, ri.Fac.importQuotes, ri.Fac.issueCertificate, ri.Fac.list, ri.Fac.recordQuote, ri.Fac.request.</para>
+    /// <para>Declared by 12 operation(s): ri.Fac.bind, ri.Fac.cancel, ri.Fac.decline, ri.Fac.generateSlip, ri.Fac.get, ri.Fac.importQuotes, ri.Fac.issueCertificate, ri.Fac.list, ri.Fac.recordQuote, ri.Fac.request, ri.Participation.add, ri.Participation.replace.</para>
     /// </remarks>
     public const string Security = "RI-ERR-SECURITY";
 

@@ -859,7 +859,7 @@ paths:
       - W5-BIL-01
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 2
+      x-typed: REQ-BIL-052, REQ-BIL-059
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -927,6 +927,7 @@ paths:
       - W5-BIL-01
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-BIL-058
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -6862,9 +6863,22 @@ components:
                 $ref: ../events/common.schema.json#/$defs/Code
               planVersion:
                 $ref: ../events/common.schema.json#/$defs/Code
+              instalments:
+                type: integer
+                minimum: 1
+                description: Number of instalments of the plan
+              intervalMonths:
+                type: integer
+                minimum: 1
+                description: Months between two instalments (12 for the single instalment of ANNUAL)
+              fee:
+                $ref: ../events/common.schema.json#/$defs/Money
+                description: Plan fee per term (zero in the seed catalogue)
             required:
             - planCode
             - planVersion
+            - instalments
+            - intervalMonths
         exclusions:
           type: array
           items:
@@ -6935,72 +6949,140 @@ components:
       description: 'Typed from REQ-BIL-003, REQ-BIL-052. PRD outputs: "plan instance, schedule"'
     PaymentPlanChangeRequest:
       type: object
-      description: 'bil.PaymentPlan.change request. PRD inputs: "term or job, plan, method, due day"'
       properties:
-        term:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term or job" (optional)'
-        job:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "term or job" (optional)'
-        plan:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "plan"'
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        planCode:
+          $ref: ../events/common.schema.json#/$defs/Code
         method:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "method"'
+          $ref: ../events/common.schema.json#/$defs/Code
         dueDay:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "due day"'
+          type: integer
+          description: Due day
+          minimum: 1
+          maximum: 31
+      required:
+      - planCode
+      - method
       oneOf:
       - required:
-        - term
+        - termId
       - required:
-        - job
+        - jobId
+      description: 'Typed from REQ-BIL-052, REQ-BIL-059. PRD inputs: "term or job, plan, method, due day"'
     PaymentPlanChangeResponse:
       type: object
-      description: 'bil.PaymentPlan.change result. PRD outputs: "plan instance, schedule"'
       properties:
-        planInstance:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "plan instance"'
+        planInstanceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        planCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        planVersion:
+          $ref: ../events/common.schema.json#/$defs/Code
+        downPayment:
+          $ref: ../events/common.schema.json#/$defs/Money
         schedule:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "schedule"'
+          type: array
+          items:
+            type: object
+            properties:
+              dueDate:
+                $ref: ../events/common.schema.json#/$defs/LocalDate
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+            required:
+            - dueDate
+            - amount
+      required:
+      - planInstanceId
+      - schedule
+      description: 'Typed from REQ-BIL-052, REQ-BIL-059. PRD outputs: "plan instance, schedule"'
     BillingPreviewComputeRequest:
       type: object
-      description: 'bil.BillingPreview.compute request. PRD inputs: "quote/job/term, hypothetical plan or delta"'
       properties:
-        quoteJobTerm:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "quote/job/term"'
-        hypotheticalPlan:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "hypothetical plan or delta" (optional)'
-        delta:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "hypothetical plan or delta" (optional)'
-      oneOf:
-      - required:
-        - hypotheticalPlan
-      - required:
-        - delta
+        termId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: A bound term whose positive charges are spread
+        planCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: The hypothetical plan
+        termFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Term start for a quote preview without a term
+        dueDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+          description: Due day of the instalments after the first
+        charges:
+          type: array
+          description: Hypothetical charges of a quote (without termId)
+          items:
+            type: object
+            properties:
+              category:
+                $ref: ../events/common.schema.json#/$defs/Code
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+            required:
+            - category
+            - amount
+      required:
+      - planCode
+      description: 'Typed from REQ-BIL-058. PRD inputs: "quote/job/term, hypothetical plan or delta" (the delta is not served yet)'
     BillingPreviewComputeResponse:
       type: object
-      description: 'bil.BillingPreview.compute result. PRD outputs: "full schedule, first due, credits, refund"'
       properties:
+        planCode:
+          $ref: ../events/common.schema.json#/$defs/Code
         fullSchedule:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "full schedule"'
+          type: array
+          items:
+            type: object
+            properties:
+              instalmentNo:
+                type: integer
+              dueDate:
+                $ref: ../events/common.schema.json#/$defs/LocalDate
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+              byCategory:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category:
+                      $ref: ../events/common.schema.json#/$defs/Code
+                    amount:
+                      $ref: ../events/common.schema.json#/$defs/Money
+                  required:
+                  - category
+                  - amount
+            required:
+            - instalmentNo
+            - dueDate
+            - amount
+            - byCategory
         firstDue:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "first due"'
-        credits:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "credits"'
-        refund:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "refund"'
+          type: object
+          properties:
+            dueDate:
+              $ref: ../events/common.schema.json#/$defs/LocalDate
+            amount:
+              $ref: ../events/common.schema.json#/$defs/Money
+          required:
+          - dueDate
+          - amount
+        total:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - planCode
+      - fullSchedule
+      - firstDue
+      - total
+      description: 'Typed from REQ-BIL-058. PRD outputs: "full schedule, first due, credits, refund" (credits and refund come with the delta preview)'
     DownPaymentStatusResponse:
       type: object
       properties:

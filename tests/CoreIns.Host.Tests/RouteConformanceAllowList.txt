@@ -13,7 +13,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/balance
 CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/query
 CONTRACT_NOT_SERVED GET /api/bil/v1/mandates/{}
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-instruments
-CONTRACT_NOT_SERVED GET /api/bil/v1/payment-plans
 CONTRACT_NOT_SERVED GET /api/chn/v1/account-current
 CONTRACT_NOT_SERVED GET /api/chn/v1/agent-logs/query
 CONTRACT_NOT_SERVED GET /api/chn/v1/api-products
@@ -120,8 +119,6 @@ CONTRACT_NOT_SERVED GET /api/ri/v1/data-products/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/ifrs17-links/query
-CONTRACT_NOT_SERVED GET /api/ri/v1/line-tables/{}
-CONTRACT_NOT_SERVED GET /api/ri/v1/security-rules/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/contingencies
 CONTRACT_NOT_SERVED GET /api/uw/v1/declines/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/disclosure-findings
@@ -159,7 +156,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/change-payer
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/close
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/move-term
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/reopen
-CONTRACT_NOT_SERVED POST /api/bil/v1/billing-preview/compute
 CONTRACT_NOT_SERVED POST /api/bil/v1/commission/dispute
 CONTRACT_NOT_SERVED POST /api/bil/v1/commission/run-payments
 CONTRACT_NOT_SERVED POST /api/bil/v1/commission/simulate
@@ -179,8 +175,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/cancel
 CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/sign
 CONTRACT_NOT_SERVED POST /api/bil/v1/payment-instruments/add
 CONTRACT_NOT_SERVED POST /api/bil/v1/payment-instruments/remove
-CONTRACT_NOT_SERVED POST /api/bil/v1/payment-plans/change
-CONTRACT_NOT_SERVED POST /api/bil/v1/payment-plans/select
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/bank
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/fin
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/invariants
@@ -534,15 +528,10 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/import/open-items
 CONTRACT_NOT_SERVED POST /api/ri/v1/import/programme
 CONTRACT_NOT_SERVED POST /api/ri/v1/import/recovery-history
 CONTRACT_NOT_SERVED POST /api/ri/v1/import/reverse
-CONTRACT_NOT_SERVED POST /api/ri/v1/line-tables/set
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/acknowledge
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/draft
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/send
-CONTRACT_NOT_SERVED POST /api/ri/v1/participations/add
-CONTRACT_NOT_SERVED POST /api/ri/v1/participations/replace
 CONTRACT_NOT_SERVED POST /api/ri/v1/reconciliation/fin
-CONTRACT_NOT_SERVED POST /api/ri/v1/securities/report
-CONTRACT_NOT_SERVED POST /api/ri/v1/security-rules/set
 CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/approve
 CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/propose
 CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/record-manual

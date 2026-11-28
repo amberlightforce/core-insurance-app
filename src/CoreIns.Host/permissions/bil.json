@@ -12,6 +12,11 @@
         "bil.Payment.take": [ "Staff.Billing" ],
         "bil.Receipt.get": [ "Staff.Billing", "Platform.Admin" ],
         "bil.Allocation.allocate": [ "Staff.Billing" ],
+        // BO-BIL-03: plan catalogue and preview are reads for billing staff; select/change write the plan instance.
+        "bil.PaymentPlan.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.PaymentPlan.select": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.PaymentPlan.change": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.BillingPreview.compute": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
         // BO-BIL-07: receipt list for billing staff; unallocate/reallocate need BIL.ALLOCATION_REVERSE authority over the amount (checked again by the handler).
         "bil.Receipt.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
         "bil.Allocation.unallocate": [ "Staff.Billing", "Staff.BillingManager" ],

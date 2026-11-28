@@ -128,6 +128,15 @@ public static class BillingModule
         services.AddCommandAuditor<ReallocateReceipt, AllocationReallocateResponse, AllocationReversalAuditor<ReallocateReceipt, AllocationReallocateResponse>>();
         services.AddCommand<ReallocateReceipt, AllocationReallocateResponse, ReallocateReceiptHandler>(CommandDescriptor.For("bil.Allocation.reallocate") with { SupportsDryRun = true });
 
+        // BO-BIL-03: payment plan catalogue, select/change and the billing preview.
+        services.AddScoped<PaymentPlanReader>();
+        services.AddScoped<IValidator<SelectPaymentPlan>, SelectPaymentPlanValidator>();
+        services.AddCommandAuditor<SelectPaymentPlan, PaymentPlanSelectResponse, PaymentPlanAuditor<SelectPaymentPlan, PaymentPlanSelectResponse>>();
+        services.AddCommand<SelectPaymentPlan, PaymentPlanSelectResponse, SelectPaymentPlanHandler>(CommandDescriptor.For("bil.PaymentPlan.select") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ChangePaymentPlan>, ChangePaymentPlanValidator>();
+        services.AddCommandAuditor<ChangePaymentPlan, PaymentPlanChangeResponse, PaymentPlanAuditor<ChangePaymentPlan, PaymentPlanChangeResponse>>();
+        services.AddCommand<ChangePaymentPlan, PaymentPlanChangeResponse, ChangePaymentPlanHandler>(CommandDescriptor.For("bil.PaymentPlan.change") with { SupportsDryRun = true });
+
         // SL2-BIL-DISB: payee accounts (IBAN P2) and the disbursement service for CLM claim payments. Both commands are
         // idempotent on the caller's key; their results carry the masked IBAN only, never the IBAN (REQ-BIL-338).
         services.AddScoped<PayeeProtection>();
@@ -274,6 +283,8 @@ public static class BillingModule
     /// <summary>Status, bilingual title and description of every BIL-ERR code the module raises (RFC 9457, D-API-15).</summary>
     internal static ErrorDefinition[] Errors { get; } =
     [
+        ErrorDefinition.For(ModuleCode.BIL, "NOT-ELIGIBLE", 422, "Δεν επιτρέπεται για αυτόν τον όρο", "Not eligible")
+            .Describe("Το πρόγραμμα πληρωμής ή ο τρόπος πληρωμής δεν ισχύει για τον όρο, ή ο όρος έχει ήδη τιμολογηθεί.", "The plan or method does not apply to the term, or the term is already billed."),
         ErrorDefinition.For(ModuleCode.BIL, "NOT-FOUND", 404, "Δεν βρέθηκε", "Not found")
             .Describe("Η εγγραφή δεν υπάρχει στη νομική σας οντότητα.", "The record does not exist in your legal entity."),
         ErrorDefinition.For(ModuleCode.BIL, "CURRENCY", 422, "Λάθος νόμισμα", "Wrong currency")

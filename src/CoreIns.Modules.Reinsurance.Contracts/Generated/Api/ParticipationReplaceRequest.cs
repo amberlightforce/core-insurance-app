@@ -4,28 +4,44 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Participation.replace request. PRD inputs: "layer/section, party ids, lines"</summary>
+/// <summary>ri.Participation.replace request (BO-RI-05). Replaces one reinsurer by another, taking over the outgoing line and lead role, from an effective date. The change is a pending endorsement: the earlier version keeps its panel as history.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ParticipationReplaceRequest
 {
-    /// <summary>PRD: "layer/section"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("layerSection")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? LayerSection { get; init; }
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
 
-    /// <summary>PRD: "party ids"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("partyIds")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.PartyId>? PartyIds { get; init; }
+    /// <summary>Contract member 'expectedRecordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
 
-    /// <summary>PRD: "lines"</summary>
+    /// <summary>Contract member 'effectiveFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveFrom")]
+    public required global::CoreIns.SharedKernel.BusinessDate EffectiveFrom { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
+
+    /// <summary>Contract member 'outgoingReinsurerPartyId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'outgoingReinsurerPartyId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("lines")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Lines { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("outgoingReinsurerPartyId")]
+    public required global::System.Guid OutgoingReinsurerPartyId { get; init; }
+
+    /// <summary>Contract member 'incomingReinsurerPartyId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'incomingReinsurerPartyId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("incomingReinsurerPartyId")]
+    public required global::System.Guid IncomingReinsurerPartyId { get; init; }
+
+    /// <summary>Contract member 'brokerPartyId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'brokerPartyId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("brokerPartyId")]
+    public global::System.Guid? BrokerPartyId { get; init; }
 }

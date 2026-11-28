@@ -4,15 +4,14 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Security.report request. PRD inputs: "rules; date"</summary>
+/// <summary>ri.Security.report request. Optional rule set to check against (default: the one in force at validAt).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SecurityReportRequest
 {
-    /// <summary>PRD: "rules"</summary>
+    /// <summary>Contract member 'ruleSetId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'ruleSetId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("rules")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Rules { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetId")]
+    public global::System.Guid? RuleSetId { get; init; }
 }
