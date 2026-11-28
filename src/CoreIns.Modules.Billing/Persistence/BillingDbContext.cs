@@ -82,6 +82,8 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
     public DbSet<MandateRow> Mandates => Set<MandateRow>();
 
+    public DbSet<DownPaymentRow> DownPayments => Set<DownPaymentRow>();
+
     public DbSet<MigrationImport.MigrationReceivableRow> MigrationReceivables => Set<MigrationImport.MigrationReceivableRow>();
 
     public DbSet<MigrationImport.MigrationMandateRow> MigrationMandates => Set<MigrationImport.MigrationMandateRow>();
@@ -609,7 +611,36 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
         ConfigureRefunds(modelBuilder);
         ConfigureDelinquency(modelBuilder);
         ConfigureMandates(modelBuilder);
+        ConfigureDownPayments(modelBuilder);
     }
+
+    /// <summary>Down payments of quoted jobs (BO-BIL-04), one per job.</summary>
+    private static void ConfigureDownPayments(ModelBuilder modelBuilder) =>
+        modelBuilder.Entity<DownPaymentRow>(entity =>
+        {
+            entity.ToTable("down_payment", table =>
+            {
+                table.HasCheckConstraint("ck_down_payment_amount", "amount > 0 AND cleared_amount >= 0");
+                table.HasCheckConstraint("ck_down_payment_record_version", "record_version >= 1");
+            });
+            entity.HasKey(e => e.DownPaymentId).HasName("pk_down_payment");
+            entity.Property(e => e.DownPaymentId).HasColumnName("down_payment_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.JobId).HasColumnName("job_id");
+            entity.Property(e => e.PlanCode).HasColumnName("plan_code");
+            entity.Property(e => e.Method).HasColumnName("method");
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.Property(e => e.PaymentReference).HasColumnName("payment_reference");
+            entity.Property(e => e.ClearedAmount).HasColumnName("cleared_amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.ClearedAt).HasColumnName("cleared_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ClearedBy).HasColumnName("cleared_by");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.LegalEntityId, e.JobId }).IsUnique().HasDatabaseName("ux_down_payment_job");
+            entity.HasIndex(e => e.PaymentReference).IsUnique().HasDatabaseName("ux_down_payment_reference");
+        });
 
     /// <summary>Payer instruments and SEPA mandates (BO-BIL-06a): IBAN as ciphertext, blind index and last four only.</summary>
     private static void ConfigureMandates(ModelBuilder modelBuilder)
