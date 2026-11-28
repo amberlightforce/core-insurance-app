@@ -80,3 +80,35 @@
   flex-direction: column;
   gap: var(--space-3);
 }
+
+.runRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.facts dt {
+  color: var(--color-text-muted);
+  font: var(--type-caption);
+}
+
+.facts dd {
+  margin: 0;
+  font: var(--type-heading-2);
+}
+
+.callout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}

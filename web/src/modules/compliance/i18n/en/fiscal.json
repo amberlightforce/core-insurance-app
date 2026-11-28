@@ -8,7 +8,9 @@
     "breaks": {
       "title": "Reconciliation breaks",
       "body": "Documents the channel has rejected or not yet registered.",
-      "empty": "No breaks: every document is registered."
+      "empty": "No breaks: every document is registered.",
+      "link": "Open the breaks page",
+      "summaryOpen": "{count, plural, =0 {No open breaks} one {# open break} other {# open breaks}}"
     },
     "list": {
       "title": "All documents",
@@ -27,7 +29,11 @@
       "issued": "Issued",
       "total": "Total",
       "mark": "MARK",
-      "rejections": "Rejection codes"
+      "rejections": "Rejection codes",
+      "kind": "Kind",
+      "detail": "Detail",
+      "detected": "Detected",
+      "lastSeen": "Last seen"
     },
     "status": {
       "PENDING": "Pending",
@@ -126,6 +132,46 @@
       "ref": "QR reference",
       "payload": "QR payload",
       "none": "The channel has not produced a QR payload yet."
+    },
+    "breaksPage": {
+      "title": "Reconciliation breaks",
+      "lead": "Local fiscal documents whose books and the tax channel status disagree. A break closes by itself when a later run no longer finds it.",
+      "back": "Back to fiscal documents",
+      "run": {
+        "title": "Run reconciliation",
+        "lead": "Compare the legal entity's fiscal documents with the channel status and record the breaks. Safe to repeat: breaks are never duplicated.",
+        "date": "Up to date",
+        "dateHelp": "YYYY-MM-DD, optional; empty means today.",
+        "dateInvalid": "Enter a date as YYYY-MM-DD.",
+        "button": "Run reconciliation",
+        "failed": "The reconciliation run failed",
+        "done": "Reconciliation finished",
+        "checked": "Documents checked",
+        "opened": "New breaks",
+        "reopened": "Reopened",
+        "resolved": "Closed",
+        "open": "Open now"
+      },
+      "list": {
+        "title": "Breaks",
+        "empty": "No breaks here: every document agrees with the channel.",
+        "emptyResolved": "No resolved breaks yet."
+      },
+      "filter": {
+        "status": "Break status",
+        "kind": "Kind",
+        "allKinds": "All kinds"
+      }
+    },
+    "breakStatus": {
+      "OPEN": "Open",
+      "RESOLVED": "Resolved"
+    },
+    "breakKind": {
+      "REJECTED_BY_CHANNEL": "Rejected by channel",
+      "PENDING_AT_CHANNEL": "Pending at channel",
+      "MARK_MISSING": "MARK missing",
+      "CORRELATION_BROKEN": "Broken link to original"
     }
   }
 }

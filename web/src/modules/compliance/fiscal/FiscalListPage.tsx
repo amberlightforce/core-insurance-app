@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Select, TextField } from '../../../design-system';
+import { Select, TextField } from '../../../design-system';
+import { LinkButton } from '../../staff/LinkButton';
 import { PageHeader, Section } from '../../staff/PageHeader';
 import { QueryView } from '../../staff/QueryView';
 import staff from '../../staff/staff.module.css';
 import { sourceTypes, useFiscalBreaks, useFiscalDocuments } from './api';
 import styles from './Fiscal.module.css';
-import { BulkResubmitDialog } from './BulkResubmitDialog';
 import { FiscalDocumentsTable } from './FiscalDocumentsTable';
 
 const ALL = 'ALL';
@@ -22,7 +22,6 @@ export function FiscalListPage() {
     sourceId: sourceId.trim(),
   });
   const breaks = useFiscalBreaks();
-  const [bulk, setBulk] = useState(false);
 
   return (
     <div className={staff.page}>
@@ -36,29 +35,17 @@ export function FiscalListPage() {
         title={t('fiscal.breaks.title')}
         family="danger"
         {...(breaks.data ? { count: breaks.data.length } : {})}
-        actions={
-          <Button
-            variant="secondary"
-            isDisabled={!breaks.data?.some((b) => b.document.status === 'REJECTED')}
-            onPress={() => {
-              setBulk(true);
-            }}
-          >
-            {t('fiscal.bulk.open')}
-          </Button>
-        }
       >
-        <p className={staff.muted}>{t('fiscal.breaks.body')}</p>
-        <QueryView query={breaks}>
-          {(rows) => (
-            <FiscalDocumentsTable
-              rows={rows}
-              label={t('fiscal.breaks.title')}
-              empty={t('fiscal.breaks.empty')}
-              showRejections
-            />
-          )}
-        </QueryView>
+        <div className={styles.callout}>
+          <p className={staff.muted}>
+            {breaks.data
+              ? t('fiscal.breaks.summaryOpen', { count: breaks.data.length })
+              : t('fiscal.breaks.body')}
+          </p>
+          <LinkButton variant="secondary" to="/compliance/fiscal/breaks">
+            {t('fiscal.breaks.link')}
+          </LinkButton>
+        </div>
       </Section>
       <Section
         title={t('fiscal.list.title')}
@@ -89,14 +76,6 @@ export function FiscalListPage() {
           )}
         </QueryView>
       </Section>
-      {bulk && breaks.data ? (
-        <BulkResubmitDialog
-          rows={breaks.data}
-          onClose={() => {
-            setBulk(false);
-          }}
-        />
-      ) : null}
     </div>
   );
 }

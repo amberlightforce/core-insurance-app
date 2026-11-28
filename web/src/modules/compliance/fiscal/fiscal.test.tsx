@@ -30,7 +30,7 @@ const doc = (status: string, number: string, rejectionCodes?: string[]) => ({
 });
 
 describe('Fiscal documents', () => {
-  it('lists documents and reconciliation breaks from the Host reads', async () => {
+  it('lists documents and summarises the open breaks from the Host reads', async () => {
     mockApi([
       {
         method: 'GET',
@@ -49,8 +49,7 @@ describe('Fiscal documents', () => {
     ]);
     renderScreen(<FiscalListPage />, { path: '/compliance/fiscal', url: '/compliance/fiscal' });
     expect(await screen.findByText('A-101')).toBeInTheDocument();
-    expect(await screen.findByText('A-102')).toBeInTheDocument();
-    expect(screen.getByText('ERR-77')).toBeInTheDocument();
+    expect(await screen.findByText('1 ανοικτή διαφορά')).toBeInTheDocument();
   });
 
   it('shows one document with its identifiers and lines', async () => {

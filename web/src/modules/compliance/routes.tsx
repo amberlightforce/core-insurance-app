@@ -30,6 +30,13 @@ const routes: RouteObject[] = [
         }),
       },
       {
+        // BO-CMP-14: reconciliation breaks and the run (declared before ':id' so it wins).
+        path: 'breaks',
+        lazy: async () => ({
+          Component: (await import('../compliance/fiscal/FiscalBreaksPage')).FiscalBreaksPage,
+        }),
+      },
+      {
         path: ':id',
         lazy: async () => ({
           Component: (await import('../compliance/fiscal/FiscalDocumentPage')).FiscalDocumentPage,
@@ -109,6 +116,7 @@ export default {
     '/compliance',
     '/compliance/dsar',
     '/compliance/fiscal',
+    '/compliance/fiscal/breaks',
     '/compliance/ai-systems',
     '/compliance/submissions',
     '/compliance/complaints',
