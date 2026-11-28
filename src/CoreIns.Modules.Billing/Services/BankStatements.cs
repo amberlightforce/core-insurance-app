@@ -146,7 +146,7 @@ internal static class BankStatementParser
 
             var lineNo = lines.Count + 1;
             var amountElement = Child(entry, "Amt");
-            if (amountElement is null || !TryAmount(amountElement.Value, out var amount) || amount <= 0 || decimal.Round(amount, 2) != amount)
+            if (amountElement is null || !TryAmount(amountElement.Value, out var amount) || amount <= 0 || amount * 100m % 1m != 0m)
             {
                 return Invalid($"Entry {lineNo}: the amount is missing, not positive or not in minor units.");
             }
@@ -308,7 +308,7 @@ internal static class BankStatementParser
                 value = parsedValue;
             }
 
-            if (!TryAmount(Cell(cells, "amount"), out var signed) || signed == 0 || decimal.Round(signed, 2) != signed)
+            if (!TryAmount(Cell(cells, "amount"), out var signed) || signed == 0 || signed * 100m % 1m != 0m)
             {
                 return Invalid($"Line {number}: the amount is not a non-zero number in minor units.");
             }
