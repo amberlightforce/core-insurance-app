@@ -8024,24 +8024,27 @@ components:
       description: 'Typed from REQ-CLM-111. PRD outputs: "set with preview, checks, approval request"'
     TransactionSetReturnRequest:
       type: object
-      description: 'clm.TransactionSet.return request. PRD inputs: "transactions"'
+      description: 'clm.TransactionSet.return request: the checker sends a set pending approval back to the maker (BO-CLM-04)'
       properties:
-        transactions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transactions"'
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Code
+        comment:
+          type: string
+      required:
+      - setId
     TransactionSetReturnResponse:
       type: object
-      description: 'clm.TransactionSet.return result. PRD outputs: "set with preview, checks, approval request"'
+      description: 'clm.TransactionSet.return result: the set after the return'
       properties:
-        setPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "set with preview"'
-        checks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checks"'
-        approvalRequest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval request"'
+        setId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - setId
+      - status
     PaymentVoidRequest:
       type: object
       properties:

@@ -72,7 +72,9 @@ internal sealed class CreateActivityHandler(ActivityEngine engine) : ICommandHan
             EscalationAt = row.EscalationAt,
             Assignment = new ActivityCreateResponse.AssignmentDetail
             {
-                AssigneeType = ActivityCreateResponse.AssignmentDetail.AssigneeTypeValue.Queue,
+                AssigneeType = row.AssigneeType == ActivityRow.User
+                    ? ActivityCreateResponse.AssignmentDetail.AssigneeTypeValue.User
+                    : ActivityCreateResponse.AssignmentDetail.AssigneeTypeValue.Queue,
                 AssigneeId = row.AssigneeId,
             },
         });
@@ -114,7 +116,7 @@ internal sealed class AssignActivityHandler(ActivityEngine engine, RequestContex
         return assigned.Map(row => new ActivityAssignResponse { Assignment = ActivityView.From(row, actor).ToElement() });
     }
 
-    /// <summary>"me" (default) is a claim; <c>{type: USER|QUEUE, id}</c> names a target. Assignment rules are not built: refused.</summary>
+    /// <summary>"me" (default) is a claim; <c>{type: USER|QUEUE, id}</c> names a target. "rules" routes by the assignment rules.</summary>
     private static Result<AssignTarget?> ParseTarget(ActivityAssignRequest request)
     {
         if (request.Target is { ValueKind: JsonValueKind.Object } target)
@@ -135,8 +137,12 @@ internal sealed class AssignActivityHandler(ActivityEngine engine, RequestContex
             return Result.Success<AssignTarget?>(null);
         }
 
-        // TODO(hardening): assignment by rules (wrk.Assignment.simulate / REQ-WRK assignment rules) is not built.
-        return WorkErrors.Of(WorkErrors.TargetIneligible, "Only \"me\" or an explicit target is supported.");
+        if (string.Equals(rulesOrMe, "rules", StringComparison.OrdinalIgnoreCase))
+        {
+            return Result.Success<AssignTarget?>(new AssignTarget(AssignTarget.Rules, "rules"));
+        }
+
+        return WorkErrors.Of(WorkErrors.TargetIneligible, "rulesOrMe is \"me\" or \"rules\".");
     }
 }
 

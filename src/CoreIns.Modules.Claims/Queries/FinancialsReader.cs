@@ -267,6 +267,42 @@ internal sealed class FinancialsReader(ClaimsDbContext db)
         };
     }
 
+    /// <summary>
+    /// Ledger lines of one business date for FIN reconciliation (XMR-F-120, REQ-CLM-106): the immutable transactions of approved
+    /// or posted sets recorded on <paramref name="date"/>, totalled per currency, cost type and kind, with the transaction ids.
+    /// Payments of a rejected claim payment are left out, as in the balances.
+    /// </summary>
+    public async Task<FinancialsDailyTotalsResponse> DailyTotalsAsync(LegalEntityId legalEntity, string legalEntityCode, BusinessDate date, CancellationToken cancellationToken)
+    {
+        var rows = await (
+                from t in db.FinancialTransactions.AsNoTracking()
+                join s in db.TransactionSets.AsNoTracking() on t.SetId equals s.SetId
+                join l in db.ReserveLines.AsNoTracking() on t.ReserveLineId equals l.ReserveLineId
+                join p in db.ClaimPayments.AsNoTracking() on t.ClaimPaymentId equals (ClaimPaymentId?)p.ClaimPaymentId into payments
+                from p in payments.DefaultIfEmpty()
+                where t.LegalEntityId == legalEntity && t.TransactionDate == date && Effective.Contains(s.Status)
+                select new { t.TxnId, t.Kind, t.Amount, t.Currency, t.FunctionalAmount, t.FunctionalCurrency, l.CostType, PaymentStatus = p == null ? null : p.Status })
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        var totals = rows
+            .Where(r => r.PaymentStatus != Rejected)
+            .GroupBy(r => (r.Currency, r.CostType, r.Kind))
+            .OrderBy(g => g.Key.Currency, StringComparer.Ordinal).ThenBy(g => g.Key.CostType, StringComparer.Ordinal).ThenBy(g => g.Key.Kind, StringComparer.Ordinal)
+            .Select(g => new
+            {
+                currency = g.Key.Currency,
+                costType = g.Key.CostType,
+                kind = g.Key.Kind,
+                amount = g.Sum(r => r.Amount).ToString("F2", System.Globalization.CultureInfo.InvariantCulture),
+                functionalAmount = g.Sum(r => r.FunctionalAmount).ToString("F2", System.Globalization.CultureInfo.InvariantCulture),
+                functionalCurrency = g.First().FunctionalCurrency,
+                transactionCount = g.Count(),
+                transactionIds = g.Select(r => r.TxnId).Order().ToList(),
+            })
+            .ToList();
+        var json = System.Text.Json.JsonSerializer.SerializeToElement(new { legalEntity = legalEntityCode, accountingDate = date.ToString(), totals });
+        return new FinancialsDailyTotalsResponse { TotalsByCurrencyAndCostType = json };
+    }
+
     private static FinancialBalance Balance(LineAmounts total, decimal open, string currency, ExposureId? exposure, bool paymentPending) => new()
     {
         ExposureId = exposure,

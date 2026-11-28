@@ -23,6 +23,7 @@ internal sealed class ActivityController : ControllerBase
     public const string CancelPermission = "wrk.Activity.cancel";
     public const string BlockingPermission = "wrk.Activity.blockingStatus";
     public const string GetNextPermission = "wrk.Queue.getNext";
+    public const string SimulatePermission = "wrk.Assignment.simulate";
 
     /// <summary>wrk.Activity.list: my tasks (default), the unassigned queue or the team's work.</summary>
     [HttpGet("activities")]
@@ -85,4 +86,11 @@ internal sealed class ActivityController : ControllerBase
     public async Task<IResult> GetNextAsync(
         [FromBody] QueueGetNextRequest request, [FromServices] ICommandHandler<GetNextActivity, QueueGetNextResponse> handler, CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new GetNextActivity(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>wrk.Assignment.simulate: where the assignment rules would route an activity of a pattern (read only).</summary>
+    [HttpPost("assignments/simulate")]
+    [Authorize(Policy = SimulatePermission)]
+    public async Task<IResult> SimulateAsync(
+        [FromBody] AssignmentSimulateRequest request, [FromServices] AssignmentSimulator simulator, CancellationToken cancellationToken) =>
+        (await simulator.SimulateAsync(request, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 }

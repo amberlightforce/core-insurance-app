@@ -70,6 +70,12 @@
           "Staff.BillingManager",
           "Platform.Admin"
         ],
+        "wrk.Assignment.simulate": [
+          "Staff.UnderwritingManager",
+          "Staff.BillingManager",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
         "wrk.Queue.getNext": [
           "Staff.Underwriter",
           "Staff.UnderwritingManager",
