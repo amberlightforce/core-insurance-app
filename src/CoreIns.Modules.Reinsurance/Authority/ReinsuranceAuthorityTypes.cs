@@ -35,6 +35,9 @@ public static class ReinsuranceAuthorityTypes
     /// </summary>
     public static AuthorityTypeCode AdjustmentApprove { get; } = AuthorityTypeCode.Parse("RI.ADJUSTMENT_APPROVE");
 
+    /// <summary>Approve a manual settlement of a reinsurer balance (BO-RI-16, D-CON-13); limited by the settled amount (EUR).</summary>
+    public static AuthorityTypeCode Settlement { get; } = AuthorityTypeCode.Parse("RI.SETTLEMENT");
+
     /// <summary>The definitions.</summary>
     public static IReadOnlyList<AuthorityTypeDefinition> Definitions { get; } =
     [
@@ -49,6 +52,9 @@ public static class ReinsuranceAuthorityTypes
             [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
         new AuthorityTypeDefinition(
             RecoveryAdjustment, ModuleCode.RI, new LocalizedText("Χειροκίνητη προσαρμογή ανάκτησης", "Manual recovery adjustment"),
+            [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
+        new AuthorityTypeDefinition(
+            Settlement, ModuleCode.RI, new LocalizedText("Έγκριση εκκαθάρισης αντασφαλιστή", "Approve reinsurer settlement"),
             [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
     ];
 

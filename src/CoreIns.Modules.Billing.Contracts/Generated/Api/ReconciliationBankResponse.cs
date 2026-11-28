@@ -4,23 +4,41 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Reconciliation.bank result. PRD outputs: "status, breaks"</summary>
+/// <summary>bil.Reconciliation.bank result: the imported statement with its lines and the breaks that need a person.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReconciliationBankResponse
 {
-    /// <summary>PRD: "status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>MATCHED when every line is matched and the balances agree; BREAKS otherwise.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Status { get; init; }
+    public required StatusValue Status { get; init; }
 
-    /// <summary>PRD: "breaks"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>True when the statement was imported before; the result is the first import, nothing was posted again.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("duplicate")]
+    public required bool Duplicate { get; init; }
+
+    /// <summary>Contract member 'statement'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("statement")]
+    public required global::CoreIns.Modules.Billing.Contracts.Api.BankStatementView Statement { get; init; }
+
+    /// <summary>Contract member 'lines'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lines")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.BankStatementLineView> Lines { get; init; }
+
+    /// <summary>Contract member 'breaks'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("breaks")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Breaks { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.BankReconciliationBreak> Breaks { get; init; }
+
+    /// <summary>MATCHED when every line is matched and the balances agree; BREAKS otherwise.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>MATCHED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("MATCHED")]
+        Matched,
+
+        /// <summary><c>BREAKS</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("BREAKS")]
+        Breaks,
+    }
 }

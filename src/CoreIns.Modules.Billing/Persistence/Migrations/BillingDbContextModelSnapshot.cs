@@ -293,6 +293,200 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.BankStatementLineRow", b =>
+                {
+                    b.Property<Guid>("LineId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("line_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateOnly>("BookingDate")
+                        .HasColumnType("date")
+                        .HasColumnName("booking_date");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("Direction")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("direction");
+
+                    b.Property<Guid?>("DisbursementId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("disbursement_id");
+
+                    b.Property<string>("EndToEndId")
+                        .HasColumnType("text")
+                        .HasColumnName("end_to_end_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<int>("LineNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("line_no");
+
+                    b.Property<decimal>("MatchedAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("matched_amount");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<Guid?>("ReceiptId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("receipt_id");
+
+                    b.Property<string>("Reference")
+                        .HasColumnType("text")
+                        .HasColumnName("reference");
+
+                    b.Property<Guid>("StatementId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("statement_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid?>("SuspenseItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("suspense_item_id");
+
+                    b.Property<DateOnly?>("ValueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("value_date");
+
+                    b.HasKey("LineId")
+                        .HasName("pk_bank_statement_line");
+
+                    b.HasIndex("DisbursementId")
+                        .HasDatabaseName("ix_bank_statement_line_disbursement");
+
+                    b.HasIndex("ReceiptId")
+                        .HasDatabaseName("ix_bank_statement_line_receipt");
+
+                    b.HasIndex("StatementId", "LineNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_bank_statement_line_no");
+
+                    b.ToTable("bank_statement_line", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_bank_statement_line_amount", "amount > 0 AND matched_amount >= 0");
+
+                            t.HasCheckConstraint("ck_bank_statement_line_currency", "currency ~ '^[A-Z]{3}$'");
+
+                            t.HasCheckConstraint("ck_bank_statement_line_direction", "direction IN ('CREDIT', 'DEBIT')");
+
+                            t.HasCheckConstraint("ck_bank_statement_line_status", "status IN ('MATCHED', 'PARTIAL', 'SUSPENSE', 'UNMATCHED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.BankStatementRow", b =>
+                {
+                    b.Property<Guid>("StatementId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("statement_id");
+
+                    b.Property<string>("BankAccount")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bank_account");
+
+                    b.Property<decimal?>("ClosingBalance")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("closing_balance");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasColumnType("char(64)")
+                        .HasColumnName("content_hash");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("FileRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("file_ref");
+
+                    b.Property<string>("Format")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("format");
+
+                    b.Property<DateOnly>("FromDate")
+                        .HasColumnType("date")
+                        .HasColumnName("from_date");
+
+                    b.Property<DateTime>("ImportedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("imported_at");
+
+                    b.Property<string>("ImportedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("imported_by");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<int>("LineCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("line_count");
+
+                    b.Property<decimal?>("OpeningBalance")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("opening_balance");
+
+                    b.Property<string>("StatementRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("statement_ref");
+
+                    b.Property<DateOnly>("ToDate")
+                        .HasColumnType("date")
+                        .HasColumnName("to_date");
+
+                    b.HasKey("StatementId")
+                        .HasName("pk_bank_statement");
+
+                    b.HasIndex("LegalEntityId", "BankAccount", "ContentHash")
+                        .IsUnique()
+                        .HasDatabaseName("ux_bank_statement_content");
+
+                    b.HasIndex("LegalEntityId", "BankAccount", "StatementRef")
+                        .IsUnique()
+                        .HasDatabaseName("ux_bank_statement_ref");
+
+                    b.ToTable("bank_statement", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_bank_statement_currency", "currency ~ '^[A-Z]{3}$'");
+
+                            t.HasCheckConstraint("ck_bank_statement_format", "format IN ('CAMT053', 'CSV')");
+
+                            t.HasCheckConstraint("ck_bank_statement_hash", "content_hash ~ '^[0-9a-f]{64}$'");
+
+                            t.HasCheckConstraint("ck_bank_statement_lines", "line_count >= 0");
+
+                            t.HasCheckConstraint("ck_bank_statement_period", "to_date >= from_date");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.BillingAccountRow", b =>
                 {
                     b.Property<Guid>("BillingAccountId")
@@ -3315,6 +3509,28 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasForeignKey("ReversesAllocationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_allocation_reverses");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.BankStatementLineRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.DisbursementRow", null)
+                        .WithMany()
+                        .HasForeignKey("DisbursementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_bank_statement_line_disbursement");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.ReceiptRow", null)
+                        .WithMany()
+                        .HasForeignKey("ReceiptId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_bank_statement_line_receipt");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.BankStatementRow", null)
+                        .WithMany()
+                        .HasForeignKey("StatementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_bank_statement_line_statement");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.CreditApplicationRow", b =>

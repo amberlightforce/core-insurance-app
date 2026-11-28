@@ -151,9 +151,7 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/intermediary-collections/report
 CONTRACT_NOT_SERVED POST /api/bil/v1/intermediary-collections/report-file
 CONTRACT_NOT_SERVED POST /api/bil/v1/invoices/dispute
 CONTRACT_NOT_SERVED POST /api/bil/v1/invoices/send-copy
-CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/bank
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/fin
-CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/invariants
 CONTRACT_NOT_SERVED POST /api/bil/v1/transfers/money
 CONTRACT_NOT_SERVED POST /api/bil/v1/write-offs/decide
 CONTRACT_NOT_SERVED POST /api/bil/v1/write-offs/post
@@ -480,10 +478,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/notices/acknowledge
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/draft
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/send
 CONTRACT_NOT_SERVED POST /api/ri/v1/reconciliation/fin
-CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/approve
-CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/propose
-CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/record-manual
-CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/release
 CONTRACT_NOT_SERVED POST /api/uw/v1/accumulation/check
 CONTRACT_NOT_SERVED POST /api/uw/v1/contingencies
 CONTRACT_NOT_SERVED POST /api/uw/v1/contingencies/apply-consequence

@@ -4404,44 +4404,231 @@
       }
     },
     "SettlementApproveRequest": {
-      "counterparty": "unspecified",
-      "statements": "unspecified",
-      "items": [
-        "unspecified"
-      ]
+      "settlementId": "01927e14-9756-7668-8940-66c5062e8a17",
+      "comment": "Sample text"
     },
     "SettlementApproveResponse": {
-      "settlement": "unspecified"
+      "settlement": {
+        "settlementId": "019268f3-592a-78a6-8b4d-db20dbb8ce97",
+        "reinsurerPartyId": "01928bd3-3e8e-7993-89b1-15ec448d15e5",
+        "currency": "Sample text",
+        "period": "Sample text",
+        "statementId": "01922d0e-ae95-7697-85e3-def480cacfc1",
+        "statementClosing": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "net": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "direction": "PAY",
+        "status": "PROPOSED",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "proposedBy": "Sample text",
+        "approvedAt": "2026-10-07T09:00:00Z",
+        "approvedBy": "Sample text",
+        "settledAt": "2026-10-07T09:00:00Z",
+        "settledBy": "Sample text",
+        "valueDate": "2026-10-07",
+        "bankReference": "Sample text",
+        "evidenceRef": "Sample text",
+        "itemId": "01920c9e-0b6d-7687-88c1-d34571b69cfd",
+        "bilReference": "Sample text"
+      }
+    },
+    "SettlementListResponse": {
+      "items": [
+        {
+          "settlementId": "0192d222-1b50-7a69-83cd-06d165623550",
+          "reinsurerPartyId": "019211f1-9905-7b45-84cd-171504cff800",
+          "currency": "Sample text",
+          "period": "Sample text",
+          "statementId": "01923abe-fb6d-7aff-8999-817d13194709",
+          "statementClosing": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "net": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "direction": "PAY",
+          "status": "PROPOSED",
+          "proposedAt": "2026-10-07T09:00:00Z",
+          "proposedBy": "Sample text",
+          "approvedAt": "2026-10-07T09:00:00Z",
+          "approvedBy": "Sample text",
+          "settledAt": "2026-10-07T09:00:00Z",
+          "settledBy": "Sample text",
+          "valueDate": "2026-10-07",
+          "bankReference": "Sample text",
+          "evidenceRef": "Sample text",
+          "itemId": "01921508-d339-7ead-89bb-5ec431c57880",
+          "bilReference": "Sample text"
+        }
+      ]
     },
     "SettlementProposeRequest": {
-      "counterparty": "unspecified",
-      "statements": "unspecified",
-      "items": [
-        "unspecified"
-      ]
+      "reinsurerPartyId": "019257cd-ed67-7cdb-8c08-5af03c4650f2",
+      "currency": "Sample text",
+      "period": "Sample text"
     },
     "SettlementProposeResponse": {
-      "settlement": "unspecified"
+      "settlement": {
+        "settlementId": "01927237-2bd5-71e3-88ed-b52376258e43",
+        "reinsurerPartyId": "0192b165-e67a-7faa-8170-5cc09911a807",
+        "currency": "Sample text",
+        "period": "Sample text",
+        "statementId": "01928a42-db43-78e1-89fe-652470b38bee",
+        "statementClosing": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "net": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "direction": "PAY",
+        "status": "PROPOSED",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "proposedBy": "Sample text",
+        "approvedAt": "2026-10-07T09:00:00Z",
+        "approvedBy": "Sample text",
+        "settledAt": "2026-10-07T09:00:00Z",
+        "settledBy": "Sample text",
+        "valueDate": "2026-10-07",
+        "bankReference": "Sample text",
+        "evidenceRef": "Sample text",
+        "itemId": "019273ab-7648-7a60-828a-c0f6af3c11d1",
+        "bilReference": "Sample text"
+      }
     },
     "SettlementRecordManualRequest": {
-      "counterparty": "unspecified",
-      "statements": "unspecified",
-      "items": [
-        "unspecified"
-      ]
+      "settlementId": "0192c358-2b58-7054-8d4b-8f1dd65b3018",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "bankReference": "Sample text",
+      "evidenceRef": "Sample text",
+      "valueDate": "2026-10-07"
     },
     "SettlementRecordManualResponse": {
-      "settlement": "unspecified"
+      "settlement": {
+        "settlementId": "0192f4d8-47ed-7a3a-862f-7a528e240462",
+        "reinsurerPartyId": "0192f1ad-aeb6-72b6-8539-601c1404f513",
+        "currency": "Sample text",
+        "period": "Sample text",
+        "statementId": "01920cc1-dca0-707b-82b4-8cb6cac09bbc",
+        "statementClosing": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "net": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "direction": "PAY",
+        "status": "PROPOSED",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "proposedBy": "Sample text",
+        "approvedAt": "2026-10-07T09:00:00Z",
+        "approvedBy": "Sample text",
+        "settledAt": "2026-10-07T09:00:00Z",
+        "settledBy": "Sample text",
+        "valueDate": "2026-10-07",
+        "bankReference": "Sample text",
+        "evidenceRef": "Sample text",
+        "itemId": "0192a16a-0b9e-73ee-818a-e01dda244f26",
+        "bilReference": "Sample text"
+      }
     },
     "SettlementReleaseRequest": {
-      "counterparty": "unspecified",
-      "statements": "unspecified",
-      "items": [
-        "unspecified"
-      ]
+      "settlementId": "0192a274-5a09-7fb0-8148-db574569c76d",
+      "valueDate": "2026-10-07"
     },
     "SettlementReleaseResponse": {
-      "settlement": "unspecified"
+      "settlement": {
+        "settlementId": "01921cac-7adc-74e7-8f07-b8258ee08cb9",
+        "reinsurerPartyId": "0192dcc9-c94c-7299-8d77-48179154952b",
+        "currency": "Sample text",
+        "period": "Sample text",
+        "statementId": "019220ef-ec75-7b27-8130-1d2580345571",
+        "statementClosing": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "net": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "direction": "PAY",
+        "status": "PROPOSED",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "proposedBy": "Sample text",
+        "approvedAt": "2026-10-07T09:00:00Z",
+        "approvedBy": "Sample text",
+        "settledAt": "2026-10-07T09:00:00Z",
+        "settledBy": "Sample text",
+        "valueDate": "2026-10-07",
+        "bankReference": "Sample text",
+        "evidenceRef": "Sample text",
+        "itemId": "0192edcb-4fae-7216-89cf-8a1158a83ab0",
+        "bilReference": "Sample text"
+      }
+    },
+    "SettlementView": {
+      "settlementId": "0192b4ee-089f-7957-8a9d-9431620cc37d",
+      "reinsurerPartyId": "0192b8a8-0707-7a28-8d8d-b28994d72286",
+      "currency": "Sample text",
+      "period": "Sample text",
+      "statementId": "0192b23e-ddbf-7946-8b2b-dacf1c4020ca",
+      "statementClosing": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "net": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "direction": "PAY",
+      "status": "PROPOSED",
+      "proposedAt": "2026-10-07T09:00:00Z",
+      "proposedBy": "Sample text",
+      "approvedAt": "2026-10-07T09:00:00Z",
+      "approvedBy": "Sample text",
+      "settledAt": "2026-10-07T09:00:00Z",
+      "settledBy": "Sample text",
+      "valueDate": "2026-10-07",
+      "bankReference": "Sample text",
+      "evidenceRef": "Sample text",
+      "itemId": "0192b548-3086-7977-8d1c-c8075c86da1e",
+      "bilReference": "Sample text"
     },
     "StatementApproveRequest": {
       "statementId": "01921b1a-11a2-723f-83c2-0fed94e5cadd"
