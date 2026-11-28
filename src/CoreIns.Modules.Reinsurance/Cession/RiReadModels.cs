@@ -96,13 +96,15 @@ internal sealed class RiReadModels(ReinsuranceDbContext db, RequestContext conte
         }
 
         var rows = await query.OrderBy(e => e.ExceptionId).Take(size + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var items = rows.Take(size).Select(e => new CessionExceptionListItem
+        var page = rows.Take(size).ToList();
+        var ids = page.Select(e => e.ExceptionId).ToArray();
+        var states = await db.CessionExceptionStates.AsNoTracking().Where(st => ids.Contains(st.ExceptionId)).ToDictionaryAsync(st => st.ExceptionId, cancellationToken).ConfigureAwait(false);
+        var linked = (await db.Cessions.AsNoTracking().Where(c => c.ExceptionId != null && ids.Contains(c.ExceptionId.Value)).OrderBy(c => c.CessionId).ToListAsync(cancellationToken).ConfigureAwait(false))
+            .ToLookup(c => c.ExceptionId!.Value);
+        var items = page.Select(e => new CessionExceptionListItem
         {
-            Exception = Json(new
-            {
-                exceptionId = e.ExceptionId, termId = e.TermId, sourceEventId = e.SourceEventId, code = e.Code, detail = e.Detail, recordedAt = e.RecordedAt.ToString(),
-            }),
-            Deltas = Json(Array.Empty<object>()), // TODO(hardening): link the cession deltas a rerun of this exception produced (rerun/resolve are not built).
+            Exception = CessionExceptionViews.Exception(e, states.GetValueOrDefault(e.ExceptionId)),
+            Deltas = CessionExceptionViews.Deltas(linked[e.ExceptionId]),
         }).ToList();
         return (items, rows.Count > size ? rows[size - 1].ExceptionId.ToString("D") : null, size);
     }
