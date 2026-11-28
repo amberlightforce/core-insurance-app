@@ -4,49 +4,33 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Cancellation.schedule request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef"</summary>
+/// <summary>pol.Cancellation.schedule request (BO-POL-06, REQ-POL-209..211). A cancellation with a future effective time: the refund is previewed at that time and the cancellation runs when it falls due. With dryRun only the preview is returned.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CancellationScheduleRequest
 {
-    /// <summary>PRD: "policyId"</summary>
+    /// <summary>Contract member 'policyId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.PolicyId? PolicyId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.PolicyId PolicyId { get; init; }
 
-    /// <summary>PRD: "source"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'source'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("source")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Source { get; init; }
+    public required string Source { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    /// <summary>Reason code from the configured list (REQ-POL-205)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
+    public required string ReasonCode { get; init; }
 
-    /// <summary>PRD: "effectiveAt"</summary>
+    /// <summary>Future effective time. The term in force at that time is cancelled.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("effectiveAt")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Instant? EffectiveAt { get; init; }
+    public required global::CoreIns.SharedKernel.Instant EffectiveAt { get; init; }
 
-    /// <summary>PRD: "evidenceRefs"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Evidence references (document ids); no personal data</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("evidenceRefs")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? EvidenceRefs { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<string>? EvidenceRefs { get; init; }
 
-    /// <summary>PRD: "requestRef"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Reference of the customer request (channel message or document id); no personal data</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("requestRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RequestRef { get; init; }
+    public string? RequestRef { get; init; }
 }

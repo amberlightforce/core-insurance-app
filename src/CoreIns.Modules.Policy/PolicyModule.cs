@@ -59,7 +59,7 @@ public static class PolicyModule
             appRole =>
             [
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
-                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.job, {Schema}.quote_version, {Schema}.policy_term, {Schema}.segment, {Schema}.pack_rollback_exception, {Schema}.dsar_restriction, {Schema}.nonpay_cancellation, {Schema}.psr_exception, {Schema}.non_renewal, {Schema}.renewal_run, {Schema}.renewal_run_item TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.job, {Schema}.quote_version, {Schema}.policy_term, {Schema}.segment, {Schema}.pack_rollback_exception, {Schema}.dsar_restriction, {Schema}.nonpay_cancellation, {Schema}.scheduled_cancellation, {Schema}.psr_exception, {Schema}.non_renewal, {Schema}.renewal_run, {Schema}.renewal_run_item TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.policy, {Schema}.policy_transaction, {Schema}.charge_line, {Schema}.oos_correction, {Schema}.withdrawal, {Schema}.migration_import TO {appRole}",
                 // The policy row is frozen (trigger); the one thing a command changes is the record-time watermark (D-SL3-03).
                 $"GRANT UPDATE (last_recorded_at, record_version) ON {Schema}.policy TO {appRole}",
@@ -155,6 +155,9 @@ public static class PolicyModule
 
         // BO-POL-08: suspension and reactivation of a term's cover.
         services.AddSuspensionCommands();
+
+        // BO-POL-06: scheduled cancellation, rescind and the sweep that runs due ones.
+        services.AddScheduledCancellation(configuration);
 
         // SL3-POL-RENEW: manual renewal (create, offer, accept).
         services.AddRenewalCommands(configuration);

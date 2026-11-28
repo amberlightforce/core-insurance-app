@@ -618,6 +618,51 @@ internal sealed class NonPaymentCancellationRow
     public int RecordVersion { get; set; } = 1;
 }
 
+/// <summary>
+/// <c>pol.scheduled_cancellation</c> (BO-POL-06): a policyholder cancellation with a future effective time. The sweep runs it when it falls due;
+/// until then it can be rescinded. <see cref="ScheduledId"/> is the "job id" the schedule and rescind operations return.
+/// </summary>
+internal sealed class ScheduledCancellationRow
+{
+    public JobId ScheduledId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public PolicyId PolicyId { get; set; }
+
+    public PolicyTermId TermId { get; set; }
+
+    public string Source { get; set; } = string.Empty;
+
+    public string ReasonCode { get; set; } = string.Empty;
+
+    public Instant EffectiveAt { get; set; }
+
+    public string RefundMethod { get; set; } = string.Empty;
+
+    public string? RequestRef { get; set; }
+
+    /// <summary>The evidence references as a JSON array, or null.</summary>
+    public string? EvidenceRefs { get; set; }
+
+    /// <summary>SCHEDULED, EXECUTED, RESCINDED or FAILED.</summary>
+    public string Status { get; set; } = "SCHEDULED";
+
+    /// <summary>The cancellation job once EXECUTED.</summary>
+    public JobId? ExecutedJobId { get; set; }
+
+    /// <summary>The error code of a permanent refusal (FAILED) or the reason of the rescission.</summary>
+    public string? Outcome { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public Instant CreatedAt { get; set; }
+
+    public Instant UpdatedAt { get; set; }
+
+    public int RecordVersion { get; set; } = 1;
+}
+
 /// <summary><c>pol.psr_exception</c>: the PSR queue entry of a non-payment cancellation that a vulnerable-customer flag or a hold stopped (D-SL6-04).</summary>
 internal sealed class PsrExceptionRow
 {
