@@ -237,6 +237,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       - name: id
         in: path
         required: true
@@ -5173,12 +5174,17 @@ paths:
       x-status: full
       x-maturity: pre-release
       x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-bounded: 'Newest write-offs of the legal entity, capped by limit (1..200); no cursor'
       x-exposure:
       - ui
       x-permission: bil.WriteOff.list
       x-error-codes:
       - code: BIL-ERR-VALIDATION
         status: 422
+      x-source:
+      - BO-BIL-13
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
