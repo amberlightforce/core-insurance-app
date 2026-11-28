@@ -40,6 +40,10 @@ internal static class WorkCatalog
     public const string UwReferralQueue = "UW-REFERRAL";
     public const string ScreeningQueue = "SCREENING";
 
+    public const string CmpOpsQueue = "CMP-OPS";
+    public const string DocOpsQueue = "DOC-OPS";
+    public const string FinOpsQueue = "FIN-OPS";
+
     public const string UwReferralInformation = "WRK-UW-REFERRAL-INFORMATION";
     public const string UwReferralReferUp = "WRK-UW-REFERRAL-REFER-UP";
 
@@ -49,6 +53,12 @@ internal static class WorkCatalog
     public const string PsrException = "WRK-POL-NONPAY-PSR-EXCEPTION";
     public const string PsrHold = "WRK-BIL-NONPAY-PSR-HOLD";
     public const string PsrNoticeReturned = "WRK-BIL-NONPAY-NOTICE-RETURNED";
+
+    public const string CmpMissingRule = "WRK-CMP-MISSING-RULE";
+    public const string CmpComplaintEscalated = "WRK-CMP-COMPLAINT-ESCALATED";
+    public const string DocDeliveryConflict = "WRK-DOC-DELIVERY-CONFLICT";
+    public const string CmpFiscalRejected = "WRK-CMP-FISCAL-REJECTED";
+    public const string CmpDsarTaskFailed = "WRK-CMP-DSAR-TASK-FAILED";
 
     /// <summary>Roles of the PSR (policy service) queue: the same people who see POL's PSR queue.</summary>
     private static readonly string[] PsrRoles = ["Staff.UnderwritingManager", "Staff.Underwriter", "Platform.Admin"];
@@ -62,6 +72,10 @@ internal static class WorkCatalog
         new(PackRollbackQueue, "Pack rollback review", ["Staff.UnderwritingManager", "Platform.Admin"]),
         // BO-UW-05: referral follow-ups (information requested, referred up) are for the underwriters.
         new(UwReferralQueue, "Underwriting referral follow-up", ["Staff.UnderwritingManager", "Staff.Underwriter", "Platform.Admin"]),
+        // BO-WRK-04: back-office queues for compliance, document and finance operations.
+        new(CmpOpsQueue, "Compliance operations", ["Staff.ComplianceOfficer", "Platform.Admin"]),
+        new(DocOpsQueue, "Document operations", ["Staff.ComplianceOfficer", "Staff.UnderwritingManager", "Platform.Admin"]),
+        new(FinOpsQueue, "Finance operations", ["Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin"]),
     ];
 
     public static IReadOnlyList<ActivityPattern> SeedPatterns { get; } =
@@ -80,6 +94,17 @@ internal static class WorkCatalog
             TargetMinutes: 24 * 60, EscalationMinutes: 2 * 24 * 60, GateBlocking: false, [ModuleCode.BIL]),
         new(PsrNoticeReturned, "1", "Non-payment notice came back undelivered", "REVIEW", "NORMAL", PsrQueue, "WRK-SLA-PSR",
             TargetMinutes: 3 * 24 * 60, EscalationMinutes: 5 * 24 * 60, GateBlocking: false, [ModuleCode.BIL]),
+        // BO-WRK-04: system-generated patterns raised by CMP and DOC. SLA targets are working constants until a policy owner sets them.
+        new(CmpMissingRule, "1", "Complaint has no matching handling rule", "REVIEW", "HIGH", CmpOpsQueue, "WRK-SLA-CMP-OPS",
+            TargetMinutes: 24 * 60, EscalationMinutes: 2 * 24 * 60, GateBlocking: false, [ModuleCode.CMP]),
+        new(CmpComplaintEscalated, "1", "Complaint escalated to the alternative dispute resolution body", "REVIEW", "HIGH", CmpOpsQueue, "WRK-SLA-CMP-OPS",
+            TargetMinutes: 24 * 60, EscalationMinutes: 2 * 24 * 60, GateBlocking: false, [ModuleCode.CMP]),
+        new(DocDeliveryConflict, "1", "Document delivery providers disagree on the outcome", "REVIEW", "NORMAL", DocOpsQueue, "WRK-SLA-DOC-OPS",
+            TargetMinutes: 3 * 24 * 60, EscalationMinutes: 5 * 24 * 60, GateBlocking: false, [ModuleCode.DOC]),
+        new(CmpFiscalRejected, "1", "Fiscal document rejected by the tax authority channel", "REVIEW", "HIGH", FinOpsQueue, "WRK-SLA-FIN-OPS",
+            TargetMinutes: 24 * 60, EscalationMinutes: 2 * 24 * 60, GateBlocking: false, [ModuleCode.CMP]),
+        new(CmpDsarTaskFailed, "1", "A data subject request task failed in a module", "REVIEW", "HIGH", CmpOpsQueue, "WRK-SLA-CMP-OPS",
+            TargetMinutes: 24 * 60, EscalationMinutes: 2 * 24 * 60, GateBlocking: false, [ModuleCode.CMP]),
     ];
 }
 
