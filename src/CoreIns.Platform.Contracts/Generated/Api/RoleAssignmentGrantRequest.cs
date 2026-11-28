@@ -4,39 +4,35 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.RoleAssignment.grant request. PRD inputs: "role, user, scope, dates"</summary>
+/// <summary>plt.RoleAssignment.grant request. Without approvalRequestId the call creates the second-approver request (PLT.ROLE_GRANT, plt.Approval) and returns PendingApproval; once a second person approved it, repeat the same request with approvalRequestId to record the assignment.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RoleAssignmentGrantRequest
 {
-    /// <summary>PRD: "role"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'userId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("userId")]
+    public required global::CoreIns.SharedKernel.Identifiers.UserId UserId { get; init; }
+
+    /// <summary>Contract member 'role'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("role")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Role { get; init; }
+    public required string Role { get; init; }
 
-    /// <summary>PRD: "user"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("user")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? User { get; init; }
-
-    /// <summary>PRD: "scope"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'scope'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("scope")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Scope { get; init; }
+    public string? Scope { get; init; }
 
-    /// <summary>PRD: "dates"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("dates")]
+    /// <summary>Contract member 'validFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validFrom")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Dates { get; init; }
+    public global::CoreIns.SharedKernel.Instant? ValidFrom { get; init; }
+
+    /// <summary>Contract member 'validTo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validTo")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? ValidTo { get; init; }
+
+    /// <summary>Contract member 'approvalRequestId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequestId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.ApprovalRequestId? ApprovalRequestId { get; init; }
 }

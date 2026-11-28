@@ -98,9 +98,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/lineage/walk
 CONTRACT_NOT_SERVED GET /api/plt/v1/retention/runs
 CONTRACT_NOT_SERVED GET /api/plt/v1/time/now
 CONTRACT_NOT_SERVED GET /api/plt/v1/transfers
-CONTRACT_NOT_SERVED GET /api/plt/v1/user-profile/get-preferences
-CONTRACT_NOT_SERVED GET /api/plt/v1/users/search
-CONTRACT_NOT_SERVED GET /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/screening/case-get
@@ -152,7 +149,6 @@ CONTRACT_NOT_SERVED GET /api/wrk/v1/teams/summary
 CONTRACT_NOT_SERVED PATCH /api/bil/v1/billing-accounts/{}
 CONTRACT_NOT_SERVED PATCH /api/clm/v1/services/{}
 CONTRACT_NOT_SERVED PATCH /api/pfc/v1/pogs/{}
-CONTRACT_NOT_SERVED PATCH /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/contingencies/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
 CONTRACT_NOT_SERVED PATCH /api/wrk/v1/activities/{}
@@ -426,8 +422,6 @@ CONTRACT_NOT_SERVED POST /api/plt/v1/privileged-accesses/request
 CONTRACT_NOT_SERVED POST /api/plt/v1/privileged-accesses/revoke
 CONTRACT_NOT_SERVED POST /api/plt/v1/retention/register-dataset
 CONTRACT_NOT_SERVED POST /api/plt/v1/retention/schedule
-CONTRACT_NOT_SERVED POST /api/plt/v1/role-assignments/grant
-CONTRACT_NOT_SERVED POST /api/plt/v1/role-assignments/revoke
 CONTRACT_NOT_SERVED POST /api/plt/v1/ror/export
 CONTRACT_NOT_SERVED POST /api/plt/v1/schemas/check
 CONTRACT_NOT_SERVED POST /api/plt/v1/schemas/register
@@ -435,11 +429,6 @@ CONTRACT_NOT_SERVED POST /api/plt/v1/subject/export
 CONTRACT_NOT_SERVED POST /api/plt/v1/tokens/exchange
 CONTRACT_NOT_SERVED POST /api/plt/v1/tokens/grant-agent-scope
 CONTRACT_NOT_SERVED POST /api/plt/v1/transfers/retry
-CONTRACT_NOT_SERVED POST /api/plt/v1/user-profile/set-language
-CONTRACT_NOT_SERVED POST /api/plt/v1/users
-CONTRACT_NOT_SERVED POST /api/plt/v1/users/disable
-CONTRACT_NOT_SERVED POST /api/plt/v1/users/reactivate
-CONTRACT_NOT_SERVED POST /api/plt/v1/users/suspend
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/cancel
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/signal
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/start

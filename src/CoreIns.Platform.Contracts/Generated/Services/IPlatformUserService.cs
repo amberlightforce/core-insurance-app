@@ -29,7 +29,7 @@ public interface IPlatformUserService
     /// <para>Status: full. Wave W1.</para>
     /// <para>Exposure: ui; consumers: PTY.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: PLT-ERR-SOD (403), PLT-ERR-OUT-OF-ORG-SCOPE (403), PLT-ERR-INVALID-TRANSITION (422), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PLT-ERR-USER-SUSPENDED (403), PLT-ERR-SOD (403), PLT-ERR-OUT-OF-ORG-SCOPE (403), PLT-ERR-INVALID-TRANSITION (422), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.UserSuspendResponse> SuspendAsync(global::CoreIns.Platform.Contracts.Api.UserSuspendRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

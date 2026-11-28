@@ -4,15 +4,11 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.UserProfile.getPreferences result. PRD outputs: "saved preferences"</summary>
+/// <summary>plt.UserProfile.getPreferences result (the signed-in user's preferences)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record UserProfileGetPreferencesResponse
 {
-    /// <summary>PRD: "saved preferences"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'savedPreferences'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("savedPreferences")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SavedPreferences { get; init; }
+    public required global::CoreIns.Platform.Contracts.Api.UserPreferences SavedPreferences { get; init; }
 }
