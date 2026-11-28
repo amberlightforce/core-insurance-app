@@ -1298,6 +1298,16 @@ paths:
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
+      - code: CLM-ERR-ILLEGAL-TRANSITION
+        note: the claim or the exposure is closed
+        status: 422
+      - code: CLM-ERR-SNAPSHOT-MISMATCH
+        note: a re-verification is pending on the claim, or POL superseded the claim's snapshot (REQ-CLM-058)
+        status: 409
+      - code: CLM-ERR-DEPENDENCY-UNAVAILABLE
+        status: 503
       x-source:
       - PRD-07 §9.1 l.1470
       parameters:
@@ -1324,6 +1334,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -1455,6 +1467,9 @@ paths:
         status: 422
       - code: CLM-ERR-COVERAGE-IN-QUESTION
         note: the exposure's cover was removed by an adopted snapshot and no coverage decision has cleared it (REQ-CLM-058)
+        status: 422
+      - code: CLM-ERR-COVERAGE-DENIED
+        note: a coverage decision denied the exposure; no new payments (BO-CLM-03)
         status: 422
       - code: CLM-ERR-DUPLICATE-PAYMENT
         status: 409
@@ -6751,32 +6766,77 @@ components:
       - claim
     CoverageDecideRequest:
       type: object
-      description: 'clm.Coverage.decide request. PRD inputs: "decision, reasons; adopt or keep"'
+      description: 'clm.Coverage.decide request (BO-CLM-03, REQ-CLM-002, -051, -058). A human decides the cover of one exposure: COVERED, DENIED (no new payments on the
+        exposure) or RESERVATION_OF_RIGHTS (the claim moves to UnderInvestigation). Refused while a re-verification is pending on the claim. PRD inputs: "decision, reasons; adopt or keep".'
       properties:
-        decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
-        reasons:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reasons"'
-        adopt:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adopt or keep" (optional)'
-        keep:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "adopt or keep" (optional)'
-      oneOf:
-      - required:
-        - adopt
-      - required:
-        - keep
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        outcome:
+          type: string
+          enum:
+          - COVERED
+          - DENIED
+          - RESERVATION_OF_RIGHTS
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Reason from the configured list; PRD "reasons"
+        comment:
+          $ref: ../events/common.schema.json#/$defs/Text
+      required:
+      - claimId
+      - exposureId
+      - outcome
+      - reasonCode
     CoverageDecideResponse:
       type: object
       description: 'clm.Coverage.decide result. PRD outputs: "decision record"'
       properties:
-        decisionRecord:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision record"'
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        outcome:
+          type: string
+          enum:
+          - COVERED
+          - DENIED
+          - RESERVATION_OF_RIGHTS
+        coverageIndication:
+          type: string
+          enum:
+          - COVERED
+          - NOT_COVERED
+          - IN_QUESTION
+        coverageDecision:
+          type: string
+          enum:
+          - PENDING
+          - COVERED
+          - COVERED_WITH_RESERVATION
+          - PARTIALLY_COVERED
+          - NOT_COVERED
+        claimStatus:
+          type: string
+          description: The claim's status after the decision (OPEN)
+        claimSubStatus:
+          type: string
+          description: UNDER_INVESTIGATION after a reservation of rights, otherwise unchanged
+        coverageInQuestion:
+          type: boolean
+          description: True while another open exposure of the claim still has its cover in question
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - claimId
+      - exposureId
+      - outcome
+      - coverageIndication
+      - coverageDecision
+      - claimStatus
+      - coverageInQuestion
+      - decidedAt
     CoverageReverifyRequest:
       type: object
       description: 'clm.Coverage.reverify request (REQ-CLM-058). A human decides after ReverificationRequired: KEEP the claim''s current snapshot ref, or

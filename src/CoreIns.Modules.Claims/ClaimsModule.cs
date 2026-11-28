@@ -187,6 +187,10 @@ public static class ClaimsModule
         services.AddScoped<IValidator<CreateExposure>, CreateExposureValidator>();
         services.AddCommandAuditor<CreateExposure, ExposureCreateResponse, CreateExposureAuditor>();
         services.AddCommand<CreateExposure, ExposureCreateResponse, CreateExposureHandler>(CommandDescriptor.For("clm.Exposure.create") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<DecideCoverage>, DecideCoverageValidator>();
+        services.AddCommandAuditor<DecideCoverage, CoverageDecideResponse, DecideCoverageAuditor>();
+        services.AddCommand<DecideCoverage, CoverageDecideResponse, DecideCoverageHandler>(
+            CommandDescriptor.For("clm.Coverage.decide") with { SupportsDryRun = true });
         services.AddScoped<IValidator<ReopenClaim>, ReopenClaimValidator>();
         services.AddCommandAuditor<ReopenClaim, ClaimReopenResponse, ReopenClaimAuditor>();
         services.AddCommand<ReopenClaim, ClaimReopenResponse, ReopenClaimHandler>(CommandDescriptor.For("clm.Claim.reopen") with { SupportsDryRun = true });
@@ -330,6 +334,8 @@ public static class ClaimsModule
             .Describe("Το νέο στιγμιότυπο δεν είναι πλέον ο διάδοχος του στιγμιοτύπου της ζημίας· φορτώστε ξανά τη ζημία και αποφασίστε με το τρέχον.", "The new snapshot is no longer the successor of the claim's snapshot; reload the claim and decide against the current one."),
         ErrorDefinition.For(ModuleCode.CLM, "COVERAGE-IN-QUESTION", 422, "Η κάλυψη της έκθεσης αμφισβητείται", "The exposure's cover is in question")
             .Describe("Το νέο στιγμιότυπο που υιοθετήθηκε δεν καλύπτει την έκθεση· δεν επιτρέπονται νέες πληρωμές μέχρι απόφαση κάλυψης.", "The adopted snapshot no longer covers the exposure; no new payments until a coverage decision."),
+        ErrorDefinition.For(ModuleCode.CLM, "COVERAGE-DENIED", 422, "Η κάλυψη της έκθεσης έχει απορριφθεί", "Cover for the exposure was denied")
+            .Describe("Απόφαση κάλυψης απέρριψε την έκθεση· δεν επιτρέπονται νέες πληρωμές.", "A coverage decision denied the exposure; no new payments."),
         ErrorDefinition.For(ModuleCode.CLM, "FS-DISABLED", 422, "Ο Φιλικός Διακανονισμός δεν είναι διαθέσιμος", "Friendly Settlement is not available")
             .Describe("Η δυνατότητα είναι ανενεργή για τη δικαιοδοσία ή δεν υπάρχει προσαρμογέας εκκαθάρισης.", "The capability is off for the jurisdiction or no clearing adapter is bound."),
         ErrorDefinition.For(ModuleCode.CLM, "RECOVERY-STATE", 422, "Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση της ανάκτησης", "The action is not allowed in the recovery state")

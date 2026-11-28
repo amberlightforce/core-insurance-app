@@ -84,7 +84,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
                 table.HasCheckConstraint("ck_job_cancellation_kind", Codes.CheckSql<CancellationKind>("cancellation_kind"));
                 table.HasCheckConstraint("ck_job_sub_state", Codes.CheckSql<JobSubState>("sub_state"));
                 table.HasCheckConstraint("ck_job_target_term",
-                    "job_type = 'SUBMISSION' OR (job_type IN ('POLICY_CHANGE', 'CANCELLATION') AND target_term_id IS NOT NULL) OR (job_type = 'RENEWAL' AND expiring_term_id IS NOT NULL)");
+                    "job_type = 'SUBMISSION' OR (job_type IN ('POLICY_CHANGE', 'CANCELLATION', 'SUSPENSION', 'REACTIVATION') AND target_term_id IS NOT NULL) OR (job_type = 'RENEWAL' AND expiring_term_id IS NOT NULL)");
             });
             entity.HasKey(e => e.JobId).HasName("pk_job");
             entity.Property(e => e.JobId).HasColumnName("job_id");
@@ -226,6 +226,7 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.PredecessorTermId).HasColumnName("predecessor_term_id");
             entity.Property(e => e.CancelledAt).HasColumnName("cancelled_at").HasColumnType("timestamptz");
+            entity.Property(e => e.SuspendedFrom).HasColumnName("suspended_from").HasColumnType("timestamptz");
 
             // One current version per term; (policy, term number) of current versions is unique (REQ-POL-032).
             entity.HasIndex(e => e.TermId).IsUnique().HasFilter("recorded_to IS NULL").HasDatabaseName("ux_policy_term_current");

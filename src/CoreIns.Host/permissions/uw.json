@@ -7,6 +7,10 @@
         "uw.Issue.blockingStatus": [ "Staff.Underwriter", "Staff.Billing" ],
         "uw.Issue.list": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Issue.decide": [ "Staff.UnderwritingManager" ],
+        // BO-UW-04: issue lifecycle commands (a person only; authority for approving stays with uw.Issue.decide).
+        "uw.Issue.reopen": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Issue.addManual": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Issue.close": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
         // BO-UW-03: batch evaluation (no effect on jobs) and issue reads.
         "uw.Rules.evaluateBatch": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Issue.get": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],

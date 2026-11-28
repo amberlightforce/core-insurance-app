@@ -62,6 +62,12 @@ internal static class TermHead
         var state = new ServicingState(term, segments, null, ordered[0].EffectiveAt);
         foreach (var transaction in ordered.Skip(1))
         {
+            // BO-POL-08: a suspension or reactivation carries no charge lines and leaves the segments untouched.
+            if (Codes.Parse<PolicyTransactionKind>(transaction.Kind) is PolicyTransactionKind.Suspension or PolicyTransactionKind.Reactivation)
+            {
+                continue;
+            }
+
             if (Codes.Parse<PolicyTransactionKind>(transaction.Kind) != PolicyTransactionKind.Change)
             {
                 return Inconsistent($"a {transaction.Kind} transaction is not supported by cancellation");

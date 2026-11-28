@@ -447,9 +447,9 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_job_sub_state", "sub_state IN ('QUICK_QUOTE', 'CONVERTING', 'OFFERED', 'ACCEPTED')");
 
-                            t.HasCheckConstraint("ck_job_target_term", "job_type = 'SUBMISSION' OR (job_type IN ('POLICY_CHANGE', 'CANCELLATION') AND target_term_id IS NOT NULL) OR (job_type = 'RENEWAL' AND expiring_term_id IS NOT NULL)");
+                            t.HasCheckConstraint("ck_job_target_term", "job_type = 'SUBMISSION' OR (job_type IN ('POLICY_CHANGE', 'CANCELLATION', 'SUSPENSION', 'REACTIVATION') AND target_term_id IS NOT NULL) OR (job_type = 'RENEWAL' AND expiring_term_id IS NOT NULL)");
 
-                            t.HasCheckConstraint("ck_job_type", "job_type IN ('SUBMISSION', 'POLICY_CHANGE', 'CANCELLATION', 'RENEWAL')");
+                            t.HasCheckConstraint("ck_job_type", "job_type IN ('SUBMISSION', 'POLICY_CHANGE', 'CANCELLATION', 'RENEWAL', 'SUSPENSION', 'REACTIVATION')");
                         });
                 });
 
@@ -1034,6 +1034,10 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("state");
+
+                    b.Property<DateTime?>("SuspendedFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("suspended_from");
 
                     b.Property<Guid>("TermId")
                         .HasColumnType("uuid")

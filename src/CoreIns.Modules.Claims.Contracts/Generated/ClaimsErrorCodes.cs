@@ -44,6 +44,12 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string ContactProhibited = "CLM-ERR-CONTACT-PROHIBITED";
 
+    /// <summary>CLM-ERR-COVERAGE-DENIED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): clm.TransactionSet.build.</para>
+    /// </remarks>
+    public const string CoverageDenied = "CLM-ERR-COVERAGE-DENIED";
+
     /// <summary>CLM-ERR-COVERAGE-IN-QUESTION (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 1 operation(s): clm.TransactionSet.build.</para>
@@ -52,7 +58,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-DEPENDENCY-UNAVAILABLE (HTTP 503).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): clm.Fnol.submit, clm.Fnol.validate, clm.FriendlySettlement.approveNet, clm.Recovery.demand.</para>
+    /// <para>Declared by 5 operation(s): clm.Coverage.decide, clm.Fnol.submit, clm.Fnol.validate, clm.FriendlySettlement.approveNet, clm.Recovery.demand.</para>
     /// </remarks>
     public const string DependencyUnavailable = "CLM-ERR-DEPENDENCY-UNAVAILABLE";
 
@@ -106,7 +112,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-ILLEGAL-TRANSITION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 17 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.close, clm.Exposure.create, clm.Exposure.reopen, clm.Exposure.update, clm.FriendlySettlement.approveNet, clm.FriendlySettlement.openOwnSettlement, ….</para>
+    /// <para>Declared by 18 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.decide, clm.Coverage.reverify, clm.Exposure.close, clm.Exposure.create, clm.Exposure.reopen, clm.Exposure.update, clm.FriendlySettlement.approveNet, ….</para>
     /// </remarks>
     public const string IllegalTransition = "CLM-ERR-ILLEGAL-TRANSITION";
 
@@ -154,7 +160,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 38 operation(s): clm.CatEvent.close, clm.CatEvent.declare, clm.CatEvent.list, clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.close, clm.Exposure.create, clm.Exposure.reopen, ….</para>
+    /// <para>Declared by 39 operation(s): clm.CatEvent.close, clm.CatEvent.declare, clm.CatEvent.list, clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.decide, clm.Coverage.reverify, clm.Exposure.close, clm.Exposure.create, ….</para>
     /// </remarks>
     public const string NotFound = "CLM-ERR-NOT-FOUND";
 
@@ -232,7 +238,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-SNAPSHOT-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): clm.Coverage.reverify.</para>
+    /// <para>Declared by 2 operation(s): clm.Coverage.decide, clm.Coverage.reverify.</para>
     /// </remarks>
     public const string SnapshotMismatch = "CLM-ERR-SNAPSHOT-MISMATCH";
 
@@ -258,7 +264,7 @@ public static class ClaimsErrorCodes
     public const string Prefix = "CLM-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Allocation, Authority, CatEvent, CertRequester, CloseGuard, ContactProhibited, CoverageInQuestion, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, FsDisabled, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, MergeFinancials, MergeNotDuplicate, MtplClocksRequired, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, RecoveryState, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Allocation, Authority, CatEvent, CertRequester, CloseGuard, ContactProhibited, CoverageDenied, CoverageInQuestion, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, FsDisabled, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, MergeFinancials, MergeNotDuplicate, MtplClocksRequired, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, RecoveryState, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -269,6 +275,7 @@ public static class ClaimsErrorCodes
         [CertRequester] = 422,
         [CloseGuard] = 422,
         [ContactProhibited] = 422,
+        [CoverageDenied] = 422,
         [CoverageInQuestion] = 422,
         [DependencyUnavailable] = 503,
         [DuplicateCandidates] = 409,

@@ -2150,21 +2150,33 @@ export interface components {
             exposure: components["schemas"]["ExposureView"];
             claim: components["schemas"]["ClaimSummary"];
         };
-        /** @description clm.Coverage.decide request. PRD inputs: "decision, reasons; adopt or keep" */
+        /** @description clm.Coverage.decide request (BO-CLM-03, REQ-CLM-002, -051, -058). A human decides the cover of one exposure: COVERED, DENIED (no new payments on the exposure) or RESERVATION_OF_RIGHTS (the claim moves to UnderInvestigation). Refused while a re-verification is pending on the claim. PRD inputs: "decision, reasons; adopt or keep". */
         CoverageDecideRequest: {
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reasons" */
-            reasons?: components["schemas"]["Unspecified"];
-            /** @description PRD: "adopt or keep" (optional) */
-            adopt?: components["schemas"]["Unspecified"];
-            /** @description PRD: "adopt or keep" (optional) */
-            keep?: components["schemas"]["Unspecified"];
-        } & (unknown | unknown);
+            claimId: components["schemas"]["Uuid"];
+            exposureId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "COVERED" | "DENIED" | "RESERVATION_OF_RIGHTS";
+            /** @description Reason from the configured list; PRD "reasons" */
+            reasonCode: components["schemas"]["Code"];
+            comment?: components["schemas"]["Text"];
+        };
         /** @description clm.Coverage.decide result. PRD outputs: "decision record" */
         CoverageDecideResponse: {
-            /** @description PRD: "decision record" */
-            decisionRecord?: components["schemas"]["Unspecified"];
+            claimId: components["schemas"]["Uuid"];
+            exposureId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "COVERED" | "DENIED" | "RESERVATION_OF_RIGHTS";
+            /** @enum {string} */
+            coverageIndication: "COVERED" | "NOT_COVERED" | "IN_QUESTION";
+            /** @enum {string} */
+            coverageDecision: "PENDING" | "COVERED" | "COVERED_WITH_RESERVATION" | "PARTIALLY_COVERED" | "NOT_COVERED";
+            /** @description The claim's status after the decision (OPEN) */
+            claimStatus: string;
+            /** @description UNDER_INVESTIGATION after a reservation of rights, otherwise unchanged */
+            claimSubStatus?: string;
+            /** @description True while another open exposure of the claim still has its cover in question */
+            coverageInQuestion: boolean;
+            decidedAt: components["schemas"]["Instant"];
         };
         /** @description clm.Coverage.reverify request (REQ-CLM-058). A human decides after ReverificationRequired: KEEP the claim's current snapshot ref, or ADOPT the new one. Never automatic (REQ-CLM-002). PRD inputs: "decision, reasons; adopt or keep". */
         CoverageReverifyRequest: {
@@ -4389,6 +4401,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];

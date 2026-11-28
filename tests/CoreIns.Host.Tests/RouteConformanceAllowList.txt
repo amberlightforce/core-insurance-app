@@ -214,7 +214,6 @@ CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/issue
 CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/request
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/schedule
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/send
-CONTRACT_NOT_SERVED POST /api/clm/v1/coverage/decide
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/purge
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/rectify
@@ -418,10 +417,8 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/rebase
 CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/release-lease
 CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/resolve-conflicts
 CONTRACT_NOT_SERVED POST /api/pol/v1/policy-moves/execute
-CONTRACT_NOT_SERVED POST /api/pol/v1/reactivations
 CONTRACT_NOT_SERVED POST /api/pol/v1/reinstatements
 CONTRACT_NOT_SERVED POST /api/pol/v1/rewrites
-CONTRACT_NOT_SERVED POST /api/pol/v1/suspensions
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/request-policy-move
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/split
@@ -531,9 +528,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/accept
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/clear
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/reject
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/verify-value
-CONTRACT_NOT_SERVED POST /api/uw/v1/issues/add-manual
-CONTRACT_NOT_SERVED POST /api/uw/v1/issues/close
-CONTRACT_NOT_SERVED POST /api/uw/v1/issues/reopen
 CONTRACT_NOT_SERVED POST /api/uw/v1/nat-cat/assess
 CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds
 CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/activate
