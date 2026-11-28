@@ -11,14 +11,14 @@ namespace CoreIns.Modules.Product.Contracts;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public interface IProductProductImportService
 {
-    /// <summary>Migration import</summary>
+    /// <summary>Import a YAML or JSON source into a draft change set</summary>
     /// <remarks>
     /// <para>Operation pfc.ProductImport.import (command; HTTP POST /api/pfc/v1/product-imports/import).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W2.</para>
     /// <para>Exposure: internal; consumers: MIG.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: PFC-ERR-IMPORT-INVALID (422), PFC-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PFC-ERR-IMPORT-INVALID (422), PFC-ERR-UNKNOWN-PRODUCT (422), PFC-ERR-NO-VERSION (422), PFC-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Product.Contracts.Api.ProductImportImportResponse> ImportAsync(global::CoreIns.Modules.Product.Contracts.Api.ProductImportImportRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

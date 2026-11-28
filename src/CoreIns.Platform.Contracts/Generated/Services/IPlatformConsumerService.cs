@@ -18,7 +18,7 @@ public interface IPlatformConsumerService
     /// <para>Status: minimal. Wave W1.</para>
     /// <para>Exposure: ui; consumers: FIN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: PLT-ERR-REPLAY-IN-PROGRESS (409), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PLT-ERR-NOT-FOUND (404), PLT-ERR-REPLAY-IN-PROGRESS (409), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> ReplayAsync(global::CoreIns.Platform.Contracts.Api.ConsumerReplayRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ConsumerReplayResponse> ReplayAsync(global::CoreIns.Platform.Contracts.Api.ConsumerReplayRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

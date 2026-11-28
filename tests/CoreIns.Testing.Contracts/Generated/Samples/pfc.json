@@ -513,7 +513,321 @@
       ]
     },
     "pfc.ProductImport.import": {
-      "changeSetOrDryRunLint": "unspecified"
+      "created": true,
+      "changeSet": {
+        "changeSetState": {
+          "changeSetId": "01922ac8-6aee-7c7b-8926-f8837da9ecdf",
+          "productCode": "SAMPLE_CODE",
+          "baseVersion": "1.0",
+          "status": "OPEN",
+          "recordVersion": 1,
+          "editCount": 1,
+          "draft": {
+            "schemaVersion": 1,
+            "productLine": {
+              "code": "SAMPLE_CODE",
+              "family": "SAMPLE_CODE",
+              "name": {
+                "el": "Sample text",
+                "en": "Sample text"
+              }
+            },
+            "product": {
+              "code": "SAMPLE_CODE",
+              "name": {
+                "el": "Sample text",
+                "en": "Sample text"
+              },
+              "abbreviation": "SAMPLE_CODE",
+              "productType": "SAMPLE_CODE",
+              "customerType": "SAMPLE_CODE"
+            },
+            "legalEntity": "SAMPLE_CODE",
+            "jurisdiction": "GR",
+            "version": "1.0",
+            "isAbstract": true,
+            "channels": [
+              "SAMPLE_CODE"
+            ],
+            "contractCurrency": "EUR",
+            "languages": [
+              "el"
+            ],
+            "terms": {
+              "allowed": [
+                "P15D"
+              ],
+              "default": "P15D"
+            },
+            "offeringRequired": true,
+            "dayCount": "SAMPLE_CODE",
+            "dayCountProvisional": true,
+            "dayCountNote": "Sample text",
+            "refundMethods": [
+              {
+                "source": "SAMPLE_CODE",
+                "method": "PRO_RATA",
+                "legalStatus": "SETTLED",
+                "illustrative": true,
+                "reference": "Sample text"
+              }
+            ],
+            "changePermissions": {
+              "editableVehicleFields": [
+                "SAMPLE_CODE"
+              ],
+              "vehicleReplacement": true
+            },
+            "windows": {
+              "newBusiness": {
+                "from": "2026-01-01",
+                "to": "2027-01-01"
+              },
+              "renewal": {
+                "from": "2026-01-01",
+                "to": "2027-01-01"
+              }
+            },
+            "elements": [
+              {
+                "code": "SAMPLE_CODE",
+                "name": {
+                  "el": "Sample text",
+                  "en": "Sample text"
+                },
+                "parent": "SAMPLE_CODE",
+                "minimum": 1,
+                "maximum": 1,
+                "fields": [
+                  {
+                    "code": "SAMPLE_CODE",
+                    "label": {
+                      "el": "Sample text",
+                      "en": "Sample text"
+                    },
+                    "dataType": "TEXT",
+                    "required": true,
+                    "requiredAt": [
+                      "SAMPLE_CODE"
+                    ],
+                    "piiClass": "P0",
+                    "choices": [
+                      "SAMPLE_CODE"
+                    ],
+                    "unit": "SAMPLE_CODE",
+                    "minimum": "12.50",
+                    "maximum": "12.50",
+                    "displayOrder": 1
+                  }
+                ]
+              }
+            ],
+            "coverages": [
+              {
+                "code": "SAMPLE_CODE",
+                "name": {
+                  "el": "Sample text",
+                  "en": "Sample text"
+                },
+                "existence": "REQUIRED",
+                "removal": "BLOCK",
+                "coveredElement": "SAMPLE_CODE",
+                "coveredParty": "FIRST_PARTY",
+                "perilTags": [
+                  "SAMPLE_CODE"
+                ],
+                "riCedable": true,
+                "requires": [
+                  "SAMPLE_CODE"
+                ],
+                "regulatory": {
+                  "sample": "SAMPLE_CODE"
+                },
+                "terms": [
+                  {
+                    "code": "SAMPLE_CODE",
+                    "name": {
+                      "el": "Sample text",
+                      "en": "Sample text"
+                    },
+                    "kind": "OPTION_LIST",
+                    "valueType": "MONEY",
+                    "modelType": "LIMIT",
+                    "aggregationBasis": "PER_INJURED_PERSON",
+                    "currency": "EUR",
+                    "required": true,
+                    "options": [
+                      {
+                        "code": "SAMPLE_CODE",
+                        "value": "12.50",
+                        "currency": "EUR",
+                        "name": {
+                          "el": "Sample text",
+                          "en": "Sample text"
+                        },
+                        "illustrative": true,
+                        "source": "Sample text"
+                      }
+                    ],
+                    "range": {
+                      "minimum": "12.50",
+                      "maximum": "12.50",
+                      "step": "12.50",
+                      "default": "12.50"
+                    },
+                    "finalBinding": {
+                      "key": "Sample text",
+                      "layer": "SAMPLE_CODE",
+                      "legalStatus": "SETTLED",
+                      "source": "Sample text",
+                      "valueAtEffectiveDate": "12.50"
+                    },
+                    "displayOrder": 1
+                  }
+                ],
+                "displayOrder": 1
+              }
+            ],
+            "questionSets": [
+              {
+                "code": "SAMPLE_CODE",
+                "type": "PRE_QUALIFICATION",
+                "name": {
+                  "el": "Sample text",
+                  "en": "Sample text"
+                },
+                "questions": [
+                  {
+                    "code": "SAMPLE_CODE",
+                    "text": {
+                      "el": "Sample text",
+                      "en": "Sample text"
+                    },
+                    "answerType": "CHOICE",
+                    "required": true,
+                    "customerVisible": true,
+                    "answers": [
+                      {
+                        "code": "SAMPLE_CODE",
+                        "label": {
+                          "el": "Sample text",
+                          "en": "Sample text"
+                        },
+                        "outcome": "NONE",
+                        "reasonKey": "SAMPLE_CODE",
+                        "uwRuleCode": "SAMPLE_CODE"
+                      }
+                    ],
+                    "mapsToField": "Sample text",
+                    "visibleWhen": {
+                      "question": "SAMPLE_CODE",
+                      "answeredWith": [
+                        "SAMPLE_CODE"
+                      ]
+                    },
+                    "requiredWhen": {
+                      "question": "SAMPLE_CODE",
+                      "answeredWith": [
+                        "SAMPLE_CODE"
+                      ]
+                    },
+                    "illustrative": true,
+                    "displayOrder": 1
+                  }
+                ]
+              }
+            ],
+            "chargeTypes": [
+              {
+                "code": "SAMPLE_CODE",
+                "name": {
+                  "el": "Sample text",
+                  "en": "Sample text"
+                },
+                "category": "PREMIUM",
+                "writtenPremium": true,
+                "computedBy": "RATING",
+                "coverage": "SAMPLE_CODE",
+                "baseChargeCodes": [
+                  "SAMPLE_CODE"
+                ],
+                "handling": "PRO_RATA",
+                "earningPattern": "DAILY_PRO_RATA",
+                "cancellationTreatment": "FOLLOW_PRODUCT_REFUND",
+                "reemitOnReapply": true,
+                "billingTreatment": "BILLED",
+                "taxClass": "SAMPLE_CODE",
+                "includedInTaxBases": [
+                  "SAMPLE_CODE"
+                ],
+                "glKey": "SAMPLE_CODE",
+                "beneficiary": "INSURER",
+                "fiscalCategoryKey": "SAMPLE_CODE",
+                "riCedable": true,
+                "commissionable": true,
+                "configKeys": [
+                  "Sample text"
+                ],
+                "legalStatus": "SETTLED",
+                "source": "Sample text",
+                "displayOrder": 1
+              }
+            ],
+            "references": {
+              "rating": {
+                "algorithmCode": "SAMPLE_CODE",
+                "inputSchemaVersion": "1",
+                "bindingMode": "PINNED",
+                "compatibleArtefactRange": "Sample text",
+                "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+              },
+              "uwRuleSets": {
+                "sample": {
+                  "code": "SAMPLE_CODE",
+                  "range": "Sample text"
+                }
+              },
+              "paymentPlans": {
+                "sample": [
+                  "SAMPLE_CODE"
+                ]
+              }
+            }
+          },
+          "history": [
+            {
+              "editId": "01922439-d936-71c0-8581-1b9841e3604c",
+              "seq": 1,
+              "op": "add",
+              "path": "sample",
+              "actor": "sample",
+              "at": "2026-10-07T09:00:00Z"
+            }
+          ]
+        },
+        "validation": {
+          "clean": true,
+          "findings": [
+            {
+              "path": "sample",
+              "code": "sample",
+              "messageKey": "sample",
+              "message": "sample"
+            }
+          ]
+        }
+      },
+      "validation": {
+        "clean": true,
+        "findings": [
+          {
+            "path": "sample",
+            "code": "sample",
+            "messageKey": "sample",
+            "message": "sample"
+          }
+        ]
+      }
     },
     "pfc.ProductVersion.resolve": {
       "version": "1.0",
@@ -3632,6 +3946,25 @@
         "sample"
       ]
     },
+    "ProductDiffEntry": {
+      "class": "ADDED",
+      "path": "sample",
+      "code": "sample",
+      "before": "sample",
+      "after": "sample"
+    },
+    "ProductDiffGroup": {
+      "area": "sample",
+      "entries": [
+        {
+          "class": "ADDED",
+          "path": "sample",
+          "code": "sample",
+          "before": "sample",
+          "after": "sample"
+        }
+      ]
+    },
     "ProductHeader": {
       "code": "SAMPLE_CODE",
       "name": {
@@ -3643,11 +3976,326 @@
       "customerType": "SAMPLE_CODE"
     },
     "ProductImportImportRequest": {
-      "legacyDefinition": "unspecified",
-      "mapping": "unspecified"
+      "source": "sample",
+      "format": "AUTO",
+      "baseVersion": "1.0"
     },
     "ProductImportImportResponse": {
-      "changeSetOrDryRunLint": "unspecified"
+      "created": true,
+      "changeSet": {
+        "changeSetState": {
+          "changeSetId": "019292de-e911-7a71-8264-fc0e4a61b3c2",
+          "productCode": "SAMPLE_CODE",
+          "baseVersion": "1.0",
+          "status": "OPEN",
+          "recordVersion": 1,
+          "editCount": 1,
+          "draft": {
+            "schemaVersion": 1,
+            "productLine": {
+              "code": "SAMPLE_CODE",
+              "family": "SAMPLE_CODE",
+              "name": {
+                "el": "Sample text",
+                "en": "Sample text"
+              }
+            },
+            "product": {
+              "code": "SAMPLE_CODE",
+              "name": {
+                "el": "Sample text",
+                "en": "Sample text"
+              },
+              "abbreviation": "SAMPLE_CODE",
+              "productType": "SAMPLE_CODE",
+              "customerType": "SAMPLE_CODE"
+            },
+            "legalEntity": "SAMPLE_CODE",
+            "jurisdiction": "GR",
+            "version": "1.0",
+            "isAbstract": true,
+            "channels": [
+              "SAMPLE_CODE"
+            ],
+            "contractCurrency": "EUR",
+            "languages": [
+              "el"
+            ],
+            "terms": {
+              "allowed": [
+                "P15D"
+              ],
+              "default": "P15D"
+            },
+            "offeringRequired": true,
+            "dayCount": "SAMPLE_CODE",
+            "dayCountProvisional": true,
+            "dayCountNote": "Sample text",
+            "refundMethods": [
+              {
+                "source": "SAMPLE_CODE",
+                "method": "PRO_RATA",
+                "legalStatus": "SETTLED",
+                "illustrative": true,
+                "reference": "Sample text"
+              }
+            ],
+            "changePermissions": {
+              "editableVehicleFields": [
+                "SAMPLE_CODE"
+              ],
+              "vehicleReplacement": true
+            },
+            "windows": {
+              "newBusiness": {
+                "from": "2026-01-01",
+                "to": "2027-01-01"
+              },
+              "renewal": {
+                "from": "2026-01-01",
+                "to": "2027-01-01"
+              }
+            },
+            "elements": [
+              {
+                "code": "SAMPLE_CODE",
+                "name": {
+                  "el": "Sample text",
+                  "en": "Sample text"
+                },
+                "parent": "SAMPLE_CODE",
+                "minimum": 1,
+                "maximum": 1,
+                "fields": [
+                  {
+                    "code": "SAMPLE_CODE",
+                    "label": {
+                      "el": "Sample text",
+                      "en": "Sample text"
+                    },
+                    "dataType": "TEXT",
+                    "required": true,
+                    "requiredAt": [
+                      "SAMPLE_CODE"
+                    ],
+                    "piiClass": "P0",
+                    "choices": [
+                      "SAMPLE_CODE"
+                    ],
+                    "unit": "SAMPLE_CODE",
+                    "minimum": "12.50",
+                    "maximum": "12.50",
+                    "displayOrder": 1
+                  }
+                ]
+              }
+            ],
+            "coverages": [
+              {
+                "code": "SAMPLE_CODE",
+                "name": {
+                  "el": "Sample text",
+                  "en": "Sample text"
+                },
+                "existence": "REQUIRED",
+                "removal": "BLOCK",
+                "coveredElement": "SAMPLE_CODE",
+                "coveredParty": "FIRST_PARTY",
+                "perilTags": [
+                  "SAMPLE_CODE"
+                ],
+                "riCedable": true,
+                "requires": [
+                  "SAMPLE_CODE"
+                ],
+                "regulatory": {
+                  "sample": "SAMPLE_CODE"
+                },
+                "terms": [
+                  {
+                    "code": "SAMPLE_CODE",
+                    "name": {
+                      "el": "Sample text",
+                      "en": "Sample text"
+                    },
+                    "kind": "OPTION_LIST",
+                    "valueType": "MONEY",
+                    "modelType": "LIMIT",
+                    "aggregationBasis": "PER_INJURED_PERSON",
+                    "currency": "EUR",
+                    "required": true,
+                    "options": [
+                      {
+                        "code": "SAMPLE_CODE",
+                        "value": "12.50",
+                        "currency": "EUR",
+                        "name": {
+                          "el": "Sample text",
+                          "en": "Sample text"
+                        },
+                        "illustrative": true,
+                        "source": "Sample text"
+                      }
+                    ],
+                    "range": {
+                      "minimum": "12.50",
+                      "maximum": "12.50",
+                      "step": "12.50",
+                      "default": "12.50"
+                    },
+                    "finalBinding": {
+                      "key": "Sample text",
+                      "layer": "SAMPLE_CODE",
+                      "legalStatus": "SETTLED",
+                      "source": "Sample text",
+                      "valueAtEffectiveDate": "12.50"
+                    },
+                    "displayOrder": 1
+                  }
+                ],
+                "displayOrder": 1
+              }
+            ],
+            "questionSets": [
+              {
+                "code": "SAMPLE_CODE",
+                "type": "PRE_QUALIFICATION",
+                "name": {
+                  "el": "Sample text",
+                  "en": "Sample text"
+                },
+                "questions": [
+                  {
+                    "code": "SAMPLE_CODE",
+                    "text": {
+                      "el": "Sample text",
+                      "en": "Sample text"
+                    },
+                    "answerType": "CHOICE",
+                    "required": true,
+                    "customerVisible": true,
+                    "answers": [
+                      {
+                        "code": "SAMPLE_CODE",
+                        "label": {
+                          "el": "Sample text",
+                          "en": "Sample text"
+                        },
+                        "outcome": "NONE",
+                        "reasonKey": "SAMPLE_CODE",
+                        "uwRuleCode": "SAMPLE_CODE"
+                      }
+                    ],
+                    "mapsToField": "Sample text",
+                    "visibleWhen": {
+                      "question": "SAMPLE_CODE",
+                      "answeredWith": [
+                        "SAMPLE_CODE"
+                      ]
+                    },
+                    "requiredWhen": {
+                      "question": "SAMPLE_CODE",
+                      "answeredWith": [
+                        "SAMPLE_CODE"
+                      ]
+                    },
+                    "illustrative": true,
+                    "displayOrder": 1
+                  }
+                ]
+              }
+            ],
+            "chargeTypes": [
+              {
+                "code": "SAMPLE_CODE",
+                "name": {
+                  "el": "Sample text",
+                  "en": "Sample text"
+                },
+                "category": "PREMIUM",
+                "writtenPremium": true,
+                "computedBy": "RATING",
+                "coverage": "SAMPLE_CODE",
+                "baseChargeCodes": [
+                  "SAMPLE_CODE"
+                ],
+                "handling": "PRO_RATA",
+                "earningPattern": "DAILY_PRO_RATA",
+                "cancellationTreatment": "FOLLOW_PRODUCT_REFUND",
+                "reemitOnReapply": true,
+                "billingTreatment": "BILLED",
+                "taxClass": "SAMPLE_CODE",
+                "includedInTaxBases": [
+                  "SAMPLE_CODE"
+                ],
+                "glKey": "SAMPLE_CODE",
+                "beneficiary": "INSURER",
+                "fiscalCategoryKey": "SAMPLE_CODE",
+                "riCedable": true,
+                "commissionable": true,
+                "configKeys": [
+                  "Sample text"
+                ],
+                "legalStatus": "SETTLED",
+                "source": "Sample text",
+                "displayOrder": 1
+              }
+            ],
+            "references": {
+              "rating": {
+                "algorithmCode": "SAMPLE_CODE",
+                "inputSchemaVersion": "1",
+                "bindingMode": "PINNED",
+                "compatibleArtefactRange": "Sample text",
+                "pinnedArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+              },
+              "uwRuleSets": {
+                "sample": {
+                  "code": "SAMPLE_CODE",
+                  "range": "Sample text"
+                }
+              },
+              "paymentPlans": {
+                "sample": [
+                  "SAMPLE_CODE"
+                ]
+              }
+            }
+          },
+          "history": [
+            {
+              "editId": "01925977-23cc-7eac-83a8-8a0425a5ef97",
+              "seq": 1,
+              "op": "add",
+              "path": "sample",
+              "actor": "sample",
+              "at": "2026-10-07T09:00:00Z"
+            }
+          ]
+        },
+        "validation": {
+          "clean": true,
+          "findings": [
+            {
+              "path": "sample",
+              "code": "sample",
+              "messageKey": "sample",
+              "message": "sample"
+            }
+          ]
+        }
+      },
+      "validation": {
+        "clean": true,
+        "findings": [
+          {
+            "path": "sample",
+            "code": "sample",
+            "messageKey": "sample",
+            "message": "sample"
+          }
+        ]
+      }
     },
     "ProductLineDef": {
       "code": "SAMPLE_CODE",
@@ -3802,7 +4450,24 @@
       }
     },
     "ProductVersionDiffResponse": {
-      "groupedEntriesClasses": "unspecified"
+      "product": "SAMPLE_CODE",
+      "from": "1.0",
+      "to": "1.0",
+      "total": 1,
+      "groups": [
+        {
+          "area": "sample",
+          "entries": [
+            {
+              "class": "ADDED",
+              "path": "sample",
+              "code": "sample",
+              "before": "sample",
+              "after": "sample"
+            }
+          ]
+        }
+      ]
     },
     "ProductVersionEmergencyFallbackRequest": {
       "productCode": "SAMPLE_CODE",
@@ -3829,6 +4494,13 @@
       "fallbackId": "0192786b-089a-746e-89cb-496f42a17863",
       "status": "PENDING_APPROVAL",
       "approvalRequestId": "0192a5a5-1194-7165-8351-2884254f904a"
+    },
+    "ProductVersionExportResponse": {
+      "product": "SAMPLE_CODE",
+      "version": "1.0",
+      "artefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "format": "YAML",
+      "source": "sample"
     },
     "ProductVersionImportRequest": {
       "definition": {

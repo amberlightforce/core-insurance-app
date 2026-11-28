@@ -113,7 +113,8 @@ public static class PlatformModule
                 .Describe("Ο τύπος αναγνωριστικού δεν έχει ορισμό σειράς στις ρυθμίσεις της πλατφόρμας.", "The identifier type has no series definition in the platform settings."));
         services.AddApprovals();
         services.AddUserDirectory();
-        services.AddDeadLetters();
+        services.AddDeadLetters(configuration);
+        services.AddOperations();
         services.AddAuditApi();
         services.AddAiControlPlane();
         services.AddSupportAuthorityTypes();
@@ -177,14 +178,50 @@ public static class PlatformModule
     }
 
     /// <summary>The dead-letter API (NX-OT-14): list, get and replay of parked outbox messages.</summary>
-    private static IServiceCollection AddDeadLetters(this IServiceCollection services)
+    private static IServiceCollection AddDeadLetters(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddOptions<DeadLetterOptions>().Bind(configuration.GetSection(DeadLetterOptions.Section));
         services.TryAddSingleton<DeadLetterQueries>();
         services.AddScoped<IValidator<ReplayDeadLetters>, ReplayDeadLettersValidator>();
         services.AddCommandAuditor<ReplayDeadLetters, DeadLetterReplayResponse, ReplayDeadLettersAuditor>();
         services.AddCommand<ReplayDeadLetters, DeadLetterReplayResponse, ReplayDeadLettersHandler>(CommandDescriptor.For("plt.DeadLetter.replay") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<DiscardDeadLetters>, DiscardDeadLettersValidator>();
+        services.AddCommandAuditor<DiscardDeadLetters, DeadLetterDiscardResponse, DiscardDeadLettersAuditor>();
+        services.AddCommand<DiscardDeadLetters, DeadLetterDiscardResponse, DiscardDeadLettersHandler>(CommandDescriptor.For("plt.DeadLetter.discard") with { SupportsDryRun = true });
+        services.AddErrorDefinitions(ErrorDefinition.For(ModuleCode.PLT, DeadLetterErrors.DiscardApprovalRequired, 422, "Απαιτείται έγκριση για την απόρριψη", "Approval is required to discard")
+            .Describe("Το μήνυμα είναι παρκαρισμένο για περισσότερο από το όριο ημερών· η απόρριψη απαιτεί εγκεκριμένο αίτημα από άλλον χρήστη.", "The dead letter has been parked longer than the threshold; discarding needs an Approved request decided by someone else."));
         services.AddErrorDefinitions(ErrorDefinition.For(ModuleCode.PLT, DeadLetterErrors.Resolved, 409, "Το μήνυμα έχει ήδη επιλυθεί", "The dead letter is already resolved")
             .Describe("Όλα τα μηνύματα που ζητήθηκαν έχουν ήδη επαναληφθεί ή απορριφθεί· δεν γίνεται καμία ενέργεια.", "Every requested dead letter was already replayed or discarded; nothing was done."));
+        return services;
+    }
+
+    /// <summary>Consumer replay, exchange search, file transfers, schema registry and manual outbox publish (BO-PLT-04).</summary>
+    private static IServiceCollection AddOperations(this IServiceCollection services)
+    {
+        services.TryAddSingleton<OperationsStore>();
+        services.AddScoped<IValidator<ReplayConsumer>, ReplayConsumerValidator>();
+        services.AddCommandAuditor<ReplayConsumer, ConsumerReplayResponse, ReplayConsumerAuditor>();
+        services.AddCommand<ReplayConsumer, ConsumerReplayResponse, ReplayConsumerHandler>(CommandDescriptor.For("plt.Consumer.replay") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<RetryTransfers>, RetryTransfersValidator>();
+        services.AddCommandAuditor<RetryTransfers, TransferRetryResponse, RetryTransfersAuditor>();
+        services.AddCommand<RetryTransfers, TransferRetryResponse, RetryTransfersHandler>(CommandDescriptor.For("plt.Transfer.retry"));
+        services.AddScoped<IValidator<RegisterSchema>, RegisterSchemaValidator>();
+        services.AddCommandAuditor<RegisterSchema, SchemaRegisterResponse, RegisterSchemaAuditor>();
+        services.AddCommand<RegisterSchema, SchemaRegisterResponse, RegisterSchemaHandler>(CommandDescriptor.For("plt.Schema.register"));
+        services.AddScoped<IValidator<CheckSchema>, CheckSchemaValidator>();
+        services.AddCommand<CheckSchema, SchemaCheckResponse, CheckSchemaHandler>(CommandDescriptor.For("plt.Schema.check") with { RequiresIdempotencyKey = false, Idempotent = false, Audited = false });
+        services.AddScoped<IValidator<PublishOutbox>, PublishOutboxValidator>();
+        services.AddCommandAuditor<PublishOutbox, OutboxPublishResponse, PublishOutboxAuditor>();
+        services.AddCommand<PublishOutbox, OutboxPublishResponse, PublishOutboxHandler>(CommandDescriptor.For("plt.Outbox.publish"));
+        services.AddErrorDefinitions(
+            ErrorDefinition.For(ModuleCode.PLT, OperationsErrors.TestTenantOnly, 403, "Μόνο για δοκιμαστικό φορέα", "Test tenants only")
+                .Describe("Η λειτουργία επιτρέπεται μόνο σε δοκιμαστικό νομικό φορέα (κωδικός που τελειώνει σε -TEST).", "The operation is only available on a test tenant (a legal entity code ending in -TEST)."),
+            ErrorDefinition.For(ModuleCode.PLT, OperationsErrors.EventTypeNotAllowed, 422, "Ο τύπος γεγονότος δεν επιτρέπεται", "The event type is not allowed")
+                .Describe("Μόνο τα γεγονότα της λίστας λειτουργιών μπορούν να δημοσιευθούν χειροκίνητα.", "Only the events on the operations allow-list can be published by hand."),
+            ErrorDefinition.For(ModuleCode.PLT, OperationsErrors.Incompatible, 422, "Το σχήμα δεν είναι συμβατό", "The schema is not compatible")
+                .Describe("Η νέα έκδοση αφαιρεί πεδίο, αλλάζει τύπο ή προσθέτει υποχρεωτικό πεδίο σε σχέση με την τελευταία έκδοση.", "The new version removes a property, changes a type or adds a required property compared with the latest version."),
+            ErrorDefinition.For(ModuleCode.PLT, OperationsErrors.NotRetryable, 422, "Η μεταφορά δεν μπορεί να επαναληφθεί", "The transfer cannot be retried")
+                .Describe("Μόνο μεταφορές σε κατάσταση Failed μπορούν να επαναληφθούν.", "Only transfers in status Failed can be retried."));
         return services;
     }
 
@@ -243,6 +280,9 @@ public static class PlatformModule
         $"GRANT SELECT, INSERT, UPDATE ON {Schema}.user_profile, {Schema}.role_assignment TO {appRole}",
         // Dev clock offset (D-SL3-12): never deleted (trigger); only read/advanced when the Development dev clock is registered.
         $"GRANT SELECT, UPDATE ON {Schema}.dev_clock TO {appRole}",
+        // Platform operations (BO-PLT-04): the schema registry is append-only; the exchange log and file transfers are written by their adapters.
+        $"GRANT SELECT, INSERT ON {Schema}.schema_registry TO {appRole}",
+        $"GRANT SELECT, INSERT, UPDATE ON {Schema}.message_exchange, {Schema}.file_transfer TO {appRole}",
         $"GRANT SELECT, INSERT ON {Schema}.audit_event TO {appRole}",
         $"GRANT SELECT ON {Schema}.audit_chain_head TO {appRole}",
         $"REVOKE ALL ON FUNCTION {Schema}.audit_chain_lock(date) FROM PUBLIC",

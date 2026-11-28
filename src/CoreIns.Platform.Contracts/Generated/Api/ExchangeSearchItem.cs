@@ -4,15 +4,64 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Exchange.search result. PRD outputs: "exchanges"</summary>
+/// <summary>plt.Exchange.search result: one logged message exchange with an external party.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ExchangeSearchItem
 {
-    /// <summary>PRD: "exchanges"</summary>
+    /// <summary>Contract member 'exchangeId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'exchangeId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exchanges")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Exchanges { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("exchangeId")]
+    public required global::System.Guid ExchangeId { get; init; }
+
+    /// <summary>Contract member 'direction'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("direction")]
+    public required DirectionValue Direction { get; init; }
+
+    /// <summary>Contract member 'counterparty'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("counterparty")]
+    public required string Counterparty { get; init; }
+
+    /// <summary>Contract member 'partyRef'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyRef")]
+    public string? PartyRef { get; init; }
+
+    /// <summary>Contract member 'channel'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
+    public required string Channel { get; init; }
+
+    /// <summary>Contract member 'operation'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("operation")]
+    public required string Operation { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required string Status { get; init; }
+
+    /// <summary>Contract member 'correlationId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("correlationId")]
+    public string? CorrelationId { get; init; }
+
+    /// <summary>Contract member 'startedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("startedAt")]
+    public required global::CoreIns.SharedKernel.Instant StartedAt { get; init; }
+
+    /// <summary>Contract member 'completedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("completedAt")]
+    public global::CoreIns.SharedKernel.Instant? CompletedAt { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DirectionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DirectionValue
+    {
+        /// <summary><c>Inbound</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Inbound")]
+        Inbound,
+
+        /// <summary><c>Outbound</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Outbound")]
+        Outbound,
+    }
 }

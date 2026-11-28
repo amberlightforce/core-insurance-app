@@ -118,15 +118,27 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-DEAD-LETTER-RESOLVED (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): plt.DeadLetter.replay.</para>
+    /// <para>Declared by 2 operation(s): plt.DeadLetter.discard, plt.DeadLetter.replay.</para>
     /// </remarks>
     public const string DeadLetterResolved = "PLT-ERR-DEAD-LETTER-RESOLVED";
+
+    /// <summary>PLT-ERR-DISCARD-APPROVAL-REQUIRED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): plt.DeadLetter.discard.</para>
+    /// </remarks>
+    public const string DiscardApprovalRequired = "PLT-ERR-DISCARD-APPROVAL-REQUIRED";
 
     /// <summary>PLT-ERR-EDITOR-CANNOT-APPROVE (HTTP 403).</summary>
     /// <remarks>
     /// <para>Declared by 4 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.list, plt.Approval.request.</para>
     /// </remarks>
     public const string EditorCannotApprove = "PLT-ERR-EDITOR-CANNOT-APPROVE";
+
+    /// <summary>PLT-ERR-EVENT-TYPE-NOT-ALLOWED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): plt.Outbox.publish.</para>
+    /// </remarks>
+    public const string EventTypeNotAllowed = "PLT-ERR-EVENT-TYPE-NOT-ALLOWED";
 
     /// <summary>PLT-ERR-EXPRESSION-COST (HTTP 422).</summary>
     /// <remarks>
@@ -220,7 +232,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.verifyForExecution, plt.Approval.withdraw, plt.DeadLetter.get, plt.DeadLetter.replay.</para>
+    /// <para>Declared by 8 operation(s): plt.Approval.decide, plt.Approval.get, plt.Approval.verifyForExecution, plt.Approval.withdraw, plt.Consumer.replay, plt.DeadLetter.discard, plt.DeadLetter.get, plt.DeadLetter.replay.</para>
     /// </remarks>
     public const string NotFound = "PLT-ERR-NOT-FOUND";
 
@@ -320,6 +332,12 @@ public static class PlatformErrorCodes
     /// </remarks>
     public const string TemplateInvalid = "PLT-ERR-TEMPLATE-INVALID";
 
+    /// <summary>PLT-ERR-TEST-TENANT-ONLY (HTTP 403).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): plt.Outbox.publish.</para>
+    /// </remarks>
+    public const string TestTenantOnly = "PLT-ERR-TEST-TENANT-ONLY";
+
     /// <summary>PLT-ERR-TYPE-EXISTS (HTTP 409).</summary>
     /// <remarks>
     /// <para>Declared by 1 operation(s): plt.AuthorityType.register.</para>
@@ -396,7 +414,7 @@ public static class PlatformErrorCodes
     public const string Prefix = "PLT-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiDisabled, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, ApprovalSubjectMismatch, AssignmentExists, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, DeadLetterResolved, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotOwner, NotRetryable, NotRunnable, OutOfOrgScope, OwnerDecided, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownRole, UnknownType, UnsupportedLanguage, UserDisabled, UserExists, UserSuspended, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiDisabled, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, ApprovalSubjectMismatch, AssignmentExists, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, DeadLetterResolved, DiscardApprovalRequired, EditorCannotApprove, EventTypeNotAllowed, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotOwner, NotRetryable, NotRunnable, OutOfOrgScope, OwnerDecided, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TestTenantOnly, TypeExists, UnknownKey, UnknownRole, UnknownType, UnsupportedLanguage, UserDisabled, UserExists, UserSuspended, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -420,7 +438,9 @@ public static class PlatformErrorCodes
         [CircuitOpen] = 503,
         [ControlNotFlaggable] = 422,
         [DeadLetterResolved] = 409,
+        [DiscardApprovalRequired] = 422,
         [EditorCannotApprove] = 403,
+        [EventTypeNotAllowed] = 422,
         [ExpressionCost] = 422,
         [ExpressionType] = 422,
         [GateFailed] = 422,
@@ -448,6 +468,7 @@ public static class PlatformErrorCodes
         [Sod] = 403,
         [TableNotActive] = 422,
         [TemplateInvalid] = 422,
+        [TestTenantOnly] = 403,
         [TypeExists] = 409,
         [UnknownKey] = 422,
         [UnknownRole] = 422,
