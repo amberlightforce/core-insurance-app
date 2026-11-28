@@ -203,8 +203,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Reopen, manual issues
-         * @description Reopen, manual issues
+         * Reopen an issue
+         * @description Reopen an issue (BO-UW-04)
          *
          *     PRD inputs: issue id / job ref, type, reason
          *     PRD outputs: issue
@@ -226,8 +226,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Reopen, manual issues
-         * @description Reopen, manual issues
+         * Add a manual issue
+         * @description Add a manual issue (BO-UW-04)
          *
          *     PRD inputs: issue id / job ref, type, reason
          *     PRD outputs: issue
@@ -249,8 +249,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Reopen, manual issues
-         * @description Reopen, manual issues
+         * Close an issue
+         * @description Close an issue (BO-UW-04)
          *
          *     PRD inputs: issue id / job ref, type, reason
          *     PRD outputs: issue
@@ -2028,6 +2028,14 @@ export interface components {
                 /** @description Issue state (PRD-04 §7.3) */
                 approvalStatus: components["schemas"]["Code"];
             }[];
+            /** @description Open contingencies of the job that block the point (REQ-UW-006) */
+            contingencies?: {
+                contingencyId: components["schemas"]["Uuid"];
+                contingencyType: components["schemas"]["Code"];
+                blockingPoint: components["schemas"]["BlockingPoint"];
+                dueDate: components["schemas"]["LocalDate"];
+                overdue: boolean;
+            }[];
         };
         /**
          * @description UW issue state (PRD-04 §7.3). Open, Rejected and Invalidated block their point (BR-UW-001).
@@ -2155,53 +2163,44 @@ export interface components {
             /** @description PRD: "pending second approval" (always false until the four-eyes thresholds of BR-UW-012 apply) */
             pendingSecondApproval: boolean;
         };
-        /** @description uw.Issue.reopen request. PRD inputs: "issue id / job ref, type, reason" */
+        /** @description uw.Issue.reopen request (BO-UW-04): put a decided issue back to Open. An approval is invalidated (MANUAL_REOPEN) and a new Open issue for the same key replaces it; a rejection is closed and replaced the same way. */
         IssueReopenRequest: {
-            /** @description PRD: "issue id" */
-            issueId?: components["schemas"]["Uuid"];
-            /** @description PRD: "job ref" */
-            jobRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "type" */
-            type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description The Approved, ApprovedWithConditions or Rejected issue to reopen */
+            issueId: components["schemas"]["Uuid"];
+            /** @description Why (mandatory) */
+            reason: string;
+            /** @description Record version of the issue as read; a different version is UW-ERR-STALE (409). Omit to skip the check. */
+            expectedRecordVersion?: number;
         };
-        /** @description uw.Issue.reopen result. PRD outputs: "issue" */
+        /** @description uw.Issue.reopen result: the new Open issue. */
         IssueReopenResponse: {
-            /** @description PRD: "issue" */
-            issue?: components["schemas"]["Unspecified"];
+            issue: components["schemas"]["IssueListItem"];
         };
-        /** @description uw.Issue.addManual request. PRD inputs: "issue id / job ref, type, reason" */
+        /** @description uw.Issue.addManual request (BO-UW-04): an underwriter raises an issue by hand on an evaluated job. It is Open, never closed by a rule evaluation, and blocks its blocking point until decided. */
         IssueAddManualRequest: {
-            /** @description PRD: "issue id" */
-            issueId?: components["schemas"]["Uuid"];
-            /** @description PRD: "job ref" */
-            jobRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "type" */
-            type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description POL job id (the job must have been evaluated) */
+            jobRef: components["schemas"]["Uuid"];
+            /** @description Active issue type of the catalogue */
+            issueType: components["schemas"]["Code"];
+            blockingPoint: components["schemas"]["BlockingPoint"];
+            /** @description Why (mandatory) */
+            reason: string;
         };
-        /** @description uw.Issue.addManual result. PRD outputs: "issue" */
+        /** @description uw.Issue.addManual result: the new Open issue. */
         IssueAddManualResponse: {
-            /** @description PRD: "issue" */
-            issue?: components["schemas"]["Unspecified"];
+            issue: components["schemas"]["IssueListItem"];
         };
-        /** @description uw.Issue.close request. PRD inputs: "issue id / job ref, type, reason" */
+        /** @description uw.Issue.close request (BO-UW-04): close an issue with a reason. An Open or Rejected issue that blocks its point cannot be closed (UW-ERR-ISSUE-TRANSITION): decide it instead. */
         IssueCloseRequest: {
-            /** @description PRD: "issue id" */
-            issueId?: components["schemas"]["Uuid"];
-            /** @description PRD: "job ref" */
-            jobRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "type" */
-            type?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            issueId: components["schemas"]["Uuid"];
+            /** @description Why (mandatory) */
+            reason: string;
+            /** @description Record version of the issue as read; a different version is UW-ERR-STALE (409). Omit to skip the check. */
+            expectedRecordVersion?: number;
         };
-        /** @description uw.Issue.close result. PRD outputs: "issue" */
+        /** @description uw.Issue.close result: the closed issue. */
         IssueCloseResponse: {
-            /** @description PRD: "issue" */
-            issue?: components["schemas"]["Unspecified"];
+            issue: components["schemas"]["IssueListItem"];
         };
         /** @description One event of an issues approval history (BO-UW-03): a decision, or the invalidation of an approval when the facts changed. */
         ApprovalHistoryItem: {
@@ -2537,21 +2536,17 @@ export interface components {
             /** @description PRD: "review referral ref" */
             reviewReferralRef?: components["schemas"]["Unspecified"];
         };
-        /** @description uw.Decline.decideReview request. PRD inputs: "job or intake ref, scope, reasons, pairs, wording" */
+        /** @description uw.Decline.decideReview request (BO-UW-07): the second underwriter decides the review of an automated decline. The decider cannot be the person who issued the decline (UW-ERR-SOD). */
         DeclineDecideReviewRequest: {
-            /** @description PRD: "job or intake ref" (optional) */
-            jobRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "job or intake ref" (optional) */
-            intakeRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "scope" */
-            scope?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reasons" */
-            reasons?: components["schemas"]["Unspecified"];
-            /** @description PRD: "pairs" */
-            pairs?: components["schemas"]["Unspecified"];
-            /** @description PRD: "wording" */
-            wording?: components["schemas"]["Unspecified"];
-        } & (unknown | unknown);
+            declineId: components["schemas"]["Uuid"];
+            /**
+             * @description UPHELD keeps the decline; OVERTURNED withdraws it (the job returns to Quoted, REQ-UW-220).
+             * @enum {string}
+             */
+            outcome: "UPHELD" | "OVERTURNED";
+            /** @description Why (mandatory) */
+            reason: string;
+        };
         /** @description uw.Decline.decideReview result. PRD outputs: "decline, refusal requirement" */
         DeclineDecideReviewResponse: {
             /** @description PRD: "decline" */
@@ -2559,14 +2554,23 @@ export interface components {
             /** @description PRD: "refusal requirement" */
             refusalRequirement?: components["schemas"]["Unspecified"];
         };
-        /** @description uw.RefusalRegister.query result. PRD outputs: "entries / file ref + manifest" */
+        /** @description uw.RefusalRegister.query result (BO-UW-07): one register entry per decline, newest first. */
         RefusalRegisterQueryItem: {
-            /** @description PRD: "entries" */
-            entries?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "file ref + manifest" */
-            fileRef?: components["schemas"]["Unspecified"];
-            /** @description PRD: "file ref + manifest" */
-            manifest?: components["schemas"]["Unspecified"];
+            declineId: components["schemas"]["Uuid"];
+            declineNumber: string;
+            /** Format: uuid */
+            jobRef?: string | null;
+            /** Format: uuid */
+            intakeRef?: string | null;
+            /** @enum {string} */
+            scope: "FULL" | "PARTIAL";
+            reasonCodes: string[];
+            automated: boolean;
+            /** @enum {string} */
+            status: "Issued" | "ReviewRequested" | "Upheld" | "Overturned";
+            issuedAt: components["schemas"]["Instant"];
+            issuedBy: string;
+            reviewOutcome?: string | null;
         };
         /** @description Page of uw.RefusalRegister.query results (cursor pagination, contract §3.5.5) */
         RefusalRegisterQueryPage: components["schemas"]["PageEnvelope"] & {
@@ -2594,52 +2598,131 @@ export interface components {
             /** @description PRD: "file ref + manifest" */
             manifest?: components["schemas"]["Unspecified"];
         };
-        /** @description uw.Contingency.create request. PRD inputs: "per operation" */
-        ContingencyCreateRequest: Record<string, never>;
+        /** @description uw.Contingency.create request (BO-UW-08): a condition on a policy term that must be met by its due date (REQ-UW-006). Default blocking point is PRE_ISSUE. */
+        ContingencyCreateRequest: {
+            /** @description Policy term the contingency belongs to */
+            termRef: components["schemas"]["Uuid"];
+            /** @description Job whose blocking-status the contingency gates (optional) */
+            jobRef?: components["schemas"]["Uuid"];
+            /** @description Contingency type code, e.g. PROOF_OF_NCB */
+            contingencyType: components["schemas"]["Code"];
+            /** @description What must be done */
+            description: string;
+            /** @description Text shown to the customer or producer (optional) */
+            customerText?: string;
+            /** @description Date the contingency is due */
+            dueDate: components["schemas"]["LocalDate"];
+            /** @description Who has to act (a person or party reference) */
+            owner: string;
+            /** @description Defaults to PRE_ISSUE; NON_BLOCKING does not gate the job */
+            blockingPoint?: components["schemas"]["BlockingPoint"];
+            /**
+             * @description What happens when it is overdue (default NONE)
+             * @enum {string}
+             */
+            consequenceCode?: "NONE" | "CANCEL_QUOTE" | "ADD_ISSUE";
+            /** @description Issue type raised by ADD_ISSUE */
+            consequenceIssueType?: components["schemas"]["Code"];
+        };
         /** @description uw.Contingency.create result. PRD outputs: "contingency" */
         ContingencyCreateResponse: {
             /** @description PRD: "contingency" */
             contingency?: components["schemas"]["Unspecified"];
         };
-        /** @description uw.Contingency.update request. PRD inputs: "per operation" */
-        ContingencyUpdateRequest: Record<string, never>;
+        /** @description uw.Contingency.update request (BO-UW-08): change the text or owner of an open contingency. */
+        ContingencyUpdateRequest: {
+            /** @description New description */
+            description?: string;
+            /** @description New customer text */
+            customerText?: string;
+            /** @description New owner */
+            owner?: string;
+            /** @description Version the caller read (optimistic concurrency) */
+            recordVersion?: number;
+        };
         /** @description uw.Contingency.update result. PRD outputs: "contingency" */
         ContingencyUpdateResponse: {
             /** @description PRD: "contingency" */
             contingency?: components["schemas"]["Unspecified"];
         };
-        /** @description uw.Contingency.satisfy request. PRD inputs: "per operation" */
-        ContingencySatisfyRequest: Record<string, never>;
+        /** @description uw.Contingency.satisfy request (BO-UW-08): the evidence arrived. */
+        ContingencySatisfyRequest: {
+            /** @description Contingency */
+            contingencyId: components["schemas"]["Uuid"];
+            /** @description Reference of the evidence (document, task) */
+            evidenceRef?: string;
+            /** @description Note */
+            note?: string;
+        };
         /** @description uw.Contingency.satisfy result. PRD outputs: "contingency" */
         ContingencySatisfyResponse: {
             /** @description PRD: "contingency" */
             contingency?: components["schemas"]["Unspecified"];
         };
-        /** @description uw.Contingency.waive request. PRD inputs: "per operation" */
-        ContingencyWaiveRequest: Record<string, never>;
+        /** @description uw.Contingency.waive request (BO-UW-08): an underwriter waives the contingency with a reason. */
+        ContingencyWaiveRequest: {
+            /** @description Contingency */
+            contingencyId: components["schemas"]["Uuid"];
+            /** @description Why it is waived (mandatory) */
+            reason: string;
+        };
         /** @description uw.Contingency.waive result. PRD outputs: "contingency" */
         ContingencyWaiveResponse: {
             /** @description PRD: "contingency" */
             contingency?: components["schemas"]["Unspecified"];
         };
-        /** @description uw.Contingency.extend request. PRD inputs: "per operation" */
-        ContingencyExtendRequest: Record<string, never>;
+        /** @description uw.Contingency.extend request (BO-UW-08): move the due date later. */
+        ContingencyExtendRequest: {
+            /** @description Contingency */
+            contingencyId: components["schemas"]["Uuid"];
+            /** @description New due date (after the current one) */
+            newDueDate: components["schemas"]["LocalDate"];
+            /** @description Why (mandatory) */
+            reason: string;
+        };
         /** @description uw.Contingency.extend result. PRD outputs: "contingency" */
         ContingencyExtendResponse: {
             /** @description PRD: "contingency" */
             contingency?: components["schemas"]["Unspecified"];
         };
-        /** @description uw.Contingency.applyConsequence request. PRD inputs: "per operation" */
-        ContingencyApplyConsequenceRequest: Record<string, never>;
+        /** @description uw.Contingency.applyConsequence request (BO-UW-08): apply the consequence of an overdue contingency. */
+        ContingencyApplyConsequenceRequest: {
+            /** @description Contingency */
+            contingencyId: components["schemas"]["Uuid"];
+        };
         /** @description uw.Contingency.applyConsequence result. PRD outputs: "contingency" */
         ContingencyApplyConsequenceResponse: {
             /** @description PRD: "contingency" */
             contingency?: components["schemas"]["Unspecified"];
         };
-        /** @description uw.Contingency.list result. PRD outputs: "contingencies" */
+        /** @description uw.Contingency.list item (BO-UW-08) */
         ContingencyListItem: {
-            /** @description PRD: "contingencies" */
-            contingencies?: components["schemas"]["Unspecified"];
+            /** @description Contingency */
+            id: components["schemas"]["Uuid"];
+            /** @description Policy term */
+            termRef: components["schemas"]["Uuid"];
+            /** @description Job (optional) */
+            jobRef?: components["schemas"]["Uuid"];
+            /** @description Type */
+            contingencyType: components["schemas"]["Code"];
+            /** @description What must be done */
+            description?: string;
+            /** @description Customer text */
+            customerText?: string;
+            /** @description Due date */
+            dueDate: components["schemas"]["LocalDate"];
+            /** @description Owner */
+            owner: string;
+            /** @description Blocking point */
+            blockingPoint: components["schemas"]["BlockingPoint"];
+            /** @description Open, Satisfied, Waived or ConsequenceApplied */
+            status: string;
+            /** @description True when due and still Open */
+            overdue: boolean;
+            /** @description Consequence when overdue */
+            consequenceCode?: string;
+            /** @description Record version */
+            recordVersion: number;
         };
         /** @description Page of uw.Contingency.list results (cursor pagination, contract §3.5.5) */
         ContingencyListPage: components["schemas"]["PageEnvelope"] & {

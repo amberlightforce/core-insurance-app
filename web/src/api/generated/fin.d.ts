@@ -2233,113 +2233,122 @@ export interface components {
         PostingRulesListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["PostingRulesListItem"][];
         };
-        /** @description fin.PostingRules.draft request. PRD inputs: "rule set, rule rows, sample events" */
-        PostingRulesDraftRequest: {
-            /** @description PRD: "rule set" */
-            ruleSet?: components["schemas"]["Unspecified"];
-            /** @description PRD: "rule rows" */
-            ruleRows?: components["schemas"]["Unspecified"];
-            /** @description PRD: "sample events" */
-            sampleEvents?: components["schemas"]["Unspecified"];
+        /** @description One posting rule as authored (REQ-FIN-048). Exactly one of account and deriveFrom. */
+        PostingRuleRowInput: {
+            code: string;
+            sourceEvent: string;
+            entryType: string;
+            sourceAccount: string;
+            chargeCategory?: string | null;
+            chargeType?: string | null;
+            account?: string | null;
+            deriveFrom?: string | null;
+            descriptionEl?: string | null;
+            descriptionEn?: string | null;
         };
-        /** @description fin.PostingRules.draft result. PRD outputs: "compile and golden results, preview" */
-        PostingRulesDraftResponse: {
-            /** @description PRD: "compile and golden results" */
-            compileResults?: components["schemas"]["Unspecified"];
-            /** @description PRD: "compile and golden results" */
-            goldenResults?: components["schemas"]["Unspecified"];
-            /** @description PRD: "preview" */
-            preview?: components["schemas"]["Unspecified"];
+        /** @description A sample (golden) event; expectRule NONE expects that no rule matches. */
+        PostingRuleSampleEvent: {
+            name?: string | null;
+            sourceEvent: string;
+            entryType: string;
+            sourceAccount: string;
+            chargeCategory?: string | null;
+            chargeType?: string | null;
+            glKey?: string | null;
+            expectRule?: string | null;
+            expectAccount?: string | null;
         };
-        /** @description fin.PostingRules.compile request. PRD inputs: "rule set, rule rows, sample events" */
-        PostingRulesCompileRequest: {
-            /** @description PRD: "rule set" */
-            ruleSet?: components["schemas"]["Unspecified"];
-            /** @description PRD: "rule rows" */
-            ruleRows?: components["schemas"]["Unspecified"];
-            /** @description PRD: "sample events" */
-            sampleEvents?: components["schemas"]["Unspecified"];
+        /** @description The rule set being authored, an existing draft or the book and effective date of a new one. */
+        PostingRuleSetRef: {
+            draftId?: components["schemas"]["Uuid"] | null;
+            book?: string | null;
+            /** @description yyyy-MM-dd */
+            effectiveFrom?: string | null;
         };
-        /** @description fin.PostingRules.compile result. PRD outputs: "compile and golden results, preview" */
-        PostingRulesCompileResponse: {
-            /** @description PRD: "compile and golden results" */
-            compileResults?: components["schemas"]["Unspecified"];
-            /** @description PRD: "compile and golden results" */
-            goldenResults?: components["schemas"]["Unspecified"];
-            /** @description PRD: "preview" */
-            preview?: components["schemas"]["Unspecified"];
+        /** @description Request of draft, compile, test and previewImpact; ruleRows and sampleEvents default to the stored draft. */
+        PostingRulesAuthoringRequest: {
+            ruleSet?: components["schemas"]["PostingRuleSetRef"];
+            ruleRows?: components["schemas"]["PostingRuleRowInput"][];
+            sampleEvents?: components["schemas"]["PostingRuleSampleEvent"][];
+            /** @description previewImpact only, journals to replay (default 200, at most 1000) */
+            limit?: number | null;
         };
-        /** @description fin.PostingRules.test request. PRD inputs: "rule set, rule rows, sample events" */
-        PostingRulesTestRequest: {
-            /** @description PRD: "rule set" */
-            ruleSet?: components["schemas"]["Unspecified"];
-            /** @description PRD: "rule rows" */
-            ruleRows?: components["schemas"]["Unspecified"];
-            /** @description PRD: "sample events" */
-            sampleEvents?: components["schemas"]["Unspecified"];
+        /** @description A posting rule draft. */
+        PostingRuleDraftView: {
+            draftId: components["schemas"]["Uuid"];
+            book: string;
+            effectiveFrom: string;
+            status: string;
+            baseVersion?: number | null;
+            contentHash: string;
+            ruleCount: number;
+            recordVersion: number;
+            createdBy: string;
+            submittedBy?: string | null;
+            decidedBy?: string | null;
+            decisionReason?: string | null;
+            activatedRuleSetId?: components["schemas"]["Uuid"] | null;
+            activatedVersion?: number | null;
         };
-        /** @description fin.PostingRules.test result. PRD outputs: "compile and golden results, preview" */
-        PostingRulesTestResponse: {
-            /** @description PRD: "compile and golden results" */
-            compileResults?: components["schemas"]["Unspecified"];
-            /** @description PRD: "compile and golden results" */
-            goldenResults?: components["schemas"]["Unspecified"];
-            /** @description PRD: "preview" */
-            preview?: components["schemas"]["Unspecified"];
+        /** @description Compile checks of a rule set. */
+        PostingRuleCompileResult: {
+            ok: boolean;
+            errors: string[];
+            warnings: string[];
         };
-        /** @description fin.PostingRules.previewImpact request. PRD inputs: "rule set, rule rows, sample events" */
-        PostingRulesPreviewImpactRequest: {
-            /** @description PRD: "rule set" */
-            ruleSet?: components["schemas"]["Unspecified"];
-            /** @description PRD: "rule rows" */
-            ruleRows?: components["schemas"]["Unspecified"];
-            /** @description PRD: "sample events" */
-            sampleEvents?: components["schemas"]["Unspecified"];
+        /** @description One sample event resolved against the rules. */
+        PostingRuleGoldenCase: {
+            name: string;
+            passed: boolean;
+            ruleCode?: string | null;
+            account?: string | null;
+            detail?: string | null;
         };
-        /** @description fin.PostingRules.previewImpact result. PRD outputs: "compile and golden results, preview" */
-        PostingRulesPreviewImpactResponse: {
-            /** @description PRD: "compile and golden results" */
-            compileResults?: components["schemas"]["Unspecified"];
-            /** @description PRD: "compile and golden results" */
-            goldenResults?: components["schemas"]["Unspecified"];
-            /** @description PRD: "preview" */
-            preview?: components["schemas"]["Unspecified"];
+        /** @description Sample events resolved against the rules. */
+        PostingRuleGoldenResult: {
+            total: number;
+            passed: number;
+            failed: number;
+            cases: components["schemas"]["PostingRuleGoldenCase"][];
         };
-        /** @description fin.PostingRules.submit request. PRD inputs: "rule set, rule rows, sample events" */
+        /** @description A replayed line whose rule or account would change. */
+        PostingRuleImpactLine: {
+            journalNumber: string;
+            lineNo: number;
+            /** @description CHANGED or UNRESOLVED */
+            outcome: string;
+            oldRule: string;
+            newRule?: string | null;
+            oldAccount: string;
+            newAccount?: string | null;
+            detail?: string | null;
+        };
+        /** @description Replay of recent event-posted lines through the proposed rules. Nothing is posted or written. */
+        PostingRuleImpactResult: {
+            journals: number;
+            lines: number;
+            unchanged: number;
+            changed: number;
+            unresolved: number;
+            skipped: number;
+            differences: components["schemas"]["PostingRuleImpactLine"][];
+        };
+        /** @description Result of an authoring operation; the parts an operation does not produce are null. */
+        PostingRulesAuthoringResponse: {
+            draft?: components["schemas"]["PostingRuleDraftView"] | null;
+            compileResults?: components["schemas"]["PostingRuleCompileResult"] | null;
+            goldenResults?: components["schemas"]["PostingRuleGoldenResult"] | null;
+            preview?: components["schemas"]["PostingRuleImpactResult"] | null;
+        };
+        /** @description fin.PostingRules.submit request */
         PostingRulesSubmitRequest: {
-            /** @description PRD: "rule set" */
-            ruleSet?: components["schemas"]["Unspecified"];
-            /** @description PRD: "rule rows" */
-            ruleRows?: components["schemas"]["Unspecified"];
-            /** @description PRD: "sample events" */
-            sampleEvents?: components["schemas"]["Unspecified"];
+            draftId: components["schemas"]["Uuid"];
         };
-        /** @description fin.PostingRules.submit result. PRD outputs: "compile and golden results, preview" */
-        PostingRulesSubmitResponse: {
-            /** @description PRD: "compile and golden results" */
-            compileResults?: components["schemas"]["Unspecified"];
-            /** @description PRD: "compile and golden results" */
-            goldenResults?: components["schemas"]["Unspecified"];
-            /** @description PRD: "preview" */
-            preview?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.PostingRules.decide request. PRD inputs: "rule set, rule rows, sample events" */
+        /** @description fin.PostingRules.decide request, decision is APPROVE or REJECT and a rejection needs a comment. */
         PostingRulesDecideRequest: {
-            /** @description PRD: "rule set" */
-            ruleSet?: components["schemas"]["Unspecified"];
-            /** @description PRD: "rule rows" */
-            ruleRows?: components["schemas"]["Unspecified"];
-            /** @description PRD: "sample events" */
-            sampleEvents?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.PostingRules.decide result. PRD outputs: "compile and golden results, preview" */
-        PostingRulesDecideResponse: {
-            /** @description PRD: "compile and golden results" */
-            compileResults?: components["schemas"]["Unspecified"];
-            /** @description PRD: "compile and golden results" */
-            goldenResults?: components["schemas"]["Unspecified"];
-            /** @description PRD: "preview" */
-            preview?: components["schemas"]["Unspecified"];
+            draftId: components["schemas"]["Uuid"];
+            decision: string;
+            comment?: string | null;
         };
         /** @description fin.IntakeException.list result. PRD outputs: "outcomes" */
         IntakeExceptionListItem: Record<string, never>;
@@ -4136,7 +4145,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PostingRulesDraftRequest"];
+                "application/json": components["schemas"]["PostingRulesAuthoringRequest"];
             };
         };
         responses: {
@@ -4146,7 +4155,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PostingRulesDraftResponse"];
+                    "application/json": components["schemas"]["PostingRulesAuthoringResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4180,7 +4189,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PostingRulesCompileRequest"];
+                "application/json": components["schemas"]["PostingRulesAuthoringRequest"];
             };
         };
         responses: {
@@ -4190,7 +4199,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PostingRulesCompileResponse"];
+                    "application/json": components["schemas"]["PostingRulesAuthoringResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4231,7 +4240,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PostingRulesTestRequest"];
+                "application/json": components["schemas"]["PostingRulesAuthoringRequest"];
             };
         };
         responses: {
@@ -4241,7 +4250,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PostingRulesTestResponse"];
+                    "application/json": components["schemas"]["PostingRulesAuthoringResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4282,7 +4291,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PostingRulesPreviewImpactRequest"];
+                "application/json": components["schemas"]["PostingRulesAuthoringRequest"];
             };
         };
         responses: {
@@ -4292,7 +4301,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PostingRulesPreviewImpactResponse"];
+                    "application/json": components["schemas"]["PostingRulesAuthoringResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4336,7 +4345,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PostingRulesSubmitResponse"];
+                    "application/json": components["schemas"]["PostingRulesAuthoringResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];
@@ -4380,7 +4389,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PostingRulesDecideResponse"];
+                    "application/json": components["schemas"]["PostingRulesAuthoringResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];

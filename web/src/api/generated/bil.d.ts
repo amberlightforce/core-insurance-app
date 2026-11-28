@@ -2323,12 +2323,16 @@ export interface components {
             status: "NOT_REQUIRED" | "PENDING" | "CLEARED" | "DEFERRED";
             /** @description Down payment required (REQ-BIL-054) */
             amount?: components["schemas"]["Money"];
+            /** @description The payment plan the down payment was initiated for (the first instalment of this plan is the amount) */
+            planCode?: components["schemas"]["Code"];
         };
         /** @description Typed from REQ-BIL-055. PRD inputs: "job or term; method" */
         DownPaymentInitiateRequest: {
             jobId?: components["schemas"]["Uuid"];
             quoteId?: components["schemas"]["Uuid"];
             method: components["schemas"]["Code"];
+            /** @description Payment plan the down payment is for; the first instalment of this plan is the amount (default ANNUAL, which needs none) */
+            paymentPlanOption?: components["schemas"]["Code"];
         } & (unknown | unknown);
         /** @description Typed from REQ-BIL-055. PRD outputs: "status, amount, reference/QR/link" */
         DownPaymentInitiateResponse: {
@@ -4211,7 +4215,14 @@ export interface operations {
     };
     "bil.BillingAccount.update": {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner

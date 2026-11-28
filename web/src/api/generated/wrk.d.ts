@@ -271,6 +271,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/wrk/v1/admin/patterns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Queue and pattern catalogue
+         * @description Queue and pattern catalogue
+         *
+         *     Outputs: the queues and activity patterns in force
+         */
+        get: operations["wrk.Pattern.list"];
+        /**
+         * Create or change queues and patterns
+         * @description Create or change queues and patterns
+         *
+         *     Inputs: queues and patterns to create or replace (by code). Outputs: the catalogue after the change
+         */
+        put: operations["wrk.Pattern.upsert"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/wrk/v1/exports": {
         parameters: {
             query?: never;
@@ -1299,6 +1327,42 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @description A work queue and the staff roles that may see and claim from it. */
+        WorkQueueDefinition: {
+            code: components["schemas"]["Code"];
+            title: string;
+            roles: string[];
+        };
+        /** @description An activity pattern; changing one creates the next version, running activities keep the version they were created with. */
+        ActivityPatternDefinition: {
+            code: components["schemas"]["Code"];
+            version?: string;
+            title: string;
+            category: string;
+            /** @description NORMAL or HIGH */
+            priority: string;
+            queue: components["schemas"]["Code"];
+            slaPolicy: string;
+            targetMinutes: number;
+            escalationMinutes: number;
+            gateBlocking?: boolean;
+            raisingModules: components["schemas"]["ModuleCode"][];
+            /** @description A user id that new activities of the pattern are offered to when the create request names none (rules still run first). */
+            suggestedAssignee?: string;
+            /** @description Per amount band, a percentage applied to the SLA minutes (for example HIGH 50 halves them). */
+            amountBandMultipliers?: components["schemas"]["OpenObject"];
+            active?: boolean;
+        };
+        /** @description The queues and patterns in force. */
+        PatternCatalogue: {
+            queues?: components["schemas"]["WorkQueueDefinition"][];
+            patterns?: components["schemas"]["ActivityPatternDefinition"][];
+        };
+        /** @description Queues and patterns to create or replace by code. */
+        PatternUpsertRequest: {
+            queues?: components["schemas"]["WorkQueueDefinition"][];
+            patterns?: components["schemas"]["ActivityPatternDefinition"][];
+        };
         /** @description Typed from REQ-WRK-001, REQ-WRK-185. PRD inputs: "pattern code, primary object, secondary objects, overrides, cause ref, suggested assignee, amount band" */
         ActivityCreateRequest: {
             patternCode: components["schemas"]["Code"];
@@ -2609,6 +2673,81 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "wrk.Pattern.list": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatternCatalogue"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "wrk.Pattern.upsert": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatternUpsertRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatternCatalogue"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };

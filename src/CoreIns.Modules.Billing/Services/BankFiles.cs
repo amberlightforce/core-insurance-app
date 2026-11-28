@@ -144,3 +144,143 @@ internal static class Pain001
         return trimmed.Length <= max ? trimmed : trimmed[..max];
     }
 }
+
+/// <summary>One direct debit of a pain.008 file; the IBAN is decrypted for the file only.</summary>
+internal sealed record Pain008Debit(
+    string EndToEndId, decimal Amount, string MandateReference, BusinessDate SignatureDate, string DebtorName, string DebtorIban,
+    string SequenceType, BusinessDate CollectionDate, string? Remittance);
+
+/// <summary>
+/// SEPA Core direct-debit initiation (ISO 20022 pain.008.001.02) of one run (BO-BIL-06b), built deterministically like <see cref="Pain001"/>:
+/// one payment-information block per collection date and sequence type, debits ordered by end-to-end id, fixed-point amounts, so the same
+/// run always yields the same bytes and hash.
+/// </summary>
+internal static class Pain008
+{
+    public const string Namespace = "urn:iso:std:iso:20022:tech:xsd:pain.008.001.02";
+
+    public static string Build(
+        string messageId, Instant createdAt, string creditorName, string creditorId, string creditorIban, IReadOnlyList<Pain008Debit> debits)
+    {
+        ArgumentNullException.ThrowIfNull(debits);
+        var ordered = debits.OrderBy(d => d.EndToEndId, StringComparer.Ordinal).ToList();
+        var settings = new XmlWriterSettings { Encoding = new UTF8Encoding(false), Indent = true, OmitXmlDeclaration = false, NewLineChars = "\n" };
+        using var buffer = new MemoryStream();
+        using (var xml = XmlWriter.Create(buffer, settings))
+        {
+            xml.WriteStartDocument();
+            xml.WriteStartElement("Document", Namespace);
+            xml.WriteStartElement("CstmrDrctDbtInitn");
+
+            xml.WriteStartElement("GrpHdr");
+            xml.WriteElementString("MsgId", messageId);
+            xml.WriteElementString("CreDtTm", createdAt.ToString());
+            xml.WriteElementString("NbOfTxs", ordered.Count.ToString(CultureInfo.InvariantCulture));
+            xml.WriteElementString("CtrlSum", Pain001.Amount(ordered.Sum(d => d.Amount)));
+            xml.WriteStartElement("InitgPty");
+            xml.WriteElementString("Nm", Text(creditorName, 70));
+            xml.WriteEndElement();
+            xml.WriteEndElement();
+
+            var blockNo = 0;
+            foreach (var block in ordered.GroupBy(d => (d.CollectionDate, d.SequenceType)).OrderBy(g => g.Key.CollectionDate.ToString(), StringComparer.Ordinal).ThenBy(g => g.Key.SequenceType, StringComparer.Ordinal))
+            {
+                blockNo++;
+                xml.WriteStartElement("PmtInf");
+                xml.WriteElementString("PmtInfId", Text(messageId + "-" + blockNo.ToString(CultureInfo.InvariantCulture), 35));
+                xml.WriteElementString("PmtMtd", "DD");
+                xml.WriteElementString("NbOfTxs", block.Count().ToString(CultureInfo.InvariantCulture));
+                xml.WriteElementString("CtrlSum", Pain001.Amount(block.Sum(d => d.Amount)));
+                xml.WriteStartElement("PmtTpInf");
+                xml.WriteStartElement("SvcLvl");
+                xml.WriteElementString("Cd", "SEPA");
+                xml.WriteEndElement();
+                xml.WriteStartElement("LclInstrm");
+                xml.WriteElementString("Cd", "CORE");
+                xml.WriteEndElement();
+                xml.WriteElementString("SeqTp", block.Key.SequenceType);
+                xml.WriteEndElement();
+                xml.WriteElementString("ReqdColltnDt", block.Key.CollectionDate.ToString());
+                xml.WriteStartElement("Cdtr");
+                xml.WriteElementString("Nm", Text(creditorName, 70));
+                xml.WriteEndElement();
+                xml.WriteStartElement("CdtrAcct");
+                xml.WriteStartElement("Id");
+                xml.WriteElementString("IBAN", creditorIban);
+                xml.WriteEndElement();
+                xml.WriteEndElement();
+                xml.WriteStartElement("CdtrAgt");
+                xml.WriteStartElement("FinInstnId");
+                xml.WriteElementString("Othr", "NOTPROVIDED");
+                xml.WriteEndElement();
+                xml.WriteEndElement();
+                xml.WriteElementString("ChrgBr", "SLEV");
+                xml.WriteStartElement("CdtrSchmeId");
+                xml.WriteStartElement("Id");
+                xml.WriteStartElement("PrvtId");
+                xml.WriteStartElement("Othr");
+                xml.WriteElementString("Id", creditorId);
+                xml.WriteStartElement("SchmeNm");
+                xml.WriteElementString("Prtry", "SEPA");
+                xml.WriteEndElement();
+                xml.WriteEndElement();
+                xml.WriteEndElement();
+                xml.WriteEndElement();
+                xml.WriteEndElement();
+
+                foreach (var d in block)
+                {
+                    xml.WriteStartElement("DrctDbtTxInf");
+                    xml.WriteStartElement("PmtId");
+                    xml.WriteElementString("EndToEndId", Text(d.EndToEndId, 35));
+                    xml.WriteEndElement();
+                    xml.WriteStartElement("InstdAmt");
+                    xml.WriteAttributeString("Ccy", "EUR");
+                    xml.WriteString(Pain001.Amount(d.Amount));
+                    xml.WriteEndElement();
+                    xml.WriteStartElement("DrctDbtTx");
+                    xml.WriteStartElement("MndtRltdInf");
+                    xml.WriteElementString("MndtId", Text(d.MandateReference, 35));
+                    xml.WriteElementString("DtOfSgntr", d.SignatureDate.ToString());
+                    xml.WriteEndElement();
+                    xml.WriteEndElement();
+                    xml.WriteStartElement("DbtrAgt");
+                    xml.WriteStartElement("FinInstnId");
+                    xml.WriteElementString("Othr", "NOTPROVIDED");
+                    xml.WriteEndElement();
+                    xml.WriteEndElement();
+                    xml.WriteStartElement("Dbtr");
+                    xml.WriteElementString("Nm", Text(d.DebtorName, 70));
+                    xml.WriteEndElement();
+                    xml.WriteStartElement("DbtrAcct");
+                    xml.WriteStartElement("Id");
+                    xml.WriteElementString("IBAN", d.DebtorIban);
+                    xml.WriteEndElement();
+                    xml.WriteEndElement();
+                    if (!string.IsNullOrWhiteSpace(d.Remittance))
+                    {
+                        xml.WriteStartElement("RmtInf");
+                        xml.WriteElementString("Ustrd", Text(d.Remittance, 140));
+                        xml.WriteEndElement();
+                    }
+
+                    xml.WriteEndElement();
+                }
+
+                xml.WriteEndElement();
+            }
+
+            xml.WriteEndElement();
+            xml.WriteEndElement();
+            xml.WriteEndDocument();
+        }
+
+        return Encoding.UTF8.GetString(buffer.ToArray());
+    }
+
+    private static string Text(string value, int max)
+    {
+        var trimmed = value.Trim();
+        return trimmed.Length <= max ? trimmed : trimmed[..max];
+    }
+}

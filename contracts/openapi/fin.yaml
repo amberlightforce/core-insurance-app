@@ -6701,15 +6701,15 @@ components:
       description: Request of draft, compile, test and previewImpact; ruleRows and sampleEvents default to the stored draft.
       properties:
         ruleSet:
-          $ref: #/components/schemas/PostingRuleSetRef
+          $ref: '#/components/schemas/PostingRuleSetRef'
         ruleRows:
           type: array
           items:
-            $ref: #/components/schemas/PostingRuleRowInput
+            $ref: '#/components/schemas/PostingRuleRowInput'
         sampleEvents:
           type: array
           items:
-            $ref: #/components/schemas/PostingRuleSampleEvent
+            $ref: '#/components/schemas/PostingRuleSampleEvent'
         limit:
           oneOf:
           - type: integer
@@ -6827,7 +6827,7 @@ components:
         cases:
           type: array
           items:
-            $ref: #/components/schemas/PostingRuleGoldenCase
+            $ref: '#/components/schemas/PostingRuleGoldenCase'
     PostingRuleImpactLine:
       type: object
       description: A replayed line whose rule or account would change.
@@ -6888,26 +6888,26 @@ components:
         differences:
           type: array
           items:
-            $ref: #/components/schemas/PostingRuleImpactLine
+            $ref: '#/components/schemas/PostingRuleImpactLine'
     PostingRulesAuthoringResponse:
       type: object
       description: Result of an authoring operation; the parts an operation does not produce are null.
       properties:
         draft:
           oneOf:
-          - $ref: #/components/schemas/PostingRuleDraftView
+          - $ref: '#/components/schemas/PostingRuleDraftView'
           - type: 'null'
         compileResults:
           oneOf:
-          - $ref: #/components/schemas/PostingRuleCompileResult
+          - $ref: '#/components/schemas/PostingRuleCompileResult'
           - type: 'null'
         goldenResults:
           oneOf:
-          - $ref: #/components/schemas/PostingRuleGoldenResult
+          - $ref: '#/components/schemas/PostingRuleGoldenResult'
           - type: 'null'
         preview:
           oneOf:
-          - $ref: #/components/schemas/PostingRuleImpactResult
+          - $ref: '#/components/schemas/PostingRuleImpactResult'
           - type: 'null'
     PostingRulesSubmitRequest:
       type: object
