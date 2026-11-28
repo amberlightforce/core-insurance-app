@@ -8,11 +8,102 @@ namespace CoreIns.Modules.Claims.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CoverageDecideResponse
 {
-    /// <summary>PRD: "decision record"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("decisionRecord")]
+    /// <summary>Contract member 'claimId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ClaimId ClaimId { get; init; }
+
+    /// <summary>Contract member 'exposureId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("exposureId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ExposureId ExposureId { get; init; }
+
+    /// <summary>Contract member 'outcome'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    public required OutcomeValue Outcome { get; init; }
+
+    /// <summary>Contract member 'coverageIndication'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("coverageIndication")]
+    public required CoverageIndicationValue CoverageIndication { get; init; }
+
+    /// <summary>Contract member 'coverageDecision'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("coverageDecision")]
+    public required CoverageDecisionValue CoverageDecision { get; init; }
+
+    /// <summary>The claim's status after the decision (OPEN)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimStatus")]
+    public required string ClaimStatus { get; init; }
+
+    /// <summary>UNDER_INVESTIGATION after a reservation of rights, otherwise unchanged</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimSubStatus")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DecisionRecord { get; init; }
+    public string? ClaimSubStatus { get; init; }
+
+    /// <summary>True while another open exposure of the claim still has its cover in question</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("coverageInQuestion")]
+    public required bool CoverageInQuestion { get; init; }
+
+    /// <summary>Contract member 'decidedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decidedAt")]
+    public required global::CoreIns.SharedKernel.Instant DecidedAt { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum OutcomeValue
+    {
+        /// <summary><c>COVERED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("COVERED")]
+        Covered,
+
+        /// <summary><c>DENIED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DENIED")]
+        Denied,
+
+        /// <summary><c>RESERVATION_OF_RIGHTS</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RESERVATION_OF_RIGHTS")]
+        ReservationOfRights,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<CoverageIndicationValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum CoverageIndicationValue
+    {
+        /// <summary><c>COVERED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("COVERED")]
+        Covered,
+
+        /// <summary><c>NOT_COVERED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NOT_COVERED")]
+        NotCovered,
+
+        /// <summary><c>IN_QUESTION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("IN_QUESTION")]
+        InQuestion,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<CoverageDecisionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum CoverageDecisionValue
+    {
+        /// <summary><c>PENDING</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PENDING")]
+        Pending,
+
+        /// <summary><c>COVERED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("COVERED")]
+        Covered,
+
+        /// <summary><c>COVERED_WITH_RESERVATION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("COVERED_WITH_RESERVATION")]
+        CoveredWithReservation,
+
+        /// <summary><c>PARTIALLY_COVERED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PARTIALLY_COVERED")]
+        PartiallyCovered,
+
+        /// <summary><c>NOT_COVERED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NOT_COVERED")]
+        NotCovered,
+    }
 }

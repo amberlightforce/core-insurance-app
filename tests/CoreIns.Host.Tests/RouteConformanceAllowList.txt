@@ -228,7 +228,6 @@ CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/issue
 CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/request
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/schedule
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/send
-CONTRACT_NOT_SERVED POST /api/clm/v1/coverage/decide
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/purge
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/rectify

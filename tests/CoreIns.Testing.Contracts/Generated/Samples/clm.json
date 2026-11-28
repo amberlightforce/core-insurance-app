@@ -1632,12 +1632,22 @@
       "messageStatus": "unspecified"
     },
     "CoverageDecideRequest": {
-      "decision": "unspecified",
-      "reasons": "unspecified",
-      "adopt": "unspecified"
+      "claimId": "01921c36-de9f-7181-8ba9-8e8a93c8e0d0",
+      "exposureId": "019204c5-df89-76b3-8680-95e5e3f55538",
+      "outcome": "COVERED",
+      "reasonCode": "SAMPLE_CODE",
+      "comment": "Sample text"
     },
     "CoverageDecideResponse": {
-      "decisionRecord": "unspecified"
+      "claimId": "0192776c-e01b-7b3b-8520-d56580b04bc9",
+      "exposureId": "01923b2d-c352-7dde-8e41-0fd3e0fbdda9",
+      "outcome": "COVERED",
+      "coverageIndication": "COVERED",
+      "coverageDecision": "PENDING",
+      "claimStatus": "sample",
+      "claimSubStatus": "sample",
+      "coverageInQuestion": true,
+      "decidedAt": "2026-10-07T09:00:00Z"
     },
     "CoverageIndication": {
       "coverageCode": "SAMPLE_CODE",

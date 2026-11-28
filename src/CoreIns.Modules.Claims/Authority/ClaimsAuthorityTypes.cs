@@ -22,6 +22,9 @@ public static class ClaimsAuthorityTypes
     public static AuthorityTypeCode RecoveryWriteOff { get; } = AuthorityTypeCode.Parse("CLM.RECOVERY_WRITEOFF");
     public static AuthorityTypeCode FsNetSettlement { get; } = AuthorityTypeCode.Parse("CLM.FS_NET_SETTLEMENT");
 
+    /// <summary>Coverage decision (amount: the open reserve of the exposure; BO-CLM-03).</summary>
+    public static AuthorityTypeCode CoverageDecision { get; } = AuthorityTypeCode.Parse("CLM.COVERAGE_DECISION");
+
     /// <summary>The money dimension.</summary>
     public const string AmountDimension = "amount";
 
@@ -43,6 +46,9 @@ public static class ClaimsAuthorityTypes
         new AuthorityTypeDefinition(
             FsNetSettlement, ModuleCode.CLM, new LocalizedText("Καθαρός φιλικός διακανονισμός", "Friendly settlement net"),
             [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money), new AuthorityDimensionDefinition(CostTypeDimension, DimensionKind.Code)]),
+        new AuthorityTypeDefinition(
+            CoverageDecision, ModuleCode.CLM, new LocalizedText("Απόφαση κάλυψης", "Coverage decision"),
+            [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
     ];
 
     /// <summary>Registers the claims authority types.</summary>

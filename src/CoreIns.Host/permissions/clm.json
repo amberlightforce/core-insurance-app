@@ -29,6 +29,7 @@
         "clm.PayeeAccount.capture": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.PayeeAccount.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.Coverage.reverify": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Coverage.decide": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.FriendlySettlement.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
         "clm.FriendlySettlement.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
         "clm.FriendlySettlement.evaluate": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist" ],
@@ -64,6 +65,8 @@
       "Grants": [
         { "Id": "clm-recovery-writeoff-illustrative", "Role": "Staff.RecoverySpecialist", "Type": "CLM.RECOVERY_WRITEOFF", "Illustrative": true, "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ] },
         { "Id": "clm-manager-writeoff-illustrative", "Role": "Staff.ClaimsManager", "Type": "CLM.RECOVERY_WRITEOFF", "Illustrative": true, "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "50000.00", "Currency": "EUR" } ] },
+        { "Id": "clm-handler-coverage-illustrative", "Role": "Staff.ClaimsHandler", "Type": "CLM.COVERAGE_DECISION", "Illustrative": true, "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "10000.00", "Currency": "EUR" } ] },
+        { "Id": "clm-manager-coverage-illustrative", "Role": "Staff.ClaimsManager", "Type": "CLM.COVERAGE_DECISION", "Illustrative": true, "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ] },
         { "Id": "clm-recovery-fsnet-illustrative", "Role": "Staff.RecoverySpecialist", "Type": "CLM.FS_NET_SETTLEMENT", "Illustrative": true, "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "50000.00", "Currency": "EUR" } ] },
         { "Id": "clm-manager-fsnet-illustrative", "Role": "Staff.ClaimsManager", "Type": "CLM.FS_NET_SETTLEMENT", "Illustrative": true, "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ] },
         {
