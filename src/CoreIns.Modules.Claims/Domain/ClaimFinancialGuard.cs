@@ -38,6 +38,17 @@ internal sealed class DerivedClaimFinancials(Queries.FinancialsReader reader) : 
     }
 }
 
+/// <summary>The payment gate of an exposure whose cover a coverage decision denied (BO-CLM-03, <c>clm.Coverage.decide</c> DENIED).</summary>
+internal static class CoverageDenialGuard
+{
+    /// <summary>True when the exposure's coverage decision is NOT_COVERED: no new payment set may be built for it.</summary>
+    public static bool IsDenied(Persistence.ExposureRow exposure)
+    {
+        ArgumentNullException.ThrowIfNull(exposure);
+        return exposure.CoverageDecision == Codes.Of(CoverageDecisionCode.NotCovered);
+    }
+}
+
 /// <summary>The close guard rule itself (pure; REQ-CLM-072): an exposure may close only with zero open reserve and no payment pending.</summary>
 internal static class CloseGuard
 {

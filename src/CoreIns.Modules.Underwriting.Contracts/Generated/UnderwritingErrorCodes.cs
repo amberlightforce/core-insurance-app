@@ -56,6 +56,12 @@ public static class UnderwritingErrorCodes
     /// </remarks>
     public const string IdempotencyMismatch = "UW-ERR-IDEMPOTENCY-MISMATCH";
 
+    /// <summary>UW-ERR-ISSUE-NOT-FOUND (HTTP 404).</summary>
+    /// <remarks>
+    /// <para>Declared by 5 operation(s): uw.Issue.addManual, uw.Issue.close, uw.Issue.decide, uw.Issue.reopen, uw.Referral.get.</para>
+    /// </remarks>
+    public const string IssueNotFound = "UW-ERR-ISSUE-NOT-FOUND";
+
     /// <summary>UW-ERR-ISSUE-TRANSITION (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 4 operation(s): uw.Issue.addManual, uw.Issue.close, uw.Issue.decide, uw.Issue.reopen.</para>
@@ -85,12 +91,6 @@ public static class UnderwritingErrorCodes
     /// <para>Declared by 1 operation(s): uw.Decline.requestReview.</para>
     /// </remarks>
     public const string NotAutomated = "UW-ERR-NOT-AUTOMATED";
-
-    /// <summary>UW-ERR-NOT-FOUND (HTTP 404).</summary>
-    /// <remarks>
-    /// <para>Declared by 2 operation(s): uw.Issue.decide, uw.Referral.get.</para>
-    /// </remarks>
-    public const string NotFound = "UW-ERR-NOT-FOUND";
 
     /// <summary>UW-ERR-NOT-REFERRABLE (HTTP 422).</summary>
     /// <remarks>
@@ -172,7 +172,7 @@ public static class UnderwritingErrorCodes
 
     /// <summary>UW-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 7 operation(s): uw.Issue.decide, uw.Referral.referUp, uw.Referral.request, uw.Referral.requestInformation, uw.Referral.withdraw, uw.Review.lock, uw.Review.release.</para>
+    /// <para>Declared by 10 operation(s): uw.Issue.addManual, uw.Issue.close, uw.Issue.decide, uw.Issue.reopen, uw.Referral.referUp, uw.Referral.request, uw.Referral.requestInformation, uw.Referral.withdraw, uw.Review.lock, uw.Review.release.</para>
     /// </remarks>
     public const string Stale = "UW-ERR-STALE";
 
@@ -210,7 +210,7 @@ public static class UnderwritingErrorCodes
     public const string Prefix = "UW-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AuthorityDenied, AuthorityRefer, CodeDuplicate, ConsentMissing, Duplicate, EvalUnavailable, HumanDecisionRequired, IdempotencyMismatch, IssueTransition, LicenceInvalid, LimitExceeded, LockedByOther, NotAutomated, NotFound, NotReferrable, NoticeDeadlinePassed, PackRuleMissing, Permission, ProtectedInput, ProviderInactive, ReasonRequired, ReviewOpen, RiUnavailable, RuleUntested, RulesetUnresolved, Snapshot, Sod, Stale, State, TableUnresolved, TranslationMissing, UnverifiedValues, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AuthorityDenied, AuthorityRefer, CodeDuplicate, ConsentMissing, Duplicate, EvalUnavailable, HumanDecisionRequired, IdempotencyMismatch, IssueNotFound, IssueTransition, LicenceInvalid, LimitExceeded, LockedByOther, NotAutomated, NotReferrable, NoticeDeadlinePassed, PackRuleMissing, Permission, ProtectedInput, ProviderInactive, ReasonRequired, ReviewOpen, RiUnavailable, RuleUntested, RulesetUnresolved, Snapshot, Sod, Stale, State, TableUnresolved, TranslationMissing, UnverifiedValues, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -223,12 +223,12 @@ public static class UnderwritingErrorCodes
         [EvalUnavailable] = 503,
         [HumanDecisionRequired] = 422,
         [IdempotencyMismatch] = 409,
+        [IssueNotFound] = 404,
         [IssueTransition] = 422,
         [LicenceInvalid] = 422,
         [LimitExceeded] = 422,
         [LockedByOther] = 409,
         [NotAutomated] = 422,
-        [NotFound] = 404,
         [NotReferrable] = 422,
         [NoticeDeadlinePassed] = 422,
         [PackRuleMissing] = 422,

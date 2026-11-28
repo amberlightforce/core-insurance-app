@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Issue.addManual result. PRD outputs: "issue"</summary>
+/// <summary>uw.Issue.addManual result: the new Open issue.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record IssueAddManualResponse
 {
-    /// <summary>PRD: "issue"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'issue'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("issue")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Issue { get; init; }
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.IssueListItem Issue { get; init; }
 }

@@ -4,42 +4,46 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Coverage.decide request. PRD inputs: "decision, reasons; adopt or keep"</summary>
-/// <remarks>
-/// <para>Exactly one of: adopt | keep.</para>
-/// </remarks>
+/// <summary>clm.Coverage.decide request (BO-CLM-03, REQ-CLM-002, -051, -058). A human decides the cover of one exposure: COVERED, DENIED (no new payments on the exposure) or RESERVATION_OF_RIGHTS (the claim moves to UnderInvestigation). Refused while a re-verification is pending on the claim. PRD inputs: "decision, reasons; adopt or keep".</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CoverageDecideRequest
 {
-    /// <summary>PRD: "decision"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Decision { get; init; }
+    /// <summary>Contract member 'claimId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("claimId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ClaimId ClaimId { get; init; }
 
-    /// <summary>PRD: "reasons"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reasons")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reasons { get; init; }
+    /// <summary>Contract member 'exposureId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("exposureId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ExposureId ExposureId { get; init; }
 
-    /// <summary>PRD: "adopt or keep" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("adopt")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Adopt { get; init; }
+    /// <summary>Contract member 'outcome'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    public required OutcomeValue Outcome { get; init; }
 
-    /// <summary>PRD: "adopt or keep" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("keep")]
+    /// <summary>Reason from the configured list; PRD "reasons"</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
+    public required string ReasonCode { get; init; }
+
+    /// <summary>Contract member 'comment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Keep { get; init; }
+    public string? Comment { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum OutcomeValue
+    {
+        /// <summary><c>COVERED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("COVERED")]
+        Covered,
+
+        /// <summary><c>DENIED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DENIED")]
+        Denied,
+
+        /// <summary><c>RESERVATION_OF_RIGHTS</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RESERVATION_OF_RIGHTS")]
+        ReservationOfRights,
+    }
 }

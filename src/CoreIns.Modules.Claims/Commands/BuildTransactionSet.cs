@@ -137,6 +137,12 @@ internal sealed class BuildTransactionSetHandler(
 
             if (kind == TransactionKind.Payment)
             {
+                // BO-CLM-03: a denied exposure takes no new payment set (reserves stay possible).
+                if (CoverageDenialGuard.IsDenied(exposure))
+                {
+                    return DomainError.Of(ModuleCode.CLM, "COVERAGE-DENIED", $"Cover for exposure {exposure.ExposureNumber} was denied; no payment.");
+                }
+
                 // REQ-CLM-058 / D-SL3-03 d: cover removed (or never established) and no coverage decision yet → no new payment.
                 if (CoverageGuard.IsInQuestion(claim, exposure))
                 {

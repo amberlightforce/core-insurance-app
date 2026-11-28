@@ -88,6 +88,19 @@ public static class UnderwritingModule
         services.AddCommand<DecideIssues, IssueDecideResponse, DecideIssuesHandler>(CommandDescriptor.For("uw.Issue.decide") with { SupportsDryRun = true });
         services.AddScoped<UnderwritingIssueQueries>();
 
+        // BO-UW-04: issue lifecycle (reopen, manual issues, close).
+        services.AddScoped<IssueLifecycleStore>();
+        services.AddScoped<IssueLifecycleSupport>();
+        services.AddScoped<IValidator<ReopenIssue>, ReopenIssueValidator>();
+        services.AddScoped<IValidator<AddManualIssue>, AddManualIssueValidator>();
+        services.AddScoped<IValidator<CloseIssue>, CloseIssueValidator>();
+        services.AddCommandAuditor<ReopenIssue, IssueReopenResponse, IssueLifecycleAuditor<ReopenIssue, IssueReopenResponse>>();
+        services.AddCommandAuditor<AddManualIssue, IssueAddManualResponse, IssueLifecycleAuditor<AddManualIssue, IssueAddManualResponse>>();
+        services.AddCommandAuditor<CloseIssue, IssueCloseResponse, IssueLifecycleAuditor<CloseIssue, IssueCloseResponse>>();
+        services.AddCommand<ReopenIssue, IssueReopenResponse, ReopenIssueHandler>(CommandDescriptor.For("uw.Issue.reopen"));
+        services.AddCommand<AddManualIssue, IssueAddManualResponse, AddManualIssueHandler>(CommandDescriptor.For("uw.Issue.addManual"));
+        services.AddCommand<CloseIssue, IssueCloseResponse, CloseIssueHandler>(CommandDescriptor.For("uw.Issue.close"));
+
         // BO-UW-03: batch evaluation (no effect on jobs) and the issue reads.
         services.AddScoped<IValidator<EvaluateRulesBatch>, EvaluateRulesBatchValidator>();
         services.AddCommandAuditor<EvaluateRulesBatch, RulesEvaluateBatchResponse, EvaluateRulesBatchAuditor>();

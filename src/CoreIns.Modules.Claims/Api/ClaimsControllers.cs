@@ -30,6 +30,7 @@ internal static class ClaimsPermissions
     public const string ExposureClose = "clm.Exposure.close";
     public const string ExposureReopen = "clm.Exposure.reopen";
     public const string CoverageReverify = "clm.Coverage.reverify";
+    public const string CoverageDecide = "clm.Coverage.decide";
     public const string ClaimUpdate = "clm.Claim.update";
     public const string ClaimReopen = "clm.Claim.reopen";
     public const string ClaimMerge = "clm.Claim.merge";

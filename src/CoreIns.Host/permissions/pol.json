@@ -17,6 +17,8 @@
         "pol.Segment.changes": [ "Staff.Underwriter", "Staff.Billing", "Staff.Finance", "Staff.ReinsuranceAccountant", "Platform.Admin" ],
         "pol.cancel": [ "Staff.Underwriter" ],
         "pol.Cancellation.create": [ "Staff.Underwriter" ],
+        "pol.Suspension.create": [ "Staff.Underwriter" ],
+        "pol.Reactivation.create": [ "Staff.Underwriter" ],
         "pol.Withdrawal.submit": [ "Staff.Underwriter" ],
         "pol.renewal.manage": [ "Staff.Underwriter" ],
         "pol.Renewal.create": [ "Staff.Underwriter" ],
