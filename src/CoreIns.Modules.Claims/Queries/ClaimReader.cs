@@ -195,6 +195,41 @@ internal sealed class ClaimReader(DbSession session, ClaimProtection protection,
         };
     }
 
+    /// <summary>
+    /// The claims of one insured party for a claims-history certificate (BO-CLM-07): matched by party id, loss date within
+    /// [<paramref name="from"/>, <paramref name="to"/>], optionally limited to <paramref name="policyNumbers"/>. Draft claims and claims
+    /// closed WITHDRAWN or DUPLICATE are left out, and so is every claim of a party under a data-subject restriction of the claim file
+    /// (<c>clm.dsar_restriction</c>). Oldest loss first; no free text is read.
+    /// </summary>
+    public async Task<IReadOnlyList<CertificateClaimLine>> CertificateClaimsAsync(
+        LegalEntityId legalEntity, PartyId party, BusinessDate from, BusinessDate to, IReadOnlyCollection<string> policyNumbers, CancellationToken cancellationToken)
+    {
+        var connection = await session.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+        var rows = await connection.QueryAsync<(string ClaimNumber, string PolicyNumber, string LossDate, string LossCause, string Status, string? Outcome)>(new CommandDefinition(
+            """
+            SELECT c.claim_number, c.policy_number, c.loss_date::text, c.loss_cause, c.status, c.outcome
+              FROM clm.claim c
+             WHERE c.legal_entity_id = @le AND c.insured_party_id = @party
+               AND c.status <> 'DRAFT'
+               AND (c.outcome IS NULL OR c.outcome NOT IN ('WITHDRAWN', 'DUPLICATE'))
+               AND c.loss_date BETWEEN @from::date AND @to::date
+               AND (cardinality(@policies) = 0 OR c.policy_number = ANY(@policies))
+               AND NOT EXISTS (SELECT 1 FROM clm.dsar_restriction d WHERE d.subject_party_id = c.insured_party_id AND d.record_class = @recordClass)
+             ORDER BY c.loss_date, c.claim_number
+            """,
+            new { le = legalEntity.Value, party = party.Value, from = from.ToString(), to = to.ToString(), policies = policyNumbers.ToArray(), recordClass = CoreIns.SharedKernel.Dsar.DsarRetentionPolicy.ClaimFile },
+            session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
+        return [.. rows.Select(r => new CertificateClaimLine
+        {
+            ClaimNumber = ClaimNumber.Parse(r.ClaimNumber),
+            PolicyNumber = PolicyNumber.Parse(r.PolicyNumber),
+            LossDate = BusinessDate.Parse(r.LossDate),
+            LossCause = r.LossCause,
+            Status = r.Status,
+            Outcome = r.Outcome,
+        })];
+    }
+
     /// <summary>Probable duplicates (REQ-CLM-041): same policy, loss date within the window, same loss cause.</summary>
     public async Task<IReadOnlyList<DuplicateCandidate>> DuplicateCandidatesAsync(
         LegalEntityId legalEntity, Guid policyId, BusinessDate lossDate, string lossCause, int windowDays, CancellationToken cancellationToken)

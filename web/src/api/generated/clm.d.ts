@@ -2877,47 +2877,57 @@ export interface components {
             /** @description PRD: "agreement → clock start" */
             agreementClockStart?: components["schemas"]["Unspecified"];
         };
-        /** @description clm.Certificate.request request. PRD inputs: "requester, policies, period" */
+        /** @description One claim on the claims-history certificate (BO-CLM-07). No AFM, no free text; matched by party id. */
+        CertificateClaimLine: {
+            claimNumber: components["schemas"]["BusinessNumber"];
+            policyNumber: components["schemas"]["BusinessNumber"];
+            lossDate: components["schemas"]["LocalDate"];
+            lossCause: components["schemas"]["Code"];
+            status: string;
+            outcome?: components["schemas"]["Code"] | null;
+        };
+        /** @description A claims-history certificate (BO-CLM-07, REQ-CLM-008). legalStatus is Unverified until the look-back value is confirmed in MKT; an unconfirmed certificate cannot be issued in Production. */
+        CertificateView: {
+            certificateId: components["schemas"]["Uuid"];
+            certificateNumber?: components["schemas"]["BusinessNumber"] | null;
+            requesterPartyId: components["schemas"]["Uuid"];
+            policyNumbers: components["schemas"]["BusinessNumber"][];
+            periodFrom: components["schemas"]["LocalDate"];
+            periodTo: components["schemas"]["LocalDate"];
+            lookbackYears: number;
+            legalStatus: string;
+            /** @enum {string} */
+            status: "REQUESTED" | "ASSEMBLED" | "ISSUED";
+            claims: components["schemas"]["CertificateClaimLine"][];
+            documentId?: components["schemas"]["Uuid"] | null;
+            issuedAt?: components["schemas"]["Instant"] | null;
+            recordVersion: number;
+        };
+        /** @description clm.Certificate.request request: the requester is a party id; no policy numbers means every policy of the requester; no period means the look-back window ending today */
         CertificateRequestRequest: {
-            /** @description PRD: "requester" */
-            requester?: components["schemas"]["Unspecified"];
-            /** @description PRD: "policies" */
-            policies?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            requesterPartyId: components["schemas"]["Uuid"];
+            policyNumbers?: components["schemas"]["BusinessNumber"][];
+            periodFrom?: components["schemas"]["LocalDate"] | null;
+            periodTo?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description clm.Certificate.request result. PRD outputs: "certificate" */
         CertificateRequestResponse: {
-            /** @description PRD: "certificate" */
-            certificate?: components["schemas"]["Unspecified"];
+            certificate: components["schemas"]["CertificateView"];
         };
-        /** @description clm.Certificate.assemble request. PRD inputs: "requester, policies, period" */
+        /** @description clm.Certificate.assemble request: collects the requester's claims of the period (withdrawn, duplicate and draft claims and claims restricted for a data-subject request are left out); may be repeated until issued */
         CertificateAssembleRequest: {
-            /** @description PRD: "requester" */
-            requester?: components["schemas"]["Unspecified"];
-            /** @description PRD: "policies" */
-            policies?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            certificateId: components["schemas"]["Uuid"];
         };
-        /** @description clm.Certificate.assemble result. PRD outputs: "certificate" */
         CertificateAssembleResponse: {
-            /** @description PRD: "certificate" */
-            certificate?: components["schemas"]["Unspecified"];
+            certificate: components["schemas"]["CertificateView"];
         };
-        /** @description clm.Certificate.issue request. PRD inputs: "requester, policies, period" */
+        /** @description clm.Certificate.issue request: issues an assembled certificate once (numbers it, renders DT-CLAIMS-HISTORY, publishes ClaimsHistoryCertificateIssued); a repeat returns the issued certificate */
         CertificateIssueRequest: {
-            /** @description PRD: "requester" */
-            requester?: components["schemas"]["Unspecified"];
-            /** @description PRD: "policies" */
-            policies?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
+            certificateId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            language?: "el" | "en";
         };
-        /** @description clm.Certificate.issue result. PRD outputs: "certificate" */
         CertificateIssueResponse: {
-            /** @description PRD: "certificate" */
-            certificate?: components["schemas"]["Unspecified"];
+            certificate: components["schemas"]["CertificateView"];
         };
         /** @description Claim tracking view (BO-CLM-08, REQ-CLM-009); derived from the claim and its approved financials, no stored state of its own */
         ClaimTrackingView: {
@@ -3463,12 +3473,6 @@ export interface components {
             nextCursor: string | null;
             limit?: number;
         };
-        /**
-         * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
-         *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
-         *     members until then.
-         */
-        Unspecified: unknown;
         Text: string;
         /** @description ISO 4217 alphabetic code. */
         CurrencyCode: string;
@@ -3479,6 +3483,12 @@ export interface components {
         };
         /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
         Sha256: string;
+        /**
+         * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
+         *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
+         *     members until then.
+         */
+        Unspecified: unknown;
         /** @description Date period; `to` is null when open-ended. */
         DatePeriod: {
             from: components["schemas"]["LocalDate"];

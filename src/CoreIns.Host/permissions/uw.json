@@ -17,6 +17,13 @@
         "uw.Issue.explain": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Issue.listForChannel": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Approval.history": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        // BO-UW-07: declines and the refusal register. The second pair of eyes (decideReview) and the register are for managers.
+        "uw.Decline.create": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Decline.get": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Decline.requestReview": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Decline.decideReview": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.RefusalRegister.query": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.RefusalRegister.export": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Referral.list": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Referral.get": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         // BO-UW-05: referral commands and the review lock. Deciding stays with uw.Issue.decide and the UW.ISSUE_APPROVAL authority.

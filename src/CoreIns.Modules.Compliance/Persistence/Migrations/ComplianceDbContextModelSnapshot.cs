@@ -929,6 +929,70 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
                     b.ToTable("legacy_fiscal_mark", "cmp");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Reconciliation.FiscalReconciliationBreakRow", b =>
+                {
+                    b.Property<Guid>("BreakId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("break_id");
+
+                    b.Property<string>("Detail")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("detail");
+
+                    b.Property<DateTime>("DetectedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("detected_at");
+
+                    b.Property<Guid>("FiscalDocumentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("fiscal_document_id");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<DateTime>("LastSeenAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("last_seen_at");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<DateOnly>("RunDate")
+                        .HasColumnType("date")
+                        .HasColumnName("run_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("BreakId")
+                        .HasName("pk_fiscal_reconciliation_break");
+
+                    b.HasIndex("LegalEntityId", "Status")
+                        .HasDatabaseName("ix_fiscal_reconciliation_break_status");
+
+                    b.HasIndex("LegalEntityId", "FiscalDocumentId", "Kind")
+                        .IsUnique()
+                        .HasDatabaseName("ux_fiscal_reconciliation_break_doc_kind");
+
+                    b.ToTable("fiscal_reconciliation_break", "cmp", t =>
+                        {
+                            t.HasCheckConstraint("ck_fiscal_reconciliation_break_kind", "kind IN ('REJECTED_BY_CHANNEL','PENDING_AT_CHANNEL','MARK_MISSING','CORRELATION_BROKEN')");
+
+                            t.HasCheckConstraint("ck_fiscal_reconciliation_break_status", "status IN ('OPEN','RESOLVED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Compliance.Submissions.SubmissionHistoryRow", b =>
                 {
                     b.Property<Guid>("HistoryId")

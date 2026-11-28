@@ -109,14 +109,12 @@ CONTRACT_NOT_SERVED GET /api/ri/v1/facs
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/ifrs17-links/query
 CONTRACT_NOT_SERVED GET /api/uw/v1/contingencies
-CONTRACT_NOT_SERVED GET /api/uw/v1/declines/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/disclosure-findings
 CONTRACT_NOT_SERVED GET /api/uw/v1/disclosure-findings/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/external-reports
 CONTRACT_NOT_SERVED GET /api/uw/v1/external-reports/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/inspections/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/intakes/{}
-CONTRACT_NOT_SERVED GET /api/uw/v1/refusal-registers/query
 CONTRACT_NOT_SERVED GET /api/uw/v1/renewal-directions/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/desktop/get
 CONTRACT_NOT_SERVED GET /api/wrk/v1/inbound-documents
@@ -204,9 +202,6 @@ CONTRACT_NOT_SERVED POST /api/chn/v1/webhooks/pause
 CONTRACT_NOT_SERVED POST /api/chn/v1/webhooks/replay
 CONTRACT_NOT_SERVED POST /api/chn/v1/webhooks/subscribe
 CONTRACT_NOT_SERVED POST /api/chn/v1/webhooks/verify
-CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/assemble
-CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/issue
-CONTRACT_NOT_SERVED POST /api/clm/v1/certificates/request
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/schedule
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/send
 CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/export
@@ -247,8 +242,6 @@ CONTRACT_NOT_SERVED POST /api/cmp/v1/enfia-confirmations/propose
 CONTRACT_NOT_SERVED POST /api/cmp/v1/enfia-confirmations/transmit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/evidence/submit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/import
-CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-reconciliation/run
-CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-rules/certify
 CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/render-xbrl
 CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/validate-taxonomy
 CONTRACT_NOT_SERVED POST /api/cmp/v1/taxonomies/activate
@@ -505,9 +498,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/contingencies/waive
 CONTRACT_NOT_SERVED POST /api/uw/v1/data-subject/erase
 CONTRACT_NOT_SERVED POST /api/uw/v1/data-subject/export
 CONTRACT_NOT_SERVED POST /api/uw/v1/data-subject/restrict
-CONTRACT_NOT_SERVED POST /api/uw/v1/declines
-CONTRACT_NOT_SERVED POST /api/uw/v1/declines/decide-review
-CONTRACT_NOT_SERVED POST /api/uw/v1/declines/request-review
 CONTRACT_NOT_SERVED POST /api/uw/v1/disclosure-findings/decide
 CONTRACT_NOT_SERVED POST /api/uw/v1/disclosure-findings/record
 CONTRACT_NOT_SERVED POST /api/uw/v1/external-reports/cancel
@@ -528,7 +518,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/check
 CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/copy
 CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/impact
 CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/release
-CONTRACT_NOT_SERVED POST /api/uw/v1/refusal-registers/export
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/bulk-set
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/set
 CONTRACT_NOT_SERVED POST /api/uw/v1/valuation/compute

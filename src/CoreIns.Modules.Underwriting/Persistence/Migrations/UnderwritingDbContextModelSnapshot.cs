@@ -24,6 +24,148 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.DeclineRow", b =>
+                {
+                    b.Property<Guid>("DeclineId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("decline_id");
+
+                    b.Property<bool>("Automated")
+                        .HasColumnType("boolean")
+                        .HasColumnName("automated");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DeclineNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("decline_number");
+
+                    b.Property<Guid?>("EvaluationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("evaluation_id");
+
+                    b.Property<Guid?>("IntakeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("intake_id");
+
+                    b.Property<Guid?>("JobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("job_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("LetterData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("letter_data");
+
+                    b.Property<string>("LetterStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("letter_status");
+
+                    b.Property<string>("Pairs")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("pairs");
+
+                    b.Property<string>("ReasonCodes")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("reason_codes");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<DateTime?>("ReviewDecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("review_decided_at");
+
+                    b.Property<string>("ReviewDecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("review_decided_by");
+
+                    b.Property<string>("ReviewOutcome")
+                        .HasColumnType("text")
+                        .HasColumnName("review_outcome");
+
+                    b.Property<string>("ReviewReason")
+                        .HasColumnType("text")
+                        .HasColumnName("review_reason");
+
+                    b.Property<DateTime?>("ReviewRequestedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("review_requested_at");
+
+                    b.Property<string>("ReviewRequestedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("review_requested_by");
+
+                    b.Property<string>("ReviewRequester")
+                        .HasColumnType("text")
+                        .HasColumnName("review_requester");
+
+                    b.Property<string>("ReviewStatement")
+                        .HasColumnType("text")
+                        .HasColumnName("review_statement");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Wording")
+                        .HasColumnType("text")
+                        .HasColumnName("wording");
+
+                    b.HasKey("DeclineId")
+                        .HasName("pk_decline");
+
+                    b.HasIndex("IntakeId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_decline_intake")
+                        .HasFilter("intake_id IS NOT NULL AND status <> 'Overturned'");
+
+                    b.HasIndex("JobId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_decline_job")
+                        .HasFilter("job_id IS NOT NULL AND status <> 'Overturned'");
+
+                    b.HasIndex("LegalEntityId", "DeclineNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ux_decline_number");
+
+                    b.HasIndex("LegalEntityId", "CreatedAt", "DeclineId")
+                        .HasDatabaseName("ix_decline_register");
+
+                    b.ToTable("decline", "uw", t =>
+                        {
+                            t.HasCheckConstraint("ck_decline_scope", "scope IN ('FULL', 'PARTIAL')");
+
+                            t.HasCheckConstraint("ck_decline_status", "status IN ('Issued', 'ReviewRequested', 'Upheld', 'Overturned')");
+
+                            t.HasCheckConstraint("ck_decline_subject", "(job_id IS NULL) <> (intake_id IS NULL)");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.EvaluationRow", b =>
                 {
                     b.Property<Guid>("EvaluationId")

@@ -8,11 +8,15 @@ namespace CoreIns.Modules.Compliance.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FiscalRuleCertifyResponse
 {
-    /// <summary>PRD: "pass or fail with keys"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("passOrFailKeys")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PassOrFailKeys { get; init; }
+    /// <summary>Contract member 'pass'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("pass")]
+    public required bool Pass { get; init; }
+
+    /// <summary>Contract member 'failedKeys'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("failedKeys")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> FailedKeys { get; init; }
+
+    /// <summary>Contract member 'checkedKeys'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("checkedKeys")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> CheckedKeys { get; init; }
 }

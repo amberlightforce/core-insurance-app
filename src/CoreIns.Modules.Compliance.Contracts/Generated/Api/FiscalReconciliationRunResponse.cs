@@ -8,11 +8,45 @@ namespace CoreIns.Modules.Compliance.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FiscalReconciliationRunResponse
 {
-    /// <summary>PRD: "breaks"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Fiscal documents compared with their channel status</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("checked")]
+    public required int Checked { get; init; }
+
+    /// <summary>Breaks found for the first time</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("opened")]
+    public required int Opened { get; init; }
+
+    /// <summary>Resolved breaks that came back</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reopened")]
+    public required int Reopened { get; init; }
+
+    /// <summary>Open breaks that no longer exist (closed automatically)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("resolved")]
+    public required int Resolved { get; init; }
+
+    /// <summary>Open breaks after the run</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("open")]
+    public required int Open { get; init; }
+
+    /// <summary>PRD: "breaks" (the open breaks after the run, capped at 200)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("breaks")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Breaks { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<BreakItem> Breaks { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record BreakItem
+    {
+        /// <summary>Contract member 'fiscalDocumentId'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("fiscalDocumentId")]
+        public required global::CoreIns.SharedKernel.Identifiers.FiscalDocumentId FiscalDocumentId { get; init; }
+
+        /// <summary>Contract member 'kind'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("kind")]
+        public required string Kind { get; init; }
+
+        /// <summary>Contract member 'detail'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("detail")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Detail { get; init; }
+    }
 }
