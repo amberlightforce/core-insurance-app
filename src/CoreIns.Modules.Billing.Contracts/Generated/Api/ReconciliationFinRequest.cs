@@ -4,36 +4,26 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Reconciliation.fin request. PRD inputs: "legal entity, accounting date, optional sub-ledger account and event type"</summary>
+/// <summary>bil.Reconciliation.fin request: the control totals of one accounting day (BO-BIL-12). The legal entity is the one of the caller.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReconciliationFinRequest
 {
-    /// <summary>PRD: "legal entity"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("legalEntity")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? LegalEntity { get; init; }
-
-    /// <summary>PRD: "accounting date"</summary>
+    /// <summary>Accounting day, not after today.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("accountingDate")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? AccountingDate { get; init; }
+    public required global::CoreIns.SharedKernel.BusinessDate AccountingDate { get; init; }
 
-    /// <summary>PRD: "optional sub-ledger account and event type" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Restrict the totals to one sub-ledger account (optional).</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("subLedgerAccount")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SubLedgerAccount { get; init; }
+    public string? SubLedgerAccount { get; init; }
 
-    /// <summary>PRD: "optional sub-ledger account and event type" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Restrict the totals to one entry type (optional).</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("eventType")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? EventType { get; init; }
+    public string? EventType { get; init; }
+
+    /// <summary>List the ids of the entries behind the totals.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("includeEntryIds")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? IncludeEntryIds { get; init; }
 }

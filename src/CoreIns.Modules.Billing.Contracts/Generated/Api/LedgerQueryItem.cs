@@ -4,23 +4,52 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Ledger.query result. PRD outputs: "entries, balances"</summary>
+/// <summary>bil.Ledger.query result: one sub-ledger entry with its lines.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record LedgerQueryItem
 {
-    /// <summary>PRD: "entries"</summary>
+    /// <summary>Contract member 'entryId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'entryId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("entries")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Entries { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("entryId")]
+    public required global::System.Guid EntryId { get; init; }
 
-    /// <summary>PRD: "balances"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("balances")]
+    /// <summary>Contract member 'entryType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("entryType")]
+    public required string EntryType { get; init; }
+
+    /// <summary>Contract member 'accountingDate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("accountingDate")]
+    public required global::CoreIns.SharedKernel.BusinessDate AccountingDate { get; init; }
+
+    /// <summary>Contract member 'businessDate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("businessDate")]
+    public required global::CoreIns.SharedKernel.BusinessDate BusinessDate { get; init; }
+
+    /// <summary>Contract member 'billingAccountId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("billingAccountId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Balances { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.BillingAccountId? BillingAccountId { get; init; }
+
+    /// <summary>Contract member 'disbursementId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("disbursementId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.DisbursementId? DisbursementId { get; init; }
+
+    /// <summary>Contract member 'reversesEntryId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'reversesEntryId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reversesEntryId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? ReversesEntryId { get; init; }
+
+    /// <summary>Contract member 'causeOperation'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("causeOperation")]
+    public required string CauseOperation { get; init; }
+
+    /// <summary>Contract member 'lines'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lines")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.LedgerLineView> Lines { get; init; }
 }

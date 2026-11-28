@@ -5796,9 +5796,10 @@ paths:
   /api/bil/v1/ledger/query:
     get:
       operationId: bil.Ledger.query
-      summary: Ledger
+      summary: Query sub-ledger entries
       description: |-
-        Ledger
+        Entries of the legal entity sub-ledger with their lines (BO-BIL-12), oldest first, filtered by billing account, line account,
+        entry type, currency and accounting date range. Cursor pagination on the entry id.
 
         PRD inputs: dimensions, dates
         PRD outputs: entries, balances
@@ -5834,18 +5835,44 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: dimensions
+      - name: billingAccountId
         in: query
         required: false
-        description: 'PRD: "dimensions"'
+        description: Only entries of this billing account.
         schema:
-          type: string
-      - name: dates
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: account
         in: query
         required: false
-        description: 'PRD: "dates"'
+        description: Only lines on this sub-ledger account (LA-01 .. LA-29).
         schema:
           type: string
+      - name: entryType
+        in: query
+        required: false
+        description: Only entries of this type (the eventType of BillingEntryPosted, e.g. BILLED, ALLOCATED, WRITTEN_OFF).
+        schema:
+          type: string
+      - name: currency
+        in: query
+        required: false
+        description: Only lines in this currency.
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        description: First accounting date (inclusive).
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        required: false
+        description: Last accounting date (inclusive).
+        schema:
+          type: string
+          format: date
       responses:
         '200':
           description: Success
@@ -5864,9 +5891,10 @@ paths:
   /api/bil/v1/ledger/balance:
     get:
       operationId: bil.Ledger.balance
-      summary: Ledger
+      summary: Sub-ledger balances
       description: |-
-        Ledger
+        Debit, credit and net per sub-ledger account and currency over the same filters as bil.Ledger.query (BO-BIL-12); the net is
+        debit minus credit.
 
         PRD inputs: dimensions, dates
         PRD outputs: entries, balances
@@ -5900,18 +5928,44 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      - name: dimensions
+      - name: billingAccountId
         in: query
         required: false
-        description: 'PRD: "dimensions"'
+        description: Only entries of this billing account.
         schema:
-          type: string
-      - name: dates
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: account
         in: query
         required: false
-        description: 'PRD: "dates"'
+        description: Only lines on this sub-ledger account (LA-01 .. LA-29).
         schema:
           type: string
+      - name: entryType
+        in: query
+        required: false
+        description: Only entries of this type (the eventType of BillingEntryPosted, e.g. BILLED, ALLOCATED, WRITTEN_OFF).
+        schema:
+          type: string
+      - name: currency
+        in: query
+        required: false
+        description: Only lines in this currency.
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        description: First accounting date (inclusive).
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        required: false
+        description: Last accounting date (inclusive).
+        schema:
+          type: string
+          format: date
       responses:
         '200':
           description: Success
@@ -10212,18 +10266,68 @@ components:
       - provisional
       - disbursementId
       - status
+    LedgerLineView:
+      type: object
+      description: One line of a sub-ledger entry.
+      properties:
+        lineNo:
+          type: integer
+        account:
+          type: string
+          description: Sub-ledger account, LA-01 .. LA-29.
+        side:
+          type: string
+          enum:
+          - DEBIT
+          - CREDIT
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        chargeType:
+          type: string
+        chargeCategory:
+          type: string
+        invoiceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        receiptId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        disbursementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - lineNo
+      - account
+      - side
+      - amount
     LedgerQueryItem:
       type: object
-      description: 'bil.Ledger.query result. PRD outputs: "entries, balances"'
+      description: 'bil.Ledger.query result: one sub-ledger entry with its lines.'
       properties:
-        entries:
+        entryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        entryType:
+          type: string
+        accountingDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        businessDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        disbursementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reversesEntryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        causeOperation:
+          type: string
+        lines:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entries"'
-        balances:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "balances"'
+            $ref: '#/components/schemas/LedgerLineView'
+      required:
+      - entryId
+      - entryType
+      - accountingDate
+      - businessDate
+      - causeOperation
+      - lines
     LedgerQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -10234,18 +10338,40 @@ components:
             items:
               $ref: '#/components/schemas/LedgerQueryItem'
       description: Page of bil.Ledger.query results (cursor pagination, contract §3.5.5)
+    LedgerBalanceLine:
+      type: object
+      description: Balance of one sub-ledger account in one currency.
+      properties:
+        account:
+          type: string
+        currency:
+          type: string
+        debit:
+          $ref: ../events/common.schema.json#/$defs/Money
+        credit:
+          $ref: ../events/common.schema.json#/$defs/Money
+        net:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Debit minus credit.
+        lineCount:
+          type: integer
+      required:
+      - account
+      - currency
+      - debit
+      - credit
+      - net
+      - lineCount
     LedgerBalanceResponse:
       type: object
-      description: 'bil.Ledger.balance result. PRD outputs: "entries, balances"'
+      description: 'bil.Ledger.balance result: balances per account and currency.'
       properties:
-        entries:
+        balances:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entries"'
-        balances:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "balances"'
+            $ref: '#/components/schemas/LedgerBalanceLine'
+      required:
+      - balances
     ReconciliationBankRequest:
       type: object
       description: 'bil.Reconciliation.bank request (BO-BIL-11): one statement of an own bank account as camt.053 XML or as CSV text with the
@@ -10482,31 +10608,83 @@ components:
       - samples
     ReconciliationFinRequest:
       type: object
-      description: 'bil.Reconciliation.fin request. PRD inputs: "legal entity, accounting date, optional sub-ledger account
-        and event type"'
+      description: 'bil.Reconciliation.fin request: the control totals of one accounting day (BO-BIL-12). The legal entity is the one of the caller.'
       properties:
-        legalEntity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "legal entity"'
         accountingDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "accounting date"'
+          description: Accounting day, not after today.
         subLedgerAccount:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "optional sub-ledger account and event type" (optional)'
+          type: string
+          description: Restrict the totals to one sub-ledger account (optional).
         eventType:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "optional sub-ledger account and event type" (optional)'
+          type: string
+          description: Restrict the totals to one entry type (optional).
+        includeEntryIds:
+          type: boolean
+          description: List the ids of the entries behind the totals.
+      required:
+      - accountingDate
+    ReconciliationFinTotal:
+      type: object
+      properties:
+        account:
+          type: string
+        eventType:
+          type: string
+        currency:
+          type: string
+        debit:
+          $ref: ../events/common.schema.json#/$defs/Money
+        credit:
+          $ref: ../events/common.schema.json#/$defs/Money
+        net:
+          $ref: ../events/common.schema.json#/$defs/Money
+        lineCount:
+          type: integer
+        entryIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - account
+      - eventType
+      - currency
+      - debit
+      - credit
+      - net
+      - lineCount
+    ReconciliationFinControl:
+      type: object
+      properties:
+        currency:
+          type: string
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        count:
+          type: integer
+      required:
+      - currency
+      - amount
+      - count
     ReconciliationFinResponse:
       type: object
-      description: 'bil.Reconciliation.fin result. PRD outputs: "control totals per account and event type, entry ids on request"'
+      description: 'bil.Reconciliation.fin result: control totals per account and entry type, and the receivable control figure FIN compares.'
       properties:
-        controlTotalsPerAccountAndEvent:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "control totals per account and event type"'
-        entryIdsOnRequest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entry ids on request"'
+        accountingDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReconciliationFinTotal'
+        receivableControl:
+          type: array
+          description: Net debit and line count of the billed receivable LA-02 per currency, the figure pushed to fin.Reconciliation.exchange (source BIL).
+          items:
+            $ref: '#/components/schemas/ReconciliationFinControl'
+      required:
+      - accountingDate
+      - totals
+      - receivableControl
     ImportReverseRequest:
       type: object
       description: 'bil.Import.reverse request. PRD inputs: "batch id or source key"'

@@ -85,6 +85,17 @@ internal sealed class BillingOptions
     [Range(1, 86400)]
     public int DelinquencySweepIntervalSeconds { get; set; } = 3600;
 
+    /// <summary>Whether the worker role pushes the daily BIL control totals to the FIN reconciliation (BO-BIL-12).</summary>
+    public bool FinControlTotalsEnabled { get; set; } = true;
+
+    /// <summary>Seconds between pushes of the control totals (default hourly; a push of a day replaces the earlier one of that day).</summary>
+    [Range(1, 86400)]
+    public int FinControlTotalsIntervalSeconds { get; set; } = 3600;
+
+    /// <summary>Days back, including today, whose control totals each push sends (late postings change earlier days).</summary>
+    [Range(1, 31)]
+    public int FinControlTotalsDays { get; set; } = 3;
+
     /// <summary>Whether the worker role runs the scheduled SEPA direct-debit collection run (BO-BIL-06b). Off by default: a legal entity switches it on once its creditor identifier is set.</summary>
     public bool DirectDebitEnabled { get; set; }
 

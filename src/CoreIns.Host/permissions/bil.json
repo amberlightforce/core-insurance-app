@@ -93,6 +93,10 @@
         // BO-BIL-11: the statement import records money (billing staff); the invariant report is read-only (billing, finance).
         "bil.Reconciliation.bank": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.Reconciliation.invariants": [ "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Platform.Admin" ],
+        // BO-BIL-12: ledger reads and the day control totals FIN compares (read-only).
+        "bil.Ledger.query": [ "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Platform.Admin" ],
+        "bil.Ledger.balance": [ "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Platform.Admin" ],
+        "bil.Reconciliation.fin": [ "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Platform.Admin" ],
         "bil.PlanInstance.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ]
       }
     },

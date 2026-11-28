@@ -489,18 +489,53 @@
       "limit": 1
     },
     "bil.Ledger.balance": {
-      "entries": [
-        "unspecified"
-      ],
-      "balances": "unspecified"
+      "balances": [
+        {
+          "account": "sample",
+          "currency": "sample",
+          "debit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "credit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "net": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "lineCount": 1
+        }
+      ]
     },
     "bil.Ledger.query": {
       "items": [
         {
-          "entries": [
-            "unspecified"
-          ],
-          "balances": "unspecified"
+          "entryId": "0192a4cb-09bd-775a-87da-50746e426b76",
+          "entryType": "sample",
+          "accountingDate": "2026-10-07",
+          "businessDate": "2026-10-07",
+          "billingAccountId": "01927dc3-13f1-7a5d-81b6-eeba5e678852",
+          "disbursementId": "019238a7-f308-711e-8ca6-14a7218805e4",
+          "reversesEntryId": "0192084e-22c1-7ba8-8aa9-35e9c1240270",
+          "causeOperation": "sample",
+          "lines": [
+            {
+              "lineNo": 1,
+              "account": "sample",
+              "side": "DEBIT",
+              "amount": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "chargeType": "sample",
+              "chargeCategory": "sample",
+              "invoiceId": "01922279-b473-72f1-8bc1-0279b27fe4d2",
+              "receiptId": "0192cdcf-98e7-7f74-897a-e36c03edec6f",
+              "disbursementId": "01922da8-9406-7346-8ac1-02c194708a6f"
+            }
+          ]
         }
       ],
       "nextCursor": "sample",
@@ -832,8 +867,40 @@
       }
     },
     "bil.Reconciliation.fin": {
-      "controlTotalsPerAccountAndEvent": "unspecified",
-      "entryIdsOnRequest": "unspecified"
+      "accountingDate": "2026-10-07",
+      "totals": [
+        {
+          "account": "sample",
+          "eventType": "sample",
+          "currency": "sample",
+          "debit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "credit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "net": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "lineCount": 1,
+          "entryIds": [
+            "0192a3f0-c01c-792b-8113-0ae2e9f7b858"
+          ]
+        }
+      ],
+      "receivableControl": [
+        {
+          "currency": "sample",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "count": 1
+        }
+      ]
     },
     "bil.Refund.decide": {
       "refund": {
@@ -2709,25 +2776,111 @@
       ],
       "originalInvoiceId": "019270a4-e6c6-733f-8867-7a5643a6f068"
     },
+    "LedgerBalanceLine": {
+      "account": "sample",
+      "currency": "sample",
+      "debit": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "credit": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "net": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "lineCount": 1
+    },
     "LedgerBalanceResponse": {
-      "entries": [
-        "unspecified"
-      ],
-      "balances": "unspecified"
+      "balances": [
+        {
+          "account": "sample",
+          "currency": "sample",
+          "debit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "credit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "net": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "lineCount": 1
+        }
+      ]
+    },
+    "LedgerLineView": {
+      "lineNo": 1,
+      "account": "sample",
+      "side": "DEBIT",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "chargeType": "sample",
+      "chargeCategory": "sample",
+      "invoiceId": "01920936-a41c-7734-8e9a-f32410830561",
+      "receiptId": "0192b41e-3bdd-7a57-87d6-25c3991508c9",
+      "disbursementId": "0192c27d-946d-7ead-8540-695b42502b26"
     },
     "LedgerQueryItem": {
-      "entries": [
-        "unspecified"
-      ],
-      "balances": "unspecified"
+      "entryId": "0192d8a2-9dae-7b6b-860c-d8776b247f9b",
+      "entryType": "sample",
+      "accountingDate": "2026-10-07",
+      "businessDate": "2026-10-07",
+      "billingAccountId": "01925ea9-c90b-7f77-8e48-c3fb22b03318",
+      "disbursementId": "0192dda3-4db4-7e3f-831e-f38e6702dae0",
+      "reversesEntryId": "0192c06a-b51b-7589-8679-0606b5c349eb",
+      "causeOperation": "sample",
+      "lines": [
+        {
+          "lineNo": 1,
+          "account": "sample",
+          "side": "DEBIT",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "chargeType": "sample",
+          "chargeCategory": "sample",
+          "invoiceId": "01927c6b-221b-7706-8f62-7eb9984032be",
+          "receiptId": "0192d2c6-1e7a-7c63-84fe-fd7e4bee45f6",
+          "disbursementId": "01925c1f-95a7-7f63-88bb-f91c10e3005f"
+        }
+      ]
     },
     "LedgerQueryPage": {
       "items": [
         {
-          "entries": [
-            "unspecified"
-          ],
-          "balances": "unspecified"
+          "entryId": "01926b21-ea39-77a7-8619-17430a6072f7",
+          "entryType": "sample",
+          "accountingDate": "2026-10-07",
+          "businessDate": "2026-10-07",
+          "billingAccountId": "01920060-8485-7d5b-8832-6c6802f41600",
+          "disbursementId": "01928ac0-5dfa-70e1-8978-c1593d96dd24",
+          "reversesEntryId": "0192d728-e7c6-7ad1-811f-bf299ba6757c",
+          "causeOperation": "sample",
+          "lines": [
+            {
+              "lineNo": 1,
+              "account": "sample",
+              "side": "DEBIT",
+              "amount": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "chargeType": "sample",
+              "chargeCategory": "sample",
+              "invoiceId": "01926296-ca73-7b8d-8eaf-f30901e56ba9",
+              "receiptId": "0192e2c2-538e-7b8f-8e67-7a5e2d0998ae",
+              "disbursementId": "0192a7d4-bcd8-7805-8ba9-81d7a341f72d"
+            }
+          ]
         }
       ],
       "nextCursor": "sample",
@@ -3483,15 +3636,76 @@
         }
       ]
     },
+    "ReconciliationFinControl": {
+      "currency": "sample",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "count": 1
+    },
     "ReconciliationFinRequest": {
-      "legalEntity": "unspecified",
       "accountingDate": "2026-10-07",
-      "subLedgerAccount": "unspecified",
-      "eventType": "unspecified"
+      "subLedgerAccount": "sample",
+      "eventType": "sample",
+      "includeEntryIds": true
     },
     "ReconciliationFinResponse": {
-      "controlTotalsPerAccountAndEvent": "unspecified",
-      "entryIdsOnRequest": "unspecified"
+      "accountingDate": "2026-10-07",
+      "totals": [
+        {
+          "account": "sample",
+          "eventType": "sample",
+          "currency": "sample",
+          "debit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "credit": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "net": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "lineCount": 1,
+          "entryIds": [
+            "01920b8b-d6c1-74fb-8ccf-b35d147668c0"
+          ]
+        }
+      ],
+      "receivableControl": [
+        {
+          "currency": "sample",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "count": 1
+        }
+      ]
+    },
+    "ReconciliationFinTotal": {
+      "account": "sample",
+      "eventType": "sample",
+      "currency": "sample",
+      "debit": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "credit": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "net": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "lineCount": 1,
+      "entryIds": [
+        "0192da1c-0e5b-7108-8d6d-7c6ce8c49a70"
+      ]
     },
     "ReconciliationInvariantsRequest": {
       "account": "01922f9a-7d6c-72cb-815a-9914b26c8481",

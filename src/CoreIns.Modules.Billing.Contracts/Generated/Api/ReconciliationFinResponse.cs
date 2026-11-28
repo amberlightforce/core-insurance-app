@@ -4,23 +4,19 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Reconciliation.fin result. PRD outputs: "control totals per account and event type, entry ids on request"</summary>
+/// <summary>bil.Reconciliation.fin result: control totals per account and entry type, and the receivable control figure FIN compares.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReconciliationFinResponse
 {
-    /// <summary>PRD: "control totals per account and event type"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("controlTotalsPerAccountAndEvent")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ControlTotalsPerAccountAndEvent { get; init; }
+    /// <summary>Contract member 'accountingDate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("accountingDate")]
+    public required global::CoreIns.SharedKernel.BusinessDate AccountingDate { get; init; }
 
-    /// <summary>PRD: "entry ids on request"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("entryIdsOnRequest")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? EntryIdsOnRequest { get; init; }
+    /// <summary>Contract member 'totals'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("totals")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.ReconciliationFinTotal> Totals { get; init; }
+
+    /// <summary>Net debit and line count of the billed receivable LA-02 per currency, the figure pushed to fin.Reconciliation.exchange (source BIL).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receivableControl")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.ReconciliationFinControl> ReceivableControl { get; init; }
 }
