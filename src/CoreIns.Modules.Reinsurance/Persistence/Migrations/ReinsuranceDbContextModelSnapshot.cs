@@ -30,10 +30,30 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("exception_id");
 
+                    b.Property<decimal?>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("ChargeCategory")
+                        .HasColumnType("text")
+                        .HasColumnName("charge_category");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("code");
+
+                    b.Property<Guid?>("CorrectionOf")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correction_of");
+
+                    b.Property<string>("CoverageCode")
+                        .HasColumnType("text")
+                        .HasColumnName("coverage_code");
+
+                    b.Property<string>("Currency")
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
 
                     b.Property<string>("Detail")
                         .IsRequired()
@@ -44,9 +64,25 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("legal_entity_id");
 
+                    b.Property<Guid?>("OosSetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("oos_set_id");
+
+                    b.Property<Guid?>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
                     b.Property<DateTime>("RecordedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("recorded_at");
+
+                    b.Property<Guid?>("SetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("set_id");
+
+                    b.Property<int?>("SetSize")
+                        .HasColumnType("integer")
+                        .HasColumnName("set_size");
 
                     b.Property<Guid>("SourceEventId")
                         .HasColumnType("uuid")
@@ -56,6 +92,10 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("term_id");
 
+                    b.Property<DateOnly?>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
                     b.HasKey("ExceptionId")
                         .HasName("pk_cession_exception");
 
@@ -63,6 +103,70 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .HasDatabaseName("ix_cession_exception_term");
 
                     b.ToTable("cession_exception", "ri");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Cession.CessionExceptionStateRow", b =>
+                {
+                    b.Property<Guid>("ExceptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("exception_id");
+
+                    b.Property<DateTime?>("AssignedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("assigned_at");
+
+                    b.Property<string>("AssignedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("assigned_by");
+
+                    b.Property<string>("Assignee")
+                        .HasColumnType("text")
+                        .HasColumnName("assignee");
+
+                    b.Property<DateTime?>("LastRerunAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("last_rerun_at");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<int>("RerunCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("rerun_count");
+
+                    b.Property<string>("Resolution")
+                        .HasColumnType("text")
+                        .HasColumnName("resolution");
+
+                    b.Property<string>("ResolutionReason")
+                        .HasColumnType("text")
+                        .HasColumnName("resolution_reason");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<string>("ResolvedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("resolved_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("ExceptionId")
+                        .HasName("pk_cession_exception_state");
+
+                    b.HasIndex("LegalEntityId", "Status")
+                        .HasDatabaseName("ix_cession_exception_state_status");
+
+                    b.ToTable("cession_exception_state", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_cession_exception_state_status", "status IN ('OPEN', 'ASSIGNED', 'RESOLVED')");
+                        });
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Cession.CessionRow", b =>
@@ -84,6 +188,10 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .HasColumnType("numeric(19,4)")
                         .HasColumnName("delta");
 
+                    b.Property<Guid?>("ExceptionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("exception_id");
+
                     b.Property<Guid>("LegalEntityId")
                         .HasColumnType("uuid")
                         .HasColumnName("legal_entity_id");
@@ -96,6 +204,10 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                     b.Property<DateTime>("RecordedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("recorded_at");
+
+                    b.Property<Guid?>("RunId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("run_id");
 
                     b.Property<Guid>("SetKey")
                         .HasColumnType("uuid")
@@ -120,6 +232,9 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
 
                     b.HasKey("CessionId")
                         .HasName("pk_cession");
+
+                    b.HasIndex("ExceptionId")
+                        .HasDatabaseName("ix_cession_exception_link");
 
                     b.HasIndex("TermId", "TreatyId", "SetKey")
                         .IsUnique()

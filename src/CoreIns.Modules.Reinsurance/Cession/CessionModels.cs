@@ -191,6 +191,12 @@ internal sealed class CessionRow
     public string Mode { get; set; } = "NET";
 
     public Instant RecordedAt { get; set; }
+
+    /// <summary>The rerun that wrote the row (BO-RI-07); null for a row of the event intake.</summary>
+    public Guid? RunId { get; set; }
+
+    /// <summary>The cession exception whose rerun wrote the row; null otherwise.</summary>
+    public Guid? ExceptionId { get; set; }
 }
 
 /// <summary><c>ri.cession_exception</c>: what the cession could not apply (unknown treaty, outside every treaty period). Append-only.</summary>
@@ -209,6 +215,64 @@ internal sealed class CessionExceptionRow
     public string Detail { get; set; } = string.Empty;
 
     public Instant RecordedAt { get; set; }
+
+    // The premium line the intake could not apply, kept so that a rerun can replay it (BO-RI-07). Null on rows older than the rerun.
+    public Guid? PolicyId { get; set; }
+
+    public string? CoverageCode { get; set; }
+
+    public string? ChargeCategory { get; set; }
+
+    public decimal? Amount { get; set; }
+
+    public string? Currency { get; set; }
+
+    public BusinessDate? ValidFrom { get; set; }
+
+    public Guid? SetId { get; set; }
+
+    public int? SetSize { get; set; }
+
+    public Guid? CorrectionOf { get; set; }
+
+    public Guid? OosSetId { get; set; }
+}
+
+/// <summary>Workflow statuses of a cession exception; an exception without a state row is OPEN.</summary>
+internal static class CessionExceptionStatus
+{
+    public const string Open = "OPEN";
+    public const string Assigned = "ASSIGNED";
+    public const string Resolved = "RESOLVED";
+}
+
+/// <summary><c>ri.cession_exception_state</c>: the mutable workflow of an exception (the exception row itself is append-only).</summary>
+internal sealed class CessionExceptionStateRow
+{
+    public Guid ExceptionId { get; set; }
+
+    public Guid LegalEntityId { get; set; }
+
+    public string Status { get; set; } = CessionExceptionStatus.Open;
+
+    public string? Assignee { get; set; }
+
+    public Instant? AssignedAt { get; set; }
+
+    public string? AssignedBy { get; set; }
+
+    public Instant? ResolvedAt { get; set; }
+
+    public string? ResolvedBy { get; set; }
+
+    /// <summary>RERUN (the replay cleared it) or MANUAL (closed by hand with a reason).</summary>
+    public string? Resolution { get; set; }
+
+    public string? ResolutionReason { get; set; }
+
+    public int RerunCount { get; set; }
+
+    public Instant? LastRerunAt { get; set; }
 }
 
 /// <summary><c>ri.tracker</c>: the opening aggregate of a treaty year (migration import). Idempotent on (legal entity, treaty, year).</summary>

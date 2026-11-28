@@ -68,6 +68,7 @@ public static class ReinsuranceModule
                 // SL6-RI-CESSION-DELTA: the premium ledger, cession rows, exception log and tracker are sealed (SELECT, INSERT only).
                 $"GRANT SELECT, INSERT ON {Schema}.premium_delta, {Schema}.cession, {Schema}.cession_exception, {Schema}.tracker TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.cession_treaty TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.cession_exception_state TO {appRole}",
                 // BO-RI-10: premium accounting rows are append-only (SELECT, INSERT only).
                 $"GRANT SELECT, INSERT ON {Schema}.deposit_schedule, {Schema}.adjustment, {Schema}.commission, {Schema}.accounting_decision TO {appRole}",
                 // BO-RI-08: occurrences (a link is stamped when unlinked) and the sealed manual adjustments.
@@ -308,6 +309,19 @@ public static class ReinsuranceModule
         services.AddOptions<CessionOptions>().Bind(configuration.GetSection(CessionOptions.Section));
         services.AddScoped<Registry.CessionTreatyRegistry>();
         services.AddScoped<CessionIntake>();
+        services.AddScoped<CessionPreviewService>();
+        services.AddScoped<IValidator<RerunCession>, RerunCessionValidator>();
+        services.AddCommandAuditor<RerunCession, CessionRerunResponse, RerunCessionAuditor>();
+        services.AddCommand<RerunCession, CessionRerunResponse, RerunCessionHandler>(CommandDescriptor.For("ri.Cession.rerun") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<AssignCessionException>, AssignCessionExceptionValidator>();
+        services.AddCommandAuditor<AssignCessionException, CessionExceptionAssignResponse, AssignCessionExceptionAuditor>();
+        services.AddCommand<AssignCessionException, CessionExceptionAssignResponse, AssignCessionExceptionHandler>(CommandDescriptor.For("ri.CessionException.assign"));
+        services.AddScoped<IValidator<ResolveCessionException>, ResolveCessionExceptionValidator>();
+        services.AddCommandAuditor<ResolveCessionException, CessionExceptionResolveResponse, ResolveCessionExceptionAuditor>();
+        services.AddCommand<ResolveCessionException, CessionExceptionResolveResponse, ResolveCessionExceptionHandler>(CommandDescriptor.For("ri.CessionException.resolve") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<RerunCessionException>, RerunCessionExceptionValidator>();
+        services.AddCommandAuditor<RerunCessionException, CessionExceptionRerunResponse, RerunCessionExceptionAuditor>();
+        services.AddCommand<RerunCessionException, CessionExceptionRerunResponse, RerunCessionExceptionHandler>(CommandDescriptor.For("ri.CessionException.rerun"));
         services.AddScoped<TrackerService>();
         services.AddScoped<IMigrationImporter, MigrationImport.ReinsuranceMigrationImporter>();
         services.AddScoped<IMigrationReverser, MigrationImport.ReinsuranceMigrationReverser>();
