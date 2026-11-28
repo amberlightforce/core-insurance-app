@@ -597,6 +597,70 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/render-pdf:
+    post:
+      operationId: doc.Document.renderPdf
+      summary: Render the PDF of a document
+      description: |-
+        Renders the archived HTML letter of a document to PDF (BO-DOC-07) and stores it as a `PDF` rendition next to the HTML
+        (`doc.Archive.addRendition` semantics). With Gotenberg configured the PDF is PDF/A-3b (`pdfA: true`); without it a plain
+        local PDF is produced and flagged `pdfA: false`. Idempotent: a document that already has a PDF rendition returns it
+        (`alreadyRendered: true`). Delivery and the HTML archive entry are untouched.
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-004
+      x-wave: W2
+      x-work-packages:
+      - W2-DOC-03
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'Idempotent on the document (one PDF rendition each)'
+      x-exposure:
+      - ui
+      x-permission: doc.Document.renderPdf
+      x-error-codes:
+      - code: DOC-ERR-NOT-FOUND
+        status: 404
+      - code: DOC-ERR-RENDER-FAILED
+        status: 502
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - BO-DOC-07
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentRenderPdfRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentRenderPdfResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/doc/v1/documents/resend:
     post:
       operationId: doc.Document.resend
@@ -3540,6 +3604,31 @@ components:
         link:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "link"'
+    DocumentRenderPdfRequest:
+      type: object
+      description: 'doc.Document.renderPdf request (BO-DOC-07).'
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required: [documentId]
+    DocumentRenderPdfResponse:
+      type: object
+      description: 'doc.Document.renderPdf result: the PDF rendition entry.'
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Archive entry of the PDF rendition (download with doc.Archive.download).
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        pdfA:
+          type: boolean
+          description: True when the PDF is PDF/A-3b (Gotenberg); false for the plain local fallback.
+        alreadyRendered:
+          type: boolean
+          description: True when a PDF rendition already existed and nothing was rendered.
+      required: [documentId, archiveId, hash, pdfA, alreadyRendered]
     DocumentResendRequest:
       type: object
       description: 'doc.Document.resend request (BO-DOC-02): a new delivery of the same archived document. A reason is required.'

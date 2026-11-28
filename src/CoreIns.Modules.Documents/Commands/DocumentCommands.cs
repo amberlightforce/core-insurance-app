@@ -44,6 +44,15 @@ public sealed class DocumentsOptions
     /// <summary>Most issued documents one completeness check inspects; the report says when it was cut off.</summary>
     public int CompletenessMaxDocuments { get; set; } = 2000;
 
+    /// <summary>
+    /// Base URL of Gotenberg for PDF rendering (BO-DOC-07). When empty, <c>DocRender:Url</c> (the local stack and bicep setting) is used;
+    /// when both are empty a plain, non-PDF/A local fallback renders.
+    /// </summary>
+    public string? GotenbergUrl { get; set; }
+
+    /// <summary>Seconds before a Gotenberg call is abandoned.</summary>
+    public int GotenbergTimeoutSeconds { get; set; } = 30;
+
     internal TimeZoneInfo Zone => TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
 }
 
