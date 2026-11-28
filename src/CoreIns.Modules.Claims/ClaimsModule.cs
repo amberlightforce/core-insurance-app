@@ -63,6 +63,7 @@ public static class ClaimsModule
                 $"GRANT SELECT, INSERT ON {Schema}.fnol_snapshot TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.fnol_draft TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.cat_event TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.certificate_request TO {appRole}",
 
                 // Claim financials (SL2-CLM-MONEY, D-ARC-34): the ledger lines are insert-only; the set header, line flags,
                 // payments and the payee read model move.
@@ -203,6 +204,14 @@ public static class ClaimsModule
         services.AddScoped<FnolDraftReader>();
         services.AddScoped<ClaimTrackingReader>();
         services.AddScoped<CatEventReader>();
+        services.AddScoped<Commands.Certificates.CertificateSupport>();
+        services.AddScoped<IValidator<Commands.Certificates.RequestCertificate>, Commands.Certificates.RequestCertificateValidator>();
+        services.AddCommandAuditor<Commands.Certificates.RequestCertificate, CertificateRequestResponse, Commands.Certificates.RequestCertificateAuditor>();
+        services.AddCommand<Commands.Certificates.RequestCertificate, CertificateRequestResponse, Commands.Certificates.RequestCertificateHandler>(CommandDescriptor.For("clm.Certificate.request"));
+        services.AddCommandAuditor<Commands.Certificates.AssembleCertificate, CertificateAssembleResponse, Commands.Certificates.AssembleCertificateAuditor>();
+        services.AddCommand<Commands.Certificates.AssembleCertificate, CertificateAssembleResponse, Commands.Certificates.AssembleCertificateHandler>(CommandDescriptor.For("clm.Certificate.assemble"));
+        services.AddCommandAuditor<Commands.Certificates.IssueCertificate, CertificateIssueResponse, Commands.Certificates.IssueCertificateAuditor>();
+        services.AddCommand<Commands.Certificates.IssueCertificate, CertificateIssueResponse, Commands.Certificates.IssueCertificateHandler>(CommandDescriptor.For("clm.Certificate.issue"));
         services.AddScoped<IValidator<DeclareCatEvent>, DeclareCatEventValidator>();
         services.AddCommandAuditor<DeclareCatEvent, CatEventDeclareResponse, DeclareCatEventAuditor>();
         services.AddCommand<DeclareCatEvent, CatEventDeclareResponse, DeclareCatEventHandler>(CommandDescriptor.For("clm.CatEvent.declare"));
@@ -308,6 +317,10 @@ public static class ClaimsModule
             .Describe("Υπάρχει ανοιχτό απόθεμα ή εκκρεμής πληρωμή σε έκθεση· αποδεσμεύστε ή τακτοποιήστε πρώτα.", "An exposure has an open reserve or a pending payment; release or settle it first."),
         ErrorDefinition.For(ModuleCode.CLM, "CAT-EVENT", 422, "Μη έγκυρο συμβάν καταστροφής", "The CAT event request is not valid")
             .Describe("Το συμβάν υπάρχει ήδη, είναι κλειστό ή η ημερομηνία ζημίας είναι εκτός του παραθύρου του.", "The event exists already, is closed, or the loss date is outside its window."),
+        ErrorDefinition.For(ModuleCode.CLM, "CERT-REQUESTER", 422, "Μη έγκυρο αίτημα βεβαίωσης ιστορικού", "The claims-history request is not valid")
+            .Describe("Ο αιτών, τα ασφαλιστήρια ή η περίοδος δεν είναι αποδεκτά· η περίοδος δεν ξεπερνά το διάστημα αναδρομής.", "The requester, policies or period are not acceptable; the period stays inside the look-back."),
+        ErrorDefinition.For(ModuleCode.CLM, "CERT-STATE", 422, "Η βεβαίωση ιστορικού δεν μπορεί να προχωρήσει", "The claims-history certificate cannot proceed")
+            .Describe("Συγκεντρώστε πρώτα τη βεβαίωση· σε παραγωγή απαιτείται επιβεβαιωμένο διάστημα αναδρομής.", "Assemble the certificate first; in Production the look-back must be confirmed."),
         ErrorDefinition.For(ModuleCode.CLM, "MERGE-NOT-DUPLICATE", 422, "Οι ζημίες δεν μπορούν να συγχωνευθούν", "The claims cannot be merged")
             .Describe("Μόνο δύο ανοιχτές ζημίες του ίδιου ασφαλιστηρίου και της ίδιας ημερομηνίας ζημίας συγχωνεύονται.", "Only two open claims of the same policy and loss date can be merged."),
         ErrorDefinition.For(ModuleCode.CLM, "MERGE-FINANCIALS", 422, "Η διπλή ζημία έχει οικονομική κίνηση", "The duplicate claim has financial activity")

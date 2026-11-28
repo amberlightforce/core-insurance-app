@@ -4,58 +4,36 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Decline.decideReview request. PRD inputs: "job or intake ref, scope, reasons, pairs, wording"</summary>
-/// <remarks>
-/// <para>Exactly one of: jobRef | intakeRef.</para>
-/// </remarks>
+/// <summary>uw.Decline.decideReview request (BO-UW-07): the second underwriter decides the review of an automated decline. The decider cannot be the person who issued the decline (UW-ERR-SOD).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DeclineDecideReviewRequest
 {
-    /// <summary>PRD: "job or intake ref" (optional)</summary>
+    /// <summary>Contract member 'declineId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'declineId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("jobRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? JobRef { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("declineId")]
+    public required global::System.Guid DeclineId { get; init; }
 
-    /// <summary>PRD: "job or intake ref" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("intakeRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? IntakeRef { get; init; }
+    /// <summary>UPHELD keeps the decline; OVERTURNED withdraws it (the job returns to Quoted, REQ-UW-220).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    public required OutcomeValue Outcome { get; init; }
 
-    /// <summary>PRD: "scope"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("scope")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Scope { get; init; }
+    /// <summary>Why (mandatory)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
 
-    /// <summary>PRD: "reasons"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reasons")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reasons { get; init; }
+    /// <summary>UPHELD keeps the decline; OVERTURNED withdraws it (the job returns to Quoted, REQ-UW-220).</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum OutcomeValue
+    {
+        /// <summary><c>UPHELD</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("UPHELD")]
+        Upheld,
 
-    /// <summary>PRD: "pairs"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("pairs")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Pairs { get; init; }
-
-    /// <summary>PRD: "wording"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("wording")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Wording { get; init; }
+        /// <summary><c>OVERTURNED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("OVERTURNED")]
+        Overturned,
+    }
 }

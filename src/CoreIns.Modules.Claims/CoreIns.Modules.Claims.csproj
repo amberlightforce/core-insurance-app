@@ -25,6 +25,8 @@
     <!-- cmp.FiscalDocument.request (settlement receipt) and FiscalDocRegistered (SL4-CLM-PAYOPS). Contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Compliance.Contracts\CoreIns.Modules.Compliance.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
+    <!-- IDocumentRequestService: the claims-history certificate letter (BO-CLM-07). Contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Documents.Contracts\CoreIns.Modules.Documents.Contracts.csproj" />
     <!-- Migration SPI (IMigrationImporter / IMigrationReverser): contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Migration.Contracts\CoreIns.Modules.Migration.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Platform\CoreIns.Platform.csproj" />

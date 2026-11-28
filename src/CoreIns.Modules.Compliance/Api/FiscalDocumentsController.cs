@@ -101,26 +101,6 @@ internal sealed class FiscalDocumentsController : ControllerBase
         });
     }
 
-    /// <summary>cmp.FiscalReconciliation.breaks: documents the channel has not registered (rejected or pending).</summary>
-    [HttpGet("/api/cmp/v1/fiscal-reconciliation/breaks")]
-    [Authorize(Policy = "cmp.FiscalReconciliation.breaks")]
-    public async Task<IResult> BreaksAsync(
-        [FromServices] FiscalDocumentReader reader, [FromQuery] string? date, [FromQuery] int? limit, CancellationToken cancellationToken)
-    {
-        CoreIns.SharedKernel.BusinessDate? upTo = CoreIns.SharedKernel.BusinessDate.TryParse(date, out var d) ? d : null;
-        var take = limit ?? 100;
-        var rows = await reader.BreaksAsync(ResolveLegalEntity(), upTo, take, cancellationToken).ConfigureAwait(false);
-        return Results.Ok(new FiscalReconciliationBreaksPage
-        {
-            Items = [.. rows.Select(r => new FiscalReconciliationBreaksItem
-            {
-                Breaks = System.Text.Json.JsonSerializer.SerializeToElement(r, CoreIns.SharedKernel.Json.SharedKernelJson.Options),
-            })],
-            NextCursor = null,
-            Limit = take,
-        });
-    }
-
     private LegalEntityId ResolveLegalEntity()
     {
         var services = HttpContext.RequestServices;

@@ -37,6 +37,8 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
 
     public DbSet<NonPaymentCancellationRow> NonPaymentCancellations => Set<NonPaymentCancellationRow>();
 
+    public DbSet<ScheduledCancellationRow> ScheduledCancellations => Set<ScheduledCancellationRow>();
+
     public DbSet<PsrExceptionRow> PsrExceptions => Set<PsrExceptionRow>();
 
     public DbSet<NonRenewalRow> NonRenewals => Set<NonRenewalRow>();
@@ -409,6 +411,34 @@ internal sealed class PolicyDbContext(DbContextOptions<PolicyDbContext> options)
             entity.HasIndex(e => new { e.PolicyId, e.TermId, e.ClockInstanceId }).IsUnique().HasDatabaseName("ux_nonpay_cancellation_policy_term_clock");
             entity.HasIndex(e => e.RequestId).HasDatabaseName("ix_nonpay_cancellation_request");
             entity.HasIndex(e => new { e.Status, e.EffectiveAt }).HasDatabaseName("ix_nonpay_cancellation_due");
+        });
+
+        modelBuilder.Entity<ScheduledCancellationRow>(entity =>
+        {
+            entity.ToTable("scheduled_cancellation", table =>
+                table.HasCheckConstraint("ck_scheduled_cancellation_status", "status IN ('SCHEDULED', 'EXECUTED', 'RESCINDED', 'FAILED')"));
+            entity.HasKey(e => e.ScheduledId).HasName("pk_scheduled_cancellation");
+            entity.Property(e => e.ScheduledId).HasColumnName("scheduled_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.Source).HasColumnName("source");
+            entity.Property(e => e.ReasonCode).HasColumnName("reason_code");
+            entity.Property(e => e.EffectiveAt).HasColumnName("effective_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RefundMethod).HasColumnName("refund_method");
+            entity.Property(e => e.RequestRef).HasColumnName("request_ref");
+            entity.Property(e => e.EvidenceRefs).HasColumnName("evidence_refs");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.ExecutedJobId).HasColumnName("executed_job_id");
+            entity.Property(e => e.Outcome).HasColumnName("outcome");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => e.PolicyId).HasDatabaseName("ix_scheduled_cancellation_policy");
+            // One open scheduled cancellation per term (POL-ERR-JOB-CONFLICT on the second).
+            entity.HasIndex(e => e.TermId).IsUnique().HasFilter("status = 'SCHEDULED'").HasDatabaseName("ux_scheduled_cancellation_open_term");
+            entity.HasIndex(e => new { e.Status, e.EffectiveAt }).HasDatabaseName("ix_scheduled_cancellation_due");
         });
 
         modelBuilder.Entity<PsrExceptionRow>(entity =>

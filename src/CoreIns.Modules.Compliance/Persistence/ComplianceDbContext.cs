@@ -1,5 +1,6 @@
 using CoreIns.Modules.Compliance.AiRegister;
 using CoreIns.Modules.Compliance.Complaints;
+using CoreIns.Modules.Compliance.Reconciliation;
 using CoreIns.Modules.Compliance.Submissions;
 using CoreIns.Modules.Compliance.Domain;
 using CoreIns.Modules.Compliance.Dsar;
@@ -39,6 +40,7 @@ internal sealed class ComplianceDbContext(DbContextOptions<ComplianceDbContext> 
         modelBuilder.MapDsar();
         modelBuilder.MapComplaints();
         modelBuilder.MapSubmissions();
+        modelBuilder.MapFiscalReconciliation();
 
         modelBuilder.Entity<FiscalDocumentRow>(entity =>
         {

@@ -1104,7 +1104,13 @@
       ]
     },
     "cmp.FiscalRule.certify": {
-      "passOrFailKeys": "unspecified"
+      "pass": true,
+      "failedKeys": [
+        "sample"
+      ],
+      "checkedKeys": [
+        "sample"
+      ]
     },
     "cmp.Submission.create": {
       "submission": {
@@ -3700,13 +3706,36 @@
       "entity": "unspecified"
     },
     "FiscalReconciliationRunResponse": {
-      "breaks": "unspecified"
+      "checked": 1,
+      "opened": 1,
+      "reopened": 1,
+      "resolved": 1,
+      "open": 1,
+      "breaks": [
+        {
+          "fiscalDocumentId": "01920ee9-fca2-7e7f-8e69-67b60b33b064",
+          "kind": "sample",
+          "detail": "sample"
+        }
+      ]
     },
     "FiscalRuleCertifyRequest": {
-      "packCandidate": "2026-10-07"
+      "packCandidate": {
+        "documentType": "sample",
+        "seriesPattern": "sample",
+        "markBeforeIssue": true,
+        "markBeforeDelivery": true,
+        "legalStatus": "Verified"
+      }
     },
     "FiscalRuleCertifyResponse": {
-      "passOrFailKeys": "unspecified"
+      "pass": true,
+      "failedKeys": [
+        "sample"
+      ],
+      "checkedKeys": [
+        "sample"
+      ]
     },
     "SubmissionApproveRequest": {
       "id": "019204af-11f3-7c96-85ee-6ff080e39f07",

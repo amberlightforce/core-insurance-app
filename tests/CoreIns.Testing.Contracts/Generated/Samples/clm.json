@@ -58,7 +58,32 @@
       ]
     },
     "clm.Certificate.request": {
-      "certificate": "unspecified"
+      "certificate": {
+        "certificateId": "01929165-8684-757f-83a5-d3f1bfeeba1f",
+        "certificateNumber": "SAMPLE-000001",
+        "requesterPartyId": "01924f44-1e1d-7b89-800f-06931effa7df",
+        "policyNumbers": [
+          "SAMPLE-000001"
+        ],
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "lookbackYears": 1,
+        "legalStatus": "sample",
+        "status": "REQUESTED",
+        "claims": [
+          {
+            "claimNumber": "SAMPLE-000001",
+            "policyNumber": "SAMPLE-000001",
+            "lossDate": "2026-10-07",
+            "lossCause": "SAMPLE_CODE",
+            "status": "sample",
+            "outcome": "SAMPLE_CODE"
+          }
+        ],
+        "documentId": "0192234d-27a0-78b9-891f-dd71c4c460dd",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
     },
     "clm.Claim.get": {
       "claim": {
@@ -896,28 +921,137 @@
       "recordVersion": 1
     },
     "CertificateAssembleRequest": {
-      "requester": "unspecified",
-      "policies": "unspecified",
-      "period": "unspecified"
+      "certificateId": "01922547-6c46-7932-881a-5a085c71a677"
     },
     "CertificateAssembleResponse": {
-      "certificate": "unspecified"
+      "certificate": {
+        "certificateId": "019252f5-02dd-7474-8de5-f5f3b0bf2f32",
+        "certificateNumber": "SAMPLE-000001",
+        "requesterPartyId": "0192cb8c-f4bf-7491-8784-c86bb32078a6",
+        "policyNumbers": [
+          "SAMPLE-000001"
+        ],
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "lookbackYears": 1,
+        "legalStatus": "sample",
+        "status": "REQUESTED",
+        "claims": [
+          {
+            "claimNumber": "SAMPLE-000001",
+            "policyNumber": "SAMPLE-000001",
+            "lossDate": "2026-10-07",
+            "lossCause": "SAMPLE_CODE",
+            "status": "sample",
+            "outcome": "SAMPLE_CODE"
+          }
+        ],
+        "documentId": "0192da5a-7aa9-7a44-866e-6a235d3e1f69",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
+    "CertificateClaimLine": {
+      "claimNumber": "SAMPLE-000001",
+      "policyNumber": "SAMPLE-000001",
+      "lossDate": "2026-10-07",
+      "lossCause": "SAMPLE_CODE",
+      "status": "sample",
+      "outcome": "SAMPLE_CODE"
     },
     "CertificateIssueRequest": {
-      "requester": "unspecified",
-      "policies": "unspecified",
-      "period": "unspecified"
+      "certificateId": "01926353-4915-71a3-8da1-0c570e3f4361",
+      "language": "el"
     },
     "CertificateIssueResponse": {
-      "certificate": "unspecified"
+      "certificate": {
+        "certificateId": "01921994-5c1e-7fb3-85ed-a32204eecb00",
+        "certificateNumber": "SAMPLE-000001",
+        "requesterPartyId": "019204f8-667b-7465-88b6-2ad5fb62f5b6",
+        "policyNumbers": [
+          "SAMPLE-000001"
+        ],
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "lookbackYears": 1,
+        "legalStatus": "sample",
+        "status": "REQUESTED",
+        "claims": [
+          {
+            "claimNumber": "SAMPLE-000001",
+            "policyNumber": "SAMPLE-000001",
+            "lossDate": "2026-10-07",
+            "lossCause": "SAMPLE_CODE",
+            "status": "sample",
+            "outcome": "SAMPLE_CODE"
+          }
+        ],
+        "documentId": "019297a1-1e14-72cb-8039-2f6e059acf25",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
     },
     "CertificateRequestRequest": {
-      "requester": "unspecified",
-      "policies": "unspecified",
-      "period": "unspecified"
+      "requesterPartyId": "0192e10f-aba7-793a-8edd-31fd68408e21",
+      "policyNumbers": [
+        "SAMPLE-000001"
+      ],
+      "periodFrom": "2026-10-07",
+      "periodTo": "2026-10-07"
     },
     "CertificateRequestResponse": {
-      "certificate": "unspecified"
+      "certificate": {
+        "certificateId": "01924baf-ed7f-7fb1-88e2-49e9884e0db5",
+        "certificateNumber": "SAMPLE-000001",
+        "requesterPartyId": "0192490a-751a-7c15-814a-fc8b4ecc7c7a",
+        "policyNumbers": [
+          "SAMPLE-000001"
+        ],
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "lookbackYears": 1,
+        "legalStatus": "sample",
+        "status": "REQUESTED",
+        "claims": [
+          {
+            "claimNumber": "SAMPLE-000001",
+            "policyNumber": "SAMPLE-000001",
+            "lossDate": "2026-10-07",
+            "lossCause": "SAMPLE_CODE",
+            "status": "sample",
+            "outcome": "SAMPLE_CODE"
+          }
+        ],
+        "documentId": "01921031-4fed-7e19-833f-d20aeeda99d8",
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      }
+    },
+    "CertificateView": {
+      "certificateId": "019285c0-2ba5-773a-8526-6fa786ae40d5",
+      "certificateNumber": "SAMPLE-000001",
+      "requesterPartyId": "0192c9ca-6128-7c0f-89f5-ff813a5eaf31",
+      "policyNumbers": [
+        "SAMPLE-000001"
+      ],
+      "periodFrom": "2026-10-07",
+      "periodTo": "2026-10-07",
+      "lookbackYears": 1,
+      "legalStatus": "sample",
+      "status": "REQUESTED",
+      "claims": [
+        {
+          "claimNumber": "SAMPLE-000001",
+          "policyNumber": "SAMPLE-000001",
+          "lossDate": "2026-10-07",
+          "lossCause": "SAMPLE_CODE",
+          "status": "sample",
+          "outcome": "SAMPLE_CODE"
+        }
+      ],
+      "documentId": "01927d69-c473-7cef-82dd-f23b6b521ecb",
+      "issuedAt": "2026-10-07T09:00:00Z",
+      "recordVersion": 1
     },
     "ClaimCloseRequest": {
       "claimId": "0192a71c-b6a6-7852-8689-68d724bea0be",

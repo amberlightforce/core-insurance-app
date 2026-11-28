@@ -36,6 +36,9 @@ internal sealed class ClaimsOptions
     /// <summary>Claim tracking watch list (BO-CLM-08).</summary>
     public ClaimTrackingOptions Tracking { get; set; } = new();
 
+    /// <summary>Claims-history certificate (BO-CLM-07).</summary>
+    public CertificateOptions Certificate { get; set; } = new();
+
     /// <summary>Claim financials (SL2-CLM-MONEY): illustrative cost categories and the reserve auto-adjust switch.</summary>
     public ClaimFinancialsOptions Financials { get; set; } = new();
 
@@ -124,4 +127,16 @@ internal sealed class ClaimTrackingOptions
     /// <summary>A claim whose incurred (paid + open reserve) reaches this amount is flagged as a large loss.</summary>
     [Range(0, 1_000_000_000)]
     public decimal LargeLossThreshold { get; set; } = 50000m;
+}
+
+/// <summary>
+/// Configuration section <c>Claims:Certificate</c> (BO-CLM-07). The look-back N comes from MKT key <c>clm.history.lookback_years</c>;
+/// the PRDs state no N, so while MKT holds no value the ILLUSTRATIVE default below applies and the certificate is Unverified,
+/// which Production refuses to issue (D-REG-04 fail closed).
+/// </summary>
+internal sealed class CertificateOptions
+{
+    /// <summary>Illustrative look-back in years, used only while MKT has no value for the key. Never presented as the statutory period.</summary>
+    [Range(1, 50)]
+    public int DefaultLookbackYears { get; set; } = 5;
 }
