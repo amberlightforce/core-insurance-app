@@ -149,7 +149,7 @@ public sealed class WriteOffTests(PostgresFixture database) : IClassFixture<Post
         (await _slice.ScalarAsync<long>($"SELECT count(*) FROM bil.ledger_line WHERE entry_id = '{entryId}' AND invoice_item_id IS NOT NULL")).ShouldBe(policy.ChargeCount * 2);
         (await _slice.ScalarAsync<decimal>($"SELECT coalesce(sum(amount), 0) FROM bil.write_off_line WHERE write_off_id = '{writeOffId}'")).ShouldBe(policy.Total);
 
-        // FIN: the same entry is journalised under rule set v8; the BIL and FIN totals are equal.
+        // FIN: the same entry is journalised under rule set v9; the BIL and FIN totals are equal.
         await FinPostedAsync(_slice, account);
         (await FinNetAsync(_slice, account, "GL-1210")).ShouldBe(await NetAsync(_slice, account, "LA-02"));
         (await FinNetAsync(_slice, account, "GL-6210")).ShouldBe(await NetAsync(_slice, account, "LA-16"));
@@ -157,7 +157,7 @@ public sealed class WriteOffTests(PostgresFixture database) : IClassFixture<Post
         (await _slice.ScalarAsync<string>($"""
             SELECT string_agg(DISTINCT je.rule_set_version::text, ',') FROM fin.journal_entry je
              WHERE EXISTS (SELECT 1 FROM fin.journal_line jl WHERE jl.journal_id = je.journal_id AND jl.billing_account_id = '{account}' AND jl.account_code = 'GL-6210')
-            """)).ShouldBe("8");
+            """)).ShouldBe("9");
 
         // The inbox lists it; the ledger and the write-off rows stay sound.
         var (_, list) = await _slice.GetAsync($"/api/bil/v1/write-offs?state=POSTED&billingAccountId={account}");

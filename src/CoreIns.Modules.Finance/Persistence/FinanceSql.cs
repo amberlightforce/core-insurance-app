@@ -295,6 +295,18 @@ internal static class FinanceSeed
     /// </summary>
     public const string GrTestV8 = "gr-test.finance.v8";
 
+    /// <summary>
+    /// The seed of migration DirectDebitReturnPostings (BO-BIL-06b): v8 plus the RECEIPT_RETURNED rules RR-CASH and RR-UNALLOCATED (a receipt returned by the
+    /// bank takes the cash back out). A new rule-set version because v8 is immutable once applied; effective from 2026-10-01 and winning the tie by version number.
+    /// </summary>
+    public const string GrTestV9 = "gr-test.finance.v9";
+
+    /// <summary>Migration Down of DirectDebitReturnPostings: v9 superseded (rule rows are append-only, REQ-FIN-070); v8 governs again.</summary>
+    public const string SupersedeV9 = """
+        UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'
+         WHERE legal_entity_code = 'GR-TEST' AND book = 'IFRS17' AND version_no = 9;
+        """;
+
     /// <summary>Migration Down of WriteOffPostings: v8 superseded (rule rows are append-only, REQ-FIN-070); v7 governs again.</summary>
     public const string SupersedeV8 = """
         UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'

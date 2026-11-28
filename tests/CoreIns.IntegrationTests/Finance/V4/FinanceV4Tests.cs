@@ -235,7 +235,7 @@ public sealed class FinanceV4Tests(PostgresFixture database) : IClassFixture<Pos
             """)).ShouldBe(0);
         (await ScalarAsync<long>(_db, $"""
             SELECT count(*) FROM fin.journal_entry WHERE journal_id IN (SELECT journal_id FROM fin.journal_line WHERE {lineFilter})
-               AND (book <> 'IFRS17' OR rule_set_version <> 8)
+               AND (book <> 'IFRS17' OR rule_set_version <> 9)
             """)).ShouldBe(0);
     }
 
@@ -594,6 +594,18 @@ public sealed class FinanceV4Tests(PostgresFixture database) : IClassFixture<Pos
         FinanceSeed.ChartCodes(FinanceSeed.GrTestV7).Where(c => !FinanceSeed.ChartCodes(FinanceSeed.GrTestV8).Contains(c)).ShouldBeEmpty();
         PostingRules.Compile(v8, FinanceSeed.ChartCodes(FinanceSeed.GrTestV8), FinanceSeed.Derivations(FinanceSeed.GrTestV8)).ShouldBeEmpty();
         FinanceSeed.RuleSetHash(FinanceSeed.GrTestV8).ShouldNotBe(FinanceSeed.RuleSetHash(FinanceSeed.GrTestV7));
+    }
+
+    [Fact]
+    public void BO_BIL_06b_rule_set_v8_is_immutable_and_v9_is_v8_plus_exactly_the_receipt_returned_rules()
+    {
+        var v8 = FinanceSeed.Rules(FinanceSeed.GrTestV8);
+        var v9 = FinanceSeed.Rules(FinanceSeed.GrTestV9);
+        v8.Where(r => !v9.Contains(r)).ShouldBeEmpty();
+        v9.Where(r => !v8.Contains(r)).Select(r => r.Code).Order().ShouldBe(["RR-CASH", "RR-UNALLOCATED"]);
+        FinanceSeed.ChartCodes(FinanceSeed.GrTestV9).Order().ShouldBe(FinanceSeed.ChartCodes(FinanceSeed.GrTestV8).Order());
+        PostingRules.Compile(v9, FinanceSeed.ChartCodes(FinanceSeed.GrTestV9), FinanceSeed.Derivations(FinanceSeed.GrTestV9)).ShouldBeEmpty();
+        FinanceSeed.RuleSetHash(FinanceSeed.GrTestV9).ShouldNotBe(FinanceSeed.RuleSetHash(FinanceSeed.GrTestV8));
     }
 
     [Fact]

@@ -109,7 +109,7 @@ internal sealed partial class BankReconciler(
         if (candidates.Count > 0)
         {
             var receipt = await db.Receipts.AsNoTracking()
-                .Where(r => r.LegalEntityId == legalEntity && r.Method == ReceiptCodes.BankTransfer && r.BankReference != null && candidates.Contains(r.BankReference))
+                .Where(r => r.LegalEntityId == legalEntity && (r.Method == ReceiptCodes.BankTransfer || r.Method == ReceiptCodes.DirectDebit) && r.BankReference != null && candidates.Contains(r.BankReference))
                 .OrderBy(r => r.ReceiptNumber).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
             if (receipt is not null)
             {
