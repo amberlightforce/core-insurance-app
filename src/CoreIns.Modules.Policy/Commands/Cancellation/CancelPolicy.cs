@@ -270,7 +270,7 @@ internal sealed class CancelPolicyHandler(
             ProductVersion = term.ProductVersion, ArtefactHash = term.ArtefactHash, RatingArtefactHash = term.RatingArtefactHash,
             ResolutionHash = term.ResolutionHash, ConfigurationHash = term.ConfigurationHash, Currency = term.Currency,
             ProducerCode = term.ProducerCode, PaymentPlanRef = term.PaymentPlanRef, WrittenDate = term.WrittenDate,
-            HeadTransactionId = transactionId, CreatedBy = actor, PredecessorTermId = term.PredecessorTermId, CancelledAt = effective,
+            HeadTransactionId = transactionId, CreatedBy = actor, PredecessorTermId = term.PredecessorTermId, CancelledAt = effective, SuspendedFrom = term.SuspendedFrom,
         };
         db.Terms.Add(cancelledVersion);
 

@@ -40,6 +40,12 @@ internal enum JobType
 
     /// <summary>Renewal: the next term of an expiring one.</summary>
     Renewal,
+
+    /// <summary>Suspension of a term's cover (BO-POL-08).</summary>
+    Suspension,
+
+    /// <summary>Reactivation of a suspended term's cover (BO-POL-08).</summary>
+    Reactivation,
 }
 
 /// <summary>
