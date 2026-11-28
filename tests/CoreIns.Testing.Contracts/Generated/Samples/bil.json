@@ -1333,23 +1333,117 @@
       }
     },
     "BillingAccountChangePayerRequest": {
-      "newPayer": "unspecified",
+      "billingAccountId": "0192ea6d-074a-78f0-8a54-6f04e4328da9",
+      "newPayerPartyId": "0192a133-8951-728d-8284-80f10444ea49",
       "effectiveDate": "2026-10-07",
-      "reason": "unspecified"
+      "reason": "sample"
     },
     "BillingAccountChangePayerResponse": {
-      "account": "unspecified",
-      "approvalRef": "unspecified"
+      "account": {
+        "billingAccountId": "01922b14-542d-7628-878f-4a1cd020fb81",
+        "accountNumber": "SAMPLE-000001",
+        "payerPartyId": "01924304-83d5-7ade-8f3a-c0b81e66fd58",
+        "currency": "EUR",
+        "status": "ACTIVE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "terms": [
+          {
+            "policyTermId": "01925407-69a9-7ed7-8389-5128dc4f9255",
+            "policyId": "0192c7cf-6c80-7883-8bba-e1690f345299",
+            "policyNumber": "SAMPLE-000001",
+            "termNumber": 1,
+            "productCode": "SAMPLE_CODE",
+            "planCode": "SAMPLE_CODE",
+            "billMode": "DIRECT_BILL",
+            "termPeriod": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            }
+          }
+        ]
+      },
+      "balancesByState": {
+        "writtenUnbilled": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "billed": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "overdue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "collected": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unapplied": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "credit": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "previousPayerPartyId": "01920704-124d-75ae-85ba-6ebd480ea586"
     },
     "BillingAccountCloseRequest": {
-      "payer": "unspecified",
-      "currency": "EUR",
-      "preferences": "unspecified",
-      "criteria": "unspecified"
+      "billingAccountId": "01921ab6-884e-71d1-8578-6a7864bba291",
+      "reason": "sample"
     },
     "BillingAccountCloseResponse": {
-      "account": "unspecified",
-      "balancesByState": "unspecified"
+      "account": {
+        "billingAccountId": "0192a823-3d40-7973-8723-2422122c66de",
+        "accountNumber": "SAMPLE-000001",
+        "payerPartyId": "0192a8ce-3801-7dd5-8f92-bc3d8ff39e85",
+        "currency": "EUR",
+        "status": "ACTIVE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "terms": [
+          {
+            "policyTermId": "01926d0b-4dfc-7769-8208-992eabef8f21",
+            "policyId": "01924a27-f784-7aae-8ba0-ae253f9ec1e0",
+            "policyNumber": "SAMPLE-000001",
+            "termNumber": 1,
+            "productCode": "SAMPLE_CODE",
+            "planCode": "SAMPLE_CODE",
+            "billMode": "DIRECT_BILL",
+            "termPeriod": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            }
+          }
+        ]
+      },
+      "balancesByState": {
+        "writtenUnbilled": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "billed": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "overdue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "collected": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unapplied": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "credit": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      }
     },
     "BillingAccountCreateRequest": {
       "payer": "unspecified",
@@ -1422,38 +1516,159 @@
       "preview": "unspecified"
     },
     "BillingAccountReopenRequest": {
-      "payer": "unspecified",
-      "currency": "EUR",
-      "preferences": "unspecified",
-      "criteria": "unspecified"
+      "billingAccountId": "019299c1-ce7a-7fc7-8602-29e6847220b7",
+      "reason": "sample"
     },
     "BillingAccountReopenResponse": {
-      "account": "unspecified",
-      "balancesByState": "unspecified"
+      "account": {
+        "billingAccountId": "01923439-62c6-7335-8493-8ef176a93bb5",
+        "accountNumber": "SAMPLE-000001",
+        "payerPartyId": "019214b8-4b8a-7c61-825e-7f612579525f",
+        "currency": "EUR",
+        "status": "ACTIVE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "terms": [
+          {
+            "policyTermId": "0192dcb5-df69-7a0e-8741-8ca5ad398455",
+            "policyId": "019294d5-7205-752c-8a9c-dc693f303c04",
+            "policyNumber": "SAMPLE-000001",
+            "termNumber": 1,
+            "productCode": "SAMPLE_CODE",
+            "planCode": "SAMPLE_CODE",
+            "billMode": "DIRECT_BILL",
+            "termPeriod": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            }
+          }
+        ]
+      },
+      "balancesByState": {
+        "writtenUnbilled": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "billed": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "overdue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "collected": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unapplied": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "credit": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      }
     },
     "BillingAccountSearchItem": {
-      "account": "unspecified",
-      "balancesByState": "unspecified"
+      "account": {
+        "billingAccountId": "01922571-262d-78e3-805a-63c11c2e21ab",
+        "accountNumber": "SAMPLE-000001",
+        "payerPartyId": "0192696f-54b5-7188-8ad3-7479b0ceb9d5",
+        "currency": "EUR",
+        "status": "ACTIVE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1
+      },
+      "openBalance": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
     },
     "BillingAccountSearchPage": {
       "items": [
         {
-          "account": "unspecified",
-          "balancesByState": "unspecified"
+          "account": {
+            "billingAccountId": "019282ef-311e-74c4-89a2-918e7dbbd111",
+            "accountNumber": "SAMPLE-000001",
+            "payerPartyId": "0192e060-7d66-7c95-8f34-8cc1403a5e09",
+            "currency": "EUR",
+            "status": "ACTIVE",
+            "createdAt": "2026-10-07T09:00:00Z",
+            "recordVersion": 1
+          },
+          "openBalance": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
-    "BillingAccountUpdateRequest": {
-      "payer": "unspecified",
+    "BillingAccountSummary": {
+      "billingAccountId": "0192d8cb-75e1-7334-8f63-59d79b892af0",
+      "accountNumber": "SAMPLE-000001",
+      "payerPartyId": "01926d67-b5ef-77f9-819b-8f1bac3e7259",
       "currency": "EUR",
-      "preferences": "unspecified",
-      "criteria": "unspecified"
+      "status": "ACTIVE",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "recordVersion": 1
+    },
+    "BillingAccountUpdateRequest": {
+      "status": "ACTIVE",
+      "reason": "sample"
     },
     "BillingAccountUpdateResponse": {
-      "account": "unspecified",
-      "balancesByState": "unspecified"
+      "account": {
+        "billingAccountId": "0192468d-1a13-7a88-8991-a8af63d8017f",
+        "accountNumber": "SAMPLE-000001",
+        "payerPartyId": "0192a6dc-ec78-7bf9-82ed-6d98dd2b88c8",
+        "currency": "EUR",
+        "status": "ACTIVE",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "terms": [
+          {
+            "policyTermId": "0192c06e-1c86-7774-8cb2-2fed7505b131",
+            "policyId": "0192c131-d15b-7627-8ba5-c92eda08baea",
+            "policyNumber": "SAMPLE-000001",
+            "termNumber": 1,
+            "productCode": "SAMPLE_CODE",
+            "planCode": "SAMPLE_CODE",
+            "billMode": "DIRECT_BILL",
+            "termPeriod": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            }
+          }
+        ]
+      },
+      "balancesByState": {
+        "writtenUnbilled": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "billed": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "overdue": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "collected": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unapplied": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "credit": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      }
     },
     "BillingAccountView": {
       "billingAccountId": "019239a3-8b9f-7338-859d-8f8583ea7167",

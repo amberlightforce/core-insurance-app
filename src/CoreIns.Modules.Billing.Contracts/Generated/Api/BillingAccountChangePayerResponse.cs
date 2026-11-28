@@ -4,23 +4,23 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.BillingAccount.changePayer result. PRD outputs: "account, approval ref"</summary>
+/// <summary>bil.BillingAccount.changePayer result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BillingAccountChangePayerResponse
 {
-    /// <summary>PRD: "account"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'account'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("account")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Account { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.BillingAccountView Account { get; init; }
 
-    /// <summary>PRD: "approval ref"</summary>
+    /// <summary>Contract member 'balancesByState'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("balancesByState")]
+    public required global::CoreIns.Modules.Billing.Contracts.Api.BillingAccountBalances BalancesByState { get; init; }
+
+    /// <summary>Contract member 'previousPayerPartyId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'previousPayerPartyId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRef")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("previousPayerPartyId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ApprovalRef { get; init; }
+    public global::System.Guid? PreviousPayerPartyId { get; init; }
 }
