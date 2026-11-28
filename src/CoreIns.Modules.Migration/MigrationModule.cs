@@ -118,7 +118,7 @@ public static class MigrationModule
         services.AddCommand<PlanCutover, CutoverPlanView, CutoverCommandHandler>(CommandDescriptor.For("mig.Cutover.plan"));
         services.AddCommand<StartCutoverStep, CutoverPlanView, CutoverCommandHandler>(CommandDescriptor.For("mig.Cutover.startStep"));
         services.AddCommand<CompleteCutoverStep, CutoverPlanView, CutoverCommandHandler>(CommandDescriptor.For("mig.Cutover.completeStep"));
-        services.AddCommand<RollbackCutover, CutoverPlanView, CutoverCommandHandler>(CommandDescriptor.For("mig.Cutover.rollback") with { SupportsDryRun = true });
+        services.AddCommand<RollbackCutover, CutoverPlanView, CutoverCommandHandler>(CommandDescriptor.For("mig.Cutover.rollback"));
 
         services.AddScoped<IMigrationXrefService, MigrationXrefService>();
         services.AddScoped<IMigrationRoutingService, MigrationRoutingService>();

@@ -23,9 +23,9 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [WRK](#wrk) | 60 | 25 | 35 | 41 | 19 | 9 | 3 | 14 |
 | [PLT](#plt) | 101 | 67 | 34 | 63 | 38 | 25 | 0 | 10 |
 | [DAT](#dat) | 47 | 47 | 0 | 28 | 19 | 5 | 0 | 0 |
-| [MIG](#mig) | 45 | 45 | 0 | 29 | 16 | 5 | 0 | 12 |
+| [MIG](#mig) | 49 | 49 | 0 | 33 | 16 | 5 | 0 | 12 |
 | [MKT](#mkt) | 50 | 38 | 12 | 17 | 33 | 1 | 0 | 5 |
-| **Total** | 1224 | 1005 | 219 | 785 | 439 | 128 | 69 | 63 |
+| **Total** | 1228 | 1009 | 219 | 789 | 439 | 128 | 69 | 63 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -1375,6 +1375,10 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `mig.Batch.resume` | POST `/api/mig/v1/batches/resume` | C |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
 | `mig.Batch.reverse` | POST `/api/mig/v1/batches/reverse` | C | yes | ui |  | W9 | full | REQ-MIG-005, REQ-MIG-066..REQ-MIG-078 |
 | `mig.Batch.start` | POST `/api/mig/v1/batches/start` | C |  | ui |  | W9 | full | REQ-MIG-066..REQ-MIG-078 |
+| `mig.Cutover.completeStep` | POST `/api/mig/v1/cutover/complete-step` | C |  | ui |  | W9 | full | REQ-MIG-186..REQ-MIG-190 |
+| `mig.Cutover.plan` | POST `/api/mig/v1/cutover/plan` | C |  | ui |  | W9 | full | REQ-MIG-186..REQ-MIG-190 |
+| `mig.Cutover.rollback` | POST `/api/mig/v1/cutover/rollback` | C |  | ui |  | W9 | full | REQ-MIG-186..REQ-MIG-190 |
+| `mig.Cutover.startStep` | POST `/api/mig/v1/cutover/start-step` | C |  | ui |  | W9 | full | REQ-MIG-186..REQ-MIG-190 |
 | `mig.Dq.findings` | GET `/api/mig/v1/quality/findings` | Q |  | ui |  | W9 | full | REQ-MIG-047..REQ-MIG-050 |
 | `mig.Dq.waive` | POST `/api/mig/v1/quality/waive` | C |  | ui |  | W9 | full | REQ-MIG-047..REQ-MIG-050 |
 | `mig.Enquiry.get` | GET `/api/mig/v1/enquiries/get` | Q |  | ui |  | W9 | full | REQ-MIG-152 |

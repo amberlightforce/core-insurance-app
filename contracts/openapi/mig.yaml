@@ -3149,8 +3149,8 @@ paths:
       x-maturity: pre-release
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'BO-MIG-12: rollback previews the reversal of every batch before the real run'
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-12: the dryRun field of the body previews the reversal of every batch (like mig.Batch.reverse); the real rollback needs that preview first'
       x-exposure:
       - ui
       x-permission: mig.Cutover.rollback
