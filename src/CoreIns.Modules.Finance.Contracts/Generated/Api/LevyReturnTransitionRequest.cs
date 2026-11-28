@@ -4,23 +4,41 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.LevyReturn.transition request. PRD inputs: "levy, period"</summary>
+/// <summary>fin.LevyReturn.transition request.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record LevyReturnTransitionRequest
 {
-    /// <summary>PRD: "levy"</summary>
+    /// <summary>Contract member 'returnId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'returnId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("levy")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Levy { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("returnId")]
+    public required global::System.Guid ReturnId { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
+    /// <summary>SUBMIT (the preparer freezes the content hash and requests approval), APPROVE or REJECT (a second person).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("action")]
+    public required ActionValue Action { get; init; }
+
+    /// <summary>Contract member 'comment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    public string? Comment { get; init; }
+
+    /// <summary>SUBMIT (the preparer freezes the content hash and requests approval), APPROVE or REJECT (a second person).</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ActionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ActionValue
+    {
+        /// <summary><c>SUBMIT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUBMIT")]
+        Submit,
+
+        /// <summary><c>APPROVE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVE")]
+        Approve,
+
+        /// <summary><c>REJECT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REJECT")]
+        Reject,
+    }
 }

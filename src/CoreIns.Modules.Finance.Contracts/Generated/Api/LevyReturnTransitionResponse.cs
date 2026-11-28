@@ -4,15 +4,21 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.LevyReturn.transition result. PRD outputs: "return"</summary>
+/// <summary>fin.LevyReturn.transition result: the return, its file and its payment status.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record LevyReturnTransitionResponse
 {
-    /// <summary>PRD: "return"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'return'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("return")]
+    public required global::CoreIns.Modules.Finance.Contracts.Api.LevyReturnView Return { get; init; }
+
+    /// <summary>Contract member 'file'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("file")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Return { get; init; }
+    public global::CoreIns.Modules.Finance.Contracts.Api.LevyReturnFileView? File { get; init; }
+
+    /// <summary>Contract member 'paymentStatus'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("paymentStatus")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? PaymentStatus { get; init; }
 }

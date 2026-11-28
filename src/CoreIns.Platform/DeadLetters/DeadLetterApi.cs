@@ -7,6 +7,7 @@ using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts.Api;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
+using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Paging;
@@ -15,6 +16,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -26,12 +28,27 @@ internal static class DeadLetterPermissions
     public const string List = "plt.DeadLetter.list";
     public const string Get = "plt.DeadLetter.get";
     public const string Replay = "plt.DeadLetter.replay";
+    public const string Discard = "plt.DeadLetter.discard";
+}
+
+/// <summary>Configuration of the dead-letter operations (<c>Platform:DeadLetters</c>).</summary>
+public sealed class DeadLetterOptions
+{
+    /// <summary>Configuration section.</summary>
+    public const string Section = "Platform:DeadLetters";
+
+    /// <summary>A dead letter parked longer than this many days can only be discarded with an Approved maker-checker request (BO-PLT-04).</summary>
+    public int ApprovalAfterDays { get; set; } = 7;
 }
 
 /// <summary>Error names of the dead-letter operations.</summary>
 internal static class DeadLetterErrors
 {
     public const string Resolved = "DEAD-LETTER-RESOLVED";
+    public const string DiscardApprovalRequired = "DISCARD-APPROVAL-REQUIRED";
+
+    /// <summary>The approval type of a maker-checker discard (subject PLT/DeadLetter/&lt;id&gt;).</summary>
+    public const string DiscardApprovalType = "plt.DeadLetter.discard";
 }
 
 /// <summary>Filter of the dead-letter list (all conditions combine with AND; null = no condition).</summary>
@@ -310,6 +327,139 @@ internal sealed class ReplayDeadLettersAuditor : ICommandAuditor<ReplayDeadLette
     }
 }
 
+/// <summary><c>plt.DeadLetter.discard</c> (BO-PLT-04): gives a parked dead letter up. Reason required, audited, dry-run capable; older than the threshold needs an Approved maker-checker request.</summary>
+internal sealed record DiscardDeadLetters(DeadLetterDiscardRequest Request) : ICommand<DeadLetterDiscardResponse>
+{
+    public const int MaxPerCall = 100;
+}
+
+internal sealed class DiscardDeadLettersValidator : AbstractValidator<DiscardDeadLetters>
+{
+    public DiscardDeadLettersValidator()
+    {
+        RuleFor(c => c.Request).NotNull();
+        RuleFor(c => c.Request.DeadLetterIds).NotNull().Must(ids => ids.Count is >= 1 and <= DiscardDeadLetters.MaxPerCall)
+            .WithMessage($"Name between 1 and {DiscardDeadLetters.MaxPerCall} dead letters.").When(c => c.Request is not null);
+        RuleFor(c => c.Request.Reason).NotEmpty().Must(r => r.Trim().Length is >= 5 and <= 500)
+            .WithMessage("The reason is required (5 to 500 characters).").When(c => c.Request is not null);
+    }
+}
+
+internal sealed class DiscardDeadLettersHandler(
+    DeadLetterQueries queries, NpgsqlDataSource dataSource, RequestContext context, IClock clock, IOptions<DeadLetterOptions> options)
+    : ICommandHandler<DiscardDeadLetters, DeadLetterDiscardResponse>
+{
+    public async Task<Result<DeadLetterDiscardResponse>> HandleAsync(DiscardDeadLetters command, CancellationToken cancellationToken)
+    {
+        var reason = command.Request.Reason.Trim();
+        context.Reason = reason;
+        var ids = command.Request.DeadLetterIds.Distinct().ToList();
+        var found = (await queries.SelectAsync(ids, new DeadLetterFilter(), ids.Count, cancellationToken).ConfigureAwait(false)).ToDictionary(t => t.DeadLetterId);
+        if (found.Count == 0)
+        {
+            return DomainError.Of(ModuleCode.PLT, PlatformErrors.NotFound, "None of the named dead letters exists.");
+        }
+
+        var parked = found.Values.Where(t => t.Status == DeadLetterStatus.Parked).ToList();
+        if (parked.Count == 0)
+        {
+            return DomainError.Of(ModuleCode.PLT, DeadLetterErrors.Resolved, "Every named dead letter was already replayed or discarded; nothing to do.");
+        }
+
+        var threshold = clock.Now.ToUtcDateTime().AddTicks(-TimeSpan.TicksPerDay * Math.Max(0, options.Value.ApprovalAfterDays));
+        var old = parked.Where(t => t.ParkedAt.ToUtcDateTime() < threshold).Select(t => t.DeadLetterId).ToList();
+        if (old.Count > 0)
+        {
+            var approved = await ApprovedAsync(old, cancellationToken).ConfigureAwait(false);
+            var missing = old.Where(id => !approved.Contains(id)).ToList();
+            if (missing.Count > 0)
+            {
+                return DomainError.Of(ModuleCode.PLT, DeadLetterErrors.DiscardApprovalRequired,
+                    $"Dead letters parked longer than {options.Value.ApprovalAfterDays} days need an Approved {DeadLetterErrors.DiscardApprovalType} request decided by someone else: {string.Join(", ", missing)}.");
+            }
+        }
+
+        var discarded = new HashSet<Guid>();
+        if (context.DryRun)
+        {
+            discarded.UnionWith(parked.Select(t => t.DeadLetterId));
+        }
+        else
+        {
+            await using var update = dataSource.CreateCommand(
+                """
+                UPDATE plt.outbox_dead_letter
+                SET status = 'Discarded', resolved_at = @now, resolution_reason = @reason
+                WHERE dead_letter_id = ANY(@ids) AND status = 'Parked'
+                RETURNING dead_letter_id
+                """);
+            update.Parameters.Add(new NpgsqlParameter("now", NpgsqlDbType.TimestampTz) { Value = clock.Now.ToUtcDateTime() });
+            update.Parameters.Add(new NpgsqlParameter("reason", NpgsqlDbType.Text) { Value = reason });
+            update.Parameters.Add(new NpgsqlParameter("ids", NpgsqlDbType.Array | NpgsqlDbType.Uuid) { Value = parked.Select(t => t.DeadLetterId).ToArray() });
+            await using var reader = await update.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+            while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+            {
+                discarded.Add(reader.GetGuid(0));
+            }
+        }
+
+        var results = ids.Select(id => new DeadLetterDiscardOutcome
+        {
+            DeadLetterId = id,
+            Outcome = discarded.Contains(id)
+                ? context.DryRun ? DeadLetterDiscardOutcome.OutcomeValue.WouldDiscard : DeadLetterDiscardOutcome.OutcomeValue.Discarded
+                : found.ContainsKey(id) ? DeadLetterDiscardOutcome.OutcomeValue.AlreadyResolved : DeadLetterDiscardOutcome.OutcomeValue.NotFound,
+        }).ToList();
+        return new DeadLetterDiscardResponse { DryRun = context.DryRun, Discarded = discarded.Count, Skipped = ids.Count - discarded.Count, Results = results };
+    }
+
+    /// <summary>The dead letters with an Approved discard request that somebody other than the discarding actor decided (four eyes).</summary>
+    private async Task<HashSet<Guid>> ApprovedAsync(IReadOnlyList<Guid> ids, CancellationToken cancellationToken)
+    {
+        await using var command = dataSource.CreateCommand(
+            """
+            SELECT DISTINCT object_id FROM plt.approval_request
+            WHERE legal_entity = @le AND approval_type = @type AND object_module = 'PLT' AND object_type = 'DeadLetter'
+              AND object_id = ANY(@ids) AND status = 'Approved'
+              AND NOT (checker_kind = @kind AND checker_id = @actor)
+            """);
+        command.Parameters.Add(new NpgsqlParameter("le", NpgsqlDbType.Text) { Value = context.LegalEntity?.Value ?? string.Empty });
+        command.Parameters.Add(new NpgsqlParameter("type", NpgsqlDbType.Text) { Value = DeadLetterErrors.DiscardApprovalType });
+        command.Parameters.Add(new NpgsqlParameter("ids", NpgsqlDbType.Array | NpgsqlDbType.Text) { Value = ids.Select(i => i.ToString("D")).ToArray() });
+        command.Parameters.Add(new NpgsqlParameter("kind", NpgsqlDbType.Text) { Value = context.Actor.KindCode });
+        command.Parameters.Add(new NpgsqlParameter("actor", NpgsqlDbType.Text) { Value = context.Actor.Id });
+        var result = new HashSet<Guid>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+        {
+            if (Guid.TryParse(reader.GetString(0), out var id))
+            {
+                result.Add(id);
+            }
+        }
+
+        return result;
+    }
+}
+
+internal sealed class DiscardDeadLettersAuditor : ICommandAuditor<DiscardDeadLetters, DeadLetterDiscardResponse>
+{
+    public CommandAuditFacts Describe(DiscardDeadLetters command, Result<DeadLetterDiscardResponse>? result)
+    {
+        var ids = command.Request?.DeadLetterIds;
+        return new CommandAuditFacts
+        {
+            ObjectRef = ids is { Count: 1 } ? new ObjectRef(ModuleCode.PLT, "DeadLetter", ids[0].ToString("D")) : null,
+            Changes = result is { IsSuccess: true } && !result.Value.Value.DryRun
+                ? [.. result.Value.Value.Results.Where(r => r.Outcome == DeadLetterDiscardOutcome.OutcomeValue.Discarded)
+                    .Select(r => new AuditChange($"deadLetter.{r.DeadLetterId:D}.status", JsonValue.Create("Parked"), JsonValue.Create("Discarded"))),
+                    new AuditChange("deadLetter.discardReason", null, JsonValue.Create(command.Request!.Reason.Trim()))]
+                : [],
+            BusinessKeys = ids is { Count: > 0 } ? BusinessKeys.Empty.With("deadLetterIds", string.Join(',', ids)) : BusinessKeys.Empty,
+        };
+    }
+}
+
 /// <summary>REST facade of <c>plt.DeadLetter.*</c> (contracts/openapi/plt.yaml). Platform.Admin only.</summary>
 [ApiController]
 [Route("api/plt/v1/dead-letters")]
@@ -349,4 +499,11 @@ internal sealed class DeadLettersController : ControllerBase
     public async Task<IResult> ReplayAsync(
         [FromBody] DeadLetterReplayRequest body, [FromServices] ICommandHandler<ReplayDeadLetters, DeadLetterReplayResponse> handler, CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new ReplayDeadLetters(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>plt.DeadLetter.discard: Idempotency-Key required; <c>?dryRun=true</c> reports what would be discarded.</summary>
+    [HttpPost("discard")]
+    [Authorize(Policy = DeadLetterPermissions.Discard)]
+    public async Task<IResult> DiscardAsync(
+        [FromBody] DeadLetterDiscardRequest body, [FromServices] ICommandHandler<DiscardDeadLetters, DeadLetterDiscardResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new DiscardDeadLetters(body), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 }

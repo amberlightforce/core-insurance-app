@@ -4,15 +4,18 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Schema.register request. PRD inputs: "schema"</summary>
+/// <summary>plt.Schema.register request (BO-PLT-04): a JSON Schema object (type/properties/required) registered under a subject. Compatibility is backward: a new version may not remove a property, change its type, or add a required property.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SchemaRegisterRequest
 {
-    /// <summary>PRD: "schema"</summary>
+    /// <summary>Contract member 'subject'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("subject")]
+    public required string Subject { get; init; }
+
+    /// <summary>Contract member 'schema'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Open object: members not defined by the contract yet.</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("schema")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Schema { get; init; }
+    public required global::System.Text.Json.JsonElement Schema { get; init; }
 }

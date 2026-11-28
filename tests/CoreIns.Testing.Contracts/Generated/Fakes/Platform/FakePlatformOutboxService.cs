@@ -14,5 +14,5 @@ public sealed class FakePlatformOutboxService : global::CoreIns.Testing.Contract
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> PublishAsync(global::CoreIns.Platform.Contracts.Api.OutboxPublishRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::System.Text.Json.JsonElement>("plt.Outbox.publish", [request, options], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.OutboxPublishResponse> PublishAsync(global::CoreIns.Platform.Contracts.Api.OutboxPublishRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Platform.Contracts.Api.OutboxPublishResponse>("plt.Outbox.publish", [request, options], cancellationToken);
 }

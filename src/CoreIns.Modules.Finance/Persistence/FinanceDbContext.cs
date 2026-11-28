@@ -56,6 +56,10 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
 
     public DbSet<TaxReturnAdjustmentRow> TaxReturnAdjustments => Set<TaxReturnAdjustmentRow>();
 
+    public DbSet<LevyReturnRow> LevyReturns => Set<LevyReturnRow>();
+
+    public DbSet<LevyReturnAdjustmentRow> LevyReturnAdjustments => Set<LevyReturnAdjustmentRow>();
+
     public DbSet<MigrationImport.MigrationImportRow> MigrationImports => Set<MigrationImport.MigrationImportRow>();
 
     protected override string Schema => FinanceModule.Schema;
@@ -327,6 +331,7 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
         EarningModel.Configure(modelBuilder);
         ReconModel.Configure(modelBuilder);
         TaxReturnModel.Configure(modelBuilder);
+        LevyReturnModel.Configure(modelBuilder);
 
         modelBuilder.Entity<JournalEntryRow>(entity =>
         {

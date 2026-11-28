@@ -143,6 +143,9 @@ public static class FinanceModule
         // BO-FIN-09: IPT returns from the ledger; payment through BIL TAX_REMITTANCE.
         Commands.TaxReturnRegistration.AddTaxReturns(services);
 
+        // BO-FIN-10: levy returns per levy type (authority); payment through a BIL_LEVY disbursement.
+        Commands.LevyReturnRegistration.AddLevyReturns(services);
+
         services.AddOptions<FinanceOptions>().Bind(configuration.GetSection(FinanceOptions.Section)).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddErrorDefinitions(Errors);

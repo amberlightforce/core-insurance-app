@@ -49,8 +49,6 @@ CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17-groups/assignment
 CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17-groups/ri-held-assignment
 CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17-groups/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/ifrs17/movements
-CONTRACT_NOT_SERVED GET /api/fin/v1/levy-returns
-CONTRACT_NOT_SERVED GET /api/fin/v1/levy-returns/{}
 CONTRACT_NOT_SERVED GET /api/fin/v1/periods/status
 CONTRACT_NOT_SERVED GET /api/fin/v1/written-premium/query
 CONTRACT_NOT_SERVED GET /api/mkt/v1/capabilities/get
@@ -65,7 +63,6 @@ CONTRACT_NOT_SERVED GET /api/mkt/v1/spis/catalogue
 CONTRACT_NOT_SERVED GET /api/mkt/v1/terminology
 CONTRACT_NOT_SERVED GET /api/pfc/v1/legacy-xrefs/get
 CONTRACT_NOT_SERVED GET /api/pfc/v1/pogs/get
-CONTRACT_NOT_SERVED GET /api/pfc/v1/product-versions/diff
 CONTRACT_NOT_SERVED GET /api/pfc/v1/reference-tables/get
 CONTRACT_NOT_SERVED GET /api/pfc/v1/regulatory-mappings/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/authorities/who-can-approve
@@ -77,14 +74,12 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/calendars/next-business-day
 CONTRACT_NOT_SERVED GET /api/plt/v1/calendars/previous-business-day
 CONTRACT_NOT_SERVED GET /api/plt/v1/currencies/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/decision-tables/explain
-CONTRACT_NOT_SERVED GET /api/plt/v1/exchanges/search
 CONTRACT_NOT_SERVED GET /api/plt/v1/fx/get-rate
 CONTRACT_NOT_SERVED GET /api/plt/v1/fx/list-rates
 CONTRACT_NOT_SERVED GET /api/plt/v1/jobs/history
 CONTRACT_NOT_SERVED GET /api/plt/v1/lineage/walk
 CONTRACT_NOT_SERVED GET /api/plt/v1/retention/runs
 CONTRACT_NOT_SERVED GET /api/plt/v1/time/now
-CONTRACT_NOT_SERVED GET /api/plt/v1/transfers
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
 CONTRACT_NOT_SERVED GET /api/rat/v1/breakdowns/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/change-explanations/get
@@ -276,12 +271,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/import/lic
 CONTRACT_NOT_SERVED POST /api/fin/v1/import/opening-balances
 CONTRACT_NOT_SERVED POST /api/fin/v1/import/reverse-batch
 CONTRACT_NOT_SERVED POST /api/fin/v1/journals/reverse
-CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/add-adjustment
-CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/generate-file
-CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/recalculate
-CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/record-filing
-CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/request-payment
-CONTRACT_NOT_SERVED POST /api/fin/v1/levy-returns/transition
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/compile
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/decide
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/draft
@@ -300,7 +289,6 @@ CONTRACT_NOT_SERVED POST /api/mkt/v1/translations/gate
 CONTRACT_NOT_SERVED POST /api/pfc/v1/impact-analysises/run
 CONTRACT_NOT_SERVED POST /api/pfc/v1/pogs/record-review
 CONTRACT_NOT_SERVED POST /api/pfc/v1/pogs/record-test
-CONTRACT_NOT_SERVED POST /api/pfc/v1/product-imports/import
 CONTRACT_NOT_SERVED POST /api/pfc/v1/renewal-conversions/convert
 CONTRACT_NOT_SERVED POST /api/plt/v1/adapters/invoke
 CONTRACT_NOT_SERVED POST /api/plt/v1/approval/request
@@ -311,8 +299,6 @@ CONTRACT_NOT_SERVED POST /api/plt/v1/authorities/check
 CONTRACT_NOT_SERVED POST /api/plt/v1/authority-types/register
 CONTRACT_NOT_SERVED POST /api/plt/v1/calendars/generate
 CONTRACT_NOT_SERVED POST /api/plt/v1/calendars/publish
-CONTRACT_NOT_SERVED POST /api/plt/v1/consumers/replay
-CONTRACT_NOT_SERVED POST /api/plt/v1/dead-letters/discard
 CONTRACT_NOT_SERVED POST /api/plt/v1/decision-tables/activate
 CONTRACT_NOT_SERVED POST /api/plt/v1/decision-tables/evaluate
 CONTRACT_NOT_SERVED POST /api/plt/v1/decision-tables/test
@@ -338,7 +324,6 @@ CONTRACT_NOT_SERVED POST /api/plt/v1/legal-holds/release
 CONTRACT_NOT_SERVED POST /api/plt/v1/numbers/next
 CONTRACT_NOT_SERVED POST /api/plt/v1/numbers/reserve
 CONTRACT_NOT_SERVED POST /api/plt/v1/numbers/void
-CONTRACT_NOT_SERVED POST /api/plt/v1/outbox/publish
 CONTRACT_NOT_SERVED POST /api/plt/v1/pipeline/e2e-gate
 CONTRACT_NOT_SERVED POST /api/plt/v1/policies/evaluate
 CONTRACT_NOT_SERVED POST /api/plt/v1/privileged-accesses/approve
@@ -347,12 +332,9 @@ CONTRACT_NOT_SERVED POST /api/plt/v1/privileged-accesses/revoke
 CONTRACT_NOT_SERVED POST /api/plt/v1/retention/register-dataset
 CONTRACT_NOT_SERVED POST /api/plt/v1/retention/schedule
 CONTRACT_NOT_SERVED POST /api/plt/v1/ror/export
-CONTRACT_NOT_SERVED POST /api/plt/v1/schemas/check
-CONTRACT_NOT_SERVED POST /api/plt/v1/schemas/register
 CONTRACT_NOT_SERVED POST /api/plt/v1/subject/export
 CONTRACT_NOT_SERVED POST /api/plt/v1/tokens/exchange
 CONTRACT_NOT_SERVED POST /api/plt/v1/tokens/grant-agent-scope
-CONTRACT_NOT_SERVED POST /api/plt/v1/transfers/retry
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/cancel
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/signal
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/start

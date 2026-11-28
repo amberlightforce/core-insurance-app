@@ -4,15 +4,20 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Transfer.retry request. PRD inputs: "filters"</summary>
+/// <summary>plt.Transfer.retry request: name Failed transfers (transferIds) or select the Failed ones of a partner. At most 100 per call.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TransferRetryRequest
 {
-    /// <summary>PRD: "filters"</summary>
+    /// <summary>Contract member 'transferIds'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'transferId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("filters")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("transferIds")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Filters { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? TransferIds { get; init; }
+
+    /// <summary>Contract member 'partner'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partner")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Partner { get; init; }
 }

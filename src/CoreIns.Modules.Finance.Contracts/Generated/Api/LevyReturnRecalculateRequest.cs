@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.LevyReturn.recalculate request. PRD inputs: "levy, period"</summary>
+/// <summary>fin.LevyReturn.recalculate request.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record LevyReturnRecalculateRequest
 {
-    /// <summary>PRD: "levy"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("levy")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Levy { get; init; }
-
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Calendar month, yyyy-MM</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("period")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    public required string Period { get; init; }
+
+    /// <summary>Levy type (the levy authority) of the return, the charge type of the levy lines.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("levyType")]
+    public required string LevyType { get; init; }
 }
