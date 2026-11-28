@@ -87,13 +87,13 @@ internal static class ThreeWayMerge
         return result;
     }
 
-    private static bool Coded(JsonArray array) =>
+    internal static bool Coded(JsonArray array) =>
         array.All(i => i is JsonObject obj && obj["code"] is JsonValue v && v.TryGetValue<string>(out _))
         && Codes(array).Count() == array.Count;
 
-    private static IEnumerable<string> Codes(JsonArray array) => array.Select(i => (string)i!["code"]!);
+    internal static IEnumerable<string> Codes(JsonArray array) => array.Select(i => (string)i!["code"]!);
 
-    private static Dictionary<string, JsonNode> Index(JsonArray array) => array.ToDictionary(i => (string)i!["code"]!, i => i!);
+    internal static Dictionary<string, JsonNode> Index(JsonArray array) => array.ToDictionary(i => (string)i!["code"]!, i => i!);
 
     private static JsonNode? Get(JsonObject? obj, string key) => obj is not null && obj.TryGetPropertyValue(key, out var v) ? v : null;
 
@@ -101,5 +101,5 @@ internal static class ThreeWayMerge
 
     private static bool Same(JsonNode? a, JsonNode? b) => JsonNode.DeepEquals(a, b);
 
-    private static string Escape(string key) => key.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
+    internal static string Escape(string key) => key.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal);
 }

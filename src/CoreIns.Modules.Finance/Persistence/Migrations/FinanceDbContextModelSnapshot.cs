@@ -1166,6 +1166,225 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.LevyReturnAdjustmentRow", b =>
+                {
+                    b.Property<Guid>("AdjustmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("adjustment_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("EvidenceRef")
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_ref");
+
+                    b.Property<bool>("ExplainsReconciliation")
+                        .HasColumnType("boolean")
+                        .HasColumnName("explains_reconciliation");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("ReturnId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("return_id");
+
+                    b.HasKey("AdjustmentId")
+                        .HasName("pk_levy_return_adjustment");
+
+                    b.HasIndex("ReturnId")
+                        .HasDatabaseName("ix_levy_return_adjustment_return");
+
+                    b.ToTable("levy_return_adjustment", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_levy_return_adjustment_amount", "amount <> 0");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.LevyReturnRow", b =>
+                {
+                    b.Property<Guid>("ReturnId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("return_id");
+
+                    b.Property<decimal>("AdjustmentsTotal")
+                        .HasColumnType("numeric(19,2)")
+                        .HasColumnName("adjustments_total");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<decimal>("BilAmount")
+                        .HasColumnType("numeric(19,2)")
+                        .HasColumnName("bil_amount");
+
+                    b.Property<string>("ContentHash")
+                        .HasColumnType("text")
+                        .HasColumnName("content_hash");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<Guid?>("DisbursementId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("disbursement_id");
+
+                    b.Property<int>("EntryCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("entry_count");
+
+                    b.Property<string>("FileHash")
+                        .HasColumnType("text")
+                        .HasColumnName("file_hash");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("text")
+                        .HasColumnName("file_name");
+
+                    b.Property<DateTime?>("FiledAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("filed_at");
+
+                    b.Property<string>("FiledBy")
+                        .HasColumnType("text")
+                        .HasColumnName("filed_by");
+
+                    b.Property<DateOnly?>("FiledOn")
+                        .HasColumnType("date")
+                        .HasColumnName("filed_on");
+
+                    b.Property<string>("FilingReference")
+                        .HasColumnType("text")
+                        .HasColumnName("filing_reference");
+
+                    b.Property<decimal>("LedgerAmount")
+                        .HasColumnType("numeric(19,2)")
+                        .HasColumnName("ledger_amount");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("LegalStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_status");
+
+                    b.Property<string>("LevyType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("levy_type");
+
+                    b.Property<decimal>("NetPayable")
+                        .HasColumnType("numeric(19,2)")
+                        .HasColumnName("net_payable");
+
+                    b.Property<string>("PaymentStatus")
+                        .HasColumnType("text")
+                        .HasColumnName("payment_status");
+
+                    b.Property<string>("PeriodCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("period_code");
+
+                    b.Property<bool>("Provisional")
+                        .HasColumnType("boolean")
+                        .HasColumnName("provisional");
+
+                    b.Property<string>("ReconExplanation")
+                        .HasColumnType("text")
+                        .HasColumnName("recon_explanation");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("reviewed_at");
+
+                    b.Property<string>("ReviewedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("reviewed_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
+
+                    b.Property<Guid?>("SupersededByReturnId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("superseded_by_return_id");
+
+                    b.Property<Guid?>("SupersedesReturnId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("supersedes_return_id");
+
+                    b.Property<int>("VersionNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("version_no");
+
+                    b.HasKey("ReturnId")
+                        .HasName("pk_levy_return");
+
+                    b.HasIndex("LegalEntityId", "PeriodCode", "Status")
+                        .HasDatabaseName("ix_levy_return_period");
+
+                    b.HasIndex("LegalEntityId", "PeriodCode", "LevyType", "VersionNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_levy_return_version");
+
+                    b.ToTable("levy_return", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_levy_return_currency", "currency ~ '^[A-Z]{3}$'");
+
+                            t.HasCheckConstraint("ck_levy_return_hash", "content_hash IS NULL OR content_hash ~ '^[0-9a-f]{64}$'");
+
+                            t.HasCheckConstraint("ck_levy_return_period", "period_code ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'");
+
+                            t.HasCheckConstraint("ck_levy_return_status", "status IN ('DRAFT','REVIEWED','FILED','PAID')");
+
+                            t.HasCheckConstraint("ck_levy_return_version", "version_no >= 1");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.ManualJournalLineRow", b =>
                 {
                     b.Property<Guid>("LineId")
@@ -2087,6 +2306,16 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_journal_line_entry");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.LevyReturnAdjustmentRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Finance.Persistence.LevyReturnRow", null)
+                        .WithMany()
+                        .HasForeignKey("ReturnId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_levy_return_adjustment_return");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.ManualJournalLineRow", b =>

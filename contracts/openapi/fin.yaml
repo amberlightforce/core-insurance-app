@@ -3736,20 +3736,43 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
-      x-dry-run-note: 'PRD dry-run: as above; PRD idempotency: Yes'
+      x-dry-run-note: 'PRD dry-run: recalculate, generateFile; PRD idempotency: Yes'
       x-exposure:
       - ui
       x-permission: fin.LevyReturn.list
-      x-error-codes: []
+      x-error-codes:
+      - code: FIN-ERR-RECON-UNEXPLAINED
+        status: 422
+      - code: FIN-ERR-SPI-UNBOUND
+        status: 422
+      - code: FIN-ERR-RETURN-NOT-APPROVED
+        status: 422
       x-source:
       - PRD-09 §9.1 l.1542
-      x-prd-name:
-      - fin.LevyReturn.* (same operations as fin.TaxReturn)
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: period
+        in: query
+        required: false
+        description: Calendar month, yyyy-MM
+        schema:
+          type: string
+          pattern: ^[0-9]{4}-(0[1-9]|1[0-2])$
+      - name: levyType
+        in: query
+        required: false
+        description: Levy type (the levy authority)
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [DRAFT, REVIEWED, FILED, PAID]
       responses:
         '200':
           description: Success
@@ -3763,6 +3786,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/fin/v1/levy-returns/{id}:
@@ -3793,15 +3818,19 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
-      x-dry-run-note: 'PRD dry-run: as above; PRD idempotency: Yes'
+      x-dry-run-note: 'PRD dry-run: recalculate, generateFile; PRD idempotency: Yes'
       x-exposure:
       - ui
       x-permission: fin.LevyReturn.get
-      x-error-codes: []
+      x-error-codes:
+      - code: FIN-ERR-RECON-UNEXPLAINED
+        status: 422
+      - code: FIN-ERR-SPI-UNBOUND
+        status: 422
+      - code: FIN-ERR-RETURN-NOT-APPROVED
+        status: 422
       x-source:
       - PRD-09 §9.1 l.1542
-      x-prd-name:
-      - fin.LevyReturn.* (same operations as fin.TaxReturn)
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
@@ -3826,6 +3855,8 @@ paths:
           $ref: common.yaml#/components/responses/Forbidden
         '404':
           $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/fin/v1/levy-returns/recalculate:
@@ -3855,23 +3886,28 @@ paths:
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
-      x-dry-run-note: 'PRD dry-run: as above; PRD idempotency: Yes'
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: recalculate, generateFile; PRD idempotency: Yes'
       x-exposure:
       - ui
       x-permission: fin.LevyReturn.recalculate
       x-error-codes:
+      - code: FIN-ERR-RECON-UNEXPLAINED
+        status: 422
+      - code: FIN-ERR-SPI-UNBOUND
+        status: 422
+      - code: FIN-ERR-RETURN-NOT-APPROVED
+        status: 422
       - code: FIN-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
       x-source:
       - PRD-09 §9.1 l.1542
-      x-prd-name:
-      - fin.LevyReturn.* (same operations as fin.TaxReturn)
       parameters:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -3925,18 +3961,22 @@ paths:
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
-      x-dry-run-note: 'PRD dry-run: as above; PRD idempotency: Yes'
+      x-dry-run-note: 'PRD dry-run: recalculate, generateFile; PRD idempotency: Yes'
       x-exposure:
       - ui
       x-permission: fin.LevyReturn.addAdjustment
       x-error-codes:
+      - code: FIN-ERR-RECON-UNEXPLAINED
+        status: 422
+      - code: FIN-ERR-SPI-UNBOUND
+        status: 422
+      - code: FIN-ERR-RETURN-NOT-APPROVED
+        status: 422
       - code: FIN-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
       x-source:
       - PRD-09 §9.1 l.1542
-      x-prd-name:
-      - fin.LevyReturn.* (same operations as fin.TaxReturn)
       parameters:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
@@ -3993,23 +4033,28 @@ paths:
       x-io-shared: 8
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
-      x-dry-run-note: 'PRD dry-run: as above; PRD idempotency: Yes'
+      x-dry-run: true
+      x-dry-run-note: 'PRD dry-run: recalculate, generateFile; PRD idempotency: Yes'
       x-exposure:
       - ui
       x-permission: fin.LevyReturn.generateFile
       x-error-codes:
+      - code: FIN-ERR-RECON-UNEXPLAINED
+        status: 422
+      - code: FIN-ERR-SPI-UNBOUND
+        status: 422
+      - code: FIN-ERR-RETURN-NOT-APPROVED
+        status: 422
       - code: FIN-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
       x-source:
       - PRD-09 §9.1 l.1542
-      x-prd-name:
-      - fin.LevyReturn.* (same operations as fin.TaxReturn)
       parameters:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       requestBody:
         required: true
         content:
@@ -4063,15 +4108,19 @@ paths:
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
-      x-dry-run-note: 'PRD dry-run: as above; PRD idempotency: Yes'
+      x-dry-run-note: 'PRD dry-run: recalculate, generateFile; PRD idempotency: Yes'
       x-exposure:
       - ui
       x-permission: fin.LevyReturn.transition
-      x-error-codes: []
+      x-error-codes:
+      - code: FIN-ERR-RECON-UNEXPLAINED
+        status: 422
+      - code: FIN-ERR-SPI-UNBOUND
+        status: 422
+      - code: FIN-ERR-RETURN-NOT-APPROVED
+        status: 422
       x-source:
       - PRD-09 §9.1 l.1542
-      x-prd-name:
-      - fin.LevyReturn.* (same operations as fin.TaxReturn)
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
@@ -4094,6 +4143,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/fin/v1/levy-returns/record-filing:
@@ -4124,18 +4175,22 @@ paths:
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
-      x-dry-run-note: 'PRD dry-run: as above; PRD idempotency: Yes'
+      x-dry-run-note: 'PRD dry-run: recalculate, generateFile; PRD idempotency: Yes'
       x-exposure:
       - ui
       x-permission: fin.LevyReturn.recordFiling
       x-error-codes:
+      - code: FIN-ERR-RECON-UNEXPLAINED
+        status: 422
+      - code: FIN-ERR-SPI-UNBOUND
+        status: 422
+      - code: FIN-ERR-RETURN-NOT-APPROVED
+        status: 422
       - code: FIN-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
       x-source:
       - PRD-09 §9.1 l.1542
-      x-prd-name:
-      - fin.LevyReturn.* (same operations as fin.TaxReturn)
       parameters:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
@@ -4193,18 +4248,22 @@ paths:
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
-      x-dry-run-note: 'PRD dry-run: as above; PRD idempotency: Yes'
+      x-dry-run-note: 'PRD dry-run: recalculate, generateFile; PRD idempotency: Yes'
       x-exposure:
       - ui
       x-permission: fin.LevyReturn.requestPayment
       x-error-codes:
+      - code: FIN-ERR-RECON-UNEXPLAINED
+        status: 422
+      - code: FIN-ERR-SPI-UNBOUND
+        status: 422
+      - code: FIN-ERR-RETURN-NOT-APPROVED
+        status: 422
       - code: FIN-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
       x-source:
       - PRD-09 §9.1 l.1542
-      x-prd-name:
-      - fin.LevyReturn.* (same operations as fin.TaxReturn)
       parameters:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
@@ -8023,13 +8082,168 @@ components:
           $ref: ../events/common.schema.json#/$defs/Uuid
         requestedValueDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
+    LevyReturnAdjustmentView:
+      type: object
+      description: A manual adjustment of a DRAFT return (BO-FIN-10). Insert-only; the maker, the time and the reason are kept.
+      required: [adjustmentId, amount, reason, createdBy, createdAt]
+      properties:
+        adjustmentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          type: string
+          description: Signed decimal text, 2 places; added to the ledger liability.
+        reason:
+          type: string
+        evidenceRef:
+          type: string
+        explainsReconciliation:
+          type: boolean
+          description: True when the reason explains a difference between the ledger and the BIL levy lines.
+        createdBy:
+          type: string
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+    LevyReturnView:
+      type: object
+      description: >-
+        A levy return of one levy type (the levy authority) and period, computed from the levy payable (GL-2420) postings of the ledger and reconciled to the
+        BIL-sourced levy lines. DRAFT, REVIEWED (maker-checker, content hash frozen), FILED, PAID. An amendment is a new version linked
+        to the original; a version is never edited after review.
+      required: [returnId, period, levyType, versionNo, status, currency, ledgerAmount, bilAmount, adjustmentsTotal, netPayable, reconciliation, legalStatus, provisional]
+      properties:
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        period:
+          type: string
+          description: Calendar month, yyyy-MM
+        levyType:
+          type: string
+          description: Levy type (the levy authority), the charge type of the levy lines, e.g. GR-AUXF-PH.
+        versionNo:
+          type: integer
+        supersedesReturnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The version this one amends.
+        supersededByReturnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The later version that amends this one.
+        status:
+          type: string
+          enum: [DRAFT, REVIEWED, FILED, PAID]
+        currency:
+          type: string
+        ledgerAmount:
+          type: string
+          description: Credits minus debits of the levy payable account for the levy type in the period (credit levy rows net).
+        bilAmount:
+          type: string
+          description: The part of it posted from BIL billing entries.
+        adjustmentsTotal:
+          type: string
+        netPayable:
+          type: string
+          description: ledgerAmount plus adjustmentsTotal.
+        entryCount:
+          type: integer
+        reconciliation:
+          type: string
+          enum: [MATCHED, EXPLAINED, UNEXPLAINED]
+        reconDifference:
+          type: string
+          description: ledgerAmount minus bilAmount.
+        reconExplanation:
+          type: string
+        legalStatus:
+          type: string
+          description: Legal status of the pack rows of the levy the return rests on (Settled, PendingOpinion, Unverified, NotRegulatory).
+        provisional:
+          type: boolean
+          description: True when the return rests on values that are not Settled; refused in Production.
+        contentHash:
+          type: string
+          description: SHA-256 of the return content, frozen when it is submitted for review.
+        fileName:
+          type: string
+        fileHash:
+          type: string
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        submittedBy:
+          type: string
+        submittedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        reviewedBy:
+          type: string
+        reviewedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        filedBy:
+          type: string
+        filedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        filedOn:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        filingReference:
+          type: string
+        disbursementId:
+          type: string
+        paymentStatus:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        adjustments:
+          type: array
+          items:
+            $ref: '#/components/schemas/LevyReturnAdjustmentView'
+    LevyReturnFileView:
+      type: object
+      description: The submission file of a return (generateFile). Deterministic from the frozen content; content is present only on generateFile.
+      required: [fileName, fileHash, contentType]
+      properties:
+        fileName:
+          type: string
+        fileHash:
+          type: string
+        contentType:
+          type: string
+        content:
+          type: string
     LevyReturnListItem:
       type: object
-      description: 'fin.LevyReturn.list result. PRD outputs: "return"'
+      description: 'fin.LevyReturn.list result: return, file and payment status in brief.'
+      required: [returnId, period, levyType, versionNo, status, currency, netPayable, reconciliation]
       properties:
-        return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        period:
+          type: string
+        levyType:
+          type: string
+        versionNo:
+          type: integer
+        status:
+          type: string
+          enum: [DRAFT, REVIEWED, FILED, PAID]
+        currency:
+          type: string
+        netPayable:
+          type: string
+        reconciliation:
+          type: string
+          enum: [MATCHED, EXPLAINED, UNEXPLAINED]
+        provisional:
+          type: boolean
+        supersededByReturnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        fileName:
+          type: string
+        filingReference:
+          type: string
+        filedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        paymentStatus:
+          type: string
     LevyReturnListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -8042,113 +8256,158 @@ components:
       description: Page of fin.LevyReturn.list results (cursor pagination, contract §3.5.5)
     LevyReturnGetResponse:
       type: object
-      description: 'fin.LevyReturn.get result. PRD outputs: "return"'
+      description: 'fin.LevyReturn.get result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
-    LevyReturnRecalculateRequest:
-      type: object
-      description: 'fin.LevyReturn.recalculate request. PRD inputs: "levy, period"'
-      properties:
-        levy:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "levy"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+          $ref: '#/components/schemas/LevyReturnView'
+        file:
+          $ref: '#/components/schemas/LevyReturnFileView'
+        paymentStatus:
+          type: string
     LevyReturnRecalculateResponse:
       type: object
-      description: 'fin.LevyReturn.recalculate result. PRD outputs: "return"'
+      description: 'fin.LevyReturn.recalculate result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
-    LevyReturnAddAdjustmentRequest:
-      type: object
-      description: 'fin.LevyReturn.addAdjustment request. PRD inputs: "levy, period"'
-      properties:
-        levy:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "levy"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+          $ref: '#/components/schemas/LevyReturnView'
+        file:
+          $ref: '#/components/schemas/LevyReturnFileView'
+        paymentStatus:
+          type: string
     LevyReturnAddAdjustmentResponse:
       type: object
-      description: 'fin.LevyReturn.addAdjustment result. PRD outputs: "return"'
+      description: 'fin.LevyReturn.addAdjustment result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
-    LevyReturnGenerateFileRequest:
-      type: object
-      description: 'fin.LevyReturn.generateFile request. PRD inputs: "levy, period"'
-      properties:
-        levy:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "levy"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+          $ref: '#/components/schemas/LevyReturnView'
+        file:
+          $ref: '#/components/schemas/LevyReturnFileView'
+        paymentStatus:
+          type: string
     LevyReturnGenerateFileResponse:
       type: object
-      description: 'fin.LevyReturn.generateFile result. PRD outputs: "return"'
+      description: 'fin.LevyReturn.generateFile result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
-    LevyReturnTransitionRequest:
-      type: object
-      description: 'fin.LevyReturn.transition request. PRD inputs: "levy, period"'
-      properties:
-        levy:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "levy"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+          $ref: '#/components/schemas/LevyReturnView'
+        file:
+          $ref: '#/components/schemas/LevyReturnFileView'
+        paymentStatus:
+          type: string
     LevyReturnTransitionResponse:
       type: object
-      description: 'fin.LevyReturn.transition result. PRD outputs: "return"'
+      description: 'fin.LevyReturn.transition result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
-    LevyReturnRecordFilingRequest:
-      type: object
-      description: 'fin.LevyReturn.recordFiling request. PRD inputs: "levy, period"'
-      properties:
-        levy:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "levy"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+          $ref: '#/components/schemas/LevyReturnView'
+        file:
+          $ref: '#/components/schemas/LevyReturnFileView'
+        paymentStatus:
+          type: string
     LevyReturnRecordFilingResponse:
       type: object
-      description: 'fin.LevyReturn.recordFiling result. PRD outputs: "return"'
+      description: 'fin.LevyReturn.recordFiling result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
-    LevyReturnRequestPaymentRequest:
-      type: object
-      description: 'fin.LevyReturn.requestPayment request. PRD inputs: "levy, period"'
-      properties:
-        levy:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "levy"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+          $ref: '#/components/schemas/LevyReturnView'
+        file:
+          $ref: '#/components/schemas/LevyReturnFileView'
+        paymentStatus:
+          type: string
     LevyReturnRequestPaymentResponse:
       type: object
-      description: 'fin.LevyReturn.requestPayment result. PRD outputs: "return"'
+      description: 'fin.LevyReturn.requestPayment result: the return, its file and its payment status.'
+      required: [return]
       properties:
         return:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "return"'
+          $ref: '#/components/schemas/LevyReturnView'
+        file:
+          $ref: '#/components/schemas/LevyReturnFileView'
+        paymentStatus:
+          type: string
+    LevyReturnRecalculateRequest:
+      type: object
+      description: 'fin.LevyReturn.recalculate request.'
+      required: [levyType, period]
+      properties:
+        period:
+          type: string
+          description: Calendar month, yyyy-MM
+        levyType:
+          type: string
+          description: Levy type (the levy authority) of the return, the charge type of the levy lines.
+    LevyReturnAddAdjustmentRequest:
+      type: object
+      description: 'fin.LevyReturn.addAdjustment request.'
+      required: [returnId, amount, reason]
+      properties:
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          type: string
+          description: Signed decimal text, at most 2 places, not zero.
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        evidenceRef:
+          type: string
+          maxLength: 200
+        explainsReconciliation:
+          type: boolean
+    LevyReturnGenerateFileRequest:
+      type: object
+      description: 'fin.LevyReturn.generateFile request.'
+      required: [returnId]
+      properties:
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+    LevyReturnTransitionRequest:
+      type: object
+      description: 'fin.LevyReturn.transition request.'
+      required: [returnId, action]
+      properties:
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        action:
+          type: string
+          enum: [SUBMIT, APPROVE, REJECT]
+          description: SUBMIT (the preparer freezes the content hash and requests approval), APPROVE or REJECT (a second person).
+        comment:
+          type: string
+          maxLength: 1000
+    LevyReturnRecordFilingRequest:
+      type: object
+      description: 'fin.LevyReturn.recordFiling request.'
+      required: [returnId, filingReference, filedOn]
+      properties:
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        filingReference:
+          type: string
+          minLength: 1
+          maxLength: 200
+        filedOn:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+    LevyReturnRequestPaymentRequest:
+      type: object
+      description: 'fin.LevyReturn.requestPayment request.'
+      required: [returnId, payeePartyId, payeeAccountId]
+      properties:
+        returnId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        payeePartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        requestedValueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
     FiscalReconciliationRunRequest:
       type: object
       description: 'fin.FiscalReconciliation.run request. PRD inputs: "date or month"'

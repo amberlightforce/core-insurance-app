@@ -237,6 +237,8 @@ internal static class FinanceSql
         $"GRANT SELECT, INSERT ON fin.recon_run TO {appRole}",
         $"GRANT SELECT, INSERT, UPDATE ON fin.tax_return TO {appRole}",
         $"GRANT SELECT, INSERT ON fin.tax_return_adjustment TO {appRole}",
+        $"GRANT SELECT, INSERT, UPDATE ON fin.levy_return TO {appRole}",
+        $"GRANT SELECT, INSERT ON fin.levy_return_adjustment TO {appRole}",
         $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {FinanceModule.Schema} TO {appRole}",
     ];
 }

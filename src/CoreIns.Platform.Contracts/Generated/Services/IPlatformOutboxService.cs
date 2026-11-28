@@ -18,7 +18,7 @@ public interface IPlatformOutboxService
     /// <para>Status: minimal. Wave W1.</para>
     /// <para>Exposure: internal; consumers: MKT, PFC.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
-    /// <para>Errors: PLT-ERR-SCHEMA (422), PLT-ERR-SCHEMA-PII (422), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PLT-ERR-TEST-TENANT-ONLY (403), PLT-ERR-EVENT-TYPE-NOT-ALLOWED (422), PLT-ERR-SCHEMA (422), PLT-ERR-SCHEMA-PII (422), PLT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> PublishAsync(global::CoreIns.Platform.Contracts.Api.OutboxPublishRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.OutboxPublishResponse> PublishAsync(global::CoreIns.Platform.Contracts.Api.OutboxPublishRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }
