@@ -11,12 +11,46 @@ internal sealed class WorkDbContext(DbContextOptions<WorkDbContext> options) : M
 {
     public DbSet<ActivityRow> Activities => Set<ActivityRow>();
 
+    public DbSet<AssigneeProfileRow> AssigneeProfiles => Set<AssigneeProfileRow>();
+
+    public DbSet<AssignmentRuleRow> AssignmentRules => Set<AssignmentRuleRow>();
+
     protected override string Schema => WorkModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.MapDsarRestrictions();
+
+        modelBuilder.Entity<AssigneeProfileRow>(entity =>
+        {
+            entity.ToTable("assignee_profile");
+            entity.HasKey(e => new { e.LegalEntityId, e.UserId }).HasName("pk_assignee_profile");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id").HasMaxLength(200);
+            entity.Property(e => e.DisplayName).HasColumnName("display_name").HasMaxLength(200);
+            entity.Property(e => e.Roles).HasColumnName("roles");
+            entity.Property(e => e.Skills).HasColumnName("skills");
+            entity.Property(e => e.Active).HasColumnName("active");
+        });
+
+        modelBuilder.Entity<AssignmentRuleRow>(entity =>
+        {
+            entity.ToTable("assignment_rule", table => table.HasCheckConstraint("ck_assignment_rule_strategy", "strategy IN ('ROUND_ROBIN_OPEN_COUNT')"));
+            entity.HasKey(e => e.RuleId).HasName("pk_assignment_rule");
+            entity.Property(e => e.RuleId).HasColumnName("rule_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Code).HasColumnName("code").HasMaxLength(100);
+            entity.Property(e => e.QueueCode).HasColumnName("queue_code");
+            entity.Property(e => e.PatternCode).HasColumnName("pattern_code");
+            entity.Property(e => e.RequiredRole).HasColumnName("required_role");
+            entity.Property(e => e.RequiredSkill).HasColumnName("required_skill");
+            entity.Property(e => e.Strategy).HasColumnName("strategy");
+            entity.Property(e => e.Priority).HasColumnName("priority");
+            entity.Property(e => e.Active).HasColumnName("active");
+            entity.HasIndex(e => new { e.LegalEntityId, e.Code }).IsUnique().HasDatabaseName("ux_assignment_rule_code");
+            entity.HasIndex(e => new { e.LegalEntityId, e.QueueCode, e.Priority }).HasDatabaseName("ix_assignment_rule_queue");
+        });
 
         modelBuilder.Entity<ActivityRow>(entity =>
         {

@@ -23,14 +23,19 @@ internal sealed record CreateActivityInput(
 /// <summary>Who an assignment names.</summary>
 /// <param name="Type">USER or QUEUE.</param>
 /// <param name="Id">User id or queue code.</param>
-internal sealed record AssignTarget(string Type, string Id);
+internal sealed record AssignTarget(string Type, string Id)
+{
+    /// <summary>The target type that asks the assignment rules to choose (<c>rulesOrMe = "rules"</c>).</summary>
+    public const string Rules = "RULES";
+}
 
 /// <summary>
 /// The Work core's rules (PRD-13 subset a staff inbox needs): create from a pattern, claim and assign, complete / skip / cancel, with
 /// the SLA clock and the events. One scoped instance per unit of work; every mutation runs inside the caller's transaction (command
 /// pipeline, event handler or sweeper) so the row and its events commit together.
 /// </summary>
-internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, IEventPublisher events)
+internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, IEventPublisher events,
+    AssignmentRouter router, IWorkUserDirectory directory)
 {
     private const int MaxSecondaryObjects = 20;
     private const int MaxFieldLength = 2000;
@@ -75,6 +80,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
             return WorkErrors.Of(WorkErrors.Duplicate, $"The open activity {existing.Number} already exists for this object and cause.");
         }
 
+        var routing = await router.RouteAsync(pattern.Code, pattern.Queue, cancellationToken).ConfigureAwait(false);
         var now = clock.Now;
         var id = Guid.CreateVersion7();
         var row = new ActivityRow
@@ -97,8 +103,8 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
             SubjectPartyId = PartyOf(input.Primary) ?? input.Secondary.Select(PartyOf).FirstOrDefault(p => p is not null),
             RaisingModule = input.Raising.ToString(),
             CauseRef = cause,
-            AssigneeType = ActivityRow.Queue,
-            AssigneeId = pattern.Queue,
+            AssigneeType = routing.UserId is null ? ActivityRow.Queue : ActivityRow.User,
+            AssigneeId = routing.UserId ?? pattern.Queue,
             QueueCode = pattern.Queue,
             CreatedAt = now,
             CreatedBy = context.Actor.ToString(),
@@ -125,6 +131,12 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
             Mandatory = true,
             GateBlocking = row.GateBlocking,
         }, Keys(id)));
+        if (routing.UserId is not null)
+        {
+            // Rule based assignment at create: the previous assignee is the queue the activity started in.
+            PublishAssigned(row, ActivityRow.Queue, pattern.Queue, "RULE", routing.RuleCode, null);
+        }
+
         return row;
     }
 
@@ -159,7 +171,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
                 return WorkErrors.Of(WorkErrors.Permission, "The activity is assigned to someone else.");
             }
 
-            Assign(row, ActivityRow.User, actor.UserId);
+            Assign(row, ActivityRow.User, actor.UserId, "CLAIM");
         }
         else if (target.Type == ActivityRow.User)
         {
@@ -173,8 +185,35 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
                 return WorkErrors.Of(WorkErrors.TargetIneligible, "The user id is not valid.");
             }
 
-            // TODO(hardening): check that the target user exists, is active, and may see the activity's queue (needs the PLT user directory).
-            Assign(row, ActivityRow.User, target.Id);
+            var queue = WorkCatalog.Queue(row.QueueCode);
+            var user = await directory.FindAsync(target.Id, cancellationToken).ConfigureAwait(false);
+            if (user is null)
+            {
+                return WorkErrors.Of(WorkErrors.TargetIneligible, "The user does not exist.");
+            }
+
+            var why = queue is null ? "QUEUE_UNKNOWN" : AssignmentRouter.Reject(user, queue, null);
+            if (why is not null)
+            {
+                return WorkErrors.Of(WorkErrors.TargetIneligible, $"The user cannot take work from queue '{row.QueueCode}' ({why}).");
+            }
+
+            Assign(row, ActivityRow.User, target.Id, "MANUAL");
+        }
+        else if (target.Type == AssignTarget.Rules)
+        {
+            if (!mine && !actor.IsManager)
+            {
+                return WorkErrors.Of(WorkErrors.Permission, "Only the assignee or a manager can route an activity by the assignment rules.");
+            }
+
+            var routing = await router.RouteAsync(row.PatternCode, row.QueueCode, cancellationToken).ConfigureAwait(false);
+            if (routing.UserId is null)
+            {
+                return WorkErrors.Of(WorkErrors.TargetIneligible, "No assignment rule found an eligible user for this activity.");
+            }
+
+            Assign(row, ActivityRow.User, routing.UserId, "RULE", routing.RuleCode);
         }
         else if (target.Type == ActivityRow.Queue)
         {
@@ -188,7 +227,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
                 return WorkErrors.Of(WorkErrors.TargetIneligible, $"Queue '{target.Id}' does not exist.");
             }
 
-            Assign(row, ActivityRow.Queue, target.Id);
+            Assign(row, ActivityRow.Queue, target.Id, "MANUAL");
             row.QueueCode = target.Id;
         }
         else
@@ -290,7 +329,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
             .Take(5).ToListAsync(cancellationToken).ConfigureAwait(false);
         foreach (var row in candidates)
         {
-            Assign(row, ActivityRow.User, actor.UserId);
+            Assign(row, ActivityRow.User, actor.UserId, "CLAIM");
             var saved = await SaveAsync(row, cancellationToken).ConfigureAwait(false);
             if (saved.IsSuccess)
             {
@@ -335,14 +374,30 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
 
     internal static bool IsVisible(ActivityRow row, WorkActor actor) => IsMine(row, actor) || actor.CanSee(row.QueueCode);
 
-    private void Assign(ActivityRow row, string type, string id)
+    private void Assign(ActivityRow row, string type, string id, string method, string? ruleRef = null)
     {
+        var (previousType, previousId) = (row.AssigneeType, row.AssigneeId);
         row.AssigneeType = type;
         row.AssigneeId = id;
         row.UpdatedAt = clock.Now;
         row.RecordVersion++;
-        // TODO(hardening): publish ActivityAssigned (needs wrk user/group ids; assignee ids are directory strings today).
+        PublishAssigned(row, previousType, previousId, method, ruleRef, null);
     }
+
+    /// <summary>ActivityAssigned for any assignment change. User and queue ids on the wire are derived from the directory strings (<see cref="WorkUserIds"/>, <see cref="QueueIds"/>).</summary>
+    private void PublishAssigned(ActivityRow row, string? previousType, string? previousId, string method, string? ruleRef, string? reasonCode) =>
+        events.Publish(new OutgoingEvent(EventDescriptor.From(ActivityAssignedV1.Descriptor), "Activity", row.ActivityId.ToString("D"), new ActivityAssignedV1
+        {
+            PreviousAssignee = previousType is null || previousId is null ? null : ToAssignee(previousType, previousId),
+            NewAssignee = ToAssignee(row.AssigneeType, row.AssigneeId),
+            Method = method,
+            RuleRef = ruleRef,
+            ReasonCode = reasonCode,
+        }, Keys(row.ActivityId)));
+
+    private static Assignee ToAssignee(string type, string id) => type == ActivityRow.User
+        ? new Assignee { UserId = WorkUserIds.For(id) }
+        : new Assignee { QueueId = QueueIds.For(id) };
 
     private async Task<Result<ActivityRow>> SaveAsync(ActivityRow row, CancellationToken cancellationToken)
     {

@@ -98,6 +98,7 @@ public static class ClaimsModule
 
         // Claim financials (SL2-CLM-MONEY): derived balances, the set lifecycle and the close guard over them (REQ-CLM-072/073).
         services.AddScoped<FinancialsReader>();
+        services.AddScoped<SetDecisionRoutes>();
         services.AddScoped<SetLifecycle>();
         services.AddScoped<IClaimFinancialEngine, ClaimFinancialEngine>();
         services.TryAddScoped<IClaimFinancialEvidenceSource, ChainedClaimFinancialEvidenceSource>();
