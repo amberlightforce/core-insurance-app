@@ -117,6 +117,19 @@ export type FinancialLineBalance = Clm['schemas']['FinancialLineBalance'];
 export type FinancialBalance = Clm['schemas']['FinancialBalance'];
 
 // Market packs (mkt.yaml, SL5-UI-PACKS)
+// Market configuration change requests (BO-MKT-01/02)
+export type ConfigChangeRequestView = Mkt['schemas']['ConfigChangeRequestView'];
+export type ConfigChangeItemView = Mkt['schemas']['ConfigChangeItemView'];
+export type ConfigChangeItemInput = Mkt['schemas']['ConfigChangeItemInput'];
+export type ConfigChangeStatus = ConfigChangeRequestView['status'];
+export type ConfigLegalStatus = ConfigChangeItemInput['legalStatus'];
+export type ConfigChangeListPage = Omit<Mkt['schemas']['ConfigChangeRequestListPage'], 'items'> & {
+  items: ConfigChangeRequestView[];
+};
+export type ConfigChangePreviewRun = Mkt['schemas']['ConfigChangePreviewRun'];
+export type ConfigChangeConflict = Mkt['schemas']['ConfigChangeConflict'];
+export type ConfigChangeRebaseResponse = Mkt['schemas']['ConfigChangeRequestRebaseResponse'];
+
 export type PackListItem = Mkt['schemas']['PackListItem'];
 export type PackListPage = Omit<Mkt['schemas']['PackListPage'], 'items'> & {
   items: PackListItem[];
