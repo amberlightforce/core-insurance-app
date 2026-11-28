@@ -2,6 +2,14 @@
   "Platform": {
     "Permissions": {
       "Grants": {
+        "clm.Import.claim": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "clm.Import.financialHistory": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "clm.Import.convertCurrency": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "clm.Import.reverse": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "clm.Dsar.export": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "clm.Dsar.rectify": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "clm.Dsar.restrict": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "clm.Dsar.purge": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
         "clm.Fnol.assist": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "clm.Fnol.submit": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.Fnol.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],

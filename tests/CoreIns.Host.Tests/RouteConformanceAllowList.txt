@@ -116,10 +116,6 @@ CONTRACT_NOT_SERVED GET /api/uw/v1/renewal-directions/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/desktop/get
 CONTRACT_NOT_SERVED GET /api/wrk/v1/inbound-documents
 CONTRACT_NOT_SERVED GET /api/wrk/v1/inbound-documents/{}
-CONTRACT_NOT_SERVED GET /api/wrk/v1/notes
-CONTRACT_NOT_SERVED GET /api/wrk/v1/notes/history
-CONTRACT_NOT_SERVED GET /api/wrk/v1/notes/search
-CONTRACT_NOT_SERVED GET /api/wrk/v1/notes/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/palette/query
 CONTRACT_NOT_SERVED GET /api/wrk/v1/participants
 CONTRACT_NOT_SERVED GET /api/wrk/v1/participants/objects-for
@@ -199,15 +195,7 @@ CONTRACT_NOT_SERVED POST /api/chn/v1/webhooks/subscribe
 CONTRACT_NOT_SERVED POST /api/chn/v1/webhooks/verify
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/schedule
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/send
-CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/export
-CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/purge
-CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/rectify
-CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/restrict
 CONTRACT_NOT_SERVED POST /api/clm/v1/fraud/score
-CONTRACT_NOT_SERVED POST /api/clm/v1/import/claim
-CONTRACT_NOT_SERVED POST /api/clm/v1/import/convert-currency
-CONTRACT_NOT_SERVED POST /api/clm/v1/import/financial-history
-CONTRACT_NOT_SERVED POST /api/clm/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/clm/v1/redresses/request
 CONTRACT_NOT_SERVED POST /api/clm/v1/services/cancel
 CONTRACT_NOT_SERVED POST /api/clm/v1/services/request
@@ -522,10 +510,6 @@ CONTRACT_NOT_SERVED POST /api/wrk/v1/inbound-documents/reprocess
 CONTRACT_NOT_SERVED POST /api/wrk/v1/inbound-documents/split
 CONTRACT_NOT_SERVED POST /api/wrk/v1/inbound-documents/submit
 CONTRACT_NOT_SERVED POST /api/wrk/v1/inbound-documents/verify
-CONTRACT_NOT_SERVED POST /api/wrk/v1/notes
-CONTRACT_NOT_SERVED POST /api/wrk/v1/notes/delete
-CONTRACT_NOT_SERVED POST /api/wrk/v1/notes/edit
-CONTRACT_NOT_SERVED POST /api/wrk/v1/notes/export
 CONTRACT_NOT_SERVED POST /api/wrk/v1/participants/assign-by-rules
 CONTRACT_NOT_SERVED POST /api/wrk/v1/participants/change
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/close
