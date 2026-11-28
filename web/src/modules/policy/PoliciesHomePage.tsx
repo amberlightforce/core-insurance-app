@@ -9,14 +9,15 @@ import { underwritingManagerRole } from '../quote/uwIssues';
 import { LinkButton } from '../staff/LinkButton';
 import { PageHeader, Section } from '../staff/PageHeader';
 import { readRecent } from '../staff/recent';
+import { PolicySearchSection } from './PolicySearchSection';
 import { useRecentLabels } from '../staff/useRecentLabels';
 import styles from '../staff/staff.module.css';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
- * Policies landing. The slice has no policy search (only get by id), so staff start a quote, reopen a recently
- * viewed or bound policy, or enter a policy id.
+ * Policies landing: find a policy by number or policyholder (pol.Policy.searchByCriteria), start a quote, reopen a
+ * recently viewed or bound policy, or enter a policy id.
  */
 export function PoliciesHomePage() {
   const { t } = useTranslation(['policy', 'uw']);
@@ -53,6 +54,9 @@ export function PoliciesHomePage() {
           </>
         }
       />
+      <Section title={t('search.title')} family="brand">
+        <PolicySearchSection />
+      </Section>
       <div className={styles.grid}>
         <Section title={t('home.recent')} family="brand" count={recent.length}>
           {recent.length === 0 ? (

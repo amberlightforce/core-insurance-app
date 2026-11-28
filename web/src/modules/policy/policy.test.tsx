@@ -379,3 +379,133 @@ describe('ReferralsPage', () => {
     expect(await screen.findByText('Καμία παραπομπή σε αναμονή')).toBeInTheDocument();
   });
 });
+
+describe('PoliciesHomePage policy search', () => {
+  const hit = (n: string, id = fx.policyId) => ({
+    policyId: id,
+    policyNumber: n,
+    productCode: 'MOTOR_PRIVATE',
+    insuredPartyId: fx.partyId,
+    status: 'IN_FORCE',
+    termPeriod: { from: '2026-10-08T00:00:00Z', to: '2027-10-08T00:00:00Z' },
+  });
+  const searchRoutes = (
+    respond: (body: unknown, cursor: string | null) => { status?: number; body?: unknown },
+  ): MockRoute[] => [
+    {
+      method: 'POST',
+      path: '/api/pol/v1/policies/search',
+      respond: (r) => respond(r.body, r.url.searchParams.get('cursor')),
+    },
+    {
+      method: 'GET',
+      path: `/api/pty/v1/parties/${fx.partyId}`,
+      respond: () => ({ body: { party: fx.party() } }),
+    },
+    {
+      method: 'POST',
+      path: '/api/pty/v1/parties/search',
+      respond: () => ({ body: { items: [fx.searchItem], nextCursor: null } }),
+    },
+  ];
+  const home = () => renderScreen(<PoliciesHomePage />, { path: '/policies', url: '/policies' });
+
+  it('searches by policy number and opens the policy', async () => {
+    const api = mockApi(
+      searchRoutes(() => ({ body: { items: [hit('POL000000007')], nextCursor: null } })),
+    );
+    const { user } = home();
+    await user.type(screen.getByRole('textbox', { name: /Αριθμός ασφαλιστηρίου/ }), 'POL000000007');
+    await user.click(screen.getByRole('button', { name: 'Αναζήτηση' }));
+    const table = await screen.findByRole('grid', { name: 'Ασφαλιστήρια που ταιριάζουν' });
+    expect(await within(table).findByText('Δοκιμή Διεπαφής')).toBeInTheDocument();
+    expect(within(table).getByText('Σε ισχύ')).toBeInTheDocument();
+    expect(api.callsTo('POST', '/api/pol/v1/policies/search')[0]?.body).toEqual({
+      policyNumber: 'POL000000007',
+    });
+    await user.dblClick(within(table).getByText('POL000000007'));
+    await waitFor(() => {
+      expect(screen.getByTestId('location')).toHaveTextContent(`/policies/${fx.policyId}`);
+    });
+  });
+
+  it('searches by a chosen policyholder', async () => {
+    const api = mockApi(
+      searchRoutes(() => ({ body: { items: [hit('POL000000007')], nextCursor: null } })),
+    );
+    const { user } = home();
+    await user.click(screen.getByRole('button', { name: 'Επιλογή λήπτη ασφάλισης' }));
+    await user.type(screen.getByRole('searchbox', { name: /Αναζήτηση λήπτη/ }), 'Δοκιμή{Enter}');
+    await user.click(await screen.findByText('P000000021'));
+    expect(await screen.findByText(/Λήπτης ασφάλισης: Δοκιμή Διεπαφής/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Αναζήτηση' }));
+    expect(await screen.findByText('POL000000007')).toBeInTheDocument();
+    expect(api.callsTo('POST', '/api/pol/v1/policies/search')[0]?.body).toEqual({
+      insuredPartyId: fx.partyId,
+    });
+  });
+
+  it('asks for a criterion and rejects a malformed number without calling the API', async () => {
+    const api = mockApi(searchRoutes(() => ({ body: { items: [], nextCursor: null } })));
+    const { user } = home();
+    await user.click(screen.getByRole('button', { name: 'Αναζήτηση' }));
+    expect(await screen.findByText(/Δώστε αριθμό ασφαλιστηρίου ή επιλέξτε/)).toBeInTheDocument();
+    await user.type(screen.getByRole('textbox', { name: /Αριθμός ασφαλιστηρίου/ }), 'a b#');
+    await user.click(screen.getByRole('button', { name: 'Αναζήτηση' }));
+    expect(await screen.findByText(/Χρησιμοποιήστε μόνο γράμματα/)).toBeInTheDocument();
+    expect(api.callsTo('POST', '/api/pol/v1/policies/search')).toHaveLength(0);
+  });
+
+  it('shows an empty state', async () => {
+    mockApi(searchRoutes(() => ({ body: { items: [], nextCursor: null } })));
+    const { user } = home();
+    await user.type(screen.getByRole('textbox', { name: /Αριθμός ασφαλιστηρίου/ }), 'NOPE1');
+    await user.click(screen.getByRole('button', { name: 'Αναζήτηση' }));
+    expect(
+      await screen.findByText('Κανένα ασφαλιστήριο δεν ταιριάζει με τα κριτήρια.'),
+    ).toBeInTheDocument();
+  });
+
+  it('shows the permission problem on 403', async () => {
+    mockApi(
+      searchRoutes(() =>
+        problem(403, 'forbidden', 'Δεν έχετε δικαίωμα', 'Απαιτείται pol.Policy.search'),
+      ),
+    );
+    const { user } = home();
+    await user.type(screen.getByRole('textbox', { name: /Αριθμός ασφαλιστηρίου/ }), 'POL1');
+    await user.click(screen.getByRole('button', { name: 'Αναζήτηση' }));
+    expect(await screen.findByText(/Δεν έχετε δικαίωμα/)).toBeInTheDocument();
+  });
+
+  it('loads the next page with the cursor', async () => {
+    const api = mockApi(
+      searchRoutes((_b, cursor) =>
+        cursor === null
+          ? {
+              body: {
+                items: [hit('POL000000001', 'aaaaaaaa-0000-4000-8000-000000000001')],
+                nextCursor: 'c2',
+              },
+            }
+          : {
+              body: {
+                items: [hit('POL000000002', 'aaaaaaaa-0000-4000-8000-000000000002')],
+                nextCursor: null,
+              },
+            },
+      ),
+    );
+    const { user } = home();
+    await user.type(screen.getByRole('textbox', { name: /Αριθμός ασφαλιστηρίου/ }), 'POL');
+    await user.click(screen.getByRole('button', { name: 'Αναζήτηση' }));
+    expect(await screen.findByText('POL000000001')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Περισσότερα' }));
+    expect(await screen.findByText('POL000000002')).toBeInTheDocument();
+    expect(screen.getByText('POL000000001')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Περισσότερα' })).not.toBeInTheDocument();
+    expect(
+      api.callsTo('POST', '/api/pol/v1/policies/search')[1]?.url.searchParams.get('cursor'),
+    ).toBe('c2');
+  });
+});
