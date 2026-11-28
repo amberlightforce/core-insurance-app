@@ -1,5 +1,7 @@
 # STATUS — Greek P&C core insurance build
 
+> **Handover 2026-11-28 (main @ e43149f2):** hardening waves 1–5 done; build-out 82/295 (waves 6–8 done, MVP 82/190, all 20 P0 done). Gate green. Read `HANDOVER-2026-11-28.md` first.
+
 > **Build-out planned 2026-11-27:** 295 items in waves 6–27 (MVP 6–20, post-MVP 21–27) in `build-out/`, from six code surveys of what the master plan still lacks. Hardening waves 1–4 done, wave 5 in progress. NX-UI-14 superseded and NX-UI-11 split by the build-out. Document map: `README.md`.
 
 > **Hardening wave 1 done 2026-10-20 (NEXT-STEPS.md):** all 15 wave-1 items on main (HD-01..04, EC-01, EC-03, TST-01/02/04, OT-01..03, UI-01/03/05), plus /work aggregation page and /compliance -> DSAR redirect. Orchestrator gate on 34aef29: solution build clean; Host 45, Architecture 210, Rules 898, Platform 72, Contracts 18 green; targeted integration classes 35 green; web 1458 tests + lint green; coreins stack rebuilt and smoke-walked. Unverified until CI: E2E specs changed by TST-01/02, the new CI security job (gitleaks history), CessionDelta integration under EC-01. Next: wave 2.
