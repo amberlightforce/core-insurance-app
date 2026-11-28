@@ -4,23 +4,37 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Reconciliation.invariants result. PRD outputs: "status, breaks"</summary>
+/// <summary>bil.Reconciliation.invariants result: one result per invariant.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReconciliationInvariantsResponse
 {
-    /// <summary>PRD: "status"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'status'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Status { get; init; }
+    public required StatusValue Status { get; init; }
 
-    /// <summary>PRD: "breaks"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'asOf'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("asOf")]
+    public required global::CoreIns.SharedKernel.BusinessDate AsOf { get; init; }
+
+    /// <summary>Contract member 'results'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("results")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.InvariantResult> Results { get; init; }
+
+    /// <summary>Total number of broken rows over all invariants.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("breaks")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Breaks { get; init; }
+    public required int Breaks { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>PASS</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PASS")]
+        Pass,
+
+        /// <summary><c>FAIL</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("FAIL")]
+        Fail,
+    }
 }

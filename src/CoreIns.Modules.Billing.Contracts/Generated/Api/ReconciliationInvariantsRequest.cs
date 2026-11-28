@@ -4,19 +4,19 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Reconciliation.invariants request. PRD inputs: "account, date"</summary>
+/// <summary>bil.Reconciliation.invariants request (BO-BIL-11): all entries with an accounting date up to the date; optionally one account.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReconciliationInvariantsRequest
 {
-    /// <summary>PRD: "account"</summary>
+    /// <summary>Restrict the checks that have a billing account to this one.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'account' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("account")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Account { get; init; }
+    public global::System.Guid? Account { get; init; }
 
-    /// <summary>PRD: "date"</summary>
+    /// <summary>As-of accounting date; today when omitted.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("date")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.BusinessDate? Date { get; init; }

@@ -4,20 +4,33 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Reconciliation.bank request. PRD inputs: "account, date"</summary>
+/// <summary>bil.Reconciliation.bank request (BO-BIL-11): one statement of an own bank account as camt.053 XML or as CSV text with the header "bookingDate,valueDate,amount,currency,reference,endToEndId" (amount signed, negative is a debit; valueDate and endToEndId may be empty). The statement is kept in the bank-file store; at most 5000 lines.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReconciliationBankRequest
 {
-    /// <summary>PRD: "account"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("account")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Account { get; init; }
+    /// <summary>The own bank account the statement belongs to, as an IBAN. A camt.053 file must name the same account.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("bankAccount")]
+    public required string BankAccount { get; init; }
 
-    /// <summary>PRD: "date"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("date")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? Date { get; init; }
+    /// <summary>Contract member 'format'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("format")]
+    public required FormatValue Format { get; init; }
+
+    /// <summary>The statement text.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("content")]
+    public required string Content { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<FormatValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum FormatValue
+    {
+        /// <summary><c>CAMT053</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CAMT053")]
+        Camt053,
+
+        /// <summary><c>CSV</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("CSV")]
+        Csv,
+    }
 }
