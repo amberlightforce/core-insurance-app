@@ -327,6 +327,62 @@ internal sealed class ContingencyRow
     public int RecordVersion { get; set; } = 1;
 }
 
+/// <summary>
+/// <c>uw.policy_hold</c>: a hold on business in a place or product (BO-UW-09, REQ-UW-007). Draft until activated; an Active hold raises
+/// <c>UW_POLICY_HOLD</c> on matching jobs; Released ends it. Its scope values are in <c>uw.hold_scope</c>.
+/// </summary>
+internal sealed class PolicyHoldRow
+{
+    public Guid HoldId { get; set; }
+
+    public Guid LegalEntityId { get; set; }
+
+    public string HoldCode { get; set; } = string.Empty;
+
+    public string Description { get; set; } = string.Empty;
+
+    public string Status { get; set; } = "Draft";
+
+    public DateOnly EffectiveFrom { get; set; }
+
+    public DateOnly? EffectiveTo { get; set; }
+
+    public string[] JobTypes { get; set; } = [];
+
+    public Guid? CopiedFrom { get; set; }
+
+    public Instant CreatedAt { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public Instant? ActivatedAt { get; set; }
+
+    public string? ActivatedBy { get; set; }
+
+    public Instant? ReleasedAt { get; set; }
+
+    public string? ReleasedBy { get; set; }
+
+    public string? ReleaseReason { get; set; }
+
+    public int RecordVersion { get; set; } = 1;
+}
+
+/// <summary><c>uw.hold_scope</c>: one dimension and value a hold covers.</summary>
+internal sealed class HoldScopeRow
+{
+    public Guid ScopeId { get; set; }
+
+    public Guid HoldId { get; set; }
+
+    public string Dimension { get; set; } = string.Empty;
+
+    public string Value { get; set; } = string.Empty;
+
+    /// <summary>Set when an update of the Draft hold dropped the value (rows are never deleted).</summary>
+    public Instant? RetiredAt { get; set; }
+}
+
 /// <summary>The Underwriting module's EF Core context (schema <c>uw</c>): tables and migrations; reads and writes use Dapper on the scope's connection.</summary>
 internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbContext> options) : ModuleDbContext(options)
 {
@@ -343,6 +399,10 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
     public DbSet<DeclineRow> Declines => Set<DeclineRow>();
 
     public DbSet<ContingencyRow> Contingencies => Set<ContingencyRow>();
+
+    public DbSet<PolicyHoldRow> PolicyHolds => Set<PolicyHoldRow>();
+
+    public DbSet<HoldScopeRow> HoldScopes => Set<HoldScopeRow>();
 
     protected override string Schema => UnderwritingModule.Schema;
 
@@ -583,6 +643,46 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
             entity.HasIndex(e => new { e.LegalEntityId, e.TermId, e.Status }).HasDatabaseName("ix_contingency_term");
             entity.HasIndex(e => new { e.LegalEntityId, e.JobId, e.Status }).HasDatabaseName("ix_contingency_job");
             entity.HasIndex(e => new { e.Status, e.DueDate }).HasDatabaseName("ix_contingency_due");
+        });
+        modelBuilder.Entity<PolicyHoldRow>(entity =>
+        {
+            entity.ToTable("policy_hold", table =>
+            {
+                table.HasCheckConstraint("ck_policy_hold_status", "status IN ('Draft', 'Active', 'Released')");
+                table.HasCheckConstraint("ck_policy_hold_window", "effective_to IS NULL OR effective_to >= effective_from");
+            });
+            entity.HasKey(e => e.HoldId).HasName("pk_policy_hold");
+            entity.Property(e => e.HoldId).HasColumnName("hold_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.HoldCode).HasColumnName("hold_code");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.EffectiveFrom).HasColumnName("effective_from").HasColumnType("date");
+            entity.Property(e => e.EffectiveTo).HasColumnName("effective_to").HasColumnType("date");
+            entity.Property(e => e.JobTypes).HasColumnName("job_types").HasColumnType("text[]");
+            entity.Property(e => e.CopiedFrom).HasColumnName("copied_from");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.ActivatedAt).HasColumnName("activated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ActivatedBy).HasColumnName("activated_by");
+            entity.Property(e => e.ReleasedAt).HasColumnName("released_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ReleasedBy).HasColumnName("released_by");
+            entity.Property(e => e.ReleaseReason).HasColumnName("release_reason");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.LegalEntityId, e.HoldCode }).IsUnique().HasDatabaseName("ux_policy_hold_code");
+            entity.HasIndex(e => new { e.LegalEntityId, e.Status }).HasDatabaseName("ix_policy_hold_status");
+        });
+        modelBuilder.Entity<HoldScopeRow>(entity =>
+        {
+            entity.ToTable("hold_scope", table => table.HasCheckConstraint("ck_hold_scope_dimension", "dimension IN ('POSTCODE', 'HAZARD_ZONE', 'PRODUCT', 'LINE_OF_BUSINESS', 'COVERAGE')"));
+            entity.HasKey(e => e.ScopeId).HasName("pk_hold_scope");
+            entity.Property(e => e.ScopeId).HasColumnName("scope_id");
+            entity.Property(e => e.HoldId).HasColumnName("hold_id");
+            entity.Property(e => e.Dimension).HasColumnName("dimension");
+            entity.Property(e => e.Value).HasColumnName("value");
+            entity.Property(e => e.RetiredAt).HasColumnName("retired_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.HoldId, e.Dimension, e.Value }).IsUnique().HasFilter("retired_at IS NULL").HasDatabaseName("ux_hold_scope_value");
+            entity.HasOne<PolicyHoldRow>().WithMany().HasForeignKey(e => e.HoldId).HasConstraintName("fk_hold_scope_hold").OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

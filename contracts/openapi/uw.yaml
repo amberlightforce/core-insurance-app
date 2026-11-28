@@ -7560,9 +7560,8 @@ components:
         riskLocations:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: Risk locations (postcode / hazard-zone keys via Geocoder); shape typed by W3-UW (D-API-13)
-          x-todo-owner: W3-UW
+            $ref: '#/components/schemas/HoldRiskLocation'
+          description: Risk locations (postcode / hazard-zone keys); typed by BO-UW-09 (D-API-13)
         transactionDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
         effectiveDate:
@@ -7576,6 +7575,18 @@ components:
       - transactionDate
       - effectiveDate
       description: 'Signature of REQ-UW-007 Typed from REQ-UW-007. PRD inputs: "job attributes, risk locations, dates"'
+    HoldRiskLocation:
+      type: object
+      description: One risk location of the quote; give a postcode, a hazard-zone key or both.
+      properties:
+        postcode:
+          type: string
+          minLength: 1
+          maxLength: 16
+          description: Postcode of the risk (garaging postcode for motor); with an asterisk at the end it is a prefix
+        hazardZone:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Hazard-zone key (flood, quake, fire) as the geocoder returns it
     PolicyHoldCheckResponse:
       type: object
       properties:
@@ -7599,116 +7610,227 @@ components:
       required:
       - holds
       description: 'Typed from REQ-UW-007. PRD outputs: "holds, issue type"'
+    HoldScopeEntry:
+      type: object
+      description: One scope value of a hold. Within one dimension any value matches; across dimensions all must match.
+      properties:
+        dimension:
+          type: string
+          enum:
+          - POSTCODE
+          - HAZARD_ZONE
+          - PRODUCT
+          - LINE_OF_BUSINESS
+          - COVERAGE
+          description: What the value is. A POSTCODE ending in an asterisk is a prefix.
+        value:
+          type: string
+          minLength: 1
+          maxLength: 64
+      required:
+      - dimension
+      - value
     PolicyHoldCreateRequest:
       type: object
-      description: 'uw.PolicyHold.create request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: 'uw.PolicyHold.create request (BO-UW-09): a hold on new business, created as a Draft.'
+      properties:
+        holdCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Business code of the hold, unique per legal entity
+        description:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why the hold exists
+        effectiveFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: First effective date the hold applies to
+        effectiveTo:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: Last effective date the hold applies to (open ended when absent)
+        jobTypes:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+          description: Job types the hold blocks (all when empty), e.g. NEW_BUSINESS
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/HoldScopeEntry'
+          description: What the hold covers
+      required:
+      - holdCode
+      - description
+      - effectiveFrom
+      - scopes
     PolicyHoldCreateResponse:
       type: object
       description: 'uw.PolicyHold.create result. PRD outputs: "hold / impact counts"'
       properties:
         hold:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "hold"'
+          description: 'The hold (id, holdCode, status, scopes, recordVersion)'
         impactCounts:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "impact counts"'
+          description: 'In-force policies the hold would touch (inForcePolicies, byProduct)'
     PolicyHoldUpdateRequest:
       type: object
-      description: 'uw.PolicyHold.update request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: 'uw.PolicyHold.update request (BO-UW-09): change a Draft hold. Scopes and jobTypes replace the stored lists when given.'
+      properties:
+        recordVersion:
+          type: integer
+          description: Version the caller read; a different current version is a 409
+        description:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        effectiveFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        effectiveTo:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        jobTypes:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/HoldScopeEntry'
     PolicyHoldUpdateResponse:
       type: object
       description: 'uw.PolicyHold.update result. PRD outputs: "hold / impact counts"'
       properties:
         hold:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "hold"'
+          description: The hold
         impactCounts:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "impact counts"'
+          description: In-force policies the hold would touch
     PolicyHoldCopyRequest:
       type: object
-      description: 'uw.PolicyHold.copy request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: 'uw.PolicyHold.copy request (BO-UW-09): a new Draft hold with the scopes of an existing one.'
+      properties:
+        holdId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Hold to copy
+        holdCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Code of the copy
+      required:
+      - holdId
+      - holdCode
     PolicyHoldCopyResponse:
       type: object
       description: 'uw.PolicyHold.copy result. PRD outputs: "hold / impact counts"'
       properties:
         hold:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "hold"'
+          description: The new Draft hold
         impactCounts:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "impact counts"'
+          description: In-force policies the hold would touch
     PolicyHoldActivateRequest:
       type: object
-      description: 'uw.PolicyHold.activate request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: 'uw.PolicyHold.activate request (BO-UW-09): a Draft hold starts to apply.'
+      properties:
+        holdId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        recordVersion:
+          type: integer
+      required:
+      - holdId
     PolicyHoldActivateResponse:
       type: object
       description: 'uw.PolicyHold.activate result. PRD outputs: "hold / impact counts"'
       properties:
         hold:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "hold"'
+          description: The Active hold
         impactCounts:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "impact counts"'
+          description: In-force policies the hold touches
     PolicyHoldReleaseRequest:
       type: object
-      description: 'uw.PolicyHold.release request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: 'uw.PolicyHold.release request (BO-UW-09): an Active hold stops applying.'
+      properties:
+        holdId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+      required:
+      - holdId
+      - reason
     PolicyHoldReleaseResponse:
       type: object
       description: 'uw.PolicyHold.release result. PRD outputs: "hold / impact counts"'
       properties:
         hold:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "hold"'
+          description: The Released hold
         impactCounts:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "impact counts"'
+          description: In-force policies the hold touched
     PolicyHoldImpactRequest:
       type: object
-      description: 'uw.PolicyHold.impact request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: 'uw.PolicyHold.impact request (BO-UW-09): how many in-force policies a hold touches.'
+      properties:
+        holdId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - holdId
     PolicyHoldImpactResponse:
       type: object
       description: 'uw.PolicyHold.impact result. PRD outputs: "hold / impact counts"'
       properties:
         hold:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "hold"'
+          description: The hold
         impactCounts:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "impact counts"'
+          description: 'inForcePolicies, byProduct and the asOf instant'
     AccumulationCheckRequest:
       type: object
-      description: 'uw.Accumulation.check request. PRD inputs: "job ref, peril"'
+      description: 'uw.Accumulation.check request (BO-UW-09): the exposure in force in the zone of a risk, against the configured capacity.'
       properties:
         jobRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job ref"'
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Job asking (optional)
         peril:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "peril"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Peril whose capacity applies, e.g. FLOOD
+        zone:
+          $ref: '#/components/schemas/HoldRiskLocation'
+          description: The zone to measure
+        product:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Restrict the exposure to one product (optional)
+      required:
+      - peril
+      - zone
     AccumulationCheckResponse:
       type: object
       description: 'uw.Accumulation.check result. PRD outputs: "band, exposure, capacity, data as of"'
       properties:
         band:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "band"'
+          type: string
+          enum:
+          - GREEN
+          - AMBER
+          - RED
+          description: GREEN below 80 percent of capacity, AMBER below capacity, RED at or above it
         exposure:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposure"'
+          description: 'In-force policies in the zone (policyCount)'
         capacity:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "capacity"'
+          description: 'Configured capacity for the peril (policyCount)'
         dataAs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "data as of"'
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: When the exposure was counted
+      required:
+      - band
     ExternalReportOrderRequest:
       type: object
       description: 'uw.ExternalReport.order request. PRD inputs: "type, subject, provider, consent ref"'
