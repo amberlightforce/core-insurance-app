@@ -60,8 +60,26 @@ internal static class TermHead
         }
 
         var state = new ServicingState(term, segments, null, ordered[0].EffectiveAt);
+        var skipped = new HashSet<PolicyTransactionId>();
+        for (var i = 1; i < ordered.Count - 1; i++)
+        {
+            // BO-POL-07: a cancellation reinstated without a lapse nets out to nothing (its credits are reversed in full); both are skipped.
+            if (Codes.Parse<PolicyTransactionKind>(ordered[i].Kind) == PolicyTransactionKind.Cancellation
+                && Codes.Parse<PolicyTransactionKind>(ordered[i + 1].Kind) == PolicyTransactionKind.Reinstatement
+                && IsNoLapse(ordered[i + 1].Intent))
+            {
+                skipped.Add(ordered[i].TransactionId);
+                skipped.Add(ordered[i + 1].TransactionId);
+            }
+        }
+
         foreach (var transaction in ordered.Skip(1))
         {
+            if (skipped.Contains(transaction.TransactionId))
+            {
+                continue;
+            }
+
             // BO-POL-08: a suspension or reactivation carries no charge lines and leaves the segments untouched.
             if (Codes.Parse<PolicyTransactionKind>(transaction.Kind) is PolicyTransactionKind.Suspension or PolicyTransactionKind.Reactivation)
             {
@@ -99,6 +117,19 @@ internal static class TermHead
         }
 
         return state;
+    }
+
+    private static bool IsNoLapse(string intent)
+    {
+        try
+        {
+            using var document = System.Text.Json.JsonDocument.Parse(intent);
+            return document.RootElement.TryGetProperty("type", out var type) && type.GetString() == "NO_LAPSE";
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return false;
+        }
     }
 
     /// <summary>Tax, levy and stamp lines are priced by the MKT treatment, everything else (premium, fee, surcharge, discount) by the engine.</summary>
