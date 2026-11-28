@@ -1,0 +1,123 @@
+/* Submissions workbench: filters, forms, evidence, history timeline. */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-inline-size: 640px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3) var(--space-5);
+  margin: 0;
+}
+
+.grid dt {
+  color: var(--color-text-muted);
+  font: var(--type-caption);
+}
+
+.grid dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.evidenceMain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.history {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.event {
+  display: grid;
+  grid-template-columns: var(--space-3) 1fr;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.dot {
+  inline-size: var(--space-2);
+  block-size: var(--space-2);
+  margin-block-start: var(--space-2);
+  border-radius: var(--radius-full);
+  background-color: var(--color-border-strong);
+}
+
+.dot[data-kind='TRANSITION'] {
+  background-color: var(--color-brand-primary);
+}
+
+.eventBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.eventMeta {
+  color: var(--color-text-muted);
+  font: var(--type-caption);
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}

@@ -46,6 +46,11 @@
       "title": "AI-system register",
       "body": "Register AI systems and move them through review, approval, suspension and retirement.",
       "open": "Open the AI register"
+    },
+    "submissions": {
+      "title": "Regulatory submissions",
+      "body": "Prepare, approve, file and track submissions to regulators.",
+      "open": "Open submissions"
     }
   }
 }

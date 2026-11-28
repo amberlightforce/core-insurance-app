@@ -1,14 +1,23 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
-import { Banner, identifierColumn, textColumn, type DataColumn } from '../../../design-system';
+import {
+  Banner,
+  Button,
+  cx,
+  identifierColumn,
+  textColumn,
+  type DataColumn,
+} from '../../../design-system';
 import { LinkButton } from '../../staff/LinkButton';
 import { PageHeader, Section } from '../../staff/PageHeader';
 import { QueryView } from '../../staff/QueryView';
 import { SimpleTable } from '../../staff/SimpleTable';
 import staff from '../../staff/staff.module.css';
 import { useFormat } from '../../staff/useFormat';
-import { documentNumber, useFiscalDocument } from './api';
+import { documentNumber, useFiscalDocument, useQrPayload } from './api';
+import { FiscalActionDialog, type FiscalAction } from './FiscalActionDialog';
 import styles from './Fiscal.module.css';
 import { FiscalStatusPill } from './StatusPills';
 
@@ -24,6 +33,9 @@ export function FiscalDocumentPage() {
   const fmt = useFormat();
   const { id = '' } = useParams();
   const query = useFiscalDocument(id);
+  const [action, setAction] = useState<FiscalAction | null>(null);
+  const [showQr, setShowQr] = useState(false);
+  const qr = useQrPayload(id, showQr);
 
   const columns: DataColumn<Line>[] = [
     identifierColumn<Line>('category', t('fiscal.lines.category'), (l) => l.fiscalCategoryKey, {
@@ -49,9 +61,41 @@ export function FiscalDocumentPage() {
                 recordId={documentNumber(data)}
                 subtitle={<FiscalStatusPill status={doc.status} />}
                 actions={
-                  <LinkButton variant="secondary" to="/compliance/fiscal">
-                    {t('fiscal.back')}
-                  </LinkButton>
+                  <>
+                    {doc.status === 'REJECTED' ? (
+                      <Button
+                        variant="primary"
+                        onPress={() => {
+                          setAction('resubmit');
+                        }}
+                      >
+                        {t('fiscal.actions.resubmit.button')}
+                      </Button>
+                    ) : null}
+                    {doc.status === 'REGISTERED' && doc.role === 'ISSUE' ? (
+                      <Button
+                        variant="secondary"
+                        onPress={() => {
+                          setAction('correct');
+                        }}
+                      >
+                        {t('fiscal.actions.correct.button')}
+                      </Button>
+                    ) : null}
+                    {doc.status !== 'CANCELLED' ? (
+                      <Button
+                        variant="secondary"
+                        onPress={() => {
+                          setAction('cancel');
+                        }}
+                      >
+                        {t('fiscal.actions.cancel.button')}
+                      </Button>
+                    ) : null}
+                    <LinkButton variant="secondary" to="/compliance/fiscal">
+                      {t('fiscal.back')}
+                    </LinkButton>
+                  </>
                 }
                 facts={[
                   {
@@ -77,7 +121,7 @@ export function FiscalDocumentPage() {
                   {t('fiscal.placeholder.body')}
                 </Banner>
               ) : null}
-              <Section title={t('fiscal.detail.identifiers')}>
+              <Section title={t('fiscal.detail.identifiers')} family="brand">
                 <dl className={styles.grid}>
                   <div>
                     <dt>{t('fiscal.columns.mark')}</dt>
@@ -118,7 +162,11 @@ export function FiscalDocumentPage() {
                 </dl>
               </Section>
               {doc.rejectionCodes?.length ? (
-                <Section title={t('fiscal.detail.rejections')} count={doc.rejectionCodes.length}>
+                <Section
+                  title={t('fiscal.detail.rejections')}
+                  family="danger"
+                  count={doc.rejectionCodes.length}
+                >
                   <div className={styles.codes}>
                     {doc.rejectionCodes.map((c) => (
                       <code key={c} className="ds-mono">
@@ -128,7 +176,63 @@ export function FiscalDocumentPage() {
                   </div>
                 </Section>
               ) : null}
-              <Section title={t('fiscal.detail.lines')} count={doc.lines.length}>
+              <Section
+                title={t('fiscal.qr.title')}
+                family="warning"
+                actions={
+                  showQr ? undefined : (
+                    <Button
+                      variant="secondary"
+                      onPress={() => {
+                        setShowQr(true);
+                      }}
+                    >
+                      {t('fiscal.qr.load')}
+                    </Button>
+                  )
+                }
+              >
+                {showQr ? (
+                  <QueryView query={qr}>
+                    {(payload) => (
+                      <div className={styles.stackGap}>
+                        <Banner
+                          variant="warning"
+                          live="none"
+                          title={t('fiscal.qr.unverifiedTitle')}
+                        >
+                          {payload.layoutVerified
+                            ? t('fiscal.qr.verified')
+                            : t('fiscal.qr.unverified')}
+                        </Banner>
+                        <dl className={styles.grid}>
+                          <div>
+                            <dt>{t('fiscal.columns.mark')}</dt>
+                            <dd className="ds-mono">{dash(payload.mark)}</dd>
+                          </div>
+                          <div>
+                            <dt>{t('fiscal.detail.uid')}</dt>
+                            <dd className="ds-mono">{dash(payload.uid)}</dd>
+                          </div>
+                          <div>
+                            <dt>{t('fiscal.qr.ref')}</dt>
+                            <dd className="ds-mono">{dash(payload.qrPayloadRef)}</dd>
+                          </div>
+                        </dl>
+                        <pre
+                          className={cx(styles.qr, 'ds-mono')}
+                          aria-label={t('fiscal.qr.payload')}
+                        >
+                          {payload.qrPayload ?? t('fiscal.qr.none')}
+                        </pre>
+                      </div>
+                    )}
+                  </QueryView>
+                ) : (
+                  <p className="ds-caption">{t('fiscal.qr.body')}</p>
+                )}
+              </Section>
+              <Section title={t('fiscal.detail.lines')} family="info" count={doc.lines.length}>
                 <SimpleTable<Line>
                   aria-label={t('fiscal.detail.lines')}
                   columns={columns}
@@ -138,6 +242,15 @@ export function FiscalDocumentPage() {
                   emptyState={<p className="ds-caption">{t('fiscal.lines.empty')}</p>}
                 />
               </Section>
+              {action ? (
+                <FiscalActionDialog
+                  action={action}
+                  data={data}
+                  onClose={() => {
+                    setAction(null);
+                  }}
+                />
+              ) : null}
             </>
           );
         }}

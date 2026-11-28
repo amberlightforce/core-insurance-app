@@ -64,6 +64,68 @@
       "amount": "Amount",
       "charge": "Charge",
       "empty": "No lines."
+    },
+    "actions": {
+      "cancelButton": "Cancel",
+      "reason": "Reason",
+      "reasonHelp": "Recorded in the audit trail (up to 500 characters).",
+      "reasonInvalid": "Enter a reason of up to 500 characters.",
+      "resubmit": {
+        "button": "Resubmit",
+        "title": "Resubmit to the tax channel",
+        "lead": "Send this rejected document to the channel again. It is registered, or rejected again with new codes.",
+        "submit": "Resubmit",
+        "done": "Document resubmitted",
+        "failed": "The resubmission failed"
+      },
+      "cancel": {
+        "button": "Cancel document",
+        "title": "Cancel fiscal document",
+        "lead": "Cancels this document. A registered document is cancelled with a linked cancellation document.",
+        "warnTitle": "This cannot be undone",
+        "warn": "A cancelled document stays on record and cannot be registered again.",
+        "submit": "Cancel document",
+        "done": "Document cancelled",
+        "failed": "The cancellation failed"
+      },
+      "correct": {
+        "button": "Correct",
+        "title": "Correct fiscal document",
+        "lead": "Issues a credit note for this document and a corrected replacement with the amounts below. The corrected total must stay consistent with the source.",
+        "amountFor": "{category} ({currency})",
+        "amountInvalid": "Enter an amount with up to four decimals.",
+        "submit": "Issue credit and correction",
+        "done": "Credit note and correction issued",
+        "failed": "The correction failed"
+      }
+    },
+    "bulk": {
+      "open": "Resubmit rejected",
+      "title": "Resubmit rejected documents",
+      "lead": "Select rejected documents to send again (at most {limit}). Each one is answered separately.",
+      "none": "No rejected documents on this list.",
+      "pick": "Rejected documents",
+      "countInvalid": "Select between 1 and {limit} documents.",
+      "submit": "{count, plural, =0 {Resubmit} one {Resubmit # document} other {Resubmit # documents}}",
+      "close": "Close",
+      "failed": "The bulk resubmission failed",
+      "results": "Results per document",
+      "summary": "{requested} requested, {resubmitted} resubmitted, {skipped} skipped.",
+      "outcome": {
+        "RESUBMITTED": "Resubmitted",
+        "SKIPPED": "Skipped"
+      }
+    },
+    "qr": {
+      "title": "QR payload",
+      "body": "The data printed as the QR code on the document.",
+      "load": "Show QR payload",
+      "unverifiedTitle": "Layout not verified",
+      "unverified": "The QR layout has not been verified against the tax authority specification. Do not print it on customer documents.",
+      "verified": "The QR layout is verified.",
+      "ref": "QR reference",
+      "payload": "QR payload",
+      "none": "The channel has not produced a QR payload yet."
     }
   }
 }

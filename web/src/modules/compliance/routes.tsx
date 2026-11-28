@@ -38,6 +38,26 @@ const routes: RouteObject[] = [
     ],
   },
   {
+    // BO-CMP-14: regulatory submissions workbench (BO-CMP-09).
+    path: 'compliance/submissions',
+    element: <RequireRole roles={complianceRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('../compliance/submissions/SubmissionsListPage'))
+            .SubmissionsListPage,
+        }),
+      },
+      {
+        path: ':id',
+        lazy: async () => ({
+          Component: (await import('../compliance/submissions/SubmissionPage')).SubmissionPage,
+        }),
+      },
+    ],
+  },
+  {
     path: 'compliance/ai-systems',
     element: <RequireRole roles={complianceRoles} />,
     children: [
@@ -72,5 +92,11 @@ const routes: RouteObject[] = [
 export default {
   order: 120,
   routes,
-  implemented: ['/compliance', '/compliance/dsar', '/compliance/fiscal', '/compliance/ai-systems'],
+  implemented: [
+    '/compliance',
+    '/compliance/dsar',
+    '/compliance/fiscal',
+    '/compliance/ai-systems',
+    '/compliance/submissions',
+  ],
 } satisfies ModuleRoutes;
