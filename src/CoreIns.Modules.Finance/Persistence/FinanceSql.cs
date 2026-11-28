@@ -286,6 +286,19 @@ internal static class FinanceSeed
     /// </summary>
     public const string GrTestV7 = "gr-test.finance.v7";
 
+    /// <summary>
+    /// The seed of migration WriteOffPostings (BO-BIL-13): v7 plus the WRITTEN_OFF rules WO-RECEIVABLE, WO-EXPENSE and WO-TOLERANCE and the placeholder
+    /// accounts GL-6210 (write-offs) and GL-6220 (tolerance differences). A new rule-set version because v7 is immutable once applied; effective from
+    /// 2026-10-01 like v7 and winning the tie by version number.
+    /// </summary>
+    public const string GrTestV8 = "gr-test.finance.v8";
+
+    /// <summary>Migration Down of WriteOffPostings: v8 superseded (rule rows are append-only, REQ-FIN-070); v7 governs again.</summary>
+    public const string SupersedeV8 = """
+        UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'
+         WHERE legal_entity_code = 'GR-TEST' AND book = 'IFRS17' AND version_no = 8;
+        """;
+
     /// <summary>Migration Down of AllocationReversalPostings: v7 superseded (rule rows are append-only, REQ-FIN-070); v6 governs again.</summary>
     public const string SupersedeV7 = """
         UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'

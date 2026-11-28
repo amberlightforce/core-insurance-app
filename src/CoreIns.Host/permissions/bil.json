@@ -36,6 +36,12 @@
         "bil.Receipt.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
         "bil.Allocation.unallocate": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.Allocation.reallocate": [ "Staff.Billing", "Staff.BillingManager" ],
+        // BO-BIL-13: write-offs are proposed by billing staff, decided by a billing manager (a second person with BIL.WRITE_OFF authority over the amount) and posted; money transfers between accounts of one payer.
+        "bil.WriteOff.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.WriteOff.propose": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.WriteOff.decide": [ "Staff.BillingManager" ],
+        "bil.WriteOff.post": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Transfer.money": [ "Staff.Billing", "Staff.BillingManager" ],
         // SL2-BIL-DISB: Claims calls create/request in process; the API serves reads (claims roles: SL2-PLT).
         "bil.PayeeAccount.create": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "bil.PayeeAccount.list": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
@@ -122,6 +128,11 @@
         {
           "Id": "bil-billingmgr-allocrev-illustrative", "Role": "Staff.BillingManager", "Type": "BIL.ALLOCATION_REVERSE", "Illustrative": true,
           "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ]
+        },
+        // BO-BIL-13: approval of a write-off by amount (ILLUSTRATIVE, ignored in Production: fail closed). Only the billing manager decides.
+        {
+          "Id": "bil-billingmgr-writeoff-illustrative", "Role": "Staff.BillingManager", "Type": "BIL.WRITE_OFF", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ]
         },
         // NX-EC-09: stop/void of a disbursement by amount (ILLUSTRATIVE, ignored in Production: fail closed). A payment above the
         // actor's limit is refused; there is no referral for an immediate correction.

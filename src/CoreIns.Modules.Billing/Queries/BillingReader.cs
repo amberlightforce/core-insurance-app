@@ -104,6 +104,12 @@ internal sealed class BillingReader(BillingDbContext db)
             paidByItem[key] = paidByItem.GetValueOrDefault(key) + application.Amount;
         }
 
+        // Written-off amounts settle items too (BO-BIL-13). TODO(hardening): show the written-off part apart from "paid" on the invoice view.
+        foreach (var line in await db.WriteOffLines.AsNoTracking().Where(w => w.InvoiceId == id).ToListAsync(cancellationToken).ConfigureAwait(false))
+        {
+            paidByItem[line.InvoiceItemId] = paidByItem.GetValueOrDefault(line.InvoiceItemId) + line.Amount;
+        }
+
         return new InvoiceGetResponse
         {
             Invoice = View(invoice, items, paidByItem.Values.Sum()),
@@ -255,6 +261,13 @@ internal sealed class BillingReader(BillingDbContext db)
         foreach (var o in offset)
         {
             result[o.Key] = result.GetValueOrDefault(o.Key) + o.Sum;
+        }
+
+        var writtenOff = await db.WriteOffLines.AsNoTracking().Where(w => ids.Contains(w.InvoiceId)).GroupBy(w => w.InvoiceId)
+            .Select(g => new { g.Key, Sum = g.Sum(w => w.Amount) }).ToListAsync(cancellationToken).ConfigureAwait(false);
+        foreach (var w in writtenOff)
+        {
+            result[w.Key] = result.GetValueOrDefault(w.Key) + w.Sum;
         }
 
         var applied = await db.CreditApplications.AsNoTracking().Where(a => ids.Contains(a.CreditNoteId)).GroupBy(a => a.CreditNoteId)

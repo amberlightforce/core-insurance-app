@@ -47,6 +47,13 @@ internal sealed class PolicyOptions
     [Range(1, 365)]
     public int WithdrawalDays { get; set; } = 14;
 
+    /// <summary>
+    /// Days after the cancellation during which a term can be reinstated (BO-POL-07). ILLUSTRATIVE default 30 until the pack publishes it.
+    /// TODO(hardening): serve it from the MKT pack configuration with its legal status, per cancellation source.
+    /// </summary>
+    [Range(1, 366)]
+    public int ReinstatementWindowDays { get; set; } = 30;
+
     /// <summary>The policy write-lock wait.</summary>
     public TimeSpan LockWait => TimeSpan.FromSeconds(LockWaitSeconds);
 

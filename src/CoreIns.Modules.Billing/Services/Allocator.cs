@@ -40,7 +40,8 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var sums = allocated.ToDictionary(a => a.Item, a => a.Sum);
         var credited = await CreditedByItemAsync(ids, cancellationToken).ConfigureAwait(false);
-        return items.ToDictionary(i => i.InvoiceItemId, i => i.Amount - sums.GetValueOrDefault(i.InvoiceItemId) - credited.GetValueOrDefault(i.InvoiceItemId));
+        var writtenOff = await WrittenOffByItemAsync(ids, cancellationToken).ConfigureAwait(false);
+        return items.ToDictionary(i => i.InvoiceItemId, i => i.Amount - sums.GetValueOrDefault(i.InvoiceItemId) - credited.GetValueOrDefault(i.InvoiceItemId) - writtenOff.GetValueOrDefault(i.InvoiceItemId));
     }
 
     /// <summary>Credit applied against each invoice item by credit notes (REQ-BIL-073): the part of the item the original invoice no longer asks for.</summary>
@@ -49,6 +50,15 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
         var rows = await db.CreditApplications.AsNoTracking()
             .Where(c => c.TargetInvoiceItemId != null && itemIds.Contains(c.TargetInvoiceItemId.Value))
             .GroupBy(c => c.TargetInvoiceItemId!.Value).Select(g => new { Item = g.Key, Sum = g.Sum(c => c.Amount) })
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        return rows.ToDictionary(r => r.Item, r => r.Sum);
+    }
+
+    /// <summary>Amount written off against each invoice item (BO-BIL-13): the part of the item nobody will pay.</summary>
+    public async Task<Dictionary<Guid, decimal>> WrittenOffByItemAsync(IReadOnlyCollection<Guid> itemIds, CancellationToken cancellationToken)
+    {
+        var rows = await db.WriteOffLines.AsNoTracking().Where(w => itemIds.Contains(w.InvoiceItemId))
+            .GroupBy(w => w.InvoiceItemId).Select(g => new { Item = g.Key, Sum = g.Sum(w => w.Amount) })
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         return rows.ToDictionary(r => r.Item, r => r.Sum);
     }
@@ -260,7 +270,8 @@ internal sealed class Allocator(BillingDbContext db, RequestContext context, Led
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var sums = allocated.ToDictionary(a => a.Item, a => a.Sum);
         var credited = await CreditedByItemAsync(ids, cancellationToken).ConfigureAwait(false);
-        return items.GroupBy(i => i.TermId).ToDictionary(g => g.Key, g => g.Sum(i => i.Amount - sums.GetValueOrDefault(i.InvoiceItemId) - credited.GetValueOrDefault(i.InvoiceItemId)));
+        var writtenOff = await WrittenOffByItemAsync(ids, cancellationToken).ConfigureAwait(false);
+        return items.GroupBy(i => i.TermId).ToDictionary(g => g.Key, g => g.Sum(i => i.Amount - sums.GetValueOrDefault(i.InvoiceItemId) - credited.GetValueOrDefault(i.InvoiceItemId) - writtenOff.GetValueOrDefault(i.InvoiceItemId)));
     }
 
     /// <summary>

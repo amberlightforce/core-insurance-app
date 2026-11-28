@@ -281,6 +281,9 @@ internal sealed class BindJobHandler(
                 .With("transactionId", transactionId.Value.ToString()).With("jobId", job.JobId.Value.ToString())
                 .With("quoteId", version.QuoteId.Value.ToString())));
 
+        // BO-POL-07: the bind of a rewrite submission links the cancelled term to the new one.
+        await Reinstatement.RewriteJobs.PublishRewrittenAsync(db, events, job, termId, policyNumber, now, cancellationToken).ConfigureAwait(false);
+
         job.BoundTransactionId = transactionId;
         job.RecordVersion++;
         var saved = await SaveAsync(true, cancellationToken).ConfigureAwait(false);

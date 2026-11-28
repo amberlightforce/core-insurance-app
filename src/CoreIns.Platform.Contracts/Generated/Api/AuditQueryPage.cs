@@ -4,7 +4,7 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>Page of plt.Audit.query results (cursor pagination, contract §3.5.5)</summary>
+/// <summary>Page of plt.Audit.query results (cursor pagination, newest first, contract §3.5.5)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AuditQueryPage
 {

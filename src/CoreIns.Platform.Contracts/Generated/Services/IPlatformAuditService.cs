@@ -43,7 +43,14 @@ public interface IPlatformAuditService
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.AuditQueryPage> QueryAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="entityType">Only records about this object type (e.g. Approval, Claim)</param>
+    /// <param name="entityId">Only records about this object id</param>
+    /// <param name="actor">Only records by this actor id</param>
+    /// <param name="action">Only records of this operation (e.g. plt.Approval.decide)</param>
+    /// <param name="from">Occurred at or after (UTC instant)</param>
+    /// <param name="to">Occurred before (UTC instant); a range wider than 366 days is refused (PLT-ERR-RANGE-TOO-LARGE)</param>
+    /// <param name="correlationId">Only records of this correlation id</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.AuditQueryPage> QueryAsync(string? cursor = null, int? limit = null, string? entityType = null, string? entityId = null, string? actor = null, string? action = null, string? from = null, string? to = null, string? correlationId = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Search, export, verify</summary>
     /// <remarks>
