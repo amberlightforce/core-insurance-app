@@ -68,6 +68,12 @@
         "ri.CashCall.recordReceipt": [ "Staff.ReinsuranceAccountant" ],
         "ri.CashCall.cancel": [ "Staff.ReinsuranceManager" ],
         "ri.CashCall.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        // Manual settlement (BO-RI-16): the accountant proposes, releases or records; the manager approves (maker-checker plus the RI.SETTLEMENT amount authority).
+        "ri.Settlement.propose": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
+        "ri.Settlement.approve": [ "Staff.ReinsuranceManager" ],
+        "ri.Settlement.release": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
+        "ri.Settlement.recordManual": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
+        "ri.Settlement.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         // BO-RI-08: restatement, occurrences, adjustments and the aggregate tracker. The adjustment's real gate is the RI.RECOVERY_ADJUSTMENT authority.
         "ri.Recovery.recalculate": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Occurrence.link": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
@@ -115,6 +121,11 @@
         {
           "Id": "ri-accountant-recovery-adjust-illustrative", "Role": "Staff.ReinsuranceAccountant", "Type": "RI.RECOVERY_ADJUSTMENT", "Illustrative": true,
           "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ]
+        },
+        // BO-RI-16 (ILLUSTRATIVE, ignored in Production): approving a manual settlement by amount (EUR). The manager may approve up to EUR 2,000,000.
+        {
+          "Id": "ri-manager-settlement-illustrative", "Role": "Staff.ReinsuranceManager", "Type": "RI.SETTLEMENT", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "2000000.00", "Currency": "EUR" } ]
         }
       ]
     }

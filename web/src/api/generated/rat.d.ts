@@ -2520,7 +2520,12 @@ export interface operations {
     };
     "rat.Worksheet.explain": {
         parameters: {
-            query?: never;
+            query: {
+                /** @description Contract addition (BO-RAT-02): the worksheet to explain (PRD input "worksheet id") */
+                worksheetId: string;
+                /** @description Contract addition (BO-RAT-02): el or en (PRD input "language"); default en */
+                language?: string;
+            };
             header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key

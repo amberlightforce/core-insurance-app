@@ -1799,8 +1799,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bank reconciliation and invariant results
-         * @description Bank reconciliation and invariant results
+         * Import a bank statement and reconcile it
+         * @description Imports a camt.053 or CSV statement of an own bank account (BO-BIL-11), matches each credit by reference and amount against the
+         *     receipts and open invoices, parks what it cannot identify in suspense, matches each debit against a disbursement, and reports the
+         *     breaks. Importing the same statement again returns the first import unchanged.
          *
          *     PRD inputs: account, date
          *     PRD outputs: status, breaks
@@ -1822,8 +1824,9 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bank reconciliation and invariant results
-         * @description Bank reconciliation and invariant results
+         * Sub-ledger invariant results
+         * @description Runs the sub-ledger invariants INV-01..INV-15 as of a date (BO-BIL-11), optionally for one billing account, and lists the breaks.
+         *     Read-only.
          *
          *     PRD inputs: account, date
          *     PRD outputs: status, breaks
@@ -2110,86 +2113,75 @@ export interface components {
             /** @description LA-12 refunds payable / customer credit */
             credit: components["schemas"]["Money"];
         };
-        /** @description bil.BillingAccount.search result. PRD outputs: "account, balances by state" */
+        /** @description A billing account row of the search result (no terms; BO-BIL-01) */
+        BillingAccountSummary: {
+            billingAccountId: components["schemas"]["Uuid"];
+            accountNumber: components["schemas"]["BusinessNumber"];
+            payerPartyId: components["schemas"]["Uuid"];
+            currency: components["schemas"]["CurrencyCode"];
+            /** @enum {string} */
+            status: "ACTIVE" | "SUSPENDED" | "CLOSING" | "CLOSED";
+            createdAt: components["schemas"]["Instant"];
+            recordVersion: number;
+        };
+        /** @description bil.BillingAccount.search item (BO-BIL-01): the account and what is still open on it */
         BillingAccountSearchItem: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "balances by state" */
-            balancesByState?: components["schemas"]["Unspecified"];
+            account: components["schemas"]["BillingAccountSummary"];
+            /** @description Net billed receivable (LA-02) still open on the account; negative is customer credit */
+            openBalance: components["schemas"]["Money"];
         };
         /** @description Page of bil.BillingAccount.search results (cursor pagination, contract §3.5.5) */
         BillingAccountSearchPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["BillingAccountSearchItem"][];
         };
-        /** @description bil.BillingAccount.update request. PRD inputs: "payer, currency, preferences / criteria" */
+        /** @description bil.BillingAccount.update request (BO-BIL-01). Suspends or resumes an account; payments are refused while it is suspended. Resuming needs no other ACTIVE account of the same payer and currency. */
         BillingAccountUpdateRequest: {
-            /** @description PRD: "payer" */
-            payer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
-            /** @description PRD: "preferences" */
-            preferences?: components["schemas"]["Unspecified"];
-            /** @description PRD: "criteria" */
-            criteria?: components["schemas"]["Unspecified"];
+            /** @enum {string} */
+            status: "ACTIVE" | "SUSPENDED";
+            /** @description Why; kept in the audit record */
+            reason?: string;
         };
-        /** @description bil.BillingAccount.update result. PRD outputs: "account, balances by state" */
+        /** @description bil.BillingAccount.update result */
         BillingAccountUpdateResponse: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "balances by state" */
-            balancesByState?: components["schemas"]["Unspecified"];
+            account: components["schemas"]["BillingAccountView"];
+            balancesByState: components["schemas"]["BillingAccountBalances"];
         };
-        /** @description bil.BillingAccount.close request. PRD inputs: "payer, currency, preferences / criteria" */
+        /** @description bil.BillingAccount.close request (BO-BIL-01). Refused (BIL-ERR-BALANCE-NOT-ZERO) while the account has an open invoice or a non-zero balance, and while a draft or active mandate is on it. */
         BillingAccountCloseRequest: {
-            /** @description PRD: "payer" */
-            payer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
-            /** @description PRD: "preferences" */
-            preferences?: components["schemas"]["Unspecified"];
-            /** @description PRD: "criteria" */
-            criteria?: components["schemas"]["Unspecified"];
+            billingAccountId: components["schemas"]["Uuid"];
+            /** @description Why; kept in the audit record */
+            reason?: string;
         };
-        /** @description bil.BillingAccount.close result. PRD outputs: "account, balances by state" */
+        /** @description bil.BillingAccount.close result */
         BillingAccountCloseResponse: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "balances by state" */
-            balancesByState?: components["schemas"]["Unspecified"];
+            account: components["schemas"]["BillingAccountView"];
+            balancesByState: components["schemas"]["BillingAccountBalances"];
         };
-        /** @description bil.BillingAccount.reopen request. PRD inputs: "payer, currency, preferences / criteria" */
+        /** @description bil.BillingAccount.reopen request (BO-BIL-01). CLOSED to ACTIVE; refused when the payer already has another ACTIVE account in the currency. */
         BillingAccountReopenRequest: {
-            /** @description PRD: "payer" */
-            payer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "currency" */
-            currency?: components["schemas"]["CurrencyCode"];
-            /** @description PRD: "preferences" */
-            preferences?: components["schemas"]["Unspecified"];
-            /** @description PRD: "criteria" */
-            criteria?: components["schemas"]["Unspecified"];
+            billingAccountId: components["schemas"]["Uuid"];
+            /** @description Why; kept in the audit record */
+            reason?: string;
         };
-        /** @description bil.BillingAccount.reopen result. PRD outputs: "account, balances by state" */
+        /** @description bil.BillingAccount.reopen result */
         BillingAccountReopenResponse: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "balances by state" */
-            balancesByState?: components["schemas"]["Unspecified"];
+            account: components["schemas"]["BillingAccountView"];
+            balancesByState: components["schemas"]["BillingAccountBalances"];
         };
-        /** @description bil.BillingAccount.changePayer request. PRD inputs: "new payer, effective date, reason" */
+        /** @description bil.BillingAccount.changePayer request (BO-BIL-01). The new payer must exist in PTY and be ACTIVE or PROSPECT; the ledger is not touched. Refused while a draft or active mandate of the old payer is on the account. */
         BillingAccountChangePayerRequest: {
-            /** @description PRD: "new payer" */
-            newPayer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effective date" */
+            billingAccountId: components["schemas"]["Uuid"];
+            newPayerPartyId: components["schemas"]["Uuid"];
+            /** @description Not after today (a future-dated change is not supported yet); defaults to today */
             effectiveDate?: components["schemas"]["LocalDate"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            /** @description Why; kept in the audit record */
+            reason: string;
         };
-        /** @description bil.BillingAccount.changePayer result. PRD outputs: "account, approval ref" */
+        /** @description bil.BillingAccount.changePayer result */
         BillingAccountChangePayerResponse: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "approval ref" */
-            approvalRef?: components["schemas"]["Unspecified"];
+            account: components["schemas"]["BillingAccountView"];
+            balancesByState: components["schemas"]["BillingAccountBalances"];
+            previousPayerPartyId?: components["schemas"]["Uuid"];
         };
         /** @description bil.BillingAccount.attachTerm request. PRD inputs: "term ref, target account, billed-items choice" */
         BillingAccountAttachTermRequest: {
@@ -2483,44 +2475,61 @@ export interface components {
             /** @description PRD: "fiscal and delivery status" */
             deliveryStatus?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.PaymentInstrument.add request. PRD inputs: "IBAN and holder, or card token" */
+        /** @description Typed from REQ-BIL-103 (BO-BIL-06a). PRD inputs: "IBAN and holder, or card token". The IBAN is P2: stored field-encrypted with a blind index, never returned, logged or published. A card token is not supported yet. */
         PaymentInstrumentAddRequest: {
-            /** @description PRD: "IBAN and holder" */
-            iban?: components["schemas"]["Unspecified"];
-            /** @description PRD: "IBAN and holder" */
-            holder?: components["schemas"]["Unspecified"];
-            /** @description PRD: "or card token" */
-            orCardToken?: components["schemas"]["Unspecified"];
+            /** @description Payer party (PTY) */
+            partyId: components["schemas"]["Uuid"];
+            /** @description IBAN, electronic or print format; checked ISO 13616 */
+            iban?: string;
+            /** @description Account holder name */
+            holder: string;
+            /** @description Card token (not supported yet; refused) */
+            orCardToken?: string;
         };
-        /** @description bil.PaymentInstrument.add result. PRD outputs: "instrument (masked), VoP result" */
+        /** @description bil.PaymentInstrument.add result */
         PaymentInstrumentAddResponse: {
-            /** @description PRD: "instrument (masked)" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "VoP result" */
-            vopResult?: components["schemas"]["Unspecified"];
+            instrument: components["schemas"]["PaymentInstrumentView"];
+            /**
+             * @description Verification of payee outcome recorded when the instrument was added
+             * @enum {string}
+             */
+            vopResult?: "MATCH" | "CLOSE_MATCH" | "NO_MATCH" | "NOT_AVAILABLE";
         };
-        /** @description bil.PaymentInstrument.remove request. PRD inputs: "IBAN and holder, or card token" */
+        /** @description A payer instrument as shown to staff; the IBAN appears masked only (REQ-BIL-345) */
+        PaymentInstrumentView: {
+            instrumentId: components["schemas"]["Uuid"];
+            partyId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            kind: "BANK_ACCOUNT";
+            /** @description IBAN masked except the last four characters */
+            maskedIban: string;
+            holder: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "REMOVED";
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        /** @description bil.PaymentInstrument.remove request (BO-BIL-06a). An instrument used by a draft or active mandate cannot be removed. */
         PaymentInstrumentRemoveRequest: {
-            /** @description PRD: "IBAN and holder" */
-            iban?: components["schemas"]["Unspecified"];
-            /** @description PRD: "IBAN and holder" */
-            holder?: components["schemas"]["Unspecified"];
-            /** @description PRD: "or card token" */
-            orCardToken?: components["schemas"]["Unspecified"];
+            instrumentId: components["schemas"]["Uuid"];
         };
-        /** @description bil.PaymentInstrument.remove result. PRD outputs: "instrument (masked), VoP result" */
+        /** @description bil.PaymentInstrument.remove result */
         PaymentInstrumentRemoveResponse: {
-            /** @description PRD: "instrument (masked)" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "VoP result" */
-            vopResult?: components["schemas"]["Unspecified"];
+            instrument: components["schemas"]["PaymentInstrumentView"];
+            /**
+             * @description Verification of payee outcome recorded when the instrument was added
+             * @enum {string}
+             */
+            vopResult?: "MATCH" | "CLOSE_MATCH" | "NO_MATCH" | "NOT_AVAILABLE";
         };
-        /** @description bil.PaymentInstrument.list result. PRD outputs: "instrument (masked), VoP result" */
+        /** @description bil.PaymentInstrument.list item */
         PaymentInstrumentListItem: {
-            /** @description PRD: "instrument (masked)" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "VoP result" */
-            vopResult?: components["schemas"]["Unspecified"];
+            instrument: components["schemas"]["PaymentInstrumentView"];
+            /**
+             * @description Verification of payee outcome recorded when the instrument was added
+             * @enum {string}
+             */
+            vopResult?: "MATCH" | "CLOSE_MATCH" | "NO_MATCH" | "NOT_AVAILABLE";
         };
         /** @description Page of bil.PaymentInstrument.list results (cursor pagination, contract §3.5.5) */
         PaymentInstrumentListPage: components["schemas"]["PageEnvelope"] & {
@@ -2620,66 +2629,73 @@ export interface components {
         PayeeAccountListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["PayeeAccountGetResponse"][];
         };
-        /** @description bil.Mandate.create request. PRD inputs: "account, instrument, signature evidence" */
+        /** @description bil.Mandate.create request (BO-BIL-06a). Creates a DRAFT mandate with a generated unique reference; it collects nothing until signed. */
         MandateCreateRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "instrument" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "signature evidence" */
-            signatureEvidence?: components["schemas"]["Unspecified"];
+            billingAccountId: components["schemas"]["Uuid"];
+            /** @description An ACTIVE instrument of the account's payer */
+            instrumentId: components["schemas"]["Uuid"];
         };
-        /** @description bil.Mandate.create result. PRD outputs: "mandate" */
+        /** @description bil.Mandate.create result */
         MandateCreateResponse: {
-            /** @description PRD: "mandate" */
-            mandate?: components["schemas"]["LocalDate"];
+            mandate: components["schemas"]["MandateView"];
         };
-        /** @description bil.Mandate.sign request. PRD inputs: "account, instrument, signature evidence" */
+        /** @description A SEPA mandate (REQ-BIL-106..REQ-BIL-108). The IBAN appears masked only. */
+        MandateView: {
+            mandateId: components["schemas"]["Uuid"];
+            billingAccountId: components["schemas"]["Uuid"];
+            payerPartyId: components["schemas"]["Uuid"];
+            /** @description Absent for a migrated mandate (only its masked IBAN was carried) */
+            instrumentId?: components["schemas"]["Uuid"];
+            /** @description SEPA unique mandate reference (UMR) */
+            mandateReference: string;
+            /** @enum {string} */
+            scheme: "SEPA_CORE";
+            /** @enum {string} */
+            sequenceType: "FRST" | "RCUR" | "OOFF" | "FNAL";
+            /** @enum {string} */
+            status: "DRAFT" | "ACTIVE" | "CANCELLED";
+            maskedIban?: string;
+            signatureDate?: components["schemas"]["LocalDate"];
+            /** @description Reference of the consent evidence captured at signing */
+            signatureEvidenceId?: string;
+            amendmentCount: number;
+            /** @enum {string} */
+            origin: "NATIVE" | "MIGRATION";
+        };
+        /** @description bil.Mandate.sign request (BO-BIL-06a). Needs a consent evidence id. */
         MandateSignRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "instrument" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "signature evidence" */
-            signatureEvidence?: components["schemas"]["Unspecified"];
+            mandateId: components["schemas"]["Uuid"];
+            /** @description Reference of the captured consent evidence (signature, e-mandate log or document id) */
+            signatureEvidenceId: string;
+            /** @description Date the payer signed; defaults to today, never in the future */
+            signatureDate?: components["schemas"]["LocalDate"];
         };
-        /** @description bil.Mandate.sign result. PRD outputs: "mandate" */
+        /** @description bil.Mandate.sign result */
         MandateSignResponse: {
-            /** @description PRD: "mandate" */
-            mandate?: components["schemas"]["LocalDate"];
+            mandate: components["schemas"]["MandateView"];
         };
-        /** @description bil.Mandate.amend request. PRD inputs: "account, instrument, signature evidence" */
+        /** @description bil.Mandate.amend request (BO-BIL-06a). Moves an ACTIVE mandate to another instrument of the same payer with fresh consent evidence; the sequence type returns to FRST. */
         MandateAmendRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "instrument" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "signature evidence" */
-            signatureEvidence?: components["schemas"]["Unspecified"];
+            mandateId: components["schemas"]["Uuid"];
+            instrumentId: components["schemas"]["Uuid"];
+            signatureEvidenceId: string;
         };
-        /** @description bil.Mandate.amend result. PRD outputs: "mandate" */
+        /** @description bil.Mandate.amend result */
         MandateAmendResponse: {
-            /** @description PRD: "mandate" */
-            mandate?: components["schemas"]["LocalDate"];
+            mandate: components["schemas"]["MandateView"];
         };
-        /** @description bil.Mandate.cancel request. PRD inputs: "account, instrument, signature evidence" */
+        /** @description bil.Mandate.cancel request (BO-BIL-06a). A DRAFT or ACTIVE mandate is cancelled; a cancelled mandate is final. */
         MandateCancelRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "instrument" */
-            instrument?: components["schemas"]["Unspecified"];
-            /** @description PRD: "signature evidence" */
-            signatureEvidence?: components["schemas"]["Unspecified"];
+            mandateId: components["schemas"]["Uuid"];
+            reason?: string;
         };
-        /** @description bil.Mandate.cancel result. PRD outputs: "mandate" */
+        /** @description bil.Mandate.cancel result */
         MandateCancelResponse: {
-            /** @description PRD: "mandate" */
-            mandate?: components["schemas"]["LocalDate"];
+            mandate: components["schemas"]["MandateView"];
         };
-        /** @description bil.Mandate.get result. PRD outputs: "mandate" */
+        /** @description bil.Mandate.get result */
         MandateGetResponse: {
-            /** @description PRD: "mandate" */
-            mandate?: components["schemas"]["LocalDate"];
+            mandate: components["schemas"]["MandateView"];
         };
         /** @description Typed from REQ-BIL-004, REQ-BIL-126, REQ-BIL-127. PRD inputs: "account, amount, method". SL-BIL records money already received by bank transfer or at a cashier; card and link payments need the acquirer (OI-BIL-07). */
         PaymentTakeRequest: {
@@ -3620,33 +3636,103 @@ export interface components {
             /** @description PRD: "balances" */
             balances?: components["schemas"]["Unspecified"];
         };
-        /** @description bil.Reconciliation.bank request. PRD inputs: "account, date" */
+        /** @description bil.Reconciliation.bank request (BO-BIL-11): one statement of an own bank account as camt.053 XML or as CSV text with the header "bookingDate,valueDate,amount,currency,reference,endToEndId" (amount signed, negative is a debit; valueDate and endToEndId may be empty). The statement is kept in the bank-file store; at most 5000 lines. */
         ReconciliationBankRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "date" */
-            date?: components["schemas"]["LocalDate"];
+            /** @description The own bank account the statement belongs to, as an IBAN. A camt.053 file must name the same account. */
+            bankAccount: string;
+            /** @enum {string} */
+            format: "CAMT053" | "CSV";
+            /** @description The statement text. */
+            content: string;
         };
-        /** @description bil.Reconciliation.bank result. PRD outputs: "status, breaks" */
+        /** @description bil.Reconciliation.bank result: the imported statement with its lines and the breaks that need a person. */
         ReconciliationBankResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
-            /** @description PRD: "breaks" */
-            breaks?: components["schemas"]["Unspecified"];
+            /**
+             * @description MATCHED when every line is matched and the balances agree; BREAKS otherwise.
+             * @enum {string}
+             */
+            status: "MATCHED" | "BREAKS";
+            /** @description True when the statement was imported before; the result is the first import, nothing was posted again. */
+            duplicate: boolean;
+            statement: components["schemas"]["BankStatementView"];
+            lines: components["schemas"]["BankStatementLineView"][];
+            breaks: components["schemas"]["BankReconciliationBreak"][];
         };
-        /** @description bil.Reconciliation.invariants request. PRD inputs: "account, date" */
+        /** @description An imported bank statement (BO-BIL-11). The own account is masked; the file itself is in the bank-file store. */
+        BankStatementView: {
+            statementId: components["schemas"]["Uuid"];
+            maskedBankAccount: string;
+            statementRef: string;
+            /** @enum {string} */
+            format: "CAMT053" | "CSV";
+            currency: string;
+            fromDate?: components["schemas"]["LocalDate"];
+            toDate?: components["schemas"]["LocalDate"];
+            openingBalance?: components["schemas"]["Money"];
+            closingBalance?: components["schemas"]["Money"];
+            lineCount: number;
+            matchedCount: number;
+            partialCount: number;
+            suspenseCount: number;
+            unmatchedCount: number;
+            fileRef?: string;
+            importedBy?: string;
+            importedAt?: components["schemas"]["Instant"];
+        };
+        BankStatementLineView: {
+            lineNo: number;
+            /** @enum {string} */
+            direction: "CREDIT" | "DEBIT";
+            bookingDate: components["schemas"]["LocalDate"];
+            valueDate?: components["schemas"]["LocalDate"];
+            amount: components["schemas"]["Money"];
+            reference?: string;
+            endToEndId?: string;
+            /** @enum {string} */
+            status: "MATCHED" | "PARTIAL" | "SUSPENSE" | "UNMATCHED";
+            matchedAmount?: components["schemas"]["Money"];
+            receiptId?: components["schemas"]["Uuid"];
+            disbursementId?: components["schemas"]["Uuid"];
+            suspenseItemId?: components["schemas"]["Uuid"];
+            note?: string;
+        };
+        /** @description A statement line or a balance that needs a person. */
+        BankReconciliationBreak: {
+            /** @enum {string} */
+            kind: "PARTIAL_MATCH" | "IN_SUSPENSE" | "UNMATCHED_CREDIT" | "UNMATCHED_DEBIT" | "BALANCE_MISMATCH";
+            lineNo?: number;
+            amount?: components["schemas"]["Money"];
+            difference?: components["schemas"]["Money"];
+            reference?: string;
+            receiptId?: components["schemas"]["Uuid"];
+            suspenseItemId?: components["schemas"]["Uuid"];
+            note?: string;
+        };
+        /** @description bil.Reconciliation.invariants request (BO-BIL-11): all entries with an accounting date up to the date; optionally one account. */
         ReconciliationInvariantsRequest: {
-            /** @description PRD: "account" */
-            account?: components["schemas"]["Unspecified"];
-            /** @description PRD: "date" */
+            /** @description Restrict the checks that have a billing account to this one. */
+            account?: components["schemas"]["Uuid"];
+            /** @description As-of accounting date; today when omitted. */
             date?: components["schemas"]["LocalDate"];
         };
-        /** @description bil.Reconciliation.invariants result. PRD outputs: "status, breaks" */
+        /** @description bil.Reconciliation.invariants result: one result per invariant. */
         ReconciliationInvariantsResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
-            /** @description PRD: "breaks" */
-            breaks?: components["schemas"]["Unspecified"];
+            /** @enum {string} */
+            status: "PASS" | "FAIL";
+            asOf: components["schemas"]["LocalDate"];
+            results: components["schemas"]["InvariantResult"][];
+            /** @description Total number of broken rows over all invariants. */
+            breaks: number;
+        };
+        InvariantResult: {
+            /** @description INV-01 .. INV-15. */
+            invariantId: string;
+            name: string;
+            /** @enum {string} */
+            status: "PASS" | "FAIL";
+            breakCount: number;
+            /** @description Keys (ids) of the first broken rows. */
+            samples: string[];
         };
         /** @description bil.Reconciliation.fin request. PRD inputs: "legal entity, accounting date, optional sub-ledger account and event type" */
         ReconciliationFinRequest: {
@@ -4130,6 +4216,13 @@ export interface operations {
     "bil.BillingAccount.search": {
         parameters: {
             query?: {
+                /** @description Only accounts of this payer party */
+                payerPartyId?: string;
+                /** @description Only accounts in this state */
+                status?: "ACTIVE" | "SUSPENDED" | "CLOSING" | "CLOSED";
+                currency?: string;
+                /** @description Exact billing account number */
+                accountNumber?: string;
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
@@ -4953,7 +5046,9 @@ export interface operations {
     };
     "bil.PaymentInstrument.list": {
         parameters: {
-            query?: {
+            query: {
+                /** @description Party whose instruments are listed */
+                partyId: string;
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
@@ -7625,7 +7720,13 @@ export interface operations {
     "bil.Reconciliation.bank": {
         parameters: {
             query?: never;
-            header?: {
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
                  *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
@@ -7655,6 +7756,8 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };

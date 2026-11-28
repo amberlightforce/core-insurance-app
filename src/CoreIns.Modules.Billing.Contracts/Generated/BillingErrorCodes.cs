@@ -100,7 +100,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 56 operation(s): bil.AccountCurrent.dispute, bil.Allocation.allocate, bil.Allocation.reallocate, bil.Allocation.unallocate, bil.BillingAccount.attachTerm, bil.BillingAccount.changePayer, bil.BillingAccount.close, bil.BillingAccount.create, bil.BillingAccount.moveTerm, bil.BillingAccount.reopen, bil.BillingAccount.update, bil.Commission.dispute, ….</para>
+    /// <para>Declared by 57 operation(s): bil.AccountCurrent.dispute, bil.Allocation.allocate, bil.Allocation.reallocate, bil.Allocation.unallocate, bil.BillingAccount.attachTerm, bil.BillingAccount.changePayer, bil.BillingAccount.close, bil.BillingAccount.create, bil.BillingAccount.moveTerm, bil.BillingAccount.reopen, bil.BillingAccount.update, bil.Commission.dispute, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "BIL-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -142,7 +142,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-METHOD-UNAVAILABLE (HTTP 503).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): bil.DisbursementBatch.approveRelease, bil.DisbursementBatch.prepare, bil.DownPayment.initiate, bil.DownPayment.status, bil.Payment.take.</para>
+    /// <para>Declared by 6 operation(s): bil.DisbursementBatch.approveRelease, bil.DisbursementBatch.prepare, bil.DownPayment.initiate, bil.DownPayment.status, bil.Payment.take, bil.Reconciliation.bank.</para>
     /// </remarks>
     public const string MethodUnavailable = "BIL-ERR-METHOD-UNAVAILABLE";
 
@@ -296,6 +296,18 @@ public static class BillingErrorCodes
     /// </remarks>
     public const string Stale = "BIL-ERR-STALE";
 
+    /// <summary>BIL-ERR-STATEMENT-CONFLICT (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): bil.Reconciliation.bank.</para>
+    /// </remarks>
+    public const string StatementConflict = "BIL-ERR-STATEMENT-CONFLICT";
+
+    /// <summary>BIL-ERR-STATEMENT-INVALID (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): bil.Reconciliation.bank.</para>
+    /// </remarks>
+    public const string StatementInvalid = "BIL-ERR-STATEMENT-INVALID";
+
     /// <summary>BIL-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 5 operation(s): bil.Allocation.allocate, bil.Allocation.reallocate, bil.Allocation.unallocate, bil.Payment.take, bil.Receivable.register.</para>
@@ -318,7 +330,7 @@ public static class BillingErrorCodes
     public const string Prefix = "BIL-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AllocationRefunded, AlreadyReversed, AmountMismatch, ApprovalMismatch, ApprovalRequired, BalanceNotZero, Charset, CoolingOff, Currency, DayNotClosed, Duplicate, Entity, FiscalTreatmentOpen, HeldItems, IbanInvalid, IdempotencyMismatch, LegalHold, LevyUnsettled, LinesMismatch, LiveActivity, MandateState, MethodNotAllowed, MethodUnavailable, NoCollectAuthority, NoCredit, NotAllocated, NotEligible, NotFound, NotPermitted, NotStoppable, NothingPayable, NoticeClockRunning, OpenObligation, OverAllocation, PayeeAccount, PayeeBlocked, PayeeUnverified, PayerRole, PeriodLocked, Plan, RedressRoute, RefundBelowMinimum, RefundOpen, RefundState, ScreeningUnavailable, Sod, Source, Stale, Validation, VopHold, VopUnavailable];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AllocationRefunded, AlreadyReversed, AmountMismatch, ApprovalMismatch, ApprovalRequired, BalanceNotZero, Charset, CoolingOff, Currency, DayNotClosed, Duplicate, Entity, FiscalTreatmentOpen, HeldItems, IbanInvalid, IdempotencyMismatch, LegalHold, LevyUnsettled, LinesMismatch, LiveActivity, MandateState, MethodNotAllowed, MethodUnavailable, NoCollectAuthority, NoCredit, NotAllocated, NotEligible, NotFound, NotPermitted, NotStoppable, NothingPayable, NoticeClockRunning, OpenObligation, OverAllocation, PayeeAccount, PayeeBlocked, PayeeUnverified, PayerRole, PeriodLocked, Plan, RedressRoute, RefundBelowMinimum, RefundOpen, RefundState, ScreeningUnavailable, Sod, Source, Stale, StatementConflict, StatementInvalid, Validation, VopHold, VopUnavailable];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -371,6 +383,8 @@ public static class BillingErrorCodes
         [Sod] = 403,
         [Source] = 422,
         [Stale] = 409,
+        [StatementConflict] = 409,
+        [StatementInvalid] = 422,
         [Validation] = 422,
         [VopHold] = 409,
         [VopUnavailable] = 503,

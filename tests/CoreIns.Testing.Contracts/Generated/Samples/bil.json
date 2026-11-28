@@ -1297,6 +1297,68 @@
       "reversesAllocationId": "01923982-da8e-77a8-86e7-105b78a3d479",
       "recordedAt": "2026-10-07T09:00:00Z"
     },
+    "BankReconciliationBreak": {
+      "kind": "PARTIAL_MATCH",
+      "lineNo": 1,
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "difference": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "reference": "sample",
+      "receiptId": "0192a725-83a7-7805-8f40-c21759ffb542",
+      "suspenseItemId": "0192c1b2-090a-73cf-8bb5-175d79518ce3",
+      "note": "sample"
+    },
+    "BankStatementLineView": {
+      "lineNo": 1,
+      "direction": "CREDIT",
+      "bookingDate": "2026-10-07",
+      "valueDate": "2026-10-07",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "reference": "sample",
+      "endToEndId": "sample",
+      "status": "MATCHED",
+      "matchedAmount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "receiptId": "01927aba-d9f1-7885-8a11-b7df5e31b5d5",
+      "disbursementId": "01922896-5b61-7418-88fe-f6c17498cc5a",
+      "suspenseItemId": "0192bd75-b83f-75ea-8d95-1de701e4a210",
+      "note": "sample"
+    },
+    "BankStatementView": {
+      "statementId": "0192a356-77ff-799b-83bd-4ba4423ae453",
+      "maskedBankAccount": "sample",
+      "statementRef": "sample",
+      "format": "CAMT053",
+      "currency": "sample",
+      "fromDate": "2026-10-07",
+      "toDate": "2026-10-07",
+      "openingBalance": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "closingBalance": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "lineCount": 1,
+      "matchedCount": 1,
+      "partialCount": 1,
+      "suspenseCount": 1,
+      "unmatchedCount": 1,
+      "fileRef": "sample",
+      "importedBy": "sample",
+      "importedAt": "2026-10-07T09:00:00Z"
+    },
     "BillingAccountAttachTermRequest": {
       "termRef": "unspecified",
       "targetAccount": "unspecified",
@@ -2332,6 +2394,15 @@
     "IntermediaryCollectionReportResponse": {
       "perLineOutcome": "unspecified"
     },
+    "InvariantResult": {
+      "invariantId": "sample",
+      "name": "sample",
+      "status": "PASS",
+      "breakCount": 1,
+      "samples": [
+        "sample"
+      ]
+    },
     "InvoiceDisputeRequest": {
       "ids": [
         "01922cd4-6f62-7272-8f85-d2cab0bc1d2a"
@@ -3328,12 +3399,79 @@
       "recordVersion": 1
     },
     "ReconciliationBankRequest": {
-      "account": "unspecified",
-      "date": "2026-10-07"
+      "bankAccount": "sample",
+      "format": "CAMT053",
+      "content": "sample"
     },
     "ReconciliationBankResponse": {
-      "status": "unspecified",
-      "breaks": "unspecified"
+      "status": "MATCHED",
+      "duplicate": true,
+      "statement": {
+        "statementId": "0192a7b4-8b31-7b93-849b-17ab66a9e0fb",
+        "maskedBankAccount": "sample",
+        "statementRef": "sample",
+        "format": "CAMT053",
+        "currency": "sample",
+        "fromDate": "2026-10-07",
+        "toDate": "2026-10-07",
+        "openingBalance": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "closingBalance": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "lineCount": 1,
+        "matchedCount": 1,
+        "partialCount": 1,
+        "suspenseCount": 1,
+        "unmatchedCount": 1,
+        "fileRef": "sample",
+        "importedBy": "sample",
+        "importedAt": "2026-10-07T09:00:00Z"
+      },
+      "lines": [
+        {
+          "lineNo": 1,
+          "direction": "CREDIT",
+          "bookingDate": "2026-10-07",
+          "valueDate": "2026-10-07",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "reference": "sample",
+          "endToEndId": "sample",
+          "status": "MATCHED",
+          "matchedAmount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "receiptId": "019274a4-73c2-714a-8717-4feb777e28d1",
+          "disbursementId": "01922dbc-7e60-7c66-8405-b1738a82f7ae",
+          "suspenseItemId": "01924b30-35b4-7435-83b0-49cdc4a79e09",
+          "note": "sample"
+        }
+      ],
+      "breaks": [
+        {
+          "kind": "PARTIAL_MATCH",
+          "lineNo": 1,
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "difference": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "reference": "sample",
+          "receiptId": "0192344b-b544-726e-869c-2f74f3f264f1",
+          "suspenseItemId": "0192de6a-aa21-72e0-8d93-9cf2419939b1",
+          "note": "sample"
+        }
+      ]
     },
     "ReconciliationFinRequest": {
       "legalEntity": "unspecified",
@@ -3346,12 +3484,24 @@
       "entryIdsOnRequest": "unspecified"
     },
     "ReconciliationInvariantsRequest": {
-      "account": "unspecified",
+      "account": "01922f9a-7d6c-72cb-815a-9914b26c8481",
       "date": "2026-10-07"
     },
     "ReconciliationInvariantsResponse": {
-      "status": "unspecified",
-      "breaks": "unspecified"
+      "status": "PASS",
+      "asOf": "2026-10-07",
+      "results": [
+        {
+          "invariantId": "sample",
+          "name": "sample",
+          "status": "PASS",
+          "breakCount": 1,
+          "samples": [
+            "sample"
+          ]
+        }
+      ],
+      "breaks": 1
     },
     "RefundBreakdownLine": {
       "policyId": "0192cbc7-5307-7100-890f-a223bc3b76ed",

@@ -92,12 +92,6 @@ public static class ReinsuranceErrorCodes
     /// </remarks>
     public const string ReversalBlocked = "RI-ERR-REVERSAL-BLOCKED";
 
-    /// <summary>RI-ERR-SANCTIONS-HOLD (HTTP 422).</summary>
-    /// <remarks>
-    /// <para>Declared by 4 operation(s): ri.Settlement.approve, ri.Settlement.propose, ri.Settlement.recordManual, ri.Settlement.release.</para>
-    /// </remarks>
-    public const string SanctionsHold = "RI-ERR-SANCTIONS-HOLD";
-
     /// <summary>RI-ERR-SCHEME-UNKNOWN (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 4 operation(s): ri.Accumulation.estimate, ri.Accumulation.footprint, ri.Accumulation.query, ri.Accumulation.zone.</para>
@@ -124,7 +118,7 @@ public static class ReinsuranceErrorCodes
 
     /// <summary>RI-ERR-SOD (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): ri.Contract.approve, ri.Contract.approveEndorsement, ri.Programme.approve, ri.Programme.return, ri.Programme.submit.</para>
+    /// <para>Declared by 9 operation(s): ri.Contract.approve, ri.Contract.approveEndorsement, ri.Programme.approve, ri.Programme.return, ri.Programme.submit, ri.Settlement.approve, ri.Settlement.propose, ri.Settlement.recordManual, ri.Settlement.release.</para>
     /// </remarks>
     public const string Sod = "RI-ERR-SOD";
 
@@ -150,7 +144,7 @@ public static class ReinsuranceErrorCodes
     public const string Prefix = "RI-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [ApprovalRequired, Authority, ContractClosed, Deadline, ExceptionsOpen, Format, IdempotencyMismatch, ImportValidation, NotFound, Overlap, PartyBlocked, ReconBreak, ReinsurerId, ReversalBlocked, SanctionsHold, SchemeUnknown, Security, SharesOver100, SignedLines, Sod, Stale, State, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [ApprovalRequired, Authority, ContractClosed, Deadline, ExceptionsOpen, Format, IdempotencyMismatch, ImportValidation, NotFound, Overlap, PartyBlocked, ReconBreak, ReinsurerId, ReversalBlocked, SchemeUnknown, Security, SharesOver100, SignedLines, Sod, Stale, State, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -169,7 +163,6 @@ public static class ReinsuranceErrorCodes
         [ReconBreak] = 422,
         [ReinsurerId] = 422,
         [ReversalBlocked] = 409,
-        [SanctionsHold] = 422,
         [SchemeUnknown] = 422,
         [Security] = 422,
         [SharesOver100] = 422,
