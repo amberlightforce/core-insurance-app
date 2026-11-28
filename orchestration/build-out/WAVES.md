@@ -8,11 +8,11 @@
 | 6 | MVP | 15 | 8 | WEB, PTY, PFC, RAT, UW, POL, RI, FIN, DOC, PLT, DAT, MIG | done |
 | 7 | MVP | 15 | 5 | PTY, PFC, UW, BIL, CLM, RI, FIN, DOC, CHN, DAT, MIG | done |
 | 8 | MVP | 15 | 4 | PTY, PFC, RAT, POL, BIL, CLM, RI, FIN, DAT, MIG, MKT | done |
-| 9 | MVP | 15 | 2 | PTY, RAT, POL, CLM, RI, FIN, DOC, CMP, CHN, PLT, MIG | in progress (12/15) |
-| 10 | MVP | 15 | 1 | PTY, UW, BIL, RI, CMP, CHN, WRK, DAT | in progress (12/15) |
-| 11 | MVP | 15 | 0 | PTY, PFC, RAT, POL, BIL, FIN, DOC, CHN, DAT, MIG, MKT | in progress (8/15) |
-| 12 | MVP | 15 | 0 | UW, BIL, CLM, RI, CMP, CHN, WRK | in progress (2/15) |
-| 13 | MVP | 15 | 0 | PTY, PFC, POL, BIL, CLM, FIN, PLT, MIG, MKT | not started |
+| 9 | MVP | 15 | 2 | PTY, RAT, POL, CLM, RI, FIN, DOC, CMP, CHN, PLT, MIG | done |
+| 10 | MVP | 15 | 1 | PTY, UW, BIL, RI, CMP, CHN, WRK, DAT | done |
+| 11 | MVP | 15 | 0 | PTY, PFC, RAT, POL, BIL, FIN, DOC, CHN, DAT, MIG, MKT | done |
+| 12 | MVP | 15 | 0 | UW, BIL, CLM, RI, CMP, CHN, WRK | in progress (14/15) |
+| 13 | MVP | 15 | 0 | PTY, PFC, POL, BIL, CLM, FIN, PLT, MIG, MKT | in progress (2/15) |
 | 14 | MVP | 15 | 0 | UW, BIL, RI, CHN, WRK | in progress (3/15) |
 | 15 | MVP | 15 | 0 | CLM, FIN, DOC, CMP, DAT | not started |
 | 16 | MVP | 15 | 0 | PTY, PFC, POL, FIN, PLT, MIG | not started |
