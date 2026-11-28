@@ -70,6 +70,27 @@
           "Staff.BillingManager",
           "Platform.Admin"
         ],
+        "wrk.Activity.update": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Activity.bulkReassign": [
+          "Staff.UnderwritingManager",
+          "Staff.BillingManager",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Team.summary": [
+          "Staff.UnderwritingManager",
+          "Staff.BillingManager",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
         "wrk.Note.create": [
           "Staff.Underwriter",
           "Staff.UnderwritingManager",

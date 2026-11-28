@@ -5,6 +5,8 @@ using CoreIns.Modules.Work.Contracts.Api;
 using CoreIns.Modules.Work.Domain;
 using CoreIns.Modules.Work.Persistence;
 using CoreIns.Platform.Context;
+using CoreIns.Platform.Time;
+using CoreIns.SharedKernel.Paging;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Json;
@@ -117,10 +119,9 @@ internal sealed record ActivityView
 }
 
 /// <summary>Reads activities for the staff inbox: my tasks, the team queue, one activity, and the gate query.</summary>
-internal sealed class ActivityReader(WorkDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, WorkCatalogue catalogue)
+internal sealed class ActivityReader(WorkDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, WorkCatalogue catalogue, IClock clock)
 {
     private const int DefaultLimit = 25;
-    private const int MaxLimit = 200;
 
     private static readonly string[] States = [ActivityRow.Open, ActivityRow.Completed, ActivityRow.Skipped, ActivityRow.Cancelled];
 
@@ -131,11 +132,14 @@ internal sealed class ActivityReader(WorkDbContext db, RequestContext context, I
     /// </summary>
     public async Task<Result<ActivityListPage>> ListAsync(Guid? id, string? cursor, int? limit, string? filters, CancellationToken cancellationToken)
     {
-        // TODO(hardening): keyset cursor; an offset cursor can skip or repeat rows while the inbox changes.
-        var skip = 0;
-        if (limit is < 1 or > MaxLimit || (cursor is not null && (!int.TryParse(cursor, NumberStyles.None, CultureInfo.InvariantCulture, out skip) || skip < 0)))
+        if (!KeysetPaging.TryTake(limit, DefaultLimit, out var take))
         {
-            return WorkErrors.Invalid($"cursor is malformed or limit is outside 1..{MaxLimit}.");
+            return WorkErrors.Invalid($"limit is outside 1..{KeysetPaging.MaxPageSize}.");
+        }
+
+        if (!TryDecodeCursor(cursor, out var after))
+        {
+            return WorkErrors.Invalid("cursor is malformed.");
         }
 
         var parsed = ParseFilters(filters);
@@ -151,14 +155,161 @@ internal sealed class ActivityReader(WorkDbContext db, RequestContext context, I
             return query.Error!;
         }
 
-        var take = limit ?? DefaultLimit;
-        var rows = await Ordered(query.Value).Skip(skip).Take(take + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var filtered = query.Value;
+        if (after is { } key)
+        {
+            filtered = AfterKey(filtered, key);
+        }
+
+        var rows = await Ordered(filtered).Take(take + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var (page, next) = KeysetPaging.Slice(rows, take, CursorOf);
         return new ActivityListPage
         {
-            Items = [.. rows.Take(take).Select(r => new ActivityListItem { Activity = ActivityView.From(r, actor).ToElement() })],
-            NextCursor = rows.Count > take ? (skip + take).ToString(CultureInfo.InvariantCulture) : null,
+            Items = [.. page.Select(r => new ActivityListItem { Activity = ActivityView.From(r, actor).ToElement() })],
+            NextCursor = next,
             Limit = take,
         };
+    }
+
+    /// <summary>
+    /// The ids a bulk operation selects with a filter (same grammar and visibility as the list): at most <paramref name="max"/> + 1, so the
+    /// caller can tell the selection is too large.
+    /// </summary>
+    public async Task<Result<List<Guid>>> SelectIdsAsync(string filters, int max, CancellationToken cancellationToken)
+    {
+        var parsed = ParseFilters(filters);
+        if (parsed.IsFailure)
+        {
+            return parsed.Error!;
+        }
+
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
+        var query = VisibleTo(actor, parsed.Value, null);
+        if (query.IsFailure)
+        {
+            return query.Error!;
+        }
+
+        return await Ordered(query.Value).Take(max + 1).Select(a => a.ActivityId).ToListAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// <c>wrk.Team.summary</c>: per visible queue the open, due today (UTC day), breached and unassigned counts, and the open and breached
+    /// counts per assignee. <paramref name="groups"/> limits the queues (comma list of codes); <paramref name="grouping"/> is <c>queue</c>.
+    /// TODO(hardening): "due today" in the legal entity's time zone; assignee display names from the directory.
+    /// </summary>
+    public async Task<Result<TeamSummaryResponse>> TeamSummaryAsync(string? groups, string? grouping, CancellationToken cancellationToken)
+    {
+        if (grouping is not null && grouping != "queue")
+        {
+            return WorkErrors.Invalid("grouping is 'queue'.");
+        }
+
+        var wanted = groups?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (wanted is { Length: > 50 } || (wanted?.Any(g => g.Length > 64) ?? false))
+        {
+            return WorkErrors.Invalid("groups is a comma list of at most 50 queue codes.");
+        }
+
+        var snapshot = await catalogue.GetAsync(cancellationToken).ConfigureAwait(false);
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
+        var queues = actor.VisibleQueues.Where(q => wanted is null || wanted.Contains(q, StringComparer.Ordinal)).ToList();
+        var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
+        var now = clock.Now.ToUtcDateTime();
+        var dayStart = Instant.FromUtcDateTime(now.Date);
+        var dayEnd = Instant.FromUtcDateTime(now.Date.AddTicks(TimeSpan.TicksPerDay));
+        var open = db.Activities.AsNoTracking().Where(a => a.LegalEntityId == legalEntity && a.State == ActivityRow.Open && queues.Contains(a.QueueCode));
+        var perQueue = await open.GroupBy(a => a.QueueCode).Select(g => new
+        {
+            Queue = g.Key,
+            Open = g.Count(),
+            DueToday = g.Count(a => a.TargetAt != null && a.TargetAt >= dayStart && a.TargetAt < dayEnd),
+            Breached = g.Count(a => a.BreachedAt != null),
+            Unassigned = g.Count(a => a.AssigneeType == ActivityRow.Queue),
+        }).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var perAssignee = await open.Where(a => a.AssigneeType == ActivityRow.User).GroupBy(a => new { a.QueueCode, a.AssigneeId })
+            .Select(g => new { g.Key.QueueCode, g.Key.AssigneeId, Open = g.Count(), Breached = g.Count(a => a.BreachedAt != null) })
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        var rows = queues.Select(code =>
+        {
+            var q = perQueue.FirstOrDefault(p => p.Queue == code);
+            return new
+            {
+                queueCode = code,
+                title = snapshot.Queue(code)?.Title ?? code,
+                open = q?.Open ?? 0,
+                dueToday = q?.DueToday ?? 0,
+                breached = q?.Breached ?? 0,
+                unassigned = q?.Unassigned ?? 0,
+                assignees = perAssignee.Where(p => p.QueueCode == code).OrderByDescending(p => p.Open).ThenBy(p => p.AssigneeId, StringComparer.Ordinal)
+                    .Select(p => new { userId = p.AssigneeId, open = p.Open, breached = p.Breached }).ToList(),
+            };
+        }).ToList();
+        var counts = new
+        {
+            asOf = clock.Now,
+            totals = new { open = rows.Sum(r => r.open), dueToday = rows.Sum(r => r.dueToday), breached = rows.Sum(r => r.breached), unassigned = rows.Sum(r => r.unassigned) },
+            queues = rows,
+        };
+        return new TeamSummaryResponse { Counts = JsonSerializer.SerializeToElement(counts, SharedKernelJson.Options) };
+    }
+
+    private static string CursorOf(ActivityRow row) => KeysetPaging.Encode(
+        KeysetPaging.Part(row.Priority == "HIGH" ? 0 : 1), row.TargetAt is null ? "1" : "0", KeysetPaging.Part(row.TargetAt?.ToUtcDateTime().Ticks ?? 0),
+        KeysetPaging.Part(row.CreatedAt.ToUtcDateTime().Ticks), KeysetPaging.Part(row.ActivityId));
+
+    /// <summary>The inbox sort key of the last row served: priority rank, "no target" flag, target, created, id.</summary>
+    private sealed record SortKey(int Rank, bool NoTarget, Instant? TargetAt, Instant CreatedAt, Guid Id);
+
+    private static bool TryDecodeCursor(string? cursor, out SortKey? key)
+    {
+        key = null;
+        if (!KeysetPaging.TryDecode(cursor, 5, out var parts))
+        {
+            return false;
+        }
+
+        if (parts is null)
+        {
+            return true;
+        }
+
+        if (!int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var rank) || rank > 1 || parts[1] is not ("0" or "1")
+            || !KeysetPaging.TryLong(parts[2], out var target) || !KeysetPaging.TryLong(parts[3], out var created) || !Guid.TryParse(parts[4], out var id)
+            || !InRange(created) || (parts[1] == "0" && !InRange(target)))
+        {
+            return false;
+        }
+
+        var noTarget = parts[1] == "1";
+        key = new SortKey(
+            rank, noTarget, noTarget ? null : Instant.FromUtcDateTime(new DateTime(target, DateTimeKind.Utc)),
+            Instant.FromUtcDateTime(new DateTime(created, DateTimeKind.Utc)), id);
+        return true;
+
+        static bool InRange(long ticks) => ticks is >= 0 and <= 3_155_378_975_999_999_999;
+    }
+
+    /// <summary>The rows strictly after the key in <see cref="Ordered"/> order.</summary>
+    private static IQueryable<ActivityRow> AfterKey(IQueryable<ActivityRow> query, SortKey key)
+    {
+        var rank = key.Rank;
+        var created = key.CreatedAt;
+        var id = key.Id;
+        if (key.NoTarget)
+        {
+            // Rows without a target sort last within a priority: only those can follow.
+            return query.Where(a => (a.Priority == "HIGH" ? 0 : 1) > rank
+                || ((a.Priority == "HIGH" ? 0 : 1) == rank && a.TargetAt == null && (a.CreatedAt > created || (a.CreatedAt == created && a.ActivityId.CompareTo(id) > 0))));
+        }
+
+        var target = key.TargetAt!.Value;
+        return query.Where(a => (a.Priority == "HIGH" ? 0 : 1) > rank
+            || ((a.Priority == "HIGH" ? 0 : 1) == rank
+                && (a.TargetAt == null
+                    || a.TargetAt > target
+                    || (a.TargetAt == target && (a.CreatedAt > created || (a.CreatedAt == created && a.ActivityId.CompareTo(id) > 0))))));
     }
 
     /// <summary>One activity the asker may see; anything else is not found.</summary>

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
@@ -231,6 +232,191 @@ public sealed class WorkActivityTests(PostgresFixture database) : IClassFixture<
         nothing.Outcomes.Single().RecordCount.ShouldBe(0);
     }
 
+    [Fact]
+    public async Task An_assignee_edits_title_priority_due_and_note_under_the_record_version_and_others_cannot()
+    {
+        var id = (await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities", CreateBody(Psr, "POL", Guid.NewGuid().ToString()), Admin)).Body.Text("activityId");
+        (await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/assign", new { id }, "Staff.Underwriter", "bob")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var version = int.Parse((await SendAsync(HttpMethod.Get, $"/api/wrk/v1/activities/{id}", null, "Staff.Underwriter", "bob")).Body.Text("items.0.activity.recordVersion"), CultureInfo.InvariantCulture);
+
+        // Another underwriter (not the assignee, not a manager) may not edit; an unknown field or an empty change is refused.
+        (await SendAsync(HttpMethod.Patch, $"/api/wrk/v1/activities/{id}", new { fields = new { title = "x" }, recordVersion = version }, "Staff.Underwriter", "carl")).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        (await SendAsync(HttpMethod.Patch, $"/api/wrk/v1/activities/{id}", new { fields = new { state = "COMPLETED" }, recordVersion = version }, "Staff.Underwriter", "bob")).Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        (await SendAsync(HttpMethod.Patch, $"/api/wrk/v1/activities/{id}", new { fields = new { }, recordVersion = version }, "Staff.Underwriter", "bob")).Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        (await SendAsync(HttpMethod.Patch, $"/api/wrk/v1/activities/{Guid.NewGuid()}", new { fields = new { title = "x" }, recordVersion = 1 }, "Staff.Underwriter", "bob")).Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+
+        var due = DateTime.UtcNow.AddDays(3).ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture);
+        var edited = await SendAsync(HttpMethod.Patch, $"/api/wrk/v1/activities/{id}",
+            new { fields = new { title = "  Call the broker first ", priority = "HIGH", dueAt = due, note = "Waiting for the broker" }, reason = "customer asked", recordVersion = version }, "Staff.Underwriter", "bob");
+        edited.Response.StatusCode.ShouldBe(HttpStatusCode.OK, edited.Body?.ToJsonString());
+        edited.Body.Text("activity.title").ShouldBe("Call the broker first");
+        edited.Body.Text("activity.priority").ShouldBe("HIGH");
+        edited.Body.Text("activity.note").ShouldBe("Waiting for the broker");
+        edited.Body.Text("activity.targetAt").ShouldStartWith(due[..16]);
+        edited.Body.Text("activity.recordVersion").ShouldBe((version + 1).ToString(CultureInfo.InvariantCulture));
+
+        // The old version is stale; a manager may edit with the current one.
+        var stale = await SendAsync(HttpMethod.Patch, $"/api/wrk/v1/activities/{id}", new { fields = new { title = "again" }, recordVersion = version }, "Staff.Underwriter", "bob");
+        stale.Response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        stale.Body.Text("code").ShouldBe("WRK-ERR-STALE");
+        (await SendAsync(HttpMethod.Patch, $"/api/wrk/v1/activities/{id}", new { fields = new { note = (string?)null }, recordVersion = version + 1 }, Manager, "alice")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+        // A closed activity is not edited.
+        (await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/complete", new { id, outcome = "DONE" }, "Staff.Underwriter", "bob")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await SendAsync(HttpMethod.Patch, $"/api/wrk/v1/activities/{id}", new { fields = new { title = "late" }, recordVersion = version + 3 }, Manager, "alice")).Response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+    }
+
+    [Fact]
+    public async Task Bulk_reassign_gives_one_result_per_activity_and_a_failure_does_not_stop_the_rest()
+    {
+        var ids = new List<string>();
+        for (var i = 0; i < 3; i++)
+        {
+            ids.Add((await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities", CreateBody(Psr, "POL", Guid.NewGuid().ToString()), Admin)).Body.Text("activityId"));
+        }
+
+        await ProfileAsync("bulk-uma", "Staff.Underwriter");
+        await ProfileAsync("bulk-bea", "Staff.Billing"); // cannot take PSR work
+        var closed = ids[2];
+        (await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/assign", new { id = closed }, "Staff.Underwriter", "bob")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/complete", new { id = closed, outcome = "DONE" }, "Staff.Underwriter", "bob")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var missing = Guid.NewGuid().ToString();
+        var selection = new { ids = new[] { ids[0], ids[1], closed, missing, ids[0] } };
+
+        // Supervisors only; a reason is required; an ineligible user fails every item and changes nothing.
+        (await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/bulk-reassign", new { selection, target = new { type = "USER", id = "bulk-uma" }, reason = "x" }, "Staff.Underwriter", "bob")).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        (await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/bulk-reassign", new { selection, target = new { type = "USER", id = "bulk-uma" } }, Manager, "alice")).Response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+        var ineligible = await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/bulk-reassign", new { selection, target = new { type = "USER", id = "bulk-bea" }, reason = "rebalance" }, Manager, "alice");
+        ineligible.Response.StatusCode.ShouldBe(HttpStatusCode.OK, ineligible.Body?.ToJsonString());
+        ineligible.Body.Text("results.reassigned").ShouldBe("0");
+
+        // A dry run reports the outcome and changes nothing.
+        var dry = await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/bulk-reassign", new { selection, target = new { type = "USER", id = "bulk-uma" }, reason = "preview" }, Manager, "alice", dryRun: true);
+        dry.Response.StatusCode.ShouldBe(HttpStatusCode.OK, dry.Body?.ToJsonString());
+        dry.Body.Text("results.reassigned").ShouldBe("2");
+        (await SendAsync(HttpMethod.Get, $"/api/wrk/v1/activities/{ids[0]}", null, Manager, "alice")).Body.Text("items.0.activity.assignee.type").ShouldBe("QUEUE");
+
+        var moved = await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/bulk-reassign", new { selection, target = new { type = "USER", id = "bulk-uma" }, reason = "rebalance" }, Manager, "alice");
+        moved.Response.StatusCode.ShouldBe(HttpStatusCode.OK, moved.Body?.ToJsonString());
+        moved.Body.Text("results.requested").ShouldBe("4"); // the repeated id counts once
+        moved.Body.Text("results.reassigned").ShouldBe("2");
+        moved.Body.Text("results.failed").ShouldBe("2");
+        var results = moved.Body!["results"]!["results"]!.AsArray().ToDictionary(r => r!.Text("id"), r => r!);
+        results[ids[0]].Text("outcome").ShouldBe("REASSIGNED");
+        results[ids[1]].Text("assignee.id").ShouldBe("bulk-uma");
+        results[closed].Text("outcome").ShouldBe("FAILED");
+        results[missing].Text("outcome").ShouldBe("FAILED");
+        (await ListAsync("scope:mine", "Staff.Underwriter", "bulk-uma")).Select(i => i.Text("id")).ShouldBe([ids[0], ids[1]], ignoreOrder: true);
+
+        // By rules with no rule every item fails; more than 100 activities is refused.
+        var byRules = await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/bulk-reassign", new { selection = new { ids = new[] { ids[0] } }, rules = true, reason = "route" }, Manager, "alice");
+        byRules.Body.Text("results.failed").ShouldBe("1");
+        var tooMany = await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/bulk-reassign",
+            new { selection = new { ids = Enumerable.Range(0, 101).Select(_ => Guid.NewGuid().ToString()).ToArray() }, target = new { type = "QUEUE", id = "PSR" }, reason = "too many" }, Manager, "alice");
+        tooMany.Response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
+        tooMany.Body.Text("code").ShouldBe("WRK-ERR-LIMIT-EXCEEDED");
+
+        // A filter selects what the list would show; a queue target returns the work to the queue.
+        var back = await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/bulk-reassign",
+            new { selection = new { filter = "scope:team,queue:PSR,pattern:" + Psr }, target = new { type = "QUEUE", id = "PSR" }, reason = "return" }, Manager, "alice");
+        back.Response.StatusCode.ShouldBe(HttpStatusCode.OK, back.Body?.ToJsonString());
+        (await ListAsync("scope:mine", "Staff.Underwriter", "bulk-uma")).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task The_team_summary_counts_open_breached_and_unassigned_work_per_queue_and_assignee()
+    {
+        var before = await SummaryAsync(Manager, "alice");
+        var a = (await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities", CreateBody(Psr, "POL", Guid.NewGuid().ToString()), Admin)).Body.Text("activityId");
+        var b = (await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities", CreateBody(Psr, "POL", Guid.NewGuid().ToString()), Admin)).Body.Text("activityId");
+        (await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/assign", new { id = b }, "Staff.Underwriter", "sumi")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        await using var dataSource = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        await using (var command = dataSource.CreateCommand($"UPDATE wrk.activity SET target_at = now() - interval '2 hours', breached_at = now() WHERE activity_id = '{a}'"))
+        {
+            await command.ExecuteNonQueryAsync(Ct);
+        }
+
+        var after = await SummaryAsync(Manager, "alice");
+        Delta(after, before, "PSR", "open").ShouldBe(2);
+        Delta(after, before, "PSR", "unassigned").ShouldBe(1);
+        Delta(after, before, "PSR", "breached").ShouldBe(1);
+        after.Text("totals.open").ShouldNotBeNull();
+        var sumi = after["queues"]!.AsArray().Single(q => q!.Text("queueCode") == "PSR")!["assignees"]!.AsArray().Single(x => x!.Text("userId") == "sumi")!;
+        sumi.Text("open").ShouldBe("1");
+
+        // Supervisors only; a queue the asker cannot see is not listed; an unknown grouping is refused.
+        (await SendAsync(HttpMethod.Get, "/api/wrk/v1/teams/summary", null, "Staff.Underwriter", "bob")).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        (await SendAsync(HttpMethod.Get, "/api/wrk/v1/teams/summary?grouping=user", null, Manager, "alice")).Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        var billing = await SendAsync(HttpMethod.Get, "/api/wrk/v1/teams/summary", null, "Staff.BillingManager", "bill");
+        billing.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        billing.Body!["counts"]!["queues"]!.AsArray().Select(q => q!.Text("queueCode")).ShouldNotContain("PSR");
+    }
+
+    [Fact]
+    public async Task The_list_cursor_is_a_keyset_so_changes_between_pages_skip_and_repeat_nothing()
+    {
+        for (var i = 0; i < 6; i++)
+        {
+            await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities", CreateBody("WRK-BIL-NONPAY-NOTICE-RETURNED", "BIL", Guid.NewGuid().ToString()), Admin);
+        }
+
+        var baseline = (await ListAsync("scope:team,state:OPEN", Admin, "root")).Where(i => i.Text("state") == "OPEN").Select(i => i.Text("id")).ToList();
+        baseline.Count.ShouldBeGreaterThanOrEqualTo(6);
+
+        var first = await SendAsync(HttpMethod.Get, $"/api/wrk/v1/activities?limit=2&filters={Uri.EscapeDataString("scope:team,state:OPEN")}", null, Admin, "root");
+        first.Response.StatusCode.ShouldBe(HttpStatusCode.OK, first.Body?.ToJsonString());
+        var firstIds = first.Body!["items"]!.AsArray().Select(i => i!["activity"]!.Text("id")).ToList();
+        firstIds.ShouldBe(baseline.Take(2).ToList());
+        var cursor = first.Body["nextCursor"]?.GetValue<string>();
+
+        // Between the pages: the first row closes and another row arrives. An offset cursor would now repeat or skip a row.
+        (await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/assign", new { id = firstIds[0] }, Admin, "root")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities/cancel", new { id = firstIds[0], reason = "test" }, Admin, "root")).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        await SendAsync(HttpMethod.Post, "/api/wrk/v1/activities", CreateBody("WRK-BIL-NONPAY-PSR-HOLD", "BIL", Guid.NewGuid().ToString()), Admin);
+
+        var rest = new List<string>();
+        while (cursor is not null)
+        {
+            var page = await SendAsync(HttpMethod.Get, $"/api/wrk/v1/activities?limit=2&cursor={cursor}&filters={Uri.EscapeDataString("scope:team,state:OPEN")}", null, Admin, "root");
+            page.Response.StatusCode.ShouldBe(HttpStatusCode.OK, page.Body?.ToJsonString());
+            rest.AddRange(page.Body!["items"]!.AsArray().Select(i => i!["activity"]!.Text("id")));
+            cursor = page.Body["nextCursor"]?.GetValue<string>();
+        }
+
+        rest.Distinct().Count().ShouldBe(rest.Count);
+        rest.ShouldNotContain(firstIds[0]);
+        rest.ShouldNotContain(firstIds[1]);
+        baseline.Skip(2).ToList().ShouldBeSubsetOf(rest);
+        rest.Intersect(baseline).ToList().ShouldBe(baseline.Skip(2).ToList()); // same relative order
+
+        // Malformed cursors and limits are refused, not reset.
+        (await SendAsync(HttpMethod.Get, "/api/wrk/v1/activities?cursor=2", null, Admin, "root")).Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        (await SendAsync(HttpMethod.Get, "/api/wrk/v1/activities?limit=0", null, Admin, "root")).Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
+    private async Task<JsonNode> SummaryAsync(string roles, string user)
+    {
+        var (response, body) = await SendAsync(HttpMethod.Get, "/api/wrk/v1/teams/summary", null, roles, user);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        return body!["counts"]!;
+    }
+
+    private static int Delta(JsonNode after, JsonNode before, string queue, string field)
+    {
+        int Of(JsonNode node) => int.Parse(node["queues"]!.AsArray().SingleOrDefault(q => q!.Text("queueCode") == queue)?.Text(field) ?? "0", CultureInfo.InvariantCulture);
+        return Of(after) - Of(before);
+    }
+
+    private async Task ProfileAsync(string user, string roles)
+    {
+        await using var dataSource = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        await using var find = dataSource.CreateCommand("SELECT legal_entity_id FROM wrk.activity LIMIT 1");
+        var legalEntity = (Guid)(await find.ExecuteScalarAsync(Ct))!;
+        await using var command = dataSource.CreateCommand(
+            $"INSERT INTO wrk.assignee_profile (legal_entity_id, user_id, display_name, roles, skills, active) VALUES ('{legalEntity}', '{user}', '{user}', '{roles}', '', true)");
+        await command.ExecuteNonQueryAsync(Ct);
+    }
+
     private static object CreateBody(string pattern, string raising, string objectId, string? cause = null) => new
     {
         patternCode = pattern,
@@ -239,11 +425,16 @@ public sealed class WorkActivityTests(PostgresFixture database) : IClassFixture<
         primaryObject = new { module = raising, type = "Case", id = objectId },
     };
 
-    private async Task<(HttpResponseMessage Response, JsonNode? Body)> SendAsync(HttpMethod method, string path, object? body, string roles, string user = "test-user")
+    private async Task<(HttpResponseMessage Response, JsonNode? Body)> SendAsync(HttpMethod method, string path, object? body, string roles, string user = "test-user", bool dryRun = false)
     {
         using var request = new HttpRequestMessage(method, new Uri(path, UriKind.Relative));
         request.Headers.Add(TestAuthHandler.RolesHeader, roles);
         request.Headers.Add(TestAuthHandler.UserHeader, user);
+        if (dryRun)
+        {
+            request.Headers.Add("X-Dry-Run", "true");
+        }
+
         request.Headers.AcceptLanguage.ParseAdd("en");
         if (method != HttpMethod.Get)
         {

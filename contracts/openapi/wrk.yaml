@@ -4555,6 +4555,9 @@ components:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "job id"'
+        results:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: "Per activity outcome: {requested, reassigned, failed, results[{id, outcome, code, detail, recordVersion, assignee}]}"
         previewWhenDryRun:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "preview when dry-run"'

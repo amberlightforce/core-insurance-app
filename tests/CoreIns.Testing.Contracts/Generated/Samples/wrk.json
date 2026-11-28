@@ -230,6 +230,7 @@
     },
     "ActivityBulkReassignResponse": {
       "jobId": "0192f394-0ec2-7fb0-8901-53bb9d37aca2",
+      "results": "unspecified",
       "previewWhenDryRun": "unspecified"
     },
     "ActivityCancelRequest": {
