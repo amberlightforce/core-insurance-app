@@ -2353,8 +2353,22 @@ export interface components {
         };
         /** @description cmp.FiscalReconciliation.run result. PRD outputs: "breaks" */
         FiscalReconciliationRunResponse: {
-            /** @description PRD: "breaks" */
-            breaks?: components["schemas"]["Unspecified"];
+            /** @description Fiscal documents compared with their channel status */
+            checked: number;
+            /** @description Breaks found for the first time */
+            opened: number;
+            /** @description Resolved breaks that came back */
+            reopened: number;
+            /** @description Open breaks that no longer exist (closed automatically) */
+            resolved: number;
+            /** @description Open breaks after the run */
+            open: number;
+            /** @description PRD: "breaks" (the open breaks after the run, capped at 200) */
+            breaks: {
+                fiscalDocumentId: components["schemas"]["Uuid"];
+                kind: string;
+                detail?: string;
+            }[];
         };
         /** @description cmp.FiscalReconciliation.breaks result. PRD outputs: "breaks" */
         FiscalReconciliationBreaksItem: {
@@ -3558,13 +3572,27 @@ export interface components {
         };
         /** @description cmp.FiscalRule.certify request. PRD inputs: "pack candidate" */
         FiscalRuleCertifyRequest: {
-            /** @description PRD: "pack candidate" */
-            packCandidate?: components["schemas"]["LocalDate"];
+            /** @description PRD: "pack candidate" (the fiscal rule values a country pack proposes) */
+            packCandidate: {
+                /** @description The pack's fiscal document type code (the placeholder UNMAPPED-OQ-012 never passes) */
+                documentType?: string;
+                seriesPattern?: string;
+                /** @description The pack enforces cmp.fiscal.mark_before_issue */
+                markBeforeIssue?: boolean;
+                /** @description The pack enforces bil.fiscal.mark_before_delivery */
+                markBeforeDelivery?: boolean;
+                /**
+                 * @description Whether the values are legally confirmed (default Unverified; an unverified candidate fails)
+                 * @enum {string}
+                 */
+                legalStatus?: "Verified" | "Unverified";
+            };
         };
         /** @description cmp.FiscalRule.certify result. PRD outputs: "pass or fail with keys" */
         FiscalRuleCertifyResponse: {
-            /** @description PRD: "pass or fail with keys" */
-            passOrFailKeys?: components["schemas"]["Unspecified"];
+            pass: boolean;
+            failedKeys: string[];
+            checkedKeys: string[];
         };
         /** @description cmp.Evidence.submit request. PRD inputs: "per op" */
         EvidenceSubmitRequest: Record<string, never>;
