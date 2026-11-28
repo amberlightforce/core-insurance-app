@@ -203,6 +203,74 @@
       "processedCount": 1,
       "failedCount": 1
     },
+    "CutoverPlan": {
+      "planId": "0192e6ad-0135-72cd-894c-f2c4c1e7e8e5",
+      "name": "sample",
+      "kind": "sample",
+      "scope": "sample",
+      "status": "sample",
+      "steps": [
+        {
+          "seq": 1,
+          "kind": "sample",
+          "batchId": "0192bba1-4200-7dff-88af-e00f8810cc9d",
+          "status": "sample",
+          "startedAt": "2026-10-07T09:00:00Z",
+          "completedAt": "2026-10-07T09:00:00Z",
+          "durationMs": 1,
+          "result": "sample",
+          "note": "sample"
+        }
+      ],
+      "totalDurationMs": 1,
+      "rollbackPreviewedAt": "2026-10-07T09:00:00Z",
+      "rolledBackAt": "2026-10-07T09:00:00Z",
+      "rollback": [
+        {
+          "batchId": "0192742f-194c-7b4d-8e4c-584444d44d15",
+          "status": "sample",
+          "reversed": 1,
+          "blocked": 1,
+          "routingRestored": 1
+        }
+      ],
+      "createdBy": "sample"
+    },
+    "CutoverPlanRequest": {
+      "name": "sample",
+      "kind": "sample",
+      "scope": "sample",
+      "batchIds": [
+        "0192c627-a5fe-793f-8af2-9e661a3e487f"
+      ]
+    },
+    "CutoverRollbackOutcome": {
+      "batchId": "01922508-749e-7725-8e6a-ee11fa1e6072",
+      "status": "sample",
+      "reversed": 1,
+      "blocked": 1,
+      "routingRestored": 1
+    },
+    "CutoverRollbackRequest": {
+      "planId": "01924050-5361-7f5e-82d0-6605febfe794",
+      "dryRun": true
+    },
+    "CutoverStep": {
+      "seq": 1,
+      "kind": "sample",
+      "batchId": "0192ad2e-f92b-7e7e-8f57-d05f3d538913",
+      "status": "sample",
+      "startedAt": "2026-10-07T09:00:00Z",
+      "completedAt": "2026-10-07T09:00:00Z",
+      "durationMs": 1,
+      "result": "sample",
+      "note": "sample"
+    },
+    "CutoverStepRequest": {
+      "planId": "0192f751-02e8-725e-829a-7eedaabef6e0",
+      "seq": 1,
+      "note": "sample"
+    },
     "DqFieldProfile": {
       "field": "sample",
       "present": 1,

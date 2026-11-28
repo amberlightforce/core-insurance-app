@@ -46,7 +46,11 @@
         "mig.Wave.get": [ "Staff.MigrationManager", "Staff.DataSteward", "Staff.Finance", "Staff.ComplianceOfficer", "Platform.Admin" ],
         "mig.Wave.convert": [ "Staff.MigrationManager", "Platform.Admin" ],
         "mig.Wave.adjust": [ "Staff.MigrationManager", "Platform.Admin" ],
-        "mig.Wave.close": [ "Staff.MigrationManager", "Platform.Admin" ]
+        "mig.Wave.close": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Cutover.plan": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Cutover.startStep": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Cutover.completeStep": [ "Staff.MigrationManager", "Platform.Admin" ],
+        "mig.Cutover.rollback": [ "Staff.MigrationManager", "Platform.Admin" ]
       }
     },
     "Authority": {

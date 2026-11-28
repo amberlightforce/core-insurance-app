@@ -10,6 +10,7 @@ using CoreIns.Modules.Migration.Services.Reconciliation;
 using CoreIns.Modules.Migration.Services.SignOff;
 using CoreIns.Modules.Migration.Services.Mapping;
 using CoreIns.Modules.Migration.Services.Waves;
+using CoreIns.Modules.Migration.Services.Cutover;
 using CoreIns.Modules.Migration.Services.Quality;
 using CoreIns.Modules.Migration.Services.Staging;
 using CoreIns.Platform;
@@ -112,6 +113,12 @@ public static class MigrationModule
         services.AddCommand<ConvertWave, WaveView, WaveCommandHandler>(CommandDescriptor.For("mig.Wave.convert"));
         services.AddCommand<AdjustWave, WaveView, WaveCommandHandler>(CommandDescriptor.For("mig.Wave.adjust"));
         services.AddCommand<CloseWave, WaveView, WaveCommandHandler>(CommandDescriptor.For("mig.Wave.close"));
+
+        services.AddScoped<CutoverService>();
+        services.AddCommand<PlanCutover, CutoverPlanView, CutoverCommandHandler>(CommandDescriptor.For("mig.Cutover.plan"));
+        services.AddCommand<StartCutoverStep, CutoverPlanView, CutoverCommandHandler>(CommandDescriptor.For("mig.Cutover.startStep"));
+        services.AddCommand<CompleteCutoverStep, CutoverPlanView, CutoverCommandHandler>(CommandDescriptor.For("mig.Cutover.completeStep"));
+        services.AddCommand<RollbackCutover, CutoverPlanView, CutoverCommandHandler>(CommandDescriptor.For("mig.Cutover.rollback") with { SupportsDryRun = true });
 
         services.AddScoped<IMigrationXrefService, MigrationXrefService>();
         services.AddScoped<IMigrationRoutingService, MigrationRoutingService>();

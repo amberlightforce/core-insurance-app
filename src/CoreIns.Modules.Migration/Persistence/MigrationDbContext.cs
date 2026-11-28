@@ -47,6 +47,10 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
 
     public DbSet<Services.Waves.WaveTermRow> WaveTerms => Set<Services.Waves.WaveTermRow>();
 
+    public DbSet<Services.Cutover.CutoverPlanRow> CutoverPlans => Set<Services.Cutover.CutoverPlanRow>();
+
+    public DbSet<Services.Cutover.CutoverStepRow> CutoverSteps => Set<Services.Cutover.CutoverStepRow>();
+
     protected override string Schema => MigrationModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -59,6 +63,7 @@ internal sealed class MigrationDbContext(DbContextOptions<MigrationDbContext> op
         Services.Quality.DqModel.Configure(modelBuilder);
         Services.Mapping.MappingModel.Configure(modelBuilder);
         Services.Waves.WaveModel.Configure(modelBuilder);
+        Services.Cutover.CutoverModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BatchRow>(entity =>
         {
