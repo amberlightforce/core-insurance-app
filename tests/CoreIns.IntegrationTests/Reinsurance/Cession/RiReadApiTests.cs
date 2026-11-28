@@ -126,7 +126,7 @@ public sealed class RiReadApiTests(PostgresFixture database) : IClassFixture<Pos
             {
                 code = "RD-" + Guid.NewGuid().ToString("N")[..8].ToUpperInvariant(),
                 name = "Synthetic read programme",
-                lineCode = RegistrySlice.NewProduct(),
+                lineCode = await slice.ScalarAsync<string>($"SELECT product_codes[1] FROM ri.section s JOIN ri.contract_version v ON v.version_id = s.version_id WHERE v.contract_id = '{contractId}' LIMIT 1"),
                 period = new { from = "2026-01-01", to = "2027-01-01" },
                 layers = new[] { new { layerNo = 1, attachment = RegistrySlice.Money("500000.00"), limit = RegistrySlice.Money("500000.00"), contractId } },
             });

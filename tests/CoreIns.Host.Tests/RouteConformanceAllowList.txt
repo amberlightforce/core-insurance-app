@@ -14,7 +14,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/query
 CONTRACT_NOT_SERVED GET /api/bil/v1/mandates/{}
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-instruments
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-plans
-CONTRACT_NOT_SERVED GET /api/bil/v1/receipts
 CONTRACT_NOT_SERVED GET /api/chn/v1/account-current
 CONTRACT_NOT_SERVED GET /api/chn/v1/agent-logs/query
 CONTRACT_NOT_SERVED GET /api/chn/v1/api-products
@@ -158,8 +157,6 @@ CONTRACT_NOT_SERVED PATCH /api/uw/v1/contingencies/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
 CONTRACT_NOT_SERVED PATCH /api/wrk/v1/activities/{}
 CONTRACT_NOT_SERVED POST /api/bil/v1/account-currents/dispute
-CONTRACT_NOT_SERVED POST /api/bil/v1/allocations/reallocate
-CONTRACT_NOT_SERVED POST /api/bil/v1/allocations/unallocate
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/attach-term
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/change-payer
@@ -482,8 +479,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/complete
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/start
-CONTRACT_NOT_SERVED POST /api/pty/v1/parties/merge
-CONTRACT_NOT_SERVED POST /api/pty/v1/parties/unmerge
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/bulk
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/case-decide
 CONTRACT_NOT_SERVED POST /api/rat/v1/bonus-malus/transition
@@ -556,9 +551,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/notices/draft
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/send
 CONTRACT_NOT_SERVED POST /api/ri/v1/participations/add
 CONTRACT_NOT_SERVED POST /api/ri/v1/participations/replace
-CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/approve
-CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/return
-CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/submit
 CONTRACT_NOT_SERVED POST /api/ri/v1/reconciliation/fin
 CONTRACT_NOT_SERVED POST /api/ri/v1/securities/report
 CONTRACT_NOT_SERVED POST /api/ri/v1/security-rules/set

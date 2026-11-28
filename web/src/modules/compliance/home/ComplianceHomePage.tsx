@@ -151,6 +151,10 @@ export function ComplianceHomePage() {
         <p className={staff.muted}>{t('home.dsar.body')}</p>
         <LinkButton to="/compliance/dsar">{t('home.dsar.open')}</LinkButton>
       </Section>
+      <Section title={t('home.submissions.title')}>
+        <p className={staff.muted}>{t('home.submissions.body')}</p>
+        <LinkButton to="/compliance/submissions">{t('home.submissions.open')}</LinkButton>
+      </Section>
       <Section title={t('home.fiscal.title')}>
         <p className={staff.muted}>{t('home.fiscal.body')}</p>
         <LinkButton to="/compliance/fiscal">{t('home.fiscal.open')}</LinkButton>

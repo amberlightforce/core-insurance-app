@@ -23,6 +23,9 @@ public sealed class FakePartyPartyService : global::CoreIns.Testing.Contracts.Fa
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyMergeResponse> MergeAsync(global::CoreIns.Modules.Party.Contracts.Api.PartyMergeRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.PartyMergeResponse>("pty.Party.merge", [request, options], cancellationToken);
 
     /// <inheritdoc />
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartySurvivorResponse> ResolveSurvivorAsync(global::System.Guid id, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.PartySurvivorResponse>("pty.Party.resolveSurvivor", [id], cancellationToken);
+
+    /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartySearchPage> SearchAsync(global::CoreIns.Platform.Contracts.ValidAt? validAt = null, string? cursor = null, int? limit = null, string? partyNumber = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.PartySearchPage>("pty.Party.search", [validAt, cursor, limit, partyNumber], cancellationToken);
 
     /// <inheritdoc />

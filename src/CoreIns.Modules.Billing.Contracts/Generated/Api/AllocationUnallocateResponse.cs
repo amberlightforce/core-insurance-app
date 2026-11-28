@@ -4,15 +4,22 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Allocation.unallocate result. PRD outputs: "allocations"</summary>
+/// <summary>bil.Allocation.unallocate result: the reversal rows (negative amounts), the receipt as it now stands and the reversal ledger entry</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AllocationUnallocateResponse
 {
-    /// <summary>PRD: "allocations"</summary>
+    /// <summary>Contract member 'reversals'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reversals")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.AllocationView> Reversals { get; init; }
+
+    /// <summary>Contract member 'receipt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receipt")]
+    public required global::CoreIns.Modules.Billing.Contracts.Api.ReceiptView Receipt { get; init; }
+
+    /// <summary>Contract member 'ledgerEntryId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'ledgerEntryId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("allocations")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Allocations { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("ledgerEntryId")]
+    public required global::System.Guid LedgerEntryId { get; init; }
 }

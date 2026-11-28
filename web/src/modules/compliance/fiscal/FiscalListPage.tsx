@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Select, TextField } from '../../../design-system';
+import { Button, Select, TextField } from '../../../design-system';
 import { PageHeader, Section } from '../../staff/PageHeader';
 import { QueryView } from '../../staff/QueryView';
 import staff from '../../staff/staff.module.css';
 import { sourceTypes, useFiscalBreaks, useFiscalDocuments } from './api';
 import styles from './Fiscal.module.css';
+import { BulkResubmitDialog } from './BulkResubmitDialog';
 import { FiscalDocumentsTable } from './FiscalDocumentsTable';
 
 const ALL = 'ALL';
@@ -21,6 +22,7 @@ export function FiscalListPage() {
     sourceId: sourceId.trim(),
   });
   const breaks = useFiscalBreaks();
+  const [bulk, setBulk] = useState(false);
 
   return (
     <div className={staff.page}>
@@ -32,7 +34,19 @@ export function FiscalListPage() {
       />
       <Section
         title={t('fiscal.breaks.title')}
+        family="danger"
         {...(breaks.data ? { count: breaks.data.length } : {})}
+        actions={
+          <Button
+            variant="secondary"
+            isDisabled={!breaks.data?.some((b) => b.document.status === 'REJECTED')}
+            onPress={() => {
+              setBulk(true);
+            }}
+          >
+            {t('fiscal.bulk.open')}
+          </Button>
+        }
       >
         <p className={staff.muted}>{t('fiscal.breaks.body')}</p>
         <QueryView query={breaks}>
@@ -48,6 +62,7 @@ export function FiscalListPage() {
       </Section>
       <Section
         title={t('fiscal.list.title')}
+        family="brand"
         {...(documents.data ? { count: documents.data.length } : {})}
       >
         <div className={styles.filters}>
@@ -74,6 +89,14 @@ export function FiscalListPage() {
           )}
         </QueryView>
       </Section>
+      {bulk && breaks.data ? (
+        <BulkResubmitDialog
+          rows={breaks.data}
+          onClose={() => {
+            setBulk(false);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

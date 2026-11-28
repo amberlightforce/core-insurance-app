@@ -504,9 +504,11 @@ paths:
   /api/pty/v1/parties/merge:
     post:
       operationId: pty.Party.merge
-      summary: Merge or unmerge
+      summary: Request a merge of two parties (maker)
       description: |-
-        Merge or unmerge
+        BO-PTY-05. Asks to merge `mergedPartyId` into `survivorPartyId`; the request goes to a checker through a PLT approval
+        (PTY.PARTY_MERGE; the maker can never decide it). Nothing changes until `pty.Party.approveMerge` approves it. Two parties with
+        different valid AFMs, a restricted (DSAR) or an already merged party can never be merged. The survivor keeps its id.
 
         PRD inputs: candidates, survivorship decisions
         PRD outputs: merge record, approval request
@@ -532,10 +534,17 @@ paths:
       - MIG
       x-permission: pty.Party.merge
       x-error-codes:
-      - code: PTY-ERR-NOT-AVAILABLE
-        status: 501
-        note: not built yet in the slice (D-SLC-06)
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-MERGED
+        status: 409
+      - code: PTY-ERR-RESTRICTED
+        status: 409
+      - code: PTY-ERR-STATE
+        status: 409
       - code: PTY-ERR-MERGE-CROSS-ENTITY
+        status: 422
+      - code: PTY-ERR-MERGE-IDENTIFIER-CONFLICT
         status: 422
       - code: PTY-ERR-WINDOW-CLOSED
         status: 422
@@ -577,10 +586,10 @@ paths:
   /api/pty/v1/parties/unmerge:
     post:
       operationId: pty.Party.unmerge
-      summary: Unmerge within the window (stated separately for MIG and steward callers; same operation as the unmerge half
-        …
+      summary: Unmerge within the window
       description: |-
-        Unmerge within the window (stated separately for MIG and steward callers; same operation as the unmerge half of `pty.Party.merge / unmerge`)
+        BO-PTY-05. Reverses an executed merge within the unmerge window: the absorbed party gets back its prior status and the survivor is
+        unchanged; no data of either party was ever moved, so nothing is lost. Publishes PartyUnmerged.
 
         PRD inputs: merge_id, assignment of post-merge changes
         PRD outputs: restored parties, approval request
@@ -607,10 +616,17 @@ paths:
       - MIG
       x-permission: pty.Party.unmerge
       x-error-codes:
-      - code: PTY-ERR-NOT-AVAILABLE
-        status: 501
-        note: not built yet in the slice (D-SLC-06)
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-MERGED
+        status: 409
+      - code: PTY-ERR-RESTRICTED
+        status: 409
+      - code: PTY-ERR-STATE
+        status: 409
       - code: PTY-ERR-MERGE-CROSS-ENTITY
+        status: 422
+      - code: PTY-ERR-MERGE-IDENTIFIER-CONFLICT
         status: 422
       - code: PTY-ERR-WINDOW-CLOSED
         status: 422
@@ -648,6 +664,267 @@ paths:
           $ref: common.yaml#/components/responses/Conflict
         '422':
           $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/parties/merge/approve:
+    post:
+      operationId: pty.Party.approveMerge
+      summary: Approve or reject a merge request (checker)
+      description: |-
+        BO-PTY-05. The checker decides the PLT approval of a PENDING_APPROVAL merge. The maker, editors and an AI agent cannot decide
+        (PLT-ERR-SELF-APPROVAL); the checker needs the merge authority. Approval executes the merge and publishes PartiesMerged.
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-007
+      x-anchor:
+      - REQ-PTY-007
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'not supported'
+      x-exposure:
+      - ui
+      x-permission: pty.Party.approveMerge
+      x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-MERGED
+        status: 409
+      - code: PTY-ERR-RESTRICTED
+        status: 409
+      - code: PTY-ERR-STATE
+        status: 409
+      - code: PTY-ERR-MERGE-IDENTIFIER-CONFLICT
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1640
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartyMergeApproveRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartyMergeApproveResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/parties/merges:
+    get:
+      operationId: pty.Party.mergeList
+      summary: Merge requests and merges
+      description: |-
+        BO-PTY-05. Lists the merge records of the legal entity, newest first, optionally by status, by a party on either side or by merge id.
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-007
+      x-anchor:
+      - REQ-PTY-007
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Party.mergeList
+      x-error-codes: []
+      x-source:
+      - PRD-01 §9.1 l.1640
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - PENDING_APPROVAL
+          - EXECUTED
+          - REJECTED
+          - UNMERGED
+      - name: partyId
+        in: query
+        required: false
+        description: Merges where this party is the survivor or the absorbed party
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: mergeId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartyMergePage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/parties/duplicates:
+    get:
+      operationId: pty.Party.duplicates
+      summary: Duplicate candidates
+      description: |-
+        BO-PTY-05 (contract addition, open user decision #4). The queue of suspected duplicate pairs, best first, with a score and the reasons:
+        AFM_EXACT (score 100), NAME_AND_BIRTH_DATE (90), NAME (60). Merged, restricted and already-pending pairs are left out. P2 values are masked.
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-007
+      x-anchor:
+      - REQ-PTY-007
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-permission: pty.Party.duplicates
+      x-error-codes: []
+      x-source:
+      - PRD-01 §9.1 l.1640
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: minScore
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          maximum: 100
+      - name: partyId
+        in: query
+        required: false
+        description: Only candidates that include this party
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DuplicateCandidatePage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/parties/{id}/survivor:
+    get:
+      operationId: pty.Party.resolveSurvivor
+      summary: Resolve the surviving party
+      description: |-
+        BO-PTY-05. Follows the merge pointers of a party to the party that survives (the party itself when it was never merged). Modules that
+        hold a party id in their own data use this to re-point; PTY does not rewrite other modules' references.
+      tags:
+      - Party
+      x-requirement:
+      - REQ-PTY-007
+      x-anchor:
+      - REQ-PTY-007
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —'
+      x-exposure:
+      - ui
+      x-consumers:
+      - BIL
+      - CHN
+      - CLM
+      - POL
+      - UW
+      x-permission: pty.Party.get
+      x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-01 §9.1 l.1640
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Party id
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartySurvivorResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/pty/v1/identifiers/verify:
@@ -5535,44 +5812,227 @@ components:
       - message
     PartyMergeRequest:
       type: object
-      description: 'pty.Party.merge request. PRD inputs: "candidates, survivorship decisions"'
+      description: 'pty.Party.merge request (BO-PTY-05): merge `mergedPartyId` into `survivorPartyId` (the survivor keeps its id). Goes to a checker through a PLT approval; nothing changes until it is approved.'
       properties:
-        candidates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "candidates"'
-        survivorshipDecisions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "survivorship decisions"'
+        survivorPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        mergedPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - survivorPartyId
+      - mergedPartyId
+      - reason
     PartyMergeResponse:
       type: object
-      description: 'pty.Party.merge result. PRD outputs: "merge record, approval request"'
+      description: 'pty.Party.merge result: the merge record (PENDING_APPROVAL) with its approval request id.'
       properties:
-        mergeRecord:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "merge record"'
-        approvalRequest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval request"'
-    PartyUnmergeRequest:
+        merge:
+          $ref: '#/components/schemas/PartyMergeView'
+      required:
+      - merge
+    PartyMergeView:
       type: object
-      description: 'pty.Party.unmerge request. PRD inputs: "merge_id, assignment of post-merge changes"'
+      description: 'A merge record (pty.party_merge). Status PENDING_APPROVAL, EXECUTED, REJECTED or UNMERGED.'
       properties:
         mergeId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "merge_id"'
-        assignmentPostMergeChanges:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "assignment of post-merge changes"'
+        survivorPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        mergedPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        survivorPartyNumber:
+          type: string
+        mergedPartyNumber:
+          type: string
+        status:
+          type: string
+          enum:
+          - PENDING_APPROVAL
+          - EXECUTED
+          - REJECTED
+          - UNMERGED
+        reason:
+          type: string
+        requestedBy:
+          type: string
+        requestedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        decidedBy:
+          type:
+          - string
+          - 'null'
+        decidedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        decisionComment:
+          type:
+          - string
+          - 'null'
+        executedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        unmergeWindowEnd:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+          description: Until when the merge can be unmerged (set when executed)
+        unmergedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        unmergedBy:
+          type:
+          - string
+          - 'null'
+        priorStatus:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Status the absorbed party had before the merge; restored on unmerge
+      required:
+      - mergeId
+      - survivorPartyId
+      - mergedPartyId
+      - survivorPartyNumber
+      - mergedPartyNumber
+      - status
+      - reason
+      - requestedBy
+      - requestedAt
+    PartyMergePage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/PartyMergeView'
+      description: Page of pty.Party.mergeList results
+    PartyMergeApproveRequest:
+      type: object
+      description: 'pty.Party.approveMerge request (BO-PTY-05): the checker approves or rejects a PENDING_APPROVAL merge. The maker cannot decide (PLT-ERR-SELF-APPROVAL); the checker needs the merge authority.'
+      properties:
+        mergeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        comment:
+          oneOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+      required:
+      - mergeId
+      - decision
+    PartyMergeApproveResponse:
+      type: object
+      description: 'pty.Party.approveMerge result: the merge record after the decision (EXECUTED or REJECTED).'
+      properties:
+        merge:
+          $ref: '#/components/schemas/PartyMergeView'
+      required:
+      - merge
+    PartyUnmergeRequest:
+      type: object
+      description: 'pty.Party.unmerge request (BO-PTY-05): reverses an EXECUTED merge while its unmerge window is open (PTY-ERR-WINDOW-CLOSED otherwise).'
+      properties:
+        mergeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - mergeId
+      - reason
     PartyUnmergeResponse:
       type: object
-      description: 'pty.Party.unmerge result. PRD outputs: "restored parties, approval request"'
+      description: 'pty.Party.unmerge result: the merge record (UNMERGED) and the restored party.'
       properties:
-        restoredParties:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "restored parties"'
-        approvalRequest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval request"'
+        merge:
+          $ref: '#/components/schemas/PartyMergeView'
+        restoredPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - merge
+      - restoredPartyId
+    PartySurvivorResponse:
+      type: object
+      description: 'pty.Party.resolveSurvivor result: the party that survives the merge chain of the requested party.'
+      properties:
+        requestedPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        survivorPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        survivorPartyNumber:
+          type: string
+        merged:
+          type: boolean
+          description: True when the requested party was merged into the survivor
+        mergeId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The last merge on the chain
+      required:
+      - requestedPartyId
+      - survivorPartyId
+      - survivorPartyNumber
+      - merged
+    DuplicateCandidate:
+      type: object
+      description: 'One suspected duplicate pair of pty.Party.duplicates (BO-PTY-05): score 0..100 and the reasons (AFM_EXACT, NAME_AND_BIRTH_DATE, NAME). P2 values masked.'
+      properties:
+        candidateKey:
+          type: string
+          description: Stable key of the pair (the two party ids, ordered)
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        reasons:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        partyA:
+          $ref: '#/components/schemas/PartySearchItem'
+        partyB:
+          $ref: '#/components/schemas/PartySearchItem'
+        mergeBlockedReason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: Set when the pair can never be merged (IDENTIFIER_CONFLICT)
+      required:
+      - candidateKey
+      - score
+      - reasons
+      - partyA
+      - partyB
+    DuplicateCandidatePage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/DuplicateCandidate'
+      description: Page of pty.Party.duplicates results
     IdentifierVerifyRequest:
       type: object
       description: 'pty.Identifier.verify request (BO-PTY-01): re-checks the current identifier of a scheme with the bound IdValidator.'

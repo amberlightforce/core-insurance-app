@@ -26,7 +26,7 @@ export function ObjectLookup() {
 
   return (
     <div className={styles.grid}>
-      <Section title={t('home.bySubject')}>
+      <Section family="info" title={t('home.bySubject')}>
         <form
           noValidate
           className={styles.stack}
@@ -71,7 +71,7 @@ export function ObjectLookup() {
           </div>
         </form>
       </Section>
-      <Section title={t('home.byId')}>
+      <Section family="plum" title={t('home.byId')}>
         <form
           noValidate
           className={styles.stack}

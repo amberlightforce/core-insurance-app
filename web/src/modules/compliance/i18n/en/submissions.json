@@ -1,0 +1,212 @@
+{
+  "submissions": {
+    "overline": "Compliance · Regulatory submissions",
+    "title": "Regulatory submissions",
+    "lead": "Prepare, approve, file and track submissions to regulators. Approval needs a second person; overdue ones are flagged.",
+    "back": "All submissions",
+    "notFound": "This submission does not exist in your legal entity.",
+    "overdue": "Overdue",
+    "overdueTitle": "Overdue",
+    "overdueBody": "The due date has passed and the submission has not been filed.",
+    "unverifiedTitle": "Due date not legally verified",
+    "unverifiedBody": "The due date is not yet legally settled. In production it must be verified before approval or filing.",
+    "created": "Submission registered",
+    "required": "This field is required.",
+    "hashInvalid": "Enter a SHA-256 hash (64 hexadecimal characters).",
+    "dateInvalid": "Enter a date as yyyy-MM-dd.",
+    "dateHelp": "yyyy-MM-dd",
+    "note": "Note",
+    "version": "Version",
+    "lifecycle": "Lifecycle",
+    "preparedBy": "Prepared by",
+    "requestedBy": "Approval requested by",
+    "approvedBy": "Approved by",
+    "resubmits": "Replaces",
+    "fourEyes": "You prepared or requested this submission, so another person must approve it.",
+    "status": {
+      "PLANNED": "Planned",
+      "IN_PREPARATION": "In preparation",
+      "READY": "Ready",
+      "SUBMITTED": "Submitted",
+      "ACKNOWLEDGED": "Acknowledged",
+      "REJECTED": "Rejected",
+      "RESUBMITTED": "Resubmitted"
+    },
+    "approval": {
+      "NONE": "No approval",
+      "PENDING": "Approval pending",
+      "APPROVED": "Approved"
+    },
+    "legal": {
+      "Unverified": "Not verified",
+      "Verified": "Verified"
+    },
+    "kind": {
+      "EVIDENCE_PACK": "Evidence pack",
+      "MART_EXPORT": "Data-mart export",
+      "TAX_RETURN": "Tax return",
+      "FISCAL_DOCUMENT": "Fiscal document",
+      "OTHER": "Other"
+    },
+    "columns": {
+      "number": "Number",
+      "type": "Type",
+      "regulator": "Regulator",
+      "period": "Period",
+      "status": "Status",
+      "due": "Due",
+      "overdue": "Overdue"
+    },
+    "filter": {
+      "status": "Status",
+      "all": "All statuses",
+      "type": "Submission type",
+      "regulator": "Regulator"
+    },
+    "list": {
+      "title": "Submissions",
+      "empty": "No submissions match."
+    },
+    "new": {
+      "title": "Register a submission",
+      "lead": "Starts a planned submission. Link evidence, then request approval.",
+      "type": "Submission type",
+      "typeHelp": "For example SOLVENCY_QRT or ANNUAL_RETURN",
+      "regulator": "Regulator",
+      "regulatorHelp": "For example BOG, HCMC or AADE",
+      "period": "Reporting period",
+      "periodHelp": "For example 2026-Q3",
+      "due": "Due date",
+      "legal": "Due date status",
+      "submit": "Register submission",
+      "failed": "The submission could not be registered"
+    },
+    "archive": {
+      "title": "Document archive completeness",
+      "lead": "Checks that every issued document in a window has its archive entry.",
+      "from": "From",
+      "to": "To",
+      "monthHelp": "yyyy-MM-dd",
+      "check": "Check archive",
+      "truncated": "The check was cut off at the document cap; narrow the range.",
+      "row": "{ok} of {issued} archived, {gaps} gaps, {orphans} orphans"
+    },
+    "evidence": {
+      "title": "Evidence",
+      "empty": "No evidence linked yet.",
+      "kind": "Kind",
+      "refId": "Reference",
+      "hash": "Content hash (SHA-256)",
+      "label": "Label",
+      "download": "Download pack",
+      "downloaded": "Evidence pack downloaded",
+      "downloadFailed": "The evidence pack could not be downloaded"
+    },
+    "filing": {
+      "title": "Filing and response",
+      "empty": "Not filed yet.",
+      "channel": "Channel",
+      "reference": "Filing reference",
+      "filedAt": "Filed at",
+      "filer": "Filer",
+      "receiptHash": "Receipt hash"
+    },
+    "response": {
+      "outcome": "Regulator outcome",
+      "reference": "Regulator reference",
+      "respondedAt": "Responded at",
+      "note": "Response note"
+    },
+    "pack": {
+      "from": "Documents from",
+      "to": "Documents to",
+      "subject": "Subject",
+      "subjectHelp": "MODULE/Type/id, optional",
+      "claim": "Legal-claim reason",
+      "claimHelp": "Needed to include documents of recipients under a data-subject restriction"
+    },
+    "comment": {
+      "label": "Comment"
+    },
+    "history": {
+      "title": "History",
+      "transition": "{from} to {to}",
+      "comment": "Comment"
+    },
+    "actions": {
+      "cancelButton": "Cancel",
+      "attach": {
+        "button": "Link evidence",
+        "title": "Link evidence",
+        "lead": "Link an artefact (pack, export, return) to this submission.",
+        "submit": "Link",
+        "done": "Evidence linked",
+        "failed": "Evidence could not be linked"
+      },
+      "pack": {
+        "button": "Attach evidence pack",
+        "title": "Attach evidence pack",
+        "lead": "Exports the document evidence pack for a period and links it to this submission.",
+        "submit": "Export and attach",
+        "done": "Evidence pack attached",
+        "failed": "The evidence pack could not be created"
+      },
+      "request": {
+        "button": "Request approval",
+        "title": "Request approval",
+        "lead": "Locks the linked evidence and asks a second person to approve.",
+        "submit": "Request approval",
+        "done": "Approval requested",
+        "failed": "Approval could not be requested"
+      },
+      "approve": {
+        "button": "Approve",
+        "title": "Approve submission",
+        "lead": "Confirms the submission is ready to file.",
+        "submit": "Approve",
+        "done": "Submission approved",
+        "failed": "The approval failed"
+      },
+      "reject": {
+        "button": "Reject",
+        "title": "Reject approval",
+        "lead": "Sends the submission back for preparation. A comment is required.",
+        "submit": "Reject",
+        "done": "Approval rejected",
+        "failed": "The rejection failed"
+      },
+      "comment": {
+        "button": "Add comment",
+        "title": "Add comment",
+        "lead": "Adds a line to the history. The submission itself is not changed.",
+        "submit": "Add comment",
+        "done": "Comment added",
+        "failed": "The comment could not be added"
+      },
+      "filing": {
+        "button": "Record filing",
+        "title": "Record filing",
+        "lead": "Records that the approved submission was filed with the regulator.",
+        "submit": "Record filing",
+        "done": "Filing recorded",
+        "failed": "The filing could not be recorded"
+      },
+      "response": {
+        "button": "Record response",
+        "title": "Record regulator response",
+        "lead": "Records whether the regulator acknowledged or rejected the filing.",
+        "submit": "Record response",
+        "done": "Response recorded",
+        "failed": "The response could not be recorded"
+      },
+      "resubmit": {
+        "button": "Resubmit",
+        "title": "Resubmit",
+        "lead": "Creates the next version of this rejected submission, copying its content.",
+        "submit": "Create new version",
+        "done": "New version created",
+        "failed": "The resubmission failed"
+      }
+    }
+  }
+}

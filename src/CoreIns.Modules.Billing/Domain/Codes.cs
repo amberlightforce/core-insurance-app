@@ -100,10 +100,16 @@ internal static class ReceiptCodes
     public const string InvoiceNotOpen = "INVOICE_NOT_OPEN";
     public const string ConcurrentAllocation = "CONCURRENT_ALLOCATION";
 
+    /// <summary>The cash of a fully unallocated receipt is unapplied again (BO-BIL-07).</summary>
+    public const string Unallocated = "UNALLOCATED";
+
     /// <summary>Deterministic matching rules (REQ-BIL-127) and the manual rule.</summary>
     public const string RuleReferencedInvoice = "REFERENCED_INVOICE";
     public const string RuleUniqueOpenAmount = "UNIQUE_OPEN_AMOUNT";
     public const string RuleManual = "MANUAL";
+
+    /// <summary>Rule id of a reversal row of an allocation (BO-BIL-07).</summary>
+    public const string RuleReversal = "REVERSAL";
 }
 
 /// <summary>Status of a payee account (PRD-06 §7.1 PaymentInstrument: Active, Superseded, Revoked).</summary>

@@ -16,6 +16,9 @@ internal sealed class PartyOptions
 
     /// <summary>Most current members one account can have (BO-PTY-04).</summary>
     public int AccountMemberLimit { get; set; } = 25;
+
+    /// <summary>Days after execution during which a merge can be unmerged (BO-PTY-05, REQ-PTY-007). TODO(hardening): pack data per jurisdiction.</summary>
+    public int UnmergeWindowDays { get; set; } = 30;
 }
 
 /// <summary>Contact point normalisation (REQ-PTY-082 E.164, REQ-PTY-083 email syntax).</summary>

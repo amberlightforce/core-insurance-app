@@ -68,6 +68,7 @@ function ProductCard({ product }: { product: ProductListItem }) {
   const name = i18n.language.startsWith('el') ? product.name.el : product.name.en;
   return (
     <Section
+      family="brand"
       title={name}
       meta={`${product.code} · ${product.lineCode}`}
       actions={

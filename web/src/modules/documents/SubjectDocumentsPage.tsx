@@ -83,7 +83,7 @@ function SubjectDocumentsList({ objectRef }: { objectRef: string }) {
   );
 
   return (
-    <Section title={t('subject.documents')} count={query.data?.items.length}>
+    <Section family="brand" title={t('subject.documents')} count={query.data?.items.length}>
       <QueryView query={query} notFoundMessage={t('subject.notFound')}>
         {(page) => (
           <SimpleTable<DocumentView>

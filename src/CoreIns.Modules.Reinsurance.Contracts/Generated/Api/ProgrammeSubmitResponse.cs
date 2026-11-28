@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Programme.submit result. PRD outputs: "programme, diff"</summary>
+/// <summary>ri.Programme.submit result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProgrammeSubmitResponse
 {
-    /// <summary>PRD: "programme"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'programme'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("programme")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Programme { get; init; }
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiProgramme Programme { get; init; }
 
-    /// <summary>PRD: "diff"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("diff")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Diff { get; init; }
+    /// <summary>Contract member 'approvalRequestId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequestId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ApprovalRequestId ApprovalRequestId { get; init; }
 }

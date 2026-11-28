@@ -223,7 +223,7 @@ export function PeriodClosePage() {
           </LinkButton>
         }
       />
-      <Section title={t('ops.close.periods')}>
+      <Section family="brand" title={t('ops.close.periods')}>
         <QueryView query={query}>
           {(page) =>
             page.items.length === 0 ? (
