@@ -4,39 +4,70 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.BillingPreview.compute result. PRD outputs: "full schedule, first due, credits, refund"</summary>
+/// <summary>Typed from REQ-BIL-058. PRD outputs: "full schedule, first due, credits, refund" (credits and refund come with the delta preview)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BillingPreviewComputeResponse
 {
-    /// <summary>PRD: "full schedule"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'planCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("planCode")]
+    public required string PlanCode { get; init; }
+
+    /// <summary>Contract member 'fullSchedule'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("fullSchedule")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? FullSchedule { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<FullScheduleItem> FullSchedule { get; init; }
 
-    /// <summary>PRD: "first due"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'firstDue'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("firstDue")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? FirstDue { get; init; }
+    public required FirstDueDetail FirstDue { get; init; }
 
-    /// <summary>PRD: "credits"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("credits")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Credits { get; init; }
+    /// <summary>Contract member 'total'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("total")]
+    public required global::CoreIns.SharedKernel.Money Total { get; init; }
 
-    /// <summary>PRD: "refund"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("refund")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Refund { get; init; }
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record FullScheduleItem
+    {
+        /// <summary>Contract member 'instalmentNo'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("instalmentNo")]
+        public required int InstalmentNo { get; init; }
+
+        /// <summary>Contract member 'dueDate'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("dueDate")]
+        public required global::CoreIns.SharedKernel.BusinessDate DueDate { get; init; }
+
+        /// <summary>Contract member 'amount'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+        public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+
+        /// <summary>Contract member 'byCategory'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("byCategory")]
+        public required global::System.Collections.Generic.IReadOnlyList<ByCategoryItem> ByCategory { get; init; }
+
+        /// <summary>Generated contract member.</summary>
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public sealed record ByCategoryItem
+        {
+            /// <summary>Contract member 'category'.</summary>
+            [global::System.Text.Json.Serialization.JsonPropertyName("category")]
+            public required string Category { get; init; }
+
+            /// <summary>Contract member 'amount'.</summary>
+            [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+            public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+        }
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record FirstDueDetail
+    {
+        /// <summary>Contract member 'dueDate'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("dueDate")]
+        public required global::CoreIns.SharedKernel.BusinessDate DueDate { get; init; }
+
+        /// <summary>Contract member 'amount'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+        public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+    }
 }

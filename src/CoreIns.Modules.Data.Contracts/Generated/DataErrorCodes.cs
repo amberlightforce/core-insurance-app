@@ -94,7 +94,7 @@ public static class DataErrorCodes
 
     /// <summary>DAT-ERR-033 (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): dat.BiasTest.run.</para>
+    /// <para>Declared by 7 operation(s): dat.BiasTest.run, dat.Model.approve, dat.Model.get, dat.Model.recordValidation, dat.Model.register, dat.Model.retire, dat.Model.submitValidation.</para>
     /// </remarks>
     public const string V033 = "DAT-ERR-033";
 

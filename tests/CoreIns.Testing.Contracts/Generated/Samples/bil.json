@@ -70,10 +70,37 @@
       "preview": "unspecified"
     },
     "bil.BillingPreview.compute": {
-      "fullSchedule": "unspecified",
-      "firstDue": "unspecified",
-      "credits": "unspecified",
-      "refund": "unspecified"
+      "planCode": "SAMPLE_CODE",
+      "fullSchedule": [
+        {
+          "instalmentNo": 1,
+          "dueDate": "2026-10-07",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "byCategory": [
+            {
+              "category": "SAMPLE_CODE",
+              "amount": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ]
+        }
+      ],
+      "firstDue": {
+        "dueDate": "2026-10-07",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
     },
     "bil.Commission.dispute": {
       "dispute": "unspecified",
@@ -576,14 +603,34 @@
       }
     },
     "bil.PaymentPlan.change": {
-      "planInstance": "unspecified",
-      "schedule": "unspecified"
+      "planInstanceId": "01928893-da9f-7772-8f8d-23b93ef4e59b",
+      "planCode": "SAMPLE_CODE",
+      "planVersion": "SAMPLE_CODE",
+      "downPayment": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "schedule": [
+        {
+          "dueDate": "2026-10-07",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
     },
     "bil.PaymentPlan.list": {
       "plans": [
         {
           "planCode": "SAMPLE_CODE",
-          "planVersion": "SAMPLE_CODE"
+          "planVersion": "SAMPLE_CODE",
+          "instalments": 1,
+          "intervalMonths": 1,
+          "fee": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
         }
       ],
       "exclusions": [
@@ -1404,14 +1451,52 @@
       ]
     },
     "BillingPreviewComputeRequest": {
-      "quoteJobTerm": "unspecified",
-      "hypotheticalPlan": "unspecified"
+      "termId": "0192f369-3748-77db-8803-be7985457997",
+      "planCode": "SAMPLE_CODE",
+      "termFrom": "2026-10-07",
+      "dueDay": 1,
+      "charges": [
+        {
+          "category": "SAMPLE_CODE",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
     },
     "BillingPreviewComputeResponse": {
-      "fullSchedule": "unspecified",
-      "firstDue": "unspecified",
-      "credits": "unspecified",
-      "refund": "unspecified"
+      "planCode": "SAMPLE_CODE",
+      "fullSchedule": [
+        {
+          "instalmentNo": 1,
+          "dueDate": "2026-10-07",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "byCategory": [
+            {
+              "category": "SAMPLE_CODE",
+              "amount": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ]
+        }
+      ],
+      "firstDue": {
+        "dueDate": "2026-10-07",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      },
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
     },
     "BillingTermView": {
       "policyTermId": "019262fd-5d13-7722-8fb8-56e4a50dbd09",
@@ -2468,20 +2553,40 @@
       "vopResult": "unspecified"
     },
     "PaymentPlanChangeRequest": {
-      "term": "unspecified",
-      "plan": "unspecified",
-      "method": "unspecified",
-      "dueDay": "unspecified"
+      "termId": "01923abf-bc30-7c06-8d64-a5e5a286bf72",
+      "planCode": "SAMPLE_CODE",
+      "method": "SAMPLE_CODE",
+      "dueDay": 1
     },
     "PaymentPlanChangeResponse": {
-      "planInstance": "unspecified",
-      "schedule": "unspecified"
+      "planInstanceId": "01920d20-9c96-7fd4-8ffd-a9841583982f",
+      "planCode": "SAMPLE_CODE",
+      "planVersion": "SAMPLE_CODE",
+      "downPayment": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "schedule": [
+        {
+          "dueDate": "2026-10-07",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
     },
     "PaymentPlanListResponse": {
       "plans": [
         {
           "planCode": "SAMPLE_CODE",
-          "planVersion": "SAMPLE_CODE"
+          "planVersion": "SAMPLE_CODE",
+          "instalments": 1,
+          "intervalMonths": 1,
+          "fee": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
         }
       ],
       "exclusions": [

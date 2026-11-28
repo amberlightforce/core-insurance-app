@@ -4,15 +4,22 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.User.update request. PRD inputs: "user fields"</summary>
+/// <summary>plt.User.update request: changes the display name, email or language of a directory entry (path id).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record UserUpdateRequest
 {
-    /// <summary>PRD: "user fields"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("userFields")]
+    /// <summary>Contract member 'displayName'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("displayName")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? UserFields { get; init; }
+    public string? DisplayName { get; init; }
+
+    /// <summary>Contract member 'email'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("email")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Email { get; init; }
+
+    /// <summary>Contract member 'language'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("language")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Platform.Contracts.Api.UserLanguage? Language { get; init; }
 }

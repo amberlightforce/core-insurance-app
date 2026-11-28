@@ -15,7 +15,7 @@ public interface IBillingPaymentPlanService
     /// <remarks>
     /// <para>Operation bil.PaymentPlan.change (command; HTTP POST /api/bil/v1/payment-plans/change).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-052, REQ-BIL-059. Wave W5.</para>
     /// <para>Exposure: ui; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
     /// <para>Errors: BIL-ERR-NOT-ELIGIBLE (422), BIL-ERR-NOT-PERMITTED (403), BIL-ERR-IDEMPOTENCY-MISMATCH (409).</para>

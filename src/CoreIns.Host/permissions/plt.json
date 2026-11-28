@@ -2,12 +2,25 @@
   "Platform": {
     "Permissions": {
       "Grants": {
-        "plt.Approval.decide": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "plt.Approval.decide": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "plt.Approval.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
-        "plt.Approval.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "plt.Approval.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "plt.Approval.withdraw": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "plt.Approval.verifyForExecution": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "plt.ApprovalType.register": [ "Platform.Admin" ],
+        // BO-PLT-05: user directory and role assignments are administered by the platform administrators; a role grant needs a second administrator (PLT.ROLE_GRANT approval).
+        "plt.User.create": [ "Platform.Admin" ],
+        "plt.User.update": [ "Platform.Admin" ],
+        "plt.User.get": [ "Platform.Admin" ],
+        "plt.User.search": [ "Platform.Admin" ],
+        "plt.User.suspend": [ "Platform.Admin" ],
+        "plt.User.reactivate": [ "Platform.Admin" ],
+        "plt.User.disable": [ "Platform.Admin" ],
+        "plt.RoleAssignment.grant": [ "Platform.Admin" ],
+        "plt.RoleAssignment.revoke": [ "Platform.Admin" ],
+        // Every signed-in person reads and sets their own language.
+        "plt.UserProfile.getPreferences": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.ComplianceOfficer", "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        "plt.UserProfile.setLanguage": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Staff.RecoverySpecialist", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.ComplianceOfficer", "Staff.MigrationManager", "Staff.DataSteward", "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
         // SL6-PLT-AI: AI control plane. Toggles and the kill switch are administrator-only; invoking and the reads are staff.
         "plt.AiToggle.set": [ "Platform.Admin" ],
         "plt.AiToggle.resolve": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
@@ -23,6 +36,13 @@
         "plt.DevClock.advance": [ "Platform.Admin" ],
         "plt.DevClock.get": [ "Platform.Admin" ]
       }
+    },
+    "Authority": {
+      // BO-PLT-05: any administrator may decide a role grant (the maker can never decide their own request: four eyes in plt.Approval).
+      // ILLUSTRATIVE (no approved authority matrix; ignored in Production, so role grants fail closed there until an approved grant is configured).
+      "Grants": [
+        { "Id": "plt-admin-role-grant", "Role": "Platform.Admin", "Type": "PLT.ROLE_GRANT", "Illustrative": true }
+      ]
     }
   }
 }

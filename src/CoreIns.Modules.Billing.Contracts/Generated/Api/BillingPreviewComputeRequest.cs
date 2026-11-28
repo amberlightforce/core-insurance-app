@@ -4,34 +4,44 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.BillingPreview.compute request. PRD inputs: "quote/job/term, hypothetical plan or delta"</summary>
-/// <remarks>
-/// <para>Exactly one of: hypotheticalPlan | delta.</para>
-/// </remarks>
+/// <summary>Typed from REQ-BIL-058. PRD inputs: "quote/job/term, hypothetical plan or delta" (the delta is not served yet)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BillingPreviewComputeRequest
 {
-    /// <summary>PRD: "quote/job/term"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("quoteJobTerm")]
+    /// <summary>A bound term whose positive charges are spread</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("termId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? QuoteJobTerm { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.PolicyTermId? TermId { get; init; }
 
-    /// <summary>PRD: "hypothetical plan or delta" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("hypotheticalPlan")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? HypotheticalPlan { get; init; }
+    /// <summary>The hypothetical plan</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("planCode")]
+    public required string PlanCode { get; init; }
 
-    /// <summary>PRD: "hypothetical plan or delta" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("delta")]
+    /// <summary>Term start for a quote preview without a term</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("termFrom")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Delta { get; init; }
+    public global::CoreIns.SharedKernel.BusinessDate? TermFrom { get; init; }
+
+    /// <summary>Due day of the instalments after the first</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dueDay")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? DueDay { get; init; }
+
+    /// <summary>Hypothetical charges of a quote (without termId)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("charges")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<ChargeItem>? Charges { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ChargeItem
+    {
+        /// <summary>Contract member 'category'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("category")]
+        public required string Category { get; init; }
+
+        /// <summary>Contract member 'amount'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+        public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+    }
 }

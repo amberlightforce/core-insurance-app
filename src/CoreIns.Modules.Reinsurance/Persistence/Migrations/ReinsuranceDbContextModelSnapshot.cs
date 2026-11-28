@@ -1545,6 +1545,45 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.LineTableRow", b =>
+                {
+                    b.Property<Guid>("TableId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("table_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Rows")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("rows");
+
+                    b.Property<int>("VersionNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("version_no");
+
+                    b.HasKey("TableId")
+                        .HasName("pk_line_table");
+
+                    b.HasIndex("LegalEntityId", "VersionNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_line_table_version");
+
+                    b.ToTable("line_table", "ri");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.OccurrenceClaimRow", b =>
                 {
                     b.Property<Guid>("OccurrenceId")
@@ -2178,6 +2217,60 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                             t.HasCheckConstraint("ck_section_rev", "rev >= 1 AND section_no >= 1");
 
                             t.HasCheckConstraint("ck_section_scope", "cardinality(product_codes) >= 1 AND cardinality(coverage_codes) >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.SecurityRuleRow", b =>
+                {
+                    b.Property<Guid>("RuleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("rule_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateOnly>("EffectiveFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("effective_from");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<decimal?>("MaxSharePct")
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("max_share_pct");
+
+                    b.Property<string>("RatingFloor")
+                        .HasColumnType("text")
+                        .HasColumnName("rating_floor");
+
+                    b.Property<string>("Ratings")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("ratings");
+
+                    b.Property<int>("VersionNo")
+                        .HasColumnType("integer")
+                        .HasColumnName("version_no");
+
+                    b.HasKey("RuleId")
+                        .HasName("pk_security_rule");
+
+                    b.HasIndex("LegalEntityId", "VersionNo")
+                        .IsUnique()
+                        .HasDatabaseName("ux_security_rule_version");
+
+                    b.ToTable("security_rule", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_security_rule_share", "max_share_pct IS NULL OR (max_share_pct > 0 AND max_share_pct <= 100)");
                         });
                 });
 

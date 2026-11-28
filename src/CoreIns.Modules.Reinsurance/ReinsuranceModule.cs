@@ -84,6 +84,8 @@ public static class ReinsuranceModule
                 // BO-RI-01: programmes and their versions move (UPDATE; a trigger seals identity and, past DRAFT, the content); the layers of a Draft are replaced (DELETE, guarded).
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.programme, {Schema}.programme_version TO {appRole}",
                 $"GRANT SELECT, INSERT, DELETE ON {Schema}.programme_layer TO {appRole}",
+                // BO-RI-05: security rule sets and line table versions are append-only (SELECT, INSERT only).
+                $"GRANT SELECT, INSERT ON {Schema}.security_rule, {Schema}.line_table TO {appRole}",
             ]),
     ];
 
@@ -225,6 +227,23 @@ public static class ReinsuranceModule
         services.AddCommandAuditor<CancelCashCall, CashCallCancelResponse, CancelCashCallAuditor>();
         services.AddCommand<CancelCashCall, CashCallCancelResponse, CancelCashCallHandler>(CommandDescriptor.For("ri.CashCall.cancel"));
 
+        // BO-RI-05: panel changes (filed as endorsements), security rules and the line table.
+        services.AddScoped<SecurityReader>();
+        services.AddScoped<LineTableReader>();
+        services.AddScoped<PanelEndorsement>();
+        services.AddScoped<IValidator<AddParticipations>, AddParticipationsValidator>();
+        services.AddCommandAuditor<AddParticipations, ParticipationAddResponse, AddParticipationsAuditor>();
+        services.AddCommand<AddParticipations, ParticipationAddResponse, AddParticipationsHandler>(CommandDescriptor.For("ri.Participation.add") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ReplaceParticipation>, ReplaceParticipationValidator>();
+        services.AddCommandAuditor<ReplaceParticipation, ParticipationReplaceResponse, ReplaceParticipationAuditor>();
+        services.AddCommand<ReplaceParticipation, ParticipationReplaceResponse, ReplaceParticipationHandler>(CommandDescriptor.For("ri.Participation.replace") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<SetSecurityRules>, SetSecurityRulesValidator>();
+        services.AddCommandAuditor<SetSecurityRules, SecurityRulesSetResponse, SetSecurityRulesAuditor>();
+        services.AddCommand<SetSecurityRules, SecurityRulesSetResponse, SetSecurityRulesHandler>(CommandDescriptor.For("ri.SecurityRules.set") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<SetLineTable>, SetLineTableValidator>();
+        services.AddCommandAuditor<SetLineTable, LineTableSetResponse, SetLineTableAuditor>();
+        services.AddCommand<SetLineTable, LineTableSetResponse, SetLineTableHandler>(CommandDescriptor.For("ri.LineTable.set") with { SupportsDryRun = true });
+
         // The scanner's per-contract command (internal, no HTTP; exactly-once by the row lock and the state it finds).
         services.AddCommandAuditor<ApplyDueLifecycle, string, ApplyDueLifecycleAuditor>();
         services.AddCommand<ApplyDueLifecycle, string, ApplyDueLifecycleHandler>(
@@ -295,6 +314,10 @@ public static class ReinsuranceModule
             .Describe("Όποιος καταχώρισε, επεξεργάστηκε ή υπέβαλε τη σύμβαση δεν μπορεί να την εγκρίνει.", "Whoever entered, edited or submitted the contract cannot approve it."),
         ErrorDefinition.For(ModuleCode.RI, "SIGNED-LINES", 422, "Τα υπογεγραμμένα μερίδια δεν είναι έγκυρα", "The signed lines are not valid")
             .Describe("Το άθροισμα των υπογεγραμμένων μεριδίων πρέπει να ισούται με το τοποθετημένο ποσοστό, με ακριβώς έναν ηγέτη.", "Signed lines must add up to the placed share, with exactly one lead."),
+        ErrorDefinition.For(ModuleCode.RI, "SECURITY", 422, "Παραβίαση κανόνων ασφάλειας αντασφαλιστών", "The panel breaches the security rules")
+            .Describe("Ο αντασφαλιστής δεν πληροί το κατώτατο όριο αξιολόγησης ή υπερβαίνει το ανώτατο μερίδιο.", "The reinsurer is below the rating floor or over the maximum share."),
+        ErrorDefinition.For(ModuleCode.RI, "OVERLAP", 422, "Επικαλυπτόμενες ζώνες", "The bands overlap")
+            .Describe("Οι ζώνες του πίνακα γραμμών δεν πρέπει να επικαλύπτονται.", "The bands of a line table must not overlap."),
         ErrorDefinition.For(ModuleCode.RI, "REINSURER-ID", 422, "Μη έγκυρος αντασφαλιστής ή μεσίτης", "The reinsurer or broker is not valid")
             .Describe("Ο αντασφαλιστής και ο μεσίτης πρέπει να είναι ενεργά νομικά πρόσωπα του μητρώου μερών.", "The reinsurer and the broker must be usable organisation parties."),
         ErrorDefinition.For(ModuleCode.RI, "OCCURRENCE", 422, "Μη έγκυρη ομαδοποίηση συμβάντος", "The occurrence is not valid")

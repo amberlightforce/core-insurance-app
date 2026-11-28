@@ -4,23 +4,46 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.PaymentPlan.change result. PRD outputs: "plan instance, schedule"</summary>
+/// <summary>Typed from REQ-BIL-052, REQ-BIL-059. PRD outputs: "plan instance, schedule"</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PaymentPlanChangeResponse
 {
-    /// <summary>PRD: "plan instance"</summary>
+    /// <summary>Contract member 'planInstanceId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'planInstanceId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("planInstance")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PlanInstance { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("planInstanceId")]
+    public required global::System.Guid PlanInstanceId { get; init; }
 
-    /// <summary>PRD: "schedule"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("schedule")]
+    /// <summary>Contract member 'planCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("planCode")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Schedule { get; init; }
+    public string? PlanCode { get; init; }
+
+    /// <summary>Contract member 'planVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("planVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? PlanVersion { get; init; }
+
+    /// <summary>Contract member 'downPayment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("downPayment")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Money? DownPayment { get; init; }
+
+    /// <summary>Contract member 'schedule'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("schedule")]
+    public required global::System.Collections.Generic.IReadOnlyList<ScheduleItem> Schedule { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ScheduleItem
+    {
+        /// <summary>Contract member 'dueDate'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("dueDate")]
+        public required global::CoreIns.SharedKernel.BusinessDate DueDate { get; init; }
+
+        /// <summary>Contract member 'amount'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+        public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+    }
 }

@@ -23,4 +23,9 @@ public sealed record ModelRegisterRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("modelCard")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? ModelCard { get; init; }
+
+    /// <summary>BO-DAT-06: true registers the version as DRAFT and starts the validation lifecycle; false (default) keeps the legacy ACTIVE registration.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("draft")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Draft { get; init; }
 }

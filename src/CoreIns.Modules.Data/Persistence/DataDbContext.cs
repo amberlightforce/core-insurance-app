@@ -21,6 +21,10 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
 
     public DbSet<BiasReportRow> BiasReports => Set<BiasReportRow>();
 
+    public DbSet<ModelTransitionRow> ModelTransitions => Set<ModelTransitionRow>();
+
+    public DbSet<ModelMetricRow> ModelMetrics => Set<ModelMetricRow>();
+
     public DbSet<DataContractRow> DataContracts => Set<DataContractRow>();
 
     public DbSet<EventLedgerRow> EventLedger => Set<EventLedgerRow>();
@@ -89,7 +93,7 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
 
         modelBuilder.Entity<ModelRow>(e =>
         {
-            e.ToTable("model", t => t.HasCheckConstraint("ck_model_status", "status IN ('ACTIVE','SUSPENDED')"));
+            e.ToTable("model", t => t.HasCheckConstraint("ck_model_status", "status IN ('DRAFT','IN_VALIDATION','APPROVED','ACTIVE','SUSPENDED','RETIRED')"));
             e.HasKey(x => x.ModelId).HasName("pk_model");
             e.Property(x => x.ModelId).HasColumnName("model_id");
             e.Property(x => x.FeatureKey).HasColumnName("feature_key");
@@ -98,7 +102,48 @@ internal sealed class DataDbContext(DbContextOptions<DataDbContext> options) : M
             e.Property(x => x.Status).HasColumnName("status");
             e.Property(x => x.SuspendedReason).HasColumnName("suspended_reason");
             e.Property(x => x.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            e.Property(x => x.CreatedBy).HasColumnName("created_by");
+            e.Property(x => x.SubmittedBy).HasColumnName("submitted_by");
+            e.Property(x => x.ValidatedBy).HasColumnName("validated_by");
+            e.Property(x => x.ValidationOutcome).HasColumnName("validation_outcome");
+            e.Property(x => x.ValidationFindings).HasColumnName("validation_findings");
+            e.Property(x => x.ApprovedBy).HasColumnName("approved_by");
+            e.Property(x => x.EffectiveDate).HasColumnName("effective_date").HasColumnType("date");
+            e.Property(x => x.RetiredReason).HasColumnName("retired_reason");
+            e.Property(x => x.DriftFlagged).HasColumnName("drift_flagged");
+            e.Property(x => x.DriftReason).HasColumnName("drift_reason");
             e.HasIndex(x => new { x.FeatureKey, x.Version }).IsUnique().HasDatabaseName("ux_model_feature_version");
+        });
+
+        modelBuilder.Entity<ModelTransitionRow>(e =>
+        {
+            e.ToTable("model_transition");
+            e.HasKey(x => x.TransitionId).HasName("pk_model_transition");
+            e.Property(x => x.TransitionId).HasColumnName("transition_id");
+            e.Property(x => x.ModelId).HasColumnName("model_id");
+            e.Property(x => x.Status).HasColumnName("status");
+            e.Property(x => x.ActorKey).HasColumnName("actor_key");
+            e.Property(x => x.Note).HasColumnName("note");
+            e.Property(x => x.At).HasColumnName("at").HasColumnType("timestamptz");
+            e.HasIndex(x => x.ModelId).HasDatabaseName("ix_model_transition_model");
+        });
+
+        modelBuilder.Entity<ModelMetricRow>(e =>
+        {
+            e.ToTable("model_metric");
+            e.HasKey(x => x.MetricId).HasName("pk_model_metric");
+            e.Property(x => x.MetricId).HasColumnName("metric_id");
+            e.Property(x => x.ModelId).HasColumnName("model_id");
+            e.Property(x => x.Metric).HasColumnName("metric");
+            e.Property(x => x.Value).HasColumnName("value").HasColumnType("numeric(18,6)");
+            e.Property(x => x.Threshold).HasColumnName("threshold").HasColumnType("numeric(18,6)");
+            e.Property(x => x.Breached).HasColumnName("breached");
+            e.Property(x => x.SampleSize).HasColumnName("sample_size");
+            e.Property(x => x.WindowFrom).HasColumnName("window_from").HasColumnType("timestamptz");
+            e.Property(x => x.WindowTo).HasColumnName("window_to").HasColumnType("timestamptz");
+            e.Property(x => x.BreachId).HasColumnName("breach_id");
+            e.Property(x => x.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            e.HasIndex(x => new { x.ModelId, x.RecordedAt }).HasDatabaseName("ix_model_metric_model_time");
         });
 
         modelBuilder.Entity<BiasReportRow>(e =>
@@ -446,6 +491,68 @@ internal sealed class ModelRow
     public string? SuspendedReason { get; set; }
 
     public Instant CreatedAt { get; set; }
+
+    public string? CreatedBy { get; set; }
+
+    public string? SubmittedBy { get; set; }
+
+    public string? ValidatedBy { get; set; }
+
+    public string? ValidationOutcome { get; set; }
+
+    public string? ValidationFindings { get; set; }
+
+    public string? ApprovedBy { get; set; }
+
+    public DateOnly? EffectiveDate { get; set; }
+
+    public string? RetiredReason { get; set; }
+
+    public bool DriftFlagged { get; set; }
+
+    public string? DriftReason { get; set; }
+}
+
+/// <summary>One lifecycle step of a model (the status timeline).</summary>
+internal sealed class ModelTransitionRow
+{
+    public Guid TransitionId { get; set; }
+
+    public Guid ModelId { get; set; }
+
+    public string Status { get; set; } = string.Empty;
+
+    public string ActorKey { get; set; } = string.Empty;
+
+    public string? Note { get; set; }
+
+    public Instant At { get; set; }
+}
+
+/// <summary>One monitored metric record (PSI, drift, accuracy) of a model version.</summary>
+internal sealed class ModelMetricRow
+{
+    public Guid MetricId { get; set; }
+
+    public Guid ModelId { get; set; }
+
+    public string Metric { get; set; } = string.Empty;
+
+    public decimal Value { get; set; }
+
+    public decimal? Threshold { get; set; }
+
+    public bool Breached { get; set; }
+
+    public int SampleSize { get; set; }
+
+    public Instant? WindowFrom { get; set; }
+
+    public Instant? WindowTo { get; set; }
+
+    public Guid? BreachId { get; set; }
+
+    public Instant RecordedAt { get; set; }
 }
 
 /// <summary>The outcome of one bias test run.</summary>
