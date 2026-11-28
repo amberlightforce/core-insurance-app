@@ -1107,10 +1107,112 @@
       "passOrFailKeys": "unspecified"
     },
     "cmp.Submission.create": {
-      "regulatorySubmission": "unspecified"
+      "submission": {
+        "submissionId": "019200e7-c0ad-7514-880c-45ecccdafc17",
+        "number": "sample",
+        "version": 1,
+        "previousVersionId": "0192a042-8857-7497-85ca-179e19f5f443",
+        "status": "PLANNED",
+        "submissionType": "sample",
+        "regulator": "sample",
+        "periodLabel": "sample",
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "dueLegalStatus": "Verified",
+        "overdue": true,
+        "evidence": [
+          {
+            "kind": "sample",
+            "refId": "sample",
+            "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "label": "sample",
+            "addedBy": "sample",
+            "addedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "approvalStatus": "NONE",
+        "approvalRequestId": "01927238-be3c-7716-8b5a-240241ce62e1",
+        "preparedBy": "sample",
+        "requestedBy": "sample",
+        "approvedBy": "sample",
+        "filingChannel": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filer": "sample",
+        "filingReference": "sample",
+        "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "responseOutcome": "sample",
+        "responseReference": "sample",
+        "responseNote": "sample",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "note": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "history": [
+          {
+            "kind": "TRANSITION",
+            "fromStatus": "sample",
+            "toStatus": "sample",
+            "actor": "sample",
+            "at": "2026-10-07T09:00:00Z",
+            "text": "sample"
+          }
+        ]
+      }
     },
     "cmp.Submission.recordFiling": {
-      "regulatorySubmission": "unspecified"
+      "submission": {
+        "submissionId": "019220dd-6bd2-7ae9-8153-f7b16529b297",
+        "number": "sample",
+        "version": 1,
+        "previousVersionId": "01920d18-e560-7386-8f36-0f9fc9667b62",
+        "status": "PLANNED",
+        "submissionType": "sample",
+        "regulator": "sample",
+        "periodLabel": "sample",
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "dueLegalStatus": "Verified",
+        "overdue": true,
+        "evidence": [
+          {
+            "kind": "sample",
+            "refId": "sample",
+            "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "label": "sample",
+            "addedBy": "sample",
+            "addedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "approvalStatus": "NONE",
+        "approvalRequestId": "01923d95-5da0-7b88-8785-232e433e8110",
+        "preparedBy": "sample",
+        "requestedBy": "sample",
+        "approvedBy": "sample",
+        "filingChannel": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filer": "sample",
+        "filingReference": "sample",
+        "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "responseOutcome": "sample",
+        "responseReference": "sample",
+        "responseNote": "sample",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "note": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "history": [
+          {
+            "kind": "TRANSITION",
+            "fromStatus": "sample",
+            "toStatus": "sample",
+            "actor": "sample",
+            "at": "2026-10-07T09:00:00Z",
+            "text": "sample"
+          }
+        ]
+      }
     },
     "cmp.Taxonomy.import": {
       "taxonomyVersion": "unspecified"
@@ -3606,31 +3708,601 @@
     "FiscalRuleCertifyResponse": {
       "passOrFailKeys": "unspecified"
     },
+    "SubmissionApproveRequest": {
+      "id": "019204af-11f3-7c96-85ee-6ff080e39f07",
+      "decision": "REQUEST",
+      "comment": "sample"
+    },
     "SubmissionApproveResponse": {
-      "regulatorySubmission": "unspecified"
+      "submission": {
+        "submissionId": "019214cb-0696-7fa1-8c49-7ad71369da21",
+        "number": "sample",
+        "version": 1,
+        "previousVersionId": "0192a91e-e488-771c-8df2-2ec8c189c738",
+        "status": "PLANNED",
+        "submissionType": "sample",
+        "regulator": "sample",
+        "periodLabel": "sample",
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "dueLegalStatus": "Verified",
+        "overdue": true,
+        "evidence": [
+          {
+            "kind": "sample",
+            "refId": "sample",
+            "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "label": "sample",
+            "addedBy": "sample",
+            "addedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "approvalStatus": "NONE",
+        "approvalRequestId": "019209af-0cb8-71e4-808f-7a077b791fb3",
+        "preparedBy": "sample",
+        "requestedBy": "sample",
+        "approvedBy": "sample",
+        "filingChannel": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filer": "sample",
+        "filingReference": "sample",
+        "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "responseOutcome": "sample",
+        "responseReference": "sample",
+        "responseNote": "sample",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "note": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "history": [
+          {
+            "kind": "TRANSITION",
+            "fromStatus": "sample",
+            "toStatus": "sample",
+            "actor": "sample",
+            "at": "2026-10-07T09:00:00Z",
+            "text": "sample"
+          }
+        ]
+      }
+    },
+    "SubmissionArchiveCompletenessResponse": {
+      "from": "sample",
+      "to": "sample",
+      "periods": [
+        {
+          "period": "sample",
+          "issued": 1,
+          "ok": 1,
+          "gaps": [
+            {
+              "documentId": "0192b836-583f-705c-8622-28bfd9a4c1a7",
+              "documentNumber": "sample",
+              "kind": "sample"
+            }
+          ],
+          "orphanCount": 1
+        }
+      ],
+      "truncated": true
+    },
+    "SubmissionArchiveGap": {
+      "documentId": "01927984-4f4b-78e0-8852-786c9e485d1d",
+      "documentNumber": "sample",
+      "kind": "sample"
+    },
+    "SubmissionArchivePeriod": {
+      "period": "sample",
+      "issued": 1,
+      "ok": 1,
+      "gaps": [
+        {
+          "documentId": "0192d51d-5071-72dd-8e01-753847c64703",
+          "documentNumber": "sample",
+          "kind": "sample"
+        }
+      ],
+      "orphanCount": 1
+    },
+    "SubmissionAttachContentRequest": {
+      "id": "01929477-704b-73bf-850b-69da0af0cf88",
+      "kind": "EVIDENCE_PACK",
+      "refId": "sample",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "label": "sample"
     },
     "SubmissionAttachContentResponse": {
-      "regulatorySubmission": "unspecified"
+      "submission": {
+        "submissionId": "019201b9-cd88-73b9-8455-02147de00bc1",
+        "number": "sample",
+        "version": 1,
+        "previousVersionId": "01921f52-ee6f-7a25-844b-e8eab2269eb3",
+        "status": "PLANNED",
+        "submissionType": "sample",
+        "regulator": "sample",
+        "periodLabel": "sample",
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "dueLegalStatus": "Verified",
+        "overdue": true,
+        "evidence": [
+          {
+            "kind": "sample",
+            "refId": "sample",
+            "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "label": "sample",
+            "addedBy": "sample",
+            "addedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "approvalStatus": "NONE",
+        "approvalRequestId": "0192738d-df10-7567-8605-6983c5af71a7",
+        "preparedBy": "sample",
+        "requestedBy": "sample",
+        "approvedBy": "sample",
+        "filingChannel": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filer": "sample",
+        "filingReference": "sample",
+        "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "responseOutcome": "sample",
+        "responseReference": "sample",
+        "responseNote": "sample",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "note": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "history": [
+          {
+            "kind": "TRANSITION",
+            "fromStatus": "sample",
+            "toStatus": "sample",
+            "actor": "sample",
+            "at": "2026-10-07T09:00:00Z",
+            "text": "sample"
+          }
+        ]
+      }
+    },
+    "SubmissionCommentRequest": {
+      "id": "019235e1-a0d5-7542-82f3-2d2408cf330e",
+      "text": "sample"
     },
     "SubmissionCommentResponse": {
-      "regulatorySubmission": "unspecified"
+      "submission": {
+        "submissionId": "01920800-ff09-72f2-897c-9ed11f20ccc1",
+        "number": "sample",
+        "version": 1,
+        "previousVersionId": "019211ae-804a-7249-8765-ea825c870b52",
+        "status": "PLANNED",
+        "submissionType": "sample",
+        "regulator": "sample",
+        "periodLabel": "sample",
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "dueLegalStatus": "Verified",
+        "overdue": true,
+        "evidence": [
+          {
+            "kind": "sample",
+            "refId": "sample",
+            "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "label": "sample",
+            "addedBy": "sample",
+            "addedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "approvalStatus": "NONE",
+        "approvalRequestId": "01924e58-9129-7075-8a90-82935385ac12",
+        "preparedBy": "sample",
+        "requestedBy": "sample",
+        "approvedBy": "sample",
+        "filingChannel": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filer": "sample",
+        "filingReference": "sample",
+        "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "responseOutcome": "sample",
+        "responseReference": "sample",
+        "responseNote": "sample",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "note": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "history": [
+          {
+            "kind": "TRANSITION",
+            "fromStatus": "sample",
+            "toStatus": "sample",
+            "actor": "sample",
+            "at": "2026-10-07T09:00:00Z",
+            "text": "sample"
+          }
+        ]
+      }
+    },
+    "SubmissionCreateRequest": {
+      "submissionType": "sample",
+      "regulator": "sample",
+      "periodLabel": "sample",
+      "periodFrom": "2026-10-07",
+      "periodTo": "2026-10-07",
+      "dueDate": "2026-10-07",
+      "dueLegalStatus": "Verified",
+      "resubmitOf": "01922398-89cd-780d-8d86-f46f83fc6809",
+      "note": "sample"
     },
     "SubmissionCreateResponse": {
-      "regulatorySubmission": "unspecified"
+      "submission": {
+        "submissionId": "019228ff-7e44-7e30-837f-946070aaadc2",
+        "number": "sample",
+        "version": 1,
+        "previousVersionId": "019228db-63c6-78c1-85f2-82dea1654f20",
+        "status": "PLANNED",
+        "submissionType": "sample",
+        "regulator": "sample",
+        "periodLabel": "sample",
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "dueLegalStatus": "Verified",
+        "overdue": true,
+        "evidence": [
+          {
+            "kind": "sample",
+            "refId": "sample",
+            "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "label": "sample",
+            "addedBy": "sample",
+            "addedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "approvalStatus": "NONE",
+        "approvalRequestId": "019220cb-0324-7ee0-8fb8-3ca07e477372",
+        "preparedBy": "sample",
+        "requestedBy": "sample",
+        "approvedBy": "sample",
+        "filingChannel": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filer": "sample",
+        "filingReference": "sample",
+        "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "responseOutcome": "sample",
+        "responseReference": "sample",
+        "responseNote": "sample",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "note": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "history": [
+          {
+            "kind": "TRANSITION",
+            "fromStatus": "sample",
+            "toStatus": "sample",
+            "actor": "sample",
+            "at": "2026-10-07T09:00:00Z",
+            "text": "sample"
+          }
+        ]
+      }
+    },
+    "SubmissionEvidencePackRequest": {
+      "id": "019292b2-af4f-7930-8ab4-d562415c4b5a",
+      "createdFrom": "2026-10-07",
+      "createdTo": "2026-10-07",
+      "subject": "sample",
+      "legalClaimReason": "sample"
     },
     "SubmissionEvidencePackResponse": {
-      "regulatorySubmission": "unspecified"
+      "submission": {
+        "submissionId": "01925e00-5d51-76de-85ae-b9ab0eb55c29",
+        "number": "sample",
+        "version": 1,
+        "previousVersionId": "01921ca4-cbe1-7119-8807-5b97b4fde884",
+        "status": "PLANNED",
+        "submissionType": "sample",
+        "regulator": "sample",
+        "periodLabel": "sample",
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "dueLegalStatus": "Verified",
+        "overdue": true,
+        "evidence": [
+          {
+            "kind": "sample",
+            "refId": "sample",
+            "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "label": "sample",
+            "addedBy": "sample",
+            "addedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "approvalStatus": "NONE",
+        "approvalRequestId": "0192d5e4-f2b5-75bb-8aec-49f6fe243b9d",
+        "preparedBy": "sample",
+        "requestedBy": "sample",
+        "approvedBy": "sample",
+        "filingChannel": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filer": "sample",
+        "filingReference": "sample",
+        "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "responseOutcome": "sample",
+        "responseReference": "sample",
+        "responseNote": "sample",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "note": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "history": [
+          {
+            "kind": "TRANSITION",
+            "fromStatus": "sample",
+            "toStatus": "sample",
+            "actor": "sample",
+            "at": "2026-10-07T09:00:00Z",
+            "text": "sample"
+          }
+        ]
+      },
+      "archiveId": "0192e86f-08ab-7a59-8e5d-427e911f5158",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "documentCount": 1,
+      "excludedCount": 1
+    },
+    "SubmissionEvidenceRef": {
+      "kind": "sample",
+      "refId": "sample",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "label": "sample",
+      "addedBy": "sample",
+      "addedAt": "2026-10-07T09:00:00Z"
+    },
+    "SubmissionGetResponse": {
+      "submission": {
+        "submissionId": "019230ce-2c5d-72f1-8f4e-95eac2123389",
+        "number": "sample",
+        "version": 1,
+        "previousVersionId": "0192b766-1c9b-7c84-8a13-3919c838fa0a",
+        "status": "PLANNED",
+        "submissionType": "sample",
+        "regulator": "sample",
+        "periodLabel": "sample",
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "dueLegalStatus": "Verified",
+        "overdue": true,
+        "evidence": [
+          {
+            "kind": "sample",
+            "refId": "sample",
+            "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "label": "sample",
+            "addedBy": "sample",
+            "addedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "approvalStatus": "NONE",
+        "approvalRequestId": "01924920-0338-798f-8457-69b169f1e3ff",
+        "preparedBy": "sample",
+        "requestedBy": "sample",
+        "approvedBy": "sample",
+        "filingChannel": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filer": "sample",
+        "filingReference": "sample",
+        "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "responseOutcome": "sample",
+        "responseReference": "sample",
+        "responseNote": "sample",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "note": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "history": [
+          {
+            "kind": "TRANSITION",
+            "fromStatus": "sample",
+            "toStatus": "sample",
+            "actor": "sample",
+            "at": "2026-10-07T09:00:00Z",
+            "text": "sample"
+          }
+        ]
+      }
+    },
+    "SubmissionHistoryEntry": {
+      "kind": "TRANSITION",
+      "fromStatus": "sample",
+      "toStatus": "sample",
+      "actor": "sample",
+      "at": "2026-10-07T09:00:00Z",
+      "text": "sample"
+    },
+    "SubmissionQueryPage": {
+      "items": [
+        {
+          "submissionId": "01923764-687e-7f3b-8c5a-663162eef0a7",
+          "number": "sample",
+          "version": 1,
+          "previousVersionId": "01921b9b-b1db-7a9e-8016-3e115415ee20",
+          "status": "PLANNED",
+          "submissionType": "sample",
+          "regulator": "sample",
+          "periodLabel": "sample",
+          "periodFrom": "2026-10-07",
+          "periodTo": "2026-10-07",
+          "dueDate": "2026-10-07",
+          "dueLegalStatus": "Verified",
+          "overdue": true,
+          "evidence": [
+            {
+              "kind": "sample",
+              "refId": "sample",
+              "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              "label": "sample",
+              "addedBy": "sample",
+              "addedAt": "2026-10-07T09:00:00Z"
+            }
+          ],
+          "approvalStatus": "NONE",
+          "approvalRequestId": "01924b71-06e6-70aa-8d1a-e71d4ac47555",
+          "preparedBy": "sample",
+          "requestedBy": "sample",
+          "approvedBy": "sample",
+          "filingChannel": "sample",
+          "filedAt": "2026-10-07T09:00:00Z",
+          "filer": "sample",
+          "filingReference": "sample",
+          "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "responseOutcome": "sample",
+          "responseReference": "sample",
+          "responseNote": "sample",
+          "respondedAt": "2026-10-07T09:00:00Z",
+          "note": "sample",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "recordVersion": 1,
+          "history": [
+            {
+              "kind": "TRANSITION",
+              "fromStatus": "sample",
+              "toStatus": "sample",
+              "actor": "sample",
+              "at": "2026-10-07T09:00:00Z",
+              "text": "sample"
+            }
+          ]
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
     },
     "SubmissionRecordFilingRequest": {
       "submissionId": "01920667-bc40-7223-810e-d9e2f425fb7c",
-      "filingData": "unspecified",
-      "receipt": "unspecified"
+      "channel": "sample",
+      "filedAt": "2026-10-07T09:00:00Z",
+      "filer": "sample",
+      "filingReference": "sample",
+      "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     },
     "SubmissionRecordFilingResponse": {
-      "regulatorySubmission": "unspecified"
+      "submission": {
+        "submissionId": "0192df6d-e4aa-7362-895d-1008d639777a",
+        "number": "sample",
+        "version": 1,
+        "previousVersionId": "0192d0ea-9f6b-7e83-8069-5ab13edb69f9",
+        "status": "PLANNED",
+        "submissionType": "sample",
+        "regulator": "sample",
+        "periodLabel": "sample",
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "dueLegalStatus": "Verified",
+        "overdue": true,
+        "evidence": [
+          {
+            "kind": "sample",
+            "refId": "sample",
+            "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "label": "sample",
+            "addedBy": "sample",
+            "addedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "approvalStatus": "NONE",
+        "approvalRequestId": "0192e1ec-2bfd-7887-8145-e6aeb6c352d2",
+        "preparedBy": "sample",
+        "requestedBy": "sample",
+        "approvedBy": "sample",
+        "filingChannel": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filer": "sample",
+        "filingReference": "sample",
+        "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "responseOutcome": "sample",
+        "responseReference": "sample",
+        "responseNote": "sample",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "note": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "history": [
+          {
+            "kind": "TRANSITION",
+            "fromStatus": "sample",
+            "toStatus": "sample",
+            "actor": "sample",
+            "at": "2026-10-07T09:00:00Z",
+            "text": "sample"
+          }
+        ]
+      }
+    },
+    "SubmissionRecordResponseRequest": {
+      "id": "0192e17a-774f-70ba-870a-ef4f23e4509d",
+      "outcome": "ACKNOWLEDGED",
+      "reference": "sample",
+      "note": "sample"
     },
     "SubmissionRecordResponseResponse": {
-      "regulatorySubmission": "unspecified"
+      "submission": {
+        "submissionId": "0192435d-39df-786d-8842-ad56981245cc",
+        "number": "sample",
+        "version": 1,
+        "previousVersionId": "0192f967-fc2b-783f-87d7-f75925c222eb",
+        "status": "PLANNED",
+        "submissionType": "sample",
+        "regulator": "sample",
+        "periodLabel": "sample",
+        "periodFrom": "2026-10-07",
+        "periodTo": "2026-10-07",
+        "dueDate": "2026-10-07",
+        "dueLegalStatus": "Verified",
+        "overdue": true,
+        "evidence": [
+          {
+            "kind": "sample",
+            "refId": "sample",
+            "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "label": "sample",
+            "addedBy": "sample",
+            "addedAt": "2026-10-07T09:00:00Z"
+          }
+        ],
+        "approvalStatus": "NONE",
+        "approvalRequestId": "0192648b-4e35-7a2a-81af-8d9e7fc6dc8c",
+        "preparedBy": "sample",
+        "requestedBy": "sample",
+        "approvedBy": "sample",
+        "filingChannel": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filer": "sample",
+        "filingReference": "sample",
+        "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+        "responseOutcome": "sample",
+        "responseReference": "sample",
+        "responseNote": "sample",
+        "respondedAt": "2026-10-07T09:00:00Z",
+        "note": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "history": [
+          {
+            "kind": "TRANSITION",
+            "fromStatus": "sample",
+            "toStatus": "sample",
+            "actor": "sample",
+            "at": "2026-10-07T09:00:00Z",
+            "text": "sample"
+          }
+        ]
+      }
     },
     "SubmissionRenderXbrlRequest": {
       "submissionId": "01924e56-5a12-7a0f-8ff7-5672d26ed2b3"
@@ -3647,6 +4319,58 @@
       "instanceReference": "unspecified",
       "instanceHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "validationReport": "unspecified"
+    },
+    "SubmissionView": {
+      "submissionId": "0192f760-0565-7eb6-8959-bdff46fcb6cc",
+      "number": "sample",
+      "version": 1,
+      "previousVersionId": "01920900-a486-7bb6-823e-5708ee7d6fcc",
+      "status": "PLANNED",
+      "submissionType": "sample",
+      "regulator": "sample",
+      "periodLabel": "sample",
+      "periodFrom": "2026-10-07",
+      "periodTo": "2026-10-07",
+      "dueDate": "2026-10-07",
+      "dueLegalStatus": "Verified",
+      "overdue": true,
+      "evidence": [
+        {
+          "kind": "sample",
+          "refId": "sample",
+          "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "label": "sample",
+          "addedBy": "sample",
+          "addedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "approvalStatus": "NONE",
+      "approvalRequestId": "0192454f-d608-7c54-88cc-20b05f12fc45",
+      "preparedBy": "sample",
+      "requestedBy": "sample",
+      "approvedBy": "sample",
+      "filingChannel": "sample",
+      "filedAt": "2026-10-07T09:00:00Z",
+      "filer": "sample",
+      "filingReference": "sample",
+      "receiptHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "responseOutcome": "sample",
+      "responseReference": "sample",
+      "responseNote": "sample",
+      "respondedAt": "2026-10-07T09:00:00Z",
+      "note": "sample",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "recordVersion": 1,
+      "history": [
+        {
+          "kind": "TRANSITION",
+          "fromStatus": "sample",
+          "toStatus": "sample",
+          "actor": "sample",
+          "at": "2026-10-07T09:00:00Z",
+          "text": "sample"
+        }
+      ]
     },
     "TaxonomyActivateRequest": {
       "package": "unspecified",

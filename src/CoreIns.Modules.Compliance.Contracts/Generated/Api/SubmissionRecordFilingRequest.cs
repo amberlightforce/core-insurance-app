@@ -4,31 +4,37 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Submission.recordFiling request. PRD inputs: "submission id, filing data, receipt"</summary>
+/// <summary>cmp.Submission.recordFiling request: record the filing (channel, time, filer, reference, receipt hash) of an approved READY submission; it becomes SUBMITTED</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SubmissionRecordFilingRequest
 {
-    /// <summary>PRD: "submission id"</summary>
+    /// <summary>Contract member 'submissionId'.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'submissionId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("submissionId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Guid? SubmissionId { get; init; }
+    public required global::System.Guid SubmissionId { get; init; }
 
-    /// <summary>PRD: "filing data"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("filingData")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? FilingData { get; init; }
+    /// <summary>Filing channel, for example PORTAL, API, EMAIL</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
+    public required string Channel { get; init; }
 
-    /// <summary>PRD: "receipt"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("receipt")]
+    /// <summary>When it was filed (default now)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("filedAt")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Receipt { get; init; }
+    public global::CoreIns.SharedKernel.Instant? FiledAt { get; init; }
+
+    /// <summary>Who filed (default the caller)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("filer")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Filer { get; init; }
+
+    /// <summary>Contract member 'filingReference'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("filingReference")]
+    public required string FilingReference { get; init; }
+
+    /// <summary>SHA-256 of the receipt document, when one exists</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receiptHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? ReceiptHash { get; init; }
 }

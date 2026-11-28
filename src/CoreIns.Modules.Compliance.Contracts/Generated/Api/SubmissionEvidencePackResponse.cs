@@ -4,15 +4,30 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Submission.evidencePack result. PRD outputs: "regulatory submission"</summary>
+/// <summary>cmp.Submission.evidencePack result: the submission with the pack attached</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SubmissionEvidencePackResponse
 {
-    /// <summary>PRD: "regulatory submission"</summary>
+    /// <summary>Contract member 'submission'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("submission")]
+    public required global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionView Submission { get; init; }
+
+    /// <summary>Archive entry of the pack; download with doc.Archive.download (header X-Content-SHA256)</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'archiveId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("regulatorySubmission")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RegulatorySubmission { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("archiveId")]
+    public required global::System.Guid ArchiveId { get; init; }
+
+    /// <summary>Contract member 'hash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash Hash { get; init; }
+
+    /// <summary>Contract member 'documentCount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("documentCount")]
+    public required int DocumentCount { get; init; }
+
+    /// <summary>Documents left out because their recipient is under a DSAR restriction</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("excludedCount")]
+    public required int ExcludedCount { get; init; }
 }

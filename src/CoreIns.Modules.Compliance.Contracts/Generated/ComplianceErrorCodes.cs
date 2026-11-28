@@ -22,13 +22,13 @@ public static class ComplianceErrorCodes
 
     /// <summary>CMP-ERR-APPROVAL-REQUIRED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): cmp.Submission.recordFiling, cmp.Taxonomy.activate, cmp.Taxonomy.import, cmp.Taxonomy.list.</para>
+    /// <para>Declared by 3 operation(s): cmp.Taxonomy.activate, cmp.Taxonomy.import, cmp.Taxonomy.list.</para>
     /// </remarks>
     public const string ApprovalRequired = "CMP-ERR-APPROVAL-REQUIRED";
 
     /// <summary>CMP-ERR-APPROVAL-SAME-USER (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 7 operation(s): cmp.Submission.approve, cmp.Submission.attachContent, cmp.Submission.comment, cmp.Submission.create, cmp.Submission.evidencePack, cmp.Submission.recordFiling, cmp.Submission.recordResponse.</para>
+    /// <para>Declared by 1 operation(s): cmp.Submission.approve.</para>
     /// </remarks>
     public const string ApprovalSameUser = "CMP-ERR-APPROVAL-SAME-USER";
 
@@ -130,7 +130,7 @@ public static class ComplianceErrorCodes
 
     /// <summary>CMP-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 19 operation(s): cmp.Bureau.status, cmp.Complaint.acknowledge, cmp.Complaint.addAction, cmp.Complaint.approveReply, cmp.Complaint.classify, cmp.Complaint.close, cmp.Complaint.create, cmp.Complaint.escalate, cmp.Complaint.get, cmp.Complaint.link, cmp.Complaint.query, cmp.Complaint.submitReply, ….</para>
+    /// <para>Declared by 28 operation(s): cmp.Bureau.status, cmp.Complaint.acknowledge, cmp.Complaint.addAction, cmp.Complaint.approveReply, cmp.Complaint.classify, cmp.Complaint.close, cmp.Complaint.create, cmp.Complaint.escalate, cmp.Complaint.get, cmp.Complaint.link, cmp.Complaint.query, cmp.Complaint.submitReply, ….</para>
     /// </remarks>
     public const string NotFound = "CMP-ERR-NOT-FOUND";
 
@@ -139,6 +139,12 @@ public static class ComplianceErrorCodes
     /// <para>Declared by 1 operation(s): cmp.FiscalDocument.resubmit.</para>
     /// </remarks>
     public const string NotRejected = "CMP-ERR-NOT-REJECTED";
+
+    /// <summary>CMP-ERR-PACK-UNAVAILABLE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): cmp.Submission.evidencePack.</para>
+    /// </remarks>
+    public const string PackUnavailable = "CMP-ERR-PACK-UNAVAILABLE";
 
     /// <summary>CMP-ERR-REQ-UNKNOWN (HTTP 422).</summary>
     /// <remarks>
@@ -170,6 +176,24 @@ public static class ComplianceErrorCodes
     /// </remarks>
     public const string SourceUnknown = "CMP-ERR-SOURCE-UNKNOWN";
 
+    /// <summary>CMP-ERR-SUBMISSION-NOT-APPROVED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): cmp.Submission.recordFiling.</para>
+    /// </remarks>
+    public const string SubmissionNotApproved = "CMP-ERR-SUBMISSION-NOT-APPROVED";
+
+    /// <summary>CMP-ERR-SUBMISSION-STATE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 7 operation(s): cmp.Submission.approve, cmp.Submission.attachContent, cmp.Submission.comment, cmp.Submission.create, cmp.Submission.evidencePack, cmp.Submission.recordFiling, cmp.Submission.recordResponse.</para>
+    /// </remarks>
+    public const string SubmissionState = "CMP-ERR-SUBMISSION-STATE";
+
+    /// <summary>CMP-ERR-SUBMISSION-UNVERIFIED-DUE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): cmp.Submission.approve, cmp.Submission.recordFiling.</para>
+    /// </remarks>
+    public const string SubmissionUnverifiedDue = "CMP-ERR-SUBMISSION-UNVERIFIED-DUE";
+
     /// <summary>CMP-ERR-TAXONOMY-UNKNOWN (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 2 operation(s): cmp.Submission.renderXbrl, cmp.Submission.validateTaxonomy.</para>
@@ -198,7 +222,7 @@ public static class ComplianceErrorCodes
     public const string Prefix = "CMP-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AiChecklistIncomplete, AiProhibited, ApprovalRequired, ApprovalSameUser, BulkLimit, ClockCancelReason, ClockNoValue, ClockState, ClockUnknown, ComplaintState, CorrelatedNotFound, DatapointUnmapped, ExtensionNotAllowed, FiscalTotal, Held, IdempotencyMismatch, IdentityNotVerified, NotAComplaint, NotCancellable, NotCorrectable, NotFound, NotRejected, ReqUnknown, RootCauseRequired, RulesMissing, Sod, SourceUnknown, TaxonomyUnknown, TransportUnavailable, Validation, ValidationBlocking];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AiChecklistIncomplete, AiProhibited, ApprovalRequired, ApprovalSameUser, BulkLimit, ClockCancelReason, ClockNoValue, ClockState, ClockUnknown, ComplaintState, CorrelatedNotFound, DatapointUnmapped, ExtensionNotAllowed, FiscalTotal, Held, IdempotencyMismatch, IdentityNotVerified, NotAComplaint, NotCancellable, NotCorrectable, NotFound, NotRejected, PackUnavailable, ReqUnknown, RootCauseRequired, RulesMissing, Sod, SourceUnknown, SubmissionNotApproved, SubmissionState, SubmissionUnverifiedDue, TaxonomyUnknown, TransportUnavailable, Validation, ValidationBlocking];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -225,11 +249,15 @@ public static class ComplianceErrorCodes
         [NotCorrectable] = 422,
         [NotFound] = 404,
         [NotRejected] = 422,
+        [PackUnavailable] = 422,
         [ReqUnknown] = 422,
         [RootCauseRequired] = 422,
         [RulesMissing] = 422,
         [Sod] = 403,
         [SourceUnknown] = 422,
+        [SubmissionNotApproved] = 422,
+        [SubmissionState] = 422,
+        [SubmissionUnverifiedDue] = 422,
         [TaxonomyUnknown] = 422,
         [TransportUnavailable] = 503,
         [Validation] = 422,

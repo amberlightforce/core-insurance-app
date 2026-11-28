@@ -42,6 +42,14 @@ public sealed record AllocationView
     [global::System.Text.Json.Serialization.JsonPropertyName("source")]
     public required SourceValue Source { get; init; }
 
+    /// <summary>Set on a reversal row (negative amount) - the allocation it reverses</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'reversesAllocationId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reversesAllocationId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? ReversesAllocationId { get; init; }
+
     /// <summary>Contract member 'recordedAt'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("recordedAt")]
     public required global::CoreIns.SharedKernel.Instant RecordedAt { get; init; }

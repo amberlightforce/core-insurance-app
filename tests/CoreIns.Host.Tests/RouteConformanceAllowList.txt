@@ -14,7 +14,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/query
 CONTRACT_NOT_SERVED GET /api/bil/v1/mandates/{}
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-instruments
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-plans
-CONTRACT_NOT_SERVED GET /api/bil/v1/receipts
 CONTRACT_NOT_SERVED GET /api/chn/v1/account-current
 CONTRACT_NOT_SERVED GET /api/chn/v1/agent-logs/query
 CONTRACT_NOT_SERVED GET /api/chn/v1/api-products
@@ -103,7 +102,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/user-profile/get-preferences
 CONTRACT_NOT_SERVED GET /api/plt/v1/users/search
 CONTRACT_NOT_SERVED GET /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
-CONTRACT_NOT_SERVED GET /api/pol/v1/jobs
 CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/screening/case-get
 CONTRACT_NOT_SERVED GET /api/rat/v1/breakdowns/{}
@@ -159,8 +157,6 @@ CONTRACT_NOT_SERVED PATCH /api/uw/v1/contingencies/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
 CONTRACT_NOT_SERVED PATCH /api/wrk/v1/activities/{}
 CONTRACT_NOT_SERVED POST /api/bil/v1/account-currents/dispute
-CONTRACT_NOT_SERVED POST /api/bil/v1/allocations/reallocate
-CONTRACT_NOT_SERVED POST /api/bil/v1/allocations/unallocate
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/attach-term
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/change-payer
@@ -288,13 +284,6 @@ CONTRACT_NOT_SERVED POST /api/cmp/v1/evidence/submit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/import
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-reconciliation/run
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-rules/certify
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/approve
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/attach-content
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/comment
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/evidence-pack
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/record-filing
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/record-response
 CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/render-xbrl
 CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/validate-taxonomy
 CONTRACT_NOT_SERVED POST /api/cmp/v1/taxonomies/activate
@@ -466,13 +455,9 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/import/policy
 CONTRACT_NOT_SERVED POST /api/pol/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/pol/v1/import/term
 CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/compare-versions
-CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/copy-version
 CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/lease
-CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/new-version
-CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/not-taken
 CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/rebase
 CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/release-lease
-CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/requote
 CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/resolve-conflicts
 CONTRACT_NOT_SERVED POST /api/pol/v1/policy-moves/execute
 CONTRACT_NOT_SERVED POST /api/pol/v1/reactivations

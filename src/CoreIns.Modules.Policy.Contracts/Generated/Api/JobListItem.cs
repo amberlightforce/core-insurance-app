@@ -4,15 +4,124 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Job.list result. PRD outputs: "jobs"</summary>
+/// <summary>One job of pol.Job.list (REQ-POL-331). Newest first (created_at desc, job_id desc, keyset). `jobs` is the slim legacy object of the in-process caller (jobId, jobType, state, createdAt).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JobListItem
 {
-    /// <summary>PRD: "jobs"</summary>
+    /// <summary>Contract member 'jobId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
+
+    /// <summary>Contract member 'jobNumber'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobNumber")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.JobNumber? JobNumber { get; init; }
+
+    /// <summary>Contract member 'jobType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobType")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? JobType { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Modules.Policy.Contracts.Api.JobStateCode? State { get; init; }
+
+    /// <summary>Contract member 'referred'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("referred")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? Referred { get; init; }
+
+    /// <summary>Contract member 'policyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.PolicyId? PolicyId { get; init; }
+
+    /// <summary>Contract member 'policyholderPartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyholderPartyId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.PartyId? PolicyholderPartyId { get; init; }
+
+    /// <summary>Contract member 'accountId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("accountId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.AccountId? AccountId { get; init; }
+
+    /// <summary>Contract member 'productCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productCode")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ProductCode { get; init; }
+
+    /// <summary>Contract member 'producerCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("producerCode")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ProducerCode { get; init; }
+
+    /// <summary>Contract member 'channel'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Channel { get; init; }
+
+    /// <summary>Contract member 'quoteType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("quoteType")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public QuoteTypeValue? QuoteType { get; init; }
+
+    /// <summary>Contract member 'currentVersionNo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("currentVersionNo")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? CurrentVersionNo { get; init; }
+
+    /// <summary>Pass as expectedRecordVersion to the lifecycle commands</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? RecordVersion { get; init; }
+
+    /// <summary>Total of the current quote version, when priced</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("total")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Money? Total { get; init; }
+
+    /// <summary>The rating artefact the job is pinned to, once rated</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ratingArtefactHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? RatingArtefactHash { get; init; }
+
+    /// <summary>Contract member 'effectiveAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? EffectiveAt { get; init; }
+
+    /// <summary>Contract member 'createdAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("createdAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? CreatedAt { get; init; }
+
+    /// <summary>Contract member 'updatedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? UpdatedAt { get; init; }
+
+    /// <summary>Slim legacy object for in-process callers.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Shape not defined by the contract yet (Unspecified).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("jobs")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? Jobs { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<QuoteTypeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum QuoteTypeValue
+    {
+        /// <summary><c>QUICK</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("QUICK")]
+        Quick,
+
+        /// <summary><c>FULL</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("FULL")]
+        Full,
+    }
 }

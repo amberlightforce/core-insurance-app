@@ -8,9 +8,21 @@ namespace CoreIns.Modules.Billing.Contracts;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public static class BillingErrorCodes
 {
+    /// <summary>BIL-ERR-ALLOCATION-REFUNDED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): bil.Allocation.reallocate, bil.Allocation.unallocate.</para>
+    /// </remarks>
+    public const string AllocationRefunded = "BIL-ERR-ALLOCATION-REFUNDED";
+
+    /// <summary>BIL-ERR-ALREADY-REVERSED (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): bil.Allocation.reallocate, bil.Allocation.unallocate.</para>
+    /// </remarks>
+    public const string AlreadyReversed = "BIL-ERR-ALREADY-REVERSED";
+
     /// <summary>BIL-ERR-AMOUNT-MISMATCH (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 7 operation(s): bil.Allocation.allocate, bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.Payment.take.</para>
+    /// <para>Declared by 8 operation(s): bil.Allocation.allocate, bil.Allocation.reallocate, bil.Disbursement.get, bil.Disbursement.list, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.Payment.take.</para>
     /// </remarks>
     public const string AmountMismatch = "BIL-ERR-AMOUNT-MISMATCH";
 
@@ -46,7 +58,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-CURRENCY (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): bil.Allocation.allocate, bil.BillingAccount.attachTerm, bil.BillingAccount.moveTerm, bil.Disbursement.request, bil.Payment.take.</para>
+    /// <para>Declared by 6 operation(s): bil.Allocation.allocate, bil.Allocation.reallocate, bil.BillingAccount.attachTerm, bil.BillingAccount.moveTerm, bil.Disbursement.request, bil.Payment.take.</para>
     /// </remarks>
     public const string Currency = "BIL-ERR-CURRENCY";
 
@@ -146,6 +158,12 @@ public static class BillingErrorCodes
     /// </remarks>
     public const string NoCredit = "BIL-ERR-NO-CREDIT";
 
+    /// <summary>BIL-ERR-NOT-ALLOCATED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): bil.Allocation.reallocate, bil.Allocation.unallocate.</para>
+    /// </remarks>
+    public const string NotAllocated = "BIL-ERR-NOT-ALLOCATED";
+
     /// <summary>BIL-ERR-NOT-ELIGIBLE (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 2 operation(s): bil.PaymentPlan.change, bil.PaymentPlan.select.</para>
@@ -154,7 +172,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 18 operation(s): bil.Allocation.allocate, bil.BillingAccount.get, bil.Disbursement.approveRelease, bil.Disbursement.get, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.DisbursementBatch.release, bil.Invoice.get, bil.PayeeAccount.verify, bil.Payment.take, bil.Receipt.get, ….</para>
+    /// <para>Declared by 20 operation(s): bil.Allocation.allocate, bil.Allocation.reallocate, bil.Allocation.unallocate, bil.BillingAccount.get, bil.Disbursement.approveRelease, bil.Disbursement.get, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.DisbursementBatch.release, bil.Invoice.get, bil.PayeeAccount.verify, ….</para>
     /// </remarks>
     public const string NotFound = "BIL-ERR-NOT-FOUND";
 
@@ -190,7 +208,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-OVER-ALLOCATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): bil.Allocation.allocate, bil.Allocation.reallocate, bil.Allocation.unallocate.</para>
+    /// <para>Declared by 2 operation(s): bil.Allocation.allocate, bil.Allocation.reallocate.</para>
     /// </remarks>
     public const string OverAllocation = "BIL-ERR-OVER-ALLOCATION";
 
@@ -217,6 +235,12 @@ public static class BillingErrorCodes
     /// <para>Declared by 6 operation(s): bil.BillingAccount.close, bil.BillingAccount.create, bil.BillingAccount.get, bil.BillingAccount.reopen, bil.BillingAccount.search, bil.BillingAccount.update.</para>
     /// </remarks>
     public const string PayerRole = "BIL-ERR-PAYER-ROLE";
+
+    /// <summary>BIL-ERR-PERIOD-LOCKED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): bil.Allocation.reallocate, bil.Allocation.unallocate.</para>
+    /// </remarks>
+    public const string PeriodLocked = "BIL-ERR-PERIOD-LOCKED";
 
     /// <summary>BIL-ERR-PLAN (HTTP 422).</summary>
     /// <remarks>
@@ -256,7 +280,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-SOD (HTTP 403).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): bil.Disbursement.approveRelease, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.DisbursementBatch.approveRelease, bil.Refund.decide.</para>
+    /// <para>Declared by 8 operation(s): bil.Allocation.reallocate, bil.Allocation.unallocate, bil.Disbursement.approveRelease, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.DisbursementBatch.approveRelease, bil.Refund.decide.</para>
     /// </remarks>
     public const string Sod = "BIL-ERR-SOD";
 
@@ -268,13 +292,13 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): bil.Allocation.allocate, bil.Disbursement.approveRelease, bil.DisbursementBatch.approveRelease, bil.Refund.decide.</para>
+    /// <para>Declared by 6 operation(s): bil.Allocation.allocate, bil.Allocation.reallocate, bil.Allocation.unallocate, bil.Disbursement.approveRelease, bil.DisbursementBatch.approveRelease, bil.Refund.decide.</para>
     /// </remarks>
     public const string Stale = "BIL-ERR-STALE";
 
     /// <summary>BIL-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): bil.Allocation.allocate, bil.Payment.take, bil.Receivable.register.</para>
+    /// <para>Declared by 5 operation(s): bil.Allocation.allocate, bil.Allocation.reallocate, bil.Allocation.unallocate, bil.Payment.take, bil.Receivable.register.</para>
     /// </remarks>
     public const string Validation = "BIL-ERR-VALIDATION";
 
@@ -294,11 +318,13 @@ public static class BillingErrorCodes
     public const string Prefix = "BIL-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AmountMismatch, ApprovalMismatch, ApprovalRequired, BalanceNotZero, Charset, CoolingOff, Currency, DayNotClosed, Duplicate, Entity, FiscalTreatmentOpen, HeldItems, IbanInvalid, IdempotencyMismatch, LegalHold, LevyUnsettled, LinesMismatch, LiveActivity, MandateState, MethodNotAllowed, MethodUnavailable, NoCollectAuthority, NoCredit, NotEligible, NotFound, NotPermitted, NotStoppable, NothingPayable, NoticeClockRunning, OpenObligation, OverAllocation, PayeeAccount, PayeeBlocked, PayeeUnverified, PayerRole, Plan, RedressRoute, RefundBelowMinimum, RefundOpen, RefundState, ScreeningUnavailable, Sod, Source, Stale, Validation, VopHold, VopUnavailable];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AllocationRefunded, AlreadyReversed, AmountMismatch, ApprovalMismatch, ApprovalRequired, BalanceNotZero, Charset, CoolingOff, Currency, DayNotClosed, Duplicate, Entity, FiscalTreatmentOpen, HeldItems, IbanInvalid, IdempotencyMismatch, LegalHold, LevyUnsettled, LinesMismatch, LiveActivity, MandateState, MethodNotAllowed, MethodUnavailable, NoCollectAuthority, NoCredit, NotAllocated, NotEligible, NotFound, NotPermitted, NotStoppable, NothingPayable, NoticeClockRunning, OpenObligation, OverAllocation, PayeeAccount, PayeeBlocked, PayeeUnverified, PayerRole, PeriodLocked, Plan, RedressRoute, RefundBelowMinimum, RefundOpen, RefundState, ScreeningUnavailable, Sod, Source, Stale, Validation, VopHold, VopUnavailable];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
     {
+        [AllocationRefunded] = 422,
+        [AlreadyReversed] = 409,
         [AmountMismatch] = 422,
         [ApprovalMismatch] = 422,
         [ApprovalRequired] = 422,
@@ -322,6 +348,7 @@ public static class BillingErrorCodes
         [MethodUnavailable] = 503,
         [NoCollectAuthority] = 403,
         [NoCredit] = 422,
+        [NotAllocated] = 422,
         [NotEligible] = 422,
         [NotFound] = 404,
         [NotPermitted] = 403,
@@ -334,6 +361,7 @@ public static class BillingErrorCodes
         [PayeeBlocked] = 409,
         [PayeeUnverified] = 422,
         [PayerRole] = 422,
+        [PeriodLocked] = 422,
         [Plan] = 422,
         [RedressRoute] = 422,
         [RefundBelowMinimum] = 422,

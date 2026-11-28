@@ -1614,6 +1614,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/cmp/v1/submissions/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tracker list
+         * @description Tracker list
+         *
+         *     PRD inputs: per op
+         *     PRD outputs: regulatory submission
+         */
+        get: operations["cmp.Submission.query"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cmp/v1/submissions/archive-completeness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Archive completeness for the reporting window
+         * @description Archive completeness for the reporting window
+         *
+         *     PRD inputs: per op
+         *     PRD outputs: regulatory submission
+         */
+        get: operations["cmp.Submission.archiveCompleteness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cmp/v1/submissions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tracker detail
+         * @description Tracker detail
+         *
+         *     PRD inputs: per op
+         *     PRD outputs: regulatory submission
+         */
+        get: operations["cmp.Submission.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/cmp/v1/submissions/render-xbrl": {
         parameters: {
             query?: never;
@@ -3225,61 +3294,202 @@ export interface components {
             /** @description PRD: "confirmations" */
             confirmations?: components["schemas"]["Unspecified"];
         };
-        /** @description cmp.Submission.create request. PRD inputs: "per op" */
-        SubmissionCreateRequest: Record<string, never>;
-        /** @description cmp.Submission.create result. PRD outputs: "regulatory submission" */
+        /** @description cmp.Submission.create request: register a regulatory submission (status PLANNED), or start the next version of a REJECTED one (resubmitOf) */
+        SubmissionCreateRequest: {
+            /** @description Kind of submission, for example SOLVENCY_QRT, ANNUAL_RETURN, IPT_RETURN, DORA_REPORT */
+            submissionType: string;
+            /** @description Receiving authority, for example BOG, HCMC, AADE */
+            regulator: string;
+            /** @description Reporting period label, for example 2026-Q3 */
+            periodLabel: string;
+            periodFrom?: components["schemas"]["LocalDate"];
+            periodTo?: components["schemas"]["LocalDate"];
+            /** @description Deadline from the regulatory calendar or configuration; absent = no deadline known */
+            dueDate?: components["schemas"]["LocalDate"];
+            /**
+             * @description Whether the due date is legally settled (default Unverified); an Unverified date is refused for approval and filing in Production (D-USR-19)
+             * @enum {string}
+             */
+            dueLegalStatus?: "Verified" | "Unverified";
+            /** @description A REJECTED submission this one replaces: the new version copies its content and links back to it */
+            resubmitOf?: components["schemas"]["Uuid"];
+            note?: string;
+        };
+        /** @description cmp.Submission.create result: the regulatory submission after the action */
         SubmissionCreateResponse: {
-            /** @description PRD: "regulatory submission" */
-            regulatorySubmission?: components["schemas"]["Unspecified"];
+            submission: components["schemas"]["SubmissionView"];
         };
-        /** @description cmp.Submission.attachContent request. PRD inputs: "per op" */
-        SubmissionAttachContentRequest: Record<string, never>;
-        /** @description cmp.Submission.attachContent result. PRD outputs: "regulatory submission" */
+        /** @description cmp.Submission.attachContent request: link an artefact (evidence pack, mart export, tax return, fiscal document) to a PLANNED or IN_PREPARATION submission */
+        SubmissionAttachContentRequest: {
+            id: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            kind: "EVIDENCE_PACK" | "MART_EXPORT" | "TAX_RETURN" | "FISCAL_DOCUMENT" | "OTHER";
+            /** @description Pack archive id, mart export manifest id, tax return id or the like */
+            refId: string;
+            /** @description Content hash of the artefact (pack hash, mart export manifest hash) */
+            hash?: components["schemas"]["Sha256"];
+            label?: string;
+        };
+        /** @description cmp.Submission.attachContent result: the regulatory submission after the action */
         SubmissionAttachContentResponse: {
-            /** @description PRD: "regulatory submission" */
-            regulatorySubmission?: components["schemas"]["Unspecified"];
+            submission: components["schemas"]["SubmissionView"];
         };
-        /** @description cmp.Submission.comment request. PRD inputs: "per op" */
-        SubmissionCommentRequest: Record<string, never>;
-        /** @description cmp.Submission.comment result. PRD outputs: "regulatory submission" */
+        /** @description cmp.Submission.comment request: append a comment to the submission history (allowed in every status; the record itself is not changed) */
+        SubmissionCommentRequest: {
+            id: components["schemas"]["Uuid"];
+            text: string;
+        };
+        /** @description cmp.Submission.comment result: the regulatory submission after the action */
         SubmissionCommentResponse: {
-            /** @description PRD: "regulatory submission" */
-            regulatorySubmission?: components["schemas"]["Unspecified"];
+            submission: components["schemas"]["SubmissionView"];
         };
-        /** @description cmp.Submission.approve request. PRD inputs: "per op" */
-        SubmissionApproveRequest: Record<string, never>;
-        /** @description cmp.Submission.approve result. PRD outputs: "regulatory submission" */
+        /** @description cmp.Submission.approve request: maker-checker. REQUEST (preparer) moves IN_PREPARATION to READY and opens the approval; APPROVE or REJECT (a different user) decides it. REJECT returns the submission to IN_PREPARATION. */
+        SubmissionApproveRequest: {
+            id: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "REQUEST" | "APPROVE" | "REJECT";
+            comment?: string;
+        };
+        /** @description cmp.Submission.approve result: the regulatory submission after the action */
         SubmissionApproveResponse: {
-            /** @description PRD: "regulatory submission" */
-            regulatorySubmission?: components["schemas"]["Unspecified"];
+            submission: components["schemas"]["SubmissionView"];
         };
-        /** @description cmp.Submission.recordFiling request. PRD inputs: "submission id, filing data, receipt" */
+        /** @description cmp.Submission.recordFiling request: record the filing (channel, time, filer, reference, receipt hash) of an approved READY submission; it becomes SUBMITTED */
         SubmissionRecordFilingRequest: {
-            /** @description PRD: "submission id" */
-            submissionId?: components["schemas"]["Uuid"];
-            /** @description PRD: "filing data" */
-            filingData?: components["schemas"]["Unspecified"];
-            /** @description PRD: "receipt" */
-            receipt?: components["schemas"]["Unspecified"];
+            submissionId: components["schemas"]["Uuid"];
+            /** @description Filing channel, for example PORTAL, API, EMAIL */
+            channel: string;
+            /** @description When it was filed (default now) */
+            filedAt?: components["schemas"]["Instant"];
+            /** @description Who filed (default the caller) */
+            filer?: string;
+            filingReference: string;
+            /** @description SHA-256 of the receipt document, when one exists */
+            receiptHash?: components["schemas"]["Sha256"];
         };
-        /** @description cmp.Submission.recordFiling result. PRD outputs: "regulatory submission (Filed)" */
+        /** @description cmp.Submission.recordFiling result: the regulatory submission after the action */
         SubmissionRecordFilingResponse: {
-            /** @description PRD: "regulatory submission (Filed)" */
-            regulatorySubmission?: components["schemas"]["Unspecified"];
+            submission: components["schemas"]["SubmissionView"];
         };
-        /** @description cmp.Submission.recordResponse request. PRD inputs: "per op" */
-        SubmissionRecordResponseRequest: Record<string, never>;
-        /** @description cmp.Submission.recordResponse result. PRD outputs: "regulatory submission" */
+        /** @description cmp.Submission.recordResponse request: the regulator answered a SUBMITTED submission (ACKNOWLEDGED or REJECTED) */
+        SubmissionRecordResponseRequest: {
+            id: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "ACKNOWLEDGED" | "REJECTED";
+            reference?: string;
+            note?: string;
+        };
+        /** @description cmp.Submission.recordResponse result: the regulatory submission after the action */
         SubmissionRecordResponseResponse: {
-            /** @description PRD: "regulatory submission" */
-            regulatorySubmission?: components["schemas"]["Unspecified"];
+            submission: components["schemas"]["SubmissionView"];
         };
-        /** @description cmp.Submission.evidencePack request. PRD inputs: "per op" */
-        SubmissionEvidencePackRequest: Record<string, never>;
-        /** @description cmp.Submission.evidencePack result. PRD outputs: "regulatory submission" */
+        /** @description cmp.Submission.evidencePack request: export the DOC evidence pack of a period (createdFrom, createdTo) or subject and attach it to a PLANNED or IN_PREPARATION submission */
+        SubmissionEvidencePackRequest: {
+            id: components["schemas"]["Uuid"];
+            createdFrom?: components["schemas"]["LocalDate"];
+            createdTo?: components["schemas"]["LocalDate"];
+            /** @description MODULE/Type/id */
+            subject?: string;
+            /** @description Needed to include documents of DSAR-restricted recipients */
+            legalClaimReason?: string;
+        };
+        /** @description cmp.Submission.evidencePack result: the submission with the pack attached */
         SubmissionEvidencePackResponse: {
-            /** @description PRD: "regulatory submission" */
-            regulatorySubmission?: components["schemas"]["Unspecified"];
+            submission: components["schemas"]["SubmissionView"];
+            /** @description Archive entry of the pack; download with doc.Archive.download (header X-Content-SHA256) */
+            archiveId: components["schemas"]["Uuid"];
+            hash: components["schemas"]["Sha256"];
+            documentCount: number;
+            /** @description Documents left out because their recipient is under a DSAR restriction */
+            excludedCount: number;
+        };
+        SubmissionEvidenceRef: {
+            kind: string;
+            refId: string;
+            hash?: components["schemas"]["Sha256"];
+            label?: string;
+            addedBy?: string;
+            addedAt?: components["schemas"]["Instant"];
+        };
+        /** @description One audit line: a status transition or a comment */
+        SubmissionHistoryEntry: {
+            /** @enum {string} */
+            kind: "TRANSITION" | "COMMENT";
+            fromStatus?: string;
+            toStatus?: string;
+            actor: string;
+            at: components["schemas"]["Instant"];
+            text?: string;
+        };
+        /** @description A regulatory submission with its lifecycle, evidence links, maker-checker and filing facts */
+        SubmissionView: {
+            submissionId: components["schemas"]["Uuid"];
+            number: string;
+            /** @description Version 1 is the first filing; a resubmission is the next version, linked by previousVersionId */
+            version: number;
+            previousVersionId?: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "PLANNED" | "IN_PREPARATION" | "READY" | "SUBMITTED" | "ACKNOWLEDGED" | "REJECTED" | "RESUBMITTED";
+            submissionType: string;
+            regulator: string;
+            periodLabel: string;
+            periodFrom?: components["schemas"]["LocalDate"];
+            periodTo?: components["schemas"]["LocalDate"];
+            dueDate?: components["schemas"]["LocalDate"];
+            /** @enum {string} */
+            dueLegalStatus?: "Verified" | "Unverified";
+            /** @description The due date has passed and the submission is not yet SUBMITTED */
+            overdue: boolean;
+            evidence: components["schemas"]["SubmissionEvidenceRef"][];
+            /** @enum {string} */
+            approvalStatus: "NONE" | "PENDING" | "APPROVED";
+            approvalRequestId?: components["schemas"]["Uuid"];
+            preparedBy?: string;
+            requestedBy?: string;
+            approvedBy?: string;
+            filingChannel?: string;
+            filedAt?: components["schemas"]["Instant"];
+            filer?: string;
+            filingReference?: string;
+            receiptHash?: components["schemas"]["Sha256"];
+            responseOutcome?: string;
+            responseReference?: string;
+            responseNote?: string;
+            respondedAt?: components["schemas"]["Instant"];
+            note?: string;
+            createdAt?: components["schemas"]["Instant"];
+            recordVersion?: number;
+            history: components["schemas"]["SubmissionHistoryEntry"][];
+        };
+        /** @description cmp.Submission.get result */
+        SubmissionGetResponse: {
+            submission: components["schemas"]["SubmissionView"];
+        };
+        /** @description Page of cmp.Submission.query results (cursor pagination, contract §3.5.5) */
+        SubmissionQueryPage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["SubmissionView"][];
+        };
+        SubmissionArchiveGap: {
+            documentId: components["schemas"]["Uuid"];
+            documentNumber: string;
+            /** @description MISSING_ARCHIVE, HASH_MISMATCH or the like (DOC archive completeness) */
+            kind: string;
+        };
+        SubmissionArchivePeriod: {
+            /** @description UTC month, yyyy-MM */
+            period: string;
+            issued: number;
+            ok: number;
+            gaps: components["schemas"]["SubmissionArchiveGap"][];
+            orphanCount: number;
+        };
+        /** @description cmp.Submission.archiveCompleteness result: DOC archive gaps per month for the reporting window */
+        SubmissionArchiveCompletenessResponse: {
+            from: string;
+            to: string;
+            periods: components["schemas"]["SubmissionArchivePeriod"][];
+            /** @description The check was cut off at the DOC document cap; narrow the range */
+            truncated: boolean;
         };
         /** @description cmp.Submission.renderXbrl request. PRD inputs: "submission id" */
         SubmissionRenderXbrlRequest: {
@@ -6886,6 +7096,127 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "cmp.Submission.query": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                /** @description Filter by status */
+                status?: string;
+                /** @description Filter by submission type */
+                submissionType?: string;
+                /** @description Filter by regulator */
+                regulator?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionQueryPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "cmp.Submission.archiveCompleteness": {
+        parameters: {
+            query?: {
+                /** @description First day, yyyy-MM-dd */
+                from?: string;
+                /** @description Last day, yyyy-MM-dd */
+                to?: string;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionArchiveCompletenessResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "cmp.Submission.get": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Identifier of the Submission */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionGetResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };

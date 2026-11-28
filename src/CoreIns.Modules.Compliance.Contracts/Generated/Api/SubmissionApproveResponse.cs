@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Compliance.Contracts.Api;
 
-/// <summary>cmp.Submission.approve result. PRD outputs: "regulatory submission"</summary>
+/// <summary>cmp.Submission.approve result: the regulatory submission after the action</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SubmissionApproveResponse
 {
-    /// <summary>PRD: "regulatory submission"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("regulatorySubmission")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RegulatorySubmission { get; init; }
+    /// <summary>Contract member 'submission'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("submission")]
+    public required global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionView Submission { get; init; }
 }
