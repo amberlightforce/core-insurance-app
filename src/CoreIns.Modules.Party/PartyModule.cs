@@ -152,6 +152,19 @@ public static class PartyModule
         services.AddCommand<BulkTransferProducerOfRecord, ProducerOfRecordBulkTransferResponse, BulkTransferProducerOfRecordHandler>(CommandDescriptor.For("pty.ProducerOfRecord.bulkTransfer") with { SupportsDryRun = true });
         services.AddCommand<CancelProducerOfRecord, ProducerOfRecordCancelResponse, CancelProducerOfRecordHandler>(CommandDescriptor.For("pty.ProducerOfRecord.cancel"));
 
+        services.AddOwnerDecidedApprovalType(PartyAuthorityTypes.PartyMergeApprovalType);
+        services.AddScoped<DuplicateFinder>();
+        services.AddScoped<PartyMergeQueries>();
+        services.AddScoped<IValidator<RequestPartyMerge>, RequestPartyMergeValidator>();
+        services.AddScoped<IValidator<DecidePartyMerge>, DecidePartyMergeValidator>();
+        services.AddScoped<IValidator<UnmergeParty>, UnmergePartyValidator>();
+        services.AddCommandAuditor<RequestPartyMerge, PartyMergeResponse, MergeAuditor>();
+        services.AddCommandAuditor<DecidePartyMerge, PartyMergeApproveResponse, MergeAuditor>();
+        services.AddCommandAuditor<UnmergeParty, PartyUnmergeResponse, MergeAuditor>();
+        services.AddCommand<RequestPartyMerge, PartyMergeResponse, RequestPartyMergeHandler>(CommandDescriptor.For("pty.Party.merge"));
+        services.AddCommand<DecidePartyMerge, PartyMergeApproveResponse, DecidePartyMergeHandler>(CommandDescriptor.For("pty.Party.approveMerge"));
+        services.AddCommand<UnmergeParty, PartyUnmergeResponse, UnmergePartyHandler>(CommandDescriptor.For("pty.Party.unmerge"));
+
         services.AddScoped<VulnerabilityQueries>();
         services.AddScoped<VulnerabilityWriter>();
         services.AddScoped<IValidator<RecordVulnerability>, RecordVulnerabilityValidator>();
@@ -233,6 +246,10 @@ public static class PartyModule
             .Describe("Η αλλαγή σε άλλον διαμεσολαβητή χρειάζεται αναφορά της επιστολής του πελάτη (letterReference).", "A change to another intermediary needs the customer's letter reference (letterReference)."),
         ErrorDefinition.For(ModuleCode.PTY, "STATE", 409, "Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση", "The action is not allowed in the current state")
             .Describe("Η έκδοση ή η συμφωνία δεν βρίσκεται σε κατάσταση που επιτρέπει την ενέργεια.", "The version or agreement is not in a state that allows the action."),
+        ErrorDefinition.For(ModuleCode.PTY, "MERGE-IDENTIFIER-CONFLICT", 422, "Τα πρόσωπα έχουν διαφορετικά έγκυρα ΑΦΜ", "The parties hold different valid AFMs")
+            .Describe("Δύο πρόσωπα με διαφορετικά έγκυρα ΑΦΜ δεν είναι το ίδιο πρόσωπο και δεν μπορούν να συγχωνευθούν.", "Two parties with different valid AFMs are not the same party and cannot be merged."),
+        ErrorDefinition.For(ModuleCode.PTY, "WINDOW-CLOSED", 422, "Το περιθώριο αναίρεσης έχει λήξει", "The unmerge window has closed")
+            .Describe("Η συγχώνευση δεν μπορεί πλέον να αναιρεθεί.", "The merge can no longer be unmerged."),
         ErrorDefinition.For(ModuleCode.PTY, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

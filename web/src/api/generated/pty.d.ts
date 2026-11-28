@@ -122,8 +122,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Merge or unmerge
-         * @description Merge or unmerge
+         * Request a merge of two parties (maker)
+         * @description BO-PTY-05. Asks to merge `mergedPartyId` into `survivorPartyId`; the request goes to a checker through a PLT approval
+         *     (PTY.PARTY_MERGE; the maker can never decide it). Nothing changes until `pty.Party.approveMerge` approves it. Two parties with
+         *     different valid AFMs, a restricted (DSAR) or an already merged party can never be merged. The survivor keeps its id.
          *
          *     PRD inputs: candidates, survivorship decisions
          *     PRD outputs: merge record, approval request
@@ -145,13 +147,97 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Unmerge within the window (stated separately for MIG and steward callers; same operation as the unmerge half …
-         * @description Unmerge within the window (stated separately for MIG and steward callers; same operation as the unmerge half of `pty.Party.merge / unmerge`)
+         * Unmerge within the window
+         * @description BO-PTY-05. Reverses an executed merge within the unmerge window: the absorbed party gets back its prior status and the survivor is
+         *     unchanged; no data of either party was ever moved, so nothing is lost. Publishes PartyUnmerged.
          *
          *     PRD inputs: merge_id, assignment of post-merge changes
          *     PRD outputs: restored parties, approval request
          */
         post: operations["pty.Party.unmerge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pty/v1/parties/merge/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve or reject a merge request (checker)
+         * @description BO-PTY-05. The checker decides the PLT approval of a PENDING_APPROVAL merge. The maker, editors and an AI agent cannot decide
+         *     (PLT-ERR-SELF-APPROVAL); the checker needs the merge authority. Approval executes the merge and publishes PartiesMerged.
+         */
+        post: operations["pty.Party.approveMerge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pty/v1/parties/merges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Merge requests and merges
+         * @description BO-PTY-05. Lists the merge records of the legal entity, newest first, optionally by status, by a party on either side or by merge id.
+         */
+        get: operations["pty.Party.mergeList"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pty/v1/parties/duplicates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Duplicate candidates
+         * @description BO-PTY-05 (contract addition, open user decision #4). The queue of suspected duplicate pairs, best first, with a score and the reasons:
+         *     AFM_EXACT (score 100), NAME_AND_BIRTH_DATE (90), NAME (60). Merged, restricted and already-pending pairs are left out. P2 values are masked.
+         */
+        get: operations["pty.Party.duplicates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pty/v1/parties/{id}/survivor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resolve the surviving party
+         * @description BO-PTY-05. Follows the merge pointers of a party to the party that survives (the party itself when it was never merged). Modules that
+         *     hold a party id in their own data use this to re-point; PTY does not rewrite other modules' references.
+         */
+        get: operations["pty.Party.resolveSurvivor"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1772,33 +1858,89 @@ export interface components {
             code: components["schemas"]["Code"];
             message: string;
         };
-        /** @description pty.Party.merge request. PRD inputs: "candidates, survivorship decisions" */
+        /** @description pty.Party.merge request (BO-PTY-05): merge `mergedPartyId` into `survivorPartyId` (the survivor keeps its id). Goes to a checker through a PLT approval; nothing changes until it is approved. */
         PartyMergeRequest: {
-            /** @description PRD: "candidates" */
-            candidates?: components["schemas"]["Unspecified"];
-            /** @description PRD: "survivorship decisions" */
-            survivorshipDecisions?: components["schemas"]["Unspecified"];
+            survivorPartyId: components["schemas"]["Uuid"];
+            mergedPartyId: components["schemas"]["Uuid"];
+            reason: string;
         };
-        /** @description pty.Party.merge result. PRD outputs: "merge record, approval request" */
+        /** @description pty.Party.merge result: the merge record (PENDING_APPROVAL) with its approval request id. */
         PartyMergeResponse: {
-            /** @description PRD: "merge record" */
-            mergeRecord?: components["schemas"]["Unspecified"];
-            /** @description PRD: "approval request" */
-            approvalRequest?: components["schemas"]["Unspecified"];
+            merge: components["schemas"]["PartyMergeView"];
         };
-        /** @description pty.Party.unmerge request. PRD inputs: "merge_id, assignment of post-merge changes" */
+        /** @description A merge record (pty.party_merge). Status PENDING_APPROVAL, EXECUTED, REJECTED or UNMERGED. */
+        PartyMergeView: {
+            mergeId: components["schemas"]["Uuid"];
+            survivorPartyId: components["schemas"]["Uuid"];
+            mergedPartyId: components["schemas"]["Uuid"];
+            survivorPartyNumber: string;
+            mergedPartyNumber: string;
+            /** @enum {string} */
+            status: "PENDING_APPROVAL" | "EXECUTED" | "REJECTED" | "UNMERGED";
+            reason: string;
+            requestedBy: string;
+            requestedAt: components["schemas"]["Instant"];
+            approvalRequestId?: components["schemas"]["Uuid"] | null;
+            decidedBy?: string | null;
+            decidedAt?: components["schemas"]["Instant"] | null;
+            decisionComment?: string | null;
+            executedAt?: components["schemas"]["Instant"] | null;
+            /** @description Until when the merge can be unmerged (set when executed) */
+            unmergeWindowEnd?: components["schemas"]["Instant"] | null;
+            unmergedAt?: components["schemas"]["Instant"] | null;
+            unmergedBy?: string | null;
+            /** @description Status the absorbed party had before the merge; restored on unmerge */
+            priorStatus?: components["schemas"]["Code"] | null;
+        };
+        /** @description Page of pty.Party.mergeList results */
+        PartyMergePage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["PartyMergeView"][];
+        };
+        /** @description pty.Party.approveMerge request (BO-PTY-05): the checker approves or rejects a PENDING_APPROVAL merge. The maker cannot decide (PLT-ERR-SELF-APPROVAL); the checker needs the merge authority. */
+        PartyMergeApproveRequest: {
+            mergeId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            comment?: string | null;
+        };
+        /** @description pty.Party.approveMerge result: the merge record after the decision (EXECUTED or REJECTED). */
+        PartyMergeApproveResponse: {
+            merge: components["schemas"]["PartyMergeView"];
+        };
+        /** @description pty.Party.unmerge request (BO-PTY-05): reverses an EXECUTED merge while its unmerge window is open (PTY-ERR-WINDOW-CLOSED otherwise). */
         PartyUnmergeRequest: {
-            /** @description PRD: "merge_id" */
-            mergeId?: components["schemas"]["Uuid"];
-            /** @description PRD: "assignment of post-merge changes" */
-            assignmentPostMergeChanges?: components["schemas"]["Unspecified"];
+            mergeId: components["schemas"]["Uuid"];
+            reason: string;
         };
-        /** @description pty.Party.unmerge result. PRD outputs: "restored parties, approval request" */
+        /** @description pty.Party.unmerge result: the merge record (UNMERGED) and the restored party. */
         PartyUnmergeResponse: {
-            /** @description PRD: "restored parties" */
-            restoredParties?: components["schemas"]["Unspecified"];
-            /** @description PRD: "approval request" */
-            approvalRequest?: components["schemas"]["Unspecified"];
+            merge: components["schemas"]["PartyMergeView"];
+            restoredPartyId: components["schemas"]["Uuid"];
+        };
+        /** @description pty.Party.resolveSurvivor result: the party that survives the merge chain of the requested party. */
+        PartySurvivorResponse: {
+            requestedPartyId: components["schemas"]["Uuid"];
+            survivorPartyId: components["schemas"]["Uuid"];
+            survivorPartyNumber: string;
+            /** @description True when the requested party was merged into the survivor */
+            merged: boolean;
+            /** @description The last merge on the chain */
+            mergeId?: components["schemas"]["Uuid"] | null;
+        };
+        /** @description One suspected duplicate pair of pty.Party.duplicates (BO-PTY-05): score 0..100 and the reasons (AFM_EXACT, NAME_AND_BIRTH_DATE, NAME). P2 values masked. */
+        DuplicateCandidate: {
+            /** @description Stable key of the pair (the two party ids, ordered) */
+            candidateKey: string;
+            score: number;
+            reasons: components["schemas"]["Code"][];
+            partyA: components["schemas"]["PartySearchItem"];
+            partyB: components["schemas"]["PartySearchItem"];
+            /** @description Set when the pair can never be merged (IDENTIFIER_CONFLICT) */
+            mergeBlockedReason?: components["schemas"]["Code"] | null;
+        };
+        /** @description Page of pty.Party.duplicates results */
+        DuplicateCandidatePage: components["schemas"]["PageEnvelope"] & {
+            items?: components["schemas"]["DuplicateCandidate"][];
         };
         /** @description pty.Identifier.verify request (BO-PTY-01): re-checks the current identifier of a scheme with the bound IdValidator. */
         IdentifierVerifyRequest: {
@@ -2924,12 +3066,6 @@ export interface components {
         /** @description BCP 47 language tag (el, en, el-GR). */
         LanguageCode: string;
         /**
-         * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
-         *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
-         *     members until then.
-         */
-        Unspecified: unknown;
-        /**
          * @description Module code (contract §3.6.1).
          * @enum {string}
          */
@@ -2945,6 +3081,12 @@ export interface components {
             from: components["schemas"]["LocalDate"];
             to: components["schemas"]["LocalDate"] | null;
         };
+        /**
+         * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
+         *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
+         *     members until then.
+         */
+        Unspecified: unknown;
         /** @description Value inside an open structure. JSON numbers are not allowed at any depth: amounts are Money objects or decimal strings, counts are integers only where a typed field says so. */
         OpenValue: string | boolean | null | components["schemas"]["OpenValue"][] | {
             [key: string]: components["schemas"]["OpenValue"];
@@ -3468,6 +3610,167 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pty.Party.approveMerge": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PartyMergeApproveRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartyMergeApproveResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pty.Party.mergeList": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                status?: "PENDING_APPROVAL" | "EXECUTED" | "REJECTED" | "UNMERGED";
+                /** @description Merges where this party is the survivor or the absorbed party */
+                partyId?: components["schemas"]["Uuid"];
+                mergeId?: components["schemas"]["Uuid"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartyMergePage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pty.Party.duplicates": {
+        parameters: {
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                minScore?: number;
+                /** @description Only candidates that include this party */
+                partyId?: components["schemas"]["Uuid"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DuplicateCandidatePage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pty.Party.resolveSurvivor": {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path: {
+                /** @description Party id */
+                id: components["schemas"]["Uuid"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartySurvivorResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
         };
     };

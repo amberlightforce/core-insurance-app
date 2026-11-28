@@ -4,23 +4,19 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Party.merge request. PRD inputs: "candidates, survivorship decisions"</summary>
+/// <summary>pty.Party.merge request (BO-PTY-05): merge `mergedPartyId` into `survivorPartyId` (the survivor keeps its id). Goes to a checker through a PLT approval; nothing changes until it is approved.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PartyMergeRequest
 {
-    /// <summary>PRD: "candidates"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("candidates")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Candidates { get; init; }
+    /// <summary>Contract member 'survivorPartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("survivorPartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId SurvivorPartyId { get; init; }
 
-    /// <summary>PRD: "survivorship decisions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("survivorshipDecisions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SurvivorshipDecisions { get; init; }
+    /// <summary>Contract member 'mergedPartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("mergedPartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId MergedPartyId { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
 }

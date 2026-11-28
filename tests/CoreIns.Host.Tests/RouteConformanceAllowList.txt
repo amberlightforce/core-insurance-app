@@ -494,8 +494,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/complete
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/start
-CONTRACT_NOT_SERVED POST /api/pty/v1/parties/merge
-CONTRACT_NOT_SERVED POST /api/pty/v1/parties/unmerge
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/bulk
 CONTRACT_NOT_SERVED POST /api/pty/v1/screening/case-decide
 CONTRACT_NOT_SERVED POST /api/rat/v1/bonus-malus/transition

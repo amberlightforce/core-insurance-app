@@ -13,7 +13,7 @@ namespace CoreIns.IntegrationTests.Platform;
 /// NX-EC-09: the segregation-of-duties matrix. One scenario set runs over every approval type that carries an amount authority
 /// (each row of <see cref="Rows"/> is one type; add a row when a module registers another): maker = checker, the maker's delegate and
 /// principal, an earlier editor after edit-then-approve, a checker whose authority is below the amount, and the one valid checker.
-/// Types with no amount (MIG.BATCH_RUN, MIG.MAPPING_SPEC (maker, creator and checker are also asserted in MappingSpecTests), PFC.Fallback, MKT.PackActivation, RI.CONTRACT_APPROVE) share the same platform decide path
+/// Types with no amount (PTY.PARTY_MERGE has a row with an empty Amount; MIG.BATCH_RUN, MIG.MAPPING_SPEC (maker, creator and checker are also asserted in MappingSpecTests), PFC.Fallback, MKT.PackActivation, RI.CONTRACT_APPROVE) share the same platform decide path
 /// exercised here but have no amount row to compare.
 /// </summary>
 public sealed class ApprovalSodMatrixTests(PostgresFixture database) : IClassFixture<PostgresFixture>, IAsyncLifetime
@@ -33,6 +33,7 @@ public sealed class ApprovalSodMatrixTests(PostgresFixture database) : IClassFix
         new Row(
             "PTY.COMMISSION_AGREEMENT", ModuleCode.PTY, "CommissionAgreementVersion", "PTY.COMMISSION_AGREEMENT", "300000.00", "Staff.Underwriter", "Staff.UnderwritingManager",
             "Staff.UnderwritingManager", new Dictionary<string, string> { ["rateBand"] = "STANDARD" }),
+        new Row("PTY.PARTY_MERGE", ModuleCode.PTY, "PartyMerge", "PTY.PARTY_MERGE", "", "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.UnderwritingManager"),
     ];
 
     private ApiHostFactory _factory = null!;
@@ -68,7 +69,7 @@ public sealed class ApprovalSodMatrixTests(PostgresFixture database) : IClassFix
         Type = row.ApprovalType,
         ObjectRef = new ObjectRef(row.Module, row.SubjectType, subject),
         PayloadHash = Sha256Hash.Parse(hash),
-        Authority = new ApprovalAuthority { Type = row.AuthorityType, Amount = Money.Of(decimal.Parse(row.Amount, System.Globalization.CultureInfo.InvariantCulture), "EUR"), Codes = row.Codes },
+        Authority = new ApprovalAuthority { Type = row.AuthorityType, Amount = row.Amount.Length == 0 ? null : Money.Of(decimal.Parse(row.Amount, System.Globalization.CultureInfo.InvariantCulture), "EUR"), Codes = row.Codes },
         ReferralRole = row.ReferralRole,
         Reason = "SoD matrix",
     };
