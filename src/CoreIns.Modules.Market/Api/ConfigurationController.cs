@@ -17,6 +17,9 @@ internal static class MarketPermissions
 {
     public const string ConfigurationResolve = "mkt.Configuration.resolve";
     public const string ConfigurationCurrentHash = "mkt.Configuration.currentHash";
+    public const string ConfigurationExplain = "mkt.Configuration.explain";
+    public const string ConfigurationCompare = "mkt.Configuration.compare";
+    public const string ConfigurationExport = "mkt.Configuration.export";
     public const string RoundingApply = "mkt.Rounding.apply";
     public const string PackList = "mkt.Pack.list";
     public const string PackGet = "mkt.Pack.get";
@@ -25,7 +28,7 @@ internal static class MarketPermissions
 /// <summary>REST facade of <c>mkt.Configuration.resolve</c> and <c>mkt.Configuration.currentHash</c> (W1-MKT-01 subset).</summary>
 [ApiController]
 [Route("api/mkt/v1/configuration")]
-internal sealed class ConfigurationController(MarketConfigurationService service) : ControllerBase
+internal sealed class ConfigurationController(MarketConfigurationService service, ConfigurationLineageService lineage) : ControllerBase
 {
     /// <summary>mkt.Configuration.resolve: a pure read sent as POST, so it takes no Idempotency-Key (contract x-operation-kind query).</summary>
     [HttpPost("resolve")]
@@ -47,6 +50,39 @@ internal sealed class ConfigurationController(MarketConfigurationService service
     [Authorize(Policy = MarketPermissions.ConfigurationCurrentHash)]
     public async Task<IResult> CurrentHashAsync(CancellationToken cancellationToken) =>
         Results.Ok(await service.CurrentHashAsync(cancellationToken).ConfigureAwait(false));
+
+    /// <summary>mkt.Configuration.explain (BO-MKT-03): which layer supplied the value of a key, with the pack version and the change request.</summary>
+    [HttpGet("explain")]
+    [Authorize(Policy = MarketPermissions.ConfigurationExplain)]
+    public async Task<IResult> ExplainAsync(
+        [FromQuery] string? key, [FromQuery] string? context, [FromQuery] string? validAt, [FromQuery] string? hash, CancellationToken cancellationToken) =>
+        Results.Ok(await lineage.ExplainAsync(key, context, ParseDate(validAt, "validAt"), ParseHash(hash, "hash"), cancellationToken).ConfigureAwait(false));
+
+    /// <summary>mkt.Configuration.compare (BO-MKT-03): two recorded states by hash, or two business dates of one state.</summary>
+    [HttpGet("compare")]
+    [Authorize(Policy = MarketPermissions.ConfigurationCompare)]
+    public async Task<IResult> CompareAsync(
+        [FromQuery] string? hash, [FromQuery] string? hashB, [FromQuery] string? validAt, [FromQuery] string? validAtB, [FromQuery] string? filter,
+        CancellationToken cancellationToken) =>
+        Results.Ok(await lineage.CompareAsync(
+            ParseHash(hash, "hash"), ParseHash(hashB, "hashB"), ParseDate(validAt, "validAt"), ParseDate(validAtB, "validAtB"), filter, cancellationToken).ConfigureAwait(false));
+
+    /// <summary>mkt.Configuration.export (BO-MKT-03): a pure read sent as POST (no Idempotency-Key).</summary>
+    [HttpPost("export")]
+    [SkipIdempotency]
+    [Authorize(Policy = MarketPermissions.ConfigurationExport)]
+    public async Task<IResult> ExportAsync([FromBody] ConfigurationExportRequest request, CancellationToken cancellationToken) =>
+        Results.Ok(await lineage.ExportAsync(request, cancellationToken).ConfigureAwait(false));
+
+    private static BusinessDate? ParseDate(string? text, string name) =>
+        text is null ? null
+        : BusinessDate.TryParse(text, out var date) ? date
+        : throw new DomainException(DomainError.Of(ModuleCode.MKT, "CFG-VALIDATION", $"{name} must be a date (yyyy-MM-dd)."));
+
+    private static Sha256Hash? ParseHash(string? text, string name) =>
+        text is null ? null
+        : Sha256Hash.TryParse(text, out var hash) ? hash
+        : throw new DomainException(DomainError.Of(ModuleCode.MKT, "CFG-VALIDATION", $"{name} must be a SHA-256 hex digest."));
 
     internal static bool TryValidAt(string? text, out ValidAt? validAt)
     {

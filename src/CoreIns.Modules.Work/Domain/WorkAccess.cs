@@ -20,6 +20,7 @@ internal static class WorkErrors
     public const string LimitExceeded = "LIMIT-EXCEEDED";
     public const string TargetIneligible = "TARGET-INELIGIBLE";
     public const string NotAvailable = "NOT-AVAILABLE";
+    public const string EditWindow = "EDIT-WINDOW";
 
     public static DomainError Of(string name, string detail) => DomainError.Of(ModuleCode.WRK, name, detail);
 
@@ -47,6 +48,8 @@ internal static class WorkErrors
             .Describe("Το αίτημα ξεπερνά το επιτρεπτό πλήθος στοιχείων.", "The request exceeds the allowed number of items."),
         ErrorDefinition.For(ModuleCode.WRK, NotAvailable, 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
+        ErrorDefinition.For(ModuleCode.WRK, EditWindow, 422, "Η προθεσμία αλλαγής έληξε", "The edit window has closed")
+            .Describe("Μια σημείωση αλλάζει ή διαγράφεται από τον συντάκτη της μόνο για 24 ώρες.", "An author may change or delete a note only for 24 hours."),
         ErrorDefinition.For(ModuleCode.WRK, TargetIneligible, 422, "Ο αποδέκτης δεν είναι κατάλληλος", "The target is not eligible")
             .Describe("Η εργασία δεν μπορεί να ανατεθεί στον συγκεκριμένο αποδέκτη.", "The activity cannot be assigned to that target."),
     ];

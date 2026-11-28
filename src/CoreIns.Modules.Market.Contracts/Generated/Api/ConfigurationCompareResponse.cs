@@ -4,15 +4,27 @@
 
 namespace CoreIns.Modules.Market.Contracts.Api;
 
-/// <summary>mkt.Configuration.compare result. PRD outputs: "changes"</summary>
+/// <summary>mkt.Configuration.compare result (BO-MKT-03), empty changes when the two sides are the same.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConfigurationCompareResponse
 {
-    /// <summary>PRD: "changes"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'hashA'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("hashA")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash HashA { get; init; }
+
+    /// <summary>Contract member 'hashB'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("hashB")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash HashB { get; init; }
+
+    /// <summary>Contract member 'validAtA'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validAtA")]
+    public required global::CoreIns.SharedKernel.BusinessDate? ValidAtA { get; init; }
+
+    /// <summary>Contract member 'validAtB'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validAtB")]
+    public required global::CoreIns.SharedKernel.BusinessDate? ValidAtB { get; init; }
+
+    /// <summary>Contract member 'changes'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("changes")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Changes { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Market.Contracts.Api.ConfigurationChange> Changes { get; init; }
 }

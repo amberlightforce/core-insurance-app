@@ -692,25 +692,134 @@
         "recordVersion": 1
       }
     },
+    "ConfigurationChange": {
+      "key": "sample",
+      "node": "sample",
+      "change": "Added",
+      "before": {
+        "value": "sample",
+        "legalStatus": "sample",
+        "sourceRef": "sample",
+        "packVersion": "sample",
+        "validFrom": "2026-10-07",
+        "validTo": "2026-10-07"
+      },
+      "after": {
+        "value": "sample",
+        "legalStatus": "sample",
+        "sourceRef": "sample",
+        "packVersion": "sample",
+        "validFrom": "2026-10-07",
+        "validTo": "2026-10-07"
+      }
+    },
     "ConfigurationCompareResponse": {
-      "changes": "unspecified"
+      "hashA": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "hashB": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "validAtA": "2026-10-07",
+      "validAtB": "2026-10-07",
+      "changes": [
+        {
+          "key": "sample",
+          "node": "sample",
+          "change": "Added",
+          "before": {
+            "value": "sample",
+            "legalStatus": "sample",
+            "sourceRef": "sample",
+            "packVersion": "sample",
+            "validFrom": "2026-10-07",
+            "validTo": "2026-10-07"
+          },
+          "after": {
+            "value": "sample",
+            "legalStatus": "sample",
+            "sourceRef": "sample",
+            "packVersion": "sample",
+            "validFrom": "2026-10-07",
+            "validTo": "2026-10-07"
+          }
+        }
+      ]
     },
     "ConfigurationCurrentHashResponse": {
       "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "activatedAt": "2026-10-07T09:00:00Z"
     },
+    "ConfigurationExplainChangeRequest": {
+      "requestId": "0192ff77-691d-7f41-8423-83b15a11d825",
+      "reason": "sample",
+      "requestedBy": "sample",
+      "appliedAt": "2026-10-07T09:00:00Z",
+      "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+    },
     "ConfigurationExplainResponse": {
-      "layerContributions": "unspecified",
-      "mergeSteps": "unspecified",
-      "cr": "unspecified",
-      "approvers": "unspecified"
+      "key": "sample",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "validAt": "2026-10-07",
+      "legalEntity": "sample",
+      "jurisdiction": "sample",
+      "found": true,
+      "value": "sample",
+      "layer": "sample",
+      "legalStatus": "sample",
+      "packId": "sample",
+      "packVersion": "sample",
+      "sourceRef": "sample",
+      "layerContributions": [
+        {
+          "node": "sample",
+          "layer": "Core",
+          "value": "sample",
+          "legalStatus": "sample",
+          "sourceRef": "sample",
+          "packId": "sample",
+          "packVersion": "sample",
+          "validFrom": "2026-10-07",
+          "validTo": "2026-10-07",
+          "applies": true,
+          "winning": true
+        }
+      ],
+      "mergeSteps": [
+        "sample"
+      ],
+      "cr": {
+        "requestId": "01929cc0-80a7-7f24-8358-4cceced7816f",
+        "reason": "sample",
+        "requestedBy": "sample",
+        "appliedAt": "2026-10-07T09:00:00Z",
+        "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+      },
+      "approvers": [
+        "sample"
+      ]
     },
     "ConfigurationExportRequest": {
       "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-      "context": "unspecified"
+      "context": "sample"
     },
     "ConfigurationExportResponse": {
-      "signedCanonicalJson": "unspecified"
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "activatedAt": "2026-10-07T09:00:00Z",
+      "cause": "sample",
+      "parentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "canonicalJson": "sample",
+      "documentDigest": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "signature": "sample"
+    },
+    "ConfigurationLayerContribution": {
+      "node": "sample",
+      "layer": "Core",
+      "value": "sample",
+      "legalStatus": "sample",
+      "sourceRef": "sample",
+      "packId": "sample",
+      "packVersion": "sample",
+      "validFrom": "2026-10-07",
+      "validTo": "2026-10-07",
+      "applies": true,
+      "winning": true
     },
     "ConfigurationResolveRequest": {
       "legalEntity": "SAMPLE_CODE",
@@ -755,6 +864,14 @@
         "SAMPLE_CODE"
       ],
       "hasProvisionalValues": true
+    },
+    "ConfigurationValueSummary": {
+      "value": "sample",
+      "legalStatus": "sample",
+      "sourceRef": "sample",
+      "packVersion": "sample",
+      "validFrom": "2026-10-07",
+      "validTo": "2026-10-07"
     },
     "CrossBorderBasisResponse": {
       "authorised": true,

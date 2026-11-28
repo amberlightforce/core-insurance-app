@@ -55,8 +55,6 @@ CONTRACT_NOT_SERVED GET /api/fin/v1/periods/status
 CONTRACT_NOT_SERVED GET /api/fin/v1/written-premium/query
 CONTRACT_NOT_SERVED GET /api/mkt/v1/capabilities/get
 CONTRACT_NOT_SERVED GET /api/mkt/v1/changeover/configuration
-CONTRACT_NOT_SERVED GET /api/mkt/v1/configuration/compare
-CONTRACT_NOT_SERVED GET /api/mkt/v1/configuration/explain
 CONTRACT_NOT_SERVED GET /api/mkt/v1/cross-borders/basis
 CONTRACT_NOT_SERVED GET /api/mkt/v1/currencies/rule
 CONTRACT_NOT_SERVED GET /api/mkt/v1/l10n/bundle
@@ -118,10 +116,6 @@ CONTRACT_NOT_SERVED GET /api/uw/v1/renewal-directions/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/desktop/get
 CONTRACT_NOT_SERVED GET /api/wrk/v1/inbound-documents
 CONTRACT_NOT_SERVED GET /api/wrk/v1/inbound-documents/{}
-CONTRACT_NOT_SERVED GET /api/wrk/v1/notes
-CONTRACT_NOT_SERVED GET /api/wrk/v1/notes/history
-CONTRACT_NOT_SERVED GET /api/wrk/v1/notes/search
-CONTRACT_NOT_SERVED GET /api/wrk/v1/notes/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/palette/query
 CONTRACT_NOT_SERVED GET /api/wrk/v1/participants
 CONTRACT_NOT_SERVED GET /api/wrk/v1/participants/objects-for
@@ -299,7 +293,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/draft
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/preview-impact
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/submit
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/test
-CONTRACT_NOT_SERVED POST /api/mkt/v1/configuration/export
 CONTRACT_NOT_SERVED POST /api/mkt/v1/cross-borders/check
 CONTRACT_NOT_SERVED POST /api/mkt/v1/currencies/convert-fixed
 CONTRACT_NOT_SERVED POST /api/mkt/v1/l10n-ui-languages/resolve
@@ -519,10 +512,6 @@ CONTRACT_NOT_SERVED POST /api/wrk/v1/inbound-documents/reprocess
 CONTRACT_NOT_SERVED POST /api/wrk/v1/inbound-documents/split
 CONTRACT_NOT_SERVED POST /api/wrk/v1/inbound-documents/submit
 CONTRACT_NOT_SERVED POST /api/wrk/v1/inbound-documents/verify
-CONTRACT_NOT_SERVED POST /api/wrk/v1/notes
-CONTRACT_NOT_SERVED POST /api/wrk/v1/notes/delete
-CONTRACT_NOT_SERVED POST /api/wrk/v1/notes/edit
-CONTRACT_NOT_SERVED POST /api/wrk/v1/notes/export
 CONTRACT_NOT_SERVED POST /api/wrk/v1/participants/assign-by-rules
 CONTRACT_NOT_SERVED POST /api/wrk/v1/participants/change
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/close
