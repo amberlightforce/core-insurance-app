@@ -545,7 +545,7 @@ paths:
       x-error-codes:
       - code: UW-ERR-VALIDATION
         status: 400
-      - code: UW-ERR-NOT-FOUND
+      - code: UW-ERR-ISSUE-NOT-FOUND
         status: 404
       - code: UW-ERR-AUTHORITY-DENIED
         status: 403
@@ -602,9 +602,9 @@ paths:
   /api/uw/v1/issues/reopen:
     post:
       operationId: uw.Issue.reopen
-      summary: Reopen, manual issues
+      summary: Reopen an issue
       description: |-
-        Reopen, manual issues
+        Reopen an issue (BO-UW-04)
 
         PRD inputs: issue id / job ref, type, reason
         PRD outputs: issue
@@ -629,6 +629,10 @@ paths:
       x-error-codes:
       - code: UW-ERR-ISSUE-TRANSITION
         status: 422
+      - code: UW-ERR-STALE
+        status: 409
+      - code: UW-ERR-ISSUE-NOT-FOUND
+        status: 404
       - code: UW-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -666,9 +670,9 @@ paths:
   /api/uw/v1/issues/add-manual:
     post:
       operationId: uw.Issue.addManual
-      summary: Reopen, manual issues
+      summary: Add a manual issue
       description: |-
-        Reopen, manual issues
+        Add a manual issue (BO-UW-04)
 
         PRD inputs: issue id / job ref, type, reason
         PRD outputs: issue
@@ -693,6 +697,10 @@ paths:
       x-error-codes:
       - code: UW-ERR-ISSUE-TRANSITION
         status: 422
+      - code: UW-ERR-STALE
+        status: 409
+      - code: UW-ERR-ISSUE-NOT-FOUND
+        status: 404
       - code: UW-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -730,9 +738,9 @@ paths:
   /api/uw/v1/issues/close:
     post:
       operationId: uw.Issue.close
-      summary: Reopen, manual issues
+      summary: Close an issue
       description: |-
-        Reopen, manual issues
+        Close an issue (BO-UW-04)
 
         PRD inputs: issue id / job ref, type, reason
         PRD outputs: issue
@@ -757,6 +765,10 @@ paths:
       x-error-codes:
       - code: UW-ERR-ISSUE-TRANSITION
         status: 422
+      - code: UW-ERR-STALE
+        status: 409
+      - code: UW-ERR-ISSUE-NOT-FOUND
+        status: 404
       - code: UW-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1069,7 +1081,7 @@ paths:
         status: 422
       - code: UW-ERR-LICENCE-INVALID
         status: 422
-      - code: UW-ERR-NOT-FOUND
+      - code: UW-ERR-ISSUE-NOT-FOUND
         status: 404
       - code: UW-ERR-PERMISSION
         status: 403
@@ -6286,73 +6298,87 @@ components:
       - pendingSecondApproval
     IssueReopenRequest:
       type: object
-      description: 'uw.Issue.reopen request. PRD inputs: "issue id / job ref, type, reason"'
+      description: 'uw.Issue.reopen request (BO-UW-04): put a decided issue back to Open. An approval is invalidated (MANUAL_REOPEN) and a new Open issue for the same key replaces it; a rejection is closed and replaced the same way.'
       properties:
         issueId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "issue id"'
-        jobRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job ref"'
-        type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
+          description: The Approved, ApprovedWithConditions or Rejected issue to reopen
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why (mandatory)
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: Record version of the issue as read; a different version is UW-ERR-STALE (409). Omit to skip the check.
+      required:
+      - issueId
+      - reason
     IssueReopenResponse:
       type: object
-      description: 'uw.Issue.reopen result. PRD outputs: "issue"'
+      description: 'uw.Issue.reopen result: the new Open issue.'
       properties:
         issue:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issue"'
+          $ref: '#/components/schemas/IssueListItem'
+      required:
+      - issue
     IssueAddManualRequest:
       type: object
-      description: 'uw.Issue.addManual request. PRD inputs: "issue id / job ref, type, reason"'
+      description: 'uw.Issue.addManual request (BO-UW-04): an underwriter raises an issue by hand on an evaluated job. It is Open, never closed by a rule evaluation, and blocks its blocking point until decided.'
       properties:
-        issueId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "issue id"'
         jobRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job ref"'
-        type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: POL job id (the job must have been evaluated)
+        issueType:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Active issue type of the catalogue
+        blockingPoint:
+          $ref: ../events/common.schema.json#/$defs/BlockingPoint
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why (mandatory)
+      required:
+      - jobRef
+      - issueType
+      - blockingPoint
+      - reason
     IssueAddManualResponse:
       type: object
-      description: 'uw.Issue.addManual result. PRD outputs: "issue"'
+      description: 'uw.Issue.addManual result: the new Open issue.'
       properties:
         issue:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issue"'
+          $ref: '#/components/schemas/IssueListItem'
+      required:
+      - issue
     IssueCloseRequest:
       type: object
-      description: 'uw.Issue.close request. PRD inputs: "issue id / job ref, type, reason"'
+      description: 'uw.Issue.close request (BO-UW-04): close an issue with a reason. An Open or Rejected issue that blocks its point cannot be closed (UW-ERR-ISSUE-TRANSITION): decide it instead.'
       properties:
         issueId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "issue id"'
-        jobRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job ref"'
-        type:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "type"'
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why (mandatory)
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: Record version of the issue as read; a different version is UW-ERR-STALE (409). Omit to skip the check.
+      required:
+      - issueId
+      - reason
     IssueCloseResponse:
       type: object
-      description: 'uw.Issue.close result. PRD outputs: "issue"'
+      description: 'uw.Issue.close result: the closed issue.'
       properties:
         issue:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issue"'
+          $ref: '#/components/schemas/IssueListItem'
+      required:
+      - issue
     ApprovalHistoryItem:
       type: object
       description: 'One event of an issues approval history (BO-UW-03): a decision, or the invalidation of an approval when the facts changed.'

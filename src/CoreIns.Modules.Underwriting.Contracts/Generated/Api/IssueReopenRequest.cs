@@ -4,36 +4,20 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Issue.reopen request. PRD inputs: "issue id / job ref, type, reason"</summary>
+/// <summary>uw.Issue.reopen request (BO-UW-04): put a decided issue back to Open. An approval is invalidated (MANUAL_REOPEN) and a new Open issue for the same key replaces it; a rejection is closed and replaced the same way.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record IssueReopenRequest
 {
-    /// <summary>PRD: "issue id"</summary>
+    /// <summary>The Approved, ApprovedWithConditions or Rejected issue to reopen</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("issueId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.UwIssueId? IssueId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.UwIssueId IssueId { get; init; }
 
-    /// <summary>PRD: "job ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("jobRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? JobRef { get; init; }
-
-    /// <summary>PRD: "type"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("type")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Type { get; init; }
-
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Why (mandatory)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
+
+    /// <summary>Record version of the issue as read; a different version is UW-ERR-STALE (409). Omit to skip the check.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public int? ExpectedRecordVersion { get; init; }
 }

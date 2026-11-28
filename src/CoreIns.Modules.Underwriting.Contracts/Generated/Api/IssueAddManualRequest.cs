@@ -4,36 +4,23 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Issue.addManual request. PRD inputs: "issue id / job ref, type, reason"</summary>
+/// <summary>uw.Issue.addManual request (BO-UW-04): an underwriter raises an issue by hand on an evaluated job. It is Open, never closed by a rule evaluation, and blocks its blocking point until decided.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record IssueAddManualRequest
 {
-    /// <summary>PRD: "issue id"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("issueId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.UwIssueId? IssueId { get; init; }
-
-    /// <summary>PRD: "job ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>POL job id (the job must have been evaluated)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("jobRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? JobRef { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobRef { get; init; }
 
-    /// <summary>PRD: "type"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("type")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Type { get; init; }
+    /// <summary>Active issue type of the catalogue</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issueType")]
+    public required string IssueType { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'blockingPoint'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("blockingPoint")]
+    public required global::CoreIns.Platform.Contracts.Common.BlockingPoint BlockingPoint { get; init; }
+
+    /// <summary>Why (mandatory)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public required string Reason { get; init; }
 }
