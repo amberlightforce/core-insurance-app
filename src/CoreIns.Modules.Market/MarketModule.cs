@@ -56,7 +56,7 @@ public static class MarketModule
                 $"REVOKE ALL ON ALL TABLES IN SCHEMA {Schema} FROM {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.legal_entity, {Schema}.pack_activation, {Schema}.config_change_request TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE, DELETE ON {Schema}.config_change_item TO {appRole}",
-                $"GRANT SELECT, INSERT ON {Schema}.pack_version, {Schema}.config_state TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.pack_version, {Schema}.pack_version_event, {Schema}.config_state TO {appRole}",
                 $"GRANT UPDATE ON {Schema}.config_state_writer_lock TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
@@ -87,6 +87,7 @@ public static class MarketModule
         services.AddHostedService<ConfigurationStatesStartup>();
         services.AddScoped<PackRegistryService>();
         services.AddScoped<PackActivationEngine>();
+        services.AddScoped<PackLifecycleEngine>();
         services.AddAuthorityType(new AuthorityTypeDefinition(AuthorityTypeCode.Parse(ActivationSupport.Authority), ModuleCode.MKT,
             new LocalizedText("Ενεργοποίηση πακέτου", "Pack activation"),
             [new AuthorityDimensionDefinition("pack", DimensionKind.Code), new AuthorityDimensionDefinition("legalEntity", DimensionKind.Code)]));
@@ -130,6 +131,12 @@ public static class MarketModule
         services.AddCommand<RequestPackRollback, PackRollbackResponse, RequestPackRollbackHandler>(CommandDescriptor.For("mkt.Pack.rollback") with { SupportsDryRun = true });
         services.AddCommandAuditor<RequestPackActivation, PackScheduleActivationResponse, RequestPackActivationAuditor>();
         services.AddCommand<RequestPackActivation, PackScheduleActivationResponse, RequestPackActivationHandler>(CommandDescriptor.For("mkt.Pack.scheduleActivation") with { SupportsDryRun = true });
+        services.AddCommandAuditor<CertifyPack, PackCertifyResponse, CertifyPackAuditor>();
+        services.AddCommand<CertifyPack, PackCertifyResponse, CertifyPackHandler>(CommandDescriptor.For("mkt.Pack.certify"));
+        services.AddCommandAuditor<PublishPack, PackPublishResponse, PublishPackAuditor>();
+        services.AddCommand<PublishPack, PackPublishResponse, PublishPackHandler>(CommandDescriptor.For("mkt.Pack.publish"));
+        services.AddCommandAuditor<DeprecatePack, PackDeprecateResponse, DeprecatePackAuditor>();
+        services.AddCommand<DeprecatePack, PackDeprecateResponse, DeprecatePackHandler>(CommandDescriptor.For("mkt.Pack.deprecate"));
         services.AddCommandAuditor<DecidePackActivation, PackActivationDecideResponse, DecidePackActivationAuditor>();
         services.AddCommand<DecidePackActivation, PackActivationDecideResponse, DecidePackActivationHandler>(CommandDescriptor.For("mkt.PackActivation.decide"));
 
@@ -183,6 +190,16 @@ public static class MarketModule
             .Describe("Το αίτημα δεν υπάρχει για αυτή τη νομική οντότητα.", "The request does not exist for this legal entity."),
         ErrorDefinition.For(ModuleCode.MKT, "PACK-NOT-FOUND", 404, "Άγνωστο πακέτο χώρας", "Unknown pack")
             .Describe("Δεν υπάρχει καταχωρισμένο πακέτο με αυτό το αναγνωριστικό.", "No pack with this id is registered."),
+        ErrorDefinition.For(ModuleCode.MKT, "PACK-VERSION-UNKNOWN", 422, "Άγνωστη έκδοση πακέτου", "Unknown pack version")
+            .Describe("Η έκδοση δεν υπάρχει στο μητρώο εκδόσεων.", "The version is not in the pack-version registry."),
+        ErrorDefinition.For(ModuleCode.MKT, "PACK-LIFECYCLE", 409, "Μη επιτρεπτό βήμα κύκλου ζωής", "The pack version is not in the state this step needs")
+            .Describe("Σειρά: Built ή Signed, Certified, Published, Deprecated.", "Order: Built or Signed, Certified, Published, Deprecated."),
+        ErrorDefinition.For(ModuleCode.MKT, "PACK-NOT-SETTLED", 422, "Το πακέτο έχει μη οριστικοποιημένες τιμές", "The pack holds values that are not Settled")
+            .Describe("Η παραγωγή απαιτεί τιμές Settled ή NotRegulatory.", "Production requires values that are Settled or NotRegulatory."),
+        ErrorDefinition.For(ModuleCode.MKT, "PACK-SYNTHETIC", 422, "Συνθετικό πακέτο", "The pack is synthetic")
+            .Describe("Το συνθετικό πακέτο δεν πάει ποτέ στην παραγωγή.", "A synthetic pack never goes to Production."),
+        ErrorDefinition.For(ModuleCode.MKT, "PACK-IN-USE", 409, "Η έκδοση χρησιμοποιείται", "The pack version is in use")
+            .Describe("Υπάρχει ενεργή ή εκκρεμής ενεργοποίηση της έκδοσης.", "A live or pending activation of the version exists."),
         ErrorDefinition.For(ModuleCode.MKT, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

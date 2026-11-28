@@ -1,0 +1,35 @@
+/* Policy search: criteria form, chosen policyholder and the load-more footer. */
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+.form > * {
+  min-inline-size: 0;
+}
+
+.chosen {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.picker {
+  margin-block-start: var(--space-3);
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding-block-start: var(--space-3);
+}
+
+@media (width <= 600px) {
+  .form > *,
+  .form button {
+    inline-size: 100%;
+  }
+}

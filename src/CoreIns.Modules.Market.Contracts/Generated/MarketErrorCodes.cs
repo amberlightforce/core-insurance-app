@@ -32,11 +32,29 @@ public static class MarketErrorCodes
     /// </remarks>
     public const string PackAlreadyActive = "MKT-ERR-PACK-ALREADY-ACTIVE";
 
+    /// <summary>MKT-ERR-PACK-IN-USE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): mkt.Pack.deprecate.</para>
+    /// </remarks>
+    public const string PackInUse = "MKT-ERR-PACK-IN-USE";
+
+    /// <summary>MKT-ERR-PACK-LIFECYCLE (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): mkt.Pack.certify, mkt.Pack.deprecate, mkt.Pack.publish.</para>
+    /// </remarks>
+    public const string PackLifecycle = "MKT-ERR-PACK-LIFECYCLE";
+
     /// <summary>MKT-ERR-PACK-NOT-PUBLISHED (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 2 operation(s): mkt.Pack.rollback, mkt.Pack.scheduleActivation.</para>
     /// </remarks>
     public const string PackNotPublished = "MKT-ERR-PACK-NOT-PUBLISHED";
+
+    /// <summary>MKT-ERR-PACK-NOT-SETTLED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): mkt.Pack.certify, mkt.Pack.publish.</para>
+    /// </remarks>
+    public const string PackNotSettled = "MKT-ERR-PACK-NOT-SETTLED";
 
     /// <summary>MKT-ERR-PACK-ROLLBACK-INSTANT (HTTP 422).</summary>
     /// <remarks>
@@ -44,9 +62,15 @@ public static class MarketErrorCodes
     /// </remarks>
     public const string PackRollbackInstant = "MKT-ERR-PACK-ROLLBACK-INSTANT";
 
+    /// <summary>MKT-ERR-PACK-SYNTHETIC (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): mkt.Pack.certify, mkt.Pack.publish.</para>
+    /// </remarks>
+    public const string PackSynthetic = "MKT-ERR-PACK-SYNTHETIC";
+
     /// <summary>MKT-ERR-PACK-VERSION-UNKNOWN (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): mkt.Pack.get, mkt.Pack.rollback, mkt.Pack.scheduleActivation.</para>
+    /// <para>Declared by 6 operation(s): mkt.Pack.certify, mkt.Pack.deprecate, mkt.Pack.get, mkt.Pack.publish, mkt.Pack.rollback, mkt.Pack.scheduleActivation.</para>
     /// </remarks>
     public const string PackVersionUnknown = "MKT-ERR-PACK-VERSION-UNKNOWN";
 
@@ -60,7 +84,7 @@ public static class MarketErrorCodes
     public const string Prefix = "MKT-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [CfgValidation, IdempotencyMismatch, PackActivationState, PackAlreadyActive, PackNotPublished, PackRollbackInstant, PackVersionUnknown, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [CfgValidation, IdempotencyMismatch, PackActivationState, PackAlreadyActive, PackInUse, PackLifecycle, PackNotPublished, PackNotSettled, PackRollbackInstant, PackSynthetic, PackVersionUnknown, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -69,8 +93,12 @@ public static class MarketErrorCodes
         [IdempotencyMismatch] = 409,
         [PackActivationState] = 409,
         [PackAlreadyActive] = 409,
+        [PackInUse] = 409,
+        [PackLifecycle] = 409,
         [PackNotPublished] = 422,
+        [PackNotSettled] = 422,
         [PackRollbackInstant] = 422,
+        [PackSynthetic] = 422,
         [PackVersionUnknown] = 422,
         [Validation] = 400,
     };

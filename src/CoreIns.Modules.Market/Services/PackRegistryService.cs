@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using CoreIns.Modules.Market.Commands;
 using CoreIns.Modules.Market.Contracts.Api;
 using CoreIns.Modules.Market.Domain;
 using CoreIns.Modules.Market.Persistence;
@@ -64,12 +65,18 @@ internal sealed class PackRegistryService(MarketDbContext db)
         var entities = await db.LegalEntities.AsNoTracking().ToDictionaryAsync(e => e.LegalEntityId, e => e.Code, cancellationToken).ConfigureAwait(false);
         string Entity(LegalEntityId id) => entities.TryGetValue(id, out var code) ? code : id.Value.ToString();
 
-        var versions = rows.OrderBy(v => Semver(v.Version)).Select(v => new PackVersionView
+        var statuses = await PackLifecycle.StatusesAsync(db, packId, cancellationToken).ConfigureAwait(false);
+        var versions = rows.OrderBy(v => Semver(v.Version)).Select(v =>
         {
-            Version = v.Version,
-            Status = Enum.Parse<PackVersionStatus>(v.Status, ignoreCase: true),
-            ContentDigest = Sha256Hash.Parse(v.ContentDigest.Trim()),
-            PublishedAt = v.RegisteredAt,
+            var (status, published) = statuses[v.Version];
+            return new PackVersionView
+            {
+                Version = v.Version,
+                Status = Enum.Parse<PackVersionStatus>(status, ignoreCase: true),
+                ContentDigest = Sha256Hash.Parse(v.ContentDigest.Trim()),
+                // Versions registered as Published (shipped) carry their registration instant; later ones, the publish step.
+                PublishedAt = published ?? (status is "Published" or "Deprecated" or "Removed" ? v.RegisteredAt : null),
+            };
         }).ToList();
         var active = activations.Where(a => a.Status == "ACTIVE" && a.ActivatedAt is not null && a.ResultingHash is not null).Select(a => new PackActiveVersionView
         {

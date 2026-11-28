@@ -4,15 +4,31 @@
 
 namespace CoreIns.Modules.Market.Contracts.Api;
 
-/// <summary>mkt.Pack.certify result. PRD outputs: "pack/version/activation"</summary>
+/// <summary>mkt.Pack.certify result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PackCertifyResponse
 {
-    /// <summary>PRD: "pack/version/activation"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("packVersionActivation")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PackVersionActivation { get; init; }
+    /// <summary>Contract member 'pack'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("pack")]
+    public required string Pack { get; init; }
+
+    /// <summary>Contract member 'version'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    public required string Version { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required global::CoreIns.Modules.Market.Contracts.Api.PackVersionStatus Status { get; init; }
+
+    /// <summary>True when every value is Settled or NotRegulatory and the pack is not synthetic</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("productionEligible")]
+    public required bool ProductionEligible { get; init; }
+
+    /// <summary>Keys whose legal status is not Settled or NotRegulatory</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("unverifiedKeys")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> UnverifiedKeys { get; init; }
+
+    /// <summary>Contract member 'goldenSuite'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("goldenSuite")]
+    public required global::CoreIns.Modules.Market.Contracts.Api.PackGoldenSuiteResult GoldenSuite { get; init; }
 }

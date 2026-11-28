@@ -48,6 +48,15 @@
           "Platform.DesignAuthority",
           "Platform.Admin"
         ],
+        "mkt.Pack.certify": [
+          "Platform.DesignAuthority"
+        ],
+        "mkt.Pack.publish": [
+          "Platform.ReleaseManager"
+        ],
+        "mkt.Pack.deprecate": [
+          "Platform.ReleaseManager"
+        ],
         "mkt.Pack.rollback": [
           "Platform.ReleaseManager"
         ],

@@ -22,7 +22,8 @@
     "id": "Policy id (UUID)",
     "idInvalid": "Enter a valid UUID.",
     "open": "Open",
-    "lead": "Start a new motor quote or get back to a policy you opened recently."
+    "lead": "Find a policy by number or policyholder, start a new motor quote or get back to a policy you opened recently.",
+    "find": "Find a policy"
   },
   "term": {
     "title": "Policy term",
@@ -80,5 +81,28 @@
   "upcoming": {
     "title": "Not started yet",
     "body": "The policy starts later. Showing it as of the start of its upcoming term; pick another date to read it as of then."
+  },
+  "search": {
+    "title": "Find a policy",
+    "number": "Policy number",
+    "numberInvalid": "Use letters, digits and - . / only.",
+    "needCriteria": "Enter a policy number or choose a policyholder.",
+    "holder": "Policyholder: {name}",
+    "clearHolder": "Change",
+    "pickHolder": "Choose policyholder",
+    "hidePicker": "Hide policyholder search",
+    "holderSearch": "Search policyholder (name, tax id or party number)",
+    "submit": "Search",
+    "results": "Matching policies",
+    "empty": "No policy matches these criteria.",
+    "more": "Load more",
+    "columns": {
+      "number": "Policy number",
+      "status": "Status",
+      "from": "Start",
+      "to": "End",
+      "product": "Product",
+      "insured": "Policyholder"
+    }
   }
 }
