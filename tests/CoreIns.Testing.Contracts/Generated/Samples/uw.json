@@ -9,7 +9,19 @@
     "uw.Contingency.list": {
       "items": [
         {
-          "contingencies": "unspecified"
+          "id": "01923693-8a8c-7fa3-8b6b-36a849df0b80",
+          "termRef": "0192bc63-9196-77fc-86c9-bb36ff1893a8",
+          "jobRef": "0192d442-ced8-766b-880b-3a379d139eab",
+          "contingencyType": "SAMPLE_CODE",
+          "description": "sample",
+          "customerText": "sample",
+          "dueDate": "2026-10-07",
+          "owner": "sample",
+          "blockingPoint": "PRE_QUOTE",
+          "status": "sample",
+          "overdue": true,
+          "consequenceCode": "sample",
+          "recordVersion": 1
         }
       ],
       "nextCursor": "sample",
@@ -61,6 +73,15 @@
             "sample"
           ],
           "approvalStatus": "SAMPLE_CODE"
+        }
+      ],
+      "contingencies": [
+        {
+          "contingencyId": "01925a28-58b3-7185-82ac-ade8021ad469",
+          "contingencyType": "SAMPLE_CODE",
+          "blockingPoint": "PRE_QUOTE",
+          "dueDate": "2026-10-07",
+          "overdue": true
         }
       ]
     },
@@ -198,32 +219,91 @@
       "outcome": "ALLOW",
       "sourceGrantId": "sample"
     },
+    "ContingencyApplyConsequenceRequest": {
+      "contingencyId": "0192b226-c647-70b0-8292-c9cc1edebc5e"
+    },
     "ContingencyApplyConsequenceResponse": {
       "contingency": "unspecified"
     },
+    "ContingencyCreateRequest": {
+      "termRef": "01920e7f-0c7c-712e-8aa4-e394b677dbd0",
+      "jobRef": "0192eae8-ba87-78a9-8d9c-73be67e8a64b",
+      "contingencyType": "SAMPLE_CODE",
+      "description": "sample",
+      "customerText": "sample",
+      "dueDate": "2026-10-07",
+      "owner": "sample",
+      "blockingPoint": "PRE_QUOTE",
+      "consequenceCode": "NONE",
+      "consequenceIssueType": "SAMPLE_CODE"
+    },
     "ContingencyCreateResponse": {
       "contingency": "unspecified"
+    },
+    "ContingencyExtendRequest": {
+      "contingencyId": "0192802f-f375-789d-8c42-2f6352b19de7",
+      "newDueDate": "2026-10-07",
+      "reason": "sample"
     },
     "ContingencyExtendResponse": {
       "contingency": "unspecified"
     },
     "ContingencyListItem": {
-      "contingencies": "unspecified"
+      "id": "0192ef68-a35a-76ba-8c3d-a2a6797b06c0",
+      "termRef": "01924d4f-b58b-75cc-8dc1-06d5c560fdaf",
+      "jobRef": "019256ff-d7ab-7861-8c9e-65c9bde63721",
+      "contingencyType": "SAMPLE_CODE",
+      "description": "sample",
+      "customerText": "sample",
+      "dueDate": "2026-10-07",
+      "owner": "sample",
+      "blockingPoint": "PRE_QUOTE",
+      "status": "sample",
+      "overdue": true,
+      "consequenceCode": "sample",
+      "recordVersion": 1
     },
     "ContingencyListPage": {
       "items": [
         {
-          "contingencies": "unspecified"
+          "id": "01927f18-3feb-7923-81ac-ddf62fe81171",
+          "termRef": "019287fe-2eb8-7ff6-85aa-88a9f2190ff0",
+          "jobRef": "01920986-4635-77fe-8f5d-e574fb11011b",
+          "contingencyType": "SAMPLE_CODE",
+          "description": "sample",
+          "customerText": "sample",
+          "dueDate": "2026-10-07",
+          "owner": "sample",
+          "blockingPoint": "PRE_QUOTE",
+          "status": "sample",
+          "overdue": true,
+          "consequenceCode": "sample",
+          "recordVersion": 1
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
+    "ContingencySatisfyRequest": {
+      "contingencyId": "0192a4fc-27ed-787a-8b78-3a0b0de70a40",
+      "evidenceRef": "sample",
+      "note": "sample"
+    },
     "ContingencySatisfyResponse": {
       "contingency": "unspecified"
     },
+    "ContingencyUpdateRequest": {
+      "description": "sample",
+      "customerText": "sample",
+      "owner": "sample",
+      "recordVersion": 1
+    },
     "ContingencyUpdateResponse": {
       "contingency": "unspecified"
+    },
+    "ContingencyWaiveRequest": {
+      "contingencyId": "01921b55-ae5c-71ca-8985-c88f6a4371ba",
+      "reason": "sample"
     },
     "ContingencyWaiveResponse": {
       "contingency": "unspecified"
@@ -470,6 +550,15 @@
             "sample"
           ],
           "approvalStatus": "SAMPLE_CODE"
+        }
+      ],
+      "contingencies": [
+        {
+          "contingencyId": "019281d3-f40c-7412-89b9-fa3328214d8c",
+          "contingencyType": "SAMPLE_CODE",
+          "blockingPoint": "PRE_QUOTE",
+          "dueDate": "2026-10-07",
+          "overdue": true
         }
       ]
     },

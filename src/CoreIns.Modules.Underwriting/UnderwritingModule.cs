@@ -150,6 +150,38 @@ public static class UnderwritingModule
         services.AddCommand<DecideDeclineReview, DeclineDecideReviewResponse, DecideDeclineReviewHandler>(CommandDescriptor.For("uw.Decline.decideReview"));
         services.AddCommand<ExportRefusalRegister, RefusalRegisterExportResponse, ExportRefusalRegisterHandler>(CommandDescriptor.For("uw.RefusalRegister.export"));
 
+        // BO-UW-08: contingencies (conditions on a term, due-date job, blocking-status gate).
+        services.AddScoped<ContingencyStore>();
+        services.AddScoped<ContingencySupport>();
+        services.AddScoped<ContingencyQueries>();
+        services.AddSingleton<ContingencySweepRunner>();
+        if (string.Equals(configuration["APP_ROLE"], "worker", StringComparison.OrdinalIgnoreCase) && configuration.GetValue("Underwriting:ContingencySweepEnabled", true))
+        {
+            services.AddHostedService<ContingencySweeper>();
+        }
+
+        services.AddScoped<IValidator<CreateContingency>, CreateContingencyValidator>();
+        services.AddScoped<IValidator<UpdateContingency>, UpdateContingencyValidator>();
+        services.AddScoped<IValidator<SatisfyContingency>, SatisfyContingencyValidator>();
+        services.AddScoped<IValidator<WaiveContingency>, WaiveContingencyValidator>();
+        services.AddScoped<IValidator<ExtendContingency>, ExtendContingencyValidator>();
+        services.AddScoped<IValidator<ApplyContingencyConsequence>, ApplyContingencyConsequenceValidator>();
+        services.AddCommandAuditor<CreateContingency, ContingencyCreateResponse, ContingencyAuditor<CreateContingency, ContingencyCreateResponse>>();
+        services.AddCommandAuditor<UpdateContingency, ContingencyUpdateResponse, ContingencyAuditor<UpdateContingency, ContingencyUpdateResponse>>();
+        services.AddCommandAuditor<SatisfyContingency, ContingencySatisfyResponse, ContingencyAuditor<SatisfyContingency, ContingencySatisfyResponse>>();
+        services.AddCommandAuditor<WaiveContingency, ContingencyWaiveResponse, ContingencyAuditor<WaiveContingency, ContingencyWaiveResponse>>();
+        services.AddCommandAuditor<ExtendContingency, ContingencyExtendResponse, ContingencyAuditor<ExtendContingency, ContingencyExtendResponse>>();
+        services.AddCommandAuditor<ApplyContingencyConsequence, ContingencyApplyConsequenceResponse, ContingencyAuditor<ApplyContingencyConsequence, ContingencyApplyConsequenceResponse>>();
+        services.AddCommand<CreateContingency, ContingencyCreateResponse, CreateContingencyHandler>(CommandDescriptor.For("uw.Contingency.create") with { SupportsDryRun = true });
+        services.AddCommand<UpdateContingency, ContingencyUpdateResponse, UpdateContingencyHandler>(CommandDescriptor.For("uw.Contingency.update"));
+        services.AddCommand<SatisfyContingency, ContingencySatisfyResponse, SatisfyContingencyHandler>(CommandDescriptor.For("uw.Contingency.satisfy"));
+        services.AddCommand<WaiveContingency, ContingencyWaiveResponse, WaiveContingencyHandler>(CommandDescriptor.For("uw.Contingency.waive"));
+        services.AddCommand<ExtendContingency, ContingencyExtendResponse, ExtendContingencyHandler>(CommandDescriptor.For("uw.Contingency.extend"));
+        services.AddCommand<ApplyContingencyConsequence, ContingencyApplyConsequenceResponse, ApplyContingencyConsequenceHandler>(
+            CommandDescriptor.For("uw.Contingency.applyConsequence") with { SupportsDryRun = true });
+        services.AddCommand<SweepContingencies, int, SweepContingenciesHandler>(CommandDescriptor.For("uw.Contingency.sweep") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddScoped<IUnderwritingContingencyService, UnderwritingContingencyService>();
+
         services.AddScoped<IUnderwritingRulesService, UnderwritingRulesService>();
         services.AddScoped<IUnderwritingIssueService, UnderwritingIssueService>();
 
@@ -207,6 +239,10 @@ public static class UnderwritingModule
             .Describe("Η εργασία ή η αίτηση έχει ήδη ισχύουσα άρνηση· ανατρέψτε την πρώτα.", "The job or intake already has a standing decline; overturn it first."),
         ErrorDefinition.For(ModuleCode.UW, "DECLINE-STATE", 422, "Η άρνηση δεν μπορεί να αλλάξει έτσι", "The decline cannot change this way")
             .Describe("Η επανεξέταση αφορά αυτόματη άρνηση που δεν έχει ήδη επανεξεταστεί.", "A review applies to an automated decline that has not been reviewed yet."),
+        ErrorDefinition.For(ModuleCode.UW, "CONTINGENCY-NOT-FOUND", 404, "Δεν βρέθηκε η αίρεση", "The contingency was not found")
+            .Describe("Δεν υπάρχει αίρεση με αυτό το αναγνωριστικό στη νομική οντότητά σας.", "There is no contingency with this id in your legal entity."),
+        ErrorDefinition.For(ModuleCode.UW, "CONTINGENCY-STATE", 422, "Η αίρεση δεν μπορεί να αλλάξει έτσι", "The contingency cannot change this way")
+            .Describe("Μόνο ανοιχτή αίρεση αλλάζει· οι συνέπειες εφαρμόζονται μόνο σε εκπρόθεσμη αίρεση που έχει συνέπεια.", "Only an Open contingency changes; a consequence applies only to an overdue contingency that has one."),
         ErrorDefinition.For(ModuleCode.UW, "STALE", 409, "Το ζήτημα άλλαξε στο μεταξύ", "The issue changed meanwhile")
             .Describe("Φορτώστε ξανά το ζήτημα και αποφασίστε πάλι.", "Reload the issue and decide again."),
     ];

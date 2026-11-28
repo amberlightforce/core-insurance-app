@@ -7305,6 +7305,9 @@ components:
         amount:
           $ref: ../events/common.schema.json#/$defs/Money
           description: Down payment required (REQ-BIL-054)
+        planCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: The payment plan the down payment was initiated for (the first instalment of this plan is the amount)
       required:
       - status
       description: 'Typed from REQ-BIL-003, REQ-BIL-054. PRD outputs: "status, amount, reference/QR/link"'
@@ -7317,6 +7320,9 @@ components:
           $ref: ../events/common.schema.json#/$defs/Uuid
         method:
           $ref: ../events/common.schema.json#/$defs/Code
+        paymentPlanOption:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Payment plan the down payment is for; the first instalment of this plan is the amount (default ANNUAL, which needs none)
       required:
       - method
       oneOf:
