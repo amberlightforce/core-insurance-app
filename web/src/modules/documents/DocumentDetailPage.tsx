@@ -23,15 +23,22 @@ import { QueryView } from '../staff/QueryView';
 import { SimpleTable } from '../staff/SimpleTable';
 import styles from '../staff/staff.module.css';
 import { useFormat } from '../staff/useFormat';
+import { ArchivePanel } from './ArchivePanel';
+import { DocumentMarkers, DocumentStatusPill } from './DocumentMarkers';
+import { LifecycleDialog } from './LifecycleDialog';
 import {
   documentSemantic,
+  lifecycleState,
+  maskId,
   useDocument,
   useEvidencePack,
   useReprint,
   type DeliveryView,
   type DocumentView,
   type EvidenceView,
+  type LifecycleAction,
 } from './api';
+import local from './documents.module.css';
 
 function DeliveryTable({ items }: { items: DeliveryView[] }) {
   const { t } = useTranslation('documents');
@@ -178,8 +185,13 @@ function ReprintForm({ documentId }: { documentId: string }) {
 function DocumentBody({ document }: { document: DocumentView }) {
   const { t } = useTranslation('documents');
   const fmt = useFormat();
+  const [dialog, setDialog] = useState<LifecycleAction | null>(null);
   const [module = '', type = '', ...rest] = document.subject.split('/');
   const subjectHref = `/documents/subject/${module}/${encodeURIComponent(type)}/${encodeURIComponent(rest.join('/'))}`;
+  const state = lifecycleState(document);
+  const open = (action: LifecycleAction) => () => {
+    setDialog(action);
+  };
   return (
     <div className={styles.page}>
       <PageHeader
@@ -187,23 +199,76 @@ function DocumentBody({ document }: { document: DocumentView }) {
         overline={t('overline')}
         recordId={document.documentNumber}
         subtitle={
-          <StatusPill
-            semantic={documentSemantic(document.status)}
-            subLabel={document.status}
-            announceChanges={false}
-          />
+          <>
+            <DocumentStatusPill status={document.status} />
+            <DocumentMarkers document={document} bare />
+          </>
         }
         facts={[
           { id: 'created', label: t('detail.created'), value: fmt.dateTime(document.createdAt) },
-          { id: 'medium', label: t('detail.medium'), value: document.medium },
+          {
+            id: 'medium',
+            label: t('detail.medium'),
+            value: t(`media.${document.medium}`, { defaultValue: document.medium }),
+          },
           { id: 'language', label: t('detail.language'), value: document.language.toUpperCase() },
+          {
+            id: 'recipient',
+            label: t('columns.recipient'),
+            value: <span className="ds-mono">{maskId(document.recipientPartyId)}</span>,
+          },
         ]}
         actions={
-          <LinkButton variant="secondary" to={subjectHref}>
-            {t('detail.allForSubject')}
-          </LinkButton>
+          <div className={local.actionRow}>
+            <Button variant="secondary" onPress={open('resend')}>
+              {t('lifecycle.resend.button')}
+            </Button>
+            {document.hidden ? (
+              <Button variant="secondary" onPress={open('unhide')}>
+                {t('lifecycle.unhide.button')}
+              </Button>
+            ) : (
+              <Button variant="secondary" onPress={open('hide')}>
+                {t('lifecycle.hide.button')}
+              </Button>
+            )}
+            <Button variant="secondary" isDisabled={state !== 'normal'} onPress={open('supersede')}>
+              {t('lifecycle.supersede.button')}
+            </Button>
+            <Button variant="secondary" isDisabled={state !== 'normal'} onPress={open('withdraw')}>
+              {t('lifecycle.withdraw.button')}
+            </Button>
+            <LinkButton variant="secondary" to={subjectHref}>
+              {t('detail.allForSubject')}
+            </LinkButton>
+          </div>
         }
       />
+      {state === 'superseded' && document.supersededByDocumentId ? (
+        <Banner variant="warning" live="none" title={t('detail.supersededTitle')}>
+          <LinkButton variant="secondary" to={`/documents/${document.supersededByDocumentId}`}>
+            {t('detail.openReplacement')}
+          </LinkButton>
+        </Banner>
+      ) : null}
+      {state === 'withdrawn' ? (
+        <Banner variant="danger" live="none" title={t('detail.withdrawnTitle')}>
+          {t('detail.withdrawnBody', { reason: document.withdrawnReason })}
+        </Banner>
+      ) : null}
+      {dialog ? (
+        <LifecycleDialog
+          action={dialog}
+          document={document}
+          onClose={() => {
+            setDialog(null);
+          }}
+          onDone={(done) => {
+            setDialog(null);
+            announce(t(`lifecycle.${done}.done`));
+          }}
+        />
+      ) : null}
       <div className={styles.split}>
         <div className={styles.stack}>
           <Section title={t('deliveries.title')} count={document.deliveries.length}>
@@ -237,16 +302,11 @@ function DocumentBody({ document }: { document: DocumentView }) {
                   value: document.requestNo,
                   kind: 'mono',
                 },
-                {
-                  id: 'archive',
-                  label: t('detail.archive'),
-                  value: document.archiveId,
-                  kind: 'mono',
-                },
-                { id: 'hash', label: t('detail.hash'), value: document.contentHash, kind: 'mono' },
               ]}
             />
-            <p className={styles.muted}>{t('detail.noDownload')}</p>
+          </Section>
+          <Section title={t('archive.title')}>
+            <ArchivePanel document={document} />
           </Section>
           <Section title={t('reprint.title')}>
             <ReprintForm documentId={document.documentId} />
