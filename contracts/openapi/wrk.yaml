@@ -921,6 +921,7 @@ paths:
       - W2-WRK-01
       x-status: full
       x-maturity: pre-release
+      x-bounded: 'The queue and pattern catalogue is a small administered set'
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -972,7 +973,10 @@ paths:
       x-exposure:
       - ui
       x-permission: wrk.Pattern.upsert
-      x-error-codes: []
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
       x-source:
       - BO-WRK-03
       parameters:

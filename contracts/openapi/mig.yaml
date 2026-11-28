@@ -2571,7 +2571,7 @@ paths:
       x-bounded: 'At most 500 sampled records per call'
       x-operation-kind: query
       x-idempotency: none
-      x-dry-run: true
+      x-dry-run: false
       x-dry-run-note: 'BO-MIG-04: the preview is a dry run, it writes nothing'
       x-exposure:
       - ui
