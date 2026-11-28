@@ -310,6 +310,26 @@
       "nextCursor": "sample",
       "limit": 1
     },
+    "ActivityPatternDefinition": {
+      "code": "SAMPLE_CODE",
+      "version": "sample",
+      "title": "sample",
+      "category": "sample",
+      "priority": "sample",
+      "queue": "SAMPLE_CODE",
+      "slaPolicy": "sample",
+      "targetMinutes": 1,
+      "escalationMinutes": 1,
+      "gateBlocking": true,
+      "raisingModules": [
+        "PTY"
+      ],
+      "suggestedAssignee": "sample",
+      "amountBandMultipliers": {
+        "note": "sample"
+      },
+      "active": true
+    },
     "ActivitySkipRequest": {
       "id": "019205b0-d7f6-78db-89c4-1c577b8b770d",
       "outcome": "unspecified",
@@ -522,6 +542,72 @@
       "nextCursor": "sample",
       "limit": 1
     },
+    "PatternCatalogue": {
+      "queues": [
+        {
+          "code": "SAMPLE_CODE",
+          "title": "sample",
+          "roles": [
+            "sample"
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "code": "SAMPLE_CODE",
+          "version": "sample",
+          "title": "sample",
+          "category": "sample",
+          "priority": "sample",
+          "queue": "SAMPLE_CODE",
+          "slaPolicy": "sample",
+          "targetMinutes": 1,
+          "escalationMinutes": 1,
+          "gateBlocking": true,
+          "raisingModules": [
+            "PTY"
+          ],
+          "suggestedAssignee": "sample",
+          "amountBandMultipliers": {
+            "note": "sample"
+          },
+          "active": true
+        }
+      ]
+    },
+    "PatternUpsertRequest": {
+      "queues": [
+        {
+          "code": "SAMPLE_CODE",
+          "title": "sample",
+          "roles": [
+            "sample"
+          ]
+        }
+      ],
+      "patterns": [
+        {
+          "code": "SAMPLE_CODE",
+          "version": "sample",
+          "title": "sample",
+          "category": "sample",
+          "priority": "sample",
+          "queue": "SAMPLE_CODE",
+          "slaPolicy": "sample",
+          "targetMinutes": 1,
+          "escalationMinutes": 1,
+          "gateBlocking": true,
+          "raisingModules": [
+            "PTY"
+          ],
+          "suggestedAssignee": "sample",
+          "amountBandMultipliers": {
+            "note": "sample"
+          },
+          "active": true
+        }
+      ]
+    },
     "QueueGetNextRequest": {
       "queueId": "01920025-ac6e-7537-815f-dedcb95eedad"
     },
@@ -573,6 +659,13 @@
     },
     "TeamSummaryResponse": {
       "counts": "unspecified"
+    },
+    "WorkQueueDefinition": {
+      "code": "SAMPLE_CODE",
+      "title": "sample",
+      "roles": [
+        "sample"
+      ]
     }
   }
 }

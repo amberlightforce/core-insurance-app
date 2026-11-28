@@ -2274,6 +2274,136 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.SettlementRow", b =>
+                {
+                    b.Property<Guid>("SettlementId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("settlement_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("ApprovalComment")
+                        .HasColumnType("text")
+                        .HasColumnName("approval_comment");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("approved_at");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("approved_by");
+
+                    b.Property<Guid?>("AuthorityCheckId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("authority_check_id");
+
+                    b.Property<string>("BankReference")
+                        .HasColumnType("text")
+                        .HasColumnName("bank_reference");
+
+                    b.Property<string>("BilReference")
+                        .HasColumnType("text")
+                        .HasColumnName("bil_reference");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("Direction")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("direction");
+
+                    b.Property<string>("EvidenceRef")
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_ref");
+
+                    b.Property<Guid?>("ItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<decimal>("Net")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("net");
+
+                    b.Property<string>("Period")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("period");
+
+                    b.Property<DateTime>("ProposedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("proposed_at");
+
+                    b.Property<string>("ProposedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("proposed_by");
+
+                    b.Property<Guid>("ReinsurerPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reinsurer_party_id");
+
+                    b.Property<DateTime?>("SettledAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("settled_at");
+
+                    b.Property<string>("SettledBy")
+                        .HasColumnType("text")
+                        .HasColumnName("settled_by");
+
+                    b.Property<decimal?>("StatementClosing")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("statement_closing");
+
+                    b.Property<Guid?>("StatementId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("statement_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateOnly?>("ValueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("value_date");
+
+                    b.HasKey("SettlementId")
+                        .HasName("pk_settlement");
+
+                    b.HasIndex("LegalEntityId", "Status")
+                        .HasDatabaseName("ix_settlement_status");
+
+                    b.HasIndex("LegalEntityId", "ReinsurerPartyId", "BankReference")
+                        .IsUnique()
+                        .HasDatabaseName("ux_settlement_reference")
+                        .HasFilter("bank_reference IS NOT NULL");
+
+                    b.HasIndex("LegalEntityId", "ReinsurerPartyId", "Currency")
+                        .IsUnique()
+                        .HasDatabaseName("ux_settlement_live")
+                        .HasFilter("status IN ('PROPOSED', 'APPROVED')");
+
+                    b.ToTable("settlement", "ri", t =>
+                        {
+                            t.HasCheckConstraint("ck_settlement_amount", "amount > 0 AND amount = abs(net)");
+
+                            t.HasCheckConstraint("ck_settlement_direction", "direction IN ('PAY', 'RECEIVE')");
+
+                            t.HasCheckConstraint("ck_settlement_status", "status IN ('PROPOSED', 'APPROVED', 'RELEASED', 'RECORDED', 'SUPERSEDED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Reinsurance.Persistence.StatementLineRow", b =>
                 {
                     b.Property<Guid>("StatementId")

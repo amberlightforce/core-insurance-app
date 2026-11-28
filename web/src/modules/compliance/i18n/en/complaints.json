@@ -1,0 +1,41 @@
+{
+  "complaints": {
+    "overline": "Compliance",
+    "title": "Complaints",
+    "lead": "Customer complaints with their status, class, channel and the statutory reply deadline.",
+    "list": {
+      "title": "All complaints",
+      "empty": "No complaints match these filters."
+    },
+    "filter": {
+      "status": "Status",
+      "category": "Class",
+      "channel": "Channel",
+      "all": "All",
+      "overdue": "Overdue only"
+    },
+    "columns": {
+      "number": "Number",
+      "status": "Status",
+      "category": "Class",
+      "channel": "Channel",
+      "received": "Received",
+      "deadline": "Next deadline",
+      "overdue": "Overdue"
+    },
+    "overdue": "Overdue",
+    "countdown": {
+      "left": "{count, plural, =0 {due today} one {# day left} other {# days left}}",
+      "late": "{count, plural, one {# day late} other {# days late}}"
+    },
+    "status": {
+      "RECEIVED": "Received",
+      "ACKNOWLEDGED": "Acknowledged",
+      "UNDER_INVESTIGATION": "Under investigation",
+      "ANSWERED": "Answered",
+      "ESCALATED": "Escalated",
+      "CLOSED": "Closed"
+    },
+    "openList": "Open all complaints"
+  }
+}

@@ -483,10 +483,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/notices/acknowledge
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/draft
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/send
 CONTRACT_NOT_SERVED POST /api/ri/v1/reconciliation/fin
-CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/approve
-CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/propose
-CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/record-manual
-CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/release
 CONTRACT_NOT_SERVED POST /api/uw/v1/accumulation/check
 CONTRACT_NOT_SERVED POST /api/uw/v1/contingencies
 CONTRACT_NOT_SERVED POST /api/uw/v1/contingencies/apply-consequence

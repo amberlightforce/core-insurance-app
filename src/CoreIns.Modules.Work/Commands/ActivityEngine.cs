@@ -3,6 +3,7 @@ using System.Text.Json;
 using CoreIns.Modules.Work.Contracts.Events;
 using CoreIns.Modules.Work.Domain;
 using CoreIns.Modules.Work.Persistence;
+using CoreIns.Modules.Work.Queries;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Contracts.Common;
 using CoreIns.Platform.Errors;
@@ -18,7 +19,8 @@ namespace CoreIns.Modules.Work.Commands;
 
 /// <summary>What creates an activity: a pattern, the primary object, the module that raises it and why.</summary>
 internal sealed record CreateActivityInput(
-    string PatternCode, ObjectRef Primary, IReadOnlyList<ObjectRef> Secondary, ModuleCode Raising, string? CauseRef);
+    string PatternCode, ObjectRef Primary, IReadOnlyList<ObjectRef> Secondary, ModuleCode Raising, string? CauseRef,
+    string? SuggestedAssignee = null, string? AmountBand = null, JsonElement? Overrides = null);
 
 /// <summary>Who an assignment names.</summary>
 /// <param name="Type">USER or QUEUE.</param>
@@ -35,10 +37,11 @@ internal sealed record AssignTarget(string Type, string Id)
 /// pipeline, event handler or sweeper) so the row and its events commit together.
 /// </summary>
 internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IClock clock, IEventPublisher events,
-    AssignmentRouter router, IWorkUserDirectory directory)
+    AssignmentRouter router, IWorkUserDirectory directory, WorkCatalogue catalogue)
 {
     private const int MaxSecondaryObjects = 20;
     private const int MaxFieldLength = 2000;
+    private const int MaxSlaMinutes = 365 * 24 * 60;
 
     private LegalEntityId LegalEntity =>
         legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
@@ -47,7 +50,8 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
     public async Task<Result<ActivityRow>> CreateAsync(CreateActivityInput input, bool returnExistingOnDuplicate, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(input);
-        var pattern = WorkCatalog.Pattern(input.PatternCode);
+        var snapshot = await catalogue.GetAsync(cancellationToken).ConfigureAwait(false);
+        var pattern = snapshot.Pattern(input.PatternCode);
         if (pattern is null || !pattern.RaisingModules.Contains(input.Raising))
         {
             // Fail closed: an unknown pattern, or a module that may not raise it, never creates work.
@@ -80,7 +84,34 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
             return WorkErrors.Of(WorkErrors.Duplicate, $"The open activity {existing.Number} already exists for this object and cause.");
         }
 
+        var resolved = ResolveOverrides(pattern, input);
+        if (resolved.IsFailure)
+        {
+            return resolved.Error!;
+        }
+
+        var (priority, targetMinutes, escalationMinutes) = resolved.Value;
         var routing = await router.RouteAsync(pattern.Code, pattern.Queue, cancellationToken).ConfigureAwait(false);
+        var offered = false;
+        var patternQueue = snapshot.Queue(pattern.Queue);
+        // Precedence: the request's suggestion, then the assignment rules, then the pattern's default user, then the queue. A suggestion only
+        // counts when that user exists, is active and may take work from the queue; otherwise the next source decides.
+        foreach (var suggested in new[] { input.SuggestedAssignee, routing.UserId is null ? pattern.SuggestedAssignee : null })
+        {
+            if (suggested is null || patternQueue is null)
+            {
+                continue;
+            }
+
+            var user = await directory.FindAsync(suggested, cancellationToken).ConfigureAwait(false);
+            if (user is not null && AssignmentRouter.Reject(user, patternQueue, null) is null)
+            {
+                routing = new RoutingDecision(user.UserId, pattern.Queue, null, routing.RulePath, routing.Rejected);
+                offered = true;
+                break;
+            }
+        }
+
         var now = clock.Now;
         var id = Guid.CreateVersion7();
         var row = new ActivityRow
@@ -92,7 +123,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
             PatternVersion = pattern.Version,
             Title = pattern.Title,
             Category = pattern.Category,
-            Priority = pattern.Priority,
+            Priority = priority,
             SlaPolicy = pattern.SlaPolicy,
             GateBlocking = pattern.GateBlocking,
             State = ActivityRow.Open,
@@ -108,8 +139,8 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
             QueueCode = pattern.Queue,
             CreatedAt = now,
             CreatedBy = context.Actor.ToString(),
-            TargetAt = now.Plus(TimeSpan.FromMinutes(pattern.TargetMinutes)),
-            EscalationAt = now.Plus(TimeSpan.FromMinutes(pattern.EscalationMinutes)),
+            TargetAt = now.Plus(TimeSpan.FromMinutes(targetMinutes)),
+            EscalationAt = now.Plus(TimeSpan.FromMinutes(escalationMinutes)),
             UpdatedAt = now,
         };
         db.Activities.Add(row);
@@ -134,10 +165,56 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
         if (routing.UserId is not null)
         {
             // Rule based assignment at create: the previous assignee is the queue the activity started in.
-            PublishAssigned(row, ActivityRow.Queue, pattern.Queue, "RULE", routing.RuleCode, null);
+            PublishAssigned(row, ActivityRow.Queue, pattern.Queue, offered ? "SUGGESTED" : "RULE", routing.RuleCode, null);
         }
 
         return row;
+    }
+
+    /// <summary>
+    /// Priority and SLA minutes of a new activity: the pattern's values, scaled by the amount band's percentage, replaced by explicit
+    /// <c>overrides</c> (<c>priority</c>, <c>targetMinutes</c>, <c>escalationMinutes</c>). An override outside the safe range is refused.
+    /// </summary>
+    private static Result<(string Priority, int Target, int Escalation)> ResolveOverrides(ActivityPattern pattern, CreateActivityInput input)
+    {
+        var target = pattern.TargetMinutes;
+        var escalation = pattern.EscalationMinutes;
+        if (input.AmountBand is { } band && pattern.AmountBandPercent is { } bands && bands.TryGetValue(band, out var percent))
+        {
+            target = Math.Max(1, (int)((long)target * percent / 100));
+            escalation = Math.Max(target, (int)((long)escalation * percent / 100));
+        }
+
+        var priority = pattern.Priority;
+        if (input.Overrides is { ValueKind: JsonValueKind.Object } overrides)
+        {
+            foreach (var property in overrides.EnumerateObject())
+            {
+                switch (property.Name)
+                {
+                    case "priority" when property.Value.ValueKind == JsonValueKind.String && property.Value.GetString() is "NORMAL" or "HIGH":
+                        priority = property.Value.GetString()!;
+                        break;
+                    case "targetMinutes" when property.Value.TryGetInt32(out var t) && t is >= 1 and <= MaxSlaMinutes:
+                        target = t;
+                        escalation = Math.Max(escalation, t);
+                        break;
+                    case "escalationMinutes" when property.Value.TryGetInt32(out var e) && e is >= 1 and <= MaxSlaMinutes:
+                        escalation = e;
+                        break;
+                    default:
+                        // Fail closed: an unknown or malformed override never silently changes the SLA.
+                        return WorkErrors.Invalid($"overrides.{property.Name} is not an allowed override (priority NORMAL|HIGH, targetMinutes and escalationMinutes 1..{MaxSlaMinutes}).");
+                }
+            }
+        }
+
+        if (escalation < target)
+        {
+            return WorkErrors.Invalid("escalationMinutes must not be before targetMinutes.");
+        }
+
+        return (priority, target, escalation);
     }
 
     /// <summary>
@@ -146,7 +223,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
     /// </summary>
     public async Task<Result<ActivityRow>> AssignAsync(Guid id, AssignTarget? target, CancellationToken cancellationToken)
     {
-        var actor = WorkActor.From(context);
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
         var row = await LoadAsync(id, actor, cancellationToken).ConfigureAwait(false);
         if (row is null)
         {
@@ -185,7 +262,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
                 return WorkErrors.Of(WorkErrors.TargetIneligible, "The user id is not valid.");
             }
 
-            var queue = WorkCatalog.Queue(row.QueueCode);
+            var queue = (await catalogue.GetAsync(cancellationToken).ConfigureAwait(false)).Queue(row.QueueCode);
             var user = await directory.FindAsync(target.Id, cancellationToken).ConfigureAwait(false);
             if (user is null)
             {
@@ -222,7 +299,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
                 return WorkErrors.Of(WorkErrors.Permission, "Only the assignee or a manager can return an activity to a queue.");
             }
 
-            if (WorkCatalog.Queue(target.Id) is null)
+            if ((await catalogue.GetAsync(cancellationToken).ConfigureAwait(false)).Queue(target.Id) is null)
             {
                 return WorkErrors.Of(WorkErrors.TargetIneligible, $"Queue '{target.Id}' does not exist.");
             }
@@ -241,7 +318,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
     /// <summary>Completes, skips or cancels an open activity. Only the assignee may complete or skip it; the assignee or a manager may cancel it.</summary>
     public async Task<Result<ActivityRow>> CloseAsync(Guid id, string newState, string? outcome, string? note, string? reason, CancellationToken cancellationToken)
     {
-        var actor = WorkActor.From(context);
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
         if (note is { Length: > MaxFieldLength } || reason is { Length: > MaxFieldLength } || outcome is { Length: > 64 })
         {
             return WorkErrors.Invalid($"outcome has at most 64 and note and reason at most {MaxFieldLength} characters.");
@@ -308,7 +385,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
     /// <summary>Takes the most urgent open activity of the actor's visible queues (all, or the one named) and assigns it to them.</summary>
     public async Task<Result<ActivityRow>> ClaimNextAsync(string? queueCode, CancellationToken cancellationToken)
     {
-        var actor = WorkActor.From(context);
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
         if (actor.UserId is null)
         {
             return WorkErrors.Of(WorkErrors.Permission, "Only a signed-in user can take an activity.");

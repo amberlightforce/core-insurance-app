@@ -60,9 +60,9 @@ internal sealed class CreateActivityHandler(ActivityEngine engine) : ICommandHan
     public async Task<Result<ActivityCreateResponse>> HandleAsync(CreateActivity command, CancellationToken cancellationToken)
     {
         var request = command.Request;
-        // TODO(hardening): pattern overrides, suggestedAssignee and amountBand are ignored; the pattern's queue and SLA always apply.
         var created = await engine.CreateAsync(
-            new CreateActivityInput(request.PatternCode, request.PrimaryObject, request.SecondaryObjects ?? [], request.RaisingModule, request.CauseRef),
+            new CreateActivityInput(request.PatternCode, request.PrimaryObject, request.SecondaryObjects ?? [], request.RaisingModule, request.CauseRef,
+                request.SuggestedAssignee, request.AmountBand, request.Overrides),
             returnExistingOnDuplicate: false, cancellationToken).ConfigureAwait(false);
         return created.Map(row => new ActivityCreateResponse
         {
@@ -100,7 +100,7 @@ internal sealed class AssignActivityValidator : AbstractValidator<AssignActivity
     public AssignActivityValidator() => RuleFor(c => c.Request.Id).NotNull().NotEqual(Guid.Empty).WithErrorCode("ACTIVITY_REQUIRED");
 }
 
-internal sealed class AssignActivityHandler(ActivityEngine engine, RequestContext context) : ICommandHandler<AssignActivity, ActivityAssignResponse>
+internal sealed class AssignActivityHandler(ActivityEngine engine, WorkCatalogue catalogue) : ICommandHandler<AssignActivity, ActivityAssignResponse>
 {
     public async Task<Result<ActivityAssignResponse>> HandleAsync(AssignActivity command, CancellationToken cancellationToken)
     {
@@ -112,7 +112,7 @@ internal sealed class AssignActivityHandler(ActivityEngine engine, RequestContex
         }
 
         var assigned = await engine.AssignAsync(request.Id!.Value, target.Value, cancellationToken).ConfigureAwait(false);
-        var actor = WorkActor.From(context);
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
         return assigned.Map(row => new ActivityAssignResponse { Assignment = ActivityView.From(row, actor).ToElement() });
     }
 
@@ -160,13 +160,13 @@ internal sealed class CompleteActivityValidator : AbstractValidator<CompleteActi
     public CompleteActivityValidator() => RuleFor(c => c.Request.Id).NotNull().NotEqual(Guid.Empty).WithErrorCode("ACTIVITY_REQUIRED");
 }
 
-internal sealed class CompleteActivityHandler(ActivityEngine engine, RequestContext context) : ICommandHandler<CompleteActivity, ActivityCompleteResponse>
+internal sealed class CompleteActivityHandler(ActivityEngine engine, WorkCatalogue catalogue) : ICommandHandler<CompleteActivity, ActivityCompleteResponse>
 {
     public async Task<Result<ActivityCompleteResponse>> HandleAsync(CompleteActivity command, CancellationToken cancellationToken)
     {
         var request = command.Request;
         var closed = await engine.CloseAsync(request.Id!.Value, ActivityRow.Completed, Loose.Text(request.Outcome), Loose.Text(request.Note), Loose.Text(request.Reason), cancellationToken).ConfigureAwait(false);
-        var actor = WorkActor.From(context);
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
         return closed.Map(row => new ActivityCompleteResponse { Activity = ActivityView.From(row, actor).ToElement() });
     }
 }
@@ -185,13 +185,13 @@ internal sealed class SkipActivityValidator : AbstractValidator<SkipActivity>
     public SkipActivityValidator() => RuleFor(c => c.Request.Id).NotNull().NotEqual(Guid.Empty).WithErrorCode("ACTIVITY_REQUIRED");
 }
 
-internal sealed class SkipActivityHandler(ActivityEngine engine, RequestContext context) : ICommandHandler<SkipActivity, ActivitySkipResponse>
+internal sealed class SkipActivityHandler(ActivityEngine engine, WorkCatalogue catalogue) : ICommandHandler<SkipActivity, ActivitySkipResponse>
 {
     public async Task<Result<ActivitySkipResponse>> HandleAsync(SkipActivity command, CancellationToken cancellationToken)
     {
         var request = command.Request;
         var closed = await engine.CloseAsync(request.Id!.Value, ActivityRow.Skipped, Loose.Text(request.Outcome), Loose.Text(request.Note), Loose.Text(request.Reason), cancellationToken).ConfigureAwait(false);
-        var actor = WorkActor.From(context);
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
         return closed.Map(row => new ActivitySkipResponse { Activity = ActivityView.From(row, actor).ToElement() });
     }
 }
@@ -210,13 +210,13 @@ internal sealed class CancelActivityValidator : AbstractValidator<CancelActivity
     public CancelActivityValidator() => RuleFor(c => c.Request.Id).NotNull().NotEqual(Guid.Empty).WithErrorCode("ACTIVITY_REQUIRED");
 }
 
-internal sealed class CancelActivityHandler(ActivityEngine engine, RequestContext context) : ICommandHandler<CancelActivity, ActivityCancelResponse>
+internal sealed class CancelActivityHandler(ActivityEngine engine, WorkCatalogue catalogue) : ICommandHandler<CancelActivity, ActivityCancelResponse>
 {
     public async Task<Result<ActivityCancelResponse>> HandleAsync(CancelActivity command, CancellationToken cancellationToken)
     {
         var request = command.Request;
         var closed = await engine.CloseAsync(request.Id!.Value, ActivityRow.Cancelled, Loose.Text(request.Outcome), Loose.Text(request.Note), Loose.Text(request.Reason), cancellationToken).ConfigureAwait(false);
-        var actor = WorkActor.From(context);
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
         return closed.Map(row => new ActivityCancelResponse { Activity = ActivityView.From(row, actor).ToElement() });
     }
 }
@@ -230,14 +230,14 @@ internal sealed class CancelActivityAuditor : ICommandAuditor<CancelActivity, Ac
 /// <summary><c>wrk.Queue.getNext</c>: take the most urgent open activity of my queues.</summary>
 internal sealed record GetNextActivity(QueueGetNextRequest Request) : ICommand<QueueGetNextResponse>;
 
-internal sealed class GetNextActivityHandler(ActivityEngine engine, RequestContext context) : ICommandHandler<GetNextActivity, QueueGetNextResponse>
+internal sealed class GetNextActivityHandler(ActivityEngine engine, WorkCatalogue catalogue) : ICommandHandler<GetNextActivity, QueueGetNextResponse>
 {
     public async Task<Result<QueueGetNextResponse>> HandleAsync(GetNextActivity command, CancellationToken cancellationToken)
     {
         string? queue = null;
         if (command.Request.QueueId is { } queueId)
         {
-            queue = QueueIds.CodeOf(queueId);
+            queue = QueueIds.CodeOf(await catalogue.GetAsync(cancellationToken).ConfigureAwait(false), queueId);
             if (queue is null)
             {
                 return WorkErrors.Of(WorkErrors.QueueEmpty, "No open activity is waiting in the queue.");
@@ -245,7 +245,7 @@ internal sealed class GetNextActivityHandler(ActivityEngine engine, RequestConte
         }
 
         var claimed = await engine.ClaimNextAsync(queue, cancellationToken).ConfigureAwait(false);
-        var actor = WorkActor.From(context);
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
         return claimed.Map(row => new QueueGetNextResponse { AssignedActivity = ActivityView.From(row, actor).ToElement() });
     }
 }

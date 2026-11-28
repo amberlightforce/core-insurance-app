@@ -30,6 +30,7 @@ tags:
 - name: Desktop
 - name: Search
 - name: Palette
+- name: Pattern
 - name: RecentItem
 - name: CommandRegistry
 - name: DataSubject
@@ -901,6 +902,104 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/wrk/v1/admin/patterns:
+    get:
+      operationId: wrk.Pattern.list
+      summary: Queue and pattern catalogue
+      description: |-
+        Queue and pattern catalogue
+
+        Outputs: the queues and activity patterns in force
+      tags:
+      - Pattern
+      x-requirement:
+      - REQ-WRK-001
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'Not a PRD operation (BO-WRK-03): the administration of the queue and pattern catalogue'
+      x-exposure:
+      - ui
+      x-permission: wrk.Pattern.list
+      x-error-codes: []
+      x-source:
+      - BO-WRK-03
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatternCatalogue'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    put:
+      operationId: wrk.Pattern.upsert
+      summary: Create or change queues and patterns
+      description: |-
+        Create or change queues and patterns
+
+        Inputs: queues and patterns to create or replace (by code). Outputs: the catalogue after the change
+      tags:
+      - Pattern
+      x-requirement:
+      - REQ-WRK-001
+      x-wave: W2
+      x-work-packages:
+      - W2-WRK-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'Not a PRD operation (BO-WRK-03): the administration of the queue and pattern catalogue'
+      x-exposure:
+      - ui
+      x-permission: wrk.Pattern.upsert
+      x-error-codes: []
+      x-source:
+      - BO-WRK-03
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatternUpsertRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatternCatalogue'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/wrk/v1/exports:
@@ -4118,6 +4217,93 @@ components:
     entra:
       $ref: common.yaml#/components/securitySchemes/entra
   schemas:
+    WorkQueueDefinition:
+      type: object
+      description: A work queue and the staff roles that may see and claim from it.
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        title:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+      required:
+      - code
+      - title
+      - roles
+    ActivityPatternDefinition:
+      type: object
+      description: An activity pattern; changing one creates the next version, running activities keep the version they were created with.
+      properties:
+        code:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+        priority:
+          type: string
+          description: NORMAL or HIGH
+        queue:
+          $ref: ../events/common.schema.json#/$defs/Code
+        slaPolicy:
+          type: string
+        targetMinutes:
+          type: integer
+        escalationMinutes:
+          type: integer
+        gateBlocking:
+          type: boolean
+        raisingModules:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/ModuleCode
+        suggestedAssignee:
+          type: string
+          description: A user id that new activities of the pattern are offered to when the create request names none (rules still run first).
+        amountBandMultipliers:
+          $ref: ../events/common.schema.json#/$defs/OpenObject
+          description: Per amount band, a percentage applied to the SLA minutes (for example HIGH 50 halves them).
+        active:
+          type: boolean
+      required:
+      - code
+      - title
+      - category
+      - priority
+      - queue
+      - slaPolicy
+      - targetMinutes
+      - escalationMinutes
+      - raisingModules
+    PatternCatalogue:
+      type: object
+      description: The queues and patterns in force.
+      properties:
+        queues:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkQueueDefinition'
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityPatternDefinition'
+    PatternUpsertRequest:
+      type: object
+      description: Queues and patterns to create or replace by code.
+      properties:
+        queues:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkQueueDefinition'
+        patterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityPatternDefinition'
     ActivityCreateRequest:
       type: object
       properties:

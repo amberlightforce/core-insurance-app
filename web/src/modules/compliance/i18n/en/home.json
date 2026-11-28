@@ -30,6 +30,11 @@
         "number": "Number",
         "status": "Status",
         "deadline": "Next deadline"
+      },
+      "open": {
+        "title": "Work the complaints",
+        "body": "Filter by status, class and channel, and follow the statutory reply deadlines.",
+        "link": "Open the complaints list"
       }
     },
     "dsar": {
