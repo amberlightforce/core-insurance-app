@@ -190,7 +190,7 @@ internal sealed class BillingReader(BillingDbContext db)
         var allocations = await db.Allocations.AsNoTracking().Where(a => a.ReceiptId == id).OrderBy(a => a.RecordedAt)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
         var receivablePaid = await db.ReceivableAllocations.Where(a => a.ReceiptId == id).SumAsync(a => a.Amount, cancellationToken).ConfigureAwait(false);
-        return new ReceiptGetResponse { Receipt = Receipt(receipt, allocations.Sum(a => a.Amount) + receivablePaid), Allocations = [.. allocations.Select(Allocation)], Reversals = [] };
+        return new ReceiptGetResponse { Receipt = Receipt(receipt, allocations.Sum(a => a.Amount) + receivablePaid), Allocations = [.. allocations.Where(a => a.ReversesAllocationId is null).Select(Allocation)], Reversals = [.. allocations.Where(a => a.ReversesAllocationId is not null).Select(Allocation)] };
     }
 
     public static ReceiptView Receipt(ReceiptRow r, decimal allocated)
@@ -224,6 +224,7 @@ internal sealed class BillingReader(BillingDbContext db)
         Amount = new Money(a.Amount, Currency.FromCode(a.Currency)),
         RuleId = a.RuleId,
         Source = a.Source == "MANUAL" ? AllocationView.SourceValue.Manual : AllocationView.SourceValue.Rule,
+        ReversesAllocationId = a.ReversesAllocationId,
         RecordedAt = a.RecordedAt,
     };
 

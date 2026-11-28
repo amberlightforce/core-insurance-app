@@ -60,7 +60,8 @@ internal sealed class PolicyJobService(
     ICommandHandler<UpdateDraft, JobUpdateDraftResponse> updateDraft,
     ICommandHandler<QuoteJob, JobQuoteResponse> quote,
     ICommandHandler<BindJob, JobBindResponse> bind,
-    ICommandHandler<WithdrawJob, JobWithdrawResponse> withdraw) : IPolicyJobService
+    ICommandHandler<WithdrawJob, JobWithdrawResponse> withdraw,
+    ICommandHandler<CoreIns.Modules.Policy.Commands.Quotes.NewVersion, JobNewVersionResponse> newVersion) : IPolicyJobService
 {
     /// <summary>pol.Job.get in the caller's legal entity (another entity's job is POL-ERR-NOT-FOUND); the list filters are not built.</summary>
     public async Task<JobGetResponse> GetAsync(
@@ -92,7 +93,7 @@ internal sealed class PolicyJobService(
     /// TODO(hardening): account / participant filters, cursor paging, typed items.
     /// </summary>
     public async Task<JobListPage> ListAsync(
-        string? cursor = null, int? limit = null, string? account = null, string? policy = null, string? participant = null, string? state = null,
+        string? cursor = null, int? limit = null, string? account = null, string? policy = null, string? participant = null, string? state = null, string? partyId = null, string? producerCode = null, string? productCode = null, string? jobType = null,
         CancellationToken cancellationToken = default)
     {
         if (cursor is not null || account is not null || participant is not null || !Guid.TryParse(policy, out var policyId))
@@ -109,7 +110,7 @@ internal sealed class PolicyJobService(
     }
 
     public Task<JobNewVersionResponse> NewVersionAsync(JobNewVersionRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw InProcess.NotAvailable("pol.Job.newVersion");
+        InProcess.RunAsync(context, newVersion, new CoreIns.Modules.Policy.Commands.Quotes.NewVersion(request), options, cancellationToken);
 
     public Task<JobWithdrawResponse> WithdrawAsync(JobWithdrawRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         InProcess.RunAsync(context, withdraw, new WithdrawJob(request), options, cancellationToken);

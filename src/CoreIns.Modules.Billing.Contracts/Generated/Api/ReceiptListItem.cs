@@ -4,31 +4,16 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Receipt.list result. PRD outputs: "receipt, allocations, reversals"</summary>
+/// <summary>A receipt of bil.Receipt.list. The bank reference is masked (only its last four characters show); payer details are not part of the receipt.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ReceiptListItem
 {
-    /// <summary>PRD: "receipt"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'receipt'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("receipt")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Receipt { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.ReceiptView Receipt { get; init; }
 
-    /// <summary>PRD: "allocations"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("allocations")]
+    /// <summary>Bank reference with all but the last four characters replaced by asterisks</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("bankReferenceMasked")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Allocations { get; init; }
-
-    /// <summary>PRD: "reversals"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reversals")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reversals { get; init; }
+    public string? BankReferenceMasked { get; init; }
 }

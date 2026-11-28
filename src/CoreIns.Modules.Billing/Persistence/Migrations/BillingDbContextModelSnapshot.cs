@@ -213,6 +213,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("numeric(19,4)")
                         .HasColumnName("amount");
 
+                    b.Property<string>("Comment")
+                        .HasColumnType("text")
+                        .HasColumnName("comment");
+
                     b.Property<string>("Currency")
                         .IsRequired()
                         .HasColumnType("char(3)")
@@ -230,6 +234,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("legal_entity_id");
 
+                    b.Property<string>("ReasonCode")
+                        .HasColumnType("text")
+                        .HasColumnName("reason_code");
+
                     b.Property<Guid>("ReceiptId")
                         .HasColumnType("uuid")
                         .HasColumnName("receipt_id");
@@ -237,6 +245,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.Property<DateTime>("RecordedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("recorded_at");
+
+                    b.Property<Guid?>("ReversesAllocationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reverses_allocation_id");
 
                     b.Property<string>("RuleId")
                         .IsRequired()
@@ -264,11 +276,18 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.HasIndex("ReceiptId")
                         .HasDatabaseName("ix_allocation_receipt");
 
+                    b.HasIndex("ReversesAllocationId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_allocation_reverses")
+                        .HasFilter("reverses_allocation_id IS NOT NULL");
+
                     b.ToTable("allocation", "bil", t =>
                         {
-                            t.HasCheckConstraint("ck_allocation_amount", "amount > 0");
+                            t.HasCheckConstraint("ck_allocation_amount", "amount <> 0");
 
                             t.HasCheckConstraint("ck_allocation_currency", "currency ~ '^[A-Z]{3}$'");
+
+                            t.HasCheckConstraint("ck_allocation_reversal", "(reverses_allocation_id IS NULL) = (amount > 0)");
 
                             t.HasCheckConstraint("ck_allocation_source", "source IN ('RULE', 'AI', 'MANUAL')");
                         });
@@ -3067,6 +3086,12 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_allocation_receipt");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.AllocationRow", null)
+                        .WithMany()
+                        .HasForeignKey("ReversesAllocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_allocation_reverses");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.CreditApplicationRow", b =>

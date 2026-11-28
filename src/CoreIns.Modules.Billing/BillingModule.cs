@@ -118,6 +118,15 @@ public static class BillingModule
         services.AddCommandAuditor<AllocateReceipt, AllocationAllocateResponse, AllocateReceiptAuditor>();
         services.AddCommand<AllocateReceipt, AllocationAllocateResponse, AllocateReceiptHandler>(
             CommandDescriptor.For("bil.Allocation.allocate") with { SupportsDryRun = true });
+        // BO-BIL-07: receipt list and the reversal of allocations (unallocate, reallocate).
+        services.AddScoped<ReceiptReader>();
+        services.AddScoped<AllocationReverser>();
+        services.AddScoped<IValidator<UnallocateReceipt>, UnallocateReceiptValidator>();
+        services.AddCommandAuditor<UnallocateReceipt, AllocationUnallocateResponse, AllocationReversalAuditor<UnallocateReceipt, AllocationUnallocateResponse>>();
+        services.AddCommand<UnallocateReceipt, AllocationUnallocateResponse, UnallocateReceiptHandler>(CommandDescriptor.For("bil.Allocation.unallocate") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ReallocateReceipt>, ReallocateReceiptValidator>();
+        services.AddCommandAuditor<ReallocateReceipt, AllocationReallocateResponse, AllocationReversalAuditor<ReallocateReceipt, AllocationReallocateResponse>>();
+        services.AddCommand<ReallocateReceipt, AllocationReallocateResponse, ReallocateReceiptHandler>(CommandDescriptor.For("bil.Allocation.reallocate") with { SupportsDryRun = true });
 
         // SL2-BIL-DISB: payee accounts (IBAN P2) and the disbursement service for CLM claim payments. Both commands are
         // idempotent on the caller's key; their results carry the masked IBAN only, never the IBAN (REQ-BIL-338).
@@ -309,6 +318,17 @@ public static class BillingModule
             .Describe("Το ποσό προς επιστροφή είναι μικρότερο από το ελάχιστο· το πιστωτικό μένει στον λογαριασμό.", "The amount to refund is below the minimum; the credit stays on the account."),
         ErrorDefinition.For(ModuleCode.BIL, "REFUND-STATE", 409, "Η επιστροφή δεν είναι στην κατάλληλη κατάσταση", "The refund is not in the right state")
             .Describe("Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση της επιστροφής.", "The action is not allowed in the refund's current state."),
+        // BO-BIL-07: reversal of allocations.
+        ErrorDefinition.For(ModuleCode.BIL, "NOT-ALLOCATED", 422, "Δεν υπάρχει κατανομή προς αντιλογισμό", "Nothing is allocated to reverse")
+            .Describe("Η είσπραξη (ή οι κατανομές που αναφέρατε) δεν έχει πλέον ενεργή κατανομή σε τιμολόγιο.", "The receipt (or the named allocations) has no live allocation to an invoice any more."),
+        ErrorDefinition.For(ModuleCode.BIL, "ALREADY-REVERSED", 409, "Η κατανομή έχει ήδη αντιλογιστεί", "The allocation was already reversed")
+            .Describe("Η κατανομή αντιλογίστηκε ήδη, ή ταυτόχρονο αίτημα την αντιλόγισε πρώτο. Φορτώστε ξανά την είσπραξη.", "The allocation was reversed already, or a concurrent request reversed it first. Reload the receipt."),
+        ErrorDefinition.For(ModuleCode.BIL, "PERIOD-LOCKED", 422, "Η λογιστική περίοδος είναι κλειστή", "The accounting period is closed")
+            .Describe("Η περίοδος της κατανομής ή της σημερινής εγγραφής έχει κλείσει στη Χρηματοοικονομική· ο αντιλογισμός δεν επιτρέπεται.", "The period of the allocation or of today's posting is closed in Finance; the reversal is refused."),
+        ErrorDefinition.For(ModuleCode.BIL, "ALLOCATION-REFUNDED", 422, "Η κατανομή ανήκει σε επιστροφή που πληρώθηκε", "The allocation belongs to a refund already paid out")
+            .Describe("Η ασφαλιστική περίοδος της κατανομής ανήκει σε επιστροφή που εκταμιεύεται ή έχει πληρωθεί· δεν αντιλογίζεται.", "A term of the allocation is part of a refund that is being disbursed or was paid; it cannot be reversed."),
+        ErrorDefinition.For(ModuleCode.BIL, "INVOICE-STATE", 422, "Το τιμολόγιο δεν επιτρέπει αντιλογισμό", "The invoice does not allow a reversal")
+            .Describe("Το τιμολόγιο είναι διαγραμμένο ή αντιλογισμένο· οι κατανομές του δεν αντιλογίζονται.", "The invoice is written off or reversed; its allocations cannot be reversed."),
         ErrorDefinition.For(ModuleCode.BIL, "SOD", 403, "Διαχωρισμός καθηκόντων", "Segregation of duties")
             .Describe("Ο αιτών, όποιος επεξεργάστηκε την επιστροφή ή όποιος άλλαξε τον λογαριασμό δικαιούχου δεν μπορεί να την εγκρίνει.", "The requester, an editor of the refund or the person who changed the payee account cannot approve it."),
         ErrorDefinition.For(ModuleCode.BIL, "PAYEE-UNVERIFIED", 422, "Ο λογαριασμός δικαιούχου δεν έχει επαληθευτεί", "Payee account not verified")

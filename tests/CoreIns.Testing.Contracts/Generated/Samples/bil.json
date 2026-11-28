@@ -385,6 +385,7 @@
           },
           "ruleId": "SAMPLE_CODE",
           "source": "RULE",
+          "reversesAllocationId": "01924ff7-9aa7-7422-8c23-c28d3d746b8c",
           "recordedAt": "2026-10-07T09:00:00Z"
         }
       ],
@@ -555,6 +556,7 @@
           },
           "ruleId": "SAMPLE_CODE",
           "source": "RULE",
+          "reversesAllocationId": "0192fa78-67cb-717d-8130-94c1a6fb37ff",
           "recordedAt": "2026-10-07T09:00:00Z"
         }
       ],
@@ -647,12 +649,24 @@
           },
           "ruleId": "SAMPLE_CODE",
           "source": "RULE",
+          "reversesAllocationId": "019226af-4af1-72e0-8c14-8f8ce3320bc0",
           "recordedAt": "2026-10-07T09:00:00Z"
         }
       ],
       "reversals": [
         {
-          "note": "sample"
+          "allocationId": "01927551-6825-7647-8da9-24c62ce41744",
+          "receiptId": "01927186-ef0c-75e3-8f0b-14f128153bec",
+          "invoiceId": "0192a6eb-1d59-7a8e-8629-eb13782c5142",
+          "invoiceItemId": "01923224-0226-7fe7-8d30-3f439154bb5d",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE",
+          "source": "RULE",
+          "reversesAllocationId": "0192e53b-513e-7503-8446-511b676f2c93",
+          "recordedAt": "2026-10-07T09:00:00Z"
         }
       ]
     },
@@ -1035,6 +1049,7 @@
           },
           "ruleId": "SAMPLE_CODE",
           "source": "RULE",
+          "reversesAllocationId": "01928049-5958-75a8-884b-c0817cf2bf6f",
           "recordedAt": "2026-10-07T09:00:00Z"
         }
       ],
@@ -1065,22 +1080,133 @@
       }
     },
     "AllocationReallocateRequest": {
-      "receipt": "unspecified",
+      "receiptId": "0192df97-c9b8-7ef4-87ef-448b0be20a0f",
+      "allocationIds": [
+        "0192f0fd-74de-7865-8605-e93a7940bf12"
+      ],
+      "reasonCode": "SAMPLE_CODE",
+      "comment": "sample",
       "lines": [
-        "unspecified"
+        {
+          "invoiceId": "01928636-0119-709d-8d77-ec5c8a0b7991",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
       ]
     },
     "AllocationReallocateResponse": {
-      "allocations": "unspecified"
+      "reversals": [
+        {
+          "allocationId": "019288cc-6850-7062-8a9b-076dabf458dd",
+          "receiptId": "0192a78f-1eb4-7ebd-832a-3bebfdb98f32",
+          "invoiceId": "01928e99-7691-7cde-8f81-e3f56d9da6a2",
+          "invoiceItemId": "019205d4-28dd-79a4-8409-6d611d95bfb2",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE",
+          "source": "RULE",
+          "reversesAllocationId": "0192c579-b319-7706-897f-b70117514e37",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "allocations": [
+        {
+          "allocationId": "0192d1f5-02a0-7b9d-888d-7192f44e5e17",
+          "receiptId": "0192a93b-028b-7603-8fbb-d2bba187a178",
+          "invoiceId": "0192629b-815d-7e72-803e-c7999e681b9a",
+          "invoiceItemId": "019280ec-393f-7e2a-8331-4f8d56613e9a",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE",
+          "source": "RULE",
+          "reversesAllocationId": "01927f82-3d58-7ce1-8cca-146cf46348a8",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "receipt": {
+        "receiptId": "01925ef5-7c50-73f1-8ab1-b42850929fc0",
+        "receiptNumber": "SAMPLE-000001",
+        "billingAccountId": "019284d8-fe40-7a19-8c83-b3482aeb82df",
+        "state": "RECEIVED",
+        "channel": "SAMPLE_CODE",
+        "method": "SAMPLE_CODE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unallocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "valueDate": "2026-10-07",
+        "accountingDate": "2026-10-07",
+        "invoiceId": "019294d7-0d06-73c8-8cbe-dad49b7e5ee3",
+        "suspenseReason": "SAMPLE_CODE",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "ledgerEntryId": "0192f3da-9c1b-731a-8a35-2eae838aef48"
     },
     "AllocationUnallocateRequest": {
-      "receipt": "unspecified",
-      "lines": [
-        "unspecified"
-      ]
+      "receiptId": "01927675-0c45-730f-8029-2235b5fdcaab",
+      "allocationIds": [
+        "01925ce3-c01f-765e-8dc1-d2dd97a331ab"
+      ],
+      "reasonCode": "SAMPLE_CODE",
+      "comment": "sample"
     },
     "AllocationUnallocateResponse": {
-      "allocations": "unspecified"
+      "reversals": [
+        {
+          "allocationId": "0192eac8-d508-7905-8bbf-cb7320ad7a1c",
+          "receiptId": "0192c37d-4fe8-7801-8157-c853d6dceacb",
+          "invoiceId": "01924a50-0eb8-7273-85ce-c9e7c2ef103b",
+          "invoiceItemId": "0192eaa1-a6ea-791c-8ce4-ffa92b754fb2",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE",
+          "source": "RULE",
+          "reversesAllocationId": "0192e540-e819-7ac6-8d2a-ad4fe7cfd170",
+          "recordedAt": "2026-10-07T09:00:00Z"
+        }
+      ],
+      "receipt": {
+        "receiptId": "0192b016-0405-732f-8036-6d42afd4542a",
+        "receiptNumber": "SAMPLE-000001",
+        "billingAccountId": "0192debc-69a7-7e30-84ba-2bf2c4594000",
+        "state": "RECEIVED",
+        "channel": "SAMPLE_CODE",
+        "method": "SAMPLE_CODE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unallocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "valueDate": "2026-10-07",
+        "accountingDate": "2026-10-07",
+        "invoiceId": "01925664-1d7d-73b0-8b48-f01ef923f3b2",
+        "suspenseReason": "SAMPLE_CODE",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "ledgerEntryId": "0192950c-d911-73c3-8c3b-e6ea0c86c902"
     },
     "AllocationView": {
       "allocationId": "01923619-8672-71b3-8e1e-0d4b2b1ff901",
@@ -1093,6 +1219,7 @@
       },
       "ruleId": "SAMPLE_CODE",
       "source": "RULE",
+      "reversesAllocationId": "01923982-da8e-77a8-86e7-105b78a3d479",
       "recordedAt": "2026-10-07T09:00:00Z"
     },
     "BillingAccountAttachTermRequest": {
@@ -1980,6 +2107,7 @@
           },
           "ruleId": "SAMPLE_CODE",
           "source": "RULE",
+          "reversesAllocationId": "01928c4c-0ef5-786b-8108-38b1471a4865",
           "recordedAt": "2026-10-07T09:00:00Z"
         }
       ],
@@ -2439,6 +2567,7 @@
           },
           "ruleId": "SAMPLE_CODE",
           "source": "RULE",
+          "reversesAllocationId": "0192656a-54ee-7b9b-834d-d1a3607aa679",
           "recordedAt": "2026-10-07T09:00:00Z"
         }
       ],
@@ -2495,26 +2624,84 @@
           },
           "ruleId": "SAMPLE_CODE",
           "source": "RULE",
+          "reversesAllocationId": "0192eddf-7bd2-704f-8b20-d8b522b9b55f",
           "recordedAt": "2026-10-07T09:00:00Z"
         }
       ],
       "reversals": [
         {
-          "note": "sample"
+          "allocationId": "019254cc-f198-724a-81fc-0ca81694019e",
+          "receiptId": "0192e363-2c8d-7f16-85ba-f1bd9fa68dc2",
+          "invoiceId": "0192158d-e925-76ac-8758-c98fe0884387",
+          "invoiceItemId": "0192e309-a23d-7c1f-8476-7868d7ec0963",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE",
+          "source": "RULE",
+          "reversesAllocationId": "019293fc-7d5d-7431-868e-6ff3783661da",
+          "recordedAt": "2026-10-07T09:00:00Z"
         }
       ]
     },
     "ReceiptListItem": {
-      "receipt": "unspecified",
-      "allocations": "unspecified",
-      "reversals": "unspecified"
+      "receipt": {
+        "receiptId": "0192cd0b-3980-7b8e-82df-e87d5c13d85a",
+        "receiptNumber": "SAMPLE-000001",
+        "billingAccountId": "0192ffca-589f-740c-81b1-9740df0ed3f1",
+        "state": "RECEIVED",
+        "channel": "SAMPLE_CODE",
+        "method": "SAMPLE_CODE",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "allocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "unallocated": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "valueDate": "2026-10-07",
+        "accountingDate": "2026-10-07",
+        "invoiceId": "01928c2b-7428-7b7f-836d-461cba57b7ae",
+        "suspenseReason": "SAMPLE_CODE",
+        "recordedAt": "2026-10-07T09:00:00Z"
+      },
+      "bankReferenceMasked": "sample"
     },
     "ReceiptListPage": {
       "items": [
         {
-          "receipt": "unspecified",
-          "allocations": "unspecified",
-          "reversals": "unspecified"
+          "receipt": {
+            "receiptId": "019267bf-8df5-7716-892b-786cc2ee121a",
+            "receiptNumber": "SAMPLE-000001",
+            "billingAccountId": "0192af24-8747-761a-8ec0-66a845e6d264",
+            "state": "RECEIVED",
+            "channel": "SAMPLE_CODE",
+            "method": "SAMPLE_CODE",
+            "amount": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "allocated": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "unallocated": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "valueDate": "2026-10-07",
+            "accountingDate": "2026-10-07",
+            "invoiceId": "01922b2e-6d4f-7ec8-8552-7382c029be9e",
+            "suspenseReason": "SAMPLE_CODE",
+            "recordedAt": "2026-10-07T09:00:00Z"
+          },
+          "bankReferenceMasked": "sample"
         }
       ],
       "nextCursor": "sample",

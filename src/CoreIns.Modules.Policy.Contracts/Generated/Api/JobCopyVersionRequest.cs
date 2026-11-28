@@ -4,20 +4,37 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Job.copyVersion request. PRD inputs: "jobId, sourceVersion"</summary>
+/// <summary>pol.Job.copyVersion request: copies any version into a new version of the same Quoted job (restore a prior version) or into a new Draft job (a fresh submission with the same risk data and product resolution). Typed from REQ-POL-150, REQ-POL-151.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JobCopyVersionRequest
 {
-    /// <summary>PRD: "jobId"</summary>
+    /// <summary>Contract member 'jobId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
-    /// <summary>PRD: "sourceVersion"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'sourceVersion'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("sourceVersion")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SourceVersion { get; init; }
+    public required int SourceVersion { get; init; }
+
+    /// <summary>Contract member 'target'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("target")]
+    public required TargetValue Target { get; init; }
+
+    /// <summary>The source job's record version as read</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<TargetValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum TargetValue
+    {
+        /// <summary><c>NEW_VERSION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NEW_VERSION")]
+        NewVersion,
+
+        /// <summary><c>NEW_JOB</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("NEW_JOB")]
+        NewJob,
+    }
 }

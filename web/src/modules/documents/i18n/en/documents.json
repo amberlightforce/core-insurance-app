@@ -3,7 +3,7 @@
   "another": "Another lookup",
   "home": {
     "title": "Documents",
-    "lead": "Letters, notices and certificates issued by the system, with their delivery status and proof. Find them by the object they are about, or open one by its id.",
+    "lead": "Letters, notices and certificates issued by the system, with their delivery status and proof. Filter the library, or open a document from the lookup below the table.",
     "bySubject": "Find by object",
     "byId": "Open by document id",
     "module": "Module",
@@ -45,7 +45,9 @@
     "status": "Status",
     "medium": "Medium",
     "language": "Language",
-    "created": "Created"
+    "created": "Created",
+    "recipient": "Recipient",
+    "markers": "Markers"
   },
   "detail": {
     "title": "{type}",
@@ -59,7 +61,10 @@
     "request": "Request",
     "archive": "Archive",
     "hash": "Content hash (SHA-256)",
-    "noDownload": "The archived letter is sealed; the hash above proves its content. The API offers no file download yet."
+    "supersededTitle": "This document was replaced",
+    "openReplacement": "Open the replacement",
+    "withdrawnTitle": "This document was withdrawn",
+    "withdrawnBody": "Reason: {reason}"
   },
   "deliveries": {
     "title": "Deliveries",
@@ -93,5 +98,137 @@
     "failed": "The reprint failed",
     "done": "Reprint requested",
     "doneBody": "The copy appears among the deliveries as a reprint."
+  },
+  "statuses": {
+    "Rendered": "Issued",
+    "Superseded": "Superseded"
+  },
+  "media": {
+    "EMAIL": "Email",
+    "REGISTERED_POST": "Registered post"
+  },
+  "markers": {
+    "hidden": "Hidden",
+    "superseded": "Replaced",
+    "withdrawn": "Withdrawn",
+    "internal": "Internal"
+  },
+  "library": {
+    "title": "Document library",
+    "emptyTitle": "No documents match",
+    "emptyBody": "Change the filters, or show hidden documents.",
+    "loadMore": "Load more",
+    "loadFailed": "The next page could not be loaded"
+  },
+  "filters": {
+    "title": "Filter documents",
+    "all": "All",
+    "q": "Document number",
+    "qHelp": "Starts with.",
+    "type": "Document type",
+    "status": "Status",
+    "medium": "Medium",
+    "from": "Created from",
+    "to": "Created to",
+    "module": "About: module",
+    "subjectType": "About: object type",
+    "subjectId": "About: object id",
+    "recipient": "Recipient party id",
+    "recipientInvalid": "Enter a valid party id (UUID).",
+    "showHidden": "Show hidden documents",
+    "apply": "Apply filters",
+    "reset": "Reset"
+  },
+  "lookup": {
+    "title": "Open a specific document",
+    "lead": "Look documents up by the object they are about, or open one by its id."
+  },
+  "archive": {
+    "title": "Stored letter",
+    "verify": "Verify integrity",
+    "verifyOk": "Integrity verified",
+    "verifyOkBody": "The stored letter matches its recorded hash.",
+    "verifyTampered": "Hash mismatch",
+    "verifyTamperedBody": "The stored bytes do not match the recorded hash. Computed hash:",
+    "verifyFailed": "The check failed",
+    "download": "Download letter",
+    "downloadFailed": "The download failed",
+    "downloadFailedBody": "The stored letter could not be fetched. Try again; if it persists, report it with the time.",
+    "export": "Export evidence pack",
+    "exported": "Evidence pack ready",
+    "exportedBody": "A sealed pack with {count} document(s) was stored.",
+    "downloadPack": "Download pack",
+    "exportFailed": "The export failed"
+  },
+  "completeness": {
+    "title": "Archive completeness",
+    "lead": "Checks that every issued letter has its archived copy and that the stored hash still matches. Read-only; capped at 2000 documents per run.",
+    "run": "Run check",
+    "period": "Month",
+    "issued": "Issued",
+    "ok": "Complete",
+    "gaps": "Gaps",
+    "none": "None",
+    "orphans": "Orphan entries",
+    "truncated": "The check was capped",
+    "truncatedBody": "Narrow the date range to cover every document.",
+    "emptyTitle": "No issued documents",
+    "emptyBody": "No document was issued in this range.",
+    "kinds": {
+      "MISSING_ARCHIVE": "Archive entry missing",
+      "HASH_MISMATCH": "Archive hash differs from the stored bytes",
+      "DOCUMENT_HASH_DIFFERS": "Document hash differs from the archive"
+    },
+    "gapCount": "{count, plural, one {# gap} other {# gaps}}"
+  },
+  "lifecycle": {
+    "cancel": "Cancel",
+    "reason": "Reason",
+    "reasonInvalid": "Give a reason (at least 3 characters).",
+    "channel": "Send by",
+    "channelHelp": "A statutory notice is always sent by registered post.",
+    "replacement": "Replacement document id",
+    "replacementHelp": "An issued document about the same subject.",
+    "replacementInvalid": "Enter a valid document id (UUID).",
+    "resend": {
+      "button": "Resend",
+      "title": "Resend {number}",
+      "lead": "Sends the archived letter again as a new delivery. The reason is kept in the audit trail.",
+      "submit": "Resend",
+      "failed": "The resend failed",
+      "done": "Resend requested"
+    },
+    "hide": {
+      "button": "Hide",
+      "title": "Hide {number}",
+      "lead": "Removes the document from the default lists. The letter, archive and deliveries are kept.",
+      "submit": "Hide document",
+      "failed": "Hiding failed",
+      "done": "Document hidden"
+    },
+    "unhide": {
+      "button": "Unhide",
+      "title": "Unhide {number}",
+      "lead": "Returns the document to the default lists.",
+      "submit": "Unhide document",
+      "failed": "Unhiding failed",
+      "done": "Document unhidden"
+    },
+    "supersede": {
+      "button": "Supersede",
+      "title": "Supersede {number}",
+      "lead": "Links this document to the one that replaces it. Nothing is edited or deleted. A statutory notice needs the administrator role.",
+      "submit": "Supersede document",
+      "failed": "Superseding failed",
+      "done": "Document superseded"
+    },
+    "withdraw": {
+      "button": "Withdraw",
+      "title": "Withdraw {number}",
+      "lead": "Marks the document as withdrawn with no replacement. The archive and delivery evidence are kept. A statutory notice needs the administrator role.",
+      "submit": "Withdraw document",
+      "failed": "Withdrawing failed",
+      "done": "Document withdrawn"
+    }
   }
 }

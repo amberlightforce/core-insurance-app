@@ -4,28 +4,24 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Job.notTaken request. PRD inputs: "jobId, reasonCode, text"</summary>
+/// <summary>pol.Job.notTaken request: closes a Quoted job as not taken (Quoted to NotTaken); idempotent. Typed from REQ-POL-073, REQ-POL-155.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JobNotTakenRequest
 {
-    /// <summary>PRD: "jobId"</summary>
+    /// <summary>Contract member 'jobId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
-    /// <summary>PRD: "reasonCode"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'reasonCode'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ReasonCode { get; init; }
+    public required string ReasonCode { get; init; }
 
-    /// <summary>PRD: "text"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'text'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("text")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Text { get; init; }
+    public string? Text { get; init; }
+
+    /// <summary>Contract member 'expectedRecordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
 }

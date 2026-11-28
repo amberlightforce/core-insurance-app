@@ -4470,7 +4470,7 @@ paths:
       x-wave: W8
       x-work-packages:
       - W8-CMP-01
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
@@ -4485,10 +4485,12 @@ paths:
       - RAT
       x-permission: cmp.Submission.create
       x-error-codes:
-      - code: CMP-ERR-APPROVAL-SAME-USER
-        status: 403
       - code: CMP-ERR-VALIDATION-BLOCKING
         status: 422
+      - code: CMP-ERR-SUBMISSION-STATE
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -4546,7 +4548,7 @@ paths:
       x-wave: W8
       x-work-packages:
       - W8-CMP-01
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
@@ -4557,10 +4559,12 @@ paths:
       - ui
       x-permission: cmp.Submission.attachContent
       x-error-codes:
-      - code: CMP-ERR-APPROVAL-SAME-USER
-        status: 403
       - code: CMP-ERR-VALIDATION-BLOCKING
         status: 422
+      - code: CMP-ERR-SUBMISSION-STATE
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -4616,7 +4620,7 @@ paths:
       x-wave: W8
       x-work-packages:
       - W8-CMP-01
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
@@ -4627,10 +4631,12 @@ paths:
       - ui
       x-permission: cmp.Submission.comment
       x-error-codes:
-      - code: CMP-ERR-APPROVAL-SAME-USER
-        status: 403
       - code: CMP-ERR-VALIDATION-BLOCKING
         status: 422
+      - code: CMP-ERR-SUBMISSION-STATE
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -4686,7 +4692,7 @@ paths:
       x-wave: W8
       x-work-packages:
       - W8-CMP-01
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
@@ -4699,8 +4705,14 @@ paths:
       x-error-codes:
       - code: CMP-ERR-APPROVAL-SAME-USER
         status: 403
+      - code: CMP-ERR-SUBMISSION-UNVERIFIED-DUE
+        status: 422
       - code: CMP-ERR-VALIDATION-BLOCKING
         status: 422
+      - code: CMP-ERR-SUBMISSION-STATE
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -4772,11 +4784,13 @@ paths:
       - PLT
       x-permission: cmp.Submission.recordFiling
       x-error-codes:
-      - code: CMP-ERR-APPROVAL-SAME-USER
-        status: 403
+      - code: CMP-ERR-SUBMISSION-NOT-APPROVED
+        status: 422
+      - code: CMP-ERR-SUBMISSION-UNVERIFIED-DUE
+        status: 422
       - code: CMP-ERR-VALIDATION-BLOCKING
         status: 422
-      - code: CMP-ERR-APPROVAL-REQUIRED
+      - code: CMP-ERR-SUBMISSION-STATE
         status: 422
       - code: CMP-ERR-NOT-FOUND
         status: 404
@@ -4840,7 +4854,7 @@ paths:
       x-wave: W8
       x-work-packages:
       - W8-CMP-01
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
@@ -4851,10 +4865,12 @@ paths:
       - ui
       x-permission: cmp.Submission.recordResponse
       x-error-codes:
-      - code: CMP-ERR-APPROVAL-SAME-USER
-        status: 403
       - code: CMP-ERR-VALIDATION-BLOCKING
         status: 422
+      - code: CMP-ERR-SUBMISSION-STATE
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -4910,7 +4926,7 @@ paths:
       x-wave: W8
       x-work-packages:
       - W8-CMP-01
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
@@ -4921,10 +4937,14 @@ paths:
       - ui
       x-permission: cmp.Submission.evidencePack
       x-error-codes:
-      - code: CMP-ERR-APPROVAL-SAME-USER
-        status: 403
+      - code: CMP-ERR-PACK-UNAVAILABLE
+        status: 422
       - code: CMP-ERR-VALIDATION-BLOCKING
         status: 422
+      - code: CMP-ERR-SUBMISSION-STATE
+        status: 422
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
       - code: CMP-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -4955,6 +4975,218 @@ paths:
           $ref: common.yaml#/components/responses/Forbidden
         '409':
           $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/cmp/v1/submissions/query:
+    get:
+      operationId: cmp.Submission.query
+      summary: Tracker list
+      description: |-
+        Tracker list
+
+        PRD inputs: per op
+        PRD outputs: regulatory submission
+      tags:
+      - Submission
+      x-requirement:
+      - REQ-CMP-008
+      - REQ-CMP-195..REQ-CMP-206
+      x-anchor:
+      - REQ-CMP-008
+      x-anchor-mapped:
+      - REQ-CMP-008
+      x-wave: W8
+      x-work-packages:
+      - W8-CMP-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: cmp.Submission.query
+      x-error-codes:
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-11 §9.1 l.1241
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: status
+        in: query
+        required: false
+        description: 'Filter by status'
+        schema:
+          type: string
+      - name: submissionType
+        in: query
+        required: false
+        description: 'Filter by submission type'
+        schema:
+          type: string
+      - name: regulator
+        in: query
+        required: false
+        description: 'Filter by regulator'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionQueryPage'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/cmp/v1/submissions/archive-completeness:
+    get:
+      operationId: cmp.Submission.archiveCompleteness
+      summary: Archive completeness for the reporting window
+      description: |-
+        Archive completeness for the reporting window
+
+        PRD inputs: per op
+        PRD outputs: regulatory submission
+      tags:
+      - Submission
+      x-requirement:
+      - REQ-CMP-008
+      - REQ-CMP-195..REQ-CMP-206
+      x-anchor:
+      - REQ-CMP-008
+      x-anchor-mapped:
+      - REQ-CMP-008
+      x-wave: W8
+      x-work-packages:
+      - W8-CMP-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: cmp.Submission.archiveCompleteness
+      x-error-codes:
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-11 §9.1 l.1241
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: from
+        in: query
+        required: false
+        description: 'First day, yyyy-MM-dd'
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        description: 'Last day, yyyy-MM-dd'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionArchiveCompletenessResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/cmp/v1/submissions/{id}:
+    get:
+      operationId: cmp.Submission.get
+      summary: Tracker detail
+      description: |-
+        Tracker detail
+
+        PRD inputs: per op
+        PRD outputs: regulatory submission
+      tags:
+      - Submission
+      x-requirement:
+      - REQ-CMP-008
+      - REQ-CMP-195..REQ-CMP-206
+      x-anchor:
+      - REQ-CMP-008
+      x-anchor-mapped:
+      - REQ-CMP-008
+      x-wave: W8
+      x-work-packages:
+      - W8-CMP-01
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 7
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'PRD dry-run: —; PRD idempotency: Required'
+      x-exposure:
+      - ui
+      x-permission: cmp.Submission.get
+      x-error-codes:
+      - code: CMP-ERR-NOT-FOUND
+        status: 404
+      x-source:
+      - PRD-11 §9.1 l.1241
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: id
+        in: path
+        required: true
+        description: Identifier of the Submission
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionGetResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '422':
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
@@ -8608,90 +8840,454 @@ components:
           description: 'PRD: "confirmations"'
     SubmissionCreateRequest:
       type: object
-      description: 'cmp.Submission.create request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Submission.create request: register a regulatory submission (status PLANNED), or start the next version of a REJECTED one (resubmitOf)'
+      properties:
+        submissionType:
+          type: string
+          maxLength: 64
+          description: 'Kind of submission, for example SOLVENCY_QRT, ANNUAL_RETURN, IPT_RETURN, DORA_REPORT'
+        regulator:
+          type: string
+          maxLength: 64
+          description: 'Receiving authority, for example BOG, HCMC, AADE'
+        periodLabel:
+          type: string
+          maxLength: 32
+          description: 'Reporting period label, for example 2026-Q3'
+        periodFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        periodTo:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        dueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: 'Deadline from the regulatory calendar or configuration; absent = no deadline known'
+        dueLegalStatus:
+          type: string
+          enum:
+          - Verified
+          - Unverified
+          description: 'Whether the due date is legally settled (default Unverified); an Unverified date is refused for approval and filing in Production (D-USR-19)'
+        resubmitOf:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'A REJECTED submission this one replaces: the new version copies its content and links back to it'
+        note:
+          type: string
+          maxLength: 1000
+      required:
+      - submissionType
+      - regulator
+      - periodLabel
     SubmissionCreateResponse:
       type: object
-      description: 'cmp.Submission.create result. PRD outputs: "regulatory submission"'
+      description: 'cmp.Submission.create result: the regulatory submission after the action'
       properties:
-        regulatorySubmission:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "regulatory submission"'
+        submission:
+          $ref: '#/components/schemas/SubmissionView'
+      required:
+      - submission
     SubmissionAttachContentRequest:
       type: object
-      description: 'cmp.Submission.attachContent request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Submission.attachContent request: link an artefact (evidence pack, mart export, tax return, fiscal document) to a PLANNED or IN_PREPARATION submission'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          type: string
+          enum:
+          - EVIDENCE_PACK
+          - MART_EXPORT
+          - TAX_RETURN
+          - FISCAL_DOCUMENT
+          - OTHER
+        refId:
+          type: string
+          maxLength: 128
+          description: 'Pack archive id, mart export manifest id, tax return id or the like'
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'Content hash of the artefact (pack hash, mart export manifest hash)'
+        label:
+          type: string
+          maxLength: 200
+      required:
+      - id
+      - kind
+      - refId
     SubmissionAttachContentResponse:
       type: object
-      description: 'cmp.Submission.attachContent result. PRD outputs: "regulatory submission"'
+      description: 'cmp.Submission.attachContent result: the regulatory submission after the action'
       properties:
-        regulatorySubmission:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "regulatory submission"'
+        submission:
+          $ref: '#/components/schemas/SubmissionView'
+      required:
+      - submission
     SubmissionCommentRequest:
       type: object
-      description: 'cmp.Submission.comment request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Submission.comment request: append a comment to the submission history (allowed in every status; the record itself is not changed)'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        text:
+          type: string
+          maxLength: 2000
+      required:
+      - id
+      - text
     SubmissionCommentResponse:
       type: object
-      description: 'cmp.Submission.comment result. PRD outputs: "regulatory submission"'
+      description: 'cmp.Submission.comment result: the regulatory submission after the action'
       properties:
-        regulatorySubmission:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "regulatory submission"'
+        submission:
+          $ref: '#/components/schemas/SubmissionView'
+      required:
+      - submission
     SubmissionApproveRequest:
       type: object
-      description: 'cmp.Submission.approve request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Submission.approve request: maker-checker. REQUEST (preparer) moves IN_PREPARATION to READY and opens the approval; APPROVE or REJECT (a different user) decides it. REJECT returns the submission to IN_PREPARATION.'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - REQUEST
+          - APPROVE
+          - REJECT
+        comment:
+          type: string
+          maxLength: 512
+      required:
+      - id
+      - decision
     SubmissionApproveResponse:
       type: object
-      description: 'cmp.Submission.approve result. PRD outputs: "regulatory submission"'
+      description: 'cmp.Submission.approve result: the regulatory submission after the action'
       properties:
-        regulatorySubmission:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "regulatory submission"'
+        submission:
+          $ref: '#/components/schemas/SubmissionView'
+      required:
+      - submission
     SubmissionRecordFilingRequest:
       type: object
-      description: 'cmp.Submission.recordFiling request. PRD inputs: "submission id, filing data, receipt"'
+      description: 'cmp.Submission.recordFiling request: record the filing (channel, time, filer, reference, receipt hash) of an approved READY submission; it becomes SUBMITTED'
       properties:
         submissionId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "submission id"'
-        filingData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "filing data"'
-        receipt:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt"'
+        channel:
+          type: string
+          maxLength: 64
+          description: 'Filing channel, for example PORTAL, API, EMAIL'
+        filedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+          description: 'When it was filed (default now)'
+        filer:
+          type: string
+          maxLength: 128
+          description: 'Who filed (default the caller)'
+        filingReference:
+          type: string
+          maxLength: 128
+        receiptHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: 'SHA-256 of the receipt document, when one exists'
+      required:
+      - submissionId
+      - channel
+      - filingReference
     SubmissionRecordFilingResponse:
       type: object
-      description: 'cmp.Submission.recordFiling result. PRD outputs: "regulatory submission (Filed)"'
+      description: 'cmp.Submission.recordFiling result: the regulatory submission after the action'
       properties:
-        regulatorySubmission:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "regulatory submission (Filed)"'
+        submission:
+          $ref: '#/components/schemas/SubmissionView'
+      required:
+      - submission
     SubmissionRecordResponseRequest:
       type: object
-      description: 'cmp.Submission.recordResponse request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Submission.recordResponse request: the regulator answered a SUBMITTED submission (ACKNOWLEDGED or REJECTED)'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        outcome:
+          type: string
+          enum:
+          - ACKNOWLEDGED
+          - REJECTED
+        reference:
+          type: string
+          maxLength: 128
+        note:
+          type: string
+          maxLength: 1000
+      required:
+      - id
+      - outcome
     SubmissionRecordResponseResponse:
       type: object
-      description: 'cmp.Submission.recordResponse result. PRD outputs: "regulatory submission"'
+      description: 'cmp.Submission.recordResponse result: the regulatory submission after the action'
       properties:
-        regulatorySubmission:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "regulatory submission"'
+        submission:
+          $ref: '#/components/schemas/SubmissionView'
+      required:
+      - submission
     SubmissionEvidencePackRequest:
       type: object
-      description: 'cmp.Submission.evidencePack request. PRD inputs: "per op"'
-      x-status: minimal
+      description: 'cmp.Submission.evidencePack request: export the DOC evidence pack of a period (createdFrom, createdTo) or subject and attach it to a PLANNED or IN_PREPARATION submission'
+      properties:
+        id:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        createdFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        createdTo:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        subject:
+          type: string
+          maxLength: 256
+          description: 'MODULE/Type/id'
+        legalClaimReason:
+          type: string
+          maxLength: 500
+          description: 'Needed to include documents of DSAR-restricted recipients'
+      required:
+      - id
     SubmissionEvidencePackResponse:
       type: object
-      description: 'cmp.Submission.evidencePack result. PRD outputs: "regulatory submission"'
+      description: 'cmp.Submission.evidencePack result: the submission with the pack attached'
       properties:
-        regulatorySubmission:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "regulatory submission"'
+        submission:
+          $ref: '#/components/schemas/SubmissionView'
+        archiveId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: 'Archive entry of the pack; download with doc.Archive.download (header X-Content-SHA256)'
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        documentCount:
+          type: integer
+        excludedCount:
+          type: integer
+          description: 'Documents left out because their recipient is under a DSAR restriction'
+      required:
+      - submission
+      - archiveId
+      - hash
+      - documentCount
+      - excludedCount
+    SubmissionEvidenceRef:
+      type: object
+      properties:
+        kind:
+          type: string
+        refId:
+          type: string
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        label:
+          type: string
+        addedBy:
+          type: string
+        addedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - kind
+      - refId
+    SubmissionHistoryEntry:
+      type: object
+      description: 'One audit line: a status transition or a comment'
+      properties:
+        kind:
+          type: string
+          enum:
+          - TRANSITION
+          - COMMENT
+        fromStatus:
+          type: string
+        toStatus:
+          type: string
+        actor:
+          type: string
+        at:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        text:
+          type: string
+      required:
+      - kind
+      - actor
+      - at
+    SubmissionView:
+      type: object
+      description: 'A regulatory submission with its lifecycle, evidence links, maker-checker and filing facts'
+      properties:
+        submissionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        number:
+          type: string
+        version:
+          type: integer
+          description: 'Version 1 is the first filing; a resubmission is the next version, linked by previousVersionId'
+        previousVersionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+          enum:
+          - PLANNED
+          - IN_PREPARATION
+          - READY
+          - SUBMITTED
+          - ACKNOWLEDGED
+          - REJECTED
+          - RESUBMITTED
+        submissionType:
+          type: string
+        regulator:
+          type: string
+        periodLabel:
+          type: string
+        periodFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        periodTo:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        dueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        dueLegalStatus:
+          type: string
+          enum:
+          - Verified
+          - Unverified
+        overdue:
+          type: boolean
+          description: 'The due date has passed and the submission is not yet SUBMITTED'
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionEvidenceRef'
+        approvalStatus:
+          type: string
+          enum:
+          - NONE
+          - PENDING
+          - APPROVED
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        preparedBy:
+          type: string
+        requestedBy:
+          type: string
+        approvedBy:
+          type: string
+        filingChannel:
+          type: string
+        filedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        filer:
+          type: string
+        filingReference:
+          type: string
+        receiptHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        responseOutcome:
+          type: string
+        responseReference:
+          type: string
+        responseNote:
+          type: string
+        respondedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        note:
+          type: string
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordVersion:
+          type: integer
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionHistoryEntry'
+      required:
+      - submissionId
+      - number
+      - version
+      - status
+      - submissionType
+      - regulator
+      - periodLabel
+      - overdue
+      - evidence
+      - approvalStatus
+      - history
+    SubmissionGetResponse:
+      type: object
+      description: 'cmp.Submission.get result'
+      properties:
+        submission:
+          $ref: '#/components/schemas/SubmissionView'
+      required:
+      - submission
+    SubmissionQueryPage:
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/SubmissionView'
+      description: Page of cmp.Submission.query results (cursor pagination, contract §3.5.5)
+    SubmissionArchiveGap:
+      type: object
+      properties:
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        documentNumber:
+          type: string
+        kind:
+          type: string
+          description: 'MISSING_ARCHIVE, HASH_MISMATCH or the like (DOC archive completeness)'
+      required:
+      - documentId
+      - documentNumber
+      - kind
+    SubmissionArchivePeriod:
+      type: object
+      properties:
+        period:
+          type: string
+          description: 'UTC month, yyyy-MM'
+        issued:
+          type: integer
+        ok:
+          type: integer
+        gaps:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionArchiveGap'
+        orphanCount:
+          type: integer
+      required:
+      - period
+      - issued
+      - ok
+      - gaps
+      - orphanCount
+    SubmissionArchiveCompletenessResponse:
+      type: object
+      description: 'cmp.Submission.archiveCompleteness result: DOC archive gaps per month for the reporting window'
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+        periods:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionArchivePeriod'
+        truncated:
+          type: boolean
+          description: 'The check was cut off at the DOC document cap; narrow the range'
+      required:
+      - from
+      - to
+      - periods
+      - truncated
     SubmissionRenderXbrlRequest:
       type: object
       description: 'cmp.Submission.renderXbrl request. PRD inputs: "submission id"'

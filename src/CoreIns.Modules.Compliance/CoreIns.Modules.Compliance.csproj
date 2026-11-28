@@ -18,6 +18,8 @@
     <!-- FiscalDocumentChannel SPI: contracts only. -->
     <!-- dat.Erasure.execute / Subject.export / Restriction.apply for the DAT task. -->
     <ProjectReference Include="..\CoreIns.Modules.Data.Contracts\CoreIns.Modules.Data.Contracts.csproj" />
+    <!-- doc evidence SPI (IDocumentEvidenceService): contracts only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Documents.Contracts\CoreIns.Modules.Documents.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />
     <!-- Migration SPI (IMigrationImporter): contracts only. -->
     <ProjectReference Include="..\CoreIns.Modules.Migration.Contracts\CoreIns.Modules.Migration.Contracts.csproj" />

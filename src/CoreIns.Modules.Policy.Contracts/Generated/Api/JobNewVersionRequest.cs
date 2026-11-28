@@ -4,20 +4,19 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Job.newVersion request. PRD inputs: "jobId, sourceVersion"</summary>
+/// <summary>pol.Job.newVersion request: copies the current quote version of a Quoted job into a new editable (Draft) version; the old one is superseded and immutable. Typed from REQ-POL-150, REQ-POL-151, REQ-POL-153.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JobNewVersionRequest
 {
-    /// <summary>PRD: "jobId"</summary>
+    /// <summary>Contract member 'jobId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
-    /// <summary>PRD: "sourceVersion"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Must be the job's current version</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("sourceVersion")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SourceVersion { get; init; }
+    public required int SourceVersion { get; init; }
+
+    /// <summary>The job's record version as read (optimistic concurrency, POL-ERR-STALE)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
 }
