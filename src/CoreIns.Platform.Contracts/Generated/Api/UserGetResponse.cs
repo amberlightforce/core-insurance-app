@@ -4,15 +4,11 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.User.get result. PRD outputs: "user"</summary>
+/// <summary>plt.User.get result, the user with the role assignments</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record UserGetResponse
 {
-    /// <summary>PRD: "user"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'user'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("user")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? User { get; init; }
+    public required global::CoreIns.Platform.Contracts.Api.UserView User { get; init; }
 }

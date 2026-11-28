@@ -1721,6 +1721,9 @@ paths:
       - code: DAT-ERR-031
         note: card incomplete
         status: 422
+      - code: DAT-ERR-033
+        note: status does not allow this transition
+        status: 422
       - code: DAT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1794,6 +1797,9 @@ paths:
       - code: DAT-ERR-031
         note: card incomplete
         status: 422
+      - code: DAT-ERR-033
+        note: status does not allow this transition
+        status: 422
       x-source:
       - PRD-15 §9.1 l.1462
       parameters:
@@ -1861,6 +1867,9 @@ paths:
         status: 422
       - code: DAT-ERR-031
         note: card incomplete
+        status: 422
+      - code: DAT-ERR-033
+        note: status does not allow this transition
         status: 422
       - code: DAT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -1935,6 +1944,9 @@ paths:
       - code: DAT-ERR-031
         note: card incomplete
         status: 422
+      - code: DAT-ERR-033
+        note: status does not allow this transition
+        status: 422
       - code: DAT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -2008,6 +2020,9 @@ paths:
       - code: DAT-ERR-031
         note: card incomplete
         status: 422
+      - code: DAT-ERR-033
+        note: status does not allow this transition
+        status: 422
       - code: DAT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -2080,6 +2095,9 @@ paths:
         status: 422
       - code: DAT-ERR-031
         note: card incomplete
+        status: 422
+      - code: DAT-ERR-033
+        note: status does not allow this transition
         status: 422
       - code: DAT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -3826,6 +3844,9 @@ components:
           type: object
           additionalProperties: true
           description: Free-form model card
+        draft:
+          type: boolean
+          description: 'BO-DAT-06: true registers the version as DRAFT and starts the validation lifecycle; false (default) keeps the legacy ACTIVE registration.'
     ModelRegisterResponse:
       type: object
       description: 'dat.Model.register result'
@@ -3835,10 +3856,10 @@ components:
           $ref: ../events/common.schema.json#/$defs/Uuid
         status:
           type: string
-          enum: [ACTIVE, SUSPENDED]
+          enum: [DRAFT, IN_VALIDATION, APPROVED, ACTIVE, SUSPENDED, RETIRED]
     ModelGetResponse:
       type: object
-      description: 'dat.Model.get result'
+      description: 'dat.Model.get result: the registry row, its lifecycle trail and the latest drift metrics (BO-DAT-06).'
       required: [modelId, featureKey, version, status]
       properties:
         modelId:
@@ -3849,77 +3870,139 @@ components:
           type: string
         status:
           type: string
-          enum: [ACTIVE, SUSPENDED]
+          enum: [DRAFT, IN_VALIDATION, APPROVED, ACTIVE, SUSPENDED, RETIRED]
         suspendedReason:
           type: string
+        validationOutcome:
+          type: string
+          description: 'PASSED or FAILED once a validation was recorded.'
+        driftFlagged:
+          type: boolean
+          description: 'True while an unresolved drift breach flags the feature (cleared by a passing metric).'
+        driftReason:
+          type: string
+        effectiveDate:
+          type: string
+        transitions:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                type: string
+              at:
+                type: string
+              by:
+                type: string
+              note:
+                type: string
+        metrics:
+          type: array
+          description: 'Latest metric records, newest first (at most 50).'
+          items:
+            type: object
+            properties:
+              metric:
+                type: string
+              value:
+                type: string
+              threshold:
+                type: string
+              breached:
+                type: boolean
+              sampleSize:
+                type: integer
+              recordedAt:
+                type: string
     ModelSubmitValidationRequest:
       type: object
-      description: 'dat.Model.submitValidation request. PRD inputs: "model card, version"'
+      description: 'dat.Model.submitValidation request (BO-DAT-06): DRAFT -> IN_VALIDATION. The card must carry purpose, trainingData and limitations.'
+      required: [modelId]
       properties:
+        modelId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         modelCard:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "model card"'
-        version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
+          type: object
+          additionalProperties: true
+          description: 'Replaces the stored card when supplied.'
     ModelSubmitValidationResponse:
       type: object
-      description: 'dat.Model.submitValidation result. PRD outputs: "status"'
+      description: 'dat.Model.submitValidation result'
+      required: [modelId, status]
       properties:
+        modelId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum: [DRAFT, IN_VALIDATION, APPROVED, ACTIVE, SUSPENDED, RETIRED]
     ModelRecordValidationRequest:
       type: object
-      description: 'dat.Model.recordValidation request. PRD inputs: "model card, version"'
+      description: 'dat.Model.recordValidation request (BO-DAT-06). The validator must not be the person who registered or submitted the model. FAILED returns the model to DRAFT.'
+      required: [modelId, outcome]
       properties:
-        modelCard:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "model card"'
-        version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
+        modelId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        outcome:
+          type: string
+          enum: [PASSED, FAILED]
+        findings:
+          type: string
+          maxLength: 2000
     ModelRecordValidationResponse:
       type: object
-      description: 'dat.Model.recordValidation result. PRD outputs: "status"'
+      description: 'dat.Model.recordValidation result'
+      required: [modelId, status, outcome]
       properties:
+        modelId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum: [DRAFT, IN_VALIDATION, APPROVED, ACTIVE, SUSPENDED, RETIRED]
+        outcome:
+          type: string
     ModelApproveRequest:
       type: object
-      description: 'dat.Model.approve request. PRD inputs: "model card, version"'
+      description: 'dat.Model.approve request (BO-DAT-06). Needs a passed validation and a second person (not the developer, submitter or validator). A future effectiveDate leaves the model APPROVED.'
+      required: [modelId]
       properties:
-        modelCard:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "model card"'
-        version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
+        modelId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        effectiveDate:
+          type: string
+          description: 'yyyy-MM-dd; default today.'
     ModelApproveResponse:
       type: object
-      description: 'dat.Model.approve result. PRD outputs: "status"'
+      description: 'dat.Model.approve result'
+      required: [modelId, status]
       properties:
+        modelId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum: [DRAFT, IN_VALIDATION, APPROVED, ACTIVE, SUSPENDED, RETIRED]
+        effectiveDate:
+          type: string
     ModelRetireRequest:
       type: object
-      description: 'dat.Model.retire request. PRD inputs: "model card, version"'
+      description: 'dat.Model.retire request (BO-DAT-06): APPROVED, ACTIVE or SUSPENDED -> RETIRED.'
+      required: [modelId, reason]
       properties:
-        modelCard:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "model card"'
-        version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
+        modelId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
     ModelRetireResponse:
       type: object
-      description: 'dat.Model.retire result. PRD outputs: "status"'
+      description: 'dat.Model.retire result'
+      required: [modelId, status]
       properties:
+        modelId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum: [DRAFT, IN_VALIDATION, APPROVED, ACTIVE, SUSPENDED, RETIRED]
     CoverageStatusResponse:
       type: object
       description: 'dat.Coverage.status result. PRD outputs: "Governed / Ungoverned + reasons"'
@@ -3980,24 +4063,54 @@ components:
           description: 'Accepted but the type has no conformed fact or mart.'
     MonitorMetricsRequest:
       type: object
-      description: 'dat.Monitor.metrics request. PRD inputs: "feature, version, metric records"'
+      description: 'dat.Monitor.metrics request (BO-DAT-06): metric records of one model version. PSI/drift records at or above the threshold raise ModelDriftDetected and flag the feature.'
+      required: [feature, version, metricRecords]
       properties:
         feature:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "feature"'
+          $ref: ../events/common.schema.json#/$defs/AiFeatureId
         version:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "version"'
+          type: string
+          minLength: 1
+          maxLength: 64
         metricRecords:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "metric records"'
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: object
+            required: [metric, value]
+            properties:
+              metric:
+                $ref: ../events/common.schema.json#/$defs/Code
+                description: 'For example PSI, DRIFT, AUC.'
+              value:
+                $ref: ../events/common.schema.json#/$defs/Decimal
+              threshold:
+                $ref: ../events/common.schema.json#/$defs/Decimal
+                description: 'Breach when value is at or above it; defaults to 0.25 for PSI and DRIFT.'
+              sampleSize:
+                type: integer
+                minimum: 0
+              windowFrom:
+                $ref: ../events/common.schema.json#/$defs/Instant
+              windowTo:
+                $ref: ../events/common.schema.json#/$defs/Instant
     MonitorMetricsResponse:
       type: object
-      description: 'dat.Monitor.metrics result. PRD outputs: "accepted counts"'
+      description: 'dat.Monitor.metrics result'
+      required: [accepted, breached, driftFlagged]
       properties:
-        acceptedCounts:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "accepted counts"'
+        accepted:
+          type: integer
+        breached:
+          type: integer
+        driftFlagged:
+          type: boolean
+          description: 'The model is flagged after this call.'
+        breachIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
     BiasTestRunRequest:
       type: object
       description: 'dat.BiasTest.run request (DAT-CORE: the caller supplies the measured ratio; no lakehouse sampling yet)'

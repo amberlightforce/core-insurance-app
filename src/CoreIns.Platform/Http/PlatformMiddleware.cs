@@ -8,6 +8,7 @@ using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
 using CoreIns.Platform.Idempotency;
+using CoreIns.Platform.Identity;
 using CoreIns.Platform.Time;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
@@ -282,16 +283,93 @@ public sealed class IdempotencyMiddleware(RequestDelegate next)
     private static DomainError Error(ModuleCode module, string name, string detail) => new(ErrorCode.For(module, name), detail);
 }
 
+/// <summary>
+/// Sign-in provisioning of the user directory (BO-PLT-05): the first valid token of an Entra identity creates its
+/// <c>plt.user_profile</c> in the request's legal entity; a suspended or disabled user is refused with 403 on every call, so a
+/// suspension takes effect on the very next request (no cache). Services and AI agents have no directory entry. Entra stays the
+/// identity source and the token's app roles stay authoritative.
+/// TODO(hardening): provisioning is not audited as a command (the entry's creator is the identity itself); add an audit event and
+/// refresh display name and email from later tokens.
+/// </summary>
+public sealed class UserProvisioningMiddleware(RequestDelegate next)
+{
+    /// <summary>Runs the middleware.</summary>
+    public async Task InvokeAsync(HttpContext http, NpgsqlDataSource dataSource, IClock clock, RequestContext context, ProblemDetailsMapper problems)
+    {
+        ArgumentNullException.ThrowIfNull(http);
+        ArgumentNullException.ThrowIfNull(dataSource);
+        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(problems);
+        if (http.User.Identity?.IsAuthenticated == true && context.Actor.Kind == ActorKind.User && context.LegalEntity is { } entity
+            && http.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+        {
+            var refusal = await ProvisionAsync(http, dataSource, clock, context, entity.Value).ConfigureAwait(false);
+            if (refusal is not null)
+            {
+                await problems.WriteAsync(refusal, http).ConfigureAwait(false);
+                return;
+            }
+        }
+
+        await next(http).ConfigureAwait(false);
+    }
+
+    private static async Task<DomainError?> ProvisionAsync(HttpContext http, NpgsqlDataSource dataSource, IClock clock, RequestContext context, string legalEntity)
+    {
+        var oid = context.Actor.Id;
+        var now = clock.Now;
+        await using var connection = await dataSource.OpenConnectionAsync(http.RequestAborted).ConfigureAwait(false);
+        var row = await UserDirectoryStore.FindByOidAsync(connection, null, legalEntity, oid, http.RequestAborted).ConfigureAwait(false);
+        if (row is null)
+        {
+            var name = http.User.FindFirstValue("name") ?? http.User.FindFirstValue(ClaimTypes.Name) ?? http.User.FindFirstValue("preferred_username") ?? oid;
+            var email = http.User.FindFirstValue("email") ?? http.User.FindFirstValue(ClaimTypes.Email) ?? http.User.FindFirstValue("preferred_username");
+            row = new UserRow
+            {
+                UserId = Guid.CreateVersion7(),
+                LegalEntity = legalEntity,
+                EntraOid = oid,
+                DisplayName = name.Length > 200 ? name[..200] : name,
+                Email = email is { Length: > 0 and <= 320 } && email.Contains('@', StringComparison.Ordinal) ? email : null,
+                Language = context.Language == Language.En ? "en" : "el",
+                Status = UserDirectoryStore.Active,
+                CreatedBy = oid,
+                CreatedAt = now,
+                UpdatedAt = now,
+                LastSeenAt = now,
+            };
+            if (!await UserDirectoryStore.TryInsertAsync(connection, null, row, http.RequestAborted).ConfigureAwait(false))
+            {
+                row = await UserDirectoryStore.FindByOidAsync(connection, null, legalEntity, oid, http.RequestAborted).ConfigureAwait(false) ?? row;
+            }
+        }
+
+        if (row.Status == UserDirectoryStore.Suspended)
+        {
+            return DomainError.Of(ModuleCode.PLT, UserErrors.Suspended, "Your user is suspended; ask an administrator.");
+        }
+
+        if (row.Status == UserDirectoryStore.Disabled)
+        {
+            return DomainError.Of(ModuleCode.PLT, UserErrors.Disabled, "Your user is disabled.");
+        }
+
+        await UserDirectoryStore.TouchAsync(connection, row.UserId, now, http.RequestAborted).ConfigureAwait(false);
+        return null;
+    }
+}
+
 /// <summary>Pipeline registration of the platform middleware.</summary>
 public static class PlatformApplicationBuilderExtensions
 {
     /// <summary>
-    /// Adds the request context and idempotency middleware. Call after authentication and authorisation, so the actor
+    /// Adds the request context, sign-in provisioning (BO-PLT-05) and idempotency middleware. Call after authentication and authorisation, so the actor
     /// is known and unauthenticated requests are refused before an idempotency record is written.
     /// </summary>
     public static IApplicationBuilder UseCoreInsPlatform(this IApplicationBuilder app)
     {
         ArgumentNullException.ThrowIfNull(app);
-        return app.UseMiddleware<RequestContextMiddleware>().UseMiddleware<IdempotencyMiddleware>();
+        return app.UseMiddleware<RequestContextMiddleware>().UseMiddleware<UserProvisioningMiddleware>().UseMiddleware<IdempotencyMiddleware>();
     }
 }

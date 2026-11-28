@@ -4,23 +4,19 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Model.approve request. PRD inputs: "model card, version"</summary>
+/// <summary>dat.Model.approve request (BO-DAT-06). Needs a passed validation and a second person (not the developer, submitter or validator). A future effectiveDate leaves the model APPROVED.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ModelApproveRequest
 {
-    /// <summary>PRD: "model card"</summary>
+    /// <summary>Contract member 'modelId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'modelId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("modelCard")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ModelCard { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("modelId")]
+    public required global::System.Guid ModelId { get; init; }
 
-    /// <summary>PRD: "version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    /// <summary>yyyy-MM-dd; default today.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveDate")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Version { get; init; }
+    public string? EffectiveDate { get; init; }
 }

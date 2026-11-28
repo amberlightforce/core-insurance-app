@@ -4,15 +4,53 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Model.approve result. PRD outputs: "status"</summary>
+/// <summary>dat.Model.approve result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ModelApproveResponse
 {
-    /// <summary>PRD: "status"</summary>
+    /// <summary>Contract member 'modelId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'modelId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("modelId")]
+    public required global::System.Guid ModelId { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Contract member 'effectiveDate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveDate")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Status { get; init; }
+    public string? EffectiveDate { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>DRAFT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DRAFT")]
+        Draft,
+
+        /// <summary><c>IN_VALIDATION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("IN_VALIDATION")]
+        InValidation,
+
+        /// <summary><c>APPROVED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVED")]
+        Approved,
+
+        /// <summary><c>ACTIVE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ACTIVE")]
+        Active,
+
+        /// <summary><c>SUSPENDED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUSPENDED")]
+        Suspended,
+
+        /// <summary><c>RETIRED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RETIRED")]
+        Retired,
+    }
 }

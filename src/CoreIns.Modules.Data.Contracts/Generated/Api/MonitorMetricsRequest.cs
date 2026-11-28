@@ -4,31 +4,54 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Monitor.metrics request. PRD inputs: "feature, version, metric records"</summary>
+/// <summary>dat.Monitor.metrics request (BO-DAT-06): metric records of one model version. PSI/drift records at or above the threshold raise ModelDriftDetected and flag the feature.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MonitorMetricsRequest
 {
-    /// <summary>PRD: "feature"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'feature'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("feature")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Feature { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.AiFeatureId Feature { get; init; }
 
-    /// <summary>PRD: "version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'version'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("version")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Version { get; init; }
+    public required string Version { get; init; }
 
-    /// <summary>PRD: "metric records"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'metricRecords'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("metricRecords")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? MetricRecords { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<MetricRecordItem> MetricRecords { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record MetricRecordItem
+    {
+        /// <summary>For example PSI, DRIFT, AUC.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("metric")]
+        public required string Metric { get; init; }
+
+        /// <summary>Contract member 'value'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("value")]
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::CoreIns.Platform.Contracts.DecimalStringJsonConverter))]
+        public required decimal Value { get; init; }
+
+        /// <summary>Breach when value is at or above it; defaults to 0.25 for PSI and DRIFT.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("threshold")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::CoreIns.Platform.Contracts.DecimalStringJsonConverter))]
+        public decimal? Threshold { get; init; }
+
+        /// <summary>Contract member 'sampleSize'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("sampleSize")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public int? SampleSize { get; init; }
+
+        /// <summary>Contract member 'windowFrom'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("windowFrom")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Instant? WindowFrom { get; init; }
+
+        /// <summary>Contract member 'windowTo'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("windowTo")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Instant? WindowTo { get; init; }
+    }
 }
