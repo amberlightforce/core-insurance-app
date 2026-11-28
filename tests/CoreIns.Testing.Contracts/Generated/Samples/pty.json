@@ -917,8 +917,18 @@
       ]
     },
     "pty.Screening.bulk": {
-      "jobId": "01925415-d4d3-7447-8e03-da5c9c5d69cc",
-      "decisionCase": "unspecified"
+      "screened": 1,
+      "clear": 1,
+      "hits": 1,
+      "results": [
+        {
+          "partyId": "01929c90-b30d-7221-8dc4-777b7f3e3b94",
+          "result": "Clear",
+          "caseNumber": "sample",
+          "paymentBlock": true,
+          "error": "sample"
+        }
+      ]
     },
     "pty.Screening.screen": {
       "result": "Clear",
@@ -3619,22 +3629,141 @@
       }
     },
     "ScreeningBulkRequest": {
-      "list": "unspecified"
+      "partyIds": [
+        "01920c0d-12a5-7747-8f6d-4d742019ec1a"
+      ],
+      "callerRef": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "0192098f-32e2-7990-83c3-7c25c4cf9584"
+      }
     },
     "ScreeningBulkResponse": {
-      "jobId": "01921f16-40a1-7c96-814f-31a055e72d40",
-      "decisionCase": "unspecified"
+      "screened": 1,
+      "clear": 1,
+      "hits": 1,
+      "results": [
+        {
+          "partyId": "01927469-376a-72dd-8ab2-2acbc18f3ad7",
+          "result": "Clear",
+          "caseNumber": "sample",
+          "paymentBlock": true,
+          "error": "sample"
+        }
+      ]
     },
     "ScreeningCaseDecideRequest": {
-      "list": "unspecified"
+      "caseId": "0192b8cd-d187-7327-8c04-3a56281c15b5",
+      "action": "PROPOSE",
+      "decision": "CLEAR",
+      "comment": "sample"
     },
     "ScreeningCaseDecideResponse": {
-      "jobId": "01929bdd-b007-796a-8c27-9d538546a6dc",
-      "decisionCase": "unspecified"
+      "case": {
+        "caseId": "019297b9-1352-7585-8f90-b26e8eee2d08",
+        "caseNumber": "sample",
+        "status": "OPEN",
+        "partyId": "0192e8ae-9a18-74e7-820d-35dce210217d",
+        "subjectName": "sample",
+        "country": "sample",
+        "listVersions": [
+          "sample"
+        ],
+        "evidence": [
+          {
+            "listName": "sample",
+            "matchedName": "sample",
+            "score": 1,
+            "reason": "sample"
+          }
+        ],
+        "callerRef": {
+          "module": "POL",
+          "type": "Policy",
+          "id": "01924e04-ee58-705d-87d7-8d79bbde4416"
+        },
+        "createdAt": "2026-10-07T09:00:00Z",
+        "proposedDecision": "CLEAR",
+        "proposedBy": "sample",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "proposalComment": "sample",
+        "approvalRequestId": "0192be0e-8c16-7682-89f8-7ba08d109e03",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "sample"
+      }
     },
     "ScreeningCaseGetResponse": {
-      "jobId": "0192ea53-964a-7c23-8abd-8c1871c65f93",
-      "decisionCase": "unspecified"
+      "items": [
+        {
+          "caseId": "0192efd5-c448-7bc1-8b77-aa7cbf721735",
+          "caseNumber": "sample",
+          "status": "OPEN",
+          "partyId": "01925f03-811e-72ce-8585-87a664f09b1a",
+          "subjectName": "sample",
+          "country": "sample",
+          "listVersions": [
+            "sample"
+          ],
+          "evidence": [
+            {
+              "listName": "sample",
+              "matchedName": "sample",
+              "score": 1,
+              "reason": "sample"
+            }
+          ],
+          "callerRef": {
+            "module": "POL",
+            "type": "Policy",
+            "id": "0192faa0-8b3a-7239-819a-2bb314eada26"
+          },
+          "createdAt": "2026-10-07T09:00:00Z",
+          "proposedDecision": "CLEAR",
+          "proposedBy": "sample",
+          "proposedAt": "2026-10-07T09:00:00Z",
+          "proposalComment": "sample",
+          "approvalRequestId": "0192a984-db58-7555-84f2-12b0107bab68",
+          "decidedBy": "sample",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "decisionComment": "sample"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
+    "ScreeningCaseView": {
+      "caseId": "0192802e-7f63-798b-85ca-8e0b67d2b198",
+      "caseNumber": "sample",
+      "status": "OPEN",
+      "partyId": "01921d0f-90e9-7ece-8083-111105d39ee3",
+      "subjectName": "sample",
+      "country": "sample",
+      "listVersions": [
+        "sample"
+      ],
+      "evidence": [
+        {
+          "listName": "sample",
+          "matchedName": "sample",
+          "score": 1,
+          "reason": "sample"
+        }
+      ],
+      "callerRef": {
+        "module": "POL",
+        "type": "Policy",
+        "id": "0192581a-a6e2-73da-894b-4e6cd411dbff"
+      },
+      "createdAt": "2026-10-07T09:00:00Z",
+      "proposedDecision": "CLEAR",
+      "proposedBy": "sample",
+      "proposedAt": "2026-10-07T09:00:00Z",
+      "proposalComment": "sample",
+      "approvalRequestId": "0192c00b-b5fe-7e3a-8271-1172a51af005",
+      "decidedBy": "sample",
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "decisionComment": "sample"
     },
     "ScreeningScreenRequest": {
       "partyId": "01927a52-d759-757e-80c3-7b2cc2f16718",

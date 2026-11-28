@@ -93,7 +93,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/time/now
 CONTRACT_NOT_SERVED GET /api/plt/v1/transfers
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
-CONTRACT_NOT_SERVED GET /api/pty/v1/screening/case-get
 CONTRACT_NOT_SERVED GET /api/rat/v1/breakdowns/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/change-explanations/get
 CONTRACT_NOT_SERVED GET /api/rat/v1/impact-analysises/{}
@@ -275,11 +274,6 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/run
 CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/supersede
 CONTRACT_NOT_SERVED POST /api/dat/v1/analytics/ask
 CONTRACT_NOT_SERVED POST /api/dat/v1/feature-store/build-training-set
-CONTRACT_NOT_SERVED POST /api/dat/v1/models/approve
-CONTRACT_NOT_SERVED POST /api/dat/v1/models/record-validation
-CONTRACT_NOT_SERVED POST /api/dat/v1/models/retire
-CONTRACT_NOT_SERVED POST /api/dat/v1/models/submit-validation
-CONTRACT_NOT_SERVED POST /api/dat/v1/monitor/metrics
 CONTRACT_NOT_SERVED POST /api/dat/v1/populations/sample
 CONTRACT_NOT_SERVED POST /api/dat/v1/purpose-grants/decide
 CONTRACT_NOT_SERVED POST /api/dat/v1/purpose-grants/request
@@ -451,8 +445,6 @@ CONTRACT_NOT_SERVED POST /api/pty/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/complete
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/reverse
 CONTRACT_NOT_SERVED POST /api/pty/v1/life-events/start
-CONTRACT_NOT_SERVED POST /api/pty/v1/screening/bulk
-CONTRACT_NOT_SERVED POST /api/pty/v1/screening/case-decide
 CONTRACT_NOT_SERVED POST /api/rat/v1/bonus-malus/transition
 CONTRACT_NOT_SERVED POST /api/rat/v1/comparisons/compare-versions
 CONTRACT_NOT_SERVED POST /api/rat/v1/day-count/year-fraction

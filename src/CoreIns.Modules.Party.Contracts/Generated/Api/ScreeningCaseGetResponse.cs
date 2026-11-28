@@ -4,20 +4,20 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Screening.caseGet result. PRD outputs: "job id; decision → case"</summary>
+/// <summary>Page of pty.Screening.caseGet results (the case queue, newest first)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ScreeningCaseGetResponse
 {
-    /// <summary>PRD: "job id"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
+    /// <summary>Contract member 'items'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Party.Contracts.Api.ScreeningCaseView> Items { get; init; }
 
-    /// <summary>PRD: "decision → case"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("decisionCase")]
+    /// <summary>Cursor of the next page, or null on the last page.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("nextCursor")]
+    public required string? NextCursor { get; init; }
+
+    /// <summary>Contract member 'limit'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("limit")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DecisionCase { get; init; }
+    public int? Limit { get; init; }
 }

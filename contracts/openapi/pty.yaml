@@ -3148,12 +3148,9 @@ paths:
   /api/pty/v1/screening/bulk:
     post:
       operationId: pty.Screening.bulk
-      summary: Bulk and case management
+      summary: Bulk screening
       description: |-
-        Bulk and case management
-
-        PRD inputs: list
-        PRD outputs: job id; decision → case
+        BO-PTY-07. Screens up to 500 existing parties; each hit opens a screening case and a WRK review task.
       tags:
       - Screening
       x-requirement:
@@ -3164,7 +3161,6 @@ paths:
       - W2-PTY-03
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3214,12 +3210,9 @@ paths:
   /api/pty/v1/screening/case-decide:
     post:
       operationId: pty.Screening.caseDecide
-      summary: Bulk and case management
+      summary: Decide a screening case
       description: |-
-        Bulk and case management
-
-        PRD inputs: list
-        PRD outputs: job id; decision → case
+        BO-PTY-07. Maker-checker: one person proposes Clear or TrueMatch with a rationale, a different person approves or rejects. A true match blocks payment and bind of the party.
       tags:
       - Screening
       x-requirement:
@@ -3230,7 +3223,6 @@ paths:
       - W2-PTY-03
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -3257,8 +3249,8 @@ paths:
             schema:
               $ref: '#/components/schemas/ScreeningCaseDecideRequest'
       responses:
-        '202':
-          description: Accepted; result or job reference
+        '200':
+          description: Success
           content:
             application/json:
               schema:
@@ -3278,12 +3270,9 @@ paths:
   /api/pty/v1/screening/case-get:
     get:
       operationId: pty.Screening.caseGet
-      summary: Bulk and case management
+      summary: Screening case queue
       description: |-
-        Bulk and case management
-
-        PRD inputs: list
-        PRD outputs: job id; decision → case
+        BO-PTY-07. Lists screening cases (newest first), by status, party or case id.
       tags:
       - Screening
       x-requirement:
@@ -3294,7 +3283,6 @@ paths:
       - W2-PTY-03
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 3
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -3310,6 +3298,28 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - OPEN
+          - PENDING_APPROVAL
+          - CLEARED
+          - TRUE_MATCH
+      - name: partyId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: caseId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
       responses:
         '200':
           description: Success
@@ -7023,50 +7033,211 @@ components:
       - listVersions
       - paymentBlock
       description: 'Typed from REQ-PTY-006, REQ-PTY-174. PRD outputs: "Clear / PotentialHit / Blocked, case, block"'
+    ScreeningCaseView:
+      type: object
+      description: 'A screening case (pty.screening_case, BO-PTY-07): the review of a potential sanctions hit. Status OPEN (waiting for a proposal), PENDING_APPROVAL (a decision is proposed and waits for a second person), CLEARED or TRUE_MATCH (final).'
+      properties:
+        caseId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        caseNumber:
+          type: string
+        status:
+          type: string
+          enum:
+          - OPEN
+          - PENDING_APPROVAL
+          - CLEARED
+          - TRUE_MATCH
+        partyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        subjectName:
+          type:
+          - string
+          - 'null'
+          description: Name that was screened (personal data; the case queue is for compliance roles)
+        country:
+          type:
+          - string
+          - 'null'
+        listVersions:
+          type: array
+          items:
+            type: string
+        evidence:
+          type: array
+          items:
+            type: object
+            properties:
+              listName:
+                type: string
+              matchedName:
+                type: string
+              score:
+                type: integer
+              reason:
+                type:
+                - string
+                - 'null'
+            required:
+            - listName
+            - matchedName
+            - score
+        callerRef:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        proposedDecision:
+          type:
+          - string
+          - 'null'
+          enum:
+          - CLEAR
+          - TRUE_MATCH
+          - null
+        proposedBy:
+          type:
+          - string
+          - 'null'
+        proposedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        proposalComment:
+          type:
+          - string
+          - 'null'
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        decidedBy:
+          type:
+          - string
+          - 'null'
+        decidedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        decisionComment:
+          type:
+          - string
+          - 'null'
+      required:
+      - caseId
+      - caseNumber
+      - status
+      - listVersions
+      - evidence
+      - callerRef
+      - createdAt
     ScreeningBulkRequest:
       type: object
-      description: 'pty.Screening.bulk request. PRD inputs: "list"'
+      description: 'pty.Screening.bulk request (BO-PTY-07): screens up to 500 existing parties in one call; every hit opens a case.'
       properties:
-        list:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "list"'
+        partyIds:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+        callerRef:
+          $ref: ../events/common.schema.json#/$defs/ObjectRef
+          description: Calling object (for example the migration batch)
+      required:
+      - partyIds
+      - callerRef
     ScreeningBulkResponse:
       type: object
-      description: 'pty.Screening.bulk result. PRD outputs: "job id; decision → case"'
+      description: 'pty.Screening.bulk result: one outcome per party, in request order. The run is synchronous, so there is no job to poll.'
       properties:
-        jobId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "job id"'
-        decisionCase:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision → case"'
+        screened:
+          type: integer
+        clear:
+          type: integer
+        hits:
+          type: integer
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              partyId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              result:
+                type: string
+                enum:
+                - Clear
+                - PotentialHit
+                - Blocked
+              caseNumber:
+                type:
+                - string
+                - 'null'
+              paymentBlock:
+                type: boolean
+              error:
+                type:
+                - string
+                - 'null'
+                description: Error code when this party could not be screened
+            required:
+            - partyId
+            - paymentBlock
+      required:
+      - screened
+      - clear
+      - hits
+      - results
     ScreeningCaseDecideRequest:
       type: object
-      description: 'pty.Screening.caseDecide request. PRD inputs: "list"'
+      description: 'pty.Screening.caseDecide request (BO-PTY-07, maker-checker): PROPOSE a decision (needs decision), then a different person APPROVEs or REJECTs the proposal. The maker cannot approve (PLT-ERR-SELF-APPROVAL).'
       properties:
-        list:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "list"'
+        caseId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        action:
+          type: string
+          enum:
+          - PROPOSE
+          - APPROVE
+          - REJECT
+        decision:
+          type:
+          - string
+          - 'null'
+          enum:
+          - CLEAR
+          - TRUE_MATCH
+          - null
+          description: Required for PROPOSE
+        comment:
+          type:
+          - string
+          - 'null'
+          maxLength: 500
+          description: Required for PROPOSE (the rationale) and REJECT
+      required:
+      - caseId
+      - action
     ScreeningCaseDecideResponse:
       type: object
-      description: 'pty.Screening.caseDecide result. PRD outputs: "job id; decision → case"'
+      description: 'pty.Screening.caseDecide result: the case after the step.'
       properties:
-        jobId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "job id"'
-        decisionCase:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision → case"'
+        case:
+          $ref: '#/components/schemas/ScreeningCaseView'
+      required:
+      - case
     ScreeningCaseGetResponse:
-      type: object
-      description: 'pty.Screening.caseGet result. PRD outputs: "job id; decision → case"'
-      properties:
-        jobId:
-          $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "job id"'
-        decisionCase:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision → case"'
+      allOf:
+      - $ref: common.yaml#/components/schemas/PageEnvelope
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/ScreeningCaseView'
+      description: Page of pty.Screening.caseGet results (the case queue, newest first)
     ProducerCodeValidateRequest:
       type: object
       properties:

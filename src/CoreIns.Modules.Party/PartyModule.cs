@@ -152,6 +152,7 @@ public static class PartyModule
         services.AddCommand<BulkTransferProducerOfRecord, ProducerOfRecordBulkTransferResponse, BulkTransferProducerOfRecordHandler>(CommandDescriptor.For("pty.ProducerOfRecord.bulkTransfer") with { SupportsDryRun = true });
         services.AddCommand<CancelProducerOfRecord, ProducerOfRecordCancelResponse, CancelProducerOfRecordHandler>(CommandDescriptor.For("pty.ProducerOfRecord.cancel"));
 
+        services.AddPartyScreeningCases();
         services.AddOwnerDecidedApprovalType(PartyAuthorityTypes.PartyMergeApprovalType);
         services.AddScoped<DuplicateFinder>();
         services.AddScoped<PartyMergeQueries>();
