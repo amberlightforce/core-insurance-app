@@ -15,12 +15,12 @@ public interface IComplianceSubmissionService
     /// <remarks>
     /// <para>Operation cmp.Submission.create (command; HTTP POST /api/cmp/v1/submissions).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: minimal. Wave W8.</para>
+    /// <para>Status: full. Wave W8.</para>
     /// <para>Exposure: ui; consumers: FIN, PLT, RAT.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
-    /// <para>Errors: CMP-ERR-APPROVAL-SAME-USER (403), CMP-ERR-VALIDATION-BLOCKING (422), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: CMP-ERR-VALIDATION-BLOCKING (422), CMP-ERR-SUBMISSION-STATE (422), CMP-ERR-NOT-FOUND (404), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionCreateResponse> CreateAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionCreateResponse> CreateAsync(global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionCreateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Record filing of a regulatory submission (channel, time, filer, filing reference, receipt) and stop its …</summary>
     /// <remarks>
@@ -29,7 +29,7 @@ public interface IComplianceSubmissionService
     /// <para>Status: full. Wave W8.</para>
     /// <para>Exposure: ui; consumers: FIN, PLT.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
-    /// <para>Errors: CMP-ERR-APPROVAL-SAME-USER (403), CMP-ERR-VALIDATION-BLOCKING (422), CMP-ERR-APPROVAL-REQUIRED (422), CMP-ERR-NOT-FOUND (404), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: CMP-ERR-SUBMISSION-NOT-APPROVED (422), CMP-ERR-SUBMISSION-UNVERIFIED-DUE (422), CMP-ERR-VALIDATION-BLOCKING (422), CMP-ERR-SUBMISSION-STATE (422), CMP-ERR-NOT-FOUND (404), CMP-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionRecordFilingResponse> RecordFilingAsync(global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionRecordFilingRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

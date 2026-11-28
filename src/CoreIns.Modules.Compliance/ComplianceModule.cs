@@ -9,6 +9,7 @@ using CoreIns.Modules.Compliance.Contracts;
 using CoreIns.Modules.Compliance.Contracts.Api;
 using CoreIns.Modules.Compliance.Dsar;
 using CoreIns.Modules.Compliance.Persistence;
+using CoreIns.Modules.Compliance.Submissions;
 using CoreIns.Modules.Compliance.Queries;
 using CoreIns.Modules.Compliance.Services;
 using CoreIns.Platform;
@@ -137,6 +138,8 @@ public static class ComplianceModule
         services.AddCommand<EscalateComplaint, ComplaintEscalateResponse, EscalateComplaintHandler>(CommandDescriptor.For("cmp.Complaint.escalate"));
         services.AddCommand<CloseComplaint, ComplaintCloseResponse, CloseComplaintHandler>(CommandDescriptor.For("cmp.Complaint.close"));
 
+        services.AddSubmissions();
+
         services.AddErrorDefinitions(Errors);
         return services;
     }
@@ -194,6 +197,16 @@ public static class ComplianceModule
             .Describe("Διόρθωση επιτρέπεται μόνο σε καταχωρημένο παραστατικό έκδοσης που δεν έχει πιστωθεί, διορθωθεί ή ακυρωθεί.", "Only a Registered ISSUE document that was not credited, corrected or cancelled can be corrected."),
         ErrorDefinition.For(ModuleCode.CMP, "BULK-LIMIT", 422, "Υπέρβαση ορίου μαζικής επανυποβολής", "The bulk resubmit limit is exceeded")
             .Describe("Μία μαζική επανυποβολή δέχεται έως 50 παραστατικά.", "One bulk resubmit accepts at most 50 documents."),
+        ErrorDefinition.For(ModuleCode.CMP, "VALIDATION-BLOCKING", 422, "Μη έγκυρο αίτημα", "The request is not valid")
+            .Describe("Το αίτημα παραβιάζει κανόνα επικύρωσης που μπλοκάρει την ενέργεια.", "The request breaks a validation rule that blocks the action."),
+        ErrorDefinition.For(ModuleCode.CMP, "SUBMISSION-STATE", 422, "Η ενέργεια δεν επιτρέπεται στην κατάσταση της υποβολής", "The action is not allowed in the submission's state")
+            .Describe("Η τρέχουσα κατάσταση της ρυθμιστικής υποβολής δεν επιτρέπει αυτή την ενέργεια.", "The regulatory submission's current state does not allow this action."),
+        ErrorDefinition.For(ModuleCode.CMP, "SUBMISSION-NOT-APPROVED", 422, "Η υποβολή δεν έχει εγκριθεί", "The submission is not approved")
+            .Describe("Η υποβολή απαιτεί έγκριση του τρέχοντος περιεχομένου πριν την κατάθεση.", "The submission needs an approval of its current content before it is filed."),
+        ErrorDefinition.For(ModuleCode.CMP, "SUBMISSION-UNVERIFIED-DUE", 422, "Η προθεσμία δεν έχει επαληθευτεί νομικά", "The due date is not legally verified")
+            .Describe("Σε Production δεν εγκρίνεται ούτε κατατίθεται υποβολή με μη επαληθευμένη προθεσμία.", "In Production a submission with an unverified due date is neither approved nor filed."),
+        ErrorDefinition.For(ModuleCode.CMP, "PACK-UNAVAILABLE", 422, "Το αρχείο τεκμηρίωσης δεν είναι διαθέσιμο", "The evidence archive is not available")
+            .Describe("Η υπηρεσία αρχείου εγγράφων δεν είναι διαθέσιμη για τη δημιουργία πακέτου.", "The document archive service is not available to build a pack."),
         ErrorDefinition.For(ModuleCode.CMP, "NOT-AVAILABLE", 501, "Η λειτουργία δεν είναι ακόμη διαθέσιμη", "The operation is not available yet")
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
     ];

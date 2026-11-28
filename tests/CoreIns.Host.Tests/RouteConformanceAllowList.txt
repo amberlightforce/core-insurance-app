@@ -294,13 +294,6 @@ CONTRACT_NOT_SERVED POST /api/cmp/v1/evidence/submit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/import
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-reconciliation/run
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-rules/certify
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/approve
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/attach-content
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/comment
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/evidence-pack
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/record-filing
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/record-response
 CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/render-xbrl
 CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/validate-taxonomy
 CONTRACT_NOT_SERVED POST /api/cmp/v1/taxonomies/activate
