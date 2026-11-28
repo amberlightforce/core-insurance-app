@@ -17,6 +17,11 @@ public sealed record DownPaymentStatusResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Money? Amount { get; init; }
 
+    /// <summary>The payment plan the down payment was initiated for (the first instalment of this plan is the amount)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("planCode")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? PlanCode { get; init; }
+
     /// <summary>REQ-BIL-003</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

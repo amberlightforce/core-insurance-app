@@ -52,7 +52,7 @@ public static class WorkErrorCodes
 
     /// <summary>WRK-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 40 operation(s): wrk.Activity.assign, wrk.Activity.bulkReassign, wrk.Activity.cancel, wrk.Activity.complete, wrk.Activity.create, wrk.Activity.skip, wrk.Activity.update, wrk.CommandRegistry.register, wrk.DataSubject.erase, wrk.DataSubject.export, wrk.DataSubject.restrict, wrk.Export.create, ….</para>
+    /// <para>Declared by 41 operation(s): wrk.Activity.assign, wrk.Activity.bulkReassign, wrk.Activity.cancel, wrk.Activity.complete, wrk.Activity.create, wrk.Activity.skip, wrk.Activity.update, wrk.CommandRegistry.register, wrk.DataSubject.erase, wrk.DataSubject.export, wrk.DataSubject.restrict, wrk.Export.create, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "WRK-ERR-IDEMPOTENCY-MISMATCH";
 

@@ -23,6 +23,9 @@
         "bil.PaymentPlan.select": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.PaymentPlan.change": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.BillingPreview.compute": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        // BO-BIL-04: down-payment bind gate; staff who can bind (and the agent channel) see the status and initiate the payment.
+        "bil.DownPayment.status": [ "Staff.Billing", "Staff.BillingManager", "Staff.Underwriter", "Platform.Admin" ],
+        "bil.DownPayment.initiate": [ "Staff.Billing", "Staff.BillingManager", "Staff.Underwriter", "Platform.Admin" ],
         // BO-BIL-06a: payer instruments and SEPA mandates; reads for billing staff, writes for billing staff and managers.
         "bil.PaymentInstrument.add": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.PaymentInstrument.remove": [ "Staff.Billing", "Staff.BillingManager" ],

@@ -64,6 +64,14 @@ TIME_NAME_ALLOW = re.compile(r"^(dat\.Query\.asOf|doc\.Document\.renderAsOf|DOC-
                              r"QueryAsOf\w*|DocumentRenderAsOf\w*)$")
 
 
+# Business dates that are not bitemporal read inputs (the date a posting run earns up to, an accounting as-of date of a
+# reconciliation, the date instalments are produced up to). They are already on the wire in the generated server code, so the
+# D-API-08/-09 checks exempt exactly these (module, property) and operation/body-property pairs.
+BUSINESS_ASOF_PROPS = {("bil", "asOf"), ("ri", "asOf"), ("fin", "asOf")}
+BUSINESS_BODY_TIME = {"fin.Earning.run": {"asOf"}, "fin.Earning.simulate": {"asOf"}, "ri.Item.generate": {"asOf"},
+                      "doc.Document.preview": {"validAt"}, "dat.Mart.run": {"validAt", "knownAt"}}
+
+
 def forbidden_time_name(name: str) -> bool:
     """Case-insensitive substring match on asof / asat, except the names D-API-08 keeps."""
     n = str(name)
@@ -279,7 +287,7 @@ def check_module(m: str, rep: Report, seen_ids: dict, seen_refs: set) -> None:
                 if sch is not None:
                     sch, _ = deref(sch, rbb)
                     props = set((sch or {}).get("properties") or {})
-                    dup = props & (TIME_PARAMS | {"asOf", "asAt"})
+                    dup = props & (TIME_PARAMS | {"asOf", "asAt"}) - BUSINESS_BODY_TIME.get(oid, set())
                     if dup:
                         rep.error(f"{w}: request body carries time-travel input(s) {sorted(dup)}; use the query "
                                   f"parameter only (D-API-09)")
@@ -347,7 +355,7 @@ def check_module(m: str, rep: Report, seen_ids: dict, seen_refs: set) -> None:
             props = node.get("properties")
             if isinstance(props, dict):
                 for k in props:
-                    if forbidden_time_name(k):
+                    if forbidden_time_name(k) and (m, k) not in BUSINESS_ASOF_PROPS:
                         rep.error(f"{where}: property {k!r} is forbidden; use validAt / knownAt (D-API-08)")
                     elif JOINED.search(k):
                         rep.warn(f"{where}: property {k!r} may join two concepts (And/Or); split it")
@@ -526,7 +534,7 @@ def render_index() -> str:
             reqs = op.get("x-requirement") or []
             rq = ", ".join(reqs[:3]) + (" …" if len(reqs) > 3 else "")
             out.append(f"| `{op['operationId']}` | {method.upper()} `{path}` | {'C' if op['x-operation-kind'] == 'command' else 'Q'} | "
-                       f"{'yes' if op['x-dry-run'] else ''} | {', '.join(op['x-exposure'])} | {', '.join(op.get('x-consumers') or [])} | "
+                       f"{'yes' if op.get('x-dry-run') else ''} | {', '.join(op.get('x-exposure') or [])} | {', '.join(op.get('x-consumers') or [])} | "
                        f"{op['x-wave']} | {op['x-status']} | {rq} |")
         if fam_by[m]:
             out.append("")

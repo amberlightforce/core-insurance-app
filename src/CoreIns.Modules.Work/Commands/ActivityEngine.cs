@@ -221,7 +221,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
     /// Assigns an activity. <paramref name="target"/> null means "me" (claim): allowed from the actor's own queue or when already
     /// theirs. Naming another user, or returning to a queue, is for the assignee or a manager.
     /// </summary>
-    public async Task<Result<ActivityRow>> AssignAsync(Guid id, AssignTarget? target, CancellationToken cancellationToken)
+    public async Task<Result<ActivityRow>> AssignAsync(Guid id, AssignTarget? target, CancellationToken cancellationToken, string? reasonCode = null)
     {
         var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
         var row = await LoadAsync(id, actor, cancellationToken).ConfigureAwait(false);
@@ -248,7 +248,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
                 return WorkErrors.Of(WorkErrors.Permission, "The activity is assigned to someone else.");
             }
 
-            Assign(row, ActivityRow.User, actor.UserId, "CLAIM");
+            Assign(row, ActivityRow.User, actor.UserId, "CLAIM", reasonCode: reasonCode);
         }
         else if (target.Type == ActivityRow.User)
         {
@@ -275,7 +275,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
                 return WorkErrors.Of(WorkErrors.TargetIneligible, $"The user cannot take work from queue '{row.QueueCode}' ({why}).");
             }
 
-            Assign(row, ActivityRow.User, target.Id, "MANUAL");
+            Assign(row, ActivityRow.User, target.Id, "MANUAL", reasonCode: reasonCode);
         }
         else if (target.Type == AssignTarget.Rules)
         {
@@ -290,7 +290,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
                 return WorkErrors.Of(WorkErrors.TargetIneligible, "No assignment rule found an eligible user for this activity.");
             }
 
-            Assign(row, ActivityRow.User, routing.UserId, "RULE", routing.RuleCode);
+            Assign(row, ActivityRow.User, routing.UserId, "RULE", routing.RuleCode, reasonCode);
         }
         else if (target.Type == ActivityRow.Queue)
         {
@@ -304,7 +304,7 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
                 return WorkErrors.Of(WorkErrors.TargetIneligible, $"Queue '{target.Id}' does not exist.");
             }
 
-            Assign(row, ActivityRow.Queue, target.Id, "MANUAL");
+            Assign(row, ActivityRow.Queue, target.Id, "MANUAL", reasonCode: reasonCode);
             row.QueueCode = target.Id;
         }
         else
@@ -312,6 +312,65 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
             return WorkErrors.Of(WorkErrors.TargetIneligible, "An activity is assigned to a USER or a QUEUE.");
         }
 
+        return await SaveAsync(row, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Edits an open activity's title, priority, due date (target) or note. Only the assignee or a manager may; the caller's record version
+    /// must be the current one (optimistic concurrency). Fields not named stay as they are.
+    /// </summary>
+    public async Task<Result<ActivityRow>> UpdateAsync(Guid id, ActivityFieldChanges changes, int recordVersion, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(changes);
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
+        var row = await LoadAsync(id, actor, cancellationToken).ConfigureAwait(false);
+        if (row is null)
+        {
+            return WorkErrors.NotFound();
+        }
+
+        if (row.State != ActivityRow.Open)
+        {
+            return DomainError.Of(ModuleCode.WRK, PlatformErrors.InvalidStateTransition, "A closed activity cannot be edited.");
+        }
+
+        if (!IsMine(row, actor) && !actor.IsManager)
+        {
+            return WorkErrors.Of(WorkErrors.Permission, "Only the assignee or a manager can edit an activity.");
+        }
+
+        if (row.RecordVersion != recordVersion)
+        {
+            return WorkErrors.Of(WorkErrors.Stale, "The activity changed meanwhile. Load the newer version and try again.");
+        }
+
+        if (changes.DueAt is { } due && due < row.CreatedAt)
+        {
+            return WorkErrors.Invalid("dueAt cannot be before the activity was created.");
+        }
+
+        if (changes.Title is { } title)
+        {
+            row.Title = title;
+        }
+
+        if (changes.Priority is { } priority)
+        {
+            row.Priority = priority;
+        }
+
+        if (changes.DueAt is { } dueAt)
+        {
+            row.TargetAt = dueAt;
+        }
+
+        if (changes.NoteSet)
+        {
+            row.Note = changes.Note;
+        }
+
+        row.UpdatedAt = clock.Now;
+        row.RecordVersion++;
         return await SaveAsync(row, cancellationToken).ConfigureAwait(false);
     }
 
@@ -451,14 +510,14 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
 
     internal static bool IsVisible(ActivityRow row, WorkActor actor) => IsMine(row, actor) || actor.CanSee(row.QueueCode);
 
-    private void Assign(ActivityRow row, string type, string id, string method, string? ruleRef = null)
+    private void Assign(ActivityRow row, string type, string id, string method, string? ruleRef = null, string? reasonCode = null)
     {
         var (previousType, previousId) = (row.AssigneeType, row.AssigneeId);
         row.AssigneeType = type;
         row.AssigneeId = id;
         row.UpdatedAt = clock.Now;
         row.RecordVersion++;
-        PublishAssigned(row, previousType, previousId, method, ruleRef, null);
+        _afterSave.Add(() => PublishAssigned(row, previousType, previousId, method, ruleRef, reasonCode));
     }
 
     /// <summary>ActivityAssigned for any assignment change. User and queue ids on the wire are derived from the directory strings (<see cref="WorkUserIds"/>, <see cref="QueueIds"/>).</summary>
@@ -476,6 +535,9 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
         ? new Assignee { UserId = WorkUserIds.For(id) }
         : new Assignee { QueueId = QueueIds.For(id) };
 
+    /// <summary>Events of assignments made since the last save; published only once the row is stored (a stale write publishes nothing).</summary>
+    private readonly List<Action> _afterSave = [];
+
     private async Task<Result<ActivityRow>> SaveAsync(ActivityRow row, CancellationToken cancellationToken)
     {
         try
@@ -484,9 +546,18 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
         }
         catch (DbUpdateConcurrencyException)
         {
+            _afterSave.Clear();
+            // Forget the stale copy so a later save in the same unit of work (bulk reassign) does not retry it.
+            db.Entry(row).State = EntityState.Detached;
             return WorkErrors.Of(WorkErrors.Stale, "The activity changed meanwhile. Load the newer version and try again.");
         }
 
+        foreach (var publish in _afterSave)
+        {
+            publish();
+        }
+
+        _afterSave.Clear();
         return row;
     }
 
@@ -550,3 +621,6 @@ internal sealed class ActivityEngine(WorkDbContext db, RequestContext context, I
     private static Guid? PartyOf(ObjectRef reference) =>
         reference.Module == ModuleCode.PTY && string.Equals(reference.Type, "Party", StringComparison.OrdinalIgnoreCase) && Guid.TryParse(reference.Id, out var party) ? party : null;
 }
+
+/// <summary>Validated changes of <c>wrk.Activity.update</c>: null means unchanged (the note is unchanged unless <see cref="NoteSet"/>).</summary>
+internal sealed record ActivityFieldChanges(string? Title, string? Priority, Instant? DueAt, bool NoteSet, string? Note);

@@ -5595,6 +5595,7 @@ paths:
       x-status: full
       x-maturity: pre-release
       x-io-shared: 2
+      x-bounded: 'Cash calls capped by limit; no cursor'
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -5897,6 +5898,7 @@ paths:
       x-status: full
       x-maturity: pre-release
       x-io-shared: 2
+      x-bounded: 'Settlements, newest first, capped by limit; no cursor'
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false

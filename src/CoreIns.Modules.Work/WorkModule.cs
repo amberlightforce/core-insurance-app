@@ -79,6 +79,13 @@ public static class WorkModule
         services.AddCommand<CancelActivity, ActivityCancelResponse, CancelActivityHandler>(CommandDescriptor.For("wrk.Activity.cancel"));
         services.AddCommandAuditor<GetNextActivity, QueueGetNextResponse, GetNextActivityAuditor>();
         services.AddCommand<GetNextActivity, QueueGetNextResponse, GetNextActivityHandler>(CommandDescriptor.For("wrk.Queue.getNext"));
+        services.AddScoped<IValidator<UpdateActivity>, UpdateActivityValidator>();
+        services.AddCommandAuditor<UpdateActivity, ActivityUpdateResponse, UpdateActivityAuditor>();
+        services.AddCommand<UpdateActivity, ActivityUpdateResponse, UpdateActivityHandler>(CommandDescriptor.For("wrk.Activity.update"));
+        services.AddScoped<IValidator<BulkReassignActivities>, BulkReassignActivitiesValidator>();
+        services.AddCommandAuditor<BulkReassignActivities, ActivityBulkReassignResponse, BulkReassignActivitiesAuditor>();
+        services.AddCommand<BulkReassignActivities, ActivityBulkReassignResponse, BulkReassignActivitiesHandler>(
+            CommandDescriptor.For("wrk.Activity.bulkReassign") with { SupportsDryRun = true });
         services.AddScoped<IWorkActivityService, WorkActivityService>();
 
         // BO-WRK-07: notes on business objects.

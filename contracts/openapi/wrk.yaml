@@ -921,6 +921,7 @@ paths:
       - W2-WRK-01
       x-status: full
       x-maturity: pre-release
+      x-bounded: 'The queue and pattern catalogue is a small administered set'
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -972,7 +973,10 @@ paths:
       x-exposure:
       - ui
       x-permission: wrk.Pattern.upsert
-      x-error-codes: []
+      x-error-codes:
+      - code: WRK-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
       x-source:
       - BO-WRK-03
       parameters:
@@ -4555,6 +4559,9 @@ components:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: 'PRD: "job id"'
+        results:
+          $ref: common.yaml#/components/schemas/Unspecified
+          description: "Per activity outcome: {requested, reassigned, failed, results[{id, outcome, code, detail, recordVersion, assignee}]}"
         previewWhenDryRun:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "preview when dry-run"'

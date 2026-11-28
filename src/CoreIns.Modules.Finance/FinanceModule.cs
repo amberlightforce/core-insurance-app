@@ -70,6 +70,17 @@ public static class FinanceModule
         services.AddScoped<FinanceOpsReader>();
         services.AddScoped<ManualJournalReader>();
 
+        // BO-FIN-07: posting rule authoring (draft, compile, test, previewImpact, submit, decide); an approval appends an effective-dated rule-set version.
+        services.AddScoped<Commands.PostingRuleAuthoringService>();
+        services.AddCommand<Commands.DraftPostingRules, Domain.PostingRulesAuthoringResult, Commands.DraftPostingRulesHandler>(CommandDescriptor.For("fin.PostingRules.draft"));
+        services.AddCommand<Commands.CompilePostingRules, Domain.PostingRulesAuthoringResult, Commands.CompilePostingRulesHandler>(CommandDescriptor.For("fin.PostingRules.compile"));
+        services.AddCommand<Commands.TestPostingRules, Domain.PostingRulesAuthoringResult, Commands.TestPostingRulesHandler>(CommandDescriptor.For("fin.PostingRules.test") with { SupportsDryRun = true });
+        services.AddCommand<Commands.PreviewPostingRuleImpact, Domain.PostingRulesAuthoringResult, Commands.PreviewPostingRuleImpactHandler>(CommandDescriptor.For("fin.PostingRules.previewImpact") with { SupportsDryRun = true });
+        services.AddCommand<Commands.SubmitPostingRules, Domain.PostingRulesAuthoringResult, Commands.SubmitPostingRulesHandler>(CommandDescriptor.For("fin.PostingRules.submit"));
+        services.AddCommand<Commands.DecidePostingRules, Domain.PostingRulesAuthoringResult, Commands.DecidePostingRulesHandler>(CommandDescriptor.For("fin.PostingRules.decide"));
+        services.AddAuthorityType(Commands.PostingRuleApproval.Definition);
+        services.AddOwnerDecidedApprovalType(Commands.PostingRuleApproval.Type);
+
         // BO-FIN-01a: manual journal proposals (create, withdraw); submit and decide are BO-FIN-01b.
         services.AddCommand<Commands.CreateManualJournal, Domain.ManualJournalEnvelope, Commands.CreateManualJournalHandler>(
             CommandDescriptor.For("fin.ManualJournal.create") with { SupportsDryRun = true });
@@ -187,6 +198,10 @@ public static class FinanceModule
             .Describe("Η ενέργεια απαιτεί δήλωση που έχει εγκριθεί από δεύτερο πρόσωπο.", "The action needs a return that a second person approved."),
         ErrorDefinition.For(ModuleCode.FIN, "SPI-UNBOUND", 422, "Οι φορολογικοί κανόνες δεν είναι διαθέσιμοι", "The tax rules are not available")
             .Describe("Το πακέτο χώρας δεν διαθέτει οριστικοποιημένους κανόνες ΦΠΑ ασφαλίστρων για τη νομική οντότητα (στην παραγωγή απαιτείται νομική οριστικοποίηση).", "The country pack holds no settled IPT rules for the legal entity (Production needs legal settlement)."),
+        ErrorDefinition.For(ModuleCode.FIN, "COMPILE", 422, "Οι κανόνες καταχώρισης δεν μεταγλωττίζονται", "The posting rules do not compile")
+            .Describe("Το σύνολο κανόνων έχει σφάλματα (άγνωστος λογαριασμός, διπλός κανόνας ή ισοδύναμοι κανόνες).", "The rule set has errors (unknown account, duplicate rule or rules that can tie)."),
+        ErrorDefinition.For(ModuleCode.FIN, "GOLDEN", 422, "Αποτυχία δειγματικών γεγονότων", "Sample events fail")
+            .Describe("Ένα δειγματικό γεγονός δεν δίνει τον κανόνα ή τον λογαριασμό που αναμενόταν.", "A sample event does not produce the rule or account that was expected."),
         ErrorDefinition.For(ModuleCode.FIN, "PERIOD-LOCKED", 409, "Η περίοδος είναι κλειδωμένη", "The period is locked")
             .Describe("Η λογιστική περίοδος είναι κλειδωμένη.", "The accounting period is locked."),
     ];

@@ -24,4 +24,9 @@ public sealed record DownPaymentInitiateRequest
     /// <summary>Contract member 'method'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("method")]
     public required string Method { get; init; }
+
+    /// <summary>Payment plan the down payment is for; the first instalment of this plan is the amount (default ANNUAL, which needs none)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("paymentPlanOption")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? PaymentPlanOption { get; init; }
 }

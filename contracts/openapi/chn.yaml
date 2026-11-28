@@ -2029,6 +2029,9 @@ paths:
         status: 403
       - code: CHN-ERR-LIMIT-EXCEEDED
         status: 422
+      - code: CHN-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
       x-source:
       - PRD-12 §9.1 l.1831
       parameters:
@@ -2719,7 +2722,7 @@ paths:
       x-status: minimal
       x-maturity: pre-release
       x-io-shared: 1
-      x-operation-kind: command
+      x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
       x-exposure:
@@ -2882,6 +2885,7 @@ paths:
       x-status: minimal
       x-maturity: pre-release
       x-io-shared: 1
+      x-bounded: 'One row per customer notification class (a fixed small set)'
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false

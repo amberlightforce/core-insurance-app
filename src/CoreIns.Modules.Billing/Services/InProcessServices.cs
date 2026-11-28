@@ -217,3 +217,17 @@ internal sealed class TaxLevyService(RequestContext context, ILegalEntityDirecto
     public Task<TaxLevyPeriodsResponse> PeriodsAsync(CancellationToken cancellationToken = default) =>
         reader.PeriodsAsync(InProcess.LegalEntity(context, legalEntities), null, cancellationToken);
 }
+
+/// <summary><see cref="IBillingDownPaymentService"/>: <c>status</c> and <c>initiate</c> (REQ-BIL-003, REQ-BIL-055); the POL bind gate reads the status.</summary>
+internal sealed class DownPaymentContractService(
+    RequestContext context, ILegalEntityDirectory legalEntities, DownPaymentService service, ICommandHandler<InitiateDownPayment, DownPaymentInitiateResponse> initiate)
+    : IBillingDownPaymentService
+{
+    public Task<DownPaymentInitiateResponse> InitiateAsync(DownPaymentInitiateRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        InProcess.RunAsync(context, initiate, new InitiateDownPayment(request), options, cancellationToken);
+
+    public Task<DownPaymentStatusResponse> StatusAsync(QuoteId? quoteId = null, JobId? jobId = null, CancellationToken cancellationToken = default) =>
+        jobId is null
+            ? throw new DomainException(DomainError.Of(ModuleCode.BIL, "VALIDATION", "Give jobId."))
+            : service.StatusAsync(InProcess.LegalEntity(context, legalEntities), jobId.Value.Value, cancellationToken);
+}

@@ -67,6 +67,7 @@ public static class BillingModule
                 $"GRANT SELECT, INSERT ON {Schema}.bank_statement, {Schema}.bank_statement_line TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.write_off TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.write_off_line TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE, DELETE ON {Schema}.down_payment TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
@@ -155,6 +156,13 @@ public static class BillingModule
         services.AddScoped<IValidator<ChangePaymentPlan>, ChangePaymentPlanValidator>();
         services.AddCommandAuditor<ChangePaymentPlan, PaymentPlanChangeResponse, PaymentPlanAuditor<ChangePaymentPlan, PaymentPlanChangeResponse>>();
         services.AddCommand<ChangePaymentPlan, PaymentPlanChangeResponse, ChangePaymentPlanHandler>(CommandDescriptor.For("bil.PaymentPlan.change") with { SupportsDryRun = true });
+
+        // BO-BIL-04: down-payment bind gate.
+        services.AddScoped<DownPaymentService>();
+        services.AddScoped<IValidator<InitiateDownPayment>, InitiateDownPaymentValidator>();
+        services.AddCommandAuditor<InitiateDownPayment, DownPaymentInitiateResponse, InitiateDownPaymentAuditor>();
+        services.AddCommand<InitiateDownPayment, DownPaymentInitiateResponse, InitiateDownPaymentHandler>(CommandDescriptor.For("bil.DownPayment.initiate") with { SupportsDryRun = true });
+        services.AddScoped<IBillingDownPaymentService, DownPaymentContractService>();
 
         // BO-BIL-01: account lifecycle (search, suspend/resume, close, reopen, change payer).
         services.AddScoped<BillingAccountSearchReader>();

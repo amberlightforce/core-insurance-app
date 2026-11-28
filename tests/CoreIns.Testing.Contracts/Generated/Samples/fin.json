@@ -1843,35 +1843,115 @@
       "state": "SAMPLE_CODE",
       "closedForPosting": true
     },
-    "PostingRulesCompileRequest": {
-      "ruleSet": "unspecified",
-      "ruleRows": "unspecified",
-      "sampleEvents": "unspecified"
+    "PostingRuleCompileResult": {
+      "ok": true,
+      "errors": [
+        "sample"
+      ],
+      "warnings": [
+        "sample"
+      ]
     },
-    "PostingRulesCompileResponse": {
+    "PostingRuleDraftView": {
+      "draftId": "01923076-6a5a-7865-8ea8-a6ab47b45113",
+      "book": "sample",
+      "effectiveFrom": "sample",
+      "status": "sample",
+      "baseVersion": 1,
+      "contentHash": "sample",
+      "ruleCount": 1,
+      "recordVersion": 1,
+      "createdBy": "sample",
+      "submittedBy": "sample",
+      "decidedBy": "sample",
+      "decisionReason": "sample",
+      "activatedRuleSetId": "0192cf4e-a954-75e1-83e7-ff6e1e59c461",
+      "activatedVersion": 1
+    },
+    "PostingRuleGoldenCase": {
+      "name": "sample",
+      "passed": true,
+      "ruleCode": "sample",
+      "account": "sample",
+      "detail": "sample"
+    },
+    "PostingRuleGoldenResult": {
+      "total": 1,
+      "passed": 1,
+      "failed": 1,
+      "cases": [
+        "unspecified"
+      ]
+    },
+    "PostingRuleImpactLine": {
+      "journalNumber": "sample",
+      "lineNo": 1,
+      "outcome": "sample",
+      "oldRule": "sample",
+      "newRule": "sample",
+      "oldAccount": "sample",
+      "newAccount": "sample",
+      "detail": "sample"
+    },
+    "PostingRuleImpactResult": {
+      "journals": 1,
+      "lines": 1,
+      "unchanged": 1,
+      "changed": 1,
+      "unresolved": 1,
+      "skipped": 1,
+      "differences": [
+        "unspecified"
+      ]
+    },
+    "PostingRuleRowInput": {
+      "code": "sample",
+      "sourceEvent": "sample",
+      "entryType": "sample",
+      "sourceAccount": "sample",
+      "chargeCategory": "sample",
+      "chargeType": "sample",
+      "account": "sample",
+      "deriveFrom": "sample",
+      "descriptionEl": "sample",
+      "descriptionEn": "sample"
+    },
+    "PostingRuleSampleEvent": {
+      "name": "sample",
+      "sourceEvent": "sample",
+      "entryType": "sample",
+      "sourceAccount": "sample",
+      "chargeCategory": "sample",
+      "chargeType": "sample",
+      "glKey": "sample",
+      "expectRule": "sample",
+      "expectAccount": "sample"
+    },
+    "PostingRuleSetRef": {
+      "draftId": "0192487c-de8b-74a2-8d81-8417f2af019d",
+      "book": "sample",
+      "effectiveFrom": "sample"
+    },
+    "PostingRulesAuthoringRequest": {
+      "ruleSet": "unspecified",
+      "ruleRows": [
+        "unspecified"
+      ],
+      "sampleEvents": [
+        "unspecified"
+      ],
+      "limit": 1
+    },
+    "PostingRulesAuthoringResponse": {
+      "draft": "unspecified",
       "compileResults": "unspecified",
       "goldenResults": "unspecified",
       "preview": "unspecified"
     },
     "PostingRulesDecideRequest": {
-      "ruleSet": "unspecified",
-      "ruleRows": "unspecified",
-      "sampleEvents": "unspecified"
-    },
-    "PostingRulesDecideResponse": {
-      "compileResults": "unspecified",
-      "goldenResults": "unspecified",
-      "preview": "unspecified"
-    },
-    "PostingRulesDraftRequest": {
-      "ruleSet": "unspecified",
-      "ruleRows": "unspecified",
-      "sampleEvents": "unspecified"
-    },
-    "PostingRulesDraftResponse": {
-      "compileResults": "unspecified",
-      "goldenResults": "unspecified",
-      "preview": "unspecified"
+      "draftId": "01925d4d-d8fa-7f1e-898d-4fe1fc44c909",
+      "decision": "sample",
+      "comment": "sample"
     },
     "PostingRulesListItem": {
       "ruleSetId": "01929f15-92f1-777d-81df-248f7e320bb6",
@@ -1925,35 +2005,8 @@
       "nextCursor": "sample",
       "limit": 1
     },
-    "PostingRulesPreviewImpactRequest": {
-      "ruleSet": "unspecified",
-      "ruleRows": "unspecified",
-      "sampleEvents": "unspecified"
-    },
-    "PostingRulesPreviewImpactResponse": {
-      "compileResults": "unspecified",
-      "goldenResults": "unspecified",
-      "preview": "unspecified"
-    },
     "PostingRulesSubmitRequest": {
-      "ruleSet": "unspecified",
-      "ruleRows": "unspecified",
-      "sampleEvents": "unspecified"
-    },
-    "PostingRulesSubmitResponse": {
-      "compileResults": "unspecified",
-      "goldenResults": "unspecified",
-      "preview": "unspecified"
-    },
-    "PostingRulesTestRequest": {
-      "ruleSet": "unspecified",
-      "ruleRows": "unspecified",
-      "sampleEvents": "unspecified"
-    },
-    "PostingRulesTestResponse": {
-      "compileResults": "unspecified",
-      "goldenResults": "unspecified",
-      "preview": "unspecified"
+      "draftId": "019226b9-1e38-7de0-8cea-9cd733f5968e"
     },
     "ReconBreakView": {
       "breakId": "0192e6d9-e431-7796-8f36-bc86db9a71eb",
