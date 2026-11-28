@@ -2124,7 +2124,7 @@ paths:
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/fin/v1/earning/result:
-    post:
+    get:
       operationId: fin.Earning.result
       summary: Earning
       description: |-
@@ -2147,31 +2147,32 @@ paths:
       x-status: full
       x-maturity: pre-release
       x-io-shared: 4
-      x-operation-kind: command
-      x-idempotency: required
+      x-operation-kind: query
+      x-idempotency: none
       x-dry-run: false
-      x-dry-run-note: 'PRD dry-run: simulate; PRD idempotency: Yes'
+      x-dry-run-note: 'read-only: per-term detail of one run, paged'
       x-exposure:
       - ui
       x-permission: fin.Earning.result
       x-error-codes:
       - code: FIN-ERR-RUN-IN-PROGRESS
         status: 409
-      - code: FIN-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
-        status: 409
+      - code: FIN-ERR-NOT-FOUND
+        status: 404
       x-source:
       - PRD-09 §9.1 l.1536
       parameters:
-      - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EarningResultRequest'
+      - $ref: common.yaml#/components/parameters/Cursor
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: runId
+        in: query
+        required: false
+        description: The earning run to read; the latest completed run when absent.
+        schema:
+          type: string
+          format: uuid
       responses:
         '200':
           description: Success
@@ -2185,6 +2186,8 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
         '409':
           $ref: common.yaml#/components/responses/Conflict
         '422':
@@ -7469,26 +7472,27 @@ components:
             $ref: '#/components/schemas/EarningTermResult'
         resultsTruncated:
           type: boolean
-    EarningResultRequest:
-      type: object
-      description: 'fin.Earning.result request. PRD inputs: "entity, as-of"'
-      properties:
-        entity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entity"'
-        as:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "as-of"'
     EarningResultResponse:
       type: object
-      description: 'fin.Earning.result result. PRD outputs: "run, results"'
+      description: 'fin.Earning.result result: one earning run and a page (cursor, contract section 3.5.5) of every term it covered; the page totals over all pages equal the run totals.'
+      required:
+      - run
+      - items
+      - nextCursor
       properties:
         run:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "run"'
-        results:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "results"'
+          $ref: '#/components/schemas/EarningRunView'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EarningTermResult'
+        nextCursor:
+          type: [string, 'null']
+          description: Cursor of the next page, or null on the last page.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 200
     PeriodStatusResponse:
       type: object
       properties:

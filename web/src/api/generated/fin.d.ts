@@ -685,8 +685,6 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
         /**
          * Earning
          * @description Earning
@@ -694,7 +692,9 @@ export interface paths {
          *     PRD inputs: entity, as-of
          *     PRD outputs: run, results
          */
-        post: operations["fin.Earning.result"];
+        get: operations["fin.Earning.result"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2577,19 +2577,13 @@ export interface components {
             results: components["schemas"]["EarningTermResult"][];
             resultsTruncated: boolean;
         };
-        /** @description fin.Earning.result request. PRD inputs: "entity, as-of" */
-        EarningResultRequest: {
-            /** @description PRD: "entity" */
-            entity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "as-of" */
-            as?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.Earning.result result. PRD outputs: "run, results" */
+        /** @description fin.Earning.result result: one earning run and a page (cursor, contract section 3.5.5) of every term it covered; the page totals over all pages equal the run totals. */
         EarningResultResponse: {
-            /** @description PRD: "run" */
-            run?: components["schemas"]["Unspecified"];
-            /** @description PRD: "results" */
-            results?: components["schemas"]["Unspecified"];
+            run: components["schemas"]["EarningRunView"];
+            items: components["schemas"]["EarningTermResult"][];
+            /** @description Cursor of the next page, or null on the last page. */
+            nextCursor: string | null;
+            limit?: number;
         };
         /** @description Typed from REQ-FIN-232. PRD outputs: "state" */
         PeriodStatusResponse: {
@@ -5009,14 +5003,15 @@ export interface operations {
     };
     "fin.Earning.result": {
         parameters: {
-            query?: never;
-            header: {
-                /**
-                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
-                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
-                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
-                 */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            query?: {
+                /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
+                cursor?: components["parameters"]["Cursor"];
+                /** @description Page size, at most 200 (contract §3.5.5). */
+                limit?: components["parameters"]["Limit"];
+                /** @description The earning run to read; the latest completed run when absent. */
+                runId?: string;
+            };
+            header?: {
                 /**
                  * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
                  *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
@@ -5028,11 +5023,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EarningResultRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Success */
             200: {
@@ -5046,6 +5037,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];

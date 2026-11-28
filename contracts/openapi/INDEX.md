@@ -16,7 +16,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [BIL](#bil) | 91 | 91 | 0 | 57 | 34 | 6 | 5 | 1 |
 | [CLM](#clm) | 77 | 77 | 0 | 55 | 22 | 10 | 9 | 5 |
 | [RI](#ri) | 121 | 115 | 6 | 85 | 36 | 9 | 0 | 0 |
-| [FIN](#fin) | 88 | 80 | 8 | 55 | 33 | 10 | 0 | 3 |
+| [FIN](#fin) | 88 | 80 | 8 | 54 | 34 | 10 | 0 | 3 |
 | [DOC](#doc) | 48 | 47 | 1 | 28 | 20 | 4 | 12 | 0 |
 | [CMP](#cmp) | 93 | 62 | 31 | 69 | 24 | 21 | 0 | 3 |
 | [CHN](#chn) | 106 | 62 | 44 | 66 | 40 | 3 | 25 | 2 |
@@ -25,7 +25,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [DAT](#dat) | 47 | 47 | 0 | 28 | 19 | 4 | 0 | 0 |
 | [MIG](#mig) | 49 | 49 | 0 | 33 | 16 | 5 | 0 | 12 |
 | [MKT](#mkt) | 50 | 41 | 9 | 17 | 33 | 1 | 0 | 5 |
-| **Total** | 1232 | 1016 | 216 | 790 | 442 | 127 | 69 | 63 |
+| **Total** | 1232 | 1016 | 216 | 789 | 443 | 127 | 69 | 63 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -732,7 +732,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `fin.Close.tasks` | GET `/api/fin/v1/close/tasks` | Q |  | ui |  | W8 | full | REQ-FIN-007, REQ-FIN-227..REQ-FIN-241 |
 | `fin.Dsar.export` | POST `/api/fin/v1/dsar/export` | C | yes | internal | CMP | W8 | full | REQ-FIN-290 |
 | `fin.Dsar.restrict` | POST `/api/fin/v1/dsar/restrict` | C | yes | internal | CMP | W8 | full | REQ-FIN-290 |
-| `fin.Earning.result` | POST `/api/fin/v1/earning/result` | C |  | ui |  | W8 | full | REQ-FIN-003, REQ-FIN-104..REQ-FIN-117 |
+| `fin.Earning.result` | GET `/api/fin/v1/earning/result` | Q |  | ui |  | W8 | full | REQ-FIN-003, REQ-FIN-104..REQ-FIN-117 |
 | `fin.Earning.run` | POST `/api/fin/v1/earning/run` | C |  | ui |  | W8 | full | REQ-FIN-003, REQ-FIN-104..REQ-FIN-117 |
 | `fin.Earning.simulate` | POST `/api/fin/v1/earning/simulate` | Q |  | ui |  | W8 | full | REQ-FIN-003, REQ-FIN-104..REQ-FIN-117 |
 | `fin.Earning.status` | GET `/api/fin/v1/earning/status` | Q |  | ui |  | W8 | full | REQ-FIN-003, REQ-FIN-104..REQ-FIN-117 |

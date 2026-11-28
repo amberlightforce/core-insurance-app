@@ -148,6 +148,7 @@ public static class FinanceModule
 
         // BO-FIN-06a: the earning engine; its run gates the EARNING_RUN close task.
         services.AddScoped<Services.EarningEngine>();
+        services.AddScoped<EarningReader>();
         services.AddScoped<Domain.ICloseTaskGate, Commands.EarningRunGate>();
         // BO-FIN-08: the reconciliation framework; its open breaks gate the RECONCILIATIONS close task.
         services.AddScoped<Services.ReconciliationService>();

@@ -173,4 +173,83 @@ public sealed class EarningRunTests(PostgresFixture database) : IClassFixture<Po
         var (_, done) = await SendAsync(HttpMethod.Get, "/api/fin/v1/close/tasks?period=2026-09");
         done!["tasks"]!.AsArray().Single(t => t!["task"]!.GetValue<string>() == "EARNING_RUN")!["blocker"].ShouldBeNull();
     }
+
+    private async Task<string> RowCountsAsync()
+    {
+        var counts = new List<long>();
+        foreach (var table in new[] { "journal_entry", "journal_line", "earning_run", "earned_premium" })
+        {
+            counts.Add(await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.{table}"));
+        }
+
+        return string.Join(',', counts);
+    }
+
+    [Fact]
+    public async Task Simulate_writes_nothing_and_matches_what_the_run_then_does()
+    {
+        var policy = await WrittenTermAsync("2026-11-01", "2027-11-01", ("MTPL", "250.00"), ("OD", "115.00"));
+        var before = await RowCountsAsync();
+        var (response, sim) = await SendAsync(HttpMethod.Post, "/api/fin/v1/earning/simulate", new { asOf = "2026-11-30" });
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, sim?.ToJsonString());
+        sim!["run"]!["state"]!.GetValue<string>().ShouldBe("SIMULATED");
+        Money(sim["results"]!.AsArray().Single(r => r!["policyTermId"]!.GetValue<string>() == policy.TermId.ToString())!["delta"]).ShouldBe("30.00");
+        (await RowCountsAsync()).ShouldBe(before);
+
+        var (_, run) = await SendAsync(HttpMethod.Post, "/api/fin/v1/earning/run", new { asOf = "2026-11-30" });
+        Money(run!["results"]!.AsArray().Single(r => r!["policyTermId"]!.GetValue<string>() == policy.TermId.ToString())!["delta"]).ShouldBe("30.00");
+    }
+
+    [Fact]
+    public async Task Result_pages_every_term_of_a_run_and_the_totals_equal_the_run()
+    {
+        var first = await WrittenTermAsync("2026-11-01", "2027-11-01", ("MTPL", "250.00"), ("OD", "115.00"));
+        var second = await WrittenTermAsync("2026-11-01", "2027-11-01", ("MTPL", "73.00"));
+        (await SendAsync(HttpMethod.Get, "/api/fin/v1/earning/result")).Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+
+        var (_, run) = await SendAsync(HttpMethod.Post, "/api/fin/v1/earning/run", new { asOf = "2026-11-30" });
+        var runId = run!["run"]!["id"]!.GetValue<string>();
+        var total = decimal.Parse(Money(run["run"]!["earnedToDate"]![0]), CultureInfo.InvariantCulture);
+
+        var seen = new List<JsonNode>();
+        string? cursor = null;
+        var pages = 0;
+        do
+        {
+            var url = $"/api/fin/v1/earning/result?runId={runId}&limit=1" + (cursor is null ? string.Empty : $"&cursor={cursor}");
+            var (response, page) = await SendAsync(HttpMethod.Get, url);
+            response.StatusCode.ShouldBe(HttpStatusCode.OK, page?.ToJsonString());
+            page!["run"]!["id"]!.GetValue<string>().ShouldBe(runId);
+            seen.AddRange(page["items"]!.AsArray().Select(i => i!));
+            cursor = page["nextCursor"]?.GetValue<string>();
+            pages++;
+        }
+        while (cursor is not null && pages < 500);
+
+        seen.Count.ShouldBe(pages);
+        seen.Select(i => i["policyTermId"]!.GetValue<string>()).ShouldContain(first.TermId.ToString());
+        seen.Select(i => i["policyTermId"]!.GetValue<string>()).ShouldContain(second.TermId.ToString());
+        seen.Select(i => i["policyTermId"]!.GetValue<string>()).Distinct().Count().ShouldBe(seen.Count);
+        seen.Sum(i => decimal.Parse(Money(i["earnedToDate"]), CultureInfo.InvariantCulture)).ShouldBe(total);
+        run["run"]!["policiesProcessed"]!.GetValue<int>().ShouldBe(seen.Count);
+
+        // Without a run id the latest run answers; an unknown run, a bad limit and a missing permission are refused.
+        var (_, latest) = await SendAsync(HttpMethod.Get, "/api/fin/v1/earning/result");
+        latest!["run"]!["id"]!.GetValue<string>().ShouldBe(runId);
+        (await SendAsync(HttpMethod.Get, $"/api/fin/v1/earning/result?runId={Guid.NewGuid()}")).Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await SendAsync(HttpMethod.Get, "/api/fin/v1/earning/result?limit=0")).Response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        (await SendAsync(HttpMethod.Get, "/api/fin/v1/earning/result", roles: "Staff.Underwriter")).Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task An_earning_run_journal_cannot_be_reversed()
+    {
+        await WrittenTermAsync("2026-11-01", "2027-11-01", ("MTPL", "365.00"));
+        var (_, run) = await SendAsync(HttpMethod.Post, "/api/fin/v1/earning/run", new { asOf = "2026-11-30" });
+        var journalId = run!["run"]!["journalIds"]![0]!.GetValue<string>();
+        var (response, problem) = await SendAsync(HttpMethod.Post, "/api/fin/v1/journals/reverse", new { journalId, reason = "Undo the run" });
+        response.StatusCode.ShouldBe((HttpStatusCode)422, problem?.ToJsonString());
+        problem!["code"]!.GetValue<string>().ShouldBe("FIN-ERR-SOURCE-OWNED");
+        (await ScalarAsync<long>(_db, $"SELECT count(*) FROM fin.journal_entry WHERE reverses_journal_id = '{journalId}'")).ShouldBe(0);
+    }
 }

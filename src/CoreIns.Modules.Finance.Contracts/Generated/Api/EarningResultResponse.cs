@@ -4,23 +4,24 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.Earning.result result. PRD outputs: "run, results"</summary>
+/// <summary>fin.Earning.result result: one earning run and a page (cursor, contract section 3.5.5) of every term it covered; the page totals over all pages equal the run totals.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record EarningResultResponse
 {
-    /// <summary>PRD: "run"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'run'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("run")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Run { get; init; }
+    public required global::CoreIns.Modules.Finance.Contracts.Api.EarningRunView Run { get; init; }
 
-    /// <summary>PRD: "results"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("results")]
+    /// <summary>Contract member 'items'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Finance.Contracts.Api.EarningTermResult> Items { get; init; }
+
+    /// <summary>Cursor of the next page, or null on the last page.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("nextCursor")]
+    public required string? NextCursor { get; init; }
+
+    /// <summary>Contract member 'limit'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("limit")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Results { get; init; }
+    public int? Limit { get; init; }
 }

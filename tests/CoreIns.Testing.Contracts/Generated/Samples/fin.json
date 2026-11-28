@@ -202,13 +202,62 @@
       "restrictionOutcome": "unspecified",
       "referencesRestricted": "unspecified"
     },
-    "EarningResultRequest": {
-      "entity": "unspecified",
-      "as": "unspecified"
-    },
     "EarningResultResponse": {
-      "run": "unspecified",
-      "results": "unspecified"
+      "run": {
+        "id": "0192ea1a-c2a1-777a-8166-5a4549d5cb27",
+        "period": "sample",
+        "asOf": "2026-10-07",
+        "state": "DONE",
+        "simulated": true,
+        "startedAt": "2026-10-07T09:00:00Z",
+        "finishedAt": "2026-10-07T09:00:00Z",
+        "policiesProcessed": 1,
+        "termsSkipped": 1,
+        "earnedToDate": [
+          {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        ],
+        "postedDelta": [
+          {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        ],
+        "journalIds": [
+          "01928961-58ef-77e5-8ddb-2a935e11d3f1"
+        ]
+      },
+      "items": [
+        {
+          "policyTermId": "0192fcec-820c-70b7-8538-833d5da5486c",
+          "policyNumber": "sample",
+          "book": "sample",
+          "termStart": "2026-10-07",
+          "termEnd": "2026-10-07",
+          "writtenPremium": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "earnedToDate": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "previouslyEarned": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "delta": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "daysEarned": 1,
+          "termDays": 1
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
     },
     "EarningRunRequest": {
       "asOf": "2026-10-07"

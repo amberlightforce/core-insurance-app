@@ -144,30 +144,8 @@ internal sealed class EarningEngine(
             return NoEntity;
         }
 
-        var row = await db.EarningRuns.AsNoTracking().Where(r => r.LegalEntityId == entity.Id.Value).OrderByDescending(r => r.FinishedAt).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-        if (row is null)
-        {
-            return new EarningStatusResponse();
-        }
-
-        return new EarningStatusResponse
-        {
-            Run = new EarningRunView
-            {
-                Id = row.RunId,
-                Period = row.PeriodCode,
-                AsOf = row.AsOf,
-                State = EarningRunView.StateValue.Done,
-                Simulated = false,
-                StartedAt = row.StartedAt,
-                FinishedAt = row.FinishedAt,
-                PoliciesProcessed = row.PoliciesProcessed,
-                TermsSkipped = row.TermsSkipped,
-                EarnedToDate = [Money.Of(row.EarnedToDate, row.Currency)],
-                PostedDelta = [Money.Of(row.PostedDelta, row.Currency)],
-                JournalIds = [.. row.JournalIds.Select(j => new JournalId(j))],
-            },
-        };
+        var run = await new Queries.EarningReader(db).LatestAsync(entity.Id.Value, cancellationToken).ConfigureAwait(false);
+        return run is null ? new EarningStatusResponse() : new EarningStatusResponse { Run = run };
     }
 
     private (LegalEntityId Id, LegalEntityCode Code)? ManualJournalScopeOf() => Commands.ManualJournalScope.Of(context, legalEntities);

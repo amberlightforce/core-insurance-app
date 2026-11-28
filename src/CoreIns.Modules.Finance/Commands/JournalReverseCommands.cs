@@ -48,6 +48,12 @@ internal sealed class ReverseJournalHandler(
             return DomainError.Of(ModuleCode.FIN, "SOURCE-OWNED", $"Journal {original.JournalNumber} was posted from {original.SourceModule} events; {original.SourceModule} corrects it.");
         }
 
+        // Earning-run journals (module FIN, event type EarningRun) belong to the earning engine: reversing one would desync the run and its earned_premium rows. A later run corrects them.
+        if (string.Equals(original.SourceEventType, Earning.SourceEventType, StringComparison.Ordinal))
+        {
+            return DomainError.Of(ModuleCode.FIN, "SOURCE-OWNED", $"Journal {original.JournalNumber} was posted by an earning run; the earning engine corrects it, it cannot be reversed.");
+        }
+
         var wanted = command.Date ?? original.AccountingDate;
         var date = await periods.FirstPostableAsync(entity.Id.Value, wanted, cancellationToken).ConfigureAwait(false);
         if (date is null)

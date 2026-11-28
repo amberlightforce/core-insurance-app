@@ -52,7 +52,7 @@ public static class FinanceErrorCodes
 
     /// <summary>FIN-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 55 operation(s): fin.ActuarialResults.approve, fin.ActuarialResults.reject, fin.ActuarialResults.submit, fin.Close.acceptBreak, fin.Close.evidencePack, fin.Close.lock, fin.Close.reopen, fin.Close.signOff, fin.Close.softClose, fin.Dsar.export, fin.Dsar.restrict, fin.Earning.result, ….</para>
+    /// <para>Declared by 54 operation(s): fin.ActuarialResults.approve, fin.ActuarialResults.reject, fin.ActuarialResults.submit, fin.Close.acceptBreak, fin.Close.evidencePack, fin.Close.lock, fin.Close.reopen, fin.Close.signOff, fin.Close.softClose, fin.Dsar.export, fin.Dsar.restrict, fin.Earning.run, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "FIN-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -70,7 +70,7 @@ public static class FinanceErrorCodes
 
     /// <summary>FIN-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): fin.Dsar.restrict, fin.Ifrs17Group.assignment, fin.Ifrs17Group.riHeldAssignment, fin.Journal.get.</para>
+    /// <para>Declared by 5 operation(s): fin.Dsar.restrict, fin.Earning.result, fin.Ifrs17Group.assignment, fin.Ifrs17Group.riHeldAssignment, fin.Journal.get.</para>
     /// </remarks>
     public const string NotFound = "FIN-ERR-NOT-FOUND";
 

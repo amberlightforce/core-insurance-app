@@ -245,7 +245,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/actuarial-results/validate
 CONTRACT_NOT_SERVED POST /api/fin/v1/close/evidence-pack
 CONTRACT_NOT_SERVED POST /api/fin/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/fin/v1/dsar/restrict
-CONTRACT_NOT_SERVED POST /api/fin/v1/earning/result
 CONTRACT_NOT_SERVED POST /api/fin/v1/fiscal-reconciliation/run
 CONTRACT_NOT_SERVED POST /api/fin/v1/fx/revalue
 CONTRACT_NOT_SERVED POST /api/fin/v1/fx/translate

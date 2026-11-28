@@ -23,6 +23,7 @@
         "fin.Earning.run": [ "Staff.Finance", "Platform.Admin" ],
         "fin.Earning.status": [ "Staff.Finance", "Platform.Admin" ],
         "fin.Earning.simulate": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.Earning.result": [ "Staff.Finance", "Platform.Admin" ],
         "fin.Close.tasks": [ "Staff.Finance", "Platform.Admin" ],
         "fin.Close.signOff": [ "Staff.Finance", "Platform.Admin" ],
         "fin.Close.softClose": [ "Staff.Finance", "Platform.Admin" ],
