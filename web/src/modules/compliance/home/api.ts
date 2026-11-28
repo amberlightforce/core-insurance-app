@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { apiRequest } from '../../../api/client';
+import type { ComplaintItem } from '../complaints/api';
 
 /**
  * Compliance landing (NX-UI-09): complaints (cmp.Complaint.query) and statutory clocks (cmp.Clock.query).
@@ -20,11 +21,7 @@ export interface ClockItem {
   startedAt?: string | null;
 }
 
-export interface ComplaintItem {
-  complaint?: unknown;
-  number?: unknown;
-  deadlines?: unknown;
-}
+export type { ComplaintItem };
 
 export interface Page<T> {
   items: T[];
@@ -64,20 +61,4 @@ export function scalar(value: unknown, keys: readonly string[] = []): string {
     }
   }
   return '';
-}
-
-/** The earliest ISO instant found in an opaque «deadlines» value (array or object of instants). */
-export function earliestDeadline(value: unknown): string | null {
-  const found: string[] = [];
-  const walk = (v: unknown, depth: number) => {
-    if (depth > 3) return;
-    if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) found.push(v);
-    else if (Array.isArray(v)) {
-      for (const x of v) walk(x, depth + 1);
-    } else if (v && typeof v === 'object') {
-      for (const x of Object.values(v as Record<string, unknown>)) walk(x, depth + 1);
-    }
-  };
-  walk(value, 0);
-  return found.sort()[0] ?? null;
 }

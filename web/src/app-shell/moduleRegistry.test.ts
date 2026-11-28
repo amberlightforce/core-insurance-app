@@ -29,6 +29,7 @@ describe('module registry', () => {
       '/finance',
       '/documents',
       '/compliance',
+      '/compliance/complaints',
       '/compliance/dsar',
       '/reports',
       '/products',

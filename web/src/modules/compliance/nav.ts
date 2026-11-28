@@ -7,6 +7,13 @@ export default {
     { id: 'compliance', to: '/compliance', roles: complianceRoles },
     {
       id: 'compliance',
+      to: '/compliance/complaints',
+      label: 'complaints',
+      icon: 'complaints',
+      roles: complianceRoles,
+    },
+    {
+      id: 'compliance',
       to: '/compliance/dsar',
       label: 'dsar',
       icon: 'dsar',

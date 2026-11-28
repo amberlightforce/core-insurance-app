@@ -58,6 +58,19 @@ const routes: RouteObject[] = [
     ],
   },
   {
+    // BO-CMP-01: complaints list (the case page follows with BO-CMP-02).
+    path: 'compliance/complaints',
+    element: <RequireRole roles={complianceRoles} />,
+    children: [
+      {
+        index: true,
+        lazy: async () => ({
+          Component: (await import('../compliance/complaints/ComplaintListPage')).ComplaintListPage,
+        }),
+      },
+    ],
+  },
+  {
     path: 'compliance/ai-systems',
     element: <RequireRole roles={complianceRoles} />,
     children: [
@@ -98,5 +111,6 @@ export default {
     '/compliance/fiscal',
     '/compliance/ai-systems',
     '/compliance/submissions',
+    '/compliance/complaints',
   ],
 } satisfies ModuleRoutes;
