@@ -1474,6 +1474,18 @@ export interface components {
             recordVersion: number;
             editCount: number;
             draft: components["schemas"]["ProductArtefact"];
+            /** @description The edit log in order, for the history panel and for revert (BO-PFC-02) */
+            history?: components["schemas"]["ChangeSetEditEntry"][];
+        };
+        ChangeSetEditEntry: {
+            editId: components["schemas"]["Uuid"];
+            seq: number;
+            /** @enum {string} */
+            op: "add" | "replace" | "remove";
+            path: string;
+            actor: string;
+            /** Format: date-time */
+            at: string;
         };
         /** @description Lint result of the draft. Findings never block saving a draft; they block submitting it. */
         ChangeSetValidation: {
@@ -1508,37 +1520,29 @@ export interface components {
             changeSetState: components["schemas"]["ChangeSetState"];
             validation: components["schemas"]["ChangeSetValidation"];
         };
-        /** @description pfc.ChangeSet.revert request. PRD inputs: "product, base, edits" */
+        /** @description pfc.ChangeSet.revert request (BO-PFC-02). Undoes one logged edit by applying its inverse; a later edit on the same path makes it a conflict. */
         ChangeSetRevertRequest: {
-            /** @description PRD: "product" */
-            product?: components["schemas"]["Unspecified"];
-            /** @description PRD: "base" */
-            base?: components["schemas"]["Unspecified"];
-            /** @description PRD: "edits" */
-            edits?: components["schemas"]["Unspecified"];
+            changeSetId: components["schemas"]["Uuid"];
+            recordVersion: number;
+            /** @description The edit (from ChangeSetState.history) to undo */
+            editId: components["schemas"]["Uuid"];
         };
-        /** @description pfc.ChangeSet.revert result. PRD outputs: "change set state, validation" */
+        /** @description pfc.ChangeSet.revert result: the draft after the undo and its lint findings */
         ChangeSetRevertResponse: {
-            /** @description PRD: "change set state" */
-            changeSetState?: components["schemas"]["Unspecified"];
-            /** @description PRD: "validation" */
-            validation?: components["schemas"]["Unspecified"];
+            changeSetState: components["schemas"]["ChangeSetState"];
+            validation: components["schemas"]["ChangeSetValidation"];
         };
-        /** @description pfc.ChangeSet.rebase request. PRD inputs: "product, base, edits" */
+        /** @description pfc.ChangeSet.rebase request (BO-PFC-02). Three-way merges the draft (ours) onto a newer Locked version (theirs) of the same product, using the current base version as the common ancestor. Conflicts (same path changed on both sides) give PFC-ERR-CONFLICT (409) with one field error per JSON path and change nothing. */
         ChangeSetRebaseRequest: {
-            /** @description PRD: "product" */
-            product?: components["schemas"]["Unspecified"];
-            /** @description PRD: "base" */
-            base?: components["schemas"]["Unspecified"];
-            /** @description PRD: "edits" */
-            edits?: components["schemas"]["Unspecified"];
+            changeSetId: components["schemas"]["Uuid"];
+            recordVersion: number;
+            /** @description The Locked version to rebase onto; the latest Locked version when omitted */
+            targetVersion?: components["schemas"]["ProductVersionNumber"];
         };
-        /** @description pfc.ChangeSet.rebase result. PRD outputs: "change set state, validation" */
+        /** @description pfc.ChangeSet.rebase result: the merged draft (new base version) and its lint findings */
         ChangeSetRebaseResponse: {
-            /** @description PRD: "change set state" */
-            changeSetState?: components["schemas"]["Unspecified"];
-            /** @description PRD: "validation" */
-            validation?: components["schemas"]["Unspecified"];
+            changeSetState: components["schemas"]["ChangeSetState"];
+            validation: components["schemas"]["ChangeSetValidation"];
         };
         /** @description pfc.ChangeSet.abandon request (BO-PFC-01) */
         ChangeSetAbandonRequest: {
