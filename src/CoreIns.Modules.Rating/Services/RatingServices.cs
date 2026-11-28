@@ -377,15 +377,12 @@ internal sealed class RatingRateService(
                 ["notATariff"] = artefact.Definition.Metadata.NotATariff,
                 ["notice"] = artefact.Definition.Metadata.Note,
             },
-            ["lines"] = new JsonArray(segments.SelectMany(s => s.Premiums.Select(p => (JsonNode)new JsonObject
+            ["inputs"] = new JsonArray(segments.Select(s => (JsonNode)new JsonObject
             {
                 ["segmentId"] = s.SegmentId,
-                ["elementId"] = s.Risk.VehicleElementId,
-                ["coverageCode"] = p.Coverage,
-                ["chargeType"] = artefact.Definition.ChargeTypes[p.Coverage],
-                ["annualPremium"] = RatingEngine.Format(p.Premium),
-                ["steps"] = RatingEngine.TraceJson(p.Steps),
-            })).ToArray()),
+                ["risk"] = s.Risk.ToNormalised(envelope.RatingBasisDate.Value),
+            }).ToArray()),
+            ["lines"] = new JsonArray(segments.SelectMany(s => s.Premiums.Select(p => (JsonNode)WorksheetReader.LineJson(artefact, s.SegmentId, s.Risk, p))).ToArray()),
             ["taxes"] = new JsonArray(taxes.Select(t => (JsonNode)new JsonObject
             {
                 ["segmentId"] = t.SegmentId,
@@ -468,21 +465,150 @@ internal sealed class RatingRatingArtifactService(RatingStore store) : IRatingRa
     }
 }
 
-/// <summary><c>rat.Worksheet.get</c> (REQ-RAT-003): the stored worksheet, with its step trace.</summary>
-internal sealed class RatingWorksheetService(RatingStore store, RequestContext context, ILegalEntityDirectory legalEntities) : IRatingWorksheetService
+/// <summary>
+/// <c>rat.Worksheet.get</c> (REQ-RAT-003) and the read side of a stored worksheet (BO-RAT-02): explain, reperform, export and attach.
+/// Everything is scoped to the caller's legal entity; another entity's worksheet is "not found".
+/// </summary>
+internal sealed class RatingWorksheetService(
+    RatingStore store, RequestContext context, ILegalEntityDirectory legalEntities, DbSession session) : IRatingWorksheetService
 {
+    private const int MaxAttach = 100;
+
     public async Task<WorksheetGetResponse> GetAsync(string id, CancellationToken cancellationToken = default)
     {
-        var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
-        var body = Sha256Hash.TryParse(id, out _) ? await store.GetWorksheetAsync(id, legalEntity.Value, cancellationToken).ConfigureAwait(false) : null;
-        return body is null
-            ? throw new DomainException(DomainError.Of(ModuleCode.RAT, "WORKSHEET-NOT-FOUND", "The worksheet does not exist."))
-            : new WorksheetGetResponse { Worksheet = JsonDocument.Parse(body).RootElement.Clone() };
+        var body = await LoadAsync(id, cancellationToken).ConfigureAwait(false);
+        return new WorksheetGetResponse { Worksheet = JsonDocument.Parse(body).RootElement.Clone() };
     }
 
-    public Task<WorksheetAttachResponse> AttachAsync(WorksheetAttachRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw new DomainException(DomainError.Of(ModuleCode.RAT, "DATA-UNAVAILABLE", "rat.Worksheet.attach is not built yet."));
+    /// <summary><c>rat.Worksheet.explain</c>: plain-language text per step, taken from the artefact's step descriptions as stored in the worksheet.</summary>
+    public async Task<WorksheetExplainResponse> ExplainAsync(string worksheetId, string? language, CancellationToken cancellationToken = default)
+    {
+        var worksheet = Parse(await LoadAsync(worksheetId, cancellationToken).ConfigureAwait(false));
+        return new WorksheetExplainResponse
+        {
+            Worksheet = ToElement(worksheet),
+            Explanation = ToElement(WorksheetReader.Explain(worksheet, WorksheetReader.Language(language))),
+        };
+    }
 
-    public Task<WorksheetExplainResponse> ExplainAsync(CancellationToken cancellationToken = default) =>
-        throw new DomainException(DomainError.Of(ModuleCode.RAT, "DATA-UNAVAILABLE", "rat.Worksheet.explain is not built yet; rat.Worksheet.get returns the step trace."));
+    /// <summary>
+    /// <c>rat.Worksheet.reperform</c>: re-rates the stored inputs under the artefact and tax rates the worksheet pinned (never the one active
+    /// now) and reports whether the hash is identical, with every drifting path otherwise.
+    /// </summary>
+    public async Task<WorksheetReperformResponse> ReperformAsync(WorksheetReperformRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var id = request.WorksheetId?.Value;
+        var worksheet = Parse(await LoadAsync(id, cancellationToken).ConfigureAwait(false));
+        var artefactHash = worksheet["header"]?["ratingArtefactHash"]?.GetValue<string>() ?? string.Empty;
+        var artefact = await store.LoadAsync(artefactHash, cancellationToken).ConfigureAwait(false)
+            ?? throw new DomainException(DomainError.Of(ModuleCode.RAT, "UNKNOWN-ARTEFACT", "The artefact the worksheet pinned no longer exists."));
+        var result = WorksheetReader.Reperform(worksheet, id!, artefact);
+        return new WorksheetReperformResponse
+        {
+            Worksheet = ToElement(result.Reproduced),
+            MatchResult = ToElement(new JsonObject
+            {
+                ["match"] = result.Match,
+                ["storedHash"] = result.StoredHash,
+                ["reperformedHash"] = result.ReperformedHash,
+                ["storedIntact"] = result.StoredIntact,
+                ["ratingArtefactHash"] = artefactHash,
+                ["configurationHash"] = worksheet["header"]?["configurationHash"]?.DeepClone(),
+                ["engineVersion"] = worksheet["header"]?["engineVersion"]?.DeepClone(),
+                ["drift"] = new JsonArray(result.Drift.Select(d => (JsonNode)d.DeepClone()).ToArray()),
+            }),
+        };
+    }
+
+    /// <summary><c>rat.Worksheet.export</c>: the worksheet as CSV or JSON, with the explanation in the asked language.</summary>
+    public async Task<WorksheetExportResponse> ExportAsync(WorksheetExportRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var format = request.Format is { ValueKind: JsonValueKind.String } f ? f.GetString()!.Trim().ToUpperInvariant() : "JSON";
+        if (format is not ("CSV" or "JSON"))
+        {
+            throw new DomainException(DomainError.Of(ModuleCode.RAT, "ENVELOPE", "format must be CSV or JSON."));
+        }
+
+        var id = request.WorksheetId?.Value;
+        var language = WorksheetReader.Language(request.Language);
+        var worksheet = Parse(await LoadAsync(id, cancellationToken).ConfigureAwait(false));
+        var explanation = WorksheetReader.Explain(worksheet, language);
+        var csv = format == "CSV";
+        return new WorksheetExportResponse
+        {
+            Worksheet = ToElement(worksheet),
+            Explanation = ToElement(explanation),
+            Document = ToElement(new JsonObject
+            {
+                ["format"] = format,
+                ["contentType"] = csv ? "text/csv; charset=utf-8" : "application/json",
+                ["fileName"] = $"worksheet-{id![..12]}.{(csv ? "csv" : "json")}",
+                ["language"] = language,
+                ["columns"] = csv ? new JsonArray(WorksheetReader.CsvColumns.Select(c => (JsonNode)c).ToArray()) : null,
+                ["content"] = csv ? WorksheetReader.ToCsv(worksheet, language) : worksheet.ToJsonString(),
+            }),
+        };
+    }
+
+    /// <summary><c>rat.Worksheet.attach</c> (REQ-RAT-229): links worksheets to a bound policy transaction through <c>worksheet_index</c>. A replay changes nothing.</summary>
+    public async Task<WorksheetAttachResponse> AttachAsync(WorksheetAttachRequest request, CommandOptions options, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var ids = request.WorksheetIds ?? [];
+        if (ids.Count is 0 or > MaxAttach)
+        {
+            throw new DomainException(DomainError.Of(ModuleCode.RAT, "ENVELOPE", $"Send 1 to {MaxAttach} worksheet ids."));
+        }
+
+        var transactionId = TransactionId(request.TransactionRef);
+        var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
+        var attached = new JsonArray();
+        var already = new JsonArray();
+        await using var transaction = await session.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+        foreach (var id in ids.Select(i => i.Value).Distinct(StringComparer.Ordinal))
+        {
+            _ = await store.GetWorksheetAsync(id, legalEntity.Value, cancellationToken).ConfigureAwait(false)
+                ?? throw new DomainException(DomainError.Of(ModuleCode.RAT, "WORKSHEET-NOT-FOUND", "The worksheet does not exist."));
+            (await store.AttachWorksheetAsync(id, legalEntity.Value, transactionId, cancellationToken).ConfigureAwait(false) ? attached : already).Add(id);
+        }
+
+        await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+        // TODO(hardening): policyRef is accepted and echoed but not stored (rat.worksheet_index has no policy column); add one with the first consumer.
+        return new WorksheetAttachResponse
+        {
+            AttachmentResult = ToElement(new JsonObject
+            {
+                ["transactionId"] = transactionId,
+                ["policyRef"] = request.PolicyRef is { } policy ? JsonNode.Parse(policy.GetRawText()) : null,
+                ["attached"] = attached,
+                ["alreadyAttached"] = already,
+            }),
+        };
+    }
+
+    private static Guid TransactionId(JsonElement? reference)
+    {
+        var text = reference switch
+        {
+            { ValueKind: JsonValueKind.String } s => s.GetString(),
+            { ValueKind: JsonValueKind.Object } o when o.TryGetProperty("transactionId", out var t) && t.ValueKind == JsonValueKind.String => t.GetString(),
+            _ => null,
+        };
+        return Guid.TryParse(text, out var id) && id != Guid.Empty
+            ? id
+            : throw new DomainException(DomainError.Of(ModuleCode.RAT, "ENVELOPE", "transactionRef must be a transaction id (a string, or an object with transactionId)."));
+    }
+
+    private async Task<string> LoadAsync(string? id, CancellationToken cancellationToken)
+    {
+        var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
+        var body = id is not null && Sha256Hash.TryParse(id, out _) ? await store.GetWorksheetAsync(id, legalEntity.Value, cancellationToken).ConfigureAwait(false) : null;
+        return body ?? throw new DomainException(DomainError.Of(ModuleCode.RAT, "WORKSHEET-NOT-FOUND", "The worksheet does not exist."));
+    }
+
+    private static JsonObject Parse(string body) => (JsonObject)JsonNode.Parse(body)!;
+
+    private static JsonElement ToElement(JsonNode node) => JsonDocument.Parse(node.ToJsonString()).RootElement.Clone();
 }

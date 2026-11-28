@@ -18,7 +18,7 @@ public interface IDataModelService
     /// <para>Status: full. Wave W8.</para>
     /// <para>Exposure: ui; consumers: MKT, PFC, RAT.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: DAT-ERR-030 (422), DAT-ERR-031 (422), DAT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: DAT-ERR-030 (422), DAT-ERR-031 (422), DAT-ERR-033 (422), DAT-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Data.Contracts.Api.ModelRegisterResponse> RegisterAsync(global::CoreIns.Modules.Data.Contracts.Api.ModelRegisterRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

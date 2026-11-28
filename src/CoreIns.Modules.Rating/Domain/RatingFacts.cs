@@ -78,6 +78,26 @@ internal sealed record MotorRisk(
     }
 
     /// <summary>
+    /// Rebuilds a risk from its normalised form (<see cref="ToNormalised"/>) for reperformance: the whole-year ages are exact at the basis
+    /// date, so the first-registration year and a birth date on the basis day give the same rating facts.
+    /// </summary>
+    public static MotorRisk FromNormalised(System.Text.Json.Nodes.JsonNode risk, DateOnly basis)
+    {
+        var vehicle = risk["vehicle"] ?? throw new DomainException(DomainError.Of(ModuleCode.RAT, "DOMAIN", "A stored input has no vehicle."));
+        var driver = risk["driver"] ?? throw new DomainException(DomainError.Of(ModuleCode.RAT, "DOMAIN", "A stored input has no driver."));
+        var valueText = vehicle["vehicleValue"]?.GetValue<string>();
+        return new MotorRisk(
+            vehicle["elementId"]?.GetValue<string>() ?? "vehicle-1",
+            new DateOnly(basis.Year - vehicle["ageYears"]!.GetValue<int>(), 1, 1),
+            vehicle["engineCapacityCc"]!.GetValue<int>(),
+            valueText is null ? null : decimal.Parse(valueText, CultureInfo.InvariantCulture),
+            vehicle["usage"]?.GetValue<string>() ?? "PRIVATE",
+            basis.AddYears(-driver["ageYears"]!.GetValue<int>()),
+            driver["claimsLast5Years"]!.GetValue<int>(),
+            [.. risk["coverages"]!.AsArray().Select(c => c!.GetValue<string>())]);
+    }
+
+    /// <summary>
     /// The normalised input as canonical-JSON friendly nodes, for the input hash (REQ-RAT-032): only what pricing uses, decimals at a canonical
     /// scale, and the derived ages on <paramref name="basis"/> instead of birth date and registration year (the price depends on the age, not the date).
     /// </summary>

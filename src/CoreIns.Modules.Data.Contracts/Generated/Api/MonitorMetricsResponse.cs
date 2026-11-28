@@ -4,15 +4,27 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Monitor.metrics result. PRD outputs: "accepted counts"</summary>
+/// <summary>dat.Monitor.metrics result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record MonitorMetricsResponse
 {
-    /// <summary>PRD: "accepted counts"</summary>
+    /// <summary>Contract member 'accepted'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("accepted")]
+    public required int Accepted { get; init; }
+
+    /// <summary>Contract member 'breached'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("breached")]
+    public required int Breached { get; init; }
+
+    /// <summary>The model is flagged after this call.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("driftFlagged")]
+    public required bool DriftFlagged { get; init; }
+
+    /// <summary>Contract member 'breachIds'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'breachId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("acceptedCounts")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("breachIds")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? AcceptedCounts { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? BreachIds { get; init; }
 }

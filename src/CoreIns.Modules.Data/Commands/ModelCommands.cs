@@ -5,6 +5,7 @@ using CoreIns.Modules.Data.Contracts.Events;
 using CoreIns.Modules.Data.Persistence;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Contracts.Common;
+using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
 using CoreIns.Platform.Time;
@@ -40,7 +41,7 @@ internal sealed class RunBiasTestValidator : AbstractValidator<RunBiasTest>
     }
 }
 
-internal sealed class RegisterModelHandler(DataDbContext db, IClock clock) : ICommandHandler<RegisterModel, ModelRegisterResponse>
+internal sealed class RegisterModelHandler(DataDbContext db, IClock clock, RequestContext context) : ICommandHandler<RegisterModel, ModelRegisterResponse>
 {
     public async Task<Result<ModelRegisterResponse>> HandleAsync(RegisterModel command, CancellationToken cancellationToken)
     {
@@ -49,7 +50,7 @@ internal sealed class RegisterModelHandler(DataDbContext db, IClock clock) : ICo
             .SingleOrDefaultAsync(m => m.FeatureKey == request.FeatureKey && m.Version == request.Version, cancellationToken).ConfigureAwait(false);
         if (existing is not null)
         {
-            return new ModelRegisterResponse { ModelId = existing.ModelId, Status = Parse(existing.Status) };
+            return new ModelRegisterResponse { ModelId = existing.ModelId, Status = ModelLifecycle.MapStatus<ModelRegisterResponse.StatusValue>(existing.Status) };
         }
 
         var row = new ModelRow
@@ -58,16 +59,16 @@ internal sealed class RegisterModelHandler(DataDbContext db, IClock clock) : ICo
             FeatureKey = request.FeatureKey,
             Version = request.Version,
             Card = request.ModelCard?.GetRawText() ?? "{}",
-            Status = "ACTIVE",
+            // TODO(hardening): flip the default to DRAFT once PLT-AI registers through the validation lifecycle (BO-DAT-06 keeps the legacy ACTIVE registration unless draft=true).
+            Status = request.Draft == true ? "DRAFT" : "ACTIVE",
             CreatedAt = clock.Now,
+            CreatedBy = MartActors.Keys(context)[0],
         };
         db.Models.Add(row);
+        db.ModelTransitions.Add(ModelLifecycle.Transition(row, clock.Now, row.CreatedBy, "REGISTERED"));
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return new ModelRegisterResponse { ModelId = row.ModelId, Status = ModelRegisterResponse.StatusValue.Active };
+        return new ModelRegisterResponse { ModelId = row.ModelId, Status = ModelLifecycle.MapStatus<ModelRegisterResponse.StatusValue>(row.Status) };
     }
-
-    private static ModelRegisterResponse.StatusValue Parse(string status) =>
-        status == "SUSPENDED" ? ModelRegisterResponse.StatusValue.Suspended : ModelRegisterResponse.StatusValue.Active;
 }
 
 /// <summary>
@@ -102,10 +103,11 @@ internal sealed class RunBiasTestHandler(DataDbContext db, IClock clock, IEventP
         var model = models.OrderByDescending(m => m.CreatedAt).FirstOrDefault();
         if (breached)
         {
-            foreach (var m in models.Where(m => m.Status != "SUSPENDED"))
+            foreach (var m in models.Where(m => m.Status is not ("SUSPENDED" or "RETIRED")))
             {
                 m.Status = "SUSPENDED";
                 m.SuspendedReason = $"BIAS_RATIO_{request.Ratio.ToString(CultureInfo.InvariantCulture)}_OUTSIDE_{band}";
+                db.ModelTransitions.Add(ModelLifecycle.Transition(m, now, "system:bias-test", m.SuspendedReason));
             }
         }
 
@@ -125,7 +127,7 @@ internal sealed class RunBiasTestHandler(DataDbContext db, IClock clock, IEventP
 
         if (breached)
         {
-            // TODO(hardening): the confidence interval is a point (lower = upper = ratio) until sampling exists.
+            var (lower, upper) = ModelLifecycle.RatioInterval(request.Ratio, report.SampleSize);
             events.Publish(new OutgoingEvent(
                 EventDescriptor.From(BiasThresholdBreachedV1.Descriptor), "Model", (model?.ModelId ?? report.BiasReportId).ToString("D"),
                 new BiasThresholdBreachedV1
@@ -135,7 +137,7 @@ internal sealed class RunBiasTestHandler(DataDbContext db, IClock clock, IEventP
                     Version = model?.Version ?? "UNREGISTERED",
                     ProxyGroup = report.ProxyGroup,
                     Ratio = request.Ratio,
-                    ConfidenceInterval = new ConfidenceInterval { Lower = request.Ratio, Upper = request.Ratio },
+                    ConfidenceInterval = new ConfidenceInterval { Lower = lower, Upper = upper },
                     Band = band,
                     SampleSize = report.SampleSize,
                     BreachId = report.BiasReportId,
@@ -155,21 +157,40 @@ internal sealed class RunBiasTestHandler(DataDbContext db, IClock clock, IEventP
     }
 }
 
-/// <summary>Reads a model for <c>dat.Model.get</c>.</summary>
+/// <summary>Reads a model for <c>dat.Model.get</c>: the row, its status timeline and the latest 50 metric records.</summary>
 internal sealed class ModelReader(DataDbContext db)
 {
     public async Task<ModelGetResponse?> GetAsync(Guid id, CancellationToken cancellationToken)
     {
         var m = await db.Models.AsNoTracking().SingleOrDefaultAsync(x => x.ModelId == id, cancellationToken).ConfigureAwait(false);
-        return m is null
-            ? null
-            : new ModelGetResponse
+        if (m is null)
+        {
+            return null;
+        }
+
+        var transitions = await db.ModelTransitions.AsNoTracking().Where(t => t.ModelId == id).OrderBy(t => t.At).ThenBy(t => t.TransitionId).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var metrics = await db.ModelMetrics.AsNoTracking().Where(t => t.ModelId == id).OrderByDescending(t => t.RecordedAt).ThenByDescending(t => t.MetricId).Take(50).ToListAsync(cancellationToken).ConfigureAwait(false);
+        return new ModelGetResponse
+        {
+            ModelId = m.ModelId,
+            FeatureKey = m.FeatureKey,
+            Version = m.Version,
+            Status = ModelLifecycle.MapStatus<ModelGetResponse.StatusValue>(m.Status),
+            SuspendedReason = m.SuspendedReason,
+            ValidationOutcome = m.ValidationOutcome,
+            DriftFlagged = m.DriftFlagged,
+            DriftReason = m.DriftReason,
+            EffectiveDate = m.EffectiveDate?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            Transitions = transitions.Select(t => new ModelGetResponse.TransitionItem { Status = t.Status, At = t.At.ToString(), By = t.ActorKey, Note = t.Note }).ToList(),
+            Metrics = metrics.Select(t => new ModelGetResponse.MetricItem
             {
-                ModelId = m.ModelId,
-                FeatureKey = m.FeatureKey,
-                Version = m.Version,
-                Status = m.Status == "SUSPENDED" ? ModelGetResponse.StatusValue.Suspended : ModelGetResponse.StatusValue.Active,
-                SuspendedReason = m.SuspendedReason,
-            };
+                Metric = t.Metric,
+                Value = t.Value.ToString(CultureInfo.InvariantCulture),
+                Threshold = t.Threshold?.ToString(CultureInfo.InvariantCulture),
+                Breached = t.Breached,
+                SampleSize = t.SampleSize,
+                RecordedAt = t.RecordedAt.ToString(),
+            }).ToList(),
+        };
     }
 }

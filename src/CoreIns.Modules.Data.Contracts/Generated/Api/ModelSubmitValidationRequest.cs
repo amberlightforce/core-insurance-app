@@ -4,23 +4,22 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Model.submitValidation request. PRD inputs: "model card, version"</summary>
+/// <summary>dat.Model.submitValidation request (BO-DAT-06): DRAFT -&gt; IN_VALIDATION. The card must carry purpose, trainingData and limitations.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ModelSubmitValidationRequest
 {
-    /// <summary>PRD: "model card"</summary>
+    /// <summary>Contract member 'modelId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'modelId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("modelId")]
+    public required global::System.Guid ModelId { get; init; }
+
+    /// <summary>Replaces the stored card when supplied.</summary>
+    /// <remarks>
+    /// <para>Open object: members not defined by the contract yet.</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("modelCard")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? ModelCard { get; init; }
-
-    /// <summary>PRD: "version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Version { get; init; }
 }

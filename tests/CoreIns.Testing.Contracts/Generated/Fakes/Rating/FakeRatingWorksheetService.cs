@@ -17,7 +17,7 @@ public sealed class FakeRatingWorksheetService : global::CoreIns.Testing.Contrac
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Rating.Contracts.Api.WorksheetAttachResponse> AttachAsync(global::CoreIns.Modules.Rating.Contracts.Api.WorksheetAttachRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Rating.Contracts.Api.WorksheetAttachResponse>("rat.Worksheet.attach", [request, options], cancellationToken);
 
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Rating.Contracts.Api.WorksheetExplainResponse> ExplainAsync(global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Rating.Contracts.Api.WorksheetExplainResponse>("rat.Worksheet.explain", [], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Rating.Contracts.Api.WorksheetExplainResponse> ExplainAsync(string worksheetId, string? language = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Rating.Contracts.Api.WorksheetExplainResponse>("rat.Worksheet.explain", [worksheetId, language], cancellationToken);
 
     /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Rating.Contracts.Api.WorksheetGetResponse> GetAsync(string id, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Rating.Contracts.Api.WorksheetGetResponse>("rat.Worksheet.get", [id], cancellationToken);

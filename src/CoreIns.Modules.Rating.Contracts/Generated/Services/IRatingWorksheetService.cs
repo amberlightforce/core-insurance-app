@@ -30,7 +30,9 @@ public interface IRatingWorksheetService
     /// <para>Exposure: ui, partner; consumers: CHN, MIG, PFC, POL, UW.</para>
     /// <para>Errors: RAT-ERR-WORKSHEET-NOT-FOUND (404), RAT-ERR-RETENTION-EXPIRED (422).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Rating.Contracts.Api.WorksheetExplainResponse> ExplainAsync(global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="worksheetId">Contract addition (BO-RAT-02): the worksheet to explain (PRD input "worksheet id")</param>
+    /// <param name="language">Contract addition (BO-RAT-02): el or en (PRD input "language"); default en</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Rating.Contracts.Api.WorksheetExplainResponse> ExplainAsync(string worksheetId, string? language = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Worksheet access</summary>
     /// <remarks>

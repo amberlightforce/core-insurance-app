@@ -1441,69 +1441,96 @@ export interface components {
             modelCard?: {
                 [key: string]: unknown;
             };
+            /** @description BO-DAT-06: true registers the version as DRAFT and starts the validation lifecycle; false (default) keeps the legacy ACTIVE registration. */
+            draft?: boolean;
         };
         /** @description dat.Model.register result */
         ModelRegisterResponse: {
             modelId: components["schemas"]["Uuid"];
             /** @enum {string} */
-            status: "ACTIVE" | "SUSPENDED";
+            status: "DRAFT" | "IN_VALIDATION" | "APPROVED" | "ACTIVE" | "SUSPENDED" | "RETIRED";
         };
-        /** @description dat.Model.get result */
+        /** @description dat.Model.get result: the registry row, its lifecycle trail and the latest drift metrics (BO-DAT-06). */
         ModelGetResponse: {
             modelId: components["schemas"]["Uuid"];
             featureKey: string;
             version: string;
             /** @enum {string} */
-            status: "ACTIVE" | "SUSPENDED";
+            status: "DRAFT" | "IN_VALIDATION" | "APPROVED" | "ACTIVE" | "SUSPENDED" | "RETIRED";
             suspendedReason?: string;
+            /** @description PASSED or FAILED once a validation was recorded. */
+            validationOutcome?: string;
+            /** @description True while an unresolved drift breach flags the feature (cleared by a passing metric). */
+            driftFlagged?: boolean;
+            driftReason?: string;
+            effectiveDate?: string;
+            transitions?: {
+                status?: string;
+                at?: string;
+                by?: string;
+                note?: string;
+            }[];
+            /** @description Latest metric records, newest first (at most 50). */
+            metrics?: {
+                metric?: string;
+                value?: string;
+                threshold?: string;
+                breached?: boolean;
+                sampleSize?: number;
+                recordedAt?: string;
+            }[];
         };
-        /** @description dat.Model.submitValidation request. PRD inputs: "model card, version" */
+        /** @description dat.Model.submitValidation request (BO-DAT-06): DRAFT -> IN_VALIDATION. The card must carry purpose, trainingData and limitations. */
         ModelSubmitValidationRequest: {
-            /** @description PRD: "model card" */
-            modelCard?: components["schemas"]["Unspecified"];
-            /** @description PRD: "version" */
-            version?: components["schemas"]["Unspecified"];
+            modelId: components["schemas"]["Uuid"];
+            /** @description Replaces the stored card when supplied. */
+            modelCard?: {
+                [key: string]: unknown;
+            };
         };
-        /** @description dat.Model.submitValidation result. PRD outputs: "status" */
+        /** @description dat.Model.submitValidation result */
         ModelSubmitValidationResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            modelId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "DRAFT" | "IN_VALIDATION" | "APPROVED" | "ACTIVE" | "SUSPENDED" | "RETIRED";
         };
-        /** @description dat.Model.recordValidation request. PRD inputs: "model card, version" */
+        /** @description dat.Model.recordValidation request (BO-DAT-06). The validator must not be the person who registered or submitted the model. FAILED returns the model to DRAFT. */
         ModelRecordValidationRequest: {
-            /** @description PRD: "model card" */
-            modelCard?: components["schemas"]["Unspecified"];
-            /** @description PRD: "version" */
-            version?: components["schemas"]["Unspecified"];
+            modelId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "PASSED" | "FAILED";
+            findings?: string;
         };
-        /** @description dat.Model.recordValidation result. PRD outputs: "status" */
+        /** @description dat.Model.recordValidation result */
         ModelRecordValidationResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            modelId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "DRAFT" | "IN_VALIDATION" | "APPROVED" | "ACTIVE" | "SUSPENDED" | "RETIRED";
+            outcome: string;
         };
-        /** @description dat.Model.approve request. PRD inputs: "model card, version" */
+        /** @description dat.Model.approve request (BO-DAT-06). Needs a passed validation and a second person (not the developer, submitter or validator). A future effectiveDate leaves the model APPROVED. */
         ModelApproveRequest: {
-            /** @description PRD: "model card" */
-            modelCard?: components["schemas"]["Unspecified"];
-            /** @description PRD: "version" */
-            version?: components["schemas"]["Unspecified"];
+            modelId: components["schemas"]["Uuid"];
+            /** @description yyyy-MM-dd; default today. */
+            effectiveDate?: string;
         };
-        /** @description dat.Model.approve result. PRD outputs: "status" */
+        /** @description dat.Model.approve result */
         ModelApproveResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            modelId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "DRAFT" | "IN_VALIDATION" | "APPROVED" | "ACTIVE" | "SUSPENDED" | "RETIRED";
+            effectiveDate?: string;
         };
-        /** @description dat.Model.retire request. PRD inputs: "model card, version" */
+        /** @description dat.Model.retire request (BO-DAT-06): APPROVED, ACTIVE or SUSPENDED -> RETIRED. */
         ModelRetireRequest: {
-            /** @description PRD: "model card" */
-            modelCard?: components["schemas"]["Unspecified"];
-            /** @description PRD: "version" */
-            version?: components["schemas"]["Unspecified"];
+            modelId: components["schemas"]["Uuid"];
+            reason: string;
         };
-        /** @description dat.Model.retire result. PRD outputs: "status" */
+        /** @description dat.Model.retire result */
         ModelRetireResponse: {
-            /** @description PRD: "status" */
-            status?: components["schemas"]["Unspecified"];
+            modelId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "DRAFT" | "IN_VALIDATION" | "APPROVED" | "ACTIVE" | "SUSPENDED" | "RETIRED";
         };
         /** @description dat.Coverage.status result. PRD outputs: "Governed / Ungoverned + reasons" */
         CoverageStatusResponse: {
@@ -1538,19 +1565,28 @@ export interface components {
             /** @description Accepted but the type has no conformed fact or mart. */
             notHandled: number;
         };
-        /** @description dat.Monitor.metrics request. PRD inputs: "feature, version, metric records" */
+        /** @description dat.Monitor.metrics request (BO-DAT-06): metric records of one model version. PSI/drift records at or above the threshold raise ModelDriftDetected and flag the feature. */
         MonitorMetricsRequest: {
-            /** @description PRD: "feature" */
-            feature?: components["schemas"]["Unspecified"];
-            /** @description PRD: "version" */
-            version?: components["schemas"]["Unspecified"];
-            /** @description PRD: "metric records" */
-            metricRecords?: components["schemas"]["Unspecified"];
+            feature: components["schemas"]["AiFeatureId"];
+            version: string;
+            metricRecords: {
+                /** @description For example PSI, DRIFT, AUC. */
+                metric: components["schemas"]["Code"];
+                value: components["schemas"]["Decimal"];
+                /** @description Breach when value is at or above it; defaults to 0.25 for PSI and DRIFT. */
+                threshold?: components["schemas"]["Decimal"];
+                sampleSize?: number;
+                windowFrom?: components["schemas"]["Instant"];
+                windowTo?: components["schemas"]["Instant"];
+            }[];
         };
-        /** @description dat.Monitor.metrics result. PRD outputs: "accepted counts" */
+        /** @description dat.Monitor.metrics result */
         MonitorMetricsResponse: {
-            /** @description PRD: "accepted counts" */
-            acceptedCounts?: components["schemas"]["Unspecified"];
+            accepted: number;
+            breached: number;
+            /** @description The model is flagged after this call. */
+            driftFlagged: boolean;
+            breachIds?: components["schemas"]["Uuid"][];
         };
         /** @description dat.BiasTest.run request (DAT-CORE: the caller supplies the measured ratio; no lakehouse sampling yet) */
         BiasTestRunRequest: {

@@ -60,6 +60,51 @@ internal sealed class DataController : ControllerBase
         CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new RegisterModel(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
+    /// <summary>dat.Model.submitValidation.</summary>
+    [HttpPost("api/dat/v1/models/submit-validation")]
+    [Authorize(Policy = "dat.Model.submitValidation")]
+    public async Task<IResult> SubmitValidationAsync(
+        [FromBody] ModelSubmitValidationRequest request,
+        [FromServices] ICommandHandler<SubmitModelValidation, ModelSubmitValidationResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new SubmitModelValidation(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>dat.Model.recordValidation.</summary>
+    [HttpPost("api/dat/v1/models/record-validation")]
+    [Authorize(Policy = "dat.Model.recordValidation")]
+    public async Task<IResult> RecordValidationAsync(
+        [FromBody] ModelRecordValidationRequest request,
+        [FromServices] ICommandHandler<RecordModelValidation, ModelRecordValidationResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new RecordModelValidation(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>dat.Model.approve.</summary>
+    [HttpPost("api/dat/v1/models/approve")]
+    [Authorize(Policy = "dat.Model.approve")]
+    public async Task<IResult> ApproveModelAsync(
+        [FromBody] ModelApproveRequest request,
+        [FromServices] ICommandHandler<ApproveModel, ModelApproveResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ApproveModel(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>dat.Model.retire.</summary>
+    [HttpPost("api/dat/v1/models/retire")]
+    [Authorize(Policy = "dat.Model.retire")]
+    public async Task<IResult> RetireModelAsync(
+        [FromBody] ModelRetireRequest request,
+        [FromServices] ICommandHandler<RetireModel, ModelRetireResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new RetireModel(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>dat.Monitor.metrics (REST form for operators and tests; owning modules call IDataMonitorService).</summary>
+    [HttpPost("api/dat/v1/monitor/metrics")]
+    [Authorize(Policy = "dat.Monitor.metrics")]
+    public async Task<IResult> MetricsAsync(
+        [FromBody] MonitorMetricsRequest request,
+        [FromServices] ICommandHandler<RecordModelMetrics, MonitorMetricsResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new RecordModelMetrics(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
     /// <summary>dat.Model.get.</summary>
     [HttpGet("api/dat/v1/models/{id}")]
     [Authorize(Policy = "dat.Model.get")]

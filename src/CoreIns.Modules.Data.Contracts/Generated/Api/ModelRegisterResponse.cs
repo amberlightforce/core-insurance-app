@@ -24,6 +24,18 @@ public sealed record ModelRegisterResponse
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public enum StatusValue
     {
+        /// <summary><c>DRAFT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DRAFT")]
+        Draft,
+
+        /// <summary><c>IN_VALIDATION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("IN_VALIDATION")]
+        InValidation,
+
+        /// <summary><c>APPROVED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVED")]
+        Approved,
+
         /// <summary><c>ACTIVE</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ACTIVE")]
         Active,
@@ -31,5 +43,9 @@ public sealed record ModelRegisterResponse
         /// <summary><c>SUSPENDED</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUSPENDED")]
         Suspended,
+
+        /// <summary><c>RETIRED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RETIRED")]
+        Retired,
     }
 }
