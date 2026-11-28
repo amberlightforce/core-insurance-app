@@ -4,50 +4,33 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.PaymentPlan.change request. PRD inputs: "term or job, plan, method, due day"</summary>
+/// <summary>Typed from REQ-BIL-052, REQ-BIL-059. PRD inputs: "term or job, plan, method, due day"</summary>
 /// <remarks>
-/// <para>Exactly one of: term | job.</para>
+/// <para>Exactly one of: termId | jobId.</para>
 /// </remarks>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PaymentPlanChangeRequest
 {
-    /// <summary>PRD: "term or job" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("term")]
+    /// <summary>Contract member 'termId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("termId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Term { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.PolicyTermId? TermId { get; init; }
 
-    /// <summary>PRD: "term or job" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("job")]
+    /// <summary>Contract member 'jobId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Job { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
 
-    /// <summary>PRD: "plan"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("plan")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Plan { get; init; }
+    /// <summary>Contract member 'planCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("planCode")]
+    public required string PlanCode { get; init; }
 
-    /// <summary>PRD: "method"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'method'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("method")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Method { get; init; }
+    public required string Method { get; init; }
 
-    /// <summary>PRD: "due day"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Due day</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("dueDay")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DueDay { get; init; }
+    public int? DueDay { get; init; }
 }

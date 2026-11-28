@@ -15,7 +15,7 @@ public interface IBillingBillingPreviewService
     /// <remarks>
     /// <para>Operation bil.BillingPreview.compute (query; HTTP POST /api/bil/v1/billing-preview/compute).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
-    /// <para>Status: full. Wave W5.</para>
+    /// <para>Status: full; fully typed from REQ-BIL-058. Wave W5.</para>
     /// <para>Exposure: ui; consumers: CHN.</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.BillingPreviewComputeResponse> ComputeAsync(global::CoreIns.Modules.Billing.Contracts.Api.BillingPreviewComputeRequest request, global::System.Threading.CancellationToken cancellationToken = default);
