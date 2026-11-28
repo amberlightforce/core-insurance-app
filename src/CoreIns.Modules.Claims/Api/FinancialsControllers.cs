@@ -27,6 +27,10 @@ internal static class ClaimsFinancialPermissions
     public const string PaymentList = "clm.Payment.list";
     public const string PayeeCapture = "clm.PayeeAccount.capture";
     public const string PayeeList = "clm.PayeeAccount.list";
+    public const string SetApprove = "clm.TransactionSet.approve";
+    public const string SetReject = "clm.TransactionSet.reject";
+    public const string SetReturn = "clm.TransactionSet.return";
+    public const string DailyTotals = "clm.Financials.dailyTotals";
 }
 
 /// <summary>
@@ -72,6 +76,61 @@ internal sealed class FinancialsController : ControllerBase
         [FromBody] TransactionSetSubmitRequest request, [FromServices] ICommandHandler<SubmitTransactionSet, TransactionSetSubmitResponse> handler,
         CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new SubmitTransactionSet(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>clm.TransactionSet.approve: the same decision path as the PLT inbox (<see cref="SetDecisionRoutes"/>).</summary>
+    [HttpPost("transaction-sets/approve")]
+    [Authorize(Policy = ClaimsFinancialPermissions.SetApprove)]
+    public async Task<IResult> ApproveAsync([FromBody] TransactionSetApproveRequest request, [FromServices] SetDecisionRoutes routes, CancellationToken cancellationToken)
+    {
+        var result = await routes.ApproveAsync(request.SetId, request.ContentHash.Value, request.Comment, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess
+            ? Results.Ok(new TransactionSetApproveResponse { SetId = result.Value.SetId, Status = result.Value.Status, DisbursementIds = result.Value.DisbursementIds })
+            : HttpResults.Problem(result.Error!, HttpContext);
+    }
+
+    /// <summary>clm.TransactionSet.reject.</summary>
+    [HttpPost("transaction-sets/reject")]
+    [Authorize(Policy = ClaimsFinancialPermissions.SetReject)]
+    public async Task<IResult> RejectAsync([FromBody] TransactionSetRejectRequest request, [FromServices] SetDecisionRoutes routes, CancellationToken cancellationToken)
+    {
+        var result = await routes.RejectAsync(request.SetId, request.Reason, request.Comment, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess
+            ? Results.Ok(new TransactionSetRejectResponse { SetId = result.Value.SetId, Status = result.Value.Status })
+            : HttpResults.Problem(result.Error!, HttpContext);
+    }
+
+    /// <summary>clm.TransactionSet.return.</summary>
+    [HttpPost("transaction-sets/return")]
+    [Authorize(Policy = ClaimsFinancialPermissions.SetReturn)]
+    public async Task<IResult> ReturnAsync([FromBody] TransactionSetReturnRequest request, [FromServices] SetDecisionRoutes routes, CancellationToken cancellationToken)
+    {
+        var result = await routes.ReturnAsync(request.SetId, request.Reason, request.Comment, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess
+            ? Results.Ok(new TransactionSetReturnResponse { SetId = result.Value.SetId, Status = result.Value.Status })
+            : HttpResults.Problem(result.Error!, HttpContext);
+    }
+
+    /// <summary>clm.Financials.dailyTotals: ledger totals of one business date per currency, cost type and kind.</summary>
+    [HttpGet("financials/daily-totals")]
+    [Authorize(Policy = ClaimsFinancialPermissions.DailyTotals)]
+    public async Task<IResult> DailyTotalsAsync(
+        [FromQuery] string? legalEntity, [FromQuery] string? accountingDate, [FromServices] FinancialsReader reader, CancellationToken cancellationToken)
+    {
+        var services = HttpContext.RequestServices;
+        var code = ClaimsQueryContext.LegalEntityCode(services);
+        BusinessDate date = default;
+        if ((legalEntity is not null && legalEntity != code) || (accountingDate is not null && !BusinessDate.TryParse(accountingDate, out date)))
+        {
+            return HttpResults.Problem(DomainError.Of(ModuleCode.CLM, "VALIDATION", "legalEntity must be the caller's legal entity and accountingDate an ISO date."), HttpContext);
+        }
+
+        if (accountingDate is null)
+        {
+            date = new BusinessDate(DateOnly.FromDateTime(services.GetRequiredService<IClock>().Now.ToDateTimeOffset().UtcDateTime));
+        }
+
+        return Results.Ok(await reader.DailyTotalsAsync(ClaimsQueryContext.LegalEntity(services), code, date, cancellationToken).ConfigureAwait(false));
+    }
 
     /// <summary>clm.TransactionSet.get.</summary>
     [HttpGet("transaction-sets/{id}")]
