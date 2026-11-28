@@ -4,15 +4,15 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Audit.verify request. PRD inputs: "filters"</summary>
+/// <summary>plt.Audit.verify request: the chain days to verify (each UTC day is one chain); at most 31 days (PLT-ERR-RANGE-TOO-LARGE).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AuditVerifyRequest
 {
-    /// <summary>PRD: "filters"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("filters")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Filters { get; init; }
+    /// <summary>Contract member 'from'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("from")]
+    public required string From { get; init; }
+
+    /// <summary>Contract member 'to'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("to")]
+    public required string To { get; init; }
 }

@@ -2307,6 +2307,50 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: entityType
+        in: query
+        required: false
+        description: Only records about this object type (e.g. Approval, Claim)
+        schema:
+          type: string
+      - name: entityId
+        in: query
+        required: false
+        description: Only records about this object id
+        schema:
+          type: string
+      - name: actor
+        in: query
+        required: false
+        description: Only records by this actor id
+        schema:
+          type: string
+      - name: action
+        in: query
+        required: false
+        description: Only records of this operation (e.g. plt.Approval.decide)
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        description: Occurred at or after (UTC instant)
+        schema:
+          type: string
+          format: date-time
+      - name: to
+        in: query
+        required: false
+        description: Occurred before (UTC instant); a range wider than 366 days is refused (PLT-ERR-RANGE-TOO-LARGE)
+        schema:
+          type: string
+          format: date-time
+      - name: correlationId
+        in: query
+        required: false
+        description: Only records of this correlation id
+        schema:
+          type: string
       responses:
         '200':
           description: Success
@@ -7987,17 +8031,68 @@ components:
       x-status: minimal
     AuditQueryItem:
       type: object
-      description: 'plt.Audit.query result. PRD outputs: "page; export job; verification result"'
+      description: 'One audit record (plt.Audit.query, BO-PLT-01). Field-level changes carry P2/P3 values redacted.'
       properties:
-        page:
+        auditId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        chainDate:
+          type: string
+          format: date
+        sequence:
+          type: integer
+          format: int64
+        hash:
+          type: string
+        occurredAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        actorKind:
+          type: string
+        actorId:
+          type: string
+        onBehalfOf:
+          type: [string, 'null']
+        roles:
+          type: array
+          items:
+            type: string
+        operation:
+          type: string
+        outcome:
+          type: string
+        errorCode:
+          type: [string, 'null']
+        objectModule:
+          type: [string, 'null']
+        objectType:
+          type: [string, 'null']
+        objectId:
+          type: [string, 'null']
+        objectNumber:
+          type: [string, 'null']
+        changes:
           $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "page"'
-        exportJob:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "export job"'
-        verificationResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "verification result"'
+          description: Field-level changes as stored (JSON array)
+        reason:
+          type: [string, 'null']
+        channel:
+          type: [string, 'null']
+        correlationId:
+          type: string
+        origin:
+          type: string
+      required:
+      - auditId
+      - chainDate
+      - sequence
+      - hash
+      - occurredAt
+      - actorKind
+      - actorId
+      - operation
+      - outcome
+      - correlationId
     AuditQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -8007,47 +8102,96 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/AuditQueryItem'
-      description: Page of plt.Audit.query results (cursor pagination, contract §3.5.5)
+      description: Page of plt.Audit.query results (cursor pagination, newest first, contract §3.5.5)
     AuditExportRequest:
       type: object
-      description: 'plt.Audit.export request. PRD inputs: "filters"'
+      description: 'plt.Audit.export request: the query filters plus a required range of at most 92 days (PLT-ERR-RANGE-TOO-LARGE). At most 5000 rows are exported.'
       properties:
-        filters:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "filters"'
+        entityType:
+          type: [string, 'null']
+        entityId:
+          type: [string, 'null']
+        actor:
+          type: [string, 'null']
+        action:
+          type: [string, 'null']
+        correlationId:
+          type: [string, 'null']
+        from:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        to:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - from
+      - to
     AuditExportResponse:
       type: object
-      description: 'plt.Audit.export result. PRD outputs: "page; export job; verification result"'
+      description: 'plt.Audit.export result: the CSV is returned inline (capped); the export is itself audited.'
       properties:
-        page:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "page"'
-        exportJob:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "export job"'
-        verificationResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "verification result"'
+        fileName:
+          type: string
+        contentType:
+          type: string
+        rowCount:
+          type: integer
+        truncated:
+          type: boolean
+          description: True when more rows matched than the cap (narrow the range)
+        csv:
+          type: string
+      required:
+      - fileName
+      - contentType
+      - rowCount
+      - truncated
+      - csv
     AuditVerifyRequest:
       type: object
-      description: 'plt.Audit.verify request. PRD inputs: "filters"'
+      description: 'plt.Audit.verify request: the chain days to verify (each UTC day is one chain); at most 31 days (PLT-ERR-RANGE-TOO-LARGE).'
       properties:
-        filters:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "filters"'
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+      required:
+      - from
+      - to
+    AuditChainVerification:
+      type: object
+      description: Result of verifying one day's chain.
+      properties:
+        chainDate:
+          type: string
+          format: date
+        records:
+          type: integer
+          format: int64
+        isValid:
+          type: boolean
+        brokenAtSequence:
+          type: [integer, 'null']
+          format: int64
+        problem:
+          type: [string, 'null']
+      required:
+      - chainDate
+      - records
+      - isValid
     AuditVerifyResponse:
       type: object
-      description: 'plt.Audit.verify result. PRD outputs: "page; export job; verification result"'
+      description: 'plt.Audit.verify result: one entry per day, and whether all of them verify.'
       properties:
-        page:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "page"'
-        exportJob:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "export job"'
-        verificationResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "verification result"'
+        allValid:
+          type: boolean
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditChainVerification'
+      required:
+      - allValid
+      - days
     OutboxPublishRequest:
       type: object
       description: 'plt.Outbox.publish request. PRD inputs: "event type, aggregate, payload"'

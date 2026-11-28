@@ -4,31 +4,23 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.ChangeSet.rebase request. PRD inputs: "product, base, edits"</summary>
+/// <summary>pfc.ChangeSet.rebase request (BO-PFC-02). Three-way merges the draft (ours) onto a newer Locked version (theirs) of the same product, using the current base version as the common ancestor. Conflicts (same path changed on both sides) give PFC-ERR-CONFLICT (409) with one field error per JSON path and change nothing.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ChangeSetRebaseRequest
 {
-    /// <summary>PRD: "product"</summary>
+    /// <summary>Contract member 'changeSetId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'changeSetId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("product")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Product { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("changeSetId")]
+    public required global::System.Guid ChangeSetId { get; init; }
 
-    /// <summary>PRD: "base"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("base")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Base { get; init; }
+    /// <summary>Contract member 'recordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    public required int RecordVersion { get; init; }
 
-    /// <summary>PRD: "edits"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("edits")]
+    /// <summary>The Locked version to rebase onto; the latest Locked version when omitted</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("targetVersion")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Edits { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber? TargetVersion { get; init; }
 }

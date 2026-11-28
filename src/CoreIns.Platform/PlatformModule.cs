@@ -114,6 +114,7 @@ public static class PlatformModule
         services.AddApprovals();
         services.AddUserDirectory();
         services.AddDeadLetters();
+        services.AddAuditApi();
         services.AddAiControlPlane();
         services.AddSupportAuthorityTypes();
         return services;
@@ -159,6 +160,19 @@ public static class PlatformModule
                 .Describe("Αυτός ο τύπος αιτήματος εγκρίνεται ή απορρίπτεται μόνο από την οθόνη του τομέα που τον κατέχει (π.χ. επιστροφές χρημάτων από τη χρέωση), όχι από τα εισερχόμενα εγκρίσεων.", "This request type is approved or rejected only in the screen of the module that owns it (for example refunds in billing), not in the approvals inbox."),
             ErrorDefinition.For(ModuleCode.PLT, ApprovalErrors.SubjectMismatch, 422, "Η έγκριση αφορά άλλο αντικείμενο", "The approval is for another subject")
                 .Describe("Το αίτημα έγκρισης είναι άλλου τύπου ή αφορά άλλο αντικείμενο από αυτό που εκτελείται.", "The approval request is of another type or for another subject than the one being executed."));
+        return services;
+    }
+
+    /// <summary>The audit query, export and verify API (BO-PLT-01).</summary>
+    private static IServiceCollection AddAuditApi(this IServiceCollection services)
+    {
+        services.TryAddSingleton<AuditQueries>();
+        services.AddCommandAuditor<ExportAudit, AuditExportResponse, ExportAuditAuditor>();
+        services.AddCommand<ExportAudit, AuditExportResponse, ExportAuditHandler>(CommandDescriptor.For("plt.Audit.export"));
+        services.AddCommandAuditor<VerifyAudit, AuditVerifyResponse, VerifyAuditAuditor>();
+        services.AddCommand<VerifyAudit, AuditVerifyResponse, VerifyAuditHandler>(CommandDescriptor.For("plt.Audit.verify"));
+        services.AddErrorDefinitions(ErrorDefinition.For(ModuleCode.PLT, AuditApiErrors.RangeTooLarge, 422, "Το εύρος είναι πολύ μεγάλο", "The range is too large")
+            .Describe("Το εύρος ημερομηνιών που ζητήθηκε υπερβαίνει το μέγιστο που επιτρέπεται για τη λειτουργία.", "The requested date range exceeds the maximum the operation allows."));
         return services;
     }
 

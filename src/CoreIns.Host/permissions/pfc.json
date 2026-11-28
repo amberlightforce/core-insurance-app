@@ -13,6 +13,8 @@
         "pfc.ChangeSet.create": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
         "pfc.ChangeSet.edit": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
         "pfc.ChangeSet.abandon": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        "pfc.ChangeSet.revert": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        "pfc.ChangeSet.rebase": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
         "pfc.Artifact.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pfc.Catalogue.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pfc.Catalogue.getItem": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],

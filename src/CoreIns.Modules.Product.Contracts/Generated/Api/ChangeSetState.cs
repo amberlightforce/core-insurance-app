@@ -39,6 +39,11 @@ public sealed record ChangeSetState
     [global::System.Text.Json.Serialization.JsonPropertyName("draft")]
     public required global::CoreIns.Modules.Product.Contracts.Api.ProductArtefact Draft { get; init; }
 
+    /// <summary>The edit log in order, for the history panel and for revert (BO-PFC-02)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("history")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.ChangeSetEditEntry>? History { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]

@@ -4,31 +4,27 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Audit.export result. PRD outputs: "page; export job; verification result"</summary>
+/// <summary>plt.Audit.export result: the CSV is returned inline (capped); the export is itself audited.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AuditExportResponse
 {
-    /// <summary>PRD: "page"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("page")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Page { get; init; }
+    /// <summary>Contract member 'fileName'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fileName")]
+    public required string FileName { get; init; }
 
-    /// <summary>PRD: "export job"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exportJob")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ExportJob { get; init; }
+    /// <summary>Contract member 'contentType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contentType")]
+    public required string ContentType { get; init; }
 
-    /// <summary>PRD: "verification result"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("verificationResult")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? VerificationResult { get; init; }
+    /// <summary>Contract member 'rowCount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("rowCount")]
+    public required int RowCount { get; init; }
+
+    /// <summary>True when more rows matched than the cap (narrow the range)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("truncated")]
+    public required bool Truncated { get; init; }
+
+    /// <summary>Contract member 'csv'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("csv")]
+    public required string Csv { get; init; }
 }
