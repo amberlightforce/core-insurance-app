@@ -159,7 +159,7 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
              WHERE l.policy_number = '{policy.Number}' OR l.receipt_id = '{receipt}'
             """)).ShouldBe(7);
         (await ScalarAsync<long>(_db, $"""
-            SELECT count(*) FROM fin.journal_entry WHERE book <> 'IFRS17' OR rule_set_version <> 7 OR source_event_type <> 'BillingEntryPosted'
+            SELECT count(*) FROM fin.journal_entry WHERE book <> 'IFRS17' OR rule_set_version <> 8 OR source_event_type <> 'BillingEntryPosted'
             """)).ShouldBe(0);
 
         // Written premium per coverage on the LRC account derived from the PFC GL key (REQ-FIN-050, D-SLC-10b).
@@ -400,14 +400,14 @@ public sealed class FinanceIntakeTests(PostgresFixture database) : IClassFixture
         var (response, body) = await PartyApi.SendAsync(_client, HttpMethod.Get, $"/api/fin/v1/posting-rules?book=IFRS17&validAt={Day}&limit=200", roles: FinanceRole);
         response.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
         var items = body!["items"]!.AsArray();
-        items.Count.ShouldBe(69, "rule set v7 from 2026-10-01 (v6 plus the 2 ALLOCATION_REVERSED rules of BO-BIL-07): the 59 rules of v5 (58 of v4 plus CW-LEVY-PAYABLE, NX-HD-06) plus 8 DISBURSEMENT_RELEASED and DISBURSEMENT_REVERSED rules of the non-claim disbursement sources (BO-BIL-10)");
+        items.Count.ShouldBe(72, "rule set v8 from 2026-10-01 (v7 plus the 3 WRITTEN_OFF rules of BO-BIL-13; v7 is v6 plus the 2 ALLOCATION_REVERSED rules of BO-BIL-07): the 59 rules of v5 (58 of v4 plus CW-LEVY-PAYABLE, NX-HD-06) plus 8 DISBURSEMENT_RELEASED and DISBURSEMENT_REVERSED rules of the non-claim disbursement sources (BO-BIL-10)");
         var premium = items.Single(i => i.Text("ruleCode") == "WR-PREMIUM")!;
         premium.Text("entryType").ShouldBe("WRITTEN");
         premium.Text("sourceAccount").ShouldBe("LA-04");
         premium.Text("chargeCategory").ShouldBe("PREMIUM");
         premium.Text("deriveFrom").ShouldBe("GL_KEY");
         premium.Text("specificity").ShouldBe("1");
-        premium.Text("ruleSetVersion").ShouldBe("7");
+        premium.Text("ruleSetVersion").ShouldBe("8");
         premium.Text("contentHash").ShouldMatch("^[0-9a-f]{64}$");
         premium.Text("accountOrigin").ShouldBe("null");
         var cash = items.Single(i => i.Text("ruleCode") == "RC-CASH")!;

@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.ChangeSet.revert result. PRD outputs: "change set state, validation"</summary>
+/// <summary>pfc.ChangeSet.revert result: the draft after the undo and its lint findings</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ChangeSetRevertResponse
 {
-    /// <summary>PRD: "change set state"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'changeSetState'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("changeSetState")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ChangeSetState { get; init; }
+    public required global::CoreIns.Modules.Product.Contracts.Api.ChangeSetState ChangeSetState { get; init; }
 
-    /// <summary>PRD: "validation"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'validation'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("validation")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Validation { get; init; }
+    public required global::CoreIns.Modules.Product.Contracts.Api.ChangeSetValidation Validation { get; init; }
 }

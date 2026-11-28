@@ -2848,6 +2848,13 @@
       "amendmentCount": 1,
       "origin": "NATIVE"
     },
+    "MoneyTransferLine": {
+      "receiptId": "0192d836-f513-7af7-82d5-6e6d73aebdc5",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
     "PayeeAccountCreateRequest": {
       "partyId": "01928a36-8080-7ad1-860d-c0cc8094beb2",
       "purpose": "COLLECTION",
@@ -4253,47 +4260,208 @@
       "disbursementStatus": "sample"
     },
     "TransferMoneyRequest": {
-      "source": "unspecified",
-      "target": "unspecified",
-      "amounts": [
+      "sourceBillingAccountId": "01925388-caef-793e-8b97-38ebdc2fcb70",
+      "targetBillingAccountId": "0192dcd3-2ad6-75cc-8d06-fcdfb962493c",
+      "receiptIds": [
+        "01926331-e264-729f-8cbf-0b36370f2727"
+      ],
+      "comment": "sample"
+    },
+    "TransferMoneyResponse": {
+      "transfers": [
         {
+          "receiptId": "01922e9c-8876-7162-875f-34ccee3e35f5",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ledgerEntryId": "019231bb-c29b-7d8a-869f-f306cf99dae8"
+    },
+    "WriteOffDecideRequest": {
+      "writeOffId": "0192baac-5388-7360-866c-8af92c1295bd",
+      "decision": "APPROVE",
+      "comment": "sample"
+    },
+    "WriteOffDecideResponse": {
+      "writeOff": {
+        "writeOffId": "0192f330-ae5c-7013-8b13-e9d3256bf83e",
+        "billingAccountId": "01928348-8850-7cda-8b5e-87a544eddf37",
+        "invoiceId": "0192a4ca-4204-73a5-8559-51d6fc3a159b",
+        "invoiceNumber": "sample",
+        "amount": {
           "amount": "120.50",
           "currency": "EUR"
+        },
+        "kind": "MANUAL",
+        "state": "PROPOSED",
+        "reasonCode": "SAMPLE_CODE",
+        "comment": "sample",
+        "proposedBy": "sample",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "sample",
+        "postedAt": "2026-10-07T09:00:00Z",
+        "ledgerEntryId": "0192629c-2270-7501-8688-0098ac095c4b",
+        "recordVersion": 1
+      },
+      "postingPreview": [
+        {
+          "account": "sample",
+          "side": "DEBIT",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE"
         }
       ]
     },
-    "TransferMoneyResponse": {
-      "entriesPreview": "unspecified"
-    },
-    "WriteOffDecideRequest": {
+    "WriteOffListResponse": {
       "items": [
-        "unspecified"
-      ],
-      "reason": "unspecified"
-    },
-    "WriteOffDecideResponse": {
-      "writeOff": "unspecified",
-      "postingPreview": "unspecified"
+        {
+          "writeOffId": "01928ee2-4af2-775d-83c6-4d90bcd986d8",
+          "billingAccountId": "01922c8d-443d-7e23-8551-c7ffc8b49a83",
+          "invoiceId": "01924aa9-d4ca-79d9-8587-155c9c568cac",
+          "invoiceNumber": "sample",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "kind": "MANUAL",
+          "state": "PROPOSED",
+          "reasonCode": "SAMPLE_CODE",
+          "comment": "sample",
+          "proposedBy": "sample",
+          "proposedAt": "2026-10-07T09:00:00Z",
+          "decidedBy": "sample",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "decisionComment": "sample",
+          "postedAt": "2026-10-07T09:00:00Z",
+          "ledgerEntryId": "01925663-1c7a-7d10-8d39-25a0b5bd8102",
+          "recordVersion": 1
+        }
+      ]
     },
     "WriteOffPostRequest": {
-      "items": [
-        "unspecified"
-      ],
-      "reason": "unspecified"
+      "writeOffId": "0192e73b-d4b5-705e-8a65-d15b53a3b3a6"
     },
     "WriteOffPostResponse": {
-      "writeOff": "unspecified",
-      "postingPreview": "unspecified"
+      "writeOff": {
+        "writeOffId": "01925535-32b4-76be-87a0-423ae8e24704",
+        "billingAccountId": "01923d6a-2214-7ea4-8bbc-b11aea45ad76",
+        "invoiceId": "01922fd2-a6a4-7f70-8c47-631c9ef0512e",
+        "invoiceNumber": "sample",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "kind": "MANUAL",
+        "state": "PROPOSED",
+        "reasonCode": "SAMPLE_CODE",
+        "comment": "sample",
+        "proposedBy": "sample",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "sample",
+        "postedAt": "2026-10-07T09:00:00Z",
+        "ledgerEntryId": "0192a44c-e4bf-7eeb-8789-65c51bf69d1e",
+        "recordVersion": 1
+      },
+      "postingPreview": [
+        {
+          "account": "sample",
+          "side": "DEBIT",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE"
+        }
+      ],
+      "ledgerEntryId": "019267ac-614e-7ac6-86bd-e6a34d91fd1f"
+    },
+    "WriteOffPostingLine": {
+      "account": "sample",
+      "side": "DEBIT",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ruleId": "SAMPLE_CODE"
     },
     "WriteOffProposeRequest": {
-      "items": [
-        "unspecified"
-      ],
-      "reason": "unspecified"
+      "invoiceId": "01921572-05c4-73ee-878f-dd7c41321047",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "reasonCode": "SAMPLE_CODE",
+      "comment": "sample"
     },
     "WriteOffProposeResponse": {
-      "writeOff": "unspecified",
-      "postingPreview": "unspecified"
+      "writeOff": {
+        "writeOffId": "0192ae72-3066-7c83-8820-29b26e45391b",
+        "billingAccountId": "01928231-e2e1-7a73-88ba-d9b624e11eee",
+        "invoiceId": "0192de6a-bb73-7805-80ba-f1f25a1ac15b",
+        "invoiceNumber": "sample",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "kind": "MANUAL",
+        "state": "PROPOSED",
+        "reasonCode": "SAMPLE_CODE",
+        "comment": "sample",
+        "proposedBy": "sample",
+        "proposedAt": "2026-10-07T09:00:00Z",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "sample",
+        "postedAt": "2026-10-07T09:00:00Z",
+        "ledgerEntryId": "01928fb2-8299-7fc9-8517-4309d1927b5a",
+        "recordVersion": 1
+      },
+      "postingPreview": [
+        {
+          "account": "sample",
+          "side": "DEBIT",
+          "amount": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ruleId": "SAMPLE_CODE"
+        }
+      ]
+    },
+    "WriteOffView": {
+      "writeOffId": "0192dd5b-8e64-7ab6-8a4e-1f15b9f90909",
+      "billingAccountId": "01922627-69a5-7f10-892f-f01f08b9a0be",
+      "invoiceId": "01928d07-b272-7946-8401-55975b5321dd",
+      "invoiceNumber": "sample",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "kind": "MANUAL",
+      "state": "PROPOSED",
+      "reasonCode": "SAMPLE_CODE",
+      "comment": "sample",
+      "proposedBy": "sample",
+      "proposedAt": "2026-10-07T09:00:00Z",
+      "decidedBy": "sample",
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "decisionComment": "sample",
+      "postedAt": "2026-10-07T09:00:00Z",
+      "ledgerEntryId": "01927281-9c25-7a5e-88b7-b27bface5227",
+      "recordVersion": 1
     }
   }
 }

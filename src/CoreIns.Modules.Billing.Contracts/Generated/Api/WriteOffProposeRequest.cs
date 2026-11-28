@@ -4,23 +4,24 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.WriteOff.propose request. PRD inputs: "items, reason"</summary>
+/// <summary>bil.WriteOff.propose request (BO-BIL-13): write off part or all of the open balance of an invoice</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record WriteOffProposeRequest
 {
-    /// <summary>PRD: "items"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Items { get; init; }
+    /// <summary>Contract member 'invoiceId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("invoiceId")]
+    public required global::CoreIns.SharedKernel.Identifiers.InvoiceId InvoiceId { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    /// <summary>Contract member 'amount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+    public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+
+    /// <summary>Reason, capital letters, digits and underscores (e.g. UNCOLLECTIBLE)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
+    public required string ReasonCode { get; init; }
+
+    /// <summary>Contract member 'comment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public string? Comment { get; init; }
 }

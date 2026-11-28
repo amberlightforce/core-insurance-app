@@ -4,31 +4,105 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Audit.query result. PRD outputs: "page; export job; verification result"</summary>
+/// <summary>One audit record (plt.Audit.query, BO-PLT-01). Field-level changes carry P2/P3 values redacted.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AuditQueryItem
 {
-    /// <summary>PRD: "page"</summary>
+    /// <summary>Contract member 'auditId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'auditId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("page")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Page { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("auditId")]
+    public required global::System.Guid AuditId { get; init; }
 
-    /// <summary>PRD: "export job"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exportJob")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ExportJob { get; init; }
+    /// <summary>Contract member 'chainDate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("chainDate")]
+    public required string ChainDate { get; init; }
 
-    /// <summary>PRD: "verification result"</summary>
+    /// <summary>Contract member 'sequence'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sequence")]
+    public required int Sequence { get; init; }
+
+    /// <summary>Contract member 'hash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
+    public required string Hash { get; init; }
+
+    /// <summary>Contract member 'occurredAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("occurredAt")]
+    public required global::CoreIns.SharedKernel.Instant OccurredAt { get; init; }
+
+    /// <summary>Contract member 'recordedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordedAt")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? RecordedAt { get; init; }
+
+    /// <summary>Contract member 'actorKind'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("actorKind")]
+    public required string ActorKind { get; init; }
+
+    /// <summary>Contract member 'actorId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("actorId")]
+    public required string ActorId { get; init; }
+
+    /// <summary>Contract member 'onBehalfOf'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("onBehalfOf")]
+    public string? OnBehalfOf { get; init; }
+
+    /// <summary>Contract member 'roles'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("roles")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<string>? Roles { get; init; }
+
+    /// <summary>Contract member 'operation'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("operation")]
+    public required string Operation { get; init; }
+
+    /// <summary>Contract member 'outcome'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    public required string Outcome { get; init; }
+
+    /// <summary>Contract member 'errorCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("errorCode")]
+    public string? ErrorCode { get; init; }
+
+    /// <summary>Contract member 'objectModule'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("objectModule")]
+    public string? ObjectModule { get; init; }
+
+    /// <summary>Contract member 'objectType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("objectType")]
+    public string? ObjectType { get; init; }
+
+    /// <summary>Contract member 'objectId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("objectId")]
+    public string? ObjectId { get; init; }
+
+    /// <summary>Contract member 'objectNumber'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("objectNumber")]
+    public string? ObjectNumber { get; init; }
+
+    /// <summary>Field-level changes as stored (JSON array)</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("verificationResult")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("changes")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? VerificationResult { get; init; }
+    public global::System.Text.Json.JsonElement? Changes { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public string? Reason { get; init; }
+
+    /// <summary>Contract member 'channel'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
+    public string? Channel { get; init; }
+
+    /// <summary>Contract member 'correlationId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("correlationId")]
+    public required string CorrelationId { get; init; }
+
+    /// <summary>Contract member 'origin'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("origin")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Origin { get; init; }
 }

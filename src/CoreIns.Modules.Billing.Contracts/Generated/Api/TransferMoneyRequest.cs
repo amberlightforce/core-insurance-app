@@ -4,28 +4,30 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Transfer.money request. PRD inputs: "source, target, amounts"</summary>
+/// <summary>bil.Transfer.money request (BO-BIL-13): move the unapplied cash of receipts in suspense from one billing account to another account of the same payer</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TransferMoneyRequest
 {
-    /// <summary>PRD: "source"</summary>
+    /// <summary>Contract member 'sourceBillingAccountId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'sourceBillingAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("source")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Source { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceBillingAccountId")]
+    public required global::System.Guid SourceBillingAccountId { get; init; }
 
-    /// <summary>PRD: "target"</summary>
+    /// <summary>Contract member 'targetBillingAccountId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'targetBillingAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("target")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Target { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("targetBillingAccountId")]
+    public required global::System.Guid TargetBillingAccountId { get; init; }
 
-    /// <summary>PRD: "amounts"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("amounts")]
+    /// <summary>Contract member 'receiptIds'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receiptIds")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.PaymentId> ReceiptIds { get; init; }
+
+    /// <summary>Contract member 'comment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Money>? Amounts { get; init; }
+    public string? Comment { get; init; }
 }

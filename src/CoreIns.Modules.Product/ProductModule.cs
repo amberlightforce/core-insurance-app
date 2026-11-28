@@ -75,6 +75,14 @@ public static class ProductModule
         services.AddCommandAuditor<AbandonChangeSet, ChangeSetAbandonResponse, AbandonChangeSetAuditor>();
         services.AddCommand<AbandonChangeSet, ChangeSetAbandonResponse, AbandonChangeSetHandler>(CommandDescriptor.For("pfc.ChangeSet.abandon"));
 
+        // BO-PFC-02: revert one logged edit; rebase the draft onto a newer Locked version (three-way merge).
+        services.AddScoped<IValidator<RevertChangeSet>, RevertChangeSetValidator>();
+        services.AddCommandAuditor<RevertChangeSet, ChangeSetRevertResponse, RevertChangeSetAuditor>();
+        services.AddCommand<RevertChangeSet, ChangeSetRevertResponse, RevertChangeSetHandler>(CommandDescriptor.For("pfc.ChangeSet.revert"));
+        services.AddScoped<IValidator<RebaseChangeSet>, RebaseChangeSetValidator>();
+        services.AddCommandAuditor<RebaseChangeSet, ChangeSetRebaseResponse, RebaseChangeSetAuditor>();
+        services.AddCommand<RebaseChangeSet, ChangeSetRebaseResponse, RebaseChangeSetHandler>(CommandDescriptor.For("pfc.ChangeSet.rebase"));
+
         // BO-PFC-04: release lifecycle (submit, sign-off with PLT approval PFC.Release / authority PFC.RELEASE, schedule, cancel) and the due-date publisher.
         services.AddOwnerDecidedApprovalType(ProductAuthorityTypes.ReleaseApprovalType);
         services.AddScoped<ReleasePublisher>();
@@ -149,6 +157,8 @@ public static class ProductModule
             .Describe("Μόνο ανοιχτό σύνολο αλλαγών μπορεί να τροποποιηθεί ή να εγκαταλειφθεί.", "Only an open change set can be edited or abandoned."),
         ErrorDefinition.For(ModuleCode.PFC, "INVALID-EDIT", 422, "Μη έγκυρη επεξεργασία", "Invalid edit")
             .Describe("Η διαδρομή ή η τιμή της επεξεργασίας δεν ταιριάζει με το προσχέδιο.", "The edit's path or value does not fit the draft."),
+        ErrorDefinition.For(ModuleCode.PFC, "CONFLICT", 409, "Σύγκρουση αλλαγών", "Change conflict")
+            .Describe("Η ίδια διαδρομή άλλαξε και στο προσχέδιο και στη νεότερη έκδοση, ή μια μεταγενέστερη αλλαγή την επηρεάζει.", "The same path changed on both sides, or a later change touches it."),
         ErrorDefinition.For(ModuleCode.PFC, "CHECKS-FAILED", 422, "Οι έλεγχοι υποβολής απέτυχαν", "Submit checks failed")
             .Describe("Το προσχέδιο έχει ευρήματα ελέγχου ή αλλάζει την ταυτότητα του προϊόντος. Δείτε τα πεδία σφάλματος.", "The draft has lint findings or changes the product identity. See the field errors."),
         ErrorDefinition.For(ModuleCode.PFC, "RELEASE-STATE", 409, "Η κυκλοφορία δεν είναι σε κατάλληλη κατάσταση", "The release is not in a valid state")

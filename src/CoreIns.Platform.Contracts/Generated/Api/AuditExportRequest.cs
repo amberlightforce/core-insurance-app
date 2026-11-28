@@ -4,15 +4,35 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Audit.export request. PRD inputs: "filters"</summary>
+/// <summary>plt.Audit.export request: the query filters plus a required range of at most 92 days (PLT-ERR-RANGE-TOO-LARGE). At most 5000 rows are exported.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AuditExportRequest
 {
-    /// <summary>PRD: "filters"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("filters")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Filters { get; init; }
+    /// <summary>Contract member 'entityType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("entityType")]
+    public string? EntityType { get; init; }
+
+    /// <summary>Contract member 'entityId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("entityId")]
+    public string? EntityId { get; init; }
+
+    /// <summary>Contract member 'actor'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("actor")]
+    public string? Actor { get; init; }
+
+    /// <summary>Contract member 'action'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("action")]
+    public string? Action { get; init; }
+
+    /// <summary>Contract member 'correlationId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("correlationId")]
+    public string? CorrelationId { get; init; }
+
+    /// <summary>Contract member 'from'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("from")]
+    public required global::CoreIns.SharedKernel.Instant From { get; init; }
+
+    /// <summary>Contract member 'to'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("to")]
+    public required global::CoreIns.SharedKernel.Instant To { get; init; }
 }

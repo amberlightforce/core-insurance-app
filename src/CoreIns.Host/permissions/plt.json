@@ -33,6 +33,10 @@
         "plt.DeadLetter.list": [ "Platform.Admin" ],
         "plt.DeadLetter.get": [ "Platform.Admin" ],
         "plt.DeadLetter.replay": [ "Platform.Admin" ],
+        // BO-PLT-01: the audit trail is read by administrators and compliance officers. plt.Audit.append is in-process only (no route).
+        "plt.Audit.query": [ "Platform.Admin", "Staff.ComplianceOfficer" ],
+        "plt.Audit.export": [ "Platform.Admin", "Staff.ComplianceOfficer" ],
+        "plt.Audit.verify": [ "Platform.Admin", "Staff.ComplianceOfficer" ],
         "plt.DevClock.advance": [ "Platform.Admin" ],
         "plt.DevClock.get": [ "Platform.Admin" ]
       }

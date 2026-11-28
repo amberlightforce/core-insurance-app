@@ -1236,6 +1236,16 @@ paths:
       - ui
       x-permission: pfc.ChangeSet.revert
       x-error-codes:
+      - code: PFC-ERR-CHANGE-SET-NOT-FOUND
+        status: 404
+      - code: PFC-ERR-CHANGE-SET-STATE
+        status: 409
+      - code: PFC-ERR-STALE
+        status: 409
+      - code: PFC-ERR-INVALID-EDIT
+        status: 422
+      - code: PFC-ERR-NO-VERSION
+        status: 422
       - code: PFC-ERR-CONFLICT
         status: 409
       - code: PFC-ERR-FORBIDDEN
@@ -1301,6 +1311,16 @@ paths:
       - ui
       x-permission: pfc.ChangeSet.rebase
       x-error-codes:
+      - code: PFC-ERR-CHANGE-SET-NOT-FOUND
+        status: 404
+      - code: PFC-ERR-CHANGE-SET-STATE
+        status: 409
+      - code: PFC-ERR-STALE
+        status: 409
+      - code: PFC-ERR-INVALID-EDIT
+        status: 422
+      - code: PFC-ERR-NO-VERSION
+        status: 422
       - code: PFC-ERR-CONFLICT
         status: 409
       - code: PFC-ERR-FORBIDDEN
@@ -3883,6 +3903,11 @@ components:
           minimum: 0
         draft:
           $ref: '#/components/schemas/ProductArtefact'
+        history:
+          type: array
+          description: The edit log in order, for the history panel and for revert (BO-PFC-02)
+          items:
+            $ref: '#/components/schemas/ChangeSetEditEntry'
       required:
       - changeSetId
       - productCode
@@ -3891,6 +3916,34 @@ components:
       - recordVersion
       - editCount
       - draft
+    ChangeSetEditEntry:
+      type: object
+      properties:
+        editId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        seq:
+          type: integer
+          minimum: 1
+        op:
+          type: string
+          enum:
+          - add
+          - replace
+          - remove
+        path:
+          type: string
+        actor:
+          type: string
+        at:
+          type: string
+          format: date-time
+      required:
+      - editId
+      - seq
+      - op
+      - path
+      - actor
+      - at
     ChangeSetValidation:
       type: object
       description: Lint result of the draft. Findings never block saving a draft; they block submitting it.
@@ -3972,50 +4025,60 @@ components:
       - validation
     ChangeSetRevertRequest:
       type: object
-      description: 'pfc.ChangeSet.revert request. PRD inputs: "product, base, edits"'
+      description: pfc.ChangeSet.revert request (BO-PFC-02). Undoes one logged edit by applying its inverse; a later edit on the same path makes it a conflict.
       properties:
-        product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product"'
-        base:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "base"'
-        edits:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "edits"'
+        changeSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        recordVersion:
+          type: integer
+          minimum: 1
+        editId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The edit (from ChangeSetState.history) to undo
+      required:
+      - changeSetId
+      - recordVersion
+      - editId
     ChangeSetRevertResponse:
       type: object
-      description: 'pfc.ChangeSet.revert result. PRD outputs: "change set state, validation"'
+      description: 'pfc.ChangeSet.revert result: the draft after the undo and its lint findings'
       properties:
         changeSetState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set state"'
+          $ref: '#/components/schemas/ChangeSetState'
         validation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validation"'
+          $ref: '#/components/schemas/ChangeSetValidation'
+      required:
+      - changeSetState
+      - validation
     ChangeSetRebaseRequest:
       type: object
-      description: 'pfc.ChangeSet.rebase request. PRD inputs: "product, base, edits"'
+      description: >-
+        pfc.ChangeSet.rebase request (BO-PFC-02). Three-way merges the draft (ours) onto a newer Locked version (theirs) of the same
+        product, using the current base version as the common ancestor. Conflicts (same path changed on both sides) give
+        PFC-ERR-CONFLICT (409) with one field error per JSON path and change nothing.
       properties:
-        product:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "product"'
-        base:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "base"'
-        edits:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "edits"'
+        changeSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        recordVersion:
+          type: integer
+          minimum: 1
+        targetVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+          description: The Locked version to rebase onto; the latest Locked version when omitted
+      required:
+      - changeSetId
+      - recordVersion
     ChangeSetRebaseResponse:
       type: object
-      description: 'pfc.ChangeSet.rebase result. PRD outputs: "change set state, validation"'
+      description: 'pfc.ChangeSet.rebase result: the merged draft (new base version) and its lint findings'
       properties:
         changeSetState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set state"'
+          $ref: '#/components/schemas/ChangeSetState'
         validation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validation"'
+          $ref: '#/components/schemas/ChangeSetValidation'
+      required:
+      - changeSetState
+      - validation
     ChangeSetAbandonRequest:
       type: object
       description: pfc.ChangeSet.abandon request (BO-PFC-01)
