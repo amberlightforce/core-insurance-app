@@ -77,14 +77,12 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/calendars/next-business-day
 CONTRACT_NOT_SERVED GET /api/plt/v1/calendars/previous-business-day
 CONTRACT_NOT_SERVED GET /api/plt/v1/currencies/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/decision-tables/explain
-CONTRACT_NOT_SERVED GET /api/plt/v1/exchanges/search
 CONTRACT_NOT_SERVED GET /api/plt/v1/fx/get-rate
 CONTRACT_NOT_SERVED GET /api/plt/v1/fx/list-rates
 CONTRACT_NOT_SERVED GET /api/plt/v1/jobs/history
 CONTRACT_NOT_SERVED GET /api/plt/v1/lineage/walk
 CONTRACT_NOT_SERVED GET /api/plt/v1/retention/runs
 CONTRACT_NOT_SERVED GET /api/plt/v1/time/now
-CONTRACT_NOT_SERVED GET /api/plt/v1/transfers
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
 CONTRACT_NOT_SERVED GET /api/rat/v1/breakdowns/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/change-explanations/get
@@ -320,8 +318,6 @@ CONTRACT_NOT_SERVED POST /api/plt/v1/authorities/check
 CONTRACT_NOT_SERVED POST /api/plt/v1/authority-types/register
 CONTRACT_NOT_SERVED POST /api/plt/v1/calendars/generate
 CONTRACT_NOT_SERVED POST /api/plt/v1/calendars/publish
-CONTRACT_NOT_SERVED POST /api/plt/v1/consumers/replay
-CONTRACT_NOT_SERVED POST /api/plt/v1/dead-letters/discard
 CONTRACT_NOT_SERVED POST /api/plt/v1/decision-tables/activate
 CONTRACT_NOT_SERVED POST /api/plt/v1/decision-tables/evaluate
 CONTRACT_NOT_SERVED POST /api/plt/v1/decision-tables/test
@@ -347,7 +343,6 @@ CONTRACT_NOT_SERVED POST /api/plt/v1/legal-holds/release
 CONTRACT_NOT_SERVED POST /api/plt/v1/numbers/next
 CONTRACT_NOT_SERVED POST /api/plt/v1/numbers/reserve
 CONTRACT_NOT_SERVED POST /api/plt/v1/numbers/void
-CONTRACT_NOT_SERVED POST /api/plt/v1/outbox/publish
 CONTRACT_NOT_SERVED POST /api/plt/v1/pipeline/e2e-gate
 CONTRACT_NOT_SERVED POST /api/plt/v1/policies/evaluate
 CONTRACT_NOT_SERVED POST /api/plt/v1/privileged-accesses/approve
@@ -356,12 +351,9 @@ CONTRACT_NOT_SERVED POST /api/plt/v1/privileged-accesses/revoke
 CONTRACT_NOT_SERVED POST /api/plt/v1/retention/register-dataset
 CONTRACT_NOT_SERVED POST /api/plt/v1/retention/schedule
 CONTRACT_NOT_SERVED POST /api/plt/v1/ror/export
-CONTRACT_NOT_SERVED POST /api/plt/v1/schemas/check
-CONTRACT_NOT_SERVED POST /api/plt/v1/schemas/register
 CONTRACT_NOT_SERVED POST /api/plt/v1/subject/export
 CONTRACT_NOT_SERVED POST /api/plt/v1/tokens/exchange
 CONTRACT_NOT_SERVED POST /api/plt/v1/tokens/grant-agent-scope
-CONTRACT_NOT_SERVED POST /api/plt/v1/transfers/retry
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/cancel
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/signal
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/start

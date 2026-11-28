@@ -4,23 +4,78 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Transfer.list result. PRD outputs: "transfers; transfer id → retry"</summary>
+/// <summary>plt.Transfer.list result: one file transfer.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TransferListItem
 {
-    /// <summary>PRD: "transfers"</summary>
+    /// <summary>Contract member 'transferId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'transferId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("transfers")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Transfers { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("transferId")]
+    public required global::System.Guid TransferId { get; init; }
 
-    /// <summary>PRD: "transfer id → retry"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("transferIdRetry")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? TransferIdRetry { get; init; }
+    /// <summary>Contract member 'direction'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("direction")]
+    public required DirectionValue Direction { get; init; }
+
+    /// <summary>Contract member 'partner'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partner")]
+    public required string Partner { get; init; }
+
+    /// <summary>Contract member 'fileName'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fileName")]
+    public required string FileName { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Contract member 'attempts'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("attempts")]
+    public required int Attempts { get; init; }
+
+    /// <summary>Contract member 'lastError'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("lastError")]
+    public string? LastError { get; init; }
+
+    /// <summary>Contract member 'createdAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("createdAt")]
+    public required global::CoreIns.SharedKernel.Instant CreatedAt { get; init; }
+
+    /// <summary>Contract member 'updatedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
+    public required global::CoreIns.SharedKernel.Instant UpdatedAt { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DirectionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DirectionValue
+    {
+        /// <summary><c>Inbound</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Inbound")]
+        Inbound,
+
+        /// <summary><c>Outbound</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Outbound")]
+        Outbound,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>Pending</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Pending")]
+        Pending,
+
+        /// <summary><c>Sent</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Sent")]
+        Sent,
+
+        /// <summary><c>Failed</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Failed")]
+        Failed,
+    }
 }

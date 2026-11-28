@@ -14,5 +14,5 @@ public sealed class FakePlatformConsumerService : global::CoreIns.Testing.Contra
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> ReplayAsync(global::CoreIns.Platform.Contracts.Api.ConsumerReplayRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::System.Text.Json.JsonElement>("plt.Consumer.replay", [request, options], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Platform.Contracts.Api.ConsumerReplayResponse> ReplayAsync(global::CoreIns.Platform.Contracts.Api.ConsumerReplayRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Platform.Contracts.Api.ConsumerReplayResponse>("plt.Consumer.replay", [request, options], cancellationToken);
 }

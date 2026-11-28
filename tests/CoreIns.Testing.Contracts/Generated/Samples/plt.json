@@ -268,7 +268,12 @@
       "calendarVersions": "unspecified"
     },
     "plt.Consumer.replay": {
-      "key": "value"
+      "dryRun": true,
+      "consumer": "sample",
+      "matched": 1,
+      "delivered": 1,
+      "skipped": 1,
+      "stillFailing": 1
     },
     "plt.Currency.get": {
       "rate": "unspecified",
@@ -365,7 +370,8 @@
       "number": "unspecified"
     },
     "plt.Outbox.publish": {
-      "key": "value"
+      "eventId": "01928fad-5cc5-73f8-80c2-30907338526b",
+      "eventType": "sample"
     },
     "plt.Pipeline.e2eGate": {
       "perScenarioResult": "unspecified",
@@ -385,10 +391,20 @@
       "changeApprovalRequest": "unspecified"
     },
     "plt.Schema.check": {
-      "compatibilityResult": "unspecified"
+      "subject": "sample",
+      "compatible": true,
+      "version": 1,
+      "issues": [
+        "sample"
+      ]
     },
     "plt.Schema.register": {
-      "compatibilityResult": "unspecified"
+      "subject": "sample",
+      "compatible": true,
+      "version": 1,
+      "issues": [
+        "sample"
+      ]
     },
     "plt.Subject.export": {
       "key": "value"
@@ -1085,21 +1101,46 @@
       "years": "unspecified"
     },
     "ConsumerReplayRequest": {
-      "consumer": "unspecified",
-      "fromPosition": "unspecified",
+      "consumer": "sample",
+      "recordedFrom": "2026-10-07T09:00:00Z",
+      "recordedTo": "2026-10-07T09:00:00Z",
+      "aggregateType": "sample",
+      "aggregateId": "sample",
       "deadLetterIds": [
         "01925501-477b-7060-83bb-953b9f88b249"
       ]
+    },
+    "ConsumerReplayResponse": {
+      "dryRun": true,
+      "consumer": "sample",
+      "matched": 1,
+      "delivered": 1,
+      "skipped": 1,
+      "stillFailing": 1
     },
     "CurrencyGetResponse": {
       "rate": "unspecified",
       "rateId": "01920eca-a119-7f5c-85e7-79524f9f6059"
     },
+    "DeadLetterDiscardOutcome": {
+      "deadLetterId": "019230a6-7265-7d12-8131-5535676a06ed",
+      "outcome": "Discarded"
+    },
     "DeadLetterDiscardRequest": {
-      "consumer": "unspecified",
-      "fromPosition": "unspecified",
       "deadLetterIds": [
         "0192f5c9-4485-7d78-8e25-79603ae537fd"
+      ],
+      "reason": "sample"
+    },
+    "DeadLetterDiscardResponse": {
+      "dryRun": true,
+      "discarded": 1,
+      "skipped": 1,
+      "results": [
+        {
+          "deadLetterId": "0192525a-7b2d-7f06-8e8c-7d4cb584f9c5",
+          "outcome": "Discarded"
+        }
       ]
     },
     "DeadLetterListItem": {
@@ -1213,12 +1254,30 @@
       "evaluationId": "019275a9-a837-76f5-8c06-b2632ae60710"
     },
     "ExchangeSearchItem": {
-      "exchanges": "unspecified"
+      "exchangeId": "0192464b-f563-755d-89b5-dc32ec3b4a3f",
+      "direction": "Inbound",
+      "counterparty": "sample",
+      "partyRef": "sample",
+      "channel": "sample",
+      "operation": "sample",
+      "status": "sample",
+      "correlationId": "sample",
+      "startedAt": "2026-10-07T09:00:00Z",
+      "completedAt": "2026-10-07T09:00:00Z"
     },
     "ExchangeSearchPage": {
       "items": [
         {
-          "exchanges": "unspecified"
+          "exchangeId": "01920b33-aaec-7f95-87b6-20662a14aa9f",
+          "direction": "Inbound",
+          "counterparty": "sample",
+          "partyRef": "sample",
+          "channel": "sample",
+          "operation": "sample",
+          "status": "sample",
+          "correlationId": "sample",
+          "startedAt": "2026-10-07T09:00:00Z",
+          "completedAt": "2026-10-07T09:00:00Z"
         }
       ],
       "nextCursor": "sample",
@@ -1356,9 +1415,19 @@
       "number": "unspecified"
     },
     "OutboxPublishRequest": {
-      "eventType": "unspecified",
-      "aggregate": "unspecified",
-      "payload": "unspecified"
+      "eventType": "sample",
+      "aggregateType": "sample",
+      "aggregateId": "sample",
+      "payload": {
+        "key": "value"
+      },
+      "businessKeys": {
+        "sample": "sample"
+      }
+    },
+    "OutboxPublishResponse": {
+      "eventId": "0192b649-a8c4-7412-8c8f-4a4adfc7277c",
+      "eventType": "sample"
     },
     "PipelineE2eGateRequest": {
       "releaseCandidate": "2026-10-07",
@@ -1460,16 +1529,32 @@
       "revokedBy": "sample"
     },
     "SchemaCheckRequest": {
-      "schema": "unspecified"
+      "subject": "sample",
+      "schema": {
+        "key": "value"
+      }
     },
     "SchemaCheckResponse": {
-      "compatibilityResult": "unspecified"
+      "subject": "sample",
+      "compatible": true,
+      "version": 1,
+      "issues": [
+        "sample"
+      ]
     },
     "SchemaRegisterRequest": {
-      "schema": "unspecified"
+      "subject": "sample",
+      "schema": {
+        "key": "value"
+      }
     },
     "SchemaRegisterResponse": {
-      "compatibilityResult": "unspecified"
+      "subject": "sample",
+      "compatible": true,
+      "version": 1,
+      "issues": [
+        "sample"
+      ]
     },
     "TimeNowResponse": {
       "instant": "unspecified"
@@ -1490,25 +1575,46 @@
       "grantedOrRefused": "unspecified"
     },
     "TransferListItem": {
-      "transfers": "unspecified",
-      "transferIdRetry": "unspecified"
+      "transferId": "01929165-6bc7-7998-8c83-788c5e5e2681",
+      "direction": "Inbound",
+      "partner": "sample",
+      "fileName": "sample",
+      "status": "Pending",
+      "attempts": 1,
+      "lastError": "sample",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "updatedAt": "2026-10-07T09:00:00Z"
     },
     "TransferListPage": {
       "items": [
         {
-          "transfers": "unspecified",
-          "transferIdRetry": "unspecified"
+          "transferId": "01925021-d2c9-7d68-8041-5fd0bff9ca16",
+          "direction": "Inbound",
+          "partner": "sample",
+          "fileName": "sample",
+          "status": "Pending",
+          "attempts": 1,
+          "lastError": "sample",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "updatedAt": "2026-10-07T09:00:00Z"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "TransferRetryRequest": {
-      "filters": "unspecified"
+      "transferIds": [
+        "01926632-15e8-730b-86b0-f4621217a8c4"
+      ],
+      "partner": "sample"
     },
     "TransferRetryResponse": {
-      "transfers": "unspecified",
-      "transferIdRetry": "unspecified"
+      "retried": [
+        "019213db-a36b-74e5-8994-9684f2f37197"
+      ],
+      "skipped": [
+        "0192a60b-3931-7876-8f22-9f3e61c392e5"
+      ]
     },
     "UserCreateRequest": {
       "entraOid": "sample",

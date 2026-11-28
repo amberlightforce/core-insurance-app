@@ -4,23 +4,21 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Transfer.retry result. PRD outputs: "transfers; transfer id → retry"</summary>
+/// <summary>Generated contract member.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record TransferRetryResponse
 {
-    /// <summary>PRD: "transfers"</summary>
+    /// <summary>Contract member 'retried'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'retried' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("transfers")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Transfers { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("retried")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::System.Guid> Retried { get; init; }
 
-    /// <summary>PRD: "transfer id → retry"</summary>
+    /// <summary>Contract member 'skipped'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'skipped' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("transferIdRetry")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? TransferIdRetry { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("skipped")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::System.Guid> Skipped { get; init; }
 }

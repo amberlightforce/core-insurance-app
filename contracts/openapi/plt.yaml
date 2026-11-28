@@ -2533,6 +2533,11 @@ paths:
       - PFC
       x-permission: plt.Outbox.publish
       x-error-codes:
+      - code: PLT-ERR-TEST-TENANT-ONLY
+        note: the caller legal entity is not a test tenant
+        status: 403
+      - code: PLT-ERR-EVENT-TYPE-NOT-ALLOWED
+        status: 422
       - code: PLT-ERR-SCHEMA
         status: 422
       - code: PLT-ERR-SCHEMA-PII
@@ -2739,6 +2744,9 @@ paths:
       - FIN
       x-permission: plt.Consumer.replay
       x-error-codes:
+      - code: PLT-ERR-NOT-FOUND
+        note: no event handler of that name is registered
+        status: 404
       - code: PLT-ERR-REPLAY-IN-PROGRESS
         status: 409
       - code: PLT-ERR-IDEMPOTENCY-MISMATCH
@@ -3049,6 +3057,13 @@ paths:
       - ui
       x-permission: plt.DeadLetter.discard
       x-error-codes:
+      - code: PLT-ERR-DISCARD-APPROVAL-REQUIRED
+        note: the dead letter is older than the approval threshold and has no Approved plt.DeadLetter.discard approval
+        status: 422
+      - code: PLT-ERR-DEAD-LETTER-RESOLVED
+        status: 409
+      - code: PLT-ERR-NOT-FOUND
+        status: 404
       - code: PLT-ERR-REPLAY-IN-PROGRESS
         status: 409
       - code: PLT-ERR-IDEMPOTENCY-MISMATCH
@@ -3199,12 +3214,33 @@ paths:
         description: 'PRD: "party ref"'
         schema:
           type: string
-      - name: period
+      - name: from
         in: query
         required: false
-        description: 'PRD: "period"'
+        description: Started at or after (UTC instant)
         schema:
           type: string
+          format: date-time
+      - name: to
+        in: query
+        required: false
+        description: Started before (UTC instant)
+        schema:
+          type: string
+          format: date-time
+      - name: counterparty
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: direction
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - Inbound
+          - Outbound
       responses:
         '200':
           description: Success
@@ -6505,12 +6541,28 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: filters
+      - name: partner
         in: query
         required: false
-        description: 'PRD: "filters"'
         schema:
           type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - Pending
+          - Sent
+          - Failed
+      - name: direction
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - Inbound
+          - Outbound
       responses:
         '200':
           description: Success
@@ -8194,68 +8246,158 @@ components:
       - days
     OutboxPublishRequest:
       type: object
-      description: 'plt.Outbox.publish request. PRD inputs: "event type, aggregate, payload"'
+      description: 'plt.Outbox.publish request (BO-PLT-04): administrator tool for test tenants only (legal entity ending -TEST). Only the events in the
+        operations allow-list can be published (ConfigChanged, FeatureFlagChanged); the payload must satisfy the event contract.'
       properties:
         eventType:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "event type"'
-        aggregate:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "aggregate"'
+          type: string
+        aggregateType:
+          type: string
+        aggregateId:
+          type: string
         payload:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payload"'
+          type: object
+          additionalProperties: true
+        businessKeys:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+      - eventType
+      - aggregateType
+      - aggregateId
+      - payload
     OutboxPublishResponse:
       type: object
-      description: 'plt.Outbox.publish result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'plt.Outbox.publish result: the staged event.'
+      properties:
+        eventId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        eventType:
+          type: string
+      required:
+      - eventId
+      - eventType
     SchemaRegisterRequest:
       type: object
-      description: 'plt.Schema.register request. PRD inputs: "schema"'
+      description: 'plt.Schema.register request (BO-PLT-04): a JSON Schema object (type/properties/required) registered under a subject. Compatibility is backward: a new
+        version may not remove a property, change its type, or add a required property.'
       properties:
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
         schema:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "schema"'
+          type: object
+          additionalProperties: true
+      required:
+      - subject
+      - schema
     SchemaRegisterResponse:
       type: object
-      description: 'plt.Schema.register result. PRD outputs: "compatibility result"'
       properties:
-        compatibilityResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compatibility result"'
-    SchemaCheckRequest:
-      type: object
-      description: 'plt.Schema.check request. PRD inputs: "schema"'
-      properties:
-        schema:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "schema"'
-    SchemaCheckResponse:
-      type: object
-      description: 'plt.Schema.check result. PRD outputs: "compatibility result"'
-      properties:
-        compatibilityResult:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compatibility result"'
-    ConsumerReplayRequest:
-      type: object
-      description: 'plt.Consumer.replay request. PRD inputs: "consumer, from position; dead-letter ids"'
-      properties:
-        consumer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "consumer"'
-        fromPosition:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "from position"'
-        deadLetterIds:
+        subject:
+          type: string
+        compatible:
+          type: boolean
+        version:
+          type:
+          - integer
+          - 'null'
+          description: The registered version (register), or the latest version compared against (check); null when none exists
+        issues:
           type: array
           items:
+            type: string
+      required:
+      - subject
+      - compatible
+      - issues
+    SchemaCheckRequest:
+      type: object
+      description: 'plt.Schema.check request (BO-PLT-04): a JSON Schema object (type/properties/required) registered under a subject. Compatibility is backward: a new
+        version may not remove a property, change its type, or add a required property.'
+      properties:
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 200
+        schema:
+          type: object
+          additionalProperties: true
+      required:
+      - subject
+      - schema
+    SchemaCheckResponse:
+      type: object
+      properties:
+        subject:
+          type: string
+        compatible:
+          type: boolean
+        version:
+          type:
+          - integer
+          - 'null'
+          description: The registered version (register), or the latest version compared against (check); null when none exists
+        issues:
+          type: array
+          items:
+            type: string
+      required:
+      - subject
+      - compatible
+      - issues
+    ConsumerReplayRequest:
+      type: object
+      description: 'plt.Consumer.replay request (BO-PLT-04). Either name deadLetterIds (re-runs the Parked ones; resolved ones are skipped) or give
+        a consumer (event handler name) plus a recordedFrom/recordedTo range of the event archive, re-delivered in archive order with origin REPLAY
+        (the handler must be idempotent).'
+      properties:
+        consumer:
+          type: string
+          maxLength: 200
+        recordedFrom:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordedTo:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        aggregateType:
+          type: string
+        aggregateId:
+          type: string
+        deadLetterIds:
+          type: array
+          maxItems: 100
+          items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "dead-letter ids"'
     ConsumerReplayResponse:
       type: object
-      description: 'plt.Consumer.replay result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'plt.Consumer.replay result. A dry run delivers nothing and only counts the events that would be re-delivered.'
+      properties:
+        dryRun:
+          type: boolean
+        consumer:
+          type:
+          - string
+          - 'null'
+        matched:
+          type: integer
+          minimum: 0
+        delivered:
+          type: integer
+          minimum: 0
+        skipped:
+          type: integer
+          minimum: 0
+        stillFailing:
+          type: integer
+          minimum: 0
+      required:
+      - dryRun
+      - matched
+      - delivered
+      - skipped
+      - stillFailing
     DeadLetterStatus:
       type: string
       enum:
@@ -8403,23 +8545,59 @@ components:
       - results
     DeadLetterDiscardRequest:
       type: object
-      description: 'plt.DeadLetter.discard request. PRD inputs: "consumer, from position; dead-letter ids"'
+      description: 'plt.DeadLetter.discard request (BO-PLT-04). Name the Parked dead letters and give the reason (required, kept in the audit
+        trail and on the row). A dead letter parked longer than the configured number of days (Platform:DeadLetters:ApprovalAfterDays, default 7)
+        also needs an Approved plt.Approval of type plt.DeadLetter.discard for subject PLT/DeadLetter/<id> (maker-checker). At most 100 per call.'
       properties:
-        consumer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "consumer"'
-        fromPosition:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "from position"'
         deadLetterIds:
           type: array
+          minItems: 1
+          maxItems: 100
           items:
             $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "dead-letter ids"'
+        reason:
+          type: string
+          minLength: 5
+          maxLength: 500
+      required:
+      - deadLetterIds
+      - reason
+    DeadLetterDiscardOutcome:
+      type: object
+      properties:
+        deadLetterId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        outcome:
+          type: string
+          enum:
+          - Discarded
+          - WouldDiscard
+          - AlreadyResolved
+          - NotFound
+      required:
+      - deadLetterId
+      - outcome
     DeadLetterDiscardResponse:
       type: object
-      description: 'plt.DeadLetter.discard result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'plt.DeadLetter.discard result. A dry run discards nothing and reports WouldDiscard for every Parked letter.'
+      properties:
+        dryRun:
+          type: boolean
+        discarded:
+          type: integer
+          minimum: 0
+        skipped:
+          type: integer
+          minimum: 0
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeadLetterDiscardOutcome'
+      required:
+      - dryRun
+      - discarded
+      - skipped
+      - results
     AdapterInvokeRequest:
       type: object
       description: 'plt.Adapter.invoke request. PRD inputs: "adapter, operation, payload, idempotency key"'
@@ -8445,11 +8623,45 @@ components:
           description: 'PRD: "response"'
     ExchangeSearchItem:
       type: object
-      description: 'plt.Exchange.search result. PRD outputs: "exchanges"'
+      description: 'plt.Exchange.search result: one logged message exchange with an external party.'
       properties:
-        exchanges:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exchanges"'
+        exchangeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        direction:
+          type: string
+          enum:
+          - Inbound
+          - Outbound
+        counterparty:
+          type: string
+        partyRef:
+          type:
+          - string
+          - 'null'
+        channel:
+          type: string
+        operation:
+          type: string
+        status:
+          type: string
+        correlationId:
+          type:
+          - string
+          - 'null'
+        startedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        completedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+      required:
+      - exchangeId
+      - direction
+      - counterparty
+      - channel
+      - operation
+      - status
+      - startedAt
     ExchangeSearchPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -9273,14 +9485,44 @@ components:
           description: 'PRD: "legacy xref entries"'
     TransferListItem:
       type: object
-      description: 'plt.Transfer.list result. PRD outputs: "transfers; transfer id → retry"'
+      description: 'plt.Transfer.list result: one file transfer.'
       properties:
-        transfers:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transfers"'
-        transferIdRetry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transfer id → retry"'
+        transferId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        direction:
+          type: string
+          enum:
+          - Inbound
+          - Outbound
+        partner:
+          type: string
+        fileName:
+          type: string
+        status:
+          type: string
+          enum:
+          - Pending
+          - Sent
+          - Failed
+        attempts:
+          type: integer
+        lastError:
+          type:
+          - string
+          - 'null'
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        updatedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - transferId
+      - direction
+      - partner
+      - fileName
+      - status
+      - attempts
+      - createdAt
+      - updatedAt
     TransferListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -9293,21 +9535,29 @@ components:
       description: Page of plt.Transfer.list results (cursor pagination, contract §3.5.5)
     TransferRetryRequest:
       type: object
-      description: 'plt.Transfer.retry request. PRD inputs: "filters"'
+      description: 'plt.Transfer.retry request: name Failed transfers (transferIds) or select the Failed ones of a partner. At most 100 per call.'
       properties:
-        filters:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "filters"'
+        transferIds:
+          type: array
+          maxItems: 100
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+        partner:
+          type: string
     TransferRetryResponse:
       type: object
-      description: 'plt.Transfer.retry result. PRD outputs: "transfers; transfer id → retry"'
       properties:
-        transfers:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transfers"'
-        transferIdRetry:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "transfer id → retry"'
+        retried:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+        skipped:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - retried
+      - skipped
     TokenGrantAgentScopeRequest:
       type: object
       description: 'plt.Token.grantAgentScope request. PRD inputs: "client, scope"'

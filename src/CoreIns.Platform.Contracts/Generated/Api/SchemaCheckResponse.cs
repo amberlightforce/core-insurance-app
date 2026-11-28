@@ -4,15 +4,23 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Schema.check result. PRD outputs: "compatibility result"</summary>
+/// <summary>Generated contract member.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SchemaCheckResponse
 {
-    /// <summary>PRD: "compatibility result"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("compatibilityResult")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? CompatibilityResult { get; init; }
+    /// <summary>Contract member 'subject'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("subject")]
+    public required string Subject { get; init; }
+
+    /// <summary>Contract member 'compatible'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("compatible")]
+    public required bool Compatible { get; init; }
+
+    /// <summary>The registered version (register), or the latest version compared against (check); null when none exists</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    public int? Version { get; init; }
+
+    /// <summary>Contract member 'issues'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issues")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> Issues { get; init; }
 }

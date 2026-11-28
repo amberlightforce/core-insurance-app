@@ -4,31 +4,31 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Outbox.publish request. PRD inputs: "event type, aggregate, payload"</summary>
+/// <summary>plt.Outbox.publish request (BO-PLT-04): administrator tool for test tenants only (legal entity ending -TEST). Only the events in the operations allow-list can be published (ConfigChanged, FeatureFlagChanged); the payload must satisfy the event contract.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record OutboxPublishRequest
 {
-    /// <summary>PRD: "event type"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'eventType'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("eventType")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? EventType { get; init; }
+    public required string EventType { get; init; }
 
-    /// <summary>PRD: "aggregate"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("aggregate")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Aggregate { get; init; }
+    /// <summary>Contract member 'aggregateType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("aggregateType")]
+    public required string AggregateType { get; init; }
 
-    /// <summary>PRD: "payload"</summary>
+    /// <summary>Contract member 'aggregateId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("aggregateId")]
+    public required string AggregateId { get; init; }
+
+    /// <summary>Contract member 'payload'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Open object: members not defined by the contract yet.</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("payload")]
+    public required global::System.Text.Json.JsonElement Payload { get; init; }
+
+    /// <summary>Contract member 'businessKeys'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("businessKeys")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Payload { get; init; }
+    public global::System.Collections.Generic.IReadOnlyDictionary<string, string>? BusinessKeys { get; init; }
 }

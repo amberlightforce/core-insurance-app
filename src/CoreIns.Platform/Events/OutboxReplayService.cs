@@ -41,6 +41,23 @@ public sealed class OutboxReplayService(NpgsqlDataSource dataSource, EventHandle
     /// <summary>Re-delivers the matching archived events to <paramref name="handlerName"/>; returns how many were delivered.</summary>
     public async Task<int> ReplayAsync(string handlerName, ReplayFilter filter, CancellationToken cancellationToken)
     {
+        var (handler, matching) = await SelectAsync(handlerName, filter, cancellationToken).ConfigureAwait(false);
+        var delivered = 0;
+        foreach (var envelope in matching)
+        {
+            await _invoker.InvokeAsync(handler, envelope, replay: true, clock, cancellationToken).ConfigureAwait(false);
+            delivered++;
+        }
+
+        return delivered;
+    }
+
+    /// <summary>How many archived events a <see cref="ReplayAsync"/> with the same arguments would re-deliver (dry run).</summary>
+    public async Task<int> CountAsync(string handlerName, ReplayFilter filter, CancellationToken cancellationToken) =>
+        (await SelectAsync(handlerName, filter, cancellationToken).ConfigureAwait(false)).Matching.Count;
+
+    private async Task<(EventHandlerRegistration Handler, List<EventEnvelope> Matching)> SelectAsync(string handlerName, ReplayFilter filter, CancellationToken cancellationToken)
+    {
         ArgumentNullException.ThrowIfNull(filter);
         var handler = registry.Find(handlerName) ?? throw new InvalidOperationException($"No event handler named '{handlerName}'.");
 
@@ -70,14 +87,8 @@ public sealed class OutboxReplayService(NpgsqlDataSource dataSource, EventHandle
             }
         }
 
-        var delivered = 0;
-        foreach (var envelope in envelopes.Where(e => string.Equals(e.RoutingKey, handler.RoutingKey, StringComparison.Ordinal)))
-        {
-            await _invoker.InvokeAsync(handler, envelope, replay: true, clock, cancellationToken).ConfigureAwait(false);
-            delivered++;
-        }
-
-        return delivered;
+        var matching = envelopes.Where(e => string.Equals(e.RoutingKey, handler.RoutingKey, StringComparison.Ordinal)).ToList();
+        return (handler, matching);
     }
 
     /// <summary>Re-runs a parked handler for its event. Returns true when it succeeded (the dead letter becomes Replayed).</summary>
