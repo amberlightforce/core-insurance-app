@@ -32,9 +32,6 @@ CONTRACT_NOT_SERVED GET /api/chn/v1/quotes/{}/issues
 CONTRACT_NOT_SERVED GET /api/chn/v1/wallets/status
 CONTRACT_NOT_SERVED GET /api/chn/v1/webhooks/deliveries
 CONTRACT_NOT_SERVED GET /api/chn/v1/{}/{}/documents
-CONTRACT_NOT_SERVED GET /api/clm/v1/cat-events/aggregate
-CONTRACT_NOT_SERVED GET /api/clm/v1/claim-trackings
-CONTRACT_NOT_SERVED GET /api/clm/v1/claim-trackings/{}
 CONTRACT_NOT_SERVED GET /api/clm/v1/conversations
 CONTRACT_NOT_SERVED GET /api/clm/v1/financials/daily-totals
 CONTRACT_NOT_SERVED GET /api/cmp/v1/bureaus/status
@@ -288,13 +285,6 @@ CONTRACT_NOT_SERVED POST /api/cmp/v1/evidence/submit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-documents/import
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-reconciliation/run
 CONTRACT_NOT_SERVED POST /api/cmp/v1/fiscal-rules/certify
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/approve
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/attach-content
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/comment
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/evidence-pack
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/record-filing
-CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/record-response
 CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/render-xbrl
 CONTRACT_NOT_SERVED POST /api/cmp/v1/submissions/validate-taxonomy
 CONTRACT_NOT_SERVED POST /api/cmp/v1/taxonomies/activate
@@ -482,8 +472,6 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/suspensions
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/request-policy-move
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/split
-CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/resolve
-CONTRACT_NOT_SERVED POST /api/pty/v1/commission-agreements/simulate
 CONTRACT_NOT_SERVED POST /api/pty/v1/communication-preferences/resolve
 CONTRACT_NOT_SERVED POST /api/pty/v1/communication-preferences/set
 CONTRACT_NOT_SERVED POST /api/pty/v1/consents/record

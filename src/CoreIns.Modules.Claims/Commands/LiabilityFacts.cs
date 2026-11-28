@@ -78,9 +78,16 @@ internal sealed class UpdateClaimValidator : AbstractValidator<UpdateClaim>
     {
         RuleFor(c => c.Request.ExpectedRecordVersion).NotNull().GreaterThanOrEqualTo(1);
         RuleFor(c => c.Request.Changes).NotNull();
-        RuleFor(c => c.Request.Changes!.LiabilityFacts).NotNull().Must(f => f is null || LiabilityMapping.Valid(f)).WithErrorCode("LIABILITY")
-            .WithMessage("Fault is 0 to 100 with at most two decimals, the vehicle count at least 1 and the fault source a code.")
+        RuleFor(c => c.Request.Changes!).Must(ch => ch.LiabilityFacts is not null || ch.Milestone is not null || ch.CatEventCode is not null || ch.UntagCatEvent == true)
+            .WithErrorCode("CHANGES").WithMessage("Give at least one change: liabilityFacts, milestone, catEventCode or untagCatEvent.")
             .When(c => c.Request.Changes is not null);
+        RuleFor(c => c.Request.Changes!.LiabilityFacts!).Must(LiabilityMapping.Valid).WithErrorCode("LIABILITY")
+            .WithMessage("Fault is 0 to 100 with at most two decimals, the vehicle count at least 1 and the fault source a code.")
+            .When(c => c.Request.Changes?.LiabilityFacts is not null);
+        RuleFor(c => c.Request.Changes!.Milestone!).Matches(RecoverySupportCodes.CodePattern).WithErrorCode("CODE").When(c => c.Request.Changes?.Milestone is not null);
+        RuleFor(c => c.Request.Changes!.CatEventCode!).Matches(RecoverySupportCodes.CodePattern).WithErrorCode("CODE").When(c => c.Request.Changes?.CatEventCode is not null);
+        RuleFor(c => c.Request.Changes!).Must(ch => !(ch.CatEventCode is not null && ch.UntagCatEvent == true))
+            .WithErrorCode("CAT-EVENT").WithMessage("Tag or untag a CAT event, not both.").When(c => c.Request.Changes is not null);
         RuleFor(c => c.Request.Reason).Matches(RecoverySupportCodes.CodePattern).When(c => c.Request.Reason is not null).WithErrorCode("CODE");
     }
 }
@@ -91,7 +98,7 @@ internal static class RecoverySupportCodes
 }
 
 /// <summary>
-/// Sets the liability facts of an open claim (REQ-CLM-076 subset, REQ-CLM-144): members present replace the stored ones, the claim
+/// Sets the liability facts, tracking milestone and CAT event tag of an open claim (REQ-CLM-076 subset, REQ-CLM-144, BO-CLM-08): members present replace the stored ones, the claim
 /// record version moves, the change is audited and <c>ClaimUpdated</c> says that the LIABILITY_FACTS group changed. Subrogation is
 /// proposed to the handler by the UI when the insured fault is below 100 (a case is never opened implicitly).
 /// </summary>
@@ -115,11 +122,55 @@ internal sealed class UpdateClaimHandler(
 
         if (claim.Status != ClaimStates.Open)
         {
-            return DomainError.Of(ModuleCode.CLM, "ILLEGAL-TRANSITION", "Liability facts can be changed on an open claim only.");
+            return DomainError.Of(ModuleCode.CLM, "ILLEGAL-TRANSITION", "Claim changes are accepted on an open claim only.");
         }
 
-        LiabilityMapping.Apply(claim, command.Request.Changes!.LiabilityFacts!);
-        claim.UpdatedAt = clock.Now;
+        var changes = command.Request.Changes!;
+        var now = clock.Now;
+        var groups = new List<string>();
+        OutgoingEvent? assigned = null;
+        if (changes.LiabilityFacts is { } facts)
+        {
+            LiabilityMapping.Apply(claim, facts);
+            groups.Add("LIABILITY_FACTS");
+        }
+
+        if (changes.Milestone is { } milestone && milestone != claim.Milestone)
+        {
+            claim.Milestone = milestone;
+            claim.MilestoneAt = now;
+            groups.Add("TRACKING");
+        }
+
+        if (changes.CatEventCode is { } catCode || changes.UntagCatEvent == true)
+        {
+            var previous = claim.CatEventCode;
+            if (changes.CatEventCode is { } tag)
+            {
+                var rejected = await ValidateTagAsync(legalEntity, claim, tag, cancellationToken).ConfigureAwait(false);
+                if (rejected is not null)
+                {
+                    return rejected;
+                }
+            }
+            else if (previous is null)
+            {
+                return CatEventSupport.Error("The claim is not tagged to a CAT event.");
+            }
+
+            var next = changes.CatEventCode;
+            if (next != previous)
+            {
+                claim.CatEventCode = next;
+                groups.Add("CAT_EVENT");
+                assigned = new OutgoingEvent(
+                    EventDescriptor.From(CatEventAssignedV1.Descriptor), ClaimEvents.AggregateType, claim.ClaimId.Value.ToString(),
+                    new CatEventAssignedV1 { CatCode = next, PreviousCatCode = previous, AssignmentMethod = CatEventAssignedV1.AssignmentMethodValue.Manual },
+                    BusinessKeys.Empty.With("claimId", claim.ClaimId.Value.ToString()));
+            }
+        }
+
+        claim.UpdatedAt = now;
         claim.RecordVersion++;
         try
         {
@@ -132,13 +183,40 @@ internal sealed class UpdateClaimHandler(
 
         events.Publish(new OutgoingEvent(
             EventDescriptor.From(ClaimUpdatedV1.Descriptor), ClaimEvents.AggregateType, claim.ClaimId.Value.ToString(),
-            new ClaimUpdatedV1 { ChangedAttributeGroups = ["LIABILITY_FACTS"], SubStatus = claim.SubStatus },
+            new ClaimUpdatedV1 { ChangedAttributeGroups = groups, NewMilestone = groups.Contains("TRACKING") ? claim.Milestone : null, SubStatus = claim.SubStatus },
             BusinessKeys.Empty.With("claimId", claim.ClaimId.Value.ToString())));
+        if (assigned is not null)
+        {
+            events.Publish(assigned);
+        }
+
         return new ClaimUpdateResponse
         {
             Claim = (await reader.GetSummaryAsync(legalEntity, claim.ClaimId, cancellationToken).ConfigureAwait(false))!,
             LiabilityFacts = LiabilityMapping.Of(claim),
         };
+    }
+
+    /// <summary>The CAT event must exist in the caller's entity, be open, and its window must contain the loss instant (REQ-CLM-210).</summary>
+    private async Task<DomainError?> ValidateTagAsync(LegalEntityId legalEntity, ClaimRow claim, string catCode, CancellationToken cancellationToken)
+    {
+        var cat = await db.CatEvents.AsNoTracking().SingleOrDefaultAsync(e => e.LegalEntityId == legalEntity && e.CatCode == catCode, cancellationToken).ConfigureAwait(false);
+        if (cat is null)
+        {
+            return ClaimSupport.NotFound("CAT event");
+        }
+
+        if (cat.Status != CatEventRow.Open)
+        {
+            return CatEventSupport.Error($"CAT event {catCode} is closed.");
+        }
+
+        if (claim.LossAt < cat.WindowFrom || (cat.WindowTo is { } to && claim.LossAt >= to))
+        {
+            return CatEventSupport.Error($"The loss date of the claim is outside the window of CAT event {catCode}.");
+        }
+
+        return null;
     }
 }
 
@@ -149,7 +227,7 @@ internal sealed class UpdateClaimAuditor : ICommandAuditor<UpdateClaim, ClaimUpd
         {
             ObjectRef = ObjectRef.For(ModuleCode.CLM, "Claim", command.ClaimId),
             BusinessKeys = BusinessKeys.Empty.With("claimId", command.ClaimId.Value.ToString()),
-            Changes = AuditDiff.Compute(null, new { liabilityFacts = ok.Value.LiabilityFacts, reason = command.Request.Reason }),
+            Changes = AuditDiff.Compute(null, new { liabilityFacts = command.Request.Changes?.LiabilityFacts is null ? null : ok.Value.LiabilityFacts, milestone = command.Request.Changes?.Milestone, catEventCode = command.Request.Changes?.CatEventCode, untagCatEvent = command.Request.Changes?.UntagCatEvent, reason = command.Request.Reason }),
         }
         : new CommandAuditFacts
         {

@@ -139,7 +139,33 @@
       }
     },
     "pty.CommissionAgreement.resolve": {
-      "key": "value"
+      "date": "2026-10-07",
+      "outcome": "RESOLVED",
+      "reason": "NO_PRODUCER",
+      "reasonText": "sample",
+      "producers": [
+        {
+          "intermediaryId": "01923cfd-fcd6-7945-88f5-283140ce373f",
+          "producerCode": "SAMPLE_CODE",
+          "role": "PRODUCER",
+          "sharePct": "12.50",
+          "resolved": true,
+          "reason": "NO_AGREEMENT",
+          "agreementId": "01928048-4828-717a-8ac5-1cd2facf0bde",
+          "versionId": "0192b72a-4b22-71ac-833c-9039a2ebd32a",
+          "versionNo": 1,
+          "scopeKey": "sample",
+          "rateLine": {
+            "businessType": "NEW_BUSINESS",
+            "lineOfBusiness": "SAMPLE_CODE",
+            "basis": "NET_PREMIUM",
+            "ratePct": "12.50"
+          },
+          "explanation": [
+            "sample"
+          ]
+        }
+      ]
     },
     "pty.CommunicationPreference.resolve": {
       "channel": "unspecified",
@@ -1306,6 +1332,123 @@
         ]
       }
     },
+    "CommissionAgreementResolveRequest": {
+      "policyId": "019284cf-8afe-7670-81bf-23bad57f16f9",
+      "intermediaryId": "0192d2d4-a459-75df-804f-938796e9738b",
+      "productCode": "SAMPLE_CODE",
+      "lineOfBusiness": "SAMPLE_CODE",
+      "date": "2026-10-07",
+      "businessType": "NEW_BUSINESS",
+      "basis": "NET_PREMIUM"
+    },
+    "CommissionAgreementResolveResponse": {
+      "date": "2026-10-07",
+      "outcome": "RESOLVED",
+      "reason": "NO_PRODUCER",
+      "reasonText": "sample",
+      "producers": [
+        {
+          "intermediaryId": "0192808d-7464-7bf4-856d-62491ce8db87",
+          "producerCode": "SAMPLE_CODE",
+          "role": "PRODUCER",
+          "sharePct": "12.50",
+          "resolved": true,
+          "reason": "NO_AGREEMENT",
+          "agreementId": "019262f8-a5e0-7149-8492-e7b9ef68fbc6",
+          "versionId": "019273e4-3224-76e9-80ab-a7603dd36fd9",
+          "versionNo": 1,
+          "scopeKey": "sample",
+          "rateLine": {
+            "businessType": "NEW_BUSINESS",
+            "lineOfBusiness": "SAMPLE_CODE",
+            "basis": "NET_PREMIUM",
+            "ratePct": "12.50"
+          },
+          "explanation": [
+            "sample"
+          ]
+        }
+      ]
+    },
+    "CommissionAgreementSimulateRequest": {
+      "policyId": "019293ae-4cfe-777e-8e6a-77086f36b181",
+      "intermediaryId": "01929e66-4136-7213-81d0-440075f91e3a",
+      "productCode": "SAMPLE_CODE",
+      "date": "2026-10-07",
+      "lines": [
+        {
+          "businessType": "NEW_BUSINESS",
+          "lineOfBusiness": "SAMPLE_CODE",
+          "basis": "NET_PREMIUM",
+          "premium": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "date": "2026-10-07"
+        }
+      ]
+    },
+    "CommissionAgreementSimulateResponse": {
+      "lines": [
+        {
+          "lineIndex": 1,
+          "premium": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "outcome": "RESOLVED",
+          "reason": "sample",
+          "reasonText": "sample",
+          "commission": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "allocations": [
+            {
+              "intermediaryId": "01924468-4004-7034-85ab-1405a9add6c5",
+              "producerCode": "SAMPLE_CODE",
+              "sharePct": "12.50",
+              "ratePct": "12.50",
+              "commission": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "versionId": "0192c591-579a-70ae-8363-aaf4b87742d0",
+              "explanation": [
+                "sample"
+              ]
+            }
+          ],
+          "unresolved": [
+            {
+              "intermediaryId": "0192c5f5-5233-7db6-8507-7219a45633c0",
+              "producerCode": "SAMPLE_CODE",
+              "role": "PRODUCER",
+              "sharePct": "12.50",
+              "resolved": true,
+              "reason": "NO_AGREEMENT",
+              "agreementId": "01925c5d-81a3-7fc0-844b-b6aa2fc61fdd",
+              "versionId": "01922f95-c05f-78b3-8e32-ab38d94bd2d1",
+              "versionNo": 1,
+              "scopeKey": "sample",
+              "rateLine": {
+                "businessType": "NEW_BUSINESS",
+                "lineOfBusiness": "SAMPLE_CODE",
+                "basis": "NET_PREMIUM",
+                "ratePct": "12.50"
+              },
+              "explanation": [
+                "sample"
+              ]
+            }
+          ]
+        }
+      ],
+      "totalCommission": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
     "CommissionAgreementSubmitRequest": {
       "versionId": "01925318-b15b-7605-8d0b-76286679c677",
       "reason": "sample"
@@ -1410,6 +1553,20 @@
         }
       ]
     },
+    "CommissionAllocation": {
+      "intermediaryId": "0192166b-c72b-7d6c-80e3-1578ed16b7d3",
+      "producerCode": "SAMPLE_CODE",
+      "sharePct": "12.50",
+      "ratePct": "12.50",
+      "commission": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "versionId": "0192f596-b2c5-7996-8676-028c21c1df68",
+      "explanation": [
+        "sample"
+      ]
+    },
     "CommissionFieldChange": {
       "field": "sample",
       "from": "sample",
@@ -1428,6 +1585,90 @@
       "basis": "sample",
       "fromRatePct": "12.50",
       "toRatePct": "12.50"
+    },
+    "CommissionResolvedProducer": {
+      "intermediaryId": "01923e2a-d6af-71dd-8ecc-afa98526c71c",
+      "producerCode": "SAMPLE_CODE",
+      "role": "PRODUCER",
+      "sharePct": "12.50",
+      "resolved": true,
+      "reason": "NO_AGREEMENT",
+      "agreementId": "0192f5cd-db5b-7649-8d86-014810ca0c4d",
+      "versionId": "0192dcd5-0202-7c65-8a52-694f21e0a334",
+      "versionNo": 1,
+      "scopeKey": "sample",
+      "rateLine": {
+        "businessType": "NEW_BUSINESS",
+        "lineOfBusiness": "SAMPLE_CODE",
+        "basis": "NET_PREMIUM",
+        "ratePct": "12.50"
+      },
+      "explanation": [
+        "sample"
+      ]
+    },
+    "CommissionSimulateLine": {
+      "businessType": "NEW_BUSINESS",
+      "lineOfBusiness": "SAMPLE_CODE",
+      "basis": "NET_PREMIUM",
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "date": "2026-10-07"
+    },
+    "CommissionSimulatedLine": {
+      "lineIndex": 1,
+      "premium": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "outcome": "RESOLVED",
+      "reason": "sample",
+      "reasonText": "sample",
+      "commission": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "allocations": [
+        {
+          "intermediaryId": "01926e81-092c-7814-8108-f044d44a9836",
+          "producerCode": "SAMPLE_CODE",
+          "sharePct": "12.50",
+          "ratePct": "12.50",
+          "commission": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "versionId": "01921e8b-802c-7157-8e7b-c170537cd1d7",
+          "explanation": [
+            "sample"
+          ]
+        }
+      ],
+      "unresolved": [
+        {
+          "intermediaryId": "0192baa6-cbb6-797d-832c-129e9f96e803",
+          "producerCode": "SAMPLE_CODE",
+          "role": "PRODUCER",
+          "sharePct": "12.50",
+          "resolved": true,
+          "reason": "NO_AGREEMENT",
+          "agreementId": "01920da1-cdc3-780c-8693-4dda93947d33",
+          "versionId": "01925a4c-7ef0-704c-882b-6e39b3616d49",
+          "versionNo": 1,
+          "scopeKey": "sample",
+          "rateLine": {
+            "businessType": "NEW_BUSINESS",
+            "lineOfBusiness": "SAMPLE_CODE",
+            "basis": "NET_PREMIUM",
+            "ratePct": "12.50"
+          },
+          "explanation": [
+            "sample"
+          ]
+        }
+      ]
     },
     "CommunicationPreferenceResolveRequest": {
       "party": "unspecified",

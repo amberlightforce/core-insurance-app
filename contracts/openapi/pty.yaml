@@ -7307,12 +7307,134 @@ components:
       - history
     CommissionAgreementResolveRequest:
       type: object
-      description: 'pty.CommissionAgreement.resolve request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.CommissionAgreement.resolve request (BO-PTY-11, REQ-PTY-010): which commission rate applies on a date. Give the policy (the producer of record on the date is found, with any split) or the intermediary directly. Nothing is written.'
+      properties:
+        policyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The policy whose producer of record on the date earns the commission; when it has no producer-of-record change, give intermediaryId
+        intermediaryId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The intermediary to resolve for when the policy has no producer-of-record change (the term's own producer) or no policy is given
+        productCode:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        lineOfBusiness:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+          description: The date the agreement version must be in force
+        businessType:
+          type: string
+          enum:
+          - NEW_BUSINESS
+          - RENEWAL
+        basis:
+          type: string
+          enum:
+          - NET_PREMIUM
+          - GROSS_PREMIUM
+      required:
+      - date
+      - businessType
+      - basis
+    CommissionResolvedProducer:
+      type: object
+      description: 'One producer that earns a share of the commission and the rate that applies to it (BO-PTY-11). resolved=false means no commission is due to this producer, with the reason.'
+      properties:
+        intermediaryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        producerCode:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        role:
+          type: string
+          enum:
+          - PRODUCER
+          - PREVIOUS_PRODUCER
+        sharePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: Percent of the commission this producer earns (100 when not split)
+        resolved:
+          type: boolean
+        reason:
+          oneOf:
+          - type: string
+            enum:
+            - NO_AGREEMENT
+            - NO_RATE_LINE
+          - type: 'null'
+        agreementId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        versionId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        versionNo:
+          oneOf:
+          - type: integer
+          - type: 'null'
+        scopeKey:
+          oneOf:
+          - type: string
+          - type: 'null'
+          description: product|line of the agreement that won, "*" for all
+        rateLine:
+          oneOf:
+          - $ref: '#/components/schemas/CommissionRateLine'
+          - type: 'null'
+        explanation:
+          type: array
+          items:
+            type: string
+          description: 'Why this line won, in order: scopes considered most specific first, then business type, then line'
+      required:
+      - intermediaryId
+      - role
+      - sharePct
+      - resolved
+      - explanation
     CommissionAgreementResolveResponse:
       type: object
-      description: 'pty.CommissionAgreement.resolve result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.CommissionAgreement.resolve result (BO-PTY-11). outcome NO_COMMISSION is explicit, never a silent zero: reason says why. Same inputs always give the same answer.'
+      properties:
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        outcome:
+          type: string
+          enum:
+          - RESOLVED
+          - NO_COMMISSION
+        reason:
+          oneOf:
+          - type: string
+            enum:
+            - NO_PRODUCER
+            - NO_AGREEMENT
+            - NO_RATE_LINE
+            - PRODUCER_KEEPS_ALL_NOT_FOUND
+          - type: 'null'
+        reasonText:
+          oneOf:
+          - type: string
+          - type: 'null'
+        producers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommissionResolvedProducer'
+      required:
+      - date
+      - outcome
+      - producers
     CommissionRateLine:
       type: object
       description: One commission rate of a version, for a kind of business, optionally a line of business, on a premium basis
@@ -7621,14 +7743,144 @@ components:
       - identical
       - fieldChanges
       - rateLineChanges
+    CommissionSimulateLine:
+      type: object
+      description: One premium line of a simulation
+      properties:
+        businessType:
+          type: string
+          enum:
+          - NEW_BUSINESS
+          - RENEWAL
+        lineOfBusiness:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        basis:
+          type: string
+          enum:
+          - NET_PREMIUM
+          - GROSS_PREMIUM
+        premium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        date:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Date of this line; the request date when omitted
+      required:
+      - businessType
+      - basis
+      - premium
     CommissionAgreementSimulateRequest:
       type: object
-      description: 'pty.CommissionAgreement.simulate request. PRD inputs: "as named"'
-      x-status: minimal
+      description: 'pty.CommissionAgreement.simulate request (BO-PTY-11): commission on one or more premium lines, resolved like resolve and rounded by the MKT rounding rule. Nothing is written.'
+      properties:
+        policyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        intermediaryId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        productCode:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        date:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        lines:
+          type: array
+          minItems: 1
+          maxItems: 200
+          items:
+            $ref: '#/components/schemas/CommissionSimulateLine'
+      required:
+      - date
+      - lines
+    CommissionAllocation:
+      type: object
+      description: The commission one producer earns on a simulated line
+      properties:
+        intermediaryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        producerCode:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+        sharePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        ratePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        commission:
+          $ref: ../events/common.schema.json#/$defs/Money
+        versionId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        explanation:
+          type: array
+          items:
+            type: string
+      required:
+      - intermediaryId
+      - sharePct
+      - ratePct
+      - commission
+      - versionId
+      - explanation
+    CommissionSimulatedLine:
+      type: object
+      description: The commission of one simulated premium line
+      properties:
+        lineIndex:
+          type: integer
+        premium:
+          $ref: ../events/common.schema.json#/$defs/Money
+        outcome:
+          type: string
+          enum:
+          - RESOLVED
+          - NO_COMMISSION
+        reason:
+          oneOf:
+          - type: string
+          - type: 'null'
+        reasonText:
+          oneOf:
+          - type: string
+          - type: 'null'
+        commission:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Total commission of the line (the allocations add up to it exactly); zero with outcome NO_COMMISSION
+        allocations:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommissionAllocation'
+        unresolved:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommissionResolvedProducer'
+          description: Producers with no commission on this line, with the reason
+      required:
+      - lineIndex
+      - premium
+      - outcome
+      - commission
+      - allocations
+      - unresolved
     CommissionAgreementSimulateResponse:
       type: object
-      description: 'pty.CommissionAgreement.simulate result. PRD outputs: "—"'
-      x-status: minimal
+      description: 'pty.CommissionAgreement.simulate result (BO-PTY-11). A line without an agreement in force is an explicit NO_COMMISSION line with its reason.'
+      properties:
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommissionSimulatedLine'
+        totalCommission:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - lines
+      - totalCommission
     DsarExportRequest:
       type: object
       description: 'pty.Dsar.export request. PRD inputs: "party, request id"'

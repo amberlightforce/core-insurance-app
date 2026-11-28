@@ -2586,10 +2586,49 @@ export interface components {
             policyId: components["schemas"]["Uuid"];
             history: components["schemas"]["ProducerOfRecordEntry"][];
         };
-        /** @description pty.CommissionAgreement.resolve request. PRD inputs: "as named" */
-        CommissionAgreementResolveRequest: Record<string, never>;
-        /** @description pty.CommissionAgreement.resolve result. PRD outputs: "—" */
-        CommissionAgreementResolveResponse: Record<string, never>;
+        /** @description pty.CommissionAgreement.resolve request (BO-PTY-11, REQ-PTY-010): which commission rate applies on a date. Give the policy (the producer of record on the date is found, with any split) or the intermediary directly. Nothing is written. */
+        CommissionAgreementResolveRequest: {
+            /** @description The policy whose producer of record on the date earns the commission; when it has no producer-of-record change, give intermediaryId */
+            policyId?: components["schemas"]["Uuid"] | null;
+            /** @description The intermediary to resolve for when the policy has no producer-of-record change (the term's own producer) or no policy is given */
+            intermediaryId?: components["schemas"]["Uuid"] | null;
+            productCode?: components["schemas"]["Code"] | null;
+            lineOfBusiness?: components["schemas"]["Code"] | null;
+            /** @description The date the agreement version must be in force */
+            date: components["schemas"]["LocalDate"];
+            /** @enum {string} */
+            businessType: "NEW_BUSINESS" | "RENEWAL";
+            /** @enum {string} */
+            basis: "NET_PREMIUM" | "GROSS_PREMIUM";
+        };
+        /** @description One producer that earns a share of the commission and the rate that applies to it (BO-PTY-11). resolved=false means no commission is due to this producer, with the reason. */
+        CommissionResolvedProducer: {
+            intermediaryId: components["schemas"]["Uuid"];
+            producerCode?: components["schemas"]["Code"] | null;
+            /** @enum {string} */
+            role: "PRODUCER" | "PREVIOUS_PRODUCER";
+            /** @description Percent of the commission this producer earns (100 when not split) */
+            sharePct: components["schemas"]["Decimal"];
+            resolved: boolean;
+            reason?: ("NO_AGREEMENT" | "NO_RATE_LINE") | null;
+            agreementId?: components["schemas"]["Uuid"] | null;
+            versionId?: components["schemas"]["Uuid"] | null;
+            versionNo?: number | null;
+            /** @description product|line of the agreement that won, "*" for all */
+            scopeKey?: string | null;
+            rateLine?: components["schemas"]["CommissionRateLine"] | null;
+            /** @description Why this line won, in order: scopes considered most specific first, then business type, then line */
+            explanation: string[];
+        };
+        /** @description pty.CommissionAgreement.resolve result (BO-PTY-11). outcome NO_COMMISSION is explicit, never a silent zero: reason says why. Same inputs always give the same answer. */
+        CommissionAgreementResolveResponse: {
+            date: components["schemas"]["LocalDate"];
+            /** @enum {string} */
+            outcome: "RESOLVED" | "NO_COMMISSION";
+            reason?: ("NO_PRODUCER" | "NO_AGREEMENT" | "NO_RATE_LINE" | "PRODUCER_KEEPS_ALL_NOT_FOUND") | null;
+            reasonText?: string | null;
+            producers: components["schemas"]["CommissionResolvedProducer"][];
+        };
         /** @description One commission rate of a version, for a kind of business, optionally a line of business, on a premium basis */
         CommissionRateLine: {
             /** @enum {string} */
@@ -2701,10 +2740,54 @@ export interface components {
             fieldChanges: components["schemas"]["CommissionFieldChange"][];
             rateLineChanges: components["schemas"]["CommissionRateLineChange"][];
         };
-        /** @description pty.CommissionAgreement.simulate request. PRD inputs: "as named" */
-        CommissionAgreementSimulateRequest: Record<string, never>;
-        /** @description pty.CommissionAgreement.simulate result. PRD outputs: "—" */
-        CommissionAgreementSimulateResponse: Record<string, never>;
+        /** @description One premium line of a simulation */
+        CommissionSimulateLine: {
+            /** @enum {string} */
+            businessType: "NEW_BUSINESS" | "RENEWAL";
+            lineOfBusiness?: components["schemas"]["Code"] | null;
+            /** @enum {string} */
+            basis: "NET_PREMIUM" | "GROSS_PREMIUM";
+            premium: components["schemas"]["Money"];
+            /** @description Date of this line; the request date when omitted */
+            date?: components["schemas"]["LocalDate"] | null;
+        };
+        /** @description pty.CommissionAgreement.simulate request (BO-PTY-11): commission on one or more premium lines, resolved like resolve and rounded by the MKT rounding rule. Nothing is written. */
+        CommissionAgreementSimulateRequest: {
+            policyId?: components["schemas"]["Uuid"] | null;
+            intermediaryId?: components["schemas"]["Uuid"] | null;
+            productCode?: components["schemas"]["Code"] | null;
+            date: components["schemas"]["LocalDate"];
+            lines: components["schemas"]["CommissionSimulateLine"][];
+        };
+        /** @description The commission one producer earns on a simulated line */
+        CommissionAllocation: {
+            intermediaryId: components["schemas"]["Uuid"];
+            producerCode?: components["schemas"]["Code"] | null;
+            sharePct: components["schemas"]["Decimal"];
+            ratePct: components["schemas"]["Decimal"];
+            commission: components["schemas"]["Money"];
+            versionId: components["schemas"]["Uuid"];
+            explanation: string[];
+        };
+        /** @description The commission of one simulated premium line */
+        CommissionSimulatedLine: {
+            lineIndex: number;
+            premium: components["schemas"]["Money"];
+            /** @enum {string} */
+            outcome: "RESOLVED" | "NO_COMMISSION";
+            reason?: string | null;
+            reasonText?: string | null;
+            /** @description Total commission of the line (the allocations add up to it exactly); zero with outcome NO_COMMISSION */
+            commission: components["schemas"]["Money"];
+            allocations: components["schemas"]["CommissionAllocation"][];
+            /** @description Producers with no commission on this line, with the reason */
+            unresolved: components["schemas"]["CommissionResolvedProducer"][];
+        };
+        /** @description pty.CommissionAgreement.simulate result (BO-PTY-11). A line without an agreement in force is an explicit NO_COMMISSION line with its reason. */
+        CommissionAgreementSimulateResponse: {
+            lines: components["schemas"]["CommissionSimulatedLine"][];
+            totalCommission: components["schemas"]["Money"];
+        };
         /** @description pty.Dsar.export request. PRD inputs: "party, request id" */
         DsarExportRequest: {
             /** @description PRD: "party" */
