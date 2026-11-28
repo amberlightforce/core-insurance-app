@@ -1000,6 +1000,94 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/mig/v1/cutover/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Plan a rehearsal or cut-over
+         * @description Plan a rehearsal or cut-over
+         *
+         *     Inputs: plan name, kind (REHEARSAL or CUTOVER), reconciliation and sign-off scope, and the ordered batch ids to run. Outputs: the plan with its ordered steps: one GO_NO_GO step, then one BATCH_RUN step per batch. Idempotent by name: planning the same plan again returns it; a different definition under the same name is refused. A rehearsal uses synthetic data only.
+         */
+        post: operations["mig.Cutover.plan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/cutover/start-step": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start a cut-over step
+         * @description Start a cut-over step
+         *
+         *     Inputs: plan id and step sequence. Outputs: the plan. A step starts only when every earlier step is done and no step is running; the start time is stored.
+         */
+        post: operations["mig.Cutover.startStep"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/cutover/complete-step": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Complete a cut-over step
+         * @description Complete a cut-over step
+         *
+         *     Inputs: plan id, step sequence and an optional note. Outputs: the plan with the step duration. GO_NO_GO is evaluated from the latest reconciliation and the wave sign-off status: a cut-over step with blockers is refused, a rehearsal records NO_GO and the blockers. A BATCH_RUN step needs its batch COMPLETED.
+         */
+        post: operations["mig.Cutover.completeStep"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mig/v1/cutover/rollback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Roll a cut-over back
+         * @description Roll a cut-over back
+         *
+         *     Inputs: plan id and dryRun. Outputs: the plan and one rollback outcome per batch. Reverses the batches that ran, last first, through the batch reverse operation (module reversers), then restores the routing of wave terms they converted. The real rollback needs a dry run of the plan first and stops at the first batch whose reversal is blocked (plan ROLLBACK_BLOCKED); routing is restored only for batches fully reversed.
+         */
+        post: operations["mig.Cutover.rollback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1721,6 +1809,71 @@ export interface components {
             added?: number | null;
             /** @description Terms held back by this convert call. */
             held?: number | null;
+        };
+        CutoverPlanRequest: {
+            name: string;
+            /** @description REHEARSAL (synthetic data only) or CUTOVER. */
+            kind: string;
+            /** @description Reconciliation and sign-off scope the go/no-go reads. */
+            scope: string;
+            /** @description Batches to run, in order. */
+            batchIds: components["schemas"]["Uuid"][];
+        };
+        CutoverStepRequest: {
+            planId: components["schemas"]["Uuid"];
+            /** @description Sequence of the step (1 based). */
+            seq: number;
+            /** @description Free note stored with the step (complete-step only). */
+            note?: string | null;
+        };
+        CutoverRollbackRequest: {
+            planId: components["schemas"]["Uuid"];
+            dryRun: boolean;
+        };
+        CutoverStep: {
+            seq: number;
+            /** @description GO_NO_GO or BATCH_RUN. */
+            kind: string;
+            /** Format: uuid */
+            batchId?: string | null;
+            /** @description PENDING, IN_PROGRESS, DONE or ROLLED_BACK. */
+            status: string;
+            /** Format: date-time */
+            startedAt?: string | null;
+            /** Format: date-time */
+            completedAt?: string | null;
+            /** @description Time between start and completion. */
+            durationMs?: number | null;
+            /** @description GO or NO_GO for the GO_NO_GO step. */
+            result?: string | null;
+            note?: string | null;
+        };
+        CutoverRollbackOutcome: {
+            batchId: components["schemas"]["Uuid"];
+            /** @description Batch status after the reversal (or as previewed). */
+            status: string;
+            reversed: number;
+            blocked: number;
+            /** @description Wave terms whose CORE routing was set back to the legacy master. */
+            routingRestored: number;
+        };
+        CutoverPlan: {
+            planId: components["schemas"]["Uuid"];
+            name: string;
+            kind: string;
+            scope: string;
+            /** @description PLANNED, IN_PROGRESS, COMPLETED, ROLLED_BACK or ROLLBACK_BLOCKED. */
+            status: string;
+            steps: components["schemas"]["CutoverStep"][];
+            /** @description Sum of the step durations stored so far. */
+            totalDurationMs: number;
+            /** Format: date-time */
+            rollbackPreviewedAt?: string | null;
+            /** Format: date-time */
+            rolledBackAt?: string | null;
+            /** @description Per batch outcome of the rollback call that produced this response (empty otherwise). */
+            rollback: components["schemas"]["CutoverRollbackOutcome"][];
+            createdBy: string;
         };
         /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
         Uuid: string;
@@ -3840,6 +3993,182 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Wave"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Cutover.plan": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CutoverPlanRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CutoverPlan"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Cutover.startStep": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CutoverStepRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CutoverPlan"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Cutover.completeStep": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CutoverStepRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CutoverPlan"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "mig.Cutover.rollback": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CutoverRollbackRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CutoverPlan"];
                 };
             };
             400: components["responses"]["BadRequest"];

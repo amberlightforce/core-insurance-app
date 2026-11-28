@@ -21,9 +21,6 @@ public sealed record PostingRuleGoldenResult
     public required int Failed { get; init; }
 
     /// <summary>Contract member 'cases'.</summary>
-    /// <remarks>
-    /// <para>Shape not defined by the contract yet (Unspecified).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("cases")]
-    public required global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement> Cases { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Finance.Contracts.Api.PostingRuleGoldenCase> Cases { get; init; }
 }

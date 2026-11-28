@@ -1880,7 +1880,13 @@
       "passed": 1,
       "failed": 1,
       "cases": [
-        "unspecified"
+        {
+          "name": "sample",
+          "passed": true,
+          "ruleCode": "sample",
+          "account": "sample",
+          "detail": "sample"
+        }
       ]
     },
     "PostingRuleImpactLine": {
@@ -1901,7 +1907,16 @@
       "unresolved": 1,
       "skipped": 1,
       "differences": [
-        "unspecified"
+        {
+          "journalNumber": "sample",
+          "lineNo": 1,
+          "outcome": "sample",
+          "oldRule": "sample",
+          "newRule": "sample",
+          "oldAccount": "sample",
+          "newAccount": "sample",
+          "detail": "sample"
+        }
       ]
     },
     "PostingRuleRowInput": {
@@ -1933,20 +1948,100 @@
       "effectiveFrom": "sample"
     },
     "PostingRulesAuthoringRequest": {
-      "ruleSet": "unspecified",
+      "ruleSet": {
+        "draftId": "0192ef1f-1313-72f9-89e8-5f0a27d49dbc",
+        "book": "sample",
+        "effectiveFrom": "sample"
+      },
       "ruleRows": [
-        "unspecified"
+        {
+          "code": "sample",
+          "sourceEvent": "sample",
+          "entryType": "sample",
+          "sourceAccount": "sample",
+          "chargeCategory": "sample",
+          "chargeType": "sample",
+          "account": "sample",
+          "deriveFrom": "sample",
+          "descriptionEl": "sample",
+          "descriptionEn": "sample"
+        }
       ],
       "sampleEvents": [
-        "unspecified"
+        {
+          "name": "sample",
+          "sourceEvent": "sample",
+          "entryType": "sample",
+          "sourceAccount": "sample",
+          "chargeCategory": "sample",
+          "chargeType": "sample",
+          "glKey": "sample",
+          "expectRule": "sample",
+          "expectAccount": "sample"
+        }
       ],
       "limit": 1
     },
     "PostingRulesAuthoringResponse": {
-      "draft": "unspecified",
-      "compileResults": "unspecified",
-      "goldenResults": "unspecified",
-      "preview": "unspecified"
+      "draft": {
+        "draftId": "019245b9-bc4e-7699-8921-3299701ec257",
+        "book": "sample",
+        "effectiveFrom": "sample",
+        "status": "sample",
+        "baseVersion": 1,
+        "contentHash": "sample",
+        "ruleCount": 1,
+        "recordVersion": 1,
+        "createdBy": "sample",
+        "submittedBy": "sample",
+        "decidedBy": "sample",
+        "decisionReason": "sample",
+        "activatedRuleSetId": "019290f3-4bf7-7a29-8fe0-4eb1bba2a0a0",
+        "activatedVersion": 1
+      },
+      "compileResults": {
+        "ok": true,
+        "errors": [
+          "sample"
+        ],
+        "warnings": [
+          "sample"
+        ]
+      },
+      "goldenResults": {
+        "total": 1,
+        "passed": 1,
+        "failed": 1,
+        "cases": [
+          {
+            "name": "sample",
+            "passed": true,
+            "ruleCode": "sample",
+            "account": "sample",
+            "detail": "sample"
+          }
+        ]
+      },
+      "preview": {
+        "journals": 1,
+        "lines": 1,
+        "unchanged": 1,
+        "changed": 1,
+        "unresolved": 1,
+        "skipped": 1,
+        "differences": [
+          {
+            "journalNumber": "sample",
+            "lineNo": 1,
+            "outcome": "sample",
+            "oldRule": "sample",
+            "newRule": "sample",
+            "oldAccount": "sample",
+            "newAccount": "sample",
+            "detail": "sample"
+          }
+        ]
+      }
     },
     "PostingRulesDecideRequest": {
       "draftId": "01925d4d-d8fa-7f1e-898d-4fe1fc44c909",
