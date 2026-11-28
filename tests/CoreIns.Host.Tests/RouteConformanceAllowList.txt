@@ -279,11 +279,6 @@ CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/run
 CONTRACT_NOT_SERVED POST /api/dat/v1/actuarial/supersede
 CONTRACT_NOT_SERVED POST /api/dat/v1/analytics/ask
 CONTRACT_NOT_SERVED POST /api/dat/v1/feature-store/build-training-set
-CONTRACT_NOT_SERVED POST /api/dat/v1/models/approve
-CONTRACT_NOT_SERVED POST /api/dat/v1/models/record-validation
-CONTRACT_NOT_SERVED POST /api/dat/v1/models/retire
-CONTRACT_NOT_SERVED POST /api/dat/v1/models/submit-validation
-CONTRACT_NOT_SERVED POST /api/dat/v1/monitor/metrics
 CONTRACT_NOT_SERVED POST /api/dat/v1/populations/sample
 CONTRACT_NOT_SERVED POST /api/dat/v1/purpose-grants/decide
 CONTRACT_NOT_SERVED POST /api/dat/v1/purpose-grants/request
