@@ -32,6 +32,7 @@ tags:
 - name: ProducerCode
 - name: Intermediary
 - name: ProducerOfRecord
+- name: AgencyUser
 - name: CommissionAgreement
 - name: Dsar
 - name: Import
@@ -4149,6 +4150,583 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/agency-users:
+    post:
+      operationId: pty.AgencyUser.create
+      summary: Create an agency user
+      description: |-
+        Create an agency user (BO-PTY-12, delegated agency administration).
+
+        The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+      tags:
+      - AgencyUser
+      x-requirement:
+      - REQ-PTY-243
+      - REQ-PTY-244
+      - REQ-PTY-246
+      x-anchor:
+      - REQ-PTY-243
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'No dry-run'
+      x-exposure:
+      - ui
+      x-permission: pty.AgencyUser.create
+      x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-OUT-OF-AGENCY
+        status: 403
+      - code: PTY-ERR-STATE
+        status: 409
+      - code: PTY-ERR-VALIDATION
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1658
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyUserCreateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyUserResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+    get:
+      operationId: pty.AgencyUser.list
+      summary: List the users of an agency
+      description: |-
+        List the users of an agency (BO-PTY-12, delegated agency administration).
+
+        The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+      tags:
+      - AgencyUser
+      x-requirement:
+      - REQ-PTY-243
+      - REQ-PTY-245
+      x-anchor:
+      - REQ-PTY-243
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: full
+      x-maturity: pre-release
+      x-bounded: the users of one agency (tens)
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'Query'
+      x-exposure:
+      - ui
+      x-permission: pty.AgencyUser.list
+      x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-OUT-OF-AGENCY
+        status: 403
+      - code: PTY-ERR-VALIDATION
+        status: 422
+      x-source:
+      - PRD-01 §9.1 l.1658
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: intermediaryId
+        in: query
+        required: true
+        description: The agency (intermediary) whose users are listed
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyUserListResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/agency-users/change-role:
+    post:
+      operationId: pty.AgencyUser.changeRole
+      summary: Change the agency role of a user
+      description: |-
+        Change the agency role of a user (BO-PTY-12, delegated agency administration).
+
+        The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+      tags:
+      - AgencyUser
+      x-requirement:
+      - REQ-PTY-244
+      - REQ-PTY-246
+      x-anchor:
+      - REQ-PTY-243
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'No dry-run'
+      x-exposure:
+      - ui
+      x-permission: pty.AgencyUser.changeRole
+      x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-OUT-OF-AGENCY
+        status: 403
+      - code: PTY-ERR-LAST-ADMIN
+        status: 409
+      - code: PTY-ERR-STATE
+        status: 409
+      - code: PTY-ERR-VALIDATION
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1658
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyUserChangeRoleRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyUserResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/agency-users/grant-access:
+    post:
+      operationId: pty.AgencyUser.grantAccess
+      summary: Grant a user access to producer codes of the agency
+      description: |-
+        Grant a user access to producer codes of the agency (BO-PTY-12, delegated agency administration).
+
+        The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+      tags:
+      - AgencyUser
+      x-requirement:
+      - REQ-PTY-245
+      - REQ-PTY-252
+      x-anchor:
+      - REQ-PTY-243
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'No dry-run'
+      x-exposure:
+      - ui
+      x-permission: pty.AgencyUser.grantAccess
+      x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-OUT-OF-AGENCY
+        status: 403
+      - code: PTY-ERR-STATE
+        status: 409
+      - code: PTY-ERR-VALIDATION
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1658
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyUserGrantAccessRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyUserResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/agency-users/revoke-access:
+    post:
+      operationId: pty.AgencyUser.revokeAccess
+      summary: Revoke producer-code access of a user
+      description: |-
+        Revoke producer-code access of a user (BO-PTY-12, delegated agency administration).
+
+        The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+      tags:
+      - AgencyUser
+      x-requirement:
+      - REQ-PTY-245
+      - REQ-PTY-252
+      x-anchor:
+      - REQ-PTY-243
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'No dry-run'
+      x-exposure:
+      - ui
+      x-permission: pty.AgencyUser.revokeAccess
+      x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-OUT-OF-AGENCY
+        status: 403
+      - code: PTY-ERR-STATE
+        status: 409
+      - code: PTY-ERR-VALIDATION
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1658
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyUserRevokeAccessRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyUserResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/agency-users/suspend:
+    post:
+      operationId: pty.AgencyUser.suspend
+      summary: Suspend an agency user
+      description: |-
+        Suspend an agency user (BO-PTY-12, delegated agency administration).
+
+        The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+      tags:
+      - AgencyUser
+      x-requirement:
+      - REQ-PTY-246
+      - REQ-PTY-252
+      x-anchor:
+      - REQ-PTY-243
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'No dry-run'
+      x-exposure:
+      - ui
+      x-permission: pty.AgencyUser.suspend
+      x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-OUT-OF-AGENCY
+        status: 403
+      - code: PTY-ERR-LAST-ADMIN
+        status: 409
+      - code: PTY-ERR-STATE
+        status: 409
+      - code: PTY-ERR-VALIDATION
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1658
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyUserSuspendRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyUserResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/agency-users/reactivate:
+    post:
+      operationId: pty.AgencyUser.reactivate
+      summary: Reactivate a suspended agency user
+      description: |-
+        Reactivate a suspended agency user (BO-PTY-12, delegated agency administration).
+
+        The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+      tags:
+      - AgencyUser
+      x-requirement:
+      - REQ-PTY-246
+      - REQ-PTY-252
+      x-anchor:
+      - REQ-PTY-243
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'No dry-run'
+      x-exposure:
+      - ui
+      x-permission: pty.AgencyUser.reactivate
+      x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-OUT-OF-AGENCY
+        status: 403
+      - code: PTY-ERR-STATE
+        status: 409
+      - code: PTY-ERR-VALIDATION
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1658
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyUserReactivateRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyUserResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pty/v1/agency-users/remove-producer:
+    post:
+      operationId: pty.AgencyUser.removeProducer
+      summary: Remove a producer from the agency and re-assign the book
+      description: |-
+        Remove a producer from the agency and re-assign the book (BO-PTY-12, delegated agency administration).
+
+        The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+      tags:
+      - AgencyUser
+      x-requirement:
+      - REQ-PTY-247
+      - REQ-PTY-251
+      x-anchor:
+      - REQ-PTY-243
+      x-wave: W6
+      x-work-packages:
+      - W6-PTY-02
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'No dry-run'
+      x-exposure:
+      - ui
+      x-permission: pty.AgencyUser.removeProducer
+      x-error-codes:
+      - code: PTY-ERR-NOT-FOUND
+        status: 404
+      - code: PTY-ERR-OUT-OF-AGENCY
+        status: 403
+      - code: PTY-ERR-REASSIGNMENT-REQUIRED
+        status: 422
+      - code: PTY-ERR-LAST-ADMIN
+        status: 409
+      - code: PTY-ERR-STATE
+        status: 409
+      - code: PTY-ERR-VALIDATION
+        status: 422
+      - code: PTY-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - PRD-01 §9.1 l.1658
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgencyUserRemoveProducerRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgencyUserRemoveProducerResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/pty/v1/commission-agreements/resolve:
     post:
       operationId: pty.CommissionAgreement.resolve
@@ -5006,18 +5584,6 @@ x-operation-families:
   note: PRD names the family only; members are named by the owning work package (no invented verbs)
   x-source:
   - PRD-01 §9.1 l.1655
-- family: pty.AgencyUser.*
-  summary: Delegated administration
-  inputs: user, role, grants
-  outputs: —
-  x-requirement:
-  - REQ-PTY-243..REQ-PTY-252
-  x-wave: W6
-  x-status: unexpanded
-  x-maturity: pre-release
-  note: PRD names the family only; members are named by the owning work package (no invented verbs)
-  x-source:
-  - PRD-01 §9.1 l.1658
 - family: pty.Bancassurance.*
   summary: Partnerships
   inputs: partnership data, branch file
@@ -7936,6 +8502,218 @@ components:
       required:
       - policyId
       - history
+    AgencyUserView:
+      type: object
+      description: 'One user of an agency (REQ-PTY-243): the link between an external-realm identity and the agency, with its role and producer-code grants'
+      properties:
+        agencyUserId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        intermediaryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        externalSubject:
+          type: string
+          maxLength: 200
+          description: The identity-provider subject of the external user (the identity itself lives in PLT and the external realm)
+        displayName:
+          type: string
+          maxLength: 200
+        role:
+          type: string
+          enum:
+          - AGENCY_ADMIN
+          - OFFICE_MANAGER
+          - PRODUCER
+          - AGENCY_STAFF
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - SUSPENDED
+          - REMOVED
+        statusReason:
+          oneOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+        producerCodes:
+          type: array
+          description: The producer codes the user is granted (REQ-PTY-245), sorted
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - agencyUserId
+      - intermediaryId
+      - externalSubject
+      - displayName
+      - role
+      - status
+      - producerCodes
+    AgencyUserCreateRequest:
+      type: object
+      description: 'pty.AgencyUser.create request (BO-PTY-12, REQ-PTY-246): add a user to an agency. An agency administrator can only add to their own agency.'
+      properties:
+        intermediaryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        externalSubject:
+          type: string
+          minLength: 1
+          maxLength: 200
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        role:
+          type: string
+          enum:
+          - AGENCY_ADMIN
+          - OFFICE_MANAGER
+          - PRODUCER
+          - AGENCY_STAFF
+        producerCodes:
+          type: array
+          description: Optional initial grants; each must be a producer code of the agency
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - intermediaryId
+      - externalSubject
+      - displayName
+      - role
+    AgencyUserResponse:
+      type: object
+      description: 'Result of an agency-user command: the user after the change'
+      properties:
+        user:
+          $ref: '#/components/schemas/AgencyUserView'
+      required:
+      - user
+    AgencyUserListResponse:
+      type: object
+      description: 'pty.AgencyUser.list result: the non-removed users of the agency'
+      properties:
+        intermediaryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgencyUserView'
+      required:
+      - intermediaryId
+      - users
+    AgencyUserChangeRoleRequest:
+      type: object
+      description: 'pty.AgencyUser.changeRole request (BO-PTY-12, REQ-PTY-244). The last active administrator cannot be demoted.'
+      properties:
+        agencyUserId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        role:
+          type: string
+          enum:
+          - AGENCY_ADMIN
+          - OFFICE_MANAGER
+          - PRODUCER
+          - AGENCY_STAFF
+      required:
+      - agencyUserId
+      - role
+    AgencyUserGrantAccessRequest:
+      type: object
+      description: 'pty.AgencyUser.grantAccess request (BO-PTY-12, REQ-PTY-245): grant producer codes. Only codes of the user''s own agency can be granted. Emits ExternalUserAccessChanged to PLT.'
+      properties:
+        agencyUserId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        producerCodes:
+          type: array
+          minItems: 1
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - agencyUserId
+      - producerCodes
+    AgencyUserRevokeAccessRequest:
+      type: object
+      description: 'pty.AgencyUser.revokeAccess request (BO-PTY-12, REQ-PTY-245). Emits ExternalUserAccessChanged to PLT.'
+      properties:
+        agencyUserId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        producerCodes:
+          type: array
+          minItems: 1
+          items:
+            $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - agencyUserId
+      - producerCodes
+    AgencyUserSuspendRequest:
+      type: object
+      description: 'pty.AgencyUser.suspend request (BO-PTY-12, REQ-PTY-246): the record stays but PLT drops every grant. The last active administrator cannot be suspended.'
+      properties:
+        agencyUserId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - agencyUserId
+      - reason
+    AgencyUserReactivateRequest:
+      type: object
+      description: 'pty.AgencyUser.reactivate request (BO-PTY-12, REQ-PTY-246): grants held before the suspension are restored.'
+      properties:
+        agencyUserId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - agencyUserId
+      - reason
+    AgencyUserRemoveProducerRequest:
+      type: object
+      description: 'pty.AgencyUser.removeProducer request (BO-PTY-12, REQ-PTY-247): remove a producer from the agency. The book (every current producer of record on the producer''s codes) is re-assigned to reassignToProducerCode, a code of the same agency; the user is removed only when every term was moved.'
+      properties:
+        agencyUserId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reassignToProducerCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - agencyUserId
+      - reassignToProducerCode
+      - reason
+    AgencyUserRemoveProducerResponse:
+      type: object
+      description: 'pty.AgencyUser.removeProducer result: whether the user was removed and the per-term outcome of the book transfer (a refused term keeps the user active so the removal can be retried)'
+      properties:
+        removed:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/AgencyUserView'
+        transferId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        transferred:
+          type: integer
+        refused:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProducerOfRecordBulkTransferResult'
+      required:
+      - removed
+      - user
+      - transferred
+      - refused
+      - results
     CommissionAgreementResolveRequest:
       type: object
       description: 'pty.CommissionAgreement.resolve request (BO-PTY-11, REQ-PTY-010): which commission rate applies on a date. Give the policy (the producer of record on the date is found, with any split) or the intermediary directly. Nothing is written.'

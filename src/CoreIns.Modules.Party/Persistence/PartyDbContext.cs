@@ -56,6 +56,10 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
 
     public DbSet<ProducerOfRecordRow> ProducerOfRecords => Set<ProducerOfRecordRow>();
 
+    public DbSet<AgencyUserRow> AgencyUsers => Set<AgencyUserRow>();
+
+    public DbSet<AgencyGrantRow> AgencyGrants => Set<AgencyGrantRow>();
+
     public DbSet<PartyMergeRow> PartyMerges => Set<PartyMergeRow>();
 
     public DbSet<ScreeningCaseRow> ScreeningCases => Set<ScreeningCaseRow>();
@@ -235,6 +239,48 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
             entity.HasIndex(e => new { e.PolicyId, e.ValidFrom }).IsUnique().HasFilter("recorded_to IS NULL").HasDatabaseName("ux_producer_of_record_current_start");
             entity.HasIndex(e => new { e.IntermediaryId, e.ValidFrom }).HasDatabaseName("ix_producer_of_record_intermediary");
             entity.HasOne<IntermediaryRow>().WithMany().HasForeignKey(e => e.IntermediaryId).HasConstraintName("fk_producer_of_record_intermediary").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AgencyUserRow>(entity =>
+        {
+            entity.ToTable("agency_user", table =>
+            {
+                table.HasCheckConstraint("ck_agency_user_role", "role IN ('AGENCY_ADMIN','OFFICE_MANAGER','PRODUCER','AGENCY_STAFF')");
+                table.HasCheckConstraint("ck_agency_user_status", "status IN ('ACTIVE','SUSPENDED','REMOVED')");
+            });
+            entity.HasKey(e => e.AgencyUserId).HasName("pk_agency_user");
+            entity.Property(e => e.AgencyUserId).HasColumnName("agency_user_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.IntermediaryId).HasColumnName("intermediary_id");
+            entity.Property(e => e.ExternalSubject).HasColumnName("external_subject");
+            entity.Property(e => e.DisplayName).HasColumnName("display_name");
+            entity.Property(e => e.Role).HasColumnName("role");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.StatusReason).HasColumnName("status_reason");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.LegalEntityId, e.ExternalSubject }).IsUnique().HasFilter("status <> 'REMOVED'").HasDatabaseName("ux_agency_user_subject");
+            entity.HasIndex(e => new { e.IntermediaryId, e.Status }).HasDatabaseName("ix_agency_user_agency");
+            entity.HasOne<IntermediaryRow>().WithMany().HasForeignKey(e => e.IntermediaryId).HasConstraintName("fk_agency_user_intermediary").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AgencyGrantRow>(entity =>
+        {
+            entity.ToTable("agency_grant");
+            entity.HasKey(e => e.GrantId).HasName("pk_agency_grant");
+            entity.Property(e => e.GrantId).HasColumnName("grant_id");
+            entity.Property(e => e.AgencyUserId).HasColumnName("agency_user_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.IntermediaryId).HasColumnName("intermediary_id");
+            entity.Property(e => e.ProducerCode).HasColumnName("producer_code");
+            entity.Property(e => e.GrantedAt).HasColumnName("granted_at").HasColumnType("timestamptz");
+            entity.Property(e => e.GrantedBy).HasColumnName("granted_by");
+            entity.Property(e => e.RevokedAt).HasColumnName("revoked_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RevokedBy).HasColumnName("revoked_by");
+            entity.HasIndex(e => new { e.AgencyUserId, e.ProducerCode }).IsUnique().HasFilter("revoked_at IS NULL").HasDatabaseName("ux_agency_grant_open");
+            entity.HasIndex(e => new { e.LegalEntityId, e.ProducerCode }).HasDatabaseName("ix_agency_grant_code");
+            entity.HasOne<AgencyUserRow>().WithMany().HasForeignKey(e => e.AgencyUserId).HasConstraintName("fk_agency_grant_user").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<AccountRow>(entity =>
