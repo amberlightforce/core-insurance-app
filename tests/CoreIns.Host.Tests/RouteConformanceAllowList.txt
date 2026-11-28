@@ -201,15 +201,7 @@ CONTRACT_NOT_SERVED POST /api/chn/v1/webhooks/subscribe
 CONTRACT_NOT_SERVED POST /api/chn/v1/webhooks/verify
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/schedule
 CONTRACT_NOT_SERVED POST /api/clm/v1/conversations/send
-CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/export
-CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/purge
-CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/rectify
-CONTRACT_NOT_SERVED POST /api/clm/v1/dsar/restrict
 CONTRACT_NOT_SERVED POST /api/clm/v1/fraud/score
-CONTRACT_NOT_SERVED POST /api/clm/v1/import/claim
-CONTRACT_NOT_SERVED POST /api/clm/v1/import/convert-currency
-CONTRACT_NOT_SERVED POST /api/clm/v1/import/financial-history
-CONTRACT_NOT_SERVED POST /api/clm/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/clm/v1/redresses/request
 CONTRACT_NOT_SERVED POST /api/clm/v1/services/cancel
 CONTRACT_NOT_SERVED POST /api/clm/v1/services/request
