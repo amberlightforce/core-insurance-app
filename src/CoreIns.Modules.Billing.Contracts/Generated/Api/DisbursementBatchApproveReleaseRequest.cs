@@ -4,20 +4,18 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.DisbursementBatch.approveRelease request. PRD inputs: "bank account, value date"</summary>
+/// <summary>bil.DisbursementBatch.approveRelease request (BO-BIL-10): the second person releases the batch to the bank. The approver must hold Staff.BillingManager and must be neither the person who requested the release nor the requester of any item in the batch (BIL-ERR-SOD).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DisbursementBatchApproveReleaseRequest
 {
-    /// <summary>PRD: "bank account"</summary>
+    /// <summary>Contract member 'batchId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'batchId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("bankAccount")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? BankAccount { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("batchId")]
+    public required global::System.Guid BatchId { get; init; }
 
-    /// <summary>PRD: "value date"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("valueDate")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? ValueDate { get; init; }
+    /// <summary>The hash of the file as shown by release; a different current hash is BIL-ERR-STALE.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("fileHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash FileHash { get; init; }
 }

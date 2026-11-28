@@ -107,6 +107,14 @@ internal sealed class ClaimRow : ClaimsRow
 
     public int ReopenCount { get; set; }
 
+    /// <summary>The CAT event code the claim is tagged to (BO-CLM-08); null = untagged.</summary>
+    public string? CatEventCode { get; set; }
+
+    /// <summary>Tracking milestone code (BO-CLM-08) and when it was set.</summary>
+    public string? Milestone { get; set; }
+
+    public Instant? MilestoneAt { get; set; }
+
     /// <summary>Last exposure sequence issued for this claim (exposure numbers = claim number + sequence, REQ-CLM-043).</summary>
     public int LastExposureSequence { get; set; }
 
@@ -221,6 +229,36 @@ internal sealed class FnolDraftRow : ClaimsRow
 
     /// <summary>The claim the draft became on submit.</summary>
     public ClaimId? ClaimId { get; set; }
+
+    public Instant UpdatedAt { get; set; }
+}
+
+/// <summary><c>clm.cat_event</c>: the CAT event register (BO-CLM-08, REQ-CLM-210..215). Claims are tagged by code.</summary>
+internal sealed class CatEventRow : ClaimsRow
+{
+    public const string Open = "OPEN";
+    public const string Closed = "CLOSED";
+
+    public Guid CatEventId { get; set; }
+
+    public string CatCode { get; set; } = string.Empty;
+
+    public string Name { get; set; } = string.Empty;
+
+    public string[] Perils { get; set; } = [];
+
+    public string Region { get; set; } = string.Empty;
+
+    public Instant WindowFrom { get; set; }
+
+    /// <summary>Null = open-ended window.</summary>
+    public Instant? WindowTo { get; set; }
+
+    public string Status { get; set; } = Open;
+
+    public string? CloseReason { get; set; }
+
+    public Instant? ClosedAt { get; set; }
 
     public Instant UpdatedAt { get; set; }
 }

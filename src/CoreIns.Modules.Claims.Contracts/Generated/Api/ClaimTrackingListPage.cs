@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>Page of clm.ClaimTracking.list results (cursor pagination, contract §3.5.5)</summary>
+/// <summary>Page of clm.ClaimTracking.list results, oldest claim first (cursor pagination, contract §3.5.5)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ClaimTrackingListPage
 {

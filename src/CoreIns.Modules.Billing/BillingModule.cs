@@ -62,6 +62,7 @@ public static class BillingModule
                 $"GRANT SELECT, INSERT ON {Schema}.migration_receivable, {Schema}.migration_mandate TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.suspense_item TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.levy_payable TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.disbursement_batch, {Schema}.disbursement_batch_item TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
@@ -137,6 +138,18 @@ public static class BillingModule
         services.AddCommandAuditor<VerifyPayeeAccount, PayeeAccountVerifyResponse, VerifyPayeeAccountAuditor>();
         services.AddCommand<VerifyPayeeAccount, PayeeAccountVerifyResponse, VerifyPayeeAccountHandler>(
             CommandDescriptor.For("bil.PayeeAccount.verify") with { SupportsDryRun = false });
+        services.AddScoped<PayeeScreener>();
+        services.AddScoped<DisbursementBatchFiles>();
+        services.AddScoped<IValidator<PrepareDisbursementBatch>, PrepareDisbursementBatchValidator>();
+        services.AddCommandAuditor<PrepareDisbursementBatch, DisbursementBatchPrepareResponse, PrepareDisbursementBatchAuditor>();
+        services.AddCommand<PrepareDisbursementBatch, DisbursementBatchPrepareResponse, PrepareDisbursementBatchHandler>(
+            CommandDescriptor.For("bil.DisbursementBatch.prepare") with { SupportsDryRun = true });
+        services.AddCommandAuditor<RequestDisbursementBatchRelease, DisbursementBatchReleaseResponse, RequestDisbursementBatchReleaseAuditor>();
+        services.AddCommand<RequestDisbursementBatchRelease, DisbursementBatchReleaseResponse, RequestDisbursementBatchReleaseHandler>(
+            CommandDescriptor.For("bil.DisbursementBatch.release") with { SupportsDryRun = true });
+        services.AddCommandAuditor<ApproveDisbursementBatchRelease, DisbursementBatchApproveReleaseResponse, ApproveDisbursementBatchReleaseAuditor>();
+        services.AddCommand<ApproveDisbursementBatchRelease, DisbursementBatchApproveReleaseResponse, ApproveDisbursementBatchReleaseHandler>(
+            CommandDescriptor.For("bil.DisbursementBatch.approveRelease") with { SupportsDryRun = true });
         services.AddScoped<DisbursementReleaser>();
         services.AddScoped<IValidator<ApproveDisbursementRelease>, ApproveDisbursementReleaseValidator>();
         services.AddCommandAuditor<ApproveDisbursementRelease, DisbursementApproveReleaseResponse, ApproveDisbursementReleaseAuditor>();
@@ -317,6 +330,10 @@ public static class BillingModule
             .Describe("Εισφορά που στηρίζεται σε γραμμές χωρίς διευθετημένο νομικό καθεστώς δεν πληρώνεται σε παραγωγή.", "A levy that rests on rows that are not legally settled is not paid in Production."),
         ErrorDefinition.For(ModuleCode.BIL, "NOTHING-PAYABLE", 422, "Δεν υπάρχει πληρωτέα εισφορά", "There is no levy to pay")
             .Describe("Δεν υπάρχει θετικό καθαρό ποσό εισφοράς για την περίοδο και το νόμισμα.", "There is no positive net levy for the period and currency."),
+        ErrorDefinition.For(ModuleCode.BIL, "HELD-ITEMS", 422, "Πληρωμές σε αναμονή", "Disbursements on hold")
+            .Describe("Μία ή περισσότερες πληρωμές δεν μπορούν να μπουν σε δέσμη (δεν είναι εγκεκριμένες, είναι ήδη σε δέσμη ή ο δικαιούχος δεν είναι επαληθευμένος).", "One or more disbursements cannot enter a batch (not Approved, already in a batch, or the payee is not verified)."),
+        ErrorDefinition.For(ModuleCode.BIL, "METHOD-UNAVAILABLE", 503, "Η τράπεζα δεν είναι διαθέσιμη", "Bank channel unavailable")
+            .Describe("Δεν έχει συνδεθεί τραπεζικό κανάλι ή αποθήκη αρχείων τράπεζας· η πληρωμή δεν γίνεται (fail closed).", "No bank channel or bank-file store is bound; nothing is prepared or released (fail closed)."),
     ];
 }
 
