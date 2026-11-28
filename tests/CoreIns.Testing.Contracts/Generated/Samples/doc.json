@@ -278,6 +278,16 @@
       "statuses": "unspecified",
       "completeness": "unspecified"
     },
+    "DocumentDecideReprintRequest": {
+      "approvalRequestId": "0192c78e-ab59-760b-8e25-05304805831c",
+      "decision": "APPROVE",
+      "comment": "sample"
+    },
+    "DocumentDecideReprintResponse": {
+      "status": "sample",
+      "documentId": "0192c3f6-10db-7a88-82f7-74cee431939c",
+      "deliveryId": "0192000a-e34e-7489-8d87-83658bb1abe2"
+    },
     "DocumentDeleteDraftRequest": {
       "documentId": "0192dfcb-d99c-725e-8730-bf1fff52d546",
       "reason": "unspecified"

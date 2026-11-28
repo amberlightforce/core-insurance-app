@@ -160,6 +160,7 @@ public sealed class DocumentCoreTests(PostgresFixture database) : IClassFixture<
 
         var (ok, okBody) = await SendAsync(client, HttpMethod.Post, "/api/doc/v1/documents/reprint", new { documentId = noticeId, reason = "LOST_IN_POST" }, roles: Admin);
         ok.StatusCode.ShouldBe(HttpStatusCode.OK, okBody?.ToJsonString());
+        okBody!["link"]!.Text("status").ShouldBe("PENDING_APPROVAL"); // a statutory reprint waits for a second approver (BO-DOC-03)
 
         var (_, ack) = await RequestAsync(client, RequestBody("DT-WITHDRAWAL-ACK", Guid.NewGuid().ToString(), Guid.CreateVersion7(), Guid.NewGuid().ToString()));
         (await SendAsync(client, HttpMethod.Post, "/api/doc/v1/documents/reprint", new { documentId = ack.Text("documentId") }, roles: Admin)).Response.StatusCode.ShouldBe(HttpStatusCode.OK);
