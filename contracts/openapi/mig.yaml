@@ -30,6 +30,7 @@ tags:
 - name: Quality
 - name: Mapping
 - name: Wave
+- name: Cutover
 paths:
   /api/mig/v1/xrefs/register:
     post:
@@ -2937,6 +2938,262 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/cutover/plan:
+    post:
+      operationId: mig.Cutover.plan
+      summary: Plan a rehearsal or cut-over
+      description: |-
+        Plan a rehearsal or cut-over
+
+        Inputs: plan name, kind (REHEARSAL or CUTOVER), reconciliation and sign-off scope, and the ordered batch ids to run. Outputs: the plan with its ordered steps: one GO_NO_GO step, then one BATCH_RUN step per batch. Idempotent by name: planning the same plan again returns it; a different definition under the same name is refused. A rehearsal uses synthetic data only.
+      tags:
+      - Cutover
+      x-requirement:
+      - REQ-MIG-186..REQ-MIG-190
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-12: a cut-over step records timings; the batches have their own dry run'
+      x-exposure:
+      - ui
+      x-permission: mig.Cutover.plan
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      x-source:
+      - BO-MIG-12
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CutoverPlanRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CutoverPlan'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/cutover/start-step:
+    post:
+      operationId: mig.Cutover.startStep
+      summary: Start a cut-over step
+      description: |-
+        Start a cut-over step
+
+        Inputs: plan id and step sequence. Outputs: the plan. A step starts only when every earlier step is done and no step is running; the start time is stored.
+      tags:
+      - Cutover
+      x-requirement:
+      - REQ-MIG-186..REQ-MIG-190
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-12: a cut-over step records timings; the batches have their own dry run'
+      x-exposure:
+      - ui
+      x-permission: mig.Cutover.startStep
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      x-source:
+      - BO-MIG-12
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CutoverStepRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CutoverPlan'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/cutover/complete-step:
+    post:
+      operationId: mig.Cutover.completeStep
+      summary: Complete a cut-over step
+      description: |-
+        Complete a cut-over step
+
+        Inputs: plan id, step sequence and an optional note. Outputs: the plan with the step duration. GO_NO_GO is evaluated from the latest reconciliation and the wave sign-off status: a cut-over step with blockers is refused, a rehearsal records NO_GO and the blockers. A BATCH_RUN step needs its batch COMPLETED.
+      tags:
+      - Cutover
+      x-requirement:
+      - REQ-MIG-186..REQ-MIG-190
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-12: a cut-over step records timings; the batches have their own dry run'
+      x-exposure:
+      - ui
+      x-permission: mig.Cutover.completeStep
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      - code: MIG-ERR-VALIDATION
+        status: 422
+      x-source:
+      - BO-MIG-12
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CutoverStepRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CutoverPlan'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/mig/v1/cutover/rollback:
+    post:
+      operationId: mig.Cutover.rollback
+      summary: Roll a cut-over back
+      description: |-
+        Roll a cut-over back
+
+        Inputs: plan id and dryRun. Outputs: the plan and one rollback outcome per batch. Reverses the batches that ran, last first, through the batch reverse operation (module reversers), then restores the routing of wave terms they converted. The real rollback needs a dry run of the plan first and stops at the first batch whose reversal is blocked (plan ROLLBACK_BLOCKED); routing is restored only for batches fully reversed.
+      tags:
+      - Cutover
+      x-requirement:
+      - REQ-MIG-186..REQ-MIG-190
+      x-wave: W9
+      x-work-packages:
+      - W9-MIG-04
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-dry-run-note: 'BO-MIG-12: the dryRun field of the body previews the reversal of every batch (like mig.Batch.reverse); the real rollback needs that preview first'
+      x-exposure:
+      - ui
+      x-permission: mig.Cutover.rollback
+      x-error-codes:
+      - code: MIG-ERR-IDEMPOTENCY-MISMATCH
+        status: 409
+      - code: MIG-ERR-NOT-FOUND
+        status: 404
+      - code: MIG-ERR-BATCH-STATE
+        status: 409
+      - code: MIG-ERR-DRYRUN-REQUIRED
+        status: 422
+      x-source:
+      - BO-MIG-12
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CutoverRollbackRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CutoverPlan'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
 x-operation-families:
 - family: mig.Cohort.*
   summary: Plan and run waves and cohorts
@@ -4394,3 +4651,120 @@ components:
           type: [integer, 'null']
           description: Terms held back by this convert call.
       required: [waveId, name, status, source, snapshot, objectType, termEndField, windowFrom, windowTo, scope, selectedCount, counts, equationHolds, batches, terms, createdBy]
+    CutoverPlanRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        kind:
+          type: string
+          description: REHEARSAL (synthetic data only) or CUTOVER.
+        scope:
+          type: string
+          description: Reconciliation and sign-off scope the go/no-go reads.
+        batchIds:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Batches to run, in order.
+      required: [name, kind, scope, batchIds]
+    CutoverStepRequest:
+      type: object
+      properties:
+        planId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        seq:
+          type: integer
+          description: Sequence of the step (1 based).
+        note:
+          type: [string, 'null']
+          description: Free note stored with the step (complete-step only).
+      required: [planId, seq]
+    CutoverRollbackRequest:
+      type: object
+      properties:
+        planId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        dryRun:
+          type: boolean
+      required: [planId, dryRun]
+    CutoverStep:
+      type: object
+      properties:
+        seq:
+          type: integer
+        kind:
+          type: string
+          description: GO_NO_GO or BATCH_RUN.
+        batchId:
+          type: [string, 'null']
+          format: uuid
+        status:
+          type: string
+          description: PENDING, IN_PROGRESS, DONE or ROLLED_BACK.
+        startedAt:
+          type: [string, 'null']
+          format: date-time
+        completedAt:
+          type: [string, 'null']
+          format: date-time
+        durationMs:
+          type: [integer, 'null']
+          description: Time between start and completion.
+        result:
+          type: [string, 'null']
+          description: GO or NO_GO for the GO_NO_GO step.
+        note:
+          type: [string, 'null']
+      required: [seq, kind, status]
+    CutoverRollbackOutcome:
+      type: object
+      properties:
+        batchId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        status:
+          type: string
+          description: Batch status after the reversal (or as previewed).
+        reversed:
+          type: integer
+        blocked:
+          type: integer
+        routingRestored:
+          type: integer
+          description: Wave terms whose CORE routing was set back to the legacy master.
+      required: [batchId, status, reversed, blocked, routingRestored]
+    CutoverPlan:
+      type: object
+      properties:
+        planId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        name:
+          type: string
+        kind:
+          type: string
+        scope:
+          type: string
+        status:
+          type: string
+          description: PLANNED, IN_PROGRESS, COMPLETED, ROLLED_BACK or ROLLBACK_BLOCKED.
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/CutoverStep'
+        totalDurationMs:
+          type: integer
+          description: Sum of the step durations stored so far.
+        rollbackPreviewedAt:
+          type: [string, 'null']
+          format: date-time
+        rolledBackAt:
+          type: [string, 'null']
+          format: date-time
+        rollback:
+          type: array
+          items:
+            $ref: '#/components/schemas/CutoverRollbackOutcome'
+          description: Per batch outcome of the rollback call that produced this response (empty otherwise).
+        createdBy:
+          type: string
+      required: [planId, name, kind, scope, status, steps, totalDurationMs, rollback, createdBy]

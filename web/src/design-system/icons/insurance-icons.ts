@@ -1,5 +1,6 @@
 import {
   Blocks,
+  SlidersHorizontal,
   BookOpen,
   BrainCircuit,
   DatabaseZap,
@@ -89,6 +90,7 @@ export const moduleIcons = {
   complaints: MessageSquareWarning,
   dsar: FileSearch,
   packs: Blocks,
+  marketConfig: SlidersHorizontal,
   migration: DatabaseZap,
   aiControl: BrainCircuit,
 } as const satisfies Record<string, LucideIcon>;
