@@ -4,28 +4,27 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.BillingAccount.changePayer request. PRD inputs: "new payer, effective date, reason"</summary>
+/// <summary>bil.BillingAccount.changePayer request (BO-BIL-01). The new payer must exist in PTY and be ACTIVE or PROSPECT; the ledger is not touched. Refused while a draft or active mandate of the old payer is on the account.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BillingAccountChangePayerRequest
 {
-    /// <summary>PRD: "new payer"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("newPayer")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? NewPayer { get; init; }
+    /// <summary>Contract member 'billingAccountId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("billingAccountId")]
+    public required global::CoreIns.SharedKernel.Identifiers.BillingAccountId BillingAccountId { get; init; }
 
-    /// <summary>PRD: "effective date"</summary>
+    /// <summary>Contract member 'newPayerPartyId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'newPayerPartyId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("newPayerPartyId")]
+    public required global::System.Guid NewPayerPartyId { get; init; }
+
+    /// <summary>Not after today (a future-dated change is not supported yet); defaults to today</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("effectiveDate")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.BusinessDate? EffectiveDate { get; init; }
 
-    /// <summary>PRD: "reason"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Why; kept in the audit record</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Reason { get; init; }
+    public required string Reason { get; init; }
 }

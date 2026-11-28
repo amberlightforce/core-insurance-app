@@ -4,36 +4,16 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.BillingAccount.reopen request. PRD inputs: "payer, currency, preferences / criteria"</summary>
+/// <summary>bil.BillingAccount.reopen request (BO-BIL-01). CLOSED to ACTIVE; refused when the payer already has another ACTIVE account in the currency.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BillingAccountReopenRequest
 {
-    /// <summary>PRD: "payer"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("payer")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Payer { get; init; }
+    /// <summary>Contract member 'billingAccountId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("billingAccountId")]
+    public required global::CoreIns.SharedKernel.Identifiers.BillingAccountId BillingAccountId { get; init; }
 
-    /// <summary>PRD: "currency"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("currency")]
+    /// <summary>Why; kept in the audit record</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Currency? Currency { get; init; }
-
-    /// <summary>PRD: "preferences"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("preferences")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Preferences { get; init; }
-
-    /// <summary>PRD: "criteria"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("criteria")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Criteria { get; init; }
+    public string? Reason { get; init; }
 }
