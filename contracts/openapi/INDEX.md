@@ -8,24 +8,24 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 
 | Module | Operations | Full | Minimal | Commands | Queries | In-process only | Partner-facing | Unexpanded families |
 |---|---|---|---|---|---|---|---|---|
-| [PTY](#pty) | 67 | 50 | 17 | 47 | 20 | 5 | 0 | 5 |
+| [PTY](#pty) | 79 | 62 | 17 | 55 | 24 | 5 | 0 | 4 |
 | [PFC](#pfc) | 34 | 31 | 3 | 17 | 17 | 1 | 1 | 0 |
 | [RAT](#rat) | 47 | 47 | 0 | 24 | 23 | 3 | 2 | 0 |
 | [UW](#uw) | 82 | 58 | 24 | 57 | 25 | 3 | 2 | 4 |
 | [POL](#pol) | 58 | 54 | 4 | 40 | 18 | 8 | 10 | 0 |
 | [BIL](#bil) | 90 | 90 | 0 | 56 | 34 | 6 | 5 | 1 |
-| [CLM](#clm) | 73 | 73 | 0 | 53 | 20 | 10 | 9 | 5 |
-| [RI](#ri) | 119 | 113 | 6 | 85 | 34 | 9 | 0 | 0 |
+| [CLM](#clm) | 77 | 77 | 0 | 55 | 22 | 10 | 9 | 5 |
+| [RI](#ri) | 120 | 114 | 6 | 85 | 35 | 9 | 0 | 0 |
 | [FIN](#fin) | 88 | 80 | 8 | 55 | 33 | 10 | 0 | 3 |
 | [DOC](#doc) | 47 | 46 | 1 | 27 | 20 | 4 | 12 | 0 |
-| [CMP](#cmp) | 90 | 53 | 37 | 69 | 21 | 21 | 0 | 3 |
-| [CHN](#chn) | 101 | 62 | 39 | 62 | 39 | 3 | 25 | 2 |
+| [CMP](#cmp) | 93 | 62 | 31 | 69 | 24 | 21 | 0 | 3 |
+| [CHN](#chn) | 106 | 62 | 44 | 67 | 39 | 3 | 25 | 2 |
 | [WRK](#wrk) | 58 | 23 | 35 | 40 | 18 | 9 | 3 | 14 |
 | [PLT](#plt) | 101 | 67 | 34 | 63 | 38 | 25 | 0 | 10 |
-| [DAT](#dat) | 46 | 46 | 0 | 28 | 18 | 5 | 0 | 0 |
+| [DAT](#dat) | 47 | 47 | 0 | 28 | 19 | 5 | 0 | 0 |
 | [MIG](#mig) | 45 | 45 | 0 | 29 | 16 | 5 | 0 | 12 |
 | [MKT](#mkt) | 50 | 38 | 12 | 17 | 33 | 1 | 0 | 5 |
-| **Total** | 1196 | 976 | 220 | 769 | 427 | 128 | 69 | 64 |
+| **Total** | 1222 | 1003 | 219 | 784 | 438 | 128 | 69 | 63 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -45,6 +45,14 @@ Contract anchors: 174; covered by operations or families: 164; not an API (reaso
 | `pty.Account.setHolder` | POST `/api/pty/v1/accounts/set-holder` | C |  | ui | UW | W2 | minimal | REQ-PTY-004 |
 | `pty.Account.split` | POST `/api/pty/v1/accounts/split` | C | yes | ui | UW | W6 | full | REQ-PTY-123, REQ-PTY-124, REQ-PTY-126 |
 | `pty.Account.withdraw` | POST `/api/pty/v1/accounts/withdraw` | C |  | ui | UW | W2 | minimal | REQ-PTY-004 |
+| `pty.AgencyUser.changeRole` | POST `/api/pty/v1/agency-users/change-role` | C |  | ui |  | W6 | full | REQ-PTY-244, REQ-PTY-246 |
+| `pty.AgencyUser.create` | POST `/api/pty/v1/agency-users` | C |  | ui |  | W6 | full | REQ-PTY-243, REQ-PTY-244, REQ-PTY-246 |
+| `pty.AgencyUser.grantAccess` | POST `/api/pty/v1/agency-users/grant-access` | C |  | ui |  | W6 | full | REQ-PTY-245, REQ-PTY-252 |
+| `pty.AgencyUser.list` | GET `/api/pty/v1/agency-users` | Q |  | ui |  | W6 | full | REQ-PTY-243, REQ-PTY-245 |
+| `pty.AgencyUser.reactivate` | POST `/api/pty/v1/agency-users/reactivate` | C |  | ui |  | W6 | full | REQ-PTY-246, REQ-PTY-252 |
+| `pty.AgencyUser.removeProducer` | POST `/api/pty/v1/agency-users/remove-producer` | C |  | ui |  | W6 | full | REQ-PTY-247, REQ-PTY-251 |
+| `pty.AgencyUser.revokeAccess` | POST `/api/pty/v1/agency-users/revoke-access` | C |  | ui |  | W6 | full | REQ-PTY-245, REQ-PTY-252 |
+| `pty.AgencyUser.suspend` | POST `/api/pty/v1/agency-users/suspend` | C |  | ui |  | W6 | full | REQ-PTY-246, REQ-PTY-252 |
 | `pty.CommissionAgreement.approve` | POST `/api/pty/v1/commission-agreements/approve` | C | yes | ui |  | W6 | minimal | REQ-PTY-010 |
 | `pty.CommissionAgreement.compare` | GET `/api/pty/v1/commission-agreements/compare` | Q |  | ui |  | W6 | minimal | REQ-PTY-010 |
 | `pty.CommissionAgreement.createVersion` | POST `/api/pty/v1/commission-agreements/create-version` | C |  | ui |  | W6 | minimal | REQ-PTY-010 |
@@ -71,12 +79,16 @@ Contract anchors: 174; covered by operations or families: 164; not an API (reaso
 | `pty.LifeEvent.complete` | POST `/api/pty/v1/life-events/complete` | C | yes | ui |  | W6 | full | REQ-PTY-113 |
 | `pty.LifeEvent.reverse` | POST `/api/pty/v1/life-events/reverse` | C | yes | ui |  | W6 | full | REQ-PTY-113 |
 | `pty.LifeEvent.start` | POST `/api/pty/v1/life-events/start` | C | yes | ui |  | W6 | full | REQ-PTY-113 |
-| `pty.Location.add` | POST `/api/pty/v1/locations/add` | C |  | ui |  | W2 | full | REQ-PTY-012, REQ-PTY-085 |
-| `pty.Location.remove` | POST `/api/pty/v1/locations/remove` | C |  | ui |  | W2 | full | REQ-PTY-085 |
-| `pty.Location.update` | PATCH `/api/pty/v1/locations/{id}` | C |  | ui |  | W2 | full | REQ-PTY-012, REQ-PTY-085 |
+| `pty.Location.add` | POST `/api/pty/v1/locations/add` | C |  | ui | CHN | W2 | full | REQ-PTY-012, REQ-PTY-085 |
+| `pty.Location.remove` | POST `/api/pty/v1/locations/remove` | C |  | ui | CHN | W2 | full | REQ-PTY-085 |
+| `pty.Location.update` | PATCH `/api/pty/v1/locations/{id}` | C |  | ui | CHN | W2 | full | REQ-PTY-012, REQ-PTY-085 |
+| `pty.Party.approveMerge` | POST `/api/pty/v1/parties/merge/approve` | C |  | ui |  | W6 | full | REQ-PTY-007 |
 | `pty.Party.create` | POST `/api/pty/v1/parties` | C | yes | ui | CHN, CLM, POL | W2 | full | REQ-PTY-001, REQ-PTY-012, REQ-PTY-038 |
+| `pty.Party.duplicates` | GET `/api/pty/v1/parties/duplicates` | Q |  | ui |  | W6 | full | REQ-PTY-007 |
 | `pty.Party.get` | GET `/api/pty/v1/parties/{id}` | Q |  | ui | BIL, CHN, CLM, CMP, DOC, FIN, PLT, POL, RI, UW | W2 | full | REQ-PTY-001, REQ-PTY-036 |
 | `pty.Party.merge` | POST `/api/pty/v1/parties/merge` | C | yes | ui | MIG | W6 | full | REQ-PTY-007 |
+| `pty.Party.mergeList` | GET `/api/pty/v1/parties/merges` | Q |  | ui |  | W6 | full | REQ-PTY-007 |
+| `pty.Party.resolveSurvivor` | GET `/api/pty/v1/parties/{id}/survivor` | Q |  | ui | BIL, CHN, CLM, POL, UW | W6 | full | REQ-PTY-007 |
 | `pty.Party.search` | GET `/api/pty/v1/parties/search` | Q |  | ui | CHN, CLM, CMP, PLT, POL, UW, WRK | W2 | full | REQ-PTY-001, REQ-PTY-068 |
 | `pty.Party.searchByCriteria` | POST `/api/pty/v1/parties/search` | Q |  | ui | CHN, CLM, CMP, PLT, POL, UW, WRK | W2 | full | REQ-PTY-001, REQ-PTY-060, REQ-PTY-068 |
 | `pty.Party.unmerge` | POST `/api/pty/v1/parties/unmerge` | C | yes | ui | MIG | W2 | full | REQ-PTY-007, REQ-PTY-138 |
@@ -109,7 +121,6 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 |---|---|---|---|---|
 | `pty.Appointment.*` | Appointments and codes |  | W2 | REQ-PTY-204..REQ-PTY-206 |
 | `pty.ProducerCode.*` | Appointments and codes |  | W2 | REQ-PTY-204..REQ-PTY-206 |
-| `pty.AgencyUser.*` | Delegated administration |  | W6 | REQ-PTY-243..REQ-PTY-252 |
 | `pty.Bancassurance.*` | Partnerships |  | unscheduled | REQ-PTY-253..REQ-PTY-258 |
 | `pty.Import.*` | Migration import |  | W9 | REQ-PTY-013 |
 
@@ -481,6 +492,9 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | Operation | Method and path | Kind | DR | Exposure | Consumers | Wave | Status | Requirements |
 |---|---|---|---|---|---|---|---|---|
 | `clm.CatEvent.aggregate` | GET `/api/clm/v1/cat-events/aggregate` | Q |  | ui | RI | W7 | full | REQ-CLM-215 |
+| `clm.CatEvent.close` | POST `/api/clm/v1/cat-events/close` | C |  | ui |  | W7 | full | REQ-CLM-006, REQ-CLM-210..REQ-CLM-215 |
+| `clm.CatEvent.declare` | POST `/api/clm/v1/cat-events` | C |  | ui |  | W7 | full | REQ-CLM-006, REQ-CLM-210..REQ-CLM-215 |
+| `clm.CatEvent.list` | GET `/api/clm/v1/cat-events` | Q |  | ui |  | W7 | full | REQ-CLM-006, REQ-CLM-210..REQ-CLM-215 |
 | `clm.Certificate.assemble` | POST `/api/clm/v1/certificates/assemble` | C | yes | ui |  | W7 | full | REQ-CLM-008, REQ-CLM-170..REQ-CLM-173 |
 | `clm.Certificate.issue` | POST `/api/clm/v1/certificates/issue` | C | yes | ui |  | W7 | full | REQ-CLM-008, REQ-CLM-170..REQ-CLM-173 |
 | `clm.Certificate.request` | POST `/api/clm/v1/certificates/request` | C | yes | ui | CHN | W7 | full | REQ-CLM-008, REQ-CLM-170..REQ-CLM-173 |
@@ -509,6 +523,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `clm.Financials.dailyTotals` | GET `/api/clm/v1/financials/daily-totals` | Q |  | internal |  | W7 | full | REQ-CLM-106 |
 | `clm.Financials.get` | GET `/api/clm/v1/financials/get` | Q |  | ui | RI | W7 | full | REQ-CLM-101 |
 | `clm.Fnol.get` | GET `/api/clm/v1/fnol/{id}` | Q |  | ui |  | W7 | full | REQ-CLM-001 |
+| `clm.Fnol.getDraft` | GET `/api/clm/v1/fnol/drafts/{draftId}` | Q |  | ui |  | W7 | full | REQ-CLM-001 |
 | `clm.Fnol.saveDraft` | POST `/api/clm/v1/fnol/save-draft` | C | yes | ui, partner | CHN | W7 | full | REQ-CLM-001 |
 | `clm.Fnol.submit` | POST `/api/clm/v1/fnol/submit` | C | yes | ui, partner | CHN | W7 | full | REQ-CLM-001 |
 | `clm.Fnol.validate` | POST `/api/clm/v1/fnol/validate` | Q |  | ui, partner | CHN | W7 | full | REQ-CLM-001 |
@@ -585,10 +600,11 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `ri.Bordereau.generate` | POST `/api/ri/v1/bordereaus/generate` | C | yes | ui |  | unscheduled | full | REQ-RI-006, REQ-RI-175 |
 | `ri.Bordereau.issue` | POST `/api/ri/v1/bordereaus/issue` | C | yes | ui |  | unscheduled | full | REQ-RI-006, REQ-RI-175 |
 | `ri.Bordereau.submit` | POST `/api/ri/v1/bordereaus/submit` | C | yes | ui |  | unscheduled | full | REQ-RI-006, REQ-RI-175 |
-| `ri.CashCall.cancel` | POST `/api/ri/v1/cash-calls/cancel` | C | yes | ui |  | unscheduled | full | REQ-RI-187, REQ-RI-188 |
-| `ri.CashCall.issue` | POST `/api/ri/v1/cash-calls/issue` | C | yes | ui |  | unscheduled | full | REQ-RI-187, REQ-RI-188 |
-| `ri.CashCall.raise` | POST `/api/ri/v1/cash-calls/raise` | C | yes | ui |  | unscheduled | full | REQ-RI-187, REQ-RI-188 |
-| `ri.CashCall.recordReceipt` | POST `/api/ri/v1/cash-calls/record-receipt` | C | yes | ui |  | unscheduled | full | REQ-RI-187, REQ-RI-188 |
+| `ri.CashCall.cancel` | POST `/api/ri/v1/cash-calls/cancel` | C |  | ui |  | W7 | full | REQ-RI-187, REQ-RI-188 |
+| `ri.CashCall.issue` | POST `/api/ri/v1/cash-calls/issue` | C |  | ui |  | W7 | full | REQ-RI-187, REQ-RI-188 |
+| `ri.CashCall.list` | GET `/api/ri/v1/cash-calls` | Q |  | ui |  | W7 | full | REQ-RI-187 |
+| `ri.CashCall.raise` | POST `/api/ri/v1/cash-calls/raise` | C |  | ui |  | W7 | full | REQ-RI-187, REQ-RI-188 |
+| `ri.CashCall.recordReceipt` | POST `/api/ri/v1/cash-calls/record-receipt` | C |  | ui |  | W7 | full | REQ-RI-187, REQ-RI-188 |
 | `ri.CatOccurrence.confirm` | POST `/api/ri/v1/cat-occurrences/confirm` | C | yes | ui |  | unscheduled | full | REQ-RI-140, REQ-RI-141, REQ-RI-219 |
 | `ri.CatOccurrence.estimate` | POST `/api/ri/v1/cat-occurrences/estimate` | Q |  | ui |  | unscheduled | full | REQ-RI-140, REQ-RI-141, REQ-RI-219 |
 | `ri.CatOccurrence.propose` | POST `/api/ri/v1/cat-occurrences/propose` | C | yes | ui |  | unscheduled | full | REQ-RI-140, REQ-RI-141, REQ-RI-219 |
@@ -930,13 +946,16 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `cmp.FiscalReconciliation.breaks` | GET `/api/cmp/v1/fiscal-reconciliation/breaks` | Q |  | ui |  | W5 | full | REQ-CMP-053, REQ-CMP-055 |
 | `cmp.FiscalReconciliation.run` | POST `/api/cmp/v1/fiscal-reconciliation/run` | C | yes | ui |  | W5 | full | REQ-CMP-053, REQ-CMP-055 |
 | `cmp.FiscalRule.certify` | POST `/api/cmp/v1/fiscal-rules/certify` | Q |  | internal | MKT | unscheduled | full | REQ-CMP-260 |
-| `cmp.Submission.approve` | POST `/api/cmp/v1/submissions/approve` | C |  | ui |  | W8 | minimal | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
-| `cmp.Submission.attachContent` | POST `/api/cmp/v1/submissions/attach-content` | C |  | ui |  | W8 | minimal | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
-| `cmp.Submission.comment` | POST `/api/cmp/v1/submissions/comment` | C |  | ui |  | W8 | minimal | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
-| `cmp.Submission.create` | POST `/api/cmp/v1/submissions` | C |  | ui | FIN, PLT, RAT | W8 | minimal | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
-| `cmp.Submission.evidencePack` | POST `/api/cmp/v1/submissions/evidence-pack` | C |  | ui |  | W8 | minimal | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
+| `cmp.Submission.approve` | POST `/api/cmp/v1/submissions/approve` | C |  | ui |  | W8 | full | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
+| `cmp.Submission.archiveCompleteness` | GET `/api/cmp/v1/submissions/archive-completeness` | Q |  | ui |  | W8 | full | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
+| `cmp.Submission.attachContent` | POST `/api/cmp/v1/submissions/attach-content` | C |  | ui |  | W8 | full | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
+| `cmp.Submission.comment` | POST `/api/cmp/v1/submissions/comment` | C |  | ui |  | W8 | full | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
+| `cmp.Submission.create` | POST `/api/cmp/v1/submissions` | C |  | ui | FIN, PLT, RAT | W8 | full | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
+| `cmp.Submission.evidencePack` | POST `/api/cmp/v1/submissions/evidence-pack` | C |  | ui |  | W8 | full | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
+| `cmp.Submission.get` | GET `/api/cmp/v1/submissions/{id}` | Q |  | ui |  | W8 | full | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
+| `cmp.Submission.query` | GET `/api/cmp/v1/submissions/query` | Q |  | ui |  | W8 | full | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
 | `cmp.Submission.recordFiling` | POST `/api/cmp/v1/submissions/record-filing` | C |  | ui | FIN, PLT | W8 | full | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206, REQ-CMP-201 … |
-| `cmp.Submission.recordResponse` | POST `/api/cmp/v1/submissions/record-response` | C |  | ui |  | W8 | minimal | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
+| `cmp.Submission.recordResponse` | POST `/api/cmp/v1/submissions/record-response` | C |  | ui |  | W8 | full | REQ-CMP-008, REQ-CMP-195..REQ-CMP-206 |
 | `cmp.Submission.renderXbrl` | POST `/api/cmp/v1/submissions/render-xbrl` | C | yes | ui |  | W8 | full | REQ-CMP-008, REQ-CMP-256, REQ-CMP-257 |
 | `cmp.Submission.validateTaxonomy` | POST `/api/cmp/v1/submissions/validate-taxonomy` | C | yes | ui |  | W8 | full | REQ-CMP-008, REQ-CMP-256, REQ-CMP-257 |
 | `cmp.Taxonomy.activate` | POST `/api/cmp/v1/taxonomies/activate` | C |  | ui |  | unscheduled | full | REQ-CMP-258 |
@@ -968,9 +987,9 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `chn.ApiProduct.list` | GET `/api/chn/v1/api-products` | Q |  | ui |  | W4 | full | REQ-CHN-215, REQ-CHN-222 |
 | `chn.ApiProduct.publish` | POST `/api/chn/v1/api-products/publish` | C |  | ui |  | W4 | full | REQ-CHN-215, REQ-CHN-222 |
 | `chn.ApiProduct.retire` | POST `/api/chn/v1/api-products/retire` | C |  | ui |  | W4 | full | REQ-CHN-215, REQ-CHN-222 |
-| `chn.Change.confirm` | POST `/api/chn/v1/changes/confirm` | C | yes | ui |  | W4 | full | REQ-CHN-004, REQ-CHN-005, REQ-CHN-122..REQ-CHN-124 … |
-| `chn.Change.preview` | POST `/api/chn/v1/changes/preview` | Q |  | ui |  | W4 | full | REQ-CHN-004, REQ-CHN-005, REQ-CHN-122..REQ-CHN-124 … |
-| `chn.Change.refer` | POST `/api/chn/v1/changes/refer` | C | yes | ui |  | W4 | full | REQ-CHN-004, REQ-CHN-005, REQ-CHN-122..REQ-CHN-124 … |
+| `chn.Change.confirm` | POST `/api/chn/v1/changes/confirm` | C |  | ui |  | W4 | full | REQ-CHN-004, REQ-CHN-005, REQ-CHN-122..REQ-CHN-124 … |
+| `chn.Change.preview` | POST `/api/chn/v1/changes/preview` | C |  | ui |  | W4 | full | REQ-CHN-004, REQ-CHN-005, REQ-CHN-122..REQ-CHN-124 … |
+| `chn.Change.refer` | POST `/api/chn/v1/changes/refer` | C |  | ui |  | W4 | full | REQ-CHN-004, REQ-CHN-005, REQ-CHN-122..REQ-CHN-124 … |
 | `chn.Client.approve` | POST `/api/chn/v1/clients/approve` | C |  | ui |  | W4 | full | REQ-CHN-223, REQ-CHN-224, REQ-CHN-240 |
 | `chn.Client.request` | POST `/api/chn/v1/clients/request` | C |  | ui |  | W4 | full | REQ-CHN-223, REQ-CHN-224, REQ-CHN-240 |
 | `chn.Client.revoke` | POST `/api/chn/v1/clients/revoke` | C |  | ui |  | W4 | full | REQ-CHN-223, REQ-CHN-224, REQ-CHN-240 |
@@ -1035,11 +1054,16 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `chn.PortalBilling.payNow` | POST `/api/chn/v1/portal/billing/invoices/{id}/pay-now` | C |  | ui |  | W6 | minimal | REQ-CHN-305 |
 | `chn.PortalBilling.refunds` | GET `/api/chn/v1/portal/billing/refunds` | Q |  | ui |  | W6 | minimal | REQ-CHN-305 |
 | `chn.PortalBilling.summary` | GET `/api/chn/v1/portal/billing/summary` | Q |  | ui |  | W6 | minimal | REQ-CHN-305 |
+| `chn.PortalCancellation.submit` | POST `/api/chn/v1/portal/cancellations/request` | C |  | ui |  | W6 | minimal | REQ-CHN-004, REQ-CHN-005, REQ-CHN-047 |
+| `chn.PortalContact.get` | GET `/api/chn/v1/portal/contact` | Q |  | ui |  | W6 | minimal | REQ-CHN-004, REQ-CHN-005, REQ-CHN-047 |
+| `chn.PortalContact.update` | POST `/api/chn/v1/portal/contact/update` | C |  | ui |  | W6 | minimal | REQ-CHN-004, REQ-CHN-005, REQ-CHN-047 |
 | `chn.PortalDocument.download` | GET `/api/chn/v1/portal/documents/{id}/download` | Q |  | ui |  | W6 | minimal | REQ-CHN-305 |
 | `chn.PortalDocument.list` | GET `/api/chn/v1/portal/documents` | Q |  | ui |  | W6 | minimal | REQ-CHN-305 |
 | `chn.PortalIdentity.get` | GET `/api/chn/v1/portal-identities/{subject}` | Q |  | ui |  | W4 | minimal | REQ-CHN-305 |
 | `chn.PortalIdentity.link` | POST `/api/chn/v1/portal-identities/link` | C |  | ui |  | W4 | minimal | REQ-CHN-305 |
 | `chn.PortalIdentity.unlink` | POST `/api/chn/v1/portal-identities/unlink` | C |  | ui |  | W4 | minimal | REQ-CHN-305 |
+| `chn.PortalRenewal.accept` | POST `/api/chn/v1/portal/renewals/accept` | C |  | ui |  | W6 | minimal | REQ-CHN-004, REQ-CHN-005, REQ-CHN-047 |
+| `chn.PortalRenewal.decline` | POST `/api/chn/v1/portal/renewals/decline` | C |  | ui |  | W6 | minimal | REQ-CHN-004, REQ-CHN-005, REQ-CHN-047 |
 | `chn.Purchase.confirm` | POST `/api/chn/v1/purchases/confirm` | C | yes | ui |  | W4 | full | REQ-CHN-004, REQ-CHN-005, REQ-CHN-099..REQ-CHN-102 |
 | `chn.Quote.startHome` | POST `/api/chn/v1/quotes/start-home` | C | yes | ui |  | W4 | full | REQ-CHN-004, REQ-CHN-005, REQ-CHN-080 … |
 | `chn.Quote.startMotor` | POST `/api/chn/v1/quotes/start-motor` | C | yes | ui |  | W4 | full | REQ-CHN-004, REQ-CHN-005, REQ-CHN-080 … |
@@ -1289,7 +1313,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `dat.ActuarialResultSet.submit` | POST `/api/dat/v1/actuarial-result-sets/submit` | C |  | ui |  | W8 | full | REQ-DAT-004, REQ-DAT-144..REQ-DAT-155 |
 | `dat.Analytics.ask` | POST `/api/dat/v1/analytics/ask` | Q |  | ui |  | unscheduled | full | REQ-DAT-234 |
 | `dat.BiasTest.run` | POST `/api/dat/v1/bias-tests/run` | C | yes | ui | RAT | W8 | full | REQ-DAT-005, REQ-DAT-216 |
-| `dat.Coverage.status` | GET `/api/dat/v1/coverage/status` | Q |  | internal | PLT | W8 | full | REQ-DAT-005, REQ-DAT-209 |
+| `dat.Coverage.status` | GET `/api/dat/v1/coverage/status` | Q |  | ui, internal | PLT | W8 | full | REQ-DAT-005, REQ-DAT-209 |
 | `dat.DataContract.get` | GET `/api/dat/v1/data-contracts/{id}` | Q |  | ui |  | W8 | full | REQ-DAT-001, REQ-DAT-030 |
 | `dat.DataContract.list` | GET `/api/dat/v1/data-contracts` | Q |  | ui |  | W8 | full | REQ-DAT-001, REQ-DAT-030 |
 | `dat.DataContract.register` | POST `/api/dat/v1/data-contracts/register` | C | yes | ui | RAT | W8 | full | REQ-DAT-001, REQ-DAT-030, REQ-DAT-031 |
@@ -1304,6 +1328,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `dat.Mart.export` | POST `/api/dat/v1/marts/export` | C | yes | ui |  | W8 | full | REQ-DAT-003, REQ-DAT-116 |
 | `dat.Mart.figure` | GET `/api/dat/v1/marts/figure` | Q |  | ui |  | W8 | full | REQ-DAT-003, REQ-DAT-085 |
 | `dat.Mart.get` | GET `/api/dat/v1/marts/{id}` | Q |  | ui |  | W8 | full | REQ-DAT-003, REQ-DAT-085 |
+| `dat.Mart.list` | GET `/api/dat/v1/marts/runs` | Q |  | ui |  | W8 | full | REQ-DAT-003 |
 | `dat.Mart.run` | POST `/api/dat/v1/marts/run` | C | yes | ui |  | W8 | full | REQ-DAT-003, REQ-DAT-104 |
 | `dat.Mart.signOff` | POST `/api/dat/v1/marts/sign-off` | C | yes | ui |  | W8 | full | REQ-DAT-003, REQ-DAT-115 |
 | `dat.Model.approve` | POST `/api/dat/v1/models/approve` | C | yes | ui |  | W8 | full | REQ-DAT-005, REQ-DAT-197..REQ-DAT-207 |
@@ -1473,7 +1498,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-PTY-004 | `pty.Account.addMember`, `pty.Account.create`, `pty.Account.get`, `pty.Account.removeMember` (+3) |  |
 | REQ-PTY-005 | `pty.CommunicationPreference.resolve`, `pty.CommunicationPreference.set`, `pty.Consent.query`, `pty.Consent.record` (+1) |  |
 | REQ-PTY-006 | `pty.Screening.screen` |  |
-| REQ-PTY-007 | `pty.Party.merge`, `pty.Party.unmerge` |  |
+| REQ-PTY-007 | `pty.Party.approveMerge`, `pty.Party.duplicates`, `pty.Party.merge`, `pty.Party.mergeList` (+2) |  |
 | REQ-PTY-008 | `pty.ProducerCode.search`, `pty.ProducerCode.validate` |  |
 | REQ-PTY-009 | `pty.ProducerOfRecord.bulkTransfer`, `pty.ProducerOfRecord.cancel`, `pty.ProducerOfRecord.change`, `pty.ProducerOfRecord.get` |  |
 | REQ-PTY-010 | `pty.CommissionAgreement.approve`, `pty.CommissionAgreement.compare`, `pty.CommissionAgreement.createVersion`, `pty.CommissionAgreement.get` (+3) |  |
@@ -1536,12 +1561,12 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-BIL-010 | `bil.AccountCurrent.dispute`, `bil.AccountCurrent.get`, `bil.AccountCurrent.list`, `bil.IntermediaryCollection.report` (+1) | mapped by builder |
 | REQ-BIL-011 | `bil.Ledger.balance`, `bil.Ledger.query`, `bil.Reconciliation.fin` | mapped by builder |
 | REQ-BIL-012 | `bil.Import.*` |  |
-| REQ-CLM-001 | `chn.PartnerClaim.report`, `clm.Fnol.get`, `clm.Fnol.saveDraft`, `clm.Fnol.submit` (+1) |  |
+| REQ-CLM-001 | `chn.PartnerClaim.report`, `clm.Fnol.get`, `clm.Fnol.getDraft`, `clm.Fnol.saveDraft` (+2) |  |
 | REQ-CLM-002 | `clm.Coverage.decide`, `clm.Coverage.reverify` | mapped by builder |
 | REQ-CLM-003 | `clm.TransactionSet.approve`, `clm.TransactionSet.build`, `clm.TransactionSet.get`, `clm.TransactionSet.list` (+3) |  |
 | REQ-CLM-004 | `clm.Payment.list`, `clm.Payment.reissue`, `clm.Payment.stop`, `clm.Payment.void` (+5) | mapped by builder |
 | REQ-CLM-005 | — | event contract (claim financial events in contracts/events/clm); secondary: clm.Financials.dailyTotals for FIN reconciliation |
-| REQ-CLM-006 | `clm.CatEvent.*` |  |
+| REQ-CLM-006 | `clm.CatEvent.*`, `clm.CatEvent.close`, `clm.CatEvent.declare`, `clm.CatEvent.list` |  |
 | REQ-CLM-007 | `clm.StatutoryOffer.issue`, `clm.StatutoryOffer.recordAcceptance`, `clm.StatutoryOffer.recordRepairAgreement` | mapped by builder |
 | REQ-CLM-008 | `clm.Certificate.assemble`, `clm.Certificate.issue`, `clm.Certificate.request` |  |
 | REQ-CLM-009 | `chn.PartnerClaim.getTracking`, `clm.ClaimTracking.get`, `clm.ClaimTracking.list` |  |
@@ -1580,13 +1605,13 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-CMP-005 | `cmp.Dsar.approve`, `cmp.Dsar.create`, `cmp.Dsar.decideItem`, `cmp.Dsar.extend` (+6) | mapped by builder |
 | REQ-CMP-006 | `cmp.Control.*`, `cmp.Evidence.submit`, `cmp.Obligation.*`, `cmp.Traceability.export` | mapped by builder |
 | REQ-CMP-007 | `cmp.AiSystem.approve`, `cmp.AiSystem.get`, `cmp.AiSystem.list`, `cmp.AiSystem.register` (+3) | mapped by builder |
-| REQ-CMP-008 | `cmp.Submission.approve`, `cmp.Submission.attachContent`, `cmp.Submission.comment`, `cmp.Submission.create` (+5) | mapped by builder |
+| REQ-CMP-008 | `cmp.Submission.approve`, `cmp.Submission.archiveCompleteness`, `cmp.Submission.attachContent`, `cmp.Submission.comment` (+8) | mapped by builder |
 | REQ-CMP-009 | `cmp.Bureau.handover`, `cmp.Clock.import`, `cmp.Complaint.import`, `cmp.Dsar.import` (+2) |  |
 | REQ-CHN-001 | `chn.PartnerAccountCurrent.get`, `chn.PartnerBillingAccount.get`, `chn.PartnerBook.changes`, `chn.PartnerClaim.getTracking` (+20) |  |
 | REQ-CHN-002 | `chn.Permission.evaluate` |  |
 | REQ-CHN-003 | `chn.Agent.mcp` |  |
-| REQ-CHN-004 | `chn.Change.confirm`, `chn.Change.preview`, `chn.Change.refer`, `chn.Journey.abandon` (+6) | mapped by builder |
-| REQ-CHN-005 | `chn.Change.confirm`, `chn.Change.preview`, `chn.Change.refer`, `chn.Journey.abandon` (+6) | mapped by builder |
+| REQ-CHN-004 | `chn.Change.confirm`, `chn.Change.preview`, `chn.Change.refer`, `chn.Journey.abandon` (+11) | mapped by builder |
+| REQ-CHN-005 | `chn.Change.confirm`, `chn.Change.preview`, `chn.Change.refer`, `chn.Journey.abandon` (+11) | mapped by builder |
 | REQ-CHN-006 | — | bancassurance is out of P1 (D-PRG-10); no §9.1 operation |
 | REQ-CHN-007 | `chn.Withdrawal.close`, `chn.Withdrawal.confirm`, `chn.Withdrawal.declare` |  |
 | REQ-CHN-008 | `chn.Language.get`, `chn.Language.set`, `plt.ExternalUser.invite`, `plt.ExternalUser.link` (+2) | mapped by builder |
@@ -1618,7 +1643,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-PLT-015 | `plt.ExternalUser.invite`, `plt.ExternalUser.link`, `plt.ExternalUser.recover`, `plt.ExternalUser.register` | mapped by builder |
 | REQ-DAT-001 | `dat.DataContract.get`, `dat.DataContract.list`, `dat.DataContract.register`, `dat.Ingestion.replay` (+1) | mapped by builder |
 | REQ-DAT-002 | `dat.Query.asOf` | mapped by builder |
-| REQ-DAT-003 | `dat.Mart.adjust`, `dat.Mart.compare`, `dat.Mart.export`, `dat.Mart.figure` (+3) | mapped by builder |
+| REQ-DAT-003 | `dat.Mart.adjust`, `dat.Mart.compare`, `dat.Mart.export`, `dat.Mart.figure` (+4) | mapped by builder |
 | REQ-DAT-004 | `dat.Actuarial.inputSet`, `dat.Actuarial.run`, `dat.Actuarial.supersede`, `dat.ActuarialResultSet.submit` | mapped by builder |
 | REQ-DAT-005 | `dat.BiasTest.run`, `dat.Coverage.status`, `dat.Model.approve`, `dat.Model.get` (+5) | mapped by builder |
 | REQ-DAT-006 | `dat.FeatureStore.buildTrainingSet`, `dat.FeatureStore.getOnline` | mapped by builder |

@@ -152,6 +152,29 @@ public static class PartyModule
         services.AddCommand<BulkTransferProducerOfRecord, ProducerOfRecordBulkTransferResponse, BulkTransferProducerOfRecordHandler>(CommandDescriptor.For("pty.ProducerOfRecord.bulkTransfer") with { SupportsDryRun = true });
         services.AddCommand<CancelProducerOfRecord, ProducerOfRecordCancelResponse, CancelProducerOfRecordHandler>(CommandDescriptor.For("pty.ProducerOfRecord.cancel"));
 
+        services.AddScoped<AgencyAdminService>();
+        services.AddScoped<IValidator<CreateAgencyUser>, CreateAgencyUserValidator>();
+        services.AddScoped<IValidator<ChangeAgencyUserRole>, ChangeAgencyUserRoleValidator>();
+        services.AddScoped<IValidator<GrantAgencyAccess>, GrantAgencyAccessValidator>();
+        services.AddScoped<IValidator<RevokeAgencyAccess>, RevokeAgencyAccessValidator>();
+        services.AddScoped<IValidator<SuspendAgencyUser>, SuspendAgencyUserValidator>();
+        services.AddScoped<IValidator<ReactivateAgencyUser>, ReactivateAgencyUserValidator>();
+        services.AddScoped<IValidator<RemoveAgencyProducer>, RemoveAgencyProducerValidator>();
+        services.AddCommandAuditor<CreateAgencyUser, AgencyUserResponse, AgencyUserAuditor>();
+        services.AddCommandAuditor<ChangeAgencyUserRole, AgencyUserResponse, AgencyUserAuditor>();
+        services.AddCommandAuditor<GrantAgencyAccess, AgencyUserResponse, AgencyUserAuditor>();
+        services.AddCommandAuditor<RevokeAgencyAccess, AgencyUserResponse, AgencyUserAuditor>();
+        services.AddCommandAuditor<SuspendAgencyUser, AgencyUserResponse, AgencyUserAuditor>();
+        services.AddCommandAuditor<ReactivateAgencyUser, AgencyUserResponse, AgencyUserAuditor>();
+        services.AddCommandAuditor<RemoveAgencyProducer, AgencyUserRemoveProducerResponse, AgencyUserAuditor>();
+        services.AddCommand<CreateAgencyUser, AgencyUserResponse, CreateAgencyUserHandler>(CommandDescriptor.For("pty.AgencyUser.create"));
+        services.AddCommand<ChangeAgencyUserRole, AgencyUserResponse, ChangeAgencyUserRoleHandler>(CommandDescriptor.For("pty.AgencyUser.changeRole"));
+        services.AddCommand<GrantAgencyAccess, AgencyUserResponse, GrantAgencyAccessHandler>(CommandDescriptor.For("pty.AgencyUser.grantAccess"));
+        services.AddCommand<RevokeAgencyAccess, AgencyUserResponse, RevokeAgencyAccessHandler>(CommandDescriptor.For("pty.AgencyUser.revokeAccess"));
+        services.AddCommand<SuspendAgencyUser, AgencyUserResponse, SuspendAgencyUserHandler>(CommandDescriptor.For("pty.AgencyUser.suspend"));
+        services.AddCommand<ReactivateAgencyUser, AgencyUserResponse, ReactivateAgencyUserHandler>(CommandDescriptor.For("pty.AgencyUser.reactivate"));
+        services.AddCommand<RemoveAgencyProducer, AgencyUserRemoveProducerResponse, RemoveAgencyProducerHandler>(CommandDescriptor.For("pty.AgencyUser.removeProducer"));
+
         services.AddPartyScreeningCases();
         services.AddOwnerDecidedApprovalType(PartyAuthorityTypes.PartyMergeApprovalType);
         services.AddScoped<DuplicateFinder>();
@@ -245,6 +268,12 @@ public static class PartyModule
             .Describe("Ο κωδικός είναι ανενεργός, ο διαμεσολαβητής σε αναστολή ή τερματισμένος, ή το προϊόν δεν είναι διορισμένο.", "The code is inactive, its intermediary is suspended or terminated, or the product is not appointed."),
         ErrorDefinition.For(ModuleCode.PTY, "POR-LETTER-REQUIRED", 422, "Απαιτείται η επιστολή αλλαγής διαμεσολαβητή", "The broker-of-record letter is required")
             .Describe("Η αλλαγή σε άλλον διαμεσολαβητή χρειάζεται αναφορά της επιστολής του πελάτη (letterReference).", "A change to another intermediary needs the customer's letter reference (letterReference)."),
+        ErrorDefinition.For(ModuleCode.PTY, "OUT-OF-AGENCY", 403, "Η ενέργεια ξεφεύγει από το πρακτορείο σας", "The action is outside the agency you administer")
+            .Describe("Ο διαχειριστής πρακτορείου ενεργεί μόνο στο δικό του πρακτορείο και στους κωδικούς παραγωγού του.", "An agency administrator acts only inside their own agency and its producer codes."),
+        ErrorDefinition.For(ModuleCode.PTY, "LAST-ADMIN", 409, "Το πρακτορείο χρειάζεται τουλάχιστον έναν ενεργό διαχειριστή", "The agency needs at least one active administrator")
+            .Describe("Ο τελευταίος ενεργός διαχειριστής δεν μπορεί να αλλάξει ρόλο ή να ανασταλεί.", "The last active administrator cannot be demoted or suspended."),
+        ErrorDefinition.For(ModuleCode.PTY, "REASSIGNMENT-REQUIRED", 422, "Απαιτείται νέος κωδικός παραγωγού για το χαρτοφυλάκιο", "A producer code to take the book is required")
+            .Describe("Η αφαίρεση παραγωγού απαιτεί κωδικό του ίδιου πρακτορείου, που δεν ανήκει στον παραγωγό που αφαιρείται.", "Removing a producer needs a code of the same agency that the removed producer does not hold."),
         ErrorDefinition.For(ModuleCode.PTY, "STATE", 409, "Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση", "The action is not allowed in the current state")
             .Describe("Η έκδοση ή η συμφωνία δεν βρίσκεται σε κατάσταση που επιτρέπει την ενέργεια.", "The version or agreement is not in a state that allows the action."),
         ErrorDefinition.For(ModuleCode.PTY, "MERGE-IDENTIFIER-CONFLICT", 422, "Τα πρόσωπα έχουν διαφορετικά έγκυρα ΑΦΜ", "The parties hold different valid AFMs")

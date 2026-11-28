@@ -59,7 +59,16 @@
         "pty.ProducerOfRecord.get": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin", "Service.RenewalRun" ],
         "pty.ProducerOfRecord.change": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "pty.ProducerOfRecord.bulkTransfer": [ "Staff.UnderwritingManager", "Platform.Admin" ],
-        "pty.ProducerOfRecord.cancel": [ "Staff.UnderwritingManager", "Platform.Admin" ]
+        "pty.ProducerOfRecord.cancel": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        // Delegated agency administration (BO-PTY-12): agency administrators act inside their own agency (checked in the handlers); insurer staff in any.
+        "pty.AgencyUser.create": [ "Agency.Administrator", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "pty.AgencyUser.list": [ "Agency.Administrator", "Agency.OfficeManager", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "pty.AgencyUser.changeRole": [ "Agency.Administrator", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "pty.AgencyUser.grantAccess": [ "Agency.Administrator", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "pty.AgencyUser.revokeAccess": [ "Agency.Administrator", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "pty.AgencyUser.suspend": [ "Agency.Administrator", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "pty.AgencyUser.reactivate": [ "Agency.Administrator", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "pty.AgencyUser.removeProducer": [ "Agency.Administrator", "Staff.UnderwritingManager", "Platform.Admin" ]
       }
     },
     "Authority": {

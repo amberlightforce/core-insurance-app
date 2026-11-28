@@ -46,7 +46,7 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 48 operation(s): pty.Account.addMember, pty.Account.create, pty.Account.merge, pty.Account.removeMember, pty.Account.requestPolicyMove, pty.Account.setHolder, pty.Account.split, pty.Account.withdraw, pty.CommissionAgreement.approve, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.submit, pty.CommunicationPreference.set, ….</para>
+    /// <para>Declared by 55 operation(s): pty.Account.addMember, pty.Account.create, pty.Account.merge, pty.Account.removeMember, pty.Account.requestPolicyMove, pty.Account.setHolder, pty.Account.split, pty.Account.withdraw, pty.AgencyUser.changeRole, pty.AgencyUser.create, pty.AgencyUser.grantAccess, pty.AgencyUser.reactivate, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "PTY-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -55,6 +55,12 @@ public static class PartyErrorCodes
     /// <para>Declared by 5 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.submit.</para>
     /// </remarks>
     public const string IntermediaryNotActive = "PTY-ERR-INTERMEDIARY-NOT-ACTIVE";
+
+    /// <summary>PTY-ERR-LAST-ADMIN (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): pty.AgencyUser.changeRole, pty.AgencyUser.removeProducer, pty.AgencyUser.suspend.</para>
+    /// </remarks>
+    public const string LastAdmin = "PTY-ERR-LAST-ADMIN";
 
     /// <summary>PTY-ERR-LIVE-DEPENDANT (HTTP 422).</summary>
     /// <remarks>
@@ -106,7 +112,7 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 16 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.submit, pty.Dsar.restrict, pty.Party.approveMerge, pty.Party.get, pty.Party.merge, pty.Party.resolveSurvivor, pty.Party.unmerge, pty.ProducerOfRecord.cancel, ….</para>
+    /// <para>Declared by 24 operation(s): pty.AgencyUser.changeRole, pty.AgencyUser.create, pty.AgencyUser.grantAccess, pty.AgencyUser.list, pty.AgencyUser.reactivate, pty.AgencyUser.removeProducer, pty.AgencyUser.revokeAccess, pty.AgencyUser.suspend, pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, ….</para>
     /// </remarks>
     public const string NotFound = "PTY-ERR-NOT-FOUND";
 
@@ -121,6 +127,12 @@ public static class PartyErrorCodes
     /// <para>Declared by 3 operation(s): pty.Account.merge, pty.Account.requestPolicyMove, pty.Account.split.</para>
     /// </remarks>
     public const string OpenJob = "PTY-ERR-OPEN-JOB";
+
+    /// <summary>PTY-ERR-OUT-OF-AGENCY (HTTP 403).</summary>
+    /// <remarks>
+    /// <para>Declared by 8 operation(s): pty.AgencyUser.changeRole, pty.AgencyUser.create, pty.AgencyUser.grantAccess, pty.AgencyUser.list, pty.AgencyUser.reactivate, pty.AgencyUser.removeProducer, pty.AgencyUser.revokeAccess, pty.AgencyUser.suspend.</para>
+    /// </remarks>
+    public const string OutOfAgency = "PTY-ERR-OUT-OF-AGENCY";
 
     /// <summary>PTY-ERR-OVERLAP (HTTP 422).</summary>
     /// <remarks>
@@ -163,6 +175,12 @@ public static class PartyErrorCodes
     /// <para>Declared by 7 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.resolve, pty.CommissionAgreement.simulate, pty.CommissionAgreement.submit.</para>
     /// </remarks>
     public const string RateAboveMax = "PTY-ERR-RATE-ABOVE-MAX";
+
+    /// <summary>PTY-ERR-REASSIGNMENT-REQUIRED (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): pty.AgencyUser.removeProducer.</para>
+    /// </remarks>
+    public const string ReassignmentRequired = "PTY-ERR-REASSIGNMENT-REQUIRED";
 
     /// <summary>PTY-ERR-REGISTRY-UNAVAILABLE (HTTP 503).</summary>
     /// <remarks>
@@ -226,13 +244,13 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-STATE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 10 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.submit, pty.Party.approveMerge, pty.Party.merge, pty.Party.unmerge, pty.ProducerOfRecord.cancel, pty.ProducerOfRecord.change.</para>
+    /// <para>Declared by 17 operation(s): pty.AgencyUser.changeRole, pty.AgencyUser.create, pty.AgencyUser.grantAccess, pty.AgencyUser.reactivate, pty.AgencyUser.removeProducer, pty.AgencyUser.revokeAccess, pty.AgencyUser.suspend, pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.submit, ….</para>
     /// </remarks>
     public const string State = "PTY-ERR-STATE";
 
     /// <summary>PTY-ERR-VALIDATION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): pty.ProducerOfRecord.bulkTransfer, pty.ProducerOfRecord.change, pty.ProducerOfRecord.get.</para>
+    /// <para>Declared by 11 operation(s): pty.AgencyUser.changeRole, pty.AgencyUser.create, pty.AgencyUser.grantAccess, pty.AgencyUser.list, pty.AgencyUser.reactivate, pty.AgencyUser.removeProducer, pty.AgencyUser.revokeAccess, pty.AgencyUser.suspend, pty.ProducerOfRecord.bulkTransfer, pty.ProducerOfRecord.change, pty.ProducerOfRecord.get.</para>
     /// </remarks>
     public const string Validation = "PTY-ERR-VALIDATION";
 
@@ -246,7 +264,7 @@ public static class PartyErrorCodes
     public const string Prefix = "PTY-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AccountHasJobs, ActivationIncomplete, Backdate, DuplicateIdentifier, EvidenceRequired, IdCheckdigit, IdempotencyMismatch, IntermediaryNotActive, LiveDependant, LocationInUse, MemberInUse, MergeCrossEntity, MergeIdentifierConflict, Merged, NoEmail, NotAvailable, NotFound, NotMigrated, OpenJob, Overlap, PorCodeInvalid, PorLetterRequired, PostcodeFormat, ProofRequired, QueryTooShort, RateAboveMax, RegistryUnavailable, RelationshipCycle, Restricted, RoleDataMissing, RoleDuplicate, RoleType, ScreenInput, SelfApproval, SplitSum, Stale, State, Validation, WindowClosed];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AccountHasJobs, ActivationIncomplete, Backdate, DuplicateIdentifier, EvidenceRequired, IdCheckdigit, IdempotencyMismatch, IntermediaryNotActive, LastAdmin, LiveDependant, LocationInUse, MemberInUse, MergeCrossEntity, MergeIdentifierConflict, Merged, NoEmail, NotAvailable, NotFound, NotMigrated, OpenJob, OutOfAgency, Overlap, PorCodeInvalid, PorLetterRequired, PostcodeFormat, ProofRequired, QueryTooShort, RateAboveMax, ReassignmentRequired, RegistryUnavailable, RelationshipCycle, Restricted, RoleDataMissing, RoleDuplicate, RoleType, ScreenInput, SelfApproval, SplitSum, Stale, State, Validation, WindowClosed];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -259,6 +277,7 @@ public static class PartyErrorCodes
         [IdCheckdigit] = 422,
         [IdempotencyMismatch] = 409,
         [IntermediaryNotActive] = 422,
+        [LastAdmin] = 409,
         [LiveDependant] = 422,
         [LocationInUse] = 422,
         [MemberInUse] = 422,
@@ -270,6 +289,7 @@ public static class PartyErrorCodes
         [NotFound] = 404,
         [NotMigrated] = 404,
         [OpenJob] = 422,
+        [OutOfAgency] = 403,
         [Overlap] = 422,
         [PorCodeInvalid] = 422,
         [PorLetterRequired] = 422,
@@ -277,6 +297,7 @@ public static class PartyErrorCodes
         [ProofRequired] = 422,
         [QueryTooShort] = 422,
         [RateAboveMax] = 422,
+        [ReassignmentRequired] = 422,
         [RegistryUnavailable] = 503,
         [RelationshipCycle] = 422,
         [Restricted] = 409,
