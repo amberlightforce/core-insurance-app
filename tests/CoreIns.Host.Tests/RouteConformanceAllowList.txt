@@ -551,9 +551,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/notices/draft
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/send
 CONTRACT_NOT_SERVED POST /api/ri/v1/participations/add
 CONTRACT_NOT_SERVED POST /api/ri/v1/participations/replace
-CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/approve
-CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/return
-CONTRACT_NOT_SERVED POST /api/ri/v1/programmes/submit
 CONTRACT_NOT_SERVED POST /api/ri/v1/reconciliation/fin
 CONTRACT_NOT_SERVED POST /api/ri/v1/securities/report
 CONTRACT_NOT_SERVED POST /api/ri/v1/security-rules/set

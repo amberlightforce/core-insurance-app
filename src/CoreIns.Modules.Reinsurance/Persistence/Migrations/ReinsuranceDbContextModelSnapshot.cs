@@ -1831,6 +1831,14 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("version_id");
 
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<string>("ContentHash")
+                        .HasColumnType("char(64)")
+                        .HasColumnName("content_hash");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
@@ -1839,6 +1847,14 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1853,10 +1869,22 @@ namespace CoreIns.Modules.Reinsurance.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("reason");
 
+                    b.Property<string>("ReturnReason")
+                        .HasColumnType("text")
+                        .HasColumnName("return_reason");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("status");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
 
                     b.Property<DateOnly>("ValidFrom")
                         .HasColumnType("date")

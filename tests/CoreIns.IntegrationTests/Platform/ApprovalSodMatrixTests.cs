@@ -30,6 +30,7 @@ public sealed class ApprovalSodMatrixTests(PostgresFixture database) : IClassFix
         new Row("FIN.MANUAL_JOURNAL", ModuleCode.FIN, "ManualJournal", "FIN.MANUAL_JOURNAL", "50000.00", "Staff.Finance", "Platform.Admin", "Staff.Finance"),
         new Row("FIN.TAX_RETURN", ModuleCode.FIN, "TaxReturn", "FIN.TAX_RETURN", "50000.00", "Staff.Finance", "Platform.Admin", "Staff.Finance"),
         new Row("RI.ADJUSTMENT_APPROVE", ModuleCode.RI, "Adjustment", "RI.ADJUSTMENT_APPROVE", "6000.00", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.ReinsuranceManager"),
+        new Row("RI.PROGRAMME_APPROVE", ModuleCode.RI, "Programme", "RI.PROGRAMME_APPROVE", "6000000.00", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.ReinsuranceManager"),
         new Row(
             "PTY.COMMISSION_AGREEMENT", ModuleCode.PTY, "CommissionAgreementVersion", "PTY.COMMISSION_AGREEMENT", "300000.00", "Staff.Underwriter", "Staff.UnderwritingManager",
             "Staff.UnderwritingManager", new Dictionary<string, string> { ["rateBand"] = "STANDARD" }),

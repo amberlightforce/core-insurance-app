@@ -2977,13 +2977,73 @@
       "checks": "unspecified"
     },
     "ProgrammeApproveRequest": {
-      "programmeData": "unspecified",
-      "period": "unspecified",
-      "decision": "unspecified"
+      "programmeId": "01926b66-0800-7272-846c-2f7129fcd005",
+      "expectedRecordVersion": 1
     },
     "ProgrammeApproveResponse": {
-      "programme": "unspecified",
-      "diff": "unspecified"
+      "programme": {
+        "programmeId": "01924bf9-cb58-746c-87cc-730440b95e55",
+        "legalEntity": "SAMPLE_CODE",
+        "code": "SAMPLE_CODE",
+        "name": "Sample text",
+        "lineCode": "SAMPLE_CODE",
+        "programmeYear": 1,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "status": "DRAFT",
+        "versionNo": 1,
+        "recordVersion": 1,
+        "retention": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "contractId": "0192d25c-434a-71ab-89b2-5f6a601b9c38",
+            "contractNumber": "Sample text",
+            "contractStatus": "DRAFT"
+          }
+        ],
+        "contracts": [
+          {
+            "contractId": "0192357c-fb26-76f0-8210-ccbc8d22e254",
+            "contractNumber": "Sample text",
+            "contractType": "XOL_PER_RISK",
+            "contractYear": 1,
+            "status": "DRAFT",
+            "currency": "EUR"
+          }
+        ],
+        "renewedFromId": "0192cc70-2c15-76c3-8e09-b347e913e931",
+        "approvalRequestId": "0192b242-ed79-7566-8975-1bfe8e6bb93d",
+        "returnReason": "Sample text",
+        "versions": [
+          {
+            "versionNo": 1,
+            "status": "DRAFT",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "supersededVersionNo": 1
     },
     "ProgrammeCreateRequest": {
       "code": "SAMPLE_CODE",
@@ -3056,6 +3116,8 @@
           }
         ],
         "renewedFromId": "0192717d-eff0-7aab-8d62-f19b90f0755a",
+        "approvalRequestId": "0192a900-1d85-7c00-89f5-86bcf44df345",
+        "returnReason": "Sample text",
         "versions": [
           {
             "versionNo": 1,
@@ -3125,6 +3187,8 @@
           }
         ],
         "renewedFromId": "01926338-c411-7b22-8521-83fdf035b8da",
+        "approvalRequestId": "01921213-13aa-7163-8b1a-7dbac32fd373",
+        "returnReason": "Sample text",
         "versions": [
           {
             "versionNo": 1,
@@ -3187,6 +3251,8 @@
           }
         ],
         "renewedFromId": "0192cf99-a73c-73c3-8a83-d6a2e863ce8b",
+        "approvalRequestId": "0192e1d8-edbc-716d-8aa1-49fbefcd7fc4",
+        "returnReason": "Sample text",
         "versions": [
           {
             "versionNo": 1,
@@ -3251,6 +3317,8 @@
               }
             ],
             "renewedFromId": "0192f103-d540-70e2-8b37-1f33e000ad1f",
+            "approvalRequestId": "0192705d-2a5c-7512-8d51-cc40568c3a44",
+            "returnReason": "Sample text",
             "versions": [
               {
                 "versionNo": 1,
@@ -3321,6 +3389,8 @@
           }
         ],
         "renewedFromId": "01928482-1337-7312-82a2-98afa05d0474",
+        "approvalRequestId": "01920db2-b886-7545-897d-afc896fad9fa",
+        "returnReason": "Sample text",
         "versions": [
           {
             "versionNo": 1,
@@ -3344,22 +3414,142 @@
       ]
     },
     "ProgrammeReturnRequest": {
-      "programmeData": "unspecified",
-      "period": "unspecified",
-      "decision": "unspecified"
+      "programmeId": "0192943b-169f-7093-8d28-471c4da37737",
+      "expectedRecordVersion": 1,
+      "reason": "Sample text"
     },
     "ProgrammeReturnResponse": {
-      "programme": "unspecified",
-      "diff": "unspecified"
+      "programme": {
+        "programmeId": "019252b0-fafe-7474-8a11-d11d3941ef12",
+        "legalEntity": "SAMPLE_CODE",
+        "code": "SAMPLE_CODE",
+        "name": "Sample text",
+        "lineCode": "SAMPLE_CODE",
+        "programmeYear": 1,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "status": "DRAFT",
+        "versionNo": 1,
+        "recordVersion": 1,
+        "retention": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "contractId": "019236b8-e364-73b7-8830-9033d57a9634",
+            "contractNumber": "Sample text",
+            "contractStatus": "DRAFT"
+          }
+        ],
+        "contracts": [
+          {
+            "contractId": "0192f51b-66b7-739e-8ec1-48909c344563",
+            "contractNumber": "Sample text",
+            "contractType": "XOL_PER_RISK",
+            "contractYear": 1,
+            "status": "DRAFT",
+            "currency": "EUR"
+          }
+        ],
+        "renewedFromId": "01925ae4-5399-7915-89bb-837513579bc0",
+        "approvalRequestId": "0192628c-e65b-771d-887a-097c72047fc6",
+        "returnReason": "Sample text",
+        "versions": [
+          {
+            "versionNo": 1,
+            "status": "DRAFT",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      }
     },
     "ProgrammeSubmitRequest": {
-      "programmeData": "unspecified",
-      "period": "unspecified",
-      "decision": "unspecified"
+      "programmeId": "019206ef-0c62-7af6-89b1-8f01cd4ca2f8",
+      "expectedRecordVersion": 1
     },
     "ProgrammeSubmitResponse": {
-      "programme": "unspecified",
-      "diff": "unspecified"
+      "programme": {
+        "programmeId": "0192b198-f30a-7ecd-8398-71527b880f6d",
+        "legalEntity": "SAMPLE_CODE",
+        "code": "SAMPLE_CODE",
+        "name": "Sample text",
+        "lineCode": "SAMPLE_CODE",
+        "programmeYear": 1,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "status": "DRAFT",
+        "versionNo": 1,
+        "recordVersion": 1,
+        "retention": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "contractId": "0192692e-4bde-7ed5-8171-251460e9e429",
+            "contractNumber": "Sample text",
+            "contractStatus": "DRAFT"
+          }
+        ],
+        "contracts": [
+          {
+            "contractId": "01920c5c-446a-73af-8f74-645b70fe14b3",
+            "contractNumber": "Sample text",
+            "contractType": "XOL_PER_RISK",
+            "contractYear": 1,
+            "status": "DRAFT",
+            "currency": "EUR"
+          }
+        ],
+        "renewedFromId": "0192b505-b86e-7a46-8457-cde7c632dcf4",
+        "approvalRequestId": "01920f1d-97cc-7157-8027-c936f60fac26",
+        "returnReason": "Sample text",
+        "versions": [
+          {
+            "versionNo": 1,
+            "status": "DRAFT",
+            "period": {
+              "from": "2026-01-01",
+              "to": "2027-01-01"
+            },
+            "createdAt": "2026-10-07T09:00:00Z",
+            "createdBy": "Sample text"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "approvalRequestId": "0192f13e-103e-77f6-8f3a-8174e65570ad"
     },
     "ProgrammeUpdateRequest": {
       "expectedRecordVersion": 1,
@@ -3431,6 +3621,8 @@
           }
         ],
         "renewedFromId": "019231c3-bcdb-77ba-86b6-1f3e8a97f8e2",
+        "approvalRequestId": "0192fd11-d7aa-76b5-8348-12f44a008492",
+        "returnReason": "Sample text",
         "versions": [
           {
             "versionNo": 1,
@@ -3821,6 +4013,8 @@
         }
       ],
       "renewedFromId": "01926658-8bbf-7392-823a-6b70309536c7",
+      "approvalRequestId": "0192cdca-b1b0-744a-873e-83f8c6f6c25a",
+      "returnReason": "Sample text",
       "versions": [
         {
           "versionNo": 1,

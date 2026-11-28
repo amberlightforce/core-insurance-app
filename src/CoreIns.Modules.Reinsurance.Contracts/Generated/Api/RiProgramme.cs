@@ -71,6 +71,14 @@ public sealed record RiProgramme
     [global::System.Text.Json.Serialization.JsonPropertyName("renewedFromId")]
     public global::System.Guid? RenewedFromId { get; init; }
 
+    /// <summary>The PLT approval request of the last submit of the current version</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequestId")]
+    public global::CoreIns.SharedKernel.Identifiers.ApprovalRequestId? ApprovalRequestId { get; init; }
+
+    /// <summary>The checker's reason when the current version was returned to DRAFT</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("returnReason")]
+    public string? ReturnReason { get; init; }
+
     /// <summary>Contract member 'versions'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("versions")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.RiProgrammeVersionSummary> Versions { get; init; }

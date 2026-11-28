@@ -36,6 +36,9 @@ internal static class ReinsurancePermissions
     public const string ProgrammeCreate = "ri.Programme.create";
     public const string ProgrammeUpdate = "ri.Programme.update";
     public const string ProgrammeRenew = "ri.Programme.renew";
+    public const string ProgrammeSubmit = "ri.Programme.submit";
+    public const string ProgrammeApprove = "ri.Programme.approve";
+    public const string ProgrammeReturn = "ri.Programme.return";
     public const string ProgrammeList = "ri.Programme.list";
     public const string ProgrammeGet = "ri.Programme.get";
     public const string ParticipationList = "ri.Participation.list";
