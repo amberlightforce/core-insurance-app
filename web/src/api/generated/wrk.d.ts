@@ -1445,6 +1445,8 @@ export interface components {
         ActivityBulkReassignResponse: {
             /** @description PRD: "job id" */
             jobId?: components["schemas"]["Uuid"];
+            /** @description Per activity outcome: {requested, reassigned, failed, results[{id, outcome, code, detail, recordVersion, assignee}]} */
+            results?: components["schemas"]["Unspecified"];
             /** @description PRD: "preview when dry-run" */
             previewWhenDryRun?: components["schemas"]["Unspecified"];
         };

@@ -114,11 +114,9 @@ CONTRACT_NOT_SERVED GET /api/wrk/v1/participants/objects-for
 CONTRACT_NOT_SERVED GET /api/wrk/v1/recent-items
 CONTRACT_NOT_SERVED GET /api/wrk/v1/requests
 CONTRACT_NOT_SERVED GET /api/wrk/v1/requests/{}
-CONTRACT_NOT_SERVED GET /api/wrk/v1/teams/summary
 CONTRACT_NOT_SERVED PATCH /api/clm/v1/services/{}
 CONTRACT_NOT_SERVED PATCH /api/pfc/v1/pogs/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
-CONTRACT_NOT_SERVED PATCH /api/wrk/v1/activities/{}
 CONTRACT_NOT_SERVED POST /api/bil/v1/account-currents/dispute
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/attach-term
@@ -441,7 +439,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/release
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/bulk-set
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/set
 CONTRACT_NOT_SERVED POST /api/uw/v1/valuation/compute
-CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/bulk-reassign
 CONTRACT_NOT_SERVED POST /api/wrk/v1/command-registries/register
 CONTRACT_NOT_SERVED POST /api/wrk/v1/data-subject/erase
 CONTRACT_NOT_SERVED POST /api/wrk/v1/data-subject/export

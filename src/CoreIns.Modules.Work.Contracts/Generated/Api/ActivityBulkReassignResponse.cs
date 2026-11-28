@@ -13,6 +13,14 @@ public sealed record ActivityBulkReassignResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
 
+    /// <summary>Per activity outcome: {requested, reassigned, failed, results[{id, outcome, code, detail, recordVersion, assignee}]}</summary>
+    /// <remarks>
+    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("results")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Text.Json.JsonElement? Results { get; init; }
+
     /// <summary>PRD: "preview when dry-run"</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
