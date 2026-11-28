@@ -134,6 +134,12 @@ internal sealed class ChangeBindService(
 
         var (history, baseSegment, baseTree, engine, state, _) = change.Value;
 
+        // BO-POL-08: no bind while the cover is suspended (the quote may predate the suspension).
+        if (history.Term.SuspendedFrom is not null)
+        {
+            return DomainError.Of(ModuleCode.POL, "ILLEGAL-TRANSITION", "The term's cover is suspended; reactivate it before binding a change (REQ-POL-236).");
+        }
+
         // The effective-date limits again, at the record time and for the binder's roles (REQ-POL-008, -135).
         var outside = ChangeLimits.Check(changeOptions.Value, context.Roles, t, history.Term, job.EffectiveAt, zone);
         if (outside is not null)
@@ -216,7 +222,7 @@ internal sealed class ChangeBindService(
             ValidFrom = oldTerm.ValidFrom, ValidTo = oldTerm.ValidTo, RecordedFrom = t, State = oldTerm.State, ProductVersion = oldTerm.ProductVersion,
             ArtefactHash = oldTerm.ArtefactHash, RatingArtefactHash = oldTerm.RatingArtefactHash, ResolutionHash = oldTerm.ResolutionHash,
             ConfigurationHash = oldTerm.ConfigurationHash, Currency = oldTerm.Currency, ProducerCode = oldTerm.ProducerCode,
-            PaymentPlanRef = oldTerm.PaymentPlanRef, WrittenDate = oldTerm.WrittenDate, HeadTransactionId = transactionId, CreatedBy = oldTerm.CreatedBy,
+            PaymentPlanRef = oldTerm.PaymentPlanRef, WrittenDate = oldTerm.WrittenDate, HeadTransactionId = transactionId, CreatedBy = oldTerm.CreatedBy, SuspendedFrom = oldTerm.SuspendedFrom,
             PredecessorTermId = oldTerm.PredecessorTermId, CancelledAt = oldTerm.CancelledAt,
         });
         db.Transactions.Add(new PolicyTransactionRow

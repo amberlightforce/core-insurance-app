@@ -1,6 +1,7 @@
 using CoreIns.Modules.Policy.Api;
 using CoreIns.Modules.Policy.Commands;
 using CoreIns.Modules.Policy.Commands.Cancellation;
+using CoreIns.Modules.Policy.Commands.Suspension;
 using CoreIns.Modules.Policy.Commands.Cancellation.NonPayment;
 using CoreIns.Modules.Policy.Commands.Withdrawal;
 using CoreIns.Modules.Policy.Commands.Renewal;
@@ -151,6 +152,9 @@ public static class PolicyModule
         services.AddScoped<IPolicyPolicyService, PolicyPolicyService>();
         services.AddScoped<IPolicyTermService, PolicyTermService>();
         services.AddScoped<IPolicySnapshotService, PolicySnapshotService>();
+
+        // BO-POL-08: suspension and reactivation of a term's cover.
+        services.AddSuspensionCommands();
 
         // SL3-POL-RENEW: manual renewal (create, offer, accept).
         services.AddRenewalCommands(configuration);

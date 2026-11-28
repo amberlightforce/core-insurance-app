@@ -250,6 +250,12 @@ internal sealed class PolicyTermRow
 
     /// <summary>When the cover ended, for a Cancelled version (the effective instant of the cancellation).</summary>
     public Instant? CancelledAt { get; set; }
+
+    /// <summary>
+    /// BO-POL-08: set while the term's cover is suspended (REQ-POL-236): the effective instant of the open Suspension transaction. Premium
+    /// stops being earned from here until the matching Reactivation (BO-POL-11); suspension is never a term state (D-CON-02).
+    /// </summary>
+    public Instant? SuspendedFrom { get; set; }
 }
 
 /// <summary><c>pol.policy_transaction</c>: an append-only bound transaction (PRD-05 §7.1 PolicyTransaction, REQ-POL-075).</summary>

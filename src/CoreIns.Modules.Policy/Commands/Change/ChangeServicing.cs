@@ -178,6 +178,11 @@ internal sealed class ChangeHistory(PolicyDbContext db)
             return DomainError.Of(ModuleCode.POL, "ILLEGAL-TRANSITION", $"A {state} term cannot be changed.");
         }
 
+        if (term.SuspendedFrom is not null)
+        {
+            return DomainError.Of(ModuleCode.POL, "ILLEGAL-TRANSITION", "The term's cover is suspended; reactivate it before changing it (REQ-POL-236).");
+        }
+
         return effectiveAt < term.ValidFrom || effectiveAt >= term.ValidTo
             ? DomainError.Of(ModuleCode.POL, "ILLEGAL-TRANSITION", "The effective time is outside the term.")
             : null;
@@ -237,6 +242,12 @@ internal sealed class ChangeHistory(PolicyDbContext db)
         var state = opened;
         foreach (var transaction in history.Transactions.Skip(1))
         {
+            // BO-POL-08: suspension and reactivation transactions carry no rates; they do not alter the replayed state.
+            if (Codes.Parse<PolicyTransactionKind>(transaction.Kind) is PolicyTransactionKind.Suspension or PolicyTransactionKind.Reactivation)
+            {
+                continue;
+            }
+
             if (Codes.Parse<PolicyTransactionKind>(transaction.Kind) != PolicyTransactionKind.Change)
             {
                 return DomainError.Of(
