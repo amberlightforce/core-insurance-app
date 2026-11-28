@@ -67,6 +67,8 @@ public static class BillingModule
                 $"GRANT SELECT, INSERT ON {Schema}.bank_statement, {Schema}.bank_statement_line TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.write_off TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.write_off_line TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.dd_collection TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.dd_item TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE, DELETE ON {Schema}.down_payment TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
@@ -285,6 +287,21 @@ public static class BillingModule
         services.AddCommandAuditor<RefundSuspenseToSender, SuspenseRefundToSenderResponse, SuspenseAuditor<RefundSuspenseToSender, SuspenseRefundToSenderResponse>>();
         services.AddCommand<RefundSuspenseToSender, SuspenseRefundToSenderResponse, RefundSuspenseToSenderHandler>(
             CommandDescriptor.For("bil.Suspense.refundToSender") with { SupportsDryRun = true });
+
+        // BO-BIL-06b: SEPA direct-debit collection run (pain.008 out through the bank-file port, settlement and R-transactions in).
+        services.AddScoped<DirectDebitCollector>();
+        services.AddSingleton<DirectDebitRunner>();
+        services.AddCommandAuditor<RunDirectDebitCollection, DirectDebitRunResult, DirectDebitRunAuditor>();
+        services.AddCommand<RunDirectDebitCollection, DirectDebitRunResult, RunDirectDebitCollectionHandler>(
+            CommandDescriptor.For("bil.DirectDebit.run") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddCommandAuditor<ApplyDirectDebitStatus, DirectDebitStatusResult, DirectDebitStatusAuditor>();
+        services.AddCommand<ApplyDirectDebitStatus, DirectDebitStatusResult, ApplyDirectDebitStatusHandler>(
+            CommandDescriptor.For("bil.DirectDebit.status") with { RequiresIdempotencyKey = false, Idempotent = false });
+        if (string.Equals(configuration["APP_ROLE"], "worker", StringComparison.OrdinalIgnoreCase)
+            && configuration.GetValue("Billing:DirectDebitEnabled", false))
+        {
+            services.AddHostedService<DirectDebitSweeper>();
+        }
 
         // SL6-BIL-DELINQ: non-payment cases (notice, waiting clock, cure, cancellation request). DOC and CMP are reached through their
         // contract interfaces, resolved when used.

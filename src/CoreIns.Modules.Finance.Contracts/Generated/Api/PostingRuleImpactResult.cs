@@ -33,9 +33,6 @@ public sealed record PostingRuleImpactResult
     public required int Skipped { get; init; }
 
     /// <summary>Contract member 'differences'.</summary>
-    /// <remarks>
-    /// <para>Shape not defined by the contract yet (Unspecified).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("differences")]
-    public required global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement> Differences { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Finance.Contracts.Api.PostingRuleImpactLine> Differences { get; init; }
 }

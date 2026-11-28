@@ -87,6 +87,7 @@ public static class PolicyModule
         services.AddScoped<PolicySnapshots>();
         services.AddScoped<PolicySearch>();
         services.AddScoped<PolicyReads>();
+        services.AddScoped<IPolicyInForceQuery, PolicyInForceQuery>();
 
         services.AddScoped<IValidator<CreateSubmission>, CreateSubmissionValidator>();
         services.AddCommandAuditor<CreateSubmission, SubmissionCreateResponse, CreateSubmissionAuditor>();

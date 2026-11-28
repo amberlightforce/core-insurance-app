@@ -24,13 +24,9 @@ public sealed record PolicyHoldCheckRequest
     [global::System.Text.Json.Serialization.JsonPropertyName("coverages")]
     public required global::System.Collections.Generic.IReadOnlyList<string> Coverages { get; init; }
 
-    /// <summary>Risk locations (postcode / hazard-zone keys via Geocoder); shape typed by W3-UW (D-API-13)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// <para>Shape to be typed by W3-UW (D-API-13).</para>
-    /// </remarks>
+    /// <summary>Risk locations (postcode / hazard-zone keys); typed by BO-UW-09 (D-API-13)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("riskLocations")]
-    public required global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement> RiskLocations { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Underwriting.Contracts.Api.HoldRiskLocation> RiskLocations { get; init; }
 
     /// <summary>Contract member 'transactionDate'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("transactionDate")]

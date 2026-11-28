@@ -9,28 +9,19 @@ namespace CoreIns.Modules.Finance.Contracts.Api;
 public sealed record PostingRulesAuthoringRequest
 {
     /// <summary>Contract member 'ruleSet'.</summary>
-    /// <remarks>
-    /// <para>Shape not defined by the contract yet (Unspecified).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("ruleSet")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RuleSet { get; init; }
+    public global::CoreIns.Modules.Finance.Contracts.Api.PostingRuleSetRef? RuleSet { get; init; }
 
     /// <summary>Contract member 'ruleRows'.</summary>
-    /// <remarks>
-    /// <para>Shape not defined by the contract yet (Unspecified).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("ruleRows")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? RuleRows { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Finance.Contracts.Api.PostingRuleRowInput>? RuleRows { get; init; }
 
     /// <summary>Contract member 'sampleEvents'.</summary>
-    /// <remarks>
-    /// <para>Shape not defined by the contract yet (Unspecified).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("sampleEvents")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? SampleEvents { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Finance.Contracts.Api.PostingRuleSampleEvent>? SampleEvents { get; init; }
 
     /// <summary>previewImpact only, journals to replay (default 200, at most 1000)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("limit")]

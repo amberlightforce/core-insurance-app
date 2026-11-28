@@ -8,15 +8,11 @@ namespace CoreIns.Modules.Underwriting.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AccumulationCheckResponse
 {
-    /// <summary>PRD: "band"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>GREEN below 80 percent of capacity, AMBER below capacity, RED at or above it</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("band")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Band { get; init; }
+    public required BandValue Band { get; init; }
 
-    /// <summary>PRD: "exposure"</summary>
+    /// <summary>In-force policies in the zone (policyCount)</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>
@@ -24,7 +20,7 @@ public sealed record AccumulationCheckResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? Exposure { get; init; }
 
-    /// <summary>PRD: "capacity"</summary>
+    /// <summary>Configured capacity for the peril (policyCount)</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>
@@ -32,11 +28,26 @@ public sealed record AccumulationCheckResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? Capacity { get; init; }
 
-    /// <summary>PRD: "data as of"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>When the exposure was counted</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("dataAs")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DataAs { get; init; }
+    public global::CoreIns.SharedKernel.Instant? DataAs { get; init; }
+
+    /// <summary>GREEN below 80 percent of capacity, AMBER below capacity, RED at or above it</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<BandValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum BandValue
+    {
+        /// <summary><c>GREEN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("GREEN")]
+        Green,
+
+        /// <summary><c>AMBER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("AMBER")]
+        Amber,
+
+        /// <summary><c>RED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RED")]
+        Red,
+    }
 }

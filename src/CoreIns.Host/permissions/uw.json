@@ -32,6 +32,15 @@
         "uw.Contingency.extend": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Contingency.waive": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Contingency.applyConsequence": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        // BO-UW-09: policy holds and the accumulation check. Activating and releasing a hold are for managers.
+        "uw.PolicyHold.check": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.PolicyHold.impact": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.PolicyHold.create": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.PolicyHold.update": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.PolicyHold.copy": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.PolicyHold.activate": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.PolicyHold.release": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "uw.Accumulation.check": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Referral.list": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "uw.Referral.get": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         // BO-UW-05: referral commands and the review lock. Deciding stays with uw.Issue.decide and the UW.ISSUE_APPROVAL authority.

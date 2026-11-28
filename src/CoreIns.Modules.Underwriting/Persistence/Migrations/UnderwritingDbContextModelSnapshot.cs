@@ -382,6 +382,45 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.HoldScopeRow", b =>
+                {
+                    b.Property<Guid>("ScopeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("scope_id");
+
+                    b.Property<string>("Dimension")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("dimension");
+
+                    b.Property<Guid>("HoldId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("hold_id");
+
+                    b.Property<DateTime?>("RetiredAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("retired_at");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("value");
+
+                    b.HasKey("ScopeId")
+                        .HasName("pk_hold_scope");
+
+                    b.HasIndex("HoldId", "Dimension", "Value")
+                        .IsUnique()
+                        .HasDatabaseName("ux_hold_scope_value")
+                        .HasFilter("retired_at IS NULL");
+
+                    b.ToTable("hold_scope", "uw", t =>
+                        {
+                            t.HasCheckConstraint("ck_hold_scope_dimension", "dimension IN ('POSTCODE', 'HAZARD_ZONE', 'PRODUCT', 'LINE_OF_BUSINESS', 'COVERAGE')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.IssueRow", b =>
                 {
                     b.Property<Guid>("IssueId")
@@ -587,6 +626,101 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                             t.HasCheckConstraint("ck_issue_type_lane", "default_lane IN ('STRAIGHT_THROUGH', 'ASSISTED', 'EXPERT')");
 
                             t.HasCheckConstraint("ck_issue_type_severity", "severity IN ('REFER', 'DECLINE')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.PolicyHoldRow", b =>
+                {
+                    b.Property<Guid>("HoldId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("hold_id");
+
+                    b.Property<DateTime?>("ActivatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("activated_at");
+
+                    b.Property<string>("ActivatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("activated_by");
+
+                    b.Property<Guid?>("CopiedFrom")
+                        .HasColumnType("uuid")
+                        .HasColumnName("copied_from");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<DateOnly>("EffectiveFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("effective_from");
+
+                    b.Property<DateOnly?>("EffectiveTo")
+                        .HasColumnType("date")
+                        .HasColumnName("effective_to");
+
+                    b.Property<string>("HoldCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("hold_code");
+
+                    b.PrimitiveCollection<string[]>("JobTypes")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("job_types");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("ReleaseReason")
+                        .HasColumnType("text")
+                        .HasColumnName("release_reason");
+
+                    b.Property<DateTime?>("ReleasedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("released_at");
+
+                    b.Property<string>("ReleasedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("released_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("HoldId")
+                        .HasName("pk_policy_hold");
+
+                    b.HasIndex("LegalEntityId", "HoldCode")
+                        .IsUnique()
+                        .HasDatabaseName("ux_policy_hold_code");
+
+                    b.HasIndex("LegalEntityId", "Status")
+                        .HasDatabaseName("ix_policy_hold_status");
+
+                    b.ToTable("policy_hold", "uw", t =>
+                        {
+                            t.HasCheckConstraint("ck_policy_hold_status", "status IN ('Draft', 'Active', 'Released')");
+
+                            t.HasCheckConstraint("ck_policy_hold_window", "effective_to IS NULL OR effective_to >= effective_from");
                         });
                 });
 
@@ -797,6 +931,16 @@ namespace CoreIns.Modules.Underwriting.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_evaluation_rule_set");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.HoldScopeRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Underwriting.Persistence.PolicyHoldRow", null)
+                        .WithMany()
+                        .HasForeignKey("HoldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_hold_scope_hold");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Underwriting.Persistence.IssueRow", b =>

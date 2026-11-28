@@ -9,30 +9,18 @@ namespace CoreIns.Modules.Finance.Contracts.Api;
 public sealed record PostingRulesAuthoringResponse
 {
     /// <summary>Contract member 'draft'.</summary>
-    /// <remarks>
-    /// <para>Shape not defined by the contract yet (Unspecified).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("draft")]
-    public global::System.Text.Json.JsonElement? Draft { get; init; }
+    public global::CoreIns.Modules.Finance.Contracts.Api.PostingRuleDraftView? Draft { get; init; }
 
     /// <summary>Contract member 'compileResults'.</summary>
-    /// <remarks>
-    /// <para>Shape not defined by the contract yet (Unspecified).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("compileResults")]
-    public global::System.Text.Json.JsonElement? CompileResults { get; init; }
+    public global::CoreIns.Modules.Finance.Contracts.Api.PostingRuleCompileResult? CompileResults { get; init; }
 
     /// <summary>Contract member 'goldenResults'.</summary>
-    /// <remarks>
-    /// <para>Shape not defined by the contract yet (Unspecified).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("goldenResults")]
-    public global::System.Text.Json.JsonElement? GoldenResults { get; init; }
+    public global::CoreIns.Modules.Finance.Contracts.Api.PostingRuleGoldenResult? GoldenResults { get; init; }
 
     /// <summary>Contract member 'preview'.</summary>
-    /// <remarks>
-    /// <para>Shape not defined by the contract yet (Unspecified).</para>
-    /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("preview")]
-    public global::System.Text.Json.JsonElement? Preview { get; init; }
+    public global::CoreIns.Modules.Finance.Contracts.Api.PostingRuleImpactResult? Preview { get; init; }
 }

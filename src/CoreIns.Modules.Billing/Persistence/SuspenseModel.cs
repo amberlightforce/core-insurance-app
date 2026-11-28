@@ -9,7 +9,7 @@ internal static class SuspenseModel
         {
             e.ToTable("suspense_item", t =>
             {
-                t.HasCheckConstraint("ck_suspense_item_state", "state IN ('OPEN', 'REFUND_PENDING', 'ALLOCATED', 'REFUNDED')");
+                t.HasCheckConstraint("ck_suspense_item_state", "state IN ('OPEN', 'REFUND_PENDING', 'ALLOCATED', 'REFUNDED', 'RETURNED')");
                 t.HasCheckConstraint("ck_suspense_item_amount", "amount > 0");
                 t.HasCheckConstraint("ck_suspense_item_record_version", "record_version >= 1");
             });

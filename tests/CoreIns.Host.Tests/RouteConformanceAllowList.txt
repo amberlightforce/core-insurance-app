@@ -114,7 +114,6 @@ CONTRACT_NOT_SERVED GET /api/wrk/v1/requests
 CONTRACT_NOT_SERVED GET /api/wrk/v1/requests/{}
 CONTRACT_NOT_SERVED PATCH /api/clm/v1/services/{}
 CONTRACT_NOT_SERVED PATCH /api/pfc/v1/pogs/{}
-CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
 CONTRACT_NOT_SERVED POST /api/bil/v1/account-currents/dispute
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/attach-term
@@ -409,7 +408,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/notices/acknowledge
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/draft
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/send
 CONTRACT_NOT_SERVED POST /api/ri/v1/reconciliation/fin
-CONTRACT_NOT_SERVED POST /api/uw/v1/accumulation/check
 CONTRACT_NOT_SERVED POST /api/uw/v1/data-subject/erase
 CONTRACT_NOT_SERVED POST /api/uw/v1/data-subject/export
 CONTRACT_NOT_SERVED POST /api/uw/v1/data-subject/restrict
@@ -427,12 +425,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/clear
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/reject
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/verify-value
 CONTRACT_NOT_SERVED POST /api/uw/v1/nat-cat/assess
-CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds
-CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/activate
-CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/check
-CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/copy
-CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/impact
-CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/release
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/bulk-set
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/set
 CONTRACT_NOT_SERVED POST /api/uw/v1/valuation/compute

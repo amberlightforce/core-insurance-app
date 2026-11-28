@@ -5,6 +5,7 @@ using CoreIns.Modules.Documents.Contracts;
 using CoreIns.Modules.Documents.Contracts.Api;
 using CoreIns.Modules.Documents.Persistence;
 using CoreIns.Modules.Documents.Queries;
+using CoreIns.Modules.Documents.Rendering;
 using CoreIns.Modules.Documents.Services;
 using CoreIns.Platform;
 using CoreIns.Platform.Commands;
@@ -63,6 +64,24 @@ public static class DocumentsModule
         services.AddCommand<SetRetentionClass, ArchiveSetRetentionClassResponse, SetRetentionClassHandler>(CommandDescriptor.For("doc.Archive.setRetentionClass"));
         services.AddCommand<ExportEvidencePack, EvidencePackExportResponse, ExportEvidencePackHandler>(CommandDescriptor.For("doc.EvidencePack.export"));
 
+        services.AddCommand<RenderDocumentPdf, DocumentRenderPdfResponse, RenderDocumentPdfHandler>(CommandDescriptor.For("doc.Document.renderPdf"));
+        services.AddSingleton<IPdfPostProcessor, PassThroughPdfPostProcessor>();
+        var gotenberg = configuration[$"{DocumentsOptions.Section}:GotenbergUrl"];
+        gotenberg = string.IsNullOrWhiteSpace(gotenberg) ? configuration["DocRender:Url"] : gotenberg;
+        if (Uri.TryCreate(gotenberg, UriKind.Absolute, out var gotenbergUri))
+        {
+            var timeout = int.TryParse(configuration[$"{DocumentsOptions.Section}:GotenbergTimeoutSeconds"], out var t) && t > 0 ? t : 30;
+            services.AddHttpClient<IPdfRenderer, GotenbergPdfRenderer>(c =>
+            {
+                c.BaseAddress = new Uri(gotenbergUri.AbsoluteUri.TrimEnd('/') + "/");
+                c.Timeout = TimeSpan.FromSeconds(timeout);
+            });
+        }
+        else
+        {
+            services.AddSingleton<IPdfRenderer, PlainPdfRenderer>();
+        }
+
         services.AddScoped<IDocumentRequestService, DocumentRequestService>();
         services.AddScoped<IDocumentContentService, DocumentContentService>();
         services.AddScoped<IDocumentEvidenceService, DocumentEvidenceService>();
@@ -94,6 +113,8 @@ public static class DocumentsModule
             .Describe("Η απόσυρση ή αντικατάσταση νόμιμης ειδοποίησης απαιτεί τον ρόλο διαχειριστή.", "Withdrawing or replacing a statutory notice needs the administrator role."),
         ErrorDefinition.For(ModuleCode.DOC, "DSAR-RESTRICTED", 422, "Περιορισμένα δεδομένα παραλήπτη", "The recipient data is restricted")
             .Describe("Τα δεδομένα του παραλήπτη είναι περιορισμένα (DSAR)· δεν γίνεται νέα αποστολή.", "The recipient data is restricted (DSAR); no new delivery is made."),
+        ErrorDefinition.For(ModuleCode.DOC, "RENDER-FAILED", 502, "Η απόδοση PDF απέτυχε", "PDF rendering failed")
+            .Describe("Η υπηρεσία απόδοσης PDF δεν ανταποκρίθηκε ή απέρριψε το έγγραφο· δοκιμάστε ξανά.", "The PDF rendering service did not respond or refused the document; try again."),
         ErrorDefinition.For(ModuleCode.DOC, "HASH-MISMATCH", 422, "Το αποτύπωμα δεν ταιριάζει", "The hash does not match")
             .Describe("Το δηλωμένο αποτύπωμα SHA-256 διαφέρει από το περιεχόμενο.", "The declared SHA-256 differs from the content."),
     ];
