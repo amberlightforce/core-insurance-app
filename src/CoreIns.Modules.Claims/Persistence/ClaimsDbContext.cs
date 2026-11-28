@@ -21,6 +21,8 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
 
     public DbSet<CatEventRow> CatEvents => Set<CatEventRow>();
 
+    public DbSet<CertificateRequestRow> CertificateRequests => Set<CertificateRequestRow>();
+
     public DbSet<ClaimantRow> Claimants => Set<ClaimantRow>();
 
     public DbSet<IncidentRow> Incidents => Set<IncidentRow>();
@@ -187,6 +189,34 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
             entity.Property(e => e.ClosedAt).HasColumnName("closed_at").HasColumnType("timestamptz");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
             entity.HasIndex(e => new { e.LegalEntityId, e.CatCode }).IsUnique().HasDatabaseName("ux_cat_event_code");
+        });
+
+        modelBuilder.Entity<CertificateRequestRow>(entity =>
+        {
+            entity.ToTable("certificate_request", table =>
+            {
+                CommonChecks(table, "certificate_request");
+                table.HasCheckConstraint("ck_certificate_request_status", "status IN ('REQUESTED', 'ASSEMBLED', 'ISSUED')");
+                table.HasCheckConstraint("ck_certificate_request_period", "period_to >= period_from");
+                table.HasCheckConstraint("ck_certificate_request_issued", "status <> 'ISSUED' OR (certificate_number IS NOT NULL AND document_id IS NOT NULL AND issued_at IS NOT NULL)");
+            });
+            entity.HasKey(e => e.CertificateId).HasName("pk_certificate_request");
+            entity.Property(e => e.CertificateId).HasColumnName("certificate_id");
+            MapCommon(entity);
+            entity.Property(e => e.RequesterPartyId).HasColumnName("requester_party_id");
+            entity.Property(e => e.PolicyNumbers).HasColumnName("policy_numbers");
+            entity.Property(e => e.PeriodFrom).HasColumnName("period_from");
+            entity.Property(e => e.PeriodTo).HasColumnName("period_to");
+            entity.Property(e => e.LookbackYears).HasColumnName("lookback_years");
+            entity.Property(e => e.LegalStatus).HasColumnName("legal_status");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.ClaimsJson).HasColumnName("claims").HasColumnType("jsonb");
+            entity.Property(e => e.CertificateNumber).HasColumnName("certificate_number");
+            entity.Property(e => e.DocumentId).HasColumnName("document_id");
+            entity.Property(e => e.IssuedAt).HasColumnName("issued_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.LegalEntityId, e.RequesterPartyId, e.CreatedAt }).HasDatabaseName("ix_certificate_request_requester");
+            entity.HasIndex(e => new { e.LegalEntityId, e.CertificateNumber }).IsUnique().HasFilter("certificate_number IS NOT NULL").HasDatabaseName("ux_certificate_request_number");
         });
 
         modelBuilder.Entity<ClaimantRow>(entity =>

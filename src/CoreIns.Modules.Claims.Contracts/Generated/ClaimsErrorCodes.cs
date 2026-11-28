@@ -32,6 +32,12 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string CertRequester = "CLM-ERR-CERT-REQUESTER";
 
+    /// <summary>CLM-ERR-CERT-STATE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): clm.Certificate.assemble, clm.Certificate.issue, clm.Certificate.request.</para>
+    /// </remarks>
+    public const string CertState = "CLM-ERR-CERT-STATE";
+
     /// <summary>CLM-ERR-CLOSE-GUARD (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 6 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Exposure.close.</para>
@@ -160,7 +166,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 39 operation(s): clm.CatEvent.close, clm.CatEvent.declare, clm.CatEvent.list, clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.decide, clm.Coverage.reverify, clm.Exposure.close, clm.Exposure.create, ….</para>
+    /// <para>Declared by 42 operation(s): clm.CatEvent.close, clm.CatEvent.declare, clm.CatEvent.list, clm.Certificate.assemble, clm.Certificate.issue, clm.Certificate.request, clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.decide, ….</para>
     /// </remarks>
     public const string NotFound = "CLM-ERR-NOT-FOUND";
 
@@ -264,7 +270,7 @@ public static class ClaimsErrorCodes
     public const string Prefix = "CLM-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Allocation, Authority, CatEvent, CertRequester, CloseGuard, ContactProhibited, CoverageDenied, CoverageInQuestion, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, FsDisabled, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, MergeFinancials, MergeNotDuplicate, MtplClocksRequired, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, RecoveryState, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Allocation, Authority, CatEvent, CertRequester, CertState, CloseGuard, ContactProhibited, CoverageDenied, CoverageInQuestion, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, FsDisabled, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, MergeFinancials, MergeNotDuplicate, MtplClocksRequired, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, RecoveryState, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -273,6 +279,7 @@ public static class ClaimsErrorCodes
         [Authority] = 403,
         [CatEvent] = 422,
         [CertRequester] = 422,
+        [CertState] = 422,
         [CloseGuard] = 422,
         [ContactProhibited] = 422,
         [CoverageDenied] = 422,

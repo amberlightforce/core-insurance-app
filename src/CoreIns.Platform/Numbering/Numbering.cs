@@ -51,6 +51,9 @@ public static class NumberingSchemes
     /// <summary>Claim number (REQ-CLM-001).</summary>
     public const string Claim = "CLAIM";
 
+    /// <summary>Claims-history certificate number (REQ-CLM-008, BO-CLM-07).</summary>
+    public const string ClaimsCertificate = "CLAIMS_CERTIFICATE";
+
     /// <summary>Journal number (REQ-FIN-069).</summary>
     public const string Journal = "JOURNAL";
 

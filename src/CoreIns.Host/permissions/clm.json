@@ -55,7 +55,10 @@
         "clm.CatEvent.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.CatEvent.aggregate": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.CatEvent.declare": [ "Staff.ClaimsManager" ],
-        "clm.CatEvent.close": [ "Staff.ClaimsManager" ]
+        "clm.CatEvent.close": [ "Staff.ClaimsManager" ],
+        "clm.Certificate.request": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Certificate.assemble": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.Certificate.issue": [ "Staff.ClaimsManager" ]
       }
     },
     "Authority": {
