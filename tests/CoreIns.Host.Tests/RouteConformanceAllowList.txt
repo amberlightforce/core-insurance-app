@@ -418,10 +418,8 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/rebase
 CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/release-lease
 CONTRACT_NOT_SERVED POST /api/pol/v1/jobs/resolve-conflicts
 CONTRACT_NOT_SERVED POST /api/pol/v1/policy-moves/execute
-CONTRACT_NOT_SERVED POST /api/pol/v1/reactivations
 CONTRACT_NOT_SERVED POST /api/pol/v1/reinstatements
 CONTRACT_NOT_SERVED POST /api/pol/v1/rewrites
-CONTRACT_NOT_SERVED POST /api/pol/v1/suspensions
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/request-policy-move
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/split
