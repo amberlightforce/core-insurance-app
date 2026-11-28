@@ -130,7 +130,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-MANDATE-STATE (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): bil.Mandate.amend, bil.Mandate.cancel, bil.Mandate.create, bil.Mandate.get, bil.Mandate.sign.</para>
+    /// <para>Declared by 6 operation(s): bil.Mandate.amend, bil.Mandate.cancel, bil.Mandate.create, bil.Mandate.get, bil.Mandate.sign, bil.PaymentInstrument.remove.</para>
     /// </remarks>
     public const string MandateState = "BIL-ERR-MANDATE-STATE";
 

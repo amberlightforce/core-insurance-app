@@ -506,10 +506,38 @@
       "limit": 1
     },
     "bil.Mandate.create": {
-      "mandate": "2026-10-07"
+      "mandate": {
+        "mandateId": "0192438b-f31c-71d2-820f-96fe7a9ae9b4",
+        "billingAccountId": "01922992-04b8-77a2-8cbb-489940a3804b",
+        "payerPartyId": "0192d148-51b2-7ff9-8965-2ce2329bccd6",
+        "instrumentId": "0192528a-084a-7dda-835b-b66931a7aa38",
+        "mandateReference": "sample",
+        "scheme": "SEPA_CORE",
+        "sequenceType": "FRST",
+        "status": "DRAFT",
+        "maskedIban": "GR1601101250000000012300695",
+        "signatureDate": "2026-10-07",
+        "signatureEvidenceId": "sample",
+        "amendmentCount": 1,
+        "origin": "NATIVE"
+      }
     },
     "bil.Mandate.sign": {
-      "mandate": "2026-10-07"
+      "mandate": {
+        "mandateId": "0192072b-562c-740f-8e81-637bbd76917e",
+        "billingAccountId": "01922ae1-2d37-70cf-8da9-ce22c7f18349",
+        "payerPartyId": "01923fb5-b2fe-7388-866d-af4bf9511e5c",
+        "instrumentId": "0192ac87-e700-7b8c-8756-41264d8775ed",
+        "mandateReference": "sample",
+        "scheme": "SEPA_CORE",
+        "sequenceType": "FRST",
+        "status": "DRAFT",
+        "maskedIban": "GR1601101250000000012300695",
+        "signatureDate": "2026-10-07",
+        "signatureEvidenceId": "sample",
+        "amendmentCount": 1,
+        "origin": "NATIVE"
+      }
     },
     "bil.PayeeAccount.create": {
       "payeeAccountId": "0192f68e-85ea-78d6-8deb-435e099d4138",
@@ -2417,39 +2445,122 @@
       "limit": 1
     },
     "MandateAmendRequest": {
-      "account": "unspecified",
-      "instrument": "unspecified",
-      "signatureEvidence": "unspecified"
+      "mandateId": "0192c331-ba62-7d8d-8876-2f12d4d2f3e3",
+      "instrumentId": "0192fdf4-b0ef-73e9-84df-503cf07c6d8d",
+      "signatureEvidenceId": "sample"
     },
     "MandateAmendResponse": {
-      "mandate": "2026-10-07"
+      "mandate": {
+        "mandateId": "0192cf7f-2fea-708c-898d-b3573b37d6f2",
+        "billingAccountId": "019296db-9c52-7b01-8304-90d0defa2ce5",
+        "payerPartyId": "01925f18-b5bb-7bda-82cf-14a023da0b06",
+        "instrumentId": "019222d9-2c01-7648-8f0f-69e02ca5827d",
+        "mandateReference": "sample",
+        "scheme": "SEPA_CORE",
+        "sequenceType": "FRST",
+        "status": "DRAFT",
+        "maskedIban": "GR1601101250000000012300695",
+        "signatureDate": "2026-10-07",
+        "signatureEvidenceId": "sample",
+        "amendmentCount": 1,
+        "origin": "NATIVE"
+      }
     },
     "MandateCancelRequest": {
-      "account": "unspecified",
-      "instrument": "unspecified",
-      "signatureEvidence": "unspecified"
+      "mandateId": "019209c1-34b1-73df-8666-26fa4d766edb",
+      "reason": "sample"
     },
     "MandateCancelResponse": {
-      "mandate": "2026-10-07"
+      "mandate": {
+        "mandateId": "01926d59-0460-7c1d-8787-a896810007ba",
+        "billingAccountId": "0192c4df-d903-7e40-80eb-9f397a4bb5ee",
+        "payerPartyId": "0192c3c9-278d-75c5-8c02-3df85207dc65",
+        "instrumentId": "01927e92-c6bc-7b10-8587-545794d631d1",
+        "mandateReference": "sample",
+        "scheme": "SEPA_CORE",
+        "sequenceType": "FRST",
+        "status": "DRAFT",
+        "maskedIban": "GR1601101250000000012300695",
+        "signatureDate": "2026-10-07",
+        "signatureEvidenceId": "sample",
+        "amendmentCount": 1,
+        "origin": "NATIVE"
+      }
     },
     "MandateCreateRequest": {
-      "account": "unspecified",
-      "instrument": "unspecified",
-      "signatureEvidence": "unspecified"
+      "billingAccountId": "01922b4d-4644-70e2-824c-5680525eb1b8",
+      "instrumentId": "01922513-f1b4-759f-8d3c-dae28874837a"
     },
     "MandateCreateResponse": {
-      "mandate": "2026-10-07"
+      "mandate": {
+        "mandateId": "01920693-2cc2-7582-8d1e-b033eca51266",
+        "billingAccountId": "0192e67c-63a2-7180-8c34-df992961e872",
+        "payerPartyId": "01928642-1687-795e-8df1-29949eb827c3",
+        "instrumentId": "01926685-38d8-77cb-8bcd-02710d509e02",
+        "mandateReference": "sample",
+        "scheme": "SEPA_CORE",
+        "sequenceType": "FRST",
+        "status": "DRAFT",
+        "maskedIban": "GR1601101250000000012300695",
+        "signatureDate": "2026-10-07",
+        "signatureEvidenceId": "sample",
+        "amendmentCount": 1,
+        "origin": "NATIVE"
+      }
     },
     "MandateGetResponse": {
-      "mandate": "2026-10-07"
+      "mandate": {
+        "mandateId": "0192f7f2-36ad-778c-82c7-4564aad5e979",
+        "billingAccountId": "0192df60-d7b5-7be5-8d14-025f5dde9e6e",
+        "payerPartyId": "0192006f-ae25-7fd4-82f7-086cd7235e18",
+        "instrumentId": "019290c2-de0e-73bf-838b-aeb68b04f391",
+        "mandateReference": "sample",
+        "scheme": "SEPA_CORE",
+        "sequenceType": "FRST",
+        "status": "DRAFT",
+        "maskedIban": "GR1601101250000000012300695",
+        "signatureDate": "2026-10-07",
+        "signatureEvidenceId": "sample",
+        "amendmentCount": 1,
+        "origin": "NATIVE"
+      }
     },
     "MandateSignRequest": {
-      "account": "unspecified",
-      "instrument": "unspecified",
-      "signatureEvidence": "unspecified"
+      "mandateId": "0192168d-ac13-752e-8557-e6e15cdbb686",
+      "signatureEvidenceId": "sample",
+      "signatureDate": "2026-10-07"
     },
     "MandateSignResponse": {
-      "mandate": "2026-10-07"
+      "mandate": {
+        "mandateId": "01924e32-cc65-78bf-8542-a20a09615496",
+        "billingAccountId": "01922fe8-5888-7c59-87ed-b7c1d7383bd7",
+        "payerPartyId": "0192f50b-c595-7b6d-8ac2-9fd8d939179f",
+        "instrumentId": "01922f61-fd20-737c-89ae-5095b4ac3b66",
+        "mandateReference": "sample",
+        "scheme": "SEPA_CORE",
+        "sequenceType": "FRST",
+        "status": "DRAFT",
+        "maskedIban": "GR1601101250000000012300695",
+        "signatureDate": "2026-10-07",
+        "signatureEvidenceId": "sample",
+        "amendmentCount": 1,
+        "origin": "NATIVE"
+      }
+    },
+    "MandateView": {
+      "mandateId": "019266f9-2650-7162-8bf1-b67ca2753940",
+      "billingAccountId": "019223fd-8975-7535-8b91-68e30a8edd6f",
+      "payerPartyId": "0192d3ef-0cb6-7cad-8dba-009724c5d704",
+      "instrumentId": "019212c1-dc1d-72c4-8b75-2c95e4c93c61",
+      "mandateReference": "sample",
+      "scheme": "SEPA_CORE",
+      "sequenceType": "FRST",
+      "status": "DRAFT",
+      "maskedIban": "GR1601101250000000012300695",
+      "signatureDate": "2026-10-07",
+      "signatureEvidenceId": "sample",
+      "amendmentCount": 1,
+      "origin": "NATIVE"
     },
     "PayeeAccountCreateRequest": {
       "partyId": "01928a36-8080-7ad1-860d-c0cc8094beb2",
@@ -2521,36 +2632,76 @@
       "preCheck": true
     },
     "PaymentInstrumentAddRequest": {
-      "iban": "unspecified",
-      "holder": "unspecified",
-      "orCardToken": "unspecified"
+      "partyId": "01927340-933a-7b9c-8592-a38661a72c6d",
+      "iban": "GR1601101250000000012300695",
+      "holder": "sample",
+      "orCardToken": "sample"
     },
     "PaymentInstrumentAddResponse": {
-      "instrument": "unspecified",
-      "vopResult": "unspecified"
+      "instrument": {
+        "instrumentId": "019232f8-059e-7b42-8ad8-ed0f70e20a7f",
+        "partyId": "01923450-ac16-7866-8ee7-0433ac477e0f",
+        "kind": "BANK_ACCOUNT",
+        "maskedIban": "GR1601101250000000012300695",
+        "holder": "sample",
+        "status": "ACTIVE",
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "vopResult": "MATCH"
     },
     "PaymentInstrumentListItem": {
-      "instrument": "unspecified",
-      "vopResult": "unspecified"
+      "instrument": {
+        "instrumentId": "0192102f-ae5c-77d1-824b-cb0e971c1d6e",
+        "partyId": "0192f92f-a98d-78b5-80d9-ca64fe17821f",
+        "kind": "BANK_ACCOUNT",
+        "maskedIban": "GR1601101250000000012300695",
+        "holder": "sample",
+        "status": "ACTIVE",
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "vopResult": "MATCH"
     },
     "PaymentInstrumentListPage": {
       "items": [
         {
-          "instrument": "unspecified",
-          "vopResult": "unspecified"
+          "instrument": {
+            "instrumentId": "01926054-749a-7646-8ec6-636c5db8b831",
+            "partyId": "01924e61-59e8-7b5c-87e4-3e3da50ed678",
+            "kind": "BANK_ACCOUNT",
+            "maskedIban": "GR1601101250000000012300695",
+            "holder": "sample",
+            "status": "ACTIVE",
+            "createdAt": "2026-10-07T09:00:00Z"
+          },
+          "vopResult": "MATCH"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "PaymentInstrumentRemoveRequest": {
-      "iban": "unspecified",
-      "holder": "unspecified",
-      "orCardToken": "unspecified"
+      "instrumentId": "0192355a-f0e1-7675-83f7-e92662dee7d0"
     },
     "PaymentInstrumentRemoveResponse": {
-      "instrument": "unspecified",
-      "vopResult": "unspecified"
+      "instrument": {
+        "instrumentId": "0192b95d-0ab7-7b06-88d8-983d57d20d1c",
+        "partyId": "01924b58-9dfd-72ff-851b-305dd78c1647",
+        "kind": "BANK_ACCOUNT",
+        "maskedIban": "GR1601101250000000012300695",
+        "holder": "sample",
+        "status": "ACTIVE",
+        "createdAt": "2026-10-07T09:00:00Z"
+      },
+      "vopResult": "MATCH"
+    },
+    "PaymentInstrumentView": {
+      "instrumentId": "01922950-b5f5-72cd-8496-fd180a5b86ef",
+      "partyId": "019248cb-6fe1-7242-8a23-309624c1d15a",
+      "kind": "BANK_ACCOUNT",
+      "maskedIban": "GR1601101250000000012300695",
+      "holder": "sample",
+      "status": "ACTIVE",
+      "createdAt": "2026-10-07T09:00:00Z"
     },
     "PaymentPlanChangeRequest": {
       "termId": "01923abf-bc30-7c06-8d64-a5e5a286bf72",

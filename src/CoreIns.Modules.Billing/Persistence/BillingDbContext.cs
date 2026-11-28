@@ -70,6 +70,10 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
     public DbSet<ReceivableAllocationRow> ReceivableAllocations => Set<ReceivableAllocationRow>();
 
+    public DbSet<PaymentInstrumentRow> PaymentInstruments => Set<PaymentInstrumentRow>();
+
+    public DbSet<MandateRow> Mandates => Set<MandateRow>();
+
     public DbSet<MigrationImport.MigrationReceivableRow> MigrationReceivables => Set<MigrationImport.MigrationReceivableRow>();
 
     public DbSet<MigrationImport.MigrationMandateRow> MigrationMandates => Set<MigrationImport.MigrationMandateRow>();
@@ -594,6 +598,88 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
         ConfigureDisbursements(modelBuilder);
         ConfigureRefunds(modelBuilder);
         ConfigureDelinquency(modelBuilder);
+        ConfigureMandates(modelBuilder);
+    }
+
+    /// <summary>Payer instruments and SEPA mandates (BO-BIL-06a): IBAN as ciphertext, blind index and last four only.</summary>
+    private static void ConfigureMandates(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<PaymentInstrumentRow>(entity =>
+        {
+            entity.ToTable("payment_instrument", table =>
+            {
+                table.HasCheckConstraint("ck_payment_instrument_status", Codes.CheckSql<InstrumentStatus>("status"));
+                table.HasCheckConstraint("ck_payment_instrument_kind", "kind = 'BANK_ACCOUNT'");
+                table.HasCheckConstraint("ck_payment_instrument_vop", "vop_result IS NULL OR " + Codes.CheckSql<VopOutcome>("vop_result"));
+                table.HasCheckConstraint("ck_payment_instrument_last4", "iban_last4 ~ '^[A-Z0-9]{4}$'");
+                table.HasCheckConstraint("ck_payment_instrument_record_version", "record_version >= 1");
+            });
+            entity.HasKey(e => e.InstrumentId).HasName("pk_payment_instrument");
+            entity.Property(e => e.InstrumentId).HasColumnName("instrument_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.Kind).HasColumnName("kind");
+            entity.Property(e => e.IbanEncrypted).HasColumnName("iban_encrypted");
+            entity.Property(e => e.IbanBlindIndex).HasColumnName("iban_blind_index");
+            entity.Property(e => e.IbanLast4).HasColumnName("iban_last4").HasColumnType("char(4)");
+            entity.Property(e => e.HolderName).HasColumnName("holder_name");
+            entity.Property(e => e.VopResult).HasColumnName("vop_result");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.RemovedAt).HasColumnName("removed_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.LegalEntityId, e.PartyId }).HasDatabaseName("ix_payment_instrument_party");
+
+            // The same IBAN is held once per party while it is active: adding it again returns the existing instrument.
+            entity.HasIndex(e => new { e.LegalEntityId, e.PartyId, e.IbanBlindIndex }).IsUnique()
+                .HasFilter("status = 'ACTIVE'").HasDatabaseName("ux_payment_instrument_active");
+        });
+
+        modelBuilder.Entity<MandateRow>(entity =>
+        {
+            entity.ToTable("mandate", table =>
+            {
+                table.HasCheckConstraint("ck_mandate_status", Codes.CheckSql<MandateStatus>("status"));
+                table.HasCheckConstraint("ck_mandate_sequence", Codes.CheckSql<MandateSequence>("sequence_type"));
+                table.HasCheckConstraint("ck_mandate_scheme", "scheme = 'SEPA_CORE'");
+                table.HasCheckConstraint("ck_mandate_origin", "origin IN ('NATIVE', 'MIGRATION')");
+                table.HasCheckConstraint("ck_mandate_reference", "char_length(mandate_reference) BETWEEN 1 AND 35");
+                table.HasCheckConstraint("ck_mandate_record_version", "record_version >= 1");
+
+                // A native mandate is only ACTIVE once signed with consent evidence (REQ-BIL-106).
+                table.HasCheckConstraint("ck_mandate_signed", "status <> 'ACTIVE' OR (signature_date IS NOT NULL AND (origin = 'MIGRATION' OR signature_evidence_id IS NOT NULL))");
+            });
+            entity.HasKey(e => e.MandateId).HasName("pk_mandate");
+            entity.Property(e => e.MandateId).HasColumnName("mandate_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.BillingAccountId).HasColumnName("billing_account_id");
+            entity.Property(e => e.PayerPartyId).HasColumnName("payer_party_id");
+            entity.Property(e => e.InstrumentId).HasColumnName("instrument_id");
+            entity.Property(e => e.MandateReference).HasColumnName("mandate_reference");
+            entity.Property(e => e.Scheme).HasColumnName("scheme");
+            entity.Property(e => e.SequenceType).HasColumnName("sequence_type");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.IbanMasked).HasColumnName("iban_masked");
+            entity.Property(e => e.SignatureDate).HasColumnName("signature_date");
+            entity.Property(e => e.SignatureEvidenceId).HasColumnName("signature_evidence_id");
+            entity.Property(e => e.AmendmentCount).HasColumnName("amendment_count");
+            entity.Property(e => e.Origin).HasColumnName("origin");
+            entity.Property(e => e.FirstUsedAt).HasColumnName("first_used_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.CancelledAt).HasColumnName("cancelled_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CancelReason).HasColumnName("cancel_reason");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.LegalEntityId, e.MandateReference }).IsUnique().HasDatabaseName("ux_mandate_reference");
+            entity.HasIndex(e => new { e.LegalEntityId, e.BillingAccountId, e.Status }).HasDatabaseName("ix_mandate_account");
+
+            // One live native mandate per billing account: a new one needs the previous cancelled (or amended).
+            entity.HasIndex(e => new { e.LegalEntityId, e.BillingAccountId }).IsUnique()
+                .HasFilter("origin = 'NATIVE' AND status IN ('DRAFT', 'ACTIVE')").HasDatabaseName("ux_mandate_live_account");
+            entity.HasOne<BillingAccountRow>().WithMany().HasForeignKey(e => e.BillingAccountId).HasConstraintName("fk_mandate_account").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<PaymentInstrumentRow>().WithMany().HasForeignKey(e => e.InstrumentId).HasConstraintName("fk_mandate_instrument").OnDelete(DeleteBehavior.Restrict);
+        });
     }
 
     /// <summary>Payee accounts (REQ-BIL-343): IBAN as ciphertext, blind index and last four characters only.</summary>

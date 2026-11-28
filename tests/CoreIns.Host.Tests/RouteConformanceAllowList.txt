@@ -11,8 +11,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/commission/statements
 CONTRACT_NOT_SERVED GET /api/bil/v1/down-payment/status
 CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/balance
 CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/query
-CONTRACT_NOT_SERVED GET /api/bil/v1/mandates/{}
-CONTRACT_NOT_SERVED GET /api/bil/v1/payment-instruments
 CONTRACT_NOT_SERVED GET /api/chn/v1/account-current
 CONTRACT_NOT_SERVED GET /api/chn/v1/agent-logs/query
 CONTRACT_NOT_SERVED GET /api/chn/v1/api-products
@@ -173,12 +171,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/intermediary-collections/report
 CONTRACT_NOT_SERVED POST /api/bil/v1/intermediary-collections/report-file
 CONTRACT_NOT_SERVED POST /api/bil/v1/invoices/dispute
 CONTRACT_NOT_SERVED POST /api/bil/v1/invoices/send-copy
-CONTRACT_NOT_SERVED POST /api/bil/v1/mandates
-CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/amend
-CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/cancel
-CONTRACT_NOT_SERVED POST /api/bil/v1/mandates/sign
-CONTRACT_NOT_SERVED POST /api/bil/v1/payment-instruments/add
-CONTRACT_NOT_SERVED POST /api/bil/v1/payment-instruments/remove
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/bank
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/fin
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/invariants

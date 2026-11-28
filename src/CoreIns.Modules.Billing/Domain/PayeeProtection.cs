@@ -29,11 +29,22 @@ internal sealed class PayeeProtection(FieldEncryptor encryptor, BlindIndexer bli
     public const string IbanField = "bil.payee_account.iban";
     public const string IndexName = "bil.iban";
 
+    /// <summary>Field of a payer instrument's IBAN (BO-BIL-06a); the blind index domain is shared with payee accounts.</summary>
+    public const string InstrumentIbanField = "bil.payment_instrument.iban";
+
     public SkLegalEntityId Current(RequestContext context) =>
         legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
 
     public ValueTask<byte[]> EncryptAsync(SkLegalEntityId legalEntity, Guid payeeAccountId, CoreIns.SharedKernel.Iban iban, CancellationToken cancellationToken) =>
         encryptor.EncryptAsync(KeyOwner(legalEntity), IbanField, iban.Value, payeeAccountId.ToString("N"), cancellationToken);
+
+    /// <summary>Envelope of a payer instrument's IBAN, bound to the instrument id.</summary>
+    public ValueTask<byte[]> EncryptInstrumentAsync(SkLegalEntityId legalEntity, Guid instrumentId, CoreIns.SharedKernel.Iban iban, CancellationToken cancellationToken) =>
+        encryptor.EncryptAsync(KeyOwner(legalEntity), InstrumentIbanField, iban.Value, instrumentId.ToString("N"), cancellationToken);
+
+    /// <summary>The IBAN of a stored instrument, for a bank call only (never logged, returned or published).</summary>
+    public ValueTask<string> DecryptInstrumentAsync(Guid instrumentId, byte[] envelope, CancellationToken cancellationToken) =>
+        encryptor.DecryptAsync(envelope, InstrumentIbanField, instrumentId.ToString("N"), cancellationToken);
 
     /// <summary>The IBAN of a stored account, for a bank call only (never logged, returned or published).</summary>
     public ValueTask<string> DecryptAsync(Guid payeeAccountId, byte[] envelope, CancellationToken cancellationToken) =>
