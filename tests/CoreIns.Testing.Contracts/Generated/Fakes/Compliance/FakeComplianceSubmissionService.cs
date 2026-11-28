@@ -14,7 +14,7 @@ public sealed class FakeComplianceSubmissionService : global::CoreIns.Testing.Co
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionCreateResponse> CreateAsync(global::System.Text.Json.JsonElement request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionCreateResponse>("cmp.Submission.create", [request, options], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionCreateResponse> CreateAsync(global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionCreateRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionCreateResponse>("cmp.Submission.create", [request, options], cancellationToken);
 
     /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionRecordFilingResponse> RecordFilingAsync(global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionRecordFilingRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Compliance.Contracts.Api.SubmissionRecordFilingResponse>("cmp.Submission.recordFiling", [request, options], cancellationToken);

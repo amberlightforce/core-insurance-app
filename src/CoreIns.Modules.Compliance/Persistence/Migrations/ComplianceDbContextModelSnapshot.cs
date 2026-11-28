@@ -929,6 +929,231 @@ namespace CoreIns.Modules.Compliance.Persistence.Migrations
                     b.ToTable("legacy_fiscal_mark", "cmp");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Submissions.SubmissionHistoryRow", b =>
+                {
+                    b.Property<Guid>("HistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("history_id");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actor");
+
+                    b.Property<DateTime>("At")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("at");
+
+                    b.Property<string>("FromStatus")
+                        .HasColumnType("text")
+                        .HasColumnName("from_status");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("SubmissionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("submission_id");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("text")
+                        .HasColumnName("text");
+
+                    b.Property<string>("ToStatus")
+                        .HasColumnType("text")
+                        .HasColumnName("to_status");
+
+                    b.HasKey("HistoryId")
+                        .HasName("pk_submission_history");
+
+                    b.HasIndex("SubmissionId", "At")
+                        .HasDatabaseName("ix_submission_history_submission");
+
+                    b.ToTable("submission_history", "cmp", t =>
+                        {
+                            t.HasCheckConstraint("ck_submission_history_kind", "kind IN ('TRANSITION','COMMENT')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Compliance.Submissions.SubmissionRow", b =>
+                {
+                    b.Property<Guid>("SubmissionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("submission_id");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<string>("ApprovalStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("approval_status");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("approved_by");
+
+                    b.Property<string>("ContentHash")
+                        .HasColumnType("text")
+                        .HasColumnName("content_hash");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly?>("DueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
+
+                    b.Property<string>("DueLegalStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("due_legal_status");
+
+                    b.Property<string>("Evidence")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("evidence");
+
+                    b.Property<DateTime?>("FiledAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("filed_at");
+
+                    b.Property<string>("Filer")
+                        .HasColumnType("text")
+                        .HasColumnName("filer");
+
+                    b.Property<string>("FilingChannel")
+                        .HasColumnType("text")
+                        .HasColumnName("filing_channel");
+
+                    b.Property<string>("FilingReference")
+                        .HasColumnType("text")
+                        .HasColumnName("filing_reference");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("number");
+
+                    b.Property<string>("Participants")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("participants");
+
+                    b.Property<DateOnly?>("PeriodFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("period_from");
+
+                    b.Property<string>("PeriodLabel")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("period_label");
+
+                    b.Property<DateOnly?>("PeriodTo")
+                        .HasColumnType("date")
+                        .HasColumnName("period_to");
+
+                    b.Property<string>("PreparedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("prepared_by");
+
+                    b.Property<Guid?>("PreviousVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("previous_version_id");
+
+                    b.Property<string>("ReceiptHash")
+                        .HasColumnType("text")
+                        .HasColumnName("receipt_hash");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Regulator")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("regulator");
+
+                    b.Property<string>("RequestedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("requested_by");
+
+                    b.Property<DateTime?>("RespondedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("responded_at");
+
+                    b.Property<string>("ResponseNote")
+                        .HasColumnType("text")
+                        .HasColumnName("response_note");
+
+                    b.Property<string>("ResponseOutcome")
+                        .HasColumnType("text")
+                        .HasColumnName("response_outcome");
+
+                    b.Property<string>("ResponseReference")
+                        .HasColumnType("text")
+                        .HasColumnName("response_reference");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("SubmissionType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("submission_type");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("SubmissionId")
+                        .HasName("pk_submission");
+
+                    b.HasIndex("PreviousVersionId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_submission_previous_version");
+
+                    b.HasIndex("LegalEntityId", "Number")
+                        .IsUnique()
+                        .HasDatabaseName("ux_submission_number");
+
+                    b.HasIndex("LegalEntityId", "Status")
+                        .HasDatabaseName("ix_submission_status");
+
+                    b.ToTable("submission", "cmp", t =>
+                        {
+                            t.HasCheckConstraint("ck_submission_approval_status", "approval_status IN ('NONE','PENDING','APPROVED')");
+
+                            t.HasCheckConstraint("ck_submission_due_legal_status", "due_legal_status IN ('Verified','Unverified')");
+
+                            t.HasCheckConstraint("ck_submission_status", "status IN ('PLANNED','IN_PREPARATION','READY','SUBMITTED','ACKNOWLEDGED','REJECTED','RESUBMITTED')");
+
+                            t.HasCheckConstraint("ck_submission_version", "version >= 1 AND record_version >= 1");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Platform.Persistence.DsarRestrictionRow", b =>
                 {
                     b.Property<Guid>("RestrictionId")

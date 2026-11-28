@@ -57,8 +57,33 @@
         "cmp.Clock.get": [ "Staff.Billing", "Staff.ComplianceOfficer", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "cmp.Clock.query": [ "Staff.Billing", "Staff.ComplianceOfficer", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "cmp.ClockDef.list": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
-        "cmp.ClockDef.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ]
+        "cmp.ClockDef.get": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        // Regulatory submissions tracker (BO-CMP-09): approve is maker-checker (a different user decides, CMP.SUBMISSION authority).
+        "cmp.Submission.create": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.Submission.attachContent": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.Submission.comment": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.Submission.approve": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.Submission.recordFiling": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.Submission.recordResponse": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.Submission.evidencePack": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.Submission.query": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.Submission.get": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.Submission.archiveCompleteness": [ "Staff.ComplianceOfficer", "Platform.Admin" ]
       }
+    },
+    "Authority": {
+      // ILLUSTRATIVE TEST DATA (D-USR-19: the regulatory calendar and who may approve which filing are not approved): a compliance officer
+      // or admin may approve these submission types. Ignored in Production (fail closed: DENY). Maker is not checker is enforced in code.
+      "Grants": [
+        {
+          "Id": "cmp-officer-submission-illustrative", "Role": "Staff.ComplianceOfficer", "Type": "CMP.SUBMISSION", "Illustrative": true,
+          "Limits": [ { "Dimension": "submissionType", "Comparison": "InSet", "Codes": [ "ANNUAL_RETURN", "SOLVENCY_QRT", "IPT_RETURN", "DORA_REPORT" ] } ]
+        },
+        {
+          "Id": "cmp-admin-submission-illustrative", "Role": "Platform.Admin", "Type": "CMP.SUBMISSION", "Illustrative": true,
+          "Limits": [ { "Dimension": "submissionType", "Comparison": "InSet", "Codes": [ "ANNUAL_RETURN", "SOLVENCY_QRT", "IPT_RETURN", "DORA_REPORT" ] } ]
+        }
+      ]
     }
   }
 }
