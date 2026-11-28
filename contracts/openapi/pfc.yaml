@@ -1714,24 +1714,32 @@ paths:
       x-exposure:
       - ui
       x-permission: pfc.ProductVersion.diff
-      x-error-codes: []
+      x-error-codes:
+      - code: PFC-ERR-NO-VERSION
+        status: 422
       x-source:
       - PRD-02 §9.1 l.1475
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: product
+        in: query
+        required: true
+        description: Product code
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
       - name: from
         in: query
-        required: false
-        description: 'PRD: "from"'
+        required: true
+        description: 'Older version number, such as "1.0"'
         schema:
-          type: string
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
       - name: to
         in: query
-        required: false
-        description: 'PRD: "to"'
+        required: true
+        description: 'Newer version number, such as "1.1"'
         schema:
-          type: string
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
       - name: language
         in: query
         required: false
@@ -1751,6 +1759,71 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
+  /api/pfc/v1/product-versions/export:
+    get:
+      operationId: pfc.ProductVersion.export
+      summary: Export a version as YAML or JSON
+      description: |-
+        Export a Locked version's canonical definition as YAML or JSON source (BO-PFC-03). Importing the result gives the same artefact hash.
+      tags:
+      - ProductVersion
+      x-requirement:
+      - REQ-PFC-240
+      x-wave: W2
+      x-work-packages:
+      - W2-PFC-05
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: Query
+      x-exposure:
+      - ui
+      x-permission: pfc.ProductVersion.export
+      x-error-codes:
+      - code: PFC-ERR-NO-VERSION
+        status: 422
+      x-source:
+      - BO-PFC-03
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: product
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: version
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+      - name: format
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - YAML
+          - JSON
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVersionExportResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/pfc/v1/impact-analysises/run:
@@ -2017,12 +2090,10 @@ paths:
   /api/pfc/v1/product-imports/import:
     post:
       operationId: pfc.ProductImport.import
-      summary: Migration import
+      summary: Import a YAML or JSON source into a draft change set
       description: |-
-        Migration import
-
-        PRD inputs: legacy definition, mapping
-        PRD outputs: change set or dry-run lint report
+        Import a YAML or JSON product source into a draft change set on the named product (BO-PFC-03); the draft is never a Locked version.
+        With the Dry-Run header nothing is stored and the lint report is returned.
       tags:
       - ProductImport
       x-requirement:
@@ -2044,6 +2115,10 @@ paths:
       x-permission: pfc.ProductImport.import
       x-error-codes:
       - code: PFC-ERR-IMPORT-INVALID
+        status: 422
+      - code: PFC-ERR-UNKNOWN-PRODUCT
+        status: 422
+      - code: PFC-ERR-NO-VERSION
         status: 422
       - code: PFC-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -4292,11 +4367,87 @@ components:
       - schedule
     ProductVersionDiffResponse:
       type: object
-      description: 'pfc.ProductVersion.diff result. PRD outputs: "grouped entries with classes"'
+      description: 'pfc.ProductVersion.diff result: item-level changes grouped by area, each with its class (ADDED, REMOVED, CHANGED)'
       properties:
-        groupedEntriesClasses:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "grouped entries with classes"'
+        product:
+          $ref: ../events/common.schema.json#/$defs/Code
+        from:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        to:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        total:
+          type: integer
+          minimum: 0
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductDiffGroup'
+      required:
+      - product
+      - from
+      - to
+      - total
+      - groups
+    ProductDiffGroup:
+      type: object
+      properties:
+        area:
+          type: string
+          description: The top-level part of the definition, such as elements, coverages, chargeTypes or dayCount
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductDiffEntry'
+      required:
+      - area
+      - entries
+    ProductDiffEntry:
+      type: object
+      properties:
+        class:
+          type: string
+          enum:
+          - ADDED
+          - REMOVED
+          - CHANGED
+        path:
+          type: string
+          description: 'JSON pointer; an item of a coded list is written /elements[CODE]/property'
+        code:
+          type: string
+          description: The code of the element, coverage or charge type the entry belongs to, if any
+        before:
+          type: string
+          description: JSON of the old value
+        after:
+          type: string
+          description: JSON of the new value
+      required:
+      - class
+      - path
+    ProductVersionExportResponse:
+      type: object
+      properties:
+        product:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+        artefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        format:
+          type: string
+          enum:
+          - YAML
+          - JSON
+        source:
+          type: string
+          description: The definition as YAML or JSON text
+      required:
+      - product
+      - version
+      - artefactHash
+      - format
+      - source
     ImpactAnalysisRunRequest:
       type: object
       description: 'pfc.ImpactAnalysis.run request. PRD inputs: "version"'
@@ -4349,21 +4500,37 @@ components:
           description: 'PRD: "record"'
     ProductImportImportRequest:
       type: object
-      description: 'pfc.ProductImport.import request. PRD inputs: "legacy definition, mapping"'
+      description: pfc.ProductImport.import request (BO-PFC-03). The source is a complete product definition as YAML or JSON text.
       properties:
-        legacyDefinition:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "legacy definition"'
-        mapping:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "mapping"'
+        source:
+          type: string
+          maxLength: 2000000
+        format:
+          type: string
+          description: AUTO (default) tells JSON from YAML by the first character
+          enum:
+          - AUTO
+          - YAML
+          - JSON
+        baseVersion:
+          $ref: ../events/common.schema.json#/$defs/ProductVersionNumber
+          description: The Locked version the draft is based on (the default is the highest Locked version of the product)
+      required:
+      - source
     ProductImportImportResponse:
       type: object
-      description: 'pfc.ProductImport.import result. PRD outputs: "change set or dry-run lint report"'
+      description: 'pfc.ProductImport.import result: the draft change set, or on dry run only the lint report'
       properties:
-        changeSetOrDryRunLint:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "change set or dry-run lint report"'
+        created:
+          type: boolean
+          description: false on a dry run
+        changeSet:
+          $ref: '#/components/schemas/ChangeSetCreateResponse'
+        validation:
+          $ref: '#/components/schemas/ChangeSetValidation'
+      required:
+      - created
+      - validation
     LegacyXrefGetResponse:
       type: object
       description: 'pfc.LegacyXref.get result. PRD outputs: "core codes"'

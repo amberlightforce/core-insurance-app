@@ -65,7 +65,6 @@ CONTRACT_NOT_SERVED GET /api/mkt/v1/spis/catalogue
 CONTRACT_NOT_SERVED GET /api/mkt/v1/terminology
 CONTRACT_NOT_SERVED GET /api/pfc/v1/legacy-xrefs/get
 CONTRACT_NOT_SERVED GET /api/pfc/v1/pogs/get
-CONTRACT_NOT_SERVED GET /api/pfc/v1/product-versions/diff
 CONTRACT_NOT_SERVED GET /api/pfc/v1/reference-tables/get
 CONTRACT_NOT_SERVED GET /api/pfc/v1/regulatory-mappings/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/authorities/who-can-approve
@@ -307,7 +306,6 @@ CONTRACT_NOT_SERVED POST /api/mkt/v1/translations/gate
 CONTRACT_NOT_SERVED POST /api/pfc/v1/impact-analysises/run
 CONTRACT_NOT_SERVED POST /api/pfc/v1/pogs/record-review
 CONTRACT_NOT_SERVED POST /api/pfc/v1/pogs/record-test
-CONTRACT_NOT_SERVED POST /api/pfc/v1/product-imports/import
 CONTRACT_NOT_SERVED POST /api/pfc/v1/renewal-conversions/convert
 CONTRACT_NOT_SERVED POST /api/plt/v1/adapters/invoke
 CONTRACT_NOT_SERVED POST /api/plt/v1/approval/request

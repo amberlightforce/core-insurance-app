@@ -4,15 +4,27 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.ProductVersion.diff result. PRD outputs: "grouped entries with classes"</summary>
+/// <summary>pfc.ProductVersion.diff result: item-level changes grouped by area, each with its class (ADDED, REMOVED, CHANGED)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProductVersionDiffResponse
 {
-    /// <summary>PRD: "grouped entries with classes"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("groupedEntriesClasses")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? GroupedEntriesClasses { get; init; }
+    /// <summary>Contract member 'product'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("product")]
+    public required string Product { get; init; }
+
+    /// <summary>Contract member 'from'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("from")]
+    public required global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber From { get; init; }
+
+    /// <summary>Contract member 'to'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("to")]
+    public required global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber To { get; init; }
+
+    /// <summary>Contract member 'total'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("total")]
+    public required int Total { get; init; }
+
+    /// <summary>Contract member 'groups'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("groups")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Product.Contracts.Api.ProductDiffGroup> Groups { get; init; }
 }

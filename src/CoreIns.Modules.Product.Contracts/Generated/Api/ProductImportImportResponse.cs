@@ -4,15 +4,20 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.ProductImport.import result. PRD outputs: "change set or dry-run lint report"</summary>
+/// <summary>pfc.ProductImport.import result: the draft change set, or on dry run only the lint report</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProductImportImportResponse
 {
-    /// <summary>PRD: "change set or dry-run lint report"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("changeSetOrDryRunLint")]
+    /// <summary>false on a dry run</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("created")]
+    public required bool Created { get; init; }
+
+    /// <summary>Contract member 'changeSet'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("changeSet")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ChangeSetOrDryRunLint { get; init; }
+    public global::CoreIns.Modules.Product.Contracts.Api.ChangeSetCreateResponse? ChangeSet { get; init; }
+
+    /// <summary>Contract member 'validation'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validation")]
+    public required global::CoreIns.Modules.Product.Contracts.Api.ChangeSetValidation Validation { get; init; }
 }

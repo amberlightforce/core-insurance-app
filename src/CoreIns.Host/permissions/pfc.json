@@ -15,6 +15,10 @@
         "pfc.ChangeSet.abandon": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
         "pfc.ChangeSet.revert": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
         "pfc.ChangeSet.rebase": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        // BO-PFC-03 (roles illustrative): diff and export are read by authoring staff, YAML or JSON import creates a draft.
+        "pfc.ProductVersion.diff": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority", "Staff.Underwriter" ],
+        "pfc.ProductVersion.export": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
+        "pfc.ProductImport.import": [ "Platform.Admin", "Platform.ReleaseManager", "Platform.DesignAuthority" ],
         "pfc.Artifact.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pfc.Catalogue.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         "pfc.Catalogue.getItem": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
