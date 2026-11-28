@@ -27,6 +27,19 @@ public sealed record PaymentPlanListResponse
         /// <summary>Contract member 'planVersion'.</summary>
         [global::System.Text.Json.Serialization.JsonPropertyName("planVersion")]
         public required string PlanVersion { get; init; }
+
+        /// <summary>Number of instalments of the plan</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("instalments")]
+        public required int Instalments { get; init; }
+
+        /// <summary>Months between two instalments (12 for the single instalment of ANNUAL)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("intervalMonths")]
+        public required int IntervalMonths { get; init; }
+
+        /// <summary>Plan fee per term (zero in the seed catalogue)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("fee")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public global::CoreIns.SharedKernel.Money? Fee { get; init; }
     }
 
     /// <summary>Generated contract member.</summary>

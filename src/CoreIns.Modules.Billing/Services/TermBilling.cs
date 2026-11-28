@@ -457,11 +457,10 @@ internal sealed class TermBilling(
             return [(1, today)];
         }
 
-        var months = 12 / count;
-        BusinessDate DueOf(int no) => plan.TermFrom.AddMonths(months * (no - 1));
+        BusinessDate DueOf(int no) => PaymentPlans.DueDateOf(plan.PlanCode, plan.TermFrom, no, plan.DueDay);
         if (transactionId == plan.BoundTransactionId)
         {
-            return [.. Enumerable.Range(1, count).Select(no => (no, DueOf(no).CompareTo(today) < 0 ? today : DueOf(no)))];
+            return PaymentPlans.BoundSchedule(plan.PlanCode, plan.TermFrom, today, plan.DueDay);
         }
 
         var future = Enumerable.Range(1, count).Where(no => DueOf(no).CompareTo(today) > 0).ToList();

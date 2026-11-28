@@ -2228,6 +2228,12 @@ export interface components {
             plans: {
                 planCode: components["schemas"]["Code"];
                 planVersion: components["schemas"]["Code"];
+                /** @description Number of instalments of the plan */
+                instalments: number;
+                /** @description Months between two instalments (12 for the single instalment of ANNUAL) */
+                intervalMonths: number;
+                /** @description Plan fee per term (zero in the seed catalogue) */
+                fee?: components["schemas"]["Money"];
             }[];
             exclusions: {
                 planCode: components["schemas"]["Code"];
@@ -2254,45 +2260,59 @@ export interface components {
                 amount: components["schemas"]["Money"];
             }[];
         };
-        /** @description bil.PaymentPlan.change request. PRD inputs: "term or job, plan, method, due day" */
+        /** @description Typed from REQ-BIL-052, REQ-BIL-059. PRD inputs: "term or job, plan, method, due day" */
         PaymentPlanChangeRequest: {
-            /** @description PRD: "term or job" (optional) */
-            term?: components["schemas"]["Unspecified"];
-            /** @description PRD: "term or job" (optional) */
-            job?: components["schemas"]["Unspecified"];
-            /** @description PRD: "plan" */
-            plan?: components["schemas"]["Unspecified"];
-            /** @description PRD: "method" */
-            method?: components["schemas"]["Unspecified"];
-            /** @description PRD: "due day" */
-            dueDay?: components["schemas"]["Unspecified"];
+            termId?: components["schemas"]["Uuid"];
+            jobId?: components["schemas"]["Uuid"];
+            planCode: components["schemas"]["Code"];
+            method: components["schemas"]["Code"];
+            /** @description Due day */
+            dueDay?: number;
         } & (unknown | unknown);
-        /** @description bil.PaymentPlan.change result. PRD outputs: "plan instance, schedule" */
+        /** @description Typed from REQ-BIL-052, REQ-BIL-059. PRD outputs: "plan instance, schedule" */
         PaymentPlanChangeResponse: {
-            /** @description PRD: "plan instance" */
-            planInstance?: components["schemas"]["Unspecified"];
-            /** @description PRD: "schedule" */
-            schedule?: components["schemas"]["Unspecified"];
+            planInstanceId: components["schemas"]["Uuid"];
+            planCode?: components["schemas"]["Code"];
+            planVersion?: components["schemas"]["Code"];
+            downPayment?: components["schemas"]["Money"];
+            schedule: {
+                dueDate: components["schemas"]["LocalDate"];
+                amount: components["schemas"]["Money"];
+            }[];
         };
-        /** @description bil.BillingPreview.compute request. PRD inputs: "quote/job/term, hypothetical plan or delta" */
+        /** @description Typed from REQ-BIL-058. PRD inputs: "quote/job/term, hypothetical plan or delta" (the delta is not served yet) */
         BillingPreviewComputeRequest: {
-            /** @description PRD: "quote/job/term" */
-            quoteJobTerm?: components["schemas"]["Unspecified"];
-            /** @description PRD: "hypothetical plan or delta" (optional) */
-            hypotheticalPlan?: components["schemas"]["Unspecified"];
-            /** @description PRD: "hypothetical plan or delta" (optional) */
-            delta?: components["schemas"]["Unspecified"];
-        } & (unknown | unknown);
-        /** @description bil.BillingPreview.compute result. PRD outputs: "full schedule, first due, credits, refund" */
+            /** @description A bound term whose positive charges are spread */
+            termId?: components["schemas"]["Uuid"];
+            /** @description The hypothetical plan */
+            planCode: components["schemas"]["Code"];
+            /** @description Term start for a quote preview without a term */
+            termFrom?: components["schemas"]["LocalDate"];
+            /** @description Due day of the instalments after the first */
+            dueDay?: number;
+            /** @description Hypothetical charges of a quote (without termId) */
+            charges?: {
+                category: components["schemas"]["Code"];
+                amount: components["schemas"]["Money"];
+            }[];
+        };
+        /** @description Typed from REQ-BIL-058. PRD outputs: "full schedule, first due, credits, refund" (credits and refund come with the delta preview) */
         BillingPreviewComputeResponse: {
-            /** @description PRD: "full schedule" */
-            fullSchedule?: components["schemas"]["Unspecified"];
-            /** @description PRD: "first due" */
-            firstDue?: components["schemas"]["Unspecified"];
-            /** @description PRD: "credits" */
-            credits?: components["schemas"]["Unspecified"];
-            /** @description PRD: "refund" */
-            refund?: components["schemas"]["Unspecified"];
+            planCode: components["schemas"]["Code"];
+            fullSchedule: {
+                instalmentNo: number;
+                dueDate: components["schemas"]["LocalDate"];
+                amount: components["schemas"]["Money"];
+                byCategory: {
+                    category: components["schemas"]["Code"];
+                    amount: components["schemas"]["Money"];
+                }[];
+            }[];
+            firstDue: {
+                dueDate: components["schemas"]["LocalDate"];
+                amount: components["schemas"]["Money"];
+            };
+            total: components["schemas"]["Money"];
         };
         /** @description Typed from REQ-BIL-003, REQ-BIL-054. PRD outputs: "status, amount, reference/QR/link" */
         DownPaymentStatusResponse: {
