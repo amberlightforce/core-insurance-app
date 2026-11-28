@@ -7093,9 +7093,43 @@ components:
       type: object
       description: 'cmp.FiscalReconciliation.run result. PRD outputs: "breaks"'
       properties:
+        checked:
+          type: integer
+          description: Fiscal documents compared with their channel status
+        opened:
+          type: integer
+          description: Breaks found for the first time
+        reopened:
+          type: integer
+          description: Resolved breaks that came back
+        resolved:
+          type: integer
+          description: Open breaks that no longer exist (closed automatically)
+        open:
+          type: integer
+          description: Open breaks after the run
         breaks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "breaks"'
+          type: array
+          description: 'PRD: "breaks" (the open breaks after the run, capped at 200)'
+          items:
+            type: object
+            properties:
+              fiscalDocumentId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              kind:
+                type: string
+              detail:
+                type: string
+            required:
+            - fiscalDocumentId
+            - kind
+      required:
+      - checked
+      - opened
+      - reopened
+      - resolved
+      - open
+      - breaks
     FiscalReconciliationBreaksItem:
       type: object
       description: 'cmp.FiscalReconciliation.breaks result. PRD outputs: "breaks"'
@@ -9390,15 +9424,46 @@ components:
       description: 'cmp.FiscalRule.certify request. PRD inputs: "pack candidate"'
       properties:
         packCandidate:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "pack candidate"'
+          type: object
+          description: 'PRD: "pack candidate" (the fiscal rule values a country pack proposes)'
+          properties:
+            documentType:
+              type: string
+              description: The pack's fiscal document type code (the placeholder UNMAPPED-OQ-012 never passes)
+            seriesPattern:
+              type: string
+            markBeforeIssue:
+              type: boolean
+              description: The pack enforces cmp.fiscal.mark_before_issue
+            markBeforeDelivery:
+              type: boolean
+              description: The pack enforces bil.fiscal.mark_before_delivery
+            legalStatus:
+              type: string
+              enum:
+              - Verified
+              - Unverified
+              description: Whether the values are legally confirmed (default Unverified; an unverified candidate fails)
+      required:
+      - packCandidate
     FiscalRuleCertifyResponse:
       type: object
       description: 'cmp.FiscalRule.certify result. PRD outputs: "pass or fail with keys"'
       properties:
-        passOrFailKeys:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pass or fail with keys"'
+        pass:
+          type: boolean
+        failedKeys:
+          type: array
+          items:
+            type: string
+        checkedKeys:
+          type: array
+          items:
+            type: string
+      required:
+      - pass
+      - failedKeys
+      - checkedKeys
     EvidenceSubmitRequest:
       type: object
       description: 'cmp.Evidence.submit request. PRD inputs: "per op"'

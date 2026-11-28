@@ -9,6 +9,7 @@ using CoreIns.Modules.Compliance.Contracts;
 using CoreIns.Modules.Compliance.Contracts.Api;
 using CoreIns.Modules.Compliance.Dsar;
 using CoreIns.Modules.Compliance.Persistence;
+using CoreIns.Modules.Compliance.Reconciliation;
 using CoreIns.Modules.Compliance.Submissions;
 using CoreIns.Modules.Compliance.Queries;
 using CoreIns.Modules.Compliance.Services;
@@ -73,6 +74,20 @@ public static class ComplianceModule
             CommandDescriptor.For("cmp.FiscalDocument.correct") with { SupportsDryRun = true });
 
         services.AddScoped<IComplianceFiscalDocumentService, ComplianceFiscalDocumentService>();
+
+        // Fiscal reconciliation (BO-CMP-07): run, breaks table and the nightly job (worker role only, switchable).
+        services.AddOptions<FiscalReconciliationOptions>().Bind(configuration.GetSection(FiscalReconciliationOptions.Section));
+        services.AddScoped<FiscalReconciliationEngine>();
+        services.AddCommandAuditor<RunFiscalReconciliation, FiscalReconciliationRunResponse, RunFiscalReconciliationAuditor>();
+        services.AddCommand<RunFiscalReconciliation, FiscalReconciliationRunResponse, RunFiscalReconciliationHandler>(
+            CommandDescriptor.For("cmp.FiscalReconciliation.run") with { SupportsDryRun = true });
+        services.AddCommand<SweepFiscalReconciliation, int, SweepFiscalReconciliationHandler>(
+            CommandDescriptor.For("cmp.FiscalReconciliation.sweep") with { RequiresIdempotencyKey = false, Idempotent = false });
+        services.AddSingleton<FiscalReconciliationRunner>();
+        if (string.Equals(configuration["APP_ROLE"], "worker", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddHostedService<FiscalReconciliationSweeper>();
+        }
 
         services.AddAiRegister();
         // Clock engine (SL6-CMP-CLOCK): commands, queries, in-process contracts and the sweeper (worker role only).
