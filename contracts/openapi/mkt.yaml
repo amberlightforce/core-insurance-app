@@ -1421,7 +1421,7 @@ paths:
       x-wave: W1
       x-work-packages:
       - W1-MKT-03
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
@@ -1432,6 +1432,18 @@ paths:
       - ui
       x-permission: mkt.Pack.certify
       x-error-codes:
+      - code: MKT-ERR-PACK-VERSION-UNKNOWN
+        note: 'the pack or the version is not in the pack-version registry'
+        status: 422
+      - code: MKT-ERR-PACK-LIFECYCLE
+        note: 'the version is not in the state this step needs (order: Built or Signed, Certified, Published, Deprecated)'
+        status: 409
+      - code: MKT-ERR-PACK-NOT-SETTLED
+        note: 'a value is not Settled or NotRegulatory and the target is PRODUCTION, or allowUnverified is not set'
+        status: 422
+      - code: MKT-ERR-PACK-SYNTHETIC
+        note: 'target PRODUCTION and the pack is synthetic (the CY stub)'
+        status: 422
       - code: MKT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1487,7 +1499,7 @@ paths:
       x-wave: W1
       x-work-packages:
       - W1-MKT-03
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
@@ -1498,6 +1510,18 @@ paths:
       - ui
       x-permission: mkt.Pack.publish
       x-error-codes:
+      - code: MKT-ERR-PACK-VERSION-UNKNOWN
+        note: 'the pack or the version is not in the pack-version registry'
+        status: 422
+      - code: MKT-ERR-PACK-LIFECYCLE
+        note: 'the version is not in the state this step needs (order: Built or Signed, Certified, Published, Deprecated)'
+        status: 409
+      - code: MKT-ERR-PACK-NOT-SETTLED
+        note: 'target PRODUCTION and the certification is not production-eligible'
+        status: 422
+      - code: MKT-ERR-PACK-SYNTHETIC
+        note: 'target PRODUCTION and the pack is synthetic (the CY stub)'
+        status: 422
       - code: MKT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1728,7 +1752,7 @@ paths:
       x-wave: W1
       x-work-packages:
       - W1-MKT-03
-      x-status: minimal
+      x-status: full
       x-maturity: pre-release
       x-io-shared: 7
       x-operation-kind: command
@@ -1739,6 +1763,15 @@ paths:
       - ui
       x-permission: mkt.Pack.deprecate
       x-error-codes:
+      - code: MKT-ERR-PACK-VERSION-UNKNOWN
+        note: 'the pack or the version is not in the pack-version registry'
+        status: 422
+      - code: MKT-ERR-PACK-LIFECYCLE
+        note: 'the version is not in the state this step needs (order: Built or Signed, Certified, Published, Deprecated)'
+        status: 409
+      - code: MKT-ERR-PACK-IN-USE
+        note: 'an activation of the version is ACTIVE, SCHEDULED or pending approval'
+        status: 409
       - code: MKT-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -4429,26 +4462,127 @@ components:
       - activationHistory
     PackCertifyRequest:
       type: object
-      description: 'mkt.Pack.certify request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: mkt.Pack.certify request. Moves a Built, Signed or Rejected version to Certified (or Rejected when the golden suite fails). Attaches the golden-suite result. Unverified values block certification for PRODUCTION; with allowUnverified the version certifies for NON_PRODUCTION only and is never production-eligible.
+      properties:
+        pack:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+        targetEnvironment:
+          type: string
+          enum: [PRODUCTION, NON_PRODUCTION]
+          description: Where the version is meant to run. PRODUCTION refuses a version with any value that is not Settled or NotRegulatory (fail closed, NX-EC-12), and the synthetic CY pack.
+        goldenSuite:
+          $ref: '#/components/schemas/PackGoldenSuiteResult'
+        allowUnverified:
+          type: boolean
+          description: Opt in to certify a version that holds values which are not Settled. Refused for PRODUCTION. Default false.
+        reason:
+          type: string
+          minLength: 20
+          maxLength: 128
+          description: Why (20 to 128 characters; carried into the audit). No personal data.
+      required:
+      - pack
+      - version
+      - targetEnvironment
+      - goldenSuite
+      - reason
+    PackGoldenSuiteResult:
+      type: object
+      description: The golden-suite run attached to a certification (produced by the CI run of the pack tests).
+      properties:
+        suite:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Suite name or run reference
+        total:
+          type: integer
+          minimum: 1
+          description: Cases run
+        passed:
+          type: integer
+          minimum: 0
+          description: Cases passed
+        failedCases:
+          type: array
+          items:
+            type: string
+          description: Names of the failed cases
+      required:
+      - suite
+      - total
+      - passed
     PackCertifyResponse:
       type: object
-      description: 'mkt.Pack.certify result. PRD outputs: "pack/version/activation"'
+      description: mkt.Pack.certify result
       properties:
-        packVersionActivation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack/version/activation"'
+        pack:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+        status:
+          $ref: '#/components/schemas/PackVersionStatus'
+        productionEligible:
+          type: boolean
+          description: True when every value is Settled or NotRegulatory and the pack is not synthetic
+        unverifiedKeys:
+          type: array
+          items:
+            type: string
+          description: Keys whose legal status is not Settled or NotRegulatory
+        goldenSuite:
+          $ref: '#/components/schemas/PackGoldenSuiteResult'
+      required:
+      - pack
+      - version
+      - status
+      - productionEligible
+      - unverifiedKeys
+      - goldenSuite
     PackPublishRequest:
       type: object
-      description: 'mkt.Pack.publish request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: mkt.Pack.publish request. Moves a Certified version to Published. PRODUCTION requires a production-eligible certification.
+      properties:
+        pack:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+        targetEnvironment:
+          type: string
+          enum: [PRODUCTION, NON_PRODUCTION]
+          description: Where the version is meant to run. PRODUCTION refuses a version with any value that is not Settled or NotRegulatory (fail closed, NX-EC-12), and the synthetic CY pack.
+        reason:
+          type: string
+          minLength: 20
+          maxLength: 128
+          description: Why (20 to 128 characters; carried into the audit). No personal data.
+      required:
+      - pack
+      - version
+      - targetEnvironment
+      - reason
     PackPublishResponse:
       type: object
-      description: 'mkt.Pack.publish result. PRD outputs: "pack/version/activation"'
+      description: mkt.Pack.publish result
       properties:
-        packVersionActivation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack/version/activation"'
+        pack:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+        status:
+          $ref: '#/components/schemas/PackVersionStatus'
+        productionEligible:
+          type: boolean
+        publishedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - pack
+      - version
+      - status
+      - productionEligible
+      - publishedAt
     PackScheduleActivationRequest:
       type: object
       description: mkt.Pack.scheduleActivation request (D-SL5-08). The activation takes effect at the checker's decision instant (immediate instant only in slice 5).
@@ -4565,15 +4699,35 @@ components:
       - approvalRequestId
     PackDeprecateRequest:
       type: object
-      description: 'mkt.Pack.deprecate request. PRD inputs: "per operation"'
-      x-status: minimal
+      description: mkt.Pack.deprecate request. Moves a Published version to Deprecated; refused while an activation of the version is live or pending.
+      properties:
+        pack:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+        reason:
+          type: string
+          minLength: 20
+          maxLength: 128
+          description: Why (20 to 128 characters; carried into the audit). No personal data.
+      required:
+      - pack
+      - version
+      - reason
     PackDeprecateResponse:
       type: object
-      description: 'mkt.Pack.deprecate result. PRD outputs: "pack/version/activation"'
+      description: mkt.Pack.deprecate result
       properties:
-        packVersionActivation:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pack/version/activation"'
+        pack:
+          $ref: ../events/common.schema.json#/$defs/Code
+        version:
+          $ref: ../events/common.schema.json#/$defs/VersionLabel
+        status:
+          $ref: '#/components/schemas/PackVersionStatus'
+      required:
+      - pack
+      - version
+      - status
     CapabilityGetResponse:
       type: object
       description: 'mkt.Capability.get result. PRD outputs: "state, source"'
