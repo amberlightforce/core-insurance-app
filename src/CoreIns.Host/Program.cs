@@ -4,6 +4,7 @@ using CoreIns.Host.Hosting;
 using CoreIns.Modules.Billing.Services;
 using CoreIns.Modules.Claims.Api;
 using CoreIns.Modules.Party.Services;
+using CoreIns.Modules.Work.Inbound;
 using CoreIns.Platform;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Http;
@@ -59,6 +60,8 @@ builder.Services.AddCountryPacks(builder.Configuration, builder.Environment);
 
 // BIL verification-of-payee and bank-channel stubs (D-SL2-05): never bound in Production.
 builder.Services.AddBillingPaymentAdapters(builder.Environment);
+// BO-WRK-11: malware scanner of inbound documents (ClamAV when configured, stub outside Production, none in Production otherwise = fail closed).
+builder.Services.AddWorkMalwareScanner(builder.Configuration, builder.Environment);
 // D-SL2-05: PTY sanctions screening is a stub (Clear, marked) outside Production; in Production it fails closed.
 builder.Services.AddPartyScreening(builder.Environment);
 builder.Services.AddCoreInsDataProtection(builder.Configuration, builder.Environment);
