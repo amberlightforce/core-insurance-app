@@ -1019,6 +1019,197 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                     b.ToTable("delinquency_contact", "bil");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DirectDebitCollectionRow", b =>
+                {
+                    b.Property<Guid>("CollectionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("collection_id");
+
+                    b.Property<DateOnly>("CollectionDate")
+                        .HasColumnType("date")
+                        .HasColumnName("collection_date");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("FileReference")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("file_reference");
+
+                    b.Property<string>("FileSha256")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("file_sha256");
+
+                    b.Property<int>("ItemCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("item_count");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("MessageId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message_id");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("total_amount");
+
+                    b.HasKey("CollectionId")
+                        .HasName("pk_dd_collection");
+
+                    b.HasIndex("LegalEntityId", "MessageId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_dd_collection_message");
+
+                    b.ToTable("dd_collection", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_dd_collection_count", "item_count > 0 AND total_amount > 0");
+
+                            t.HasCheckConstraint("ck_dd_collection_currency", "currency ~ '^[A-Z]{3}$'");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DirectDebitItemRow", b =>
+                {
+                    b.Property<Guid>("ItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("BillingAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("billing_account_id");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("closed_at");
+
+                    b.Property<DateOnly>("CollectionDate")
+                        .HasColumnType("date")
+                        .HasColumnName("collection_date");
+
+                    b.Property<Guid>("CollectionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("collection_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("EndToEndId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("end_to_end_id");
+
+                    b.Property<Guid>("InstrumentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("instrument_id");
+
+                    b.Property<Guid>("InvoiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invoice_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("MandateId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("mandate_id");
+
+                    b.Property<string>("ReasonCode")
+                        .HasColumnType("text")
+                        .HasColumnName("reason_code");
+
+                    b.Property<Guid?>("ReceiptId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("receipt_id");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("SequenceType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("sequence_type");
+
+                    b.Property<DateTime?>("SettledAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("settled_at");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.HasKey("ItemId")
+                        .HasName("pk_dd_item");
+
+                    b.HasIndex("BillingAccountId");
+
+                    b.HasIndex("CollectionId")
+                        .HasDatabaseName("ix_dd_item_collection");
+
+                    b.HasIndex("InvoiceId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_dd_item_invoice_live")
+                        .HasFilter("state IN ('SUBMITTED', 'COLLECTED')");
+
+                    b.HasIndex("MandateId");
+
+                    b.HasIndex("LegalEntityId", "EndToEndId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_dd_item_end_to_end");
+
+                    b.HasIndex("LegalEntityId", "State", "CollectionDate")
+                        .HasDatabaseName("ix_dd_item_state");
+
+                    b.ToTable("dd_item", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_dd_item_amount", "amount > 0");
+
+                            t.HasCheckConstraint("ck_dd_item_currency", "currency ~ '^[A-Z]{3}$'");
+
+                            t.HasCheckConstraint("ck_dd_item_end_to_end", "char_length(end_to_end_id) BETWEEN 1 AND 35");
+
+                            t.HasCheckConstraint("ck_dd_item_receipt", "(state IN ('COLLECTED', 'RETURNED')) = (receipt_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_dd_item_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_dd_item_sequence", "sequence_type IN ('FRST', 'RCUR')");
+
+                            t.HasCheckConstraint("ck_dd_item_state", "state IN ('SUBMITTED', 'COLLECTED', 'REJECTED', 'RETURNED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DisbursementBatchItemRow", b =>
                 {
                     b.Property<Guid>("DisbursementId")
@@ -2917,7 +3108,7 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_receipt_currency", "currency ~ '^[A-Z]{3}$'");
 
-                            t.HasCheckConstraint("ck_receipt_method", "method IN ('BANK_TRANSFER', 'CASHIER')");
+                            t.HasCheckConstraint("ck_receipt_method", "method IN ('BANK_TRANSFER', 'CASHIER', 'DIRECT_DEBIT')");
 
                             t.HasCheckConstraint("ck_receipt_record_version", "record_version >= 1");
 
@@ -3550,7 +3741,7 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
 
                             t.HasCheckConstraint("ck_suspense_item_record_version", "record_version >= 1");
 
-                            t.HasCheckConstraint("ck_suspense_item_state", "state IN ('OPEN', 'REFUND_PENDING', 'ALLOCATED', 'REFUNDED')");
+                            t.HasCheckConstraint("ck_suspense_item_state", "state IN ('OPEN', 'REFUND_PENDING', 'ALLOCATED', 'REFUNDED', 'RETURNED')");
                         });
                 });
 
@@ -3833,6 +4024,37 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_delinquency_contact_case");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DirectDebitItemRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.BillingAccountRow", null)
+                        .WithMany()
+                        .HasForeignKey("BillingAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_dd_item_account");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.DirectDebitCollectionRow", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_dd_item_collection");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.InvoiceRow", null)
+                        .WithMany()
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_dd_item_invoice");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.MandateRow", null)
+                        .WithMany()
+                        .HasForeignKey("MandateId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_dd_item_mandate");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.DisbursementBatchItemRow", b =>

@@ -94,6 +94,9 @@ internal static class ReceiptCodes
     public const string ChannelStaff = "STAFF";
     public const string BankTransfer = "BANK_TRANSFER";
     public const string Cashier = "CASHIER";
+    public const string DirectDebit = "DIRECT_DEBIT";
+    public const string ChannelBank = "BANK";
+    public const string RuleDirectDebit = "DIRECT_DEBIT";
 
     /// <summary>Suspense reasons (REQ-BIL-135).</summary>
     public const string AmountMismatch = "AMOUNT_MISMATCH";

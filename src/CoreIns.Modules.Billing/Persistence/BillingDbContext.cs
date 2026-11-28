@@ -70,6 +70,10 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
 
     public DbSet<BankStatementLineRow> BankStatementLines => Set<BankStatementLineRow>();
 
+    public DbSet<DirectDebitCollectionRow> DirectDebitCollections => Set<DirectDebitCollectionRow>();
+
+    public DbSet<DirectDebitItemRow> DirectDebitItems => Set<DirectDebitItemRow>();
+
     public DbSet<WriteOffRow> WriteOffs => Set<WriteOffRow>();
 
     public DbSet<WriteOffLineRow> WriteOffLines => Set<WriteOffLineRow>();
@@ -100,6 +104,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
         DisbursementBatchModel.Configure(modelBuilder);
         BankStatementModel.Configure(modelBuilder);
         WriteOffModel.Configure(modelBuilder);
+        DirectDebitModel.Configure(modelBuilder);
         MigrationImport.BillingMigrationModel.Configure(modelBuilder);
 
         modelBuilder.Entity<BillingAccountRow>(entity =>
@@ -364,7 +369,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
                 table.HasCheckConstraint("ck_receipt_state", Codes.CheckSql<PaymentState>("state"));
                 table.HasCheckConstraint("ck_receipt_amount", "amount > 0");
                 table.HasCheckConstraint("ck_receipt_currency", "currency ~ '^[A-Z]{3}$'");
-                table.HasCheckConstraint("ck_receipt_method", "method IN ('BANK_TRANSFER', 'CASHIER')");
+                table.HasCheckConstraint("ck_receipt_method", "method IN ('BANK_TRANSFER', 'CASHIER', 'DIRECT_DEBIT')");
                 table.HasCheckConstraint("ck_receipt_suspense", "(state = 'SUSPENSE') = (suspense_reason IS NOT NULL)");
                 table.HasCheckConstraint("ck_receipt_record_version", "record_version >= 1");
             });

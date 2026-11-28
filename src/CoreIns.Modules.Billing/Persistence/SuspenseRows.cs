@@ -18,9 +18,12 @@ internal static class SuspenseStates
     /// <summary>The cash was paid back to the sender (refund approved and disbursed).</summary>
     public const string Refunded = "REFUNDED";
 
+    /// <summary>The receipt was returned by the bank (direct-debit R-transaction, BO-BIL-06b); the cash is gone.</summary>
+    public const string Returned = "RETURNED";
+
     public const string ReasonTransferred = "TRANSFERRED";
 
-    public static readonly string[] All = [Open, RefundPending, Allocated, Refunded];
+    public static readonly string[] All = [Open, RefundPending, Allocated, Refunded, Returned];
 }
 
 /// <summary>

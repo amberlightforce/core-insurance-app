@@ -143,7 +143,7 @@ public static class PaymentStateModel
             .Permit([PaymentState.Received, PaymentState.PartiallyAllocated, PaymentState.Suspense], PaymentTrigger.AllocateInFull, PaymentState.Allocated)
             .Permit([PaymentState.Received, PaymentState.Suspense, PaymentState.PartiallyAllocated], PaymentTrigger.AllocatePartially, PaymentState.PartiallyAllocated)
             .Permit([PaymentState.Received, PaymentState.PartiallyAllocated], PaymentTrigger.MoveToSuspense, PaymentState.Suspense)
-            .Permit([PaymentState.Allocated, PaymentState.PartiallyAllocated], PaymentTrigger.Reverse, PaymentState.Reversed)
+            .Permit([PaymentState.Allocated, PaymentState.PartiallyAllocated, PaymentState.Suspense], PaymentTrigger.Reverse, PaymentState.Reversed)
             .Permit([PaymentState.Suspense, PaymentState.Allocated], PaymentTrigger.Refund, PaymentState.Refunded)
             .Permit([PaymentState.Allocated, PaymentState.PartiallyAllocated], PaymentTrigger.Unallocate, PaymentState.PartiallyAllocated)
             .Permit([PaymentState.Allocated, PaymentState.PartiallyAllocated], PaymentTrigger.ReturnToSuspense, PaymentState.Suspense)
