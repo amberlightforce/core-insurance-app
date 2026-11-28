@@ -49,6 +49,9 @@ internal static class EntryTypes
     /// </summary>
     public const string WrittenOff = "WRITTEN_OFF";
 
+    /// <summary>A receipt returned by the bank (direct-debit R-transaction, BO-BIL-06b): unapplied cash LA-11 back out against cash at bank LA-10; the mirror of <see cref="Received"/>.</summary>
+    public const string ReceiptReturned = "RECEIPT_RETURNED";
+
     /// <summary>Unapplied cash moved between two billing accounts of one payer (BO-BIL-13): LA-11 of the source through the inter-account clearing LA-20 to LA-11 of the target. FIN journalises nothing (memo).</summary>
     public const string MoneyTransferred = "MONEY_TRANSFERRED";
 

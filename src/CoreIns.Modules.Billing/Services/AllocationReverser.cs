@@ -40,7 +40,7 @@ internal sealed class AllocationReverser(
         [Codes.Of(RefundState.Disbursing), Codes.Of(RefundState.AwaitingProof), Codes.Of(RefundState.Paid)];
 
     public async Task<Result<AllocationReversalOutcome>> ReverseAsync(
-        PaymentId receiptId, IReadOnlyCollection<Guid>? allocationIds, string reasonCode, string? comment, CancellationToken cancellationToken)
+        PaymentId receiptId, IReadOnlyCollection<Guid>? allocationIds, string reasonCode, string? comment, CancellationToken cancellationToken, bool bankFact = false)
     {
         var legalEntity = ledger.LegalEntityId;
         var receipt = await db.Receipts.SingleOrDefaultAsync(r => r.ReceiptId == receiptId && r.LegalEntityId == legalEntity, cancellationToken).ConfigureAwait(false);
@@ -116,14 +116,19 @@ internal sealed class AllocationReverser(
         }
 
         // Amount-limited authority (NX-EC-09 pattern): a refer is a refusal too, the reversal is immediate.
-        var check = await authority.CheckAsync(
+        // A bank return (R-transaction) is a fact, not a decision: nobody's authority is needed to book it.
+        var check = bankFact ? null : await authority.CheckAsync(
             new AuthorityCheckRequest(
                 context.Actor, context.Roles, SupportAuthorityTypes.AllocationReverse,
                 new Dictionary<string, DimensionValue>(StringComparer.Ordinal) { [SupportAuthorityTypes.AmountDimension] = DimensionValue.Of(reversed) },
                 new ObjectRef(ModuleCode.BIL, "Receipt", receipt.ReceiptId.Value.ToString("D")), clock.Now),
             cancellationToken).ConfigureAwait(false);
-        context.AuthorityChecks.Add(check);
-        if (check.Decision != AuthorityDecision.Allow)
+        if (check is not null)
+        {
+            context.AuthorityChecks.Add(check);
+        }
+
+        if (check is not null && check.Decision != AuthorityDecision.Allow)
         {
             return DomainError.Of(ModuleCode.BIL, "SOD", $"No authority to reverse allocations of {reversed} (BIL.ALLOCATION_REVERSE: {check.ReasonCode}).") with
             {
