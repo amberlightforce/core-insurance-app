@@ -4,23 +4,18 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Model.retire request. PRD inputs: "model card, version"</summary>
+/// <summary>dat.Model.retire request (BO-DAT-06): APPROVED, ACTIVE or SUSPENDED -&gt; RETIRED.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ModelRetireRequest
 {
-    /// <summary>PRD: "model card"</summary>
+    /// <summary>Contract member 'modelId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'modelId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("modelCard")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ModelCard { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("modelId")]
+    public required global::System.Guid ModelId { get; init; }
 
-    /// <summary>PRD: "version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Version { get; init; }
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
 }

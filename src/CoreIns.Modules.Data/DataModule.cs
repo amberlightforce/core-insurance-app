@@ -62,12 +62,22 @@ public static class DataModule
         services.AddScoped<IValidator<ApplyRestriction>, ApplyRestrictionValidator>();
         services.AddScoped<IValidator<RegisterModel>, RegisterModelValidator>();
         services.AddScoped<IValidator<RunBiasTest>, RunBiasTestValidator>();
+        services.AddScoped<IValidator<SubmitModelValidation>, SubmitModelValidationValidator>();
+        services.AddScoped<IValidator<RecordModelValidation>, RecordModelValidationValidator>();
+        services.AddScoped<IValidator<ApproveModel>, ApproveModelValidator>();
+        services.AddScoped<IValidator<RetireModel>, RetireModelValidator>();
+        services.AddScoped<IValidator<RecordModelMetrics>, RecordModelMetricsValidator>();
 
         services.AddCommand<ExportSubject, SubjectExportResponse, ExportSubjectHandler>(CommandDescriptor.For("dat.Subject.export") with { SupportsDryRun = true });
         services.AddCommand<ExecuteErasure, ErasureExecuteResponse, ExecuteErasureHandler>(CommandDescriptor.For("dat.Erasure.execute") with { SupportsDryRun = true });
         services.AddCommand<ApplyRestriction, RestrictionApplyResponse, ApplyRestrictionHandler>(CommandDescriptor.For("dat.Restriction.apply") with { SupportsDryRun = true });
         services.AddCommand<RegisterModel, ModelRegisterResponse, RegisterModelHandler>(CommandDescriptor.For("dat.Model.register") with { SupportsDryRun = true });
         services.AddCommand<RunBiasTest, BiasTestRunResponse, RunBiasTestHandler>(CommandDescriptor.For("dat.BiasTest.run") with { SupportsDryRun = true });
+        services.AddCommand<SubmitModelValidation, ModelSubmitValidationResponse, SubmitModelValidationHandler>(CommandDescriptor.For("dat.Model.submitValidation") with { SupportsDryRun = true });
+        services.AddCommand<RecordModelValidation, ModelRecordValidationResponse, RecordModelValidationHandler>(CommandDescriptor.For("dat.Model.recordValidation") with { SupportsDryRun = true });
+        services.AddCommand<ApproveModel, ModelApproveResponse, ApproveModelHandler>(CommandDescriptor.For("dat.Model.approve") with { SupportsDryRun = true });
+        services.AddCommand<RetireModel, ModelRetireResponse, RetireModelHandler>(CommandDescriptor.For("dat.Model.retire") with { SupportsDryRun = true });
+        services.AddCommand<RecordModelMetrics, MonitorMetricsResponse, RecordModelMetricsHandler>(CommandDescriptor.For("dat.Monitor.metrics") with { SupportsDryRun = true });
 
         // BO-DAT-01: data-contract registry and raw-layer ingestion (rpt_raw.event_ledger / quarantine).
         services.AddScoped<ConformedProjector>();
@@ -111,6 +121,7 @@ public static class DataModule
         services.AddScoped<IDataRestrictionService>(sp => sp.GetRequiredService<DataInProcessServices>());
         services.AddScoped<IDataBiasTestService>(sp => sp.GetRequiredService<DataInProcessServices>());
         services.AddScoped<IDataModelService>(sp => sp.GetRequiredService<DataInProcessServices>());
+        services.AddScoped<IDataMonitorService>(sp => sp.GetRequiredService<DataInProcessServices>());
 
         services.AddErrorDefinitions(Errors);
         return services;
@@ -133,6 +144,14 @@ public static class DataModule
             .Describe("Την έγκριση πρέπει να δώσει άλλο πρόσωπο από αυτό που εκτέλεσε ή προσάρμοσε.", "A second person must sign off: not the one who ran or adjusted it."),
         ErrorDefinition.For(ModuleCode.DAT, "024", 422, "Η εκτέλεση δεν έχει εγκριθεί", "The run is not signed off")
             .Describe("Εξάγονται μόνο εγκεκριμένες εκτελέσεις· μια νεότερη προσαρμογή ακυρώνει την έγκριση.", "Only signed-off runs are exported; a later adjustment invalidates the sign-off."),
+        ErrorDefinition.For(ModuleCode.DAT, "030", 422, "Απαιτείται δεύτερο πρόσωπο", "A second person is required")
+            .Describe("Την επικύρωση και την έγκριση πρέπει να δώσει άλλο πρόσωπο από τον δημιουργό, τον υποβάλλοντα και τον επικυρωτή.", "Validation and approval need a person other than the developer, submitter and validator."),
+        ErrorDefinition.For(ModuleCode.DAT, "031", 422, "Ελλιπής κάρτα μοντέλου", "Model card incomplete")
+            .Describe("Η κάρτα πρέπει να δηλώνει σκοπό, δεδομένα εκπαίδευσης και περιορισμούς.", "The card must state the purpose, training data and limitations."),
+        ErrorDefinition.For(ModuleCode.DAT, "032", 422, "Άγνωστο χαρακτηριστικό ή έκδοση", "Unknown feature or version")
+            .Describe("Δεν υπάρχει καταχωρισμένο μοντέλο για αυτό το χαρακτηριστικό και την έκδοση.", "No model is registered for this feature and version."),
+        ErrorDefinition.For(ModuleCode.DAT, "033", 422, "Μη επιτρεπτή μετάβαση κατάστασης", "Status does not allow this transition")
+            .Describe("Η τρέχουσα κατάσταση του μοντέλου δεν επιτρέπει την ενέργεια.", "The model's current status does not allow the action."),
         ErrorDefinition.For(ModuleCode.DAT, "LAYOUT-UNVERIFIED", 422, "Μη επαληθευμένη ρυθμιστική διάταξη", "Regulatory layout unverified")
             .Describe("Η ρυθμιστική διάταξη δεν έχει επαληθευτεί και δεν εγκρίνεται ούτε εξάγεται στην παραγωγή.", "The regulatory layout is Unverified and is not signed off or exported in Production."),
         ErrorDefinition.For(ModuleCode.DAT, "IDEMPOTENCY-MISMATCH", 409, "Το αναγνωριστικό αιτήματος χρησιμοποιήθηκε ήδη", "The request id was already used")

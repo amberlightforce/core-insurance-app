@@ -4,23 +4,37 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Model.recordValidation request. PRD inputs: "model card, version"</summary>
+/// <summary>dat.Model.recordValidation request (BO-DAT-06). The validator must not be the person who registered or submitted the model. FAILED returns the model to DRAFT.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ModelRecordValidationRequest
 {
-    /// <summary>PRD: "model card"</summary>
+    /// <summary>Contract member 'modelId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'modelId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("modelCard")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ModelCard { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("modelId")]
+    public required global::System.Guid ModelId { get; init; }
 
-    /// <summary>PRD: "version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("version")]
+    /// <summary>Contract member 'outcome'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("outcome")]
+    public required OutcomeValue Outcome { get; init; }
+
+    /// <summary>Contract member 'findings'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("findings")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Version { get; init; }
+    public string? Findings { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<OutcomeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum OutcomeValue
+    {
+        /// <summary><c>PASSED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PASSED")]
+        Passed,
+
+        /// <summary><c>FAILED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("FAILED")]
+        Failed,
+    }
 }

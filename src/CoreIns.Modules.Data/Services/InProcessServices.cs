@@ -16,8 +16,9 @@ internal sealed class DataInProcessServices(
     ICommandHandler<ExecuteErasure, ErasureExecuteResponse> erase,
     ICommandHandler<ApplyRestriction, RestrictionApplyResponse> restrict,
     ICommandHandler<RunBiasTest, BiasTestRunResponse> bias,
-    ICommandHandler<RegisterModel, ModelRegisterResponse> register)
-    : IDataSubjectService, IDataErasureService, IDataRestrictionService, IDataBiasTestService, IDataModelService
+    ICommandHandler<RegisterModel, ModelRegisterResponse> register,
+    ICommandHandler<RecordModelMetrics, MonitorMetricsResponse> metrics)
+    : IDataSubjectService, IDataErasureService, IDataRestrictionService, IDataBiasTestService, IDataModelService, IDataMonitorService
 {
     public Task<SubjectExportResponse> ExportAsync(SubjectExportRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         RunCommandAsync(options, () => export.HandleAsync(new ExportSubject(request), cancellationToken));
@@ -33,6 +34,9 @@ internal sealed class DataInProcessServices(
 
     public Task<ModelRegisterResponse> RegisterAsync(ModelRegisterRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         RunCommandAsync(options, () => register.HandleAsync(new RegisterModel(request), cancellationToken));
+
+    public Task<MonitorMetricsResponse> MetricsAsync(MonitorMetricsRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
+        RunCommandAsync(options, () => metrics.HandleAsync(new RecordModelMetrics(request), cancellationToken));
 
     private async Task<T> RunCommandAsync<T>(CommandOptions options, Func<Task<Result<T>>> call)
     {
