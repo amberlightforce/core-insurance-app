@@ -20,4 +20,6 @@ description = "Generated contract samples (field names such as flagKey/zoneKey/i
 paths = [
   '''tests/CoreIns\.Contracts\.Tests/Generated/Samples/.*\.json''',
   '''tests/CoreIns\.IntegrationTests/ApiHostFactory\.cs''',
+  # generic-api-key on DataProtection:LocalMasterKey: the same throwaway test key (base64 of "coreins-integration-test-key-32b").
+  '''tests/CoreIns\.Host\.Tests/RouteConformanceTests\.cs''',
 ]

@@ -285,29 +285,56 @@ public sealed class SnapshotTemporalTests(PostgresFixture database) : TemporalTe
 
     // ---- date-form validAt ------------------------------------------------------------------------------------------------------
 
+    // The days under test are the next occurrence of each kind, so the test never ages out; the policy is bound to start a few
+    // days before that day. The UTC hour of the following Athens midnight is fixed per kind (an independent oracle, not computed
+    // from a time-zone database): DST ends on the last Sunday of October (25-hour day, UTC+2 at the next midnight) and starts on
+    // the last Sunday of March (23-hour day, UTC+3 at the next midnight).
     [Theory]
-    [InlineData("2026-10-25", 2026, 10, 25, 22)] // DST ends (25-hour day): Athens is UTC+2 at the next midnight
-    [InlineData("2027-03-28", 2027, 3, 28, 21)] // DST starts (23-hour day): Athens is UTC+3 at the next midnight
-    [InlineData("2027-01-15", 2027, 1, 15, 22)] // an ordinary winter day
-    [InlineData("2027-07-15", 2027, 7, 15, 21)] // an ordinary summer day
-    public async Task REQ_POL_007_PITFALL_14_a_date_form_validAt_is_the_last_microsecond_of_that_Athens_day_including_DST_days(string day, int year, int month, int dayOfMonth, int utcHourOfNextMidnight)
+    [InlineData("dst-end", 22)]
+    [InlineData("dst-start", 21)]
+    [InlineData("winter", 22)] // an ordinary winter day (15 January)
+    [InlineData("summer", 21)] // an ordinary summer day (15 July)
+    public async Task REQ_POL_007_PITFALL_14_a_date_form_validAt_is_the_last_microsecond_of_that_Athens_day_including_DST_days(string kind, int utcHourOfNextMidnight)
     {
-        var p = await BindAsync();
-        var date = new DateTime(year, month, dayOfMonth, 0, 0, 0, DateTimeKind.Utc);
+        var date = NextDayOfKind(kind, DateTime.UtcNow.Date.AddDays(10));
+        var p = await BindAsync(new DateTimeOffset(date.AddDays(-5), TimeSpan.Zero));
         p.Start.ShouldBeLessThan(date.AddDays(-1), "the term must cover the day under test");
         p.End.ShouldBeGreaterThan(date.AddDays(2));
 
+        var day = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         var (response, raw) = await RawAsync($"/api/pol/v1/snapshots/get?policyId={p.PolicyId}&validAt={day}");
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK, raw);
         // Next Athens midnight expressed in UTC, minus one microsecond (the instants are microsecond-precise).
-        var expected = new DateTime(year, month, dayOfMonth, utcHourOfNextMidnight, 0, 0, DateTimeKind.Utc);
-        if (utcHourOfNextMidnight is 22 or 21)
-        {
-            expected = expected.AddTicks(-10);
-        }
+        var expected = date.AddHours(utcHourOfNextMidnight).AddTicks(-10);
 
         Utc(JsonNode.Parse(raw).Text("validAt")).ShouldBe(expected);
         JsonNode.Parse(raw).Text("inForce").ShouldBe("true");
+    }
+
+    /// <summary>The first day of <paramref name="kind"/> on or after <paramref name="from"/> (UTC midnight of that calendar date).</summary>
+    private static DateTime NextDayOfKind(string kind, DateTime from)
+    {
+        for (var year = from.Year; ; year++)
+        {
+            var candidate = kind switch
+            {
+                "dst-end" => LastSunday(year, 10),
+                "dst-start" => LastSunday(year, 3),
+                "winter" => new DateTime(year, 1, 15, 0, 0, 0, DateTimeKind.Utc),
+                "summer" => new DateTime(year, 7, 15, 0, 0, 0, DateTimeKind.Utc),
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
+            };
+            if (candidate >= from)
+            {
+                return candidate;
+            }
+        }
+    }
+
+    private static DateTime LastSunday(int year, int month)
+    {
+        var last = new DateTime(year, month, DateTime.DaysInMonth(year, month), 0, 0, 0, DateTimeKind.Utc);
+        return last.AddDays(-(int)last.DayOfWeek);
     }
 }

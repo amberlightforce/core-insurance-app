@@ -20,6 +20,15 @@ afterEach(() => {
 
 const today = new CalendarDate(2026, 10, 7);
 
+// Pin the clock to the fixture's «today» for every test: an empty picker opens its calendar on the real current month, so
+// without this the tests that look for October 2026 in the grid fail once the real date moves on.
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-10-07T09:00:00Z') });
+});
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 function segments(group: HTMLElement) {
   return within(group).getAllByRole('spinbutton');
 }
