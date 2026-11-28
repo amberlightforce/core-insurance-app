@@ -7156,31 +7156,25 @@ components:
           description: 'PRD: "review referral ref"'
     DeclineDecideReviewRequest:
       type: object
-      description: 'uw.Decline.decideReview request. PRD inputs: "job or intake ref, scope, reasons, pairs, wording"'
+      description: 'uw.Decline.decideReview request (BO-UW-07): the second underwriter decides the review of an automated decline. The decider cannot be the person who issued the decline (UW-ERR-SOD).'
       properties:
-        jobRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job or intake ref" (optional)'
-        intakeRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job or intake ref" (optional)'
-        scope:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "scope"'
-        reasons:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reasons"'
-        pairs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "pairs"'
-        wording:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "wording"'
-      oneOf:
-      - required:
-        - jobRef
-      - required:
-        - intakeRef
+        declineId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        outcome:
+          type: string
+          enum:
+          - UPHELD
+          - OVERTURNED
+          description: UPHELD keeps the decline; OVERTURNED withdraws it (the job returns to Quoted, REQ-UW-220).
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Why (mandatory)
+      required:
+      - declineId
+      - outcome
+      - reason
     DeclineDecideReviewResponse:
       type: object
       description: 'uw.Decline.decideReview result. PRD outputs: "decline, refusal requirement"'
@@ -7193,19 +7187,57 @@ components:
           description: 'PRD: "refusal requirement"'
     RefusalRegisterQueryItem:
       type: object
-      description: 'uw.RefusalRegister.query result. PRD outputs: "entries / file ref + manifest"'
+      description: 'uw.RefusalRegister.query result (BO-UW-07): one register entry per decline, newest first.'
       properties:
-        entries:
+        declineId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        declineNumber:
+          type: string
+        jobRef:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        intakeRef:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        scope:
+          type: string
+          enum:
+          - FULL
+          - PARTIAL
+        reasonCodes:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entries"'
-        fileRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file ref + manifest"'
-        manifest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "file ref + manifest"'
+            type: string
+        automated:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - Issued
+          - ReviewRequested
+          - Upheld
+          - Overturned
+        issuedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        issuedBy:
+          type: string
+        reviewOutcome:
+          type:
+          - string
+          - 'null'
+      required:
+      - declineId
+      - declineNumber
+      - scope
+      - reasonCodes
+      - automated
+      - status
+      - issuedAt
+      - issuedBy
     RefusalRegisterQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope

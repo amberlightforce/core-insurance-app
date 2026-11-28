@@ -39,25 +39,7 @@ internal sealed class FiscalDocumentReader(ComplianceDbContext db)
         return [.. rows.Select(ToResponse)];
     }
 
-    /// <summary>
-    /// <c>cmp.FiscalReconciliation.breaks</c>: the documents the channel has not registered (Rejected, or still Pending)
-    /// for the legal entity, optionally up to a business date. A break is a document whose books and channel disagree.
-    /// </summary>
-    public async Task<IReadOnlyList<FiscalDocumentGetResponse>> BreaksAsync(
-        LegalEntityId legalEntity, BusinessDate? upTo, int limit, CancellationToken cancellationToken)
-    {
-        var query = db.FiscalDocuments.AsNoTracking()
-            .Where(d => d.LegalEntityId == legalEntity && (d.Status == "REJECTED" || d.Status == "PENDING"));
-        if (upTo is { } date)
-        {
-            query = query.Where(d => d.IssueDate <= date);
-        }
-
-        var rows = await query.OrderBy(d => d.IssueDate).Take(Math.Clamp(limit, 1, 200)).ToListAsync(cancellationToken).ConfigureAwait(false);
-        return [.. rows.Select(ToResponse)];
-    }
-
-    private static FiscalDocumentGetResponse ToResponse(FiscalDocumentRow row)
+    internal static FiscalDocumentGetResponse ToResponse(FiscalDocumentRow row)
     {
         var currency = Currency.FromCode(row.Currency);
         var lines = JsonSerializer.Deserialize<List<FiscalDocumentRequestRequest.LineItem>>(row.Lines, SharedKernelJson.Options) ?? [];

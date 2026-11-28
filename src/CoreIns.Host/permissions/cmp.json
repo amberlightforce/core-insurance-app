@@ -11,6 +11,8 @@
         "cmp.FiscalDocument.cancel": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
         "cmp.FiscalDocument.listBySource": [ "Staff.Billing", "Staff.ComplianceOfficer", "Platform.Admin" ],
         "cmp.FiscalReconciliation.breaks": [ "Staff.Billing", "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.FiscalReconciliation.run": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
+        "cmp.FiscalRule.certify": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
         "cmp.AiSystem.register": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
         "cmp.AiSystem.submitForReview": [ "Staff.ComplianceOfficer", "Platform.Admin" ],
         "cmp.AiSystem.approve": [ "Staff.ComplianceOfficer", "Platform.Admin" ],

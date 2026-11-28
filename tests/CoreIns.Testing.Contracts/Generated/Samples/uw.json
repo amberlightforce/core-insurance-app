@@ -263,11 +263,9 @@
       "refusalRequirement": "unspecified"
     },
     "DeclineDecideReviewRequest": {
-      "jobRef": "unspecified",
-      "scope": "unspecified",
-      "reasons": "unspecified",
-      "pairs": "unspecified",
-      "wording": "unspecified"
+      "declineId": "01928b4c-b8fe-77fc-8cf7-3dd617e58ea2",
+      "outcome": "UPHELD",
+      "reason": "sample"
     },
     "DeclineDecideReviewResponse": {
       "decline": "unspecified",
@@ -1388,20 +1386,36 @@
       "manifest": "unspecified"
     },
     "RefusalRegisterQueryItem": {
-      "entries": [
-        "unspecified"
+      "declineId": "01929985-f17c-70c2-8afa-106b19264208",
+      "declineNumber": "sample",
+      "jobRef": "0192ee35-b941-7fb0-8ac4-b6f6dcbfaed9",
+      "intakeRef": "019264a1-5ed7-7652-83d8-27c8f2c7489c",
+      "scope": "FULL",
+      "reasonCodes": [
+        "sample"
       ],
-      "fileRef": "unspecified",
-      "manifest": "unspecified"
+      "automated": true,
+      "status": "Issued",
+      "issuedAt": "2026-10-07T09:00:00Z",
+      "issuedBy": "sample",
+      "reviewOutcome": "sample"
     },
     "RefusalRegisterQueryPage": {
       "items": [
         {
-          "entries": [
-            "unspecified"
+          "declineId": "0192a87a-22af-794b-8662-a72f44ab778e",
+          "declineNumber": "sample",
+          "jobRef": "0192f3b7-cbee-7fe8-8f0f-c88a651573dd",
+          "intakeRef": "0192c4f5-9021-76e1-88d2-eb5c65da7329",
+          "scope": "FULL",
+          "reasonCodes": [
+            "sample"
           ],
-          "fileRef": "unspecified",
-          "manifest": "unspecified"
+          "automated": true,
+          "status": "Issued",
+          "issuedAt": "2026-10-07T09:00:00Z",
+          "issuedBy": "sample",
+          "reviewOutcome": "sample"
         }
       ],
       "nextCursor": "sample",

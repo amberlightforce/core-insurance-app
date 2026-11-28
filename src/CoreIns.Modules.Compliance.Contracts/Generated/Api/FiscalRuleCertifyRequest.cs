@@ -8,8 +8,51 @@ namespace CoreIns.Modules.Compliance.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record FiscalRuleCertifyRequest
 {
-    /// <summary>PRD: "pack candidate"</summary>
+    /// <summary>PRD: "pack candidate" (the fiscal rule values a country pack proposes)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("packCandidate")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? PackCandidate { get; init; }
+    public required PackCandidateDetail PackCandidate { get; init; }
+
+    /// <summary>PRD: "pack candidate" (the fiscal rule values a country pack proposes)</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record PackCandidateDetail
+    {
+        /// <summary>The pack's fiscal document type code (the placeholder UNMAPPED-OQ-012 never passes)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("documentType")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? DocumentType { get; init; }
+
+        /// <summary>Contract member 'seriesPattern'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("seriesPattern")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? SeriesPattern { get; init; }
+
+        /// <summary>The pack enforces cmp.fiscal.mark_before_issue</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("markBeforeIssue")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public bool? MarkBeforeIssue { get; init; }
+
+        /// <summary>The pack enforces bil.fiscal.mark_before_delivery</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("markBeforeDelivery")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public bool? MarkBeforeDelivery { get; init; }
+
+        /// <summary>Whether the values are legally confirmed (default Unverified; an unverified candidate fails)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public LegalStatusValue? LegalStatus { get; init; }
+
+        /// <summary>Whether the values are legally confirmed (default Unverified; an unverified candidate fails)</summary>
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<LegalStatusValue>))]
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public enum LegalStatusValue
+        {
+            /// <summary><c>Verified</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Verified")]
+            Verified,
+
+            /// <summary><c>Unverified</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Unverified")]
+            Unverified,
+        }
+    }
 }

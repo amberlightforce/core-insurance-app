@@ -4,31 +4,90 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.RefusalRegister.query result. PRD outputs: "entries / file ref + manifest"</summary>
+/// <summary>uw.RefusalRegister.query result (BO-UW-07): one register entry per decline, newest first.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record RefusalRegisterQueryItem
 {
-    /// <summary>PRD: "entries"</summary>
+    /// <summary>Contract member 'declineId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'declineId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("entries")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Entries { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("declineId")]
+    public required global::System.Guid DeclineId { get; init; }
 
-    /// <summary>PRD: "file ref + manifest"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("fileRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? FileRef { get; init; }
+    /// <summary>Contract member 'declineNumber'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("declineNumber")]
+    public required string DeclineNumber { get; init; }
 
-    /// <summary>PRD: "file ref + manifest"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("manifest")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Manifest { get; init; }
+    /// <summary>Contract member 'jobRef'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobRef")]
+    public string? JobRef { get; init; }
+
+    /// <summary>Contract member 'intakeRef'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("intakeRef")]
+    public string? IntakeRef { get; init; }
+
+    /// <summary>Contract member 'scope'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("scope")]
+    public required ScopeValue Scope { get; init; }
+
+    /// <summary>Contract member 'reasonCodes'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCodes")]
+    public required global::System.Collections.Generic.IReadOnlyList<string> ReasonCodes { get; init; }
+
+    /// <summary>Contract member 'automated'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("automated")]
+    public required bool Automated { get; init; }
+
+    /// <summary>Contract member 'status'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required StatusValue Status { get; init; }
+
+    /// <summary>Contract member 'issuedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issuedAt")]
+    public required global::CoreIns.SharedKernel.Instant IssuedAt { get; init; }
+
+    /// <summary>Contract member 'issuedBy'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issuedBy")]
+    public required string IssuedBy { get; init; }
+
+    /// <summary>Contract member 'reviewOutcome'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reviewOutcome")]
+    public string? ReviewOutcome { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ScopeValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum ScopeValue
+    {
+        /// <summary><c>FULL</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("FULL")]
+        Full,
+
+        /// <summary><c>PARTIAL</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PARTIAL")]
+        Partial,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StatusValue
+    {
+        /// <summary><c>Issued</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Issued")]
+        Issued,
+
+        /// <summary><c>ReviewRequested</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ReviewRequested")]
+        ReviewRequested,
+
+        /// <summary><c>Upheld</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Upheld")]
+        Upheld,
+
+        /// <summary><c>Overturned</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Overturned")]
+        Overturned,
+    }
 }

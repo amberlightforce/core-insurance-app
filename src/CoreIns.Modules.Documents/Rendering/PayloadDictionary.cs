@@ -43,6 +43,11 @@ internal static partial class PayloadDictionary
             new("certificateNumber", PayloadFieldType.Text, true), new("periodFrom", PayloadFieldType.Date, true), new("periodTo", PayloadFieldType.Date, true),
             new("issuedOn", PayloadFieldType.Date, true), new("claimCount", PayloadFieldType.Text, true), new("claimsSummary", PayloadFieldType.Text, true),
         ],
+        ["DT-REFUSAL-LETTER"] =
+        [
+            new("declineNumber", PayloadFieldType.Text, true), new("reasons", PayloadFieldType.Text, true), new("declineDate", PayloadFieldType.Date, true),
+            new("automatedNotice", PayloadFieldType.Text, true), new("customerName", PayloadFieldType.Text, false),
+        ],
         ["DT-REFUND-ADVICE"] =
         [
             new("customerName", PayloadFieldType.Text, true), new("policyNo", PayloadFieldType.Text, true), new("refundAmount", PayloadFieldType.Money, true),

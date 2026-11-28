@@ -133,6 +133,23 @@ public static class UnderwritingModule
         services.AddCommand<ReleaseReview, ReviewReleaseResponse, ReleaseReviewHandler>(CommandDescriptor.For("uw.Review.release"));
         services.AddScoped<ReferralQueries>();
 
+        // BO-UW-07: declines, review of automated declines, refusal register.
+        services.AddScoped<DeclineStore>();
+        services.AddScoped<DeclineSupport>();
+        services.AddScoped<DeclineQueries>();
+        services.AddScoped<IValidator<CreateDecline>, CreateDeclineValidator>();
+        services.AddScoped<IValidator<RequestDeclineReview>, RequestDeclineReviewValidator>();
+        services.AddScoped<IValidator<DecideDeclineReview>, DecideDeclineReviewValidator>();
+        services.AddScoped<IValidator<ExportRefusalRegister>, ExportRefusalRegisterValidator>();
+        services.AddCommandAuditor<CreateDecline, DeclineCreateResponse, DeclineAuditor<CreateDecline, DeclineCreateResponse>>();
+        services.AddCommandAuditor<RequestDeclineReview, DeclineRequestReviewResponse, DeclineAuditor<RequestDeclineReview, DeclineRequestReviewResponse>>();
+        services.AddCommandAuditor<DecideDeclineReview, DeclineDecideReviewResponse, DeclineAuditor<DecideDeclineReview, DeclineDecideReviewResponse>>();
+        services.AddCommandAuditor<ExportRefusalRegister, RefusalRegisterExportResponse, ExportRefusalRegisterAuditor>();
+        services.AddCommand<CreateDecline, DeclineCreateResponse, CreateDeclineHandler>(CommandDescriptor.For("uw.Decline.create") with { SupportsDryRun = true });
+        services.AddCommand<RequestDeclineReview, DeclineRequestReviewResponse, RequestDeclineReviewHandler>(CommandDescriptor.For("uw.Decline.requestReview"));
+        services.AddCommand<DecideDeclineReview, DeclineDecideReviewResponse, DecideDeclineReviewHandler>(CommandDescriptor.For("uw.Decline.decideReview"));
+        services.AddCommand<ExportRefusalRegister, RefusalRegisterExportResponse, ExportRefusalRegisterHandler>(CommandDescriptor.For("uw.RefusalRegister.export"));
+
         services.AddScoped<IUnderwritingRulesService, UnderwritingRulesService>();
         services.AddScoped<IUnderwritingIssueService, UnderwritingIssueService>();
 
@@ -184,6 +201,12 @@ public static class UnderwritingModule
             .Describe("Μια παρτίδα αξιολογεί έως 200 κινδύνους· χωρίστε την σε περισσότερα αιτήματα.", "A batch evaluates at most 200 risks; split it into several requests."),
         ErrorDefinition.For(ModuleCode.UW, "ISSUE-NOT-FOUND", 404, "Δεν βρέθηκε το ζήτημα", "The issue was not found")
             .Describe("Δεν υπάρχει ζήτημα με αυτό το αναγνωριστικό στη νομική οντότητά σας.", "There is no issue with this id in your legal entity."),
+        ErrorDefinition.For(ModuleCode.UW, "DECLINE-NOT-FOUND", 404, "Δεν βρέθηκε η άρνηση", "The decline was not found")
+            .Describe("Δεν υπάρχει άρνηση με αυτό το αναγνωριστικό στη νομική οντότητά σας.", "There is no decline with this id in your legal entity."),
+        ErrorDefinition.For(ModuleCode.UW, "DECLINE-EXISTS", 409, "Υπάρχει ήδη άρνηση", "A decline already stands")
+            .Describe("Η εργασία ή η αίτηση έχει ήδη ισχύουσα άρνηση· ανατρέψτε την πρώτα.", "The job or intake already has a standing decline; overturn it first."),
+        ErrorDefinition.For(ModuleCode.UW, "DECLINE-STATE", 422, "Η άρνηση δεν μπορεί να αλλάξει έτσι", "The decline cannot change this way")
+            .Describe("Η επανεξέταση αφορά αυτόματη άρνηση που δεν έχει ήδη επανεξεταστεί.", "A review applies to an automated decline that has not been reviewed yet."),
         ErrorDefinition.For(ModuleCode.UW, "STALE", 409, "Το ζήτημα άλλαξε στο μεταξύ", "The issue changed meanwhile")
             .Describe("Φορτώστε ξανά το ζήτημα και αποφασίστε πάλι.", "Reload the issue and decide again."),
     ];

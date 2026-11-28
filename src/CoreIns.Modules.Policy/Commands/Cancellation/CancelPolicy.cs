@@ -85,6 +85,7 @@ internal sealed class CancelPolicyHandler(
         var request = command.Request;
         var withdrawal = command.Withdrawal;
         var nonPayment = command.NonPayment;
+        var scheduled = command.Scheduled;
         var zone = options.Value.Zone;
         var now = PolicyWriteLock.Truncate(clock.Now);
         var kind = CancellationText.Kind(request.Kind);
@@ -108,7 +109,7 @@ internal sealed class CancelPolicyHandler(
             return Validation("source", "SOURCE_NOT_AVAILABLE", $"Cancellation by source {request.Source} is not available in this release.");
         }
 
-        if (kind == CancellationKind.Standard && withdrawal is null && nonPayment is null)
+        if (kind == CancellationKind.Standard && withdrawal is null && nonPayment is null && scheduled is null)
         {
             // REQ-POL-208/209: "cancel now" only. The effective time is the request receipt time; the requested date must be today
             // (Athens). A later date is a scheduled cancellation, an earlier one a backdated cancellation: both are refused.
@@ -146,6 +147,8 @@ internal sealed class CancelPolicyHandler(
         var terms = await db.Terms.Where(x => x.PolicyId == request.PolicyId && x.LegalEntityId == legalEntity && x.RecordedTo == null).ToListAsync(cancellationToken).ConfigureAwait(false);
         var picked = nonPayment is not null
             ? PickNonPaymentTerm(terms, nonPayment)
+            : scheduled is not null
+            ? PickScheduledTerm(terms, scheduled)
             : withdrawal is null
             ? PickTerm(terms, kind, now)
             : terms.FirstOrDefault(x => x.TermId == withdrawal.TermId) is { } target
@@ -242,6 +245,16 @@ internal sealed class CancelPolicyHandler(
         var termEndDate = DayCount.Date(term.ValidTo, zone);
         var effectiveDate = DayCount.Date(effective, zone);
         var includeTax = termEndDate > effectiveDate;
+        var preview = Preview(term, servicingTerm, state, premiumDeltas, treated, includeTax, request.Source, applied, currency, withdrawal is not null);
+        if (scheduled is { PreviewOnly: true })
+        {
+            // BO-POL-06: the refund quote of a scheduled cancellation. Nothing has been written yet (only the policy lock was taken).
+            return new CancellationCreateResponse
+            {
+                JobId = JobId.New(), State = Codes.Api(JobState.Quoted), Kind = request.Kind, EffectiveAt = effective, ServicingPreview = preview,
+            };
+        }
+
         var taxToWrite = includeTax ? treated : [];
         var count = premiumDeltas.Count + taxToWrite.Count;
         var premium = premiumDeltas.Sum(d => d.Amount);
@@ -276,7 +289,6 @@ internal sealed class CancelPolicyHandler(
 
         var jobId = JobId.New();
         var jobNumber = await numbering.NextAsync(new NumberRequest(NumberingSchemes.Job, now.ToBusinessDate(zone)), cancellationToken).ConfigureAwait(false);
-        var preview = Preview(term, servicingTerm, state, premiumDeltas, treated, includeTax, request.Source, applied, currency, withdrawal is not null);
         var intent = JobSupport.Json(new
         {
             kind = Codes.Of(kind), source = request.Source, reasonCode = request.ReasonCode, refundMethod = CancellationText.Code(applied),
@@ -486,6 +498,20 @@ internal sealed class CancelPolicyHandler(
         return effective >= target.ValidTo
             ? DomainError.Of(ModuleCode.POL, CancellationErrors.IllegalTransition, "The policy term has already ended.")
             : (target, effective);
+    }
+
+    /// <summary>The term of a scheduled cancellation (BO-POL-06): the stored term, cancelled at the scheduled instant, which must lie inside the term.</summary>
+    private static Result<(PolicyTermRow Term, Instant Effective)> PickScheduledTerm(IReadOnlyList<PolicyTermRow> terms, ScheduledCase scheduled)
+    {
+        var target = terms.FirstOrDefault(x => x.TermId == scheduled.TermId);
+        if (target is null)
+        {
+            return DomainError.Of(ModuleCode.POL, CancellationErrors.IllegalTransition, "The term of the scheduled cancellation has no current version.");
+        }
+
+        return scheduled.Effective < target.ValidFrom || scheduled.Effective >= target.ValidTo
+            ? DomainError.Of(ModuleCode.POL, PolicyErrorNames.EffdateLimit, "The scheduled effective time is outside the term.")
+            : (target, scheduled.Effective);
     }
 
     /// <summary>The term a cancellation applies to and its effective instant.</summary>
