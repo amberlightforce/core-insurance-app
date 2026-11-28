@@ -53,6 +53,9 @@ public static class NumberingSchemes
 
     /// <summary>Journal number (REQ-FIN-069).</summary>
     public const string Journal = "JOURNAL";
+
+    /// <summary>Sanctions screening case number (REQ-PTY-006, BO-PTY-07).</summary>
+    public const string ScreeningCase = "SCREENING_CASE";
 }
 
 /// <summary>Whether a series may have gaps (REQ-PLT-210, REQ-PLT-211).</summary>

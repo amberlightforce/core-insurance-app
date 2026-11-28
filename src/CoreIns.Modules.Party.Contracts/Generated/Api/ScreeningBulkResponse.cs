@@ -4,20 +4,67 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Screening.bulk result. PRD outputs: "job id; decision → case"</summary>
+/// <summary>pty.Screening.bulk result: one outcome per party, in request order. The run is synchronous, so there is no job to poll.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ScreeningBulkResponse
 {
-    /// <summary>PRD: "job id"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
+    /// <summary>Contract member 'screened'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("screened")]
+    public required int Screened { get; init; }
 
-    /// <summary>PRD: "decision → case"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("decisionCase")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DecisionCase { get; init; }
+    /// <summary>Contract member 'clear'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("clear")]
+    public required int Clear { get; init; }
+
+    /// <summary>Contract member 'hits'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("hits")]
+    public required int Hits { get; init; }
+
+    /// <summary>Contract member 'results'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("results")]
+    public required global::System.Collections.Generic.IReadOnlyList<ResultItem> Results { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record ResultItem
+    {
+        /// <summary>Contract member 'partyId'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
+        public required global::CoreIns.SharedKernel.Identifiers.PartyId PartyId { get; init; }
+
+        /// <summary>Contract member 'result'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("result")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public ResultValue? Result { get; init; }
+
+        /// <summary>Contract member 'caseNumber'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("caseNumber")]
+        public string? CaseNumber { get; init; }
+
+        /// <summary>Contract member 'paymentBlock'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("paymentBlock")]
+        public required bool PaymentBlock { get; init; }
+
+        /// <summary>Error code when this party could not be screened</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("error")]
+        public string? Error { get; init; }
+
+        /// <summary>Generated contract member.</summary>
+        [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<ResultValue>))]
+        [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+        public enum ResultValue
+        {
+            /// <summary><c>Clear</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Clear")]
+            Clear,
+
+            /// <summary><c>PotentialHit</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PotentialHit")]
+            PotentialHit,
+
+            /// <summary><c>Blocked</c></summary>
+            [global::System.Text.Json.Serialization.JsonStringEnumMemberName("Blocked")]
+            Blocked,
+        }
+    }
 }

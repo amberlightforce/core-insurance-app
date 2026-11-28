@@ -35,6 +35,7 @@ public sealed class ApprovalSodMatrixTests(PostgresFixture database) : IClassFix
             "PTY.COMMISSION_AGREEMENT", ModuleCode.PTY, "CommissionAgreementVersion", "PTY.COMMISSION_AGREEMENT", "300000.00", "Staff.Underwriter", "Staff.UnderwritingManager",
             "Staff.UnderwritingManager", new Dictionary<string, string> { ["rateBand"] = "STANDARD" }),
         new Row("PTY.PARTY_MERGE", ModuleCode.PTY, "PartyMerge", "PTY.PARTY_MERGE", "", "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.UnderwritingManager"),
+        new Row("PTY.SCREENING_DECISION", ModuleCode.PTY, "ScreeningCase", "PTY.SCREENING_DECISION", "", "Staff.Underwriter", "Staff.ComplianceOfficer", "Staff.ComplianceOfficer"),
     ];
 
     private ApiHostFactory _factory = null!;

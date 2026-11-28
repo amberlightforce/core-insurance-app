@@ -42,6 +42,12 @@ public static class PartyAuthorityTypes
     /// <summary>The PLT approval type of a party merge (owner-decided: PTY decides it, not the generic inbox).</summary>
     public const string PartyMergeApprovalType = "PTY.PARTY_MERGE";
 
+    /// <summary>Approve a screening case decision, Clear or TrueMatch (BO-PTY-07): no dimension, the holder of the grant may decide any case.</summary>
+    public static AuthorityTypeCode ScreeningDecision { get; } = AuthorityTypeCode.Parse("PTY.SCREENING_DECISION");
+
+    /// <summary>The PLT approval type of a screening case decision (owner-decided: PTY decides it, not the generic inbox).</summary>
+    public const string ScreeningDecisionApprovalType = "PTY.SCREENING_DECISION";
+
     /// <summary>The amount dimension: expected annual premium volume in EUR.</summary>
     public const string AmountDimension = "amount";
 
@@ -58,6 +64,7 @@ public static class PartyAuthorityTypes
                 new AuthorityDimensionDefinition(RateBandDimension, DimensionKind.Code),
             ]),
         new AuthorityTypeDefinition(PartyMerge, ModuleCode.PTY, new LocalizedText("Έγκριση συγχώνευσης προσώπων", "Approve party merge"), []),
+        new AuthorityTypeDefinition(ScreeningDecision, ModuleCode.PTY, new LocalizedText("Έγκριση απόφασης ελέγχου κυρώσεων", "Approve screening case decision"), []),
     ];
 
     /// <summary>Registers the Party authority types.</summary>

@@ -11,7 +11,7 @@ namespace CoreIns.Modules.Party.Contracts;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public interface IPartyScreeningService
 {
-    /// <summary>Bulk and case management</summary>
+    /// <summary>Bulk screening</summary>
     /// <remarks>
     /// <para>Operation pty.Screening.bulk (command; HTTP POST /api/pty/v1/screening/bulk).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>

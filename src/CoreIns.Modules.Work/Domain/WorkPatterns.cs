@@ -33,9 +33,12 @@ internal static class WorkCatalog
     public const string PsrQueue = "PSR";
     public const string PackRollbackQueue = "PACK-ROLLBACK-REVIEW";
     public const string UwReferralQueue = "UW-REFERRAL";
+    public const string ScreeningQueue = "SCREENING";
 
     public const string UwReferralInformation = "WRK-UW-REFERRAL-INFORMATION";
     public const string UwReferralReferUp = "WRK-UW-REFERRAL-REFER-UP";
+
+    public const string ScreeningHit = "WRK-PTY-SCREENING-HIT";
 
     public const string PackRollbackReview = "WRK-MKT-PACK-ROLLBACK-REVIEW";
     public const string PsrException = "WRK-POL-NONPAY-PSR-EXCEPTION";
@@ -47,6 +50,8 @@ internal static class WorkCatalog
 
     public static IReadOnlyList<WorkQueue> Queues { get; } =
     [
+        // BO-PTY-07: potential sanctions hits wait for compliance (the same roles as pty.Screening.caseGet).
+        new(ScreeningQueue, "Sanctions screening review", ["Staff.ComplianceOfficer", "Platform.Admin"]),
         new(PsrQueue, "Policy service representative review", PsrRoles),
         // Only the UW manager may review a pack rollback in POL (pol.PackRollbackException.review); the queue is no wider.
         new(PackRollbackQueue, "Pack rollback review", ["Staff.UnderwritingManager", "Platform.Admin"]),
@@ -56,6 +61,8 @@ internal static class WorkCatalog
 
     public static IReadOnlyList<ActivityPattern> Patterns { get; } =
     [
+        new(ScreeningHit, "1", "Review a potential sanctions screening hit", "REVIEW", "HIGH", ScreeningQueue, "WRK-SLA-SCREENING",
+            TargetMinutes: 24 * 60, EscalationMinutes: 2 * 24 * 60, GateBlocking: false, [ModuleCode.PTY]),
         new(PackRollbackReview, "1", "Review transactions recorded under a rolled-back pack version", "REVIEW", "HIGH", PackRollbackQueue, "WRK-SLA-PACK-ROLLBACK",
             TargetMinutes: 2 * 24 * 60, EscalationMinutes: 3 * 24 * 60, GateBlocking: false, [ModuleCode.MKT, ModuleCode.POL]),
         new(UwReferralInformation, "1", "Underwriting referral waits for information", "REVIEW", "NORMAL", UwReferralQueue, "WRK-SLA-UW-REFERRAL",
