@@ -47,6 +47,8 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
 
     public DbSet<CessionExceptionRow> CessionExceptions => Set<CessionExceptionRow>();
 
+    public DbSet<CessionExceptionStateRow> CessionExceptionStates => Set<CessionExceptionStateRow>();
+
     public DbSet<TrackerRow> Trackers => Set<TrackerRow>();
 
     public DbSet<DepositScheduleRow> DepositSchedules => Set<DepositScheduleRow>();
@@ -399,6 +401,9 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.Property(e => e.Delta).HasColumnName("delta").HasColumnType("numeric(19,4)");
             entity.Property(e => e.Mode).HasColumnName("mode");
             entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RunId).HasColumnName("run_id");
+            entity.Property(e => e.ExceptionId).HasColumnName("exception_id");
+            entity.HasIndex(e => e.ExceptionId).HasDatabaseName("ix_cession_exception_link");
             entity.HasIndex(e => new { e.TermId, e.TreatyId, e.SetKey }).IsUnique().HasDatabaseName("ux_cession_set");
         });
 
@@ -414,6 +419,35 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
             entity.Property(e => e.Detail).HasColumnName("detail");
             entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
             entity.HasIndex(e => e.TermId).HasDatabaseName("ix_cession_exception_term");
+            entity.Property(e => e.PolicyId).HasColumnName("policy_id");
+            entity.Property(e => e.CoverageCode).HasColumnName("coverage_code");
+            entity.Property(e => e.ChargeCategory).HasColumnName("charge_category");
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.Property(e => e.ValidFrom).HasColumnName("valid_from").HasColumnType("date");
+            entity.Property(e => e.SetId).HasColumnName("set_id");
+            entity.Property(e => e.SetSize).HasColumnName("set_size");
+            entity.Property(e => e.CorrectionOf).HasColumnName("correction_of");
+            entity.Property(e => e.OosSetId).HasColumnName("oos_set_id");
+        });
+
+        modelBuilder.Entity<CessionExceptionStateRow>(entity =>
+        {
+            entity.ToTable("cession_exception_state", table => table.HasCheckConstraint("ck_cession_exception_state_status", "status IN ('OPEN', 'ASSIGNED', 'RESOLVED')"));
+            entity.HasKey(e => e.ExceptionId).HasName("pk_cession_exception_state");
+            entity.Property(e => e.ExceptionId).HasColumnName("exception_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.Assignee).HasColumnName("assignee");
+            entity.Property(e => e.AssignedAt).HasColumnName("assigned_at").HasColumnType("timestamptz");
+            entity.Property(e => e.AssignedBy).HasColumnName("assigned_by");
+            entity.Property(e => e.ResolvedAt).HasColumnName("resolved_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ResolvedBy).HasColumnName("resolved_by");
+            entity.Property(e => e.Resolution).HasColumnName("resolution");
+            entity.Property(e => e.ResolutionReason).HasColumnName("resolution_reason");
+            entity.Property(e => e.RerunCount).HasColumnName("rerun_count");
+            entity.Property(e => e.LastRerunAt).HasColumnName("last_rerun_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.LegalEntityId, e.Status }).HasDatabaseName("ix_cession_exception_state_status");
         });
 
         modelBuilder.Entity<TrackerRow>(entity =>

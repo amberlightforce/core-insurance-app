@@ -34,6 +34,7 @@ describe('module registry', () => {
       '/reports',
       '/products',
       '/admin/packs',
+      '/admin/config',
       '/admin/migration',
       '/admin/ai',
     ]);

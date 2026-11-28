@@ -1,6 +1,8 @@
 using CoreIns.Modules.Reinsurance.Cession;
 using CoreIns.Modules.Reinsurance.Contracts.Api;
 using CoreIns.Modules.Reinsurance.Registry;
+using CoreIns.Platform.Commands;
+using CoreIns.Platform.Errors;
 using CoreIns.SharedKernel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -53,4 +55,48 @@ internal sealed class CessionsController : ControllerBase
             ? RiHttp.Problem(page.Error!, HttpContext)
             : Results.Ok(new CessionExceptionListPage { Items = page.Value.Items, NextCursor = page.Value.Next, Limit = page.Value.Limit });
     }
+
+    /// <summary>ri.Cession.preview: the dry run of the cession intake for a policy, term or hypothetical lines.</summary>
+    [HttpPost("api/ri/v1/cessions/preview")]
+    [Authorize(Policy = CessionPermissions.Preview)]
+    public async Task<IResult> PreviewAsync([FromBody] CessionPreviewRequest request, [FromServices] CessionPreviewService service, CancellationToken cancellationToken) =>
+        (await service.PreviewAsync(request, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>ri.Cession.rerun: replays one policy or term and writes only the deltas.</summary>
+    [HttpPost("api/ri/v1/cessions/rerun")]
+    [Authorize(Policy = CessionPermissions.Rerun)]
+    public async Task<IResult> RerunAsync(
+        [FromBody] CessionRerunRequest request, [FromServices] ICommandHandler<RerunCession, CessionRerunResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new RerunCession(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>ri.CessionException.assign.</summary>
+    [HttpPost("api/ri/v1/cession-exceptions/assign")]
+    [Authorize(Policy = CessionPermissions.ExceptionAssign)]
+    public async Task<IResult> AssignAsync(
+        [FromBody] CessionExceptionAssignRequest request, [FromServices] ICommandHandler<AssignCessionException, CessionExceptionAssignResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new AssignCessionException(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>ri.CessionException.resolve.</summary>
+    [HttpPost("api/ri/v1/cession-exceptions/resolve")]
+    [Authorize(Policy = CessionPermissions.ExceptionResolve)]
+    public async Task<IResult> ResolveAsync(
+        [FromBody] CessionExceptionResolveRequest request, [FromServices] ICommandHandler<ResolveCessionException, CessionExceptionResolveResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ResolveCessionException(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>ri.CessionException.rerun.</summary>
+    [HttpPost("api/ri/v1/cession-exceptions/rerun")]
+    [Authorize(Policy = CessionPermissions.ExceptionRerun)]
+    public async Task<IResult> RerunExceptionAsync(
+        [FromBody] CessionExceptionRerunRequest request, [FromServices] ICommandHandler<RerunCessionException, CessionExceptionRerunResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new RerunCessionException(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+}
+
+/// <summary>Permission names of the cession writes (BO-RI-07), granted in <c>permissions/ri.json</c>.</summary>
+internal static class CessionPermissions
+{
+    public const string Preview = "ri.Cession.preview";
+    public const string Rerun = "ri.Cession.rerun";
+    public const string ExceptionAssign = "ri.CessionException.assign";
+    public const string ExceptionResolve = "ri.CessionException.resolve";
+    public const string ExceptionRerun = "ri.CessionException.rerun";
 }

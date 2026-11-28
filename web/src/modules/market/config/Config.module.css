@@ -1,0 +1,111 @@
+/* Configuration change requests: filter bar, item cards, before/after diff. Wrapping rows, nothing clipped. */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+.filters > * {
+  min-inline-size: 0;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-0);
+  padding: var(--space-0);
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-inline-size: 0;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-inline-start-width: var(--border-width-thick);
+  border-radius: var(--radius-md);
+}
+
+.item[data-changed='true'] {
+  border-inline-start-color: var(--color-status-warning-solid);
+}
+
+.itemHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+}
+
+.key {
+  overflow-wrap: anywhere;
+  font: var(--type-label-lg);
+  font-family: var(--font-mono);
+}
+
+.diff {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-0);
+}
+
+.diff > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0_5);
+  min-inline-size: 0;
+}
+
+.diff dt {
+  color: var(--color-text-secondary);
+  font: var(--type-caption);
+}
+
+.diff dd {
+  margin: var(--space-0);
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+}
+
+.before {
+  text-decoration: line-through;
+  text-decoration-color: var(--color-status-danger-solid);
+}
+
+.after {
+  color: var(--color-status-success-fg);
+  font-weight: 600;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-inline-size: 0;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: var(--space-3) var(--space-4);
+  align-items: start;
+}
+
+.fieldGrid > * {
+  min-inline-size: 0;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.conflicts {
+  margin: var(--space-2) var(--space-0) var(--space-0);
+  padding-inline-start: var(--space-5);
+  overflow-wrap: anywhere;
+}

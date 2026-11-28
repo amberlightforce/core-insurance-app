@@ -321,6 +321,136 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Cutover.CutoverPlanRow", b =>
+                {
+                    b.Property<Guid>("PlanId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<DateTime?>("RollbackPreviewedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("rollback_previewed_at");
+
+                    b.Property<DateTime?>("RolledBackAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("rolled_back_at");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("PlanId")
+                        .HasName("pk_cutover_plan");
+
+                    b.HasIndex("LegalEntityId", "Name")
+                        .IsUnique()
+                        .HasDatabaseName("ux_cutover_plan_name");
+
+                    b.ToTable("cutover_plan", "mig", t =>
+                        {
+                            t.HasCheckConstraint("ck_cutover_plan_kind", "kind IN ('REHEARSAL','CUTOVER')");
+
+                            t.HasCheckConstraint("ck_cutover_plan_status", "status IN ('PLANNED','IN_PROGRESS','COMPLETED','ROLLED_BACK','ROLLBACK_BLOCKED')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Cutover.CutoverStepRow", b =>
+                {
+                    b.Property<Guid>("StepId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("step_id");
+
+                    b.Property<Guid?>("BatchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("batch_id");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("completed_at");
+
+                    b.Property<long?>("DurationMs")
+                        .HasColumnType("bigint")
+                        .HasColumnName("duration_ms");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("plan_id");
+
+                    b.Property<string>("Result")
+                        .HasColumnType("text")
+                        .HasColumnName("result");
+
+                    b.Property<int>("Seq")
+                        .HasColumnType("integer")
+                        .HasColumnName("seq");
+
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("StepId")
+                        .HasName("pk_cutover_step");
+
+                    b.HasIndex("PlanId", "Seq")
+                        .IsUnique()
+                        .HasDatabaseName("ux_cutover_step_seq");
+
+                    b.ToTable("cutover_step", "mig", t =>
+                        {
+                            t.HasCheckConstraint("ck_cutover_step_status", "status IN ('PENDING','IN_PROGRESS','DONE','ROLLED_BACK')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Migration.Services.Mapping.CodeMapRow", b =>
                 {
                     b.Property<Guid>("EntryId")
@@ -1313,6 +1443,16 @@ namespace CoreIns.Modules.Migration.Persistence.Migrations
                         .HasDatabaseName("ux_dsar_restriction_subject_class");
 
                     b.ToTable("dsar_restriction", "mig");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Migration.Services.Cutover.CutoverStepRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Migration.Services.Cutover.CutoverPlanRow", null)
+                        .WithMany()
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_cutover_step_plan");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Migration.Services.Mapping.CodeMapRow", b =>
