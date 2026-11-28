@@ -11,18 +11,22 @@ namespace CoreIns.Modules.Billing.Contracts;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public interface IBillingLedgerService
 {
-    /// <summary>Ledger</summary>
+    /// <summary>Sub-ledger balances</summary>
     /// <remarks>
     /// <para>Operation bil.Ledger.balance (query; HTTP GET /api/bil/v1/ledger/balance).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W5.</para>
     /// <para>Exposure: ui; consumers: FIN.</para>
     /// </remarks>
-    /// <param name="dimensions">PRD: "dimensions"</param>
-    /// <param name="dates">PRD: "dates"</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.LedgerBalanceResponse> BalanceAsync(string? dimensions = null, string? dates = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="billingAccountId">Only entries of this billing account.</param>
+    /// <param name="account">Only lines on this sub-ledger account (LA-01 .. LA-29).</param>
+    /// <param name="entryType">Only entries of this type (the eventType of BillingEntryPosted, e.g. BILLED, ALLOCATED, WRITTEN_OFF).</param>
+    /// <param name="currency">Only lines in this currency.</param>
+    /// <param name="from">First accounting date (inclusive).</param>
+    /// <param name="to">Last accounting date (inclusive).</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.LedgerBalanceResponse> BalanceAsync(global::CoreIns.SharedKernel.Identifiers.BillingAccountId? billingAccountId = null, string? account = null, string? entryType = null, string? currency = null, string? from = null, string? to = null, global::System.Threading.CancellationToken cancellationToken = default);
 
-    /// <summary>Ledger</summary>
+    /// <summary>Query sub-ledger entries</summary>
     /// <remarks>
     /// <para>Operation bil.Ledger.query (query; HTTP GET /api/bil/v1/ledger/query).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
@@ -31,7 +35,11 @@ public interface IBillingLedgerService
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    /// <param name="dimensions">PRD: "dimensions"</param>
-    /// <param name="dates">PRD: "dates"</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.LedgerQueryPage> QueryAsync(string? cursor = null, int? limit = null, string? dimensions = null, string? dates = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="billingAccountId">Only entries of this billing account.</param>
+    /// <param name="account">Only lines on this sub-ledger account (LA-01 .. LA-29).</param>
+    /// <param name="entryType">Only entries of this type (the eventType of BillingEntryPosted, e.g. BILLED, ALLOCATED, WRITTEN_OFF).</param>
+    /// <param name="currency">Only lines in this currency.</param>
+    /// <param name="from">First accounting date (inclusive).</param>
+    /// <param name="to">Last accounting date (inclusive).</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Billing.Contracts.Api.LedgerQueryPage> QueryAsync(string? cursor = null, int? limit = null, global::CoreIns.SharedKernel.Identifiers.BillingAccountId? billingAccountId = null, string? account = null, string? entryType = null, string? currency = null, string? from = null, string? to = null, global::System.Threading.CancellationToken cancellationToken = default);
 }

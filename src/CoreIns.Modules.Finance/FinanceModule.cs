@@ -145,6 +145,7 @@ public static class FinanceModule
         services.AddScoped<Domain.ICloseTaskGate, Commands.EarningRunGate>();
         // BO-FIN-08: the reconciliation framework; its open breaks gate the RECONCILIATIONS close task.
         services.AddScoped<Services.ReconciliationService>();
+        services.AddScoped<CoreIns.Modules.Finance.Contracts.IFinanceReconciliationService, Services.FinanceReconciliationContract>();
         services.AddScoped<Domain.ICloseTaskGate, Commands.ReconciliationsCloseGate>();
         services.AddCommand<Commands.RunReconciliation, CoreIns.Modules.Finance.Contracts.Api.ReconciliationRunResponse, Commands.RunReconciliationHandler>(CommandDescriptor.For("fin.Reconciliation.run"));
         services.AddCommand<Commands.MatchReconciliationBreak, CoreIns.Modules.Finance.Contracts.Api.ReconciliationMatchResponse, Commands.MatchReconciliationBreakHandler>(CommandDescriptor.For("fin.Reconciliation.match"));

@@ -7,8 +7,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/account-currents
 CONTRACT_NOT_SERVED GET /api/bil/v1/account-currents/{}
 CONTRACT_NOT_SERVED GET /api/bil/v1/commission/calculations
 CONTRACT_NOT_SERVED GET /api/bil/v1/commission/statements
-CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/balance
-CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/query
 CONTRACT_NOT_SERVED GET /api/chn/v1/account-current
 CONTRACT_NOT_SERVED GET /api/chn/v1/agent-logs/query
 CONTRACT_NOT_SERVED GET /api/chn/v1/api-products
@@ -133,7 +131,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/intermediary-collections/report
 CONTRACT_NOT_SERVED POST /api/bil/v1/intermediary-collections/report-file
 CONTRACT_NOT_SERVED POST /api/bil/v1/invoices/dispute
 CONTRACT_NOT_SERVED POST /api/bil/v1/invoices/send-copy
-CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/fin
 CONTRACT_NOT_SERVED POST /api/chn/v1/agent-logs/export
 CONTRACT_NOT_SERVED POST /api/chn/v1/aggregators/quote
 CONTRACT_NOT_SERVED POST /api/chn/v1/api-products

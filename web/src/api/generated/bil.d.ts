@@ -1759,8 +1759,9 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Ledger
-         * @description Ledger
+         * Query sub-ledger entries
+         * @description Entries of the legal entity sub-ledger with their lines (BO-BIL-12), oldest first, filtered by billing account, line account,
+         *     entry type, currency and accounting date range. Cursor pagination on the entry id.
          *
          *     PRD inputs: dimensions, dates
          *     PRD outputs: entries, balances
@@ -1782,8 +1783,9 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Ledger
-         * @description Ledger
+         * Sub-ledger balances
+         * @description Debit, credit and net per sub-ledger account and currency over the same filters as bil.Ledger.query (BO-BIL-12); the net is
+         *     debit minus credit.
          *
          *     PRD inputs: dimensions, dates
          *     PRD outputs: entries, balances
@@ -3666,23 +3668,49 @@ export interface components {
             /** @description Canonical disbursement state of the payment request */
             status: string;
         };
-        /** @description bil.Ledger.query result. PRD outputs: "entries, balances" */
+        /** @description One line of a sub-ledger entry. */
+        LedgerLineView: {
+            lineNo: number;
+            /** @description Sub-ledger account, LA-01 .. LA-29. */
+            account: string;
+            /** @enum {string} */
+            side: "DEBIT" | "CREDIT";
+            amount: components["schemas"]["Money"];
+            chargeType?: string;
+            chargeCategory?: string;
+            invoiceId?: components["schemas"]["Uuid"];
+            receiptId?: components["schemas"]["Uuid"];
+            disbursementId?: components["schemas"]["Uuid"];
+        };
+        /** @description bil.Ledger.query result: one sub-ledger entry with its lines. */
         LedgerQueryItem: {
-            /** @description PRD: "entries" */
-            entries?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "balances" */
-            balances?: components["schemas"]["Unspecified"];
+            entryId: components["schemas"]["Uuid"];
+            entryType: string;
+            accountingDate: components["schemas"]["LocalDate"];
+            businessDate: components["schemas"]["LocalDate"];
+            billingAccountId?: components["schemas"]["Uuid"];
+            disbursementId?: components["schemas"]["Uuid"];
+            reversesEntryId?: components["schemas"]["Uuid"];
+            causeOperation: string;
+            lines: components["schemas"]["LedgerLineView"][];
         };
         /** @description Page of bil.Ledger.query results (cursor pagination, contract §3.5.5) */
         LedgerQueryPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["LedgerQueryItem"][];
         };
-        /** @description bil.Ledger.balance result. PRD outputs: "entries, balances" */
+        /** @description Balance of one sub-ledger account in one currency. */
+        LedgerBalanceLine: {
+            account: string;
+            currency: string;
+            debit: components["schemas"]["Money"];
+            credit: components["schemas"]["Money"];
+            /** @description Debit minus credit. */
+            net: components["schemas"]["Money"];
+            lineCount: number;
+        };
+        /** @description bil.Ledger.balance result: balances per account and currency. */
         LedgerBalanceResponse: {
-            /** @description PRD: "entries" */
-            entries?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "balances" */
-            balances?: components["schemas"]["Unspecified"];
+            balances: components["schemas"]["LedgerBalanceLine"][];
         };
         /** @description bil.Reconciliation.bank request (BO-BIL-11): one statement of an own bank account as camt.053 XML or as CSV text with the header "bookingDate,valueDate,amount,currency,reference,endToEndId" (amount signed, negative is a debit; valueDate and endToEndId may be empty). The statement is kept in the bank-file store; at most 5000 lines. */
         ReconciliationBankRequest: {
@@ -3782,23 +3810,38 @@ export interface components {
             /** @description Keys (ids) of the first broken rows. */
             samples: string[];
         };
-        /** @description bil.Reconciliation.fin request. PRD inputs: "legal entity, accounting date, optional sub-ledger account and event type" */
+        /** @description bil.Reconciliation.fin request: the control totals of one accounting day (BO-BIL-12). The legal entity is the one of the caller. */
         ReconciliationFinRequest: {
-            /** @description PRD: "legal entity" */
-            legalEntity?: components["schemas"]["Unspecified"];
-            /** @description PRD: "accounting date" */
-            accountingDate?: components["schemas"]["LocalDate"];
-            /** @description PRD: "optional sub-ledger account and event type" (optional) */
-            subLedgerAccount?: components["schemas"]["Unspecified"];
-            /** @description PRD: "optional sub-ledger account and event type" (optional) */
-            eventType?: components["schemas"]["Unspecified"];
+            /** @description Accounting day, not after today. */
+            accountingDate: components["schemas"]["LocalDate"];
+            /** @description Restrict the totals to one sub-ledger account (optional). */
+            subLedgerAccount?: string;
+            /** @description Restrict the totals to one entry type (optional). */
+            eventType?: string;
+            /** @description List the ids of the entries behind the totals. */
+            includeEntryIds?: boolean;
         };
-        /** @description bil.Reconciliation.fin result. PRD outputs: "control totals per account and event type, entry ids on request" */
+        ReconciliationFinTotal: {
+            account: string;
+            eventType: string;
+            currency: string;
+            debit: components["schemas"]["Money"];
+            credit: components["schemas"]["Money"];
+            net: components["schemas"]["Money"];
+            lineCount: number;
+            entryIds?: components["schemas"]["Uuid"][];
+        };
+        ReconciliationFinControl: {
+            currency: string;
+            amount: components["schemas"]["Money"];
+            count: number;
+        };
+        /** @description bil.Reconciliation.fin result: control totals per account and entry type, and the receivable control figure FIN compares. */
         ReconciliationFinResponse: {
-            /** @description PRD: "control totals per account and event type" */
-            controlTotalsPerAccountAndEvent?: components["schemas"]["Unspecified"];
-            /** @description PRD: "entry ids on request" */
-            entryIdsOnRequest?: components["schemas"]["Unspecified"];
+            accountingDate: components["schemas"]["LocalDate"];
+            totals: components["schemas"]["ReconciliationFinTotal"][];
+            /** @description Net debit and line count of the billed receivable LA-02 per currency, the figure pushed to fin.Reconciliation.exchange (source BIL). */
+            receivableControl: components["schemas"]["ReconciliationFinControl"][];
         };
         /** @description bil.Import.reverse request. PRD inputs: "batch id or source key" */
         ImportReverseRequest: {
@@ -7737,10 +7780,18 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
-                /** @description PRD: "dimensions" */
-                dimensions?: string;
-                /** @description PRD: "dates" */
-                dates?: string;
+                /** @description Only entries of this billing account. */
+                billingAccountId?: components["schemas"]["Uuid"];
+                /** @description Only lines on this sub-ledger account (LA-01 .. LA-29). */
+                account?: string;
+                /** @description Only entries of this type (the eventType of BillingEntryPosted, e.g. BILLED, ALLOCATED, WRITTEN_OFF). */
+                entryType?: string;
+                /** @description Only lines in this currency. */
+                currency?: string;
+                /** @description First accounting date (inclusive). */
+                from?: string;
+                /** @description Last accounting date (inclusive). */
+                to?: string;
             };
             header?: {
                 /**
@@ -7774,10 +7825,18 @@ export interface operations {
     "bil.Ledger.balance": {
         parameters: {
             query?: {
-                /** @description PRD: "dimensions" */
-                dimensions?: string;
-                /** @description PRD: "dates" */
-                dates?: string;
+                /** @description Only entries of this billing account. */
+                billingAccountId?: components["schemas"]["Uuid"];
+                /** @description Only lines on this sub-ledger account (LA-01 .. LA-29). */
+                account?: string;
+                /** @description Only entries of this type (the eventType of BillingEntryPosted, e.g. BILLED, ALLOCATED, WRITTEN_OFF). */
+                entryType?: string;
+                /** @description Only lines in this currency. */
+                currency?: string;
+                /** @description First accounting date (inclusive). */
+                from?: string;
+                /** @description Last accounting date (inclusive). */
+                to?: string;
             };
             header?: {
                 /**

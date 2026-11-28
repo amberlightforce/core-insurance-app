@@ -215,6 +215,16 @@ public static class BillingModule
         services.AddScoped<SuspenseReader>();
         services.AddScoped<BankReconciler>();
         services.AddScoped<SubLedgerInvariants>();
+        // BO-BIL-12: ledger reads and the daily control totals pushed to the FIN reconciliation.
+        services.AddScoped<Queries.LedgerReader>();
+        services.AddScoped<FinControlTotals>();
+        services.AddScoped<IBillingReconciliationService>(sp => sp.GetRequiredService<FinControlTotals>());
+        services.AddSingleton<FinControlPublisher>();
+        if (string.Equals(configuration["APP_ROLE"], "worker", StringComparison.OrdinalIgnoreCase)
+            && configuration.GetValue("Billing:FinControlTotalsEnabled", true))
+        {
+            services.AddHostedService<FinControlSweeper>();
+        }
         services.AddScoped<IValidator<ImportBankStatement>, ImportBankStatementValidator>();
         services.AddCommandAuditor<ImportBankStatement, ReconciliationBankResponse, ImportBankStatementAuditor>();
         services.AddCommand<ImportBankStatement, ReconciliationBankResponse, ImportBankStatementHandler>(
@@ -426,6 +436,8 @@ public static class BillingModule
             .Describe("Η είσπραξη (ή οι κατανομές που αναφέρατε) δεν έχει πλέον ενεργή κατανομή σε τιμολόγιο.", "The receipt (or the named allocations) has no live allocation to an invoice any more."),
         ErrorDefinition.For(ModuleCode.BIL, "ALREADY-REVERSED", 409, "Η κατανομή έχει ήδη αντιλογιστεί", "The allocation was already reversed")
             .Describe("Η κατανομή αντιλογίστηκε ήδη, ή ταυτόχρονο αίτημα την αντιλόγισε πρώτο. Φορτώστε ξανά την είσπραξη.", "The allocation was reversed already, or a concurrent request reversed it first. Reload the receipt."),
+        ErrorDefinition.For(ModuleCode.BIL, "DAY-NOT-CLOSED", 422, "Η λογιστική ημέρα δεν έχει ξεκινήσει", "The accounting day has not started")
+            .Describe("Δεν υπάρχουν συγκεντρωτικά για μελλοντική ημέρα.", "Control totals exist for today and earlier days only."),
         ErrorDefinition.For(ModuleCode.BIL, "PERIOD-LOCKED", 422, "Η λογιστική περίοδος είναι κλειστή", "The accounting period is closed")
             .Describe("Η περίοδος της κατανομής ή της σημερινής εγγραφής έχει κλείσει στη Χρηματοοικονομική· ο αντιλογισμός δεν επιτρέπεται.", "The period of the allocation or of today's posting is closed in Finance; the reversal is refused."),
         ErrorDefinition.For(ModuleCode.BIL, "ALLOCATION-REFUNDED", 422, "Η κατανομή ανήκει σε επιστροφή που πληρώθηκε", "The allocation belongs to a refund already paid out")
