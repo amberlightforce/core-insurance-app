@@ -4,6 +4,12 @@
       "Grants": {
         "bil.Suspense.suggestMatch": [ "Staff.Billing", "Platform.Admin" ],
         "bil.BillingAccount.get": [ "Staff.Billing", "Staff.Underwriter", "Platform.Admin" ],
+        // BO-BIL-01: account lifecycle. Reads for billing staff and underwriters; suspend/resume, close and reopen for billing staff and managers; the payer change is a manager decision.
+        "bil.BillingAccount.search": [ "Staff.Billing", "Staff.BillingManager", "Staff.Underwriter", "Platform.Admin" ],
+        "bil.BillingAccount.update": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.BillingAccount.close": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.BillingAccount.reopen": [ "Staff.BillingManager" ],
+        "bil.BillingAccount.changePayer": [ "Staff.BillingManager" ],
         "bil.Invoice.get": [ "Staff.Billing", "Staff.BillingManager", "Staff.Underwriter", "Platform.Admin" ],
         "bil.Invoice.list": [ "Staff.Billing", "Staff.BillingManager", "Staff.Underwriter", "Platform.Admin" ],
         "bil.Receivable.register": [ "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],

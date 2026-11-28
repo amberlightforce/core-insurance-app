@@ -157,6 +157,132 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.AgencyGrantRow", b =>
+                {
+                    b.Property<Guid>("GrantId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("grant_id");
+
+                    b.Property<Guid>("AgencyUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agency_user_id");
+
+                    b.Property<DateTime>("GrantedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("granted_at");
+
+                    b.Property<string>("GrantedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("granted_by");
+
+                    b.Property<Guid>("IntermediaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("intermediary_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("ProducerCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("producer_code");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<string>("RevokedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("revoked_by");
+
+                    b.HasKey("GrantId")
+                        .HasName("pk_agency_grant");
+
+                    b.HasIndex("AgencyUserId", "ProducerCode")
+                        .IsUnique()
+                        .HasDatabaseName("ux_agency_grant_open")
+                        .HasFilter("revoked_at IS NULL");
+
+                    b.HasIndex("LegalEntityId", "ProducerCode")
+                        .HasDatabaseName("ix_agency_grant_code");
+
+                    b.ToTable("agency_grant", "pty");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.AgencyUserRow", b =>
+                {
+                    b.Property<Guid>("AgencyUserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("agency_user_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("display_name");
+
+                    b.Property<string>("ExternalSubject")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("external_subject");
+
+                    b.Property<Guid>("IntermediaryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("intermediary_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("role");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<string>("StatusReason")
+                        .HasColumnType("text")
+                        .HasColumnName("status_reason");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("AgencyUserId")
+                        .HasName("pk_agency_user");
+
+                    b.HasIndex("IntermediaryId", "Status")
+                        .HasDatabaseName("ix_agency_user_agency");
+
+                    b.HasIndex("LegalEntityId", "ExternalSubject")
+                        .IsUnique()
+                        .HasDatabaseName("ux_agency_user_subject")
+                        .HasFilter("status <> 'REMOVED'");
+
+                    b.ToTable("agency_user", "pty", t =>
+                        {
+                            t.HasCheckConstraint("ck_agency_user_role", "role IN ('AGENCY_ADMIN','OFFICE_MANAGER','PRODUCER','AGENCY_STAFF')");
+
+                            t.HasCheckConstraint("ck_agency_user_status", "status IN ('ACTIVE','SUSPENDED','REMOVED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.CommissionAgreementRow", b =>
                 {
                     b.Property<Guid>("AgreementId")
@@ -1845,6 +1971,26 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_account_holder");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.AgencyGrantRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.AgencyUserRow", null)
+                        .WithMany()
+                        .HasForeignKey("AgencyUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_agency_grant_user");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.AgencyUserRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.IntermediaryRow", null)
+                        .WithMany()
+                        .HasForeignKey("IntermediaryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_agency_user_intermediary");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.CommissionAgreementRow", b =>

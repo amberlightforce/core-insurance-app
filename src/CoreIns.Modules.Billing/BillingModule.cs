@@ -138,6 +138,21 @@ public static class BillingModule
         services.AddCommandAuditor<ChangePaymentPlan, PaymentPlanChangeResponse, PaymentPlanAuditor<ChangePaymentPlan, PaymentPlanChangeResponse>>();
         services.AddCommand<ChangePaymentPlan, PaymentPlanChangeResponse, ChangePaymentPlanHandler>(CommandDescriptor.For("bil.PaymentPlan.change") with { SupportsDryRun = true });
 
+        // BO-BIL-01: account lifecycle (search, suspend/resume, close, reopen, change payer).
+        services.AddScoped<BillingAccountSearchReader>();
+        services.AddScoped<IValidator<UpdateBillingAccount>, UpdateBillingAccountValidator>();
+        services.AddCommandAuditor<UpdateBillingAccount, BillingAccountUpdateResponse, BillingAccountAuditor<UpdateBillingAccount, BillingAccountUpdateResponse>>();
+        services.AddCommand<UpdateBillingAccount, BillingAccountUpdateResponse, UpdateBillingAccountHandler>(CommandDescriptor.For("bil.BillingAccount.update") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<CloseBillingAccount>, CloseBillingAccountValidator>();
+        services.AddCommandAuditor<CloseBillingAccount, BillingAccountCloseResponse, BillingAccountAuditor<CloseBillingAccount, BillingAccountCloseResponse>>();
+        services.AddCommand<CloseBillingAccount, BillingAccountCloseResponse, CloseBillingAccountHandler>(CommandDescriptor.For("bil.BillingAccount.close") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ReopenBillingAccount>, ReopenBillingAccountValidator>();
+        services.AddCommandAuditor<ReopenBillingAccount, BillingAccountReopenResponse, BillingAccountAuditor<ReopenBillingAccount, BillingAccountReopenResponse>>();
+        services.AddCommand<ReopenBillingAccount, BillingAccountReopenResponse, ReopenBillingAccountHandler>(CommandDescriptor.For("bil.BillingAccount.reopen"));
+        services.AddScoped<IValidator<ChangeBillingAccountPayer>, ChangeBillingAccountPayerValidator>();
+        services.AddCommandAuditor<ChangeBillingAccountPayer, BillingAccountChangePayerResponse, BillingAccountAuditor<ChangeBillingAccountPayer, BillingAccountChangePayerResponse>>();
+        services.AddCommand<ChangeBillingAccountPayer, BillingAccountChangePayerResponse, ChangeBillingAccountPayerHandler>(CommandDescriptor.For("bil.BillingAccount.changePayer") with { SupportsDryRun = true });
+
         // BO-BIL-06a: payer instruments (IBAN P2) and SEPA mandates.
         services.AddScoped<MandateReader>();
         services.AddScoped<IValidator<AddPaymentInstrument>, AddPaymentInstrumentValidator>();
@@ -309,6 +324,10 @@ public static class BillingModule
             .Describe("Το πρόγραμμα πληρωμής ή ο τρόπος πληρωμής δεν ισχύει για τον όρο, ή ο όρος έχει ήδη τιμολογηθεί.", "The plan or method does not apply to the term, or the term is already billed."),
         ErrorDefinition.For(ModuleCode.BIL, "MANDATE-STATE", 422, "Η εντολή άμεσης χρέωσης δεν επιτρέπει την ενέργεια", "The mandate state does not allow this")
             .Describe("Η εντολή ή το μέσο πληρωμής βρίσκεται σε κατάσταση που δεν επιτρέπει την ενέργεια (π.χ. υπογραφή μη προσχεδίου, ακυρωμένη εντολή, μέσο σε χρήση).", "The mandate or instrument is in a state that does not allow the action (for example signing a non-draft, a cancelled mandate, an instrument in use)."),
+        ErrorDefinition.For(ModuleCode.BIL, "BALANCE-NOT-ZERO", 422, "Το υπόλοιπο του λογαριασμού δεν είναι μηδέν", "The account balance is not zero")
+            .Describe("Ο λογαριασμός έχει ανοιχτά τιμολόγια ή μη μηδενικό υπόλοιπο και δεν κλείνει.", "The account has open invoices or a non-zero balance and cannot be closed."),
+        ErrorDefinition.For(ModuleCode.BIL, "PAYER-ROLE", 422, "Ο νέος πληρωτής δεν είναι δεκτός", "The new payer is not accepted")
+            .Describe("Ο νέος πληρωτής δεν υπάρχει στο μητρώο μερών, δεν είναι ενεργός ή δεν μπορεί να επαληθευτεί.", "The new payer does not exist in the party register, is not active, or cannot be verified."),
         ErrorDefinition.For(ModuleCode.BIL, "NOT-FOUND", 404, "Δεν βρέθηκε", "Not found")
             .Describe("Η εγγραφή δεν υπάρχει στη νομική σας οντότητα.", "The record does not exist in your legal entity."),
         ErrorDefinition.For(ModuleCode.BIL, "CURRENCY", 422, "Λάθος νόμισμα", "Wrong currency")

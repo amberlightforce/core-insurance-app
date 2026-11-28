@@ -34,13 +34,13 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-APPROVAL-REQUIRED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): bil.BillingAccount.changePayer, bil.Disbursement.approveRelease, bil.DisbursementBatch.approveRelease, bil.DisbursementBatch.release, bil.Transfer.money.</para>
+    /// <para>Declared by 4 operation(s): bil.Disbursement.approveRelease, bil.DisbursementBatch.approveRelease, bil.DisbursementBatch.release, bil.Transfer.money.</para>
     /// </remarks>
     public const string ApprovalRequired = "BIL-ERR-APPROVAL-REQUIRED";
 
     /// <summary>BIL-ERR-BALANCE-NOT-ZERO (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): bil.BillingAccount.close, bil.BillingAccount.create, bil.BillingAccount.get, bil.BillingAccount.reopen, bil.BillingAccount.search, bil.BillingAccount.update.</para>
+    /// <para>Declared by 3 operation(s): bil.BillingAccount.close, bil.BillingAccount.create, bil.BillingAccount.get.</para>
     /// </remarks>
     public const string BalanceNotZero = "BIL-ERR-BALANCE-NOT-ZERO";
 
@@ -166,13 +166,13 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-NOT-ELIGIBLE (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): bil.PaymentPlan.change, bil.PaymentPlan.select.</para>
+    /// <para>Declared by 6 operation(s): bil.BillingAccount.changePayer, bil.BillingAccount.close, bil.BillingAccount.reopen, bil.BillingAccount.update, bil.PaymentPlan.change, bil.PaymentPlan.select.</para>
     /// </remarks>
     public const string NotEligible = "BIL-ERR-NOT-ELIGIBLE";
 
     /// <summary>BIL-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 20 operation(s): bil.Allocation.allocate, bil.Allocation.reallocate, bil.Allocation.unallocate, bil.BillingAccount.get, bil.Disbursement.approveRelease, bil.Disbursement.get, bil.Disbursement.request, bil.Disbursement.stop, bil.Disbursement.void, bil.DisbursementBatch.release, bil.Invoice.get, bil.PayeeAccount.verify, ….</para>
+    /// <para>Declared by 24 operation(s): bil.Allocation.allocate, bil.Allocation.reallocate, bil.Allocation.unallocate, bil.BillingAccount.changePayer, bil.BillingAccount.close, bil.BillingAccount.get, bil.BillingAccount.reopen, bil.BillingAccount.update, bil.Disbursement.approveRelease, bil.Disbursement.get, bil.Disbursement.request, bil.Disbursement.stop, ….</para>
     /// </remarks>
     public const string NotFound = "BIL-ERR-NOT-FOUND";
 
@@ -232,7 +232,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-PAYER-ROLE (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): bil.BillingAccount.close, bil.BillingAccount.create, bil.BillingAccount.get, bil.BillingAccount.reopen, bil.BillingAccount.search, bil.BillingAccount.update.</para>
+    /// <para>Declared by 3 operation(s): bil.BillingAccount.changePayer, bil.BillingAccount.create, bil.BillingAccount.get.</para>
     /// </remarks>
     public const string PayerRole = "BIL-ERR-PAYER-ROLE";
 
@@ -292,7 +292,7 @@ public static class BillingErrorCodes
 
     /// <summary>BIL-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): bil.Allocation.allocate, bil.Allocation.reallocate, bil.Allocation.unallocate, bil.Disbursement.approveRelease, bil.DisbursementBatch.approveRelease, bil.Refund.decide.</para>
+    /// <para>Declared by 10 operation(s): bil.Allocation.allocate, bil.Allocation.reallocate, bil.Allocation.unallocate, bil.BillingAccount.changePayer, bil.BillingAccount.close, bil.BillingAccount.reopen, bil.BillingAccount.update, bil.Disbursement.approveRelease, bil.DisbursementBatch.approveRelease, bil.Refund.decide.</para>
     /// </remarks>
     public const string Stale = "BIL-ERR-STALE";
 
