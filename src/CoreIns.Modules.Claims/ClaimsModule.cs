@@ -64,6 +64,7 @@ public static class ClaimsModule
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.fnol_draft TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.cat_event TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.certificate_request TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.statutory_offer TO {appRole}",
 
                 // Claim financials (SL2-CLM-MONEY, D-ARC-34): the ledger lines are insert-only; the set header, line flags,
                 // payments and the payee read model move.
@@ -212,6 +213,13 @@ public static class ClaimsModule
         services.AddCommand<Commands.Certificates.AssembleCertificate, CertificateAssembleResponse, Commands.Certificates.AssembleCertificateHandler>(CommandDescriptor.For("clm.Certificate.assemble"));
         services.AddCommandAuditor<Commands.Certificates.IssueCertificate, CertificateIssueResponse, Commands.Certificates.IssueCertificateAuditor>();
         services.AddCommand<Commands.Certificates.IssueCertificate, CertificateIssueResponse, Commands.Certificates.IssueCertificateHandler>(CommandDescriptor.For("clm.Certificate.issue"));
+        services.AddScoped<IValidator<Commands.StatutoryOffers.IssueStatutoryOffer>, Commands.StatutoryOffers.IssueStatutoryOfferValidator>();
+        services.AddCommandAuditor<Commands.StatutoryOffers.IssueStatutoryOffer, StatutoryOfferIssueResponse, Commands.StatutoryOffers.IssueStatutoryOfferAuditor>();
+        services.AddCommand<Commands.StatutoryOffers.IssueStatutoryOffer, StatutoryOfferIssueResponse, Commands.StatutoryOffers.IssueStatutoryOfferHandler>(CommandDescriptor.For("clm.StatutoryOffer.issue"));
+        services.AddCommandAuditor<Commands.StatutoryOffers.RecordOfferAcceptance, StatutoryOfferRecordAcceptanceResponse, Commands.StatutoryOffers.RecordOfferAcceptanceAuditor>();
+        services.AddCommand<Commands.StatutoryOffers.RecordOfferAcceptance, StatutoryOfferRecordAcceptanceResponse, Commands.StatutoryOffers.RecordOfferAcceptanceHandler>(CommandDescriptor.For("clm.StatutoryOffer.recordAcceptance"));
+        services.AddCommandAuditor<Commands.StatutoryOffers.RecordRepairAgreement, StatutoryOfferRecordRepairAgreementResponse, Commands.StatutoryOffers.RecordRepairAgreementAuditor>();
+        services.AddCommand<Commands.StatutoryOffers.RecordRepairAgreement, StatutoryOfferRecordRepairAgreementResponse, Commands.StatutoryOffers.RecordRepairAgreementHandler>(CommandDescriptor.For("clm.StatutoryOffer.recordRepairAgreement"));
         services.AddScoped<IValidator<DeclareCatEvent>, DeclareCatEventValidator>();
         services.AddCommandAuditor<DeclareCatEvent, CatEventDeclareResponse, DeclareCatEventAuditor>();
         services.AddCommand<DeclareCatEvent, CatEventDeclareResponse, DeclareCatEventHandler>(CommandDescriptor.For("clm.CatEvent.declare"));
@@ -321,6 +329,12 @@ public static class ClaimsModule
             .Describe("Ο αιτών, τα ασφαλιστήρια ή η περίοδος δεν είναι αποδεκτά· η περίοδος δεν ξεπερνά το διάστημα αναδρομής.", "The requester, policies or period are not acceptable; the period stays inside the look-back."),
         ErrorDefinition.For(ModuleCode.CLM, "CERT-STATE", 422, "Η βεβαίωση ιστορικού δεν μπορεί να προχωρήσει", "The claims-history certificate cannot proceed")
             .Describe("Συγκεντρώστε πρώτα τη βεβαίωση· σε παραγωγή απαιτείται επιβεβαιωμένο διάστημα αναδρομής.", "Assemble the certificate first; in Production the look-back must be confirmed."),
+        ErrorDefinition.For(ModuleCode.CLM, "OFFER-CONTENT", 422, "Μη έγκυρη νόμιμη προσφορά", "The statutory offer is not valid")
+            .Describe("Η προσφορά χρειάζεται θετικό ποσό σε EUR και αιτιολόγηση· η απάντηση δεν έχει ποσό.", "An offer needs a positive EUR amount and reasoning; a reply has no amount."),
+        ErrorDefinition.For(ModuleCode.CLM, "OFFER-DELIVERY", 422, "Μη έγκυρη ημερομηνία επίδοσης", "The delivery date is not valid")
+            .Describe("Η επίδοση δεν μπορεί να προηγείται της έκδοσης ούτε να είναι μελλοντική.", "The delivery cannot be before the issue or in the future."),
+        ErrorDefinition.For(ModuleCode.CLM, "OFFER-STATE", 422, "Η νόμιμη προσφορά δεν μπορεί να προχωρήσει", "The statutory offer cannot proceed")
+            .Describe("Η ενέργεια δεν επιτρέπεται στην τρέχουσα κατάσταση της προσφοράς ή της έκθεσης.", "The step is not allowed in the current state of the offer or exposure."),
         ErrorDefinition.For(ModuleCode.CLM, "MERGE-NOT-DUPLICATE", 422, "Οι ζημίες δεν μπορούν να συγχωνευθούν", "The claims cannot be merged")
             .Describe("Μόνο δύο ανοιχτές ζημίες του ίδιου ασφαλιστηρίου και της ίδιας ημερομηνίας ζημίας συγχωνεύονται.", "Only two open claims of the same policy and loss date can be merged."),
         ErrorDefinition.For(ModuleCode.CLM, "MERGE-FINANCIALS", 422, "Η διπλή ζημία έχει οικονομική κίνηση", "The duplicate claim has financial activity")

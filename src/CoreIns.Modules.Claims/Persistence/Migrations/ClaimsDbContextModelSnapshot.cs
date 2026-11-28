@@ -2256,6 +2256,140 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.StatutoryOfferRow", b =>
+                {
+                    b.Property<Guid>("OfferId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("offer_id");
+
+                    b.Property<DateTime?>("AcceptedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("accepted_at");
+
+                    b.Property<decimal?>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("ClaimId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("claim_id");
+
+                    b.Property<string>("ClockLegalStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("clock_legal_status");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Currency")
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateTime>("DeliveredAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("delivered_at");
+
+                    b.Property<Guid>("DeliveryEvidenceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("delivery_evidence_id");
+
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("document_id");
+
+                    b.Property<Guid>("ExposureId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("exposure_id");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("issued_at");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid?>("PaymentClockId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payment_clock_id");
+
+                    b.Property<Guid?>("PaymentSetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payment_set_id");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<DateTime?>("RepairAgreedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("repair_agreed_at");
+
+                    b.Property<Guid?>("RepairClockId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("repair_clock_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("OfferId")
+                        .HasName("pk_statutory_offer");
+
+                    b.HasIndex("ExposureId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_statutory_offer_exposure")
+                        .HasFilter("kind = 'REASONED_OFFER'");
+
+                    b.HasIndex("LegalEntityId", "ClaimId")
+                        .HasDatabaseName("ix_statutory_offer_claim");
+
+                    b.ToTable("statutory_offer", "clm", t =>
+                        {
+                            t.HasCheckConstraint("ck_statutory_offer_accepted", "status <> 'ACCEPTED' OR (accepted_at IS NOT NULL AND payment_set_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_statutory_offer_amount", "(kind = 'REASONED_OFFER') = (amount IS NOT NULL AND amount > 0 AND currency IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_statutory_offer_delivery", "delivered_at >= issued_at");
+
+                            t.HasCheckConstraint("ck_statutory_offer_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+
+                            t.HasCheckConstraint("ck_statutory_offer_kind", "kind IN ('REASONED_OFFER', 'REASONED_REPLY')");
+
+                            t.HasCheckConstraint("ck_statutory_offer_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_statutory_offer_repair", "status <> 'REPAIR_AGREED' OR (repair_agreed_at IS NOT NULL AND repair_clock_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_statutory_offer_reply_closed", "kind = 'REASONED_OFFER' OR status = 'ISSUED'");
+
+                            t.HasCheckConstraint("ck_statutory_offer_status", "status IN ('ISSUED', 'ACCEPTED', 'REPAIR_AGREED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.TransactionSetRow", b =>
                 {
                     b.Property<Guid>("SetId")

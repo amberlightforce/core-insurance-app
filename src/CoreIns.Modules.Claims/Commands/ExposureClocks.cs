@@ -39,6 +39,52 @@ internal sealed class ExposureClocks(IComplianceClockService clocks, ICompliance
         return StartCodes.Any(code => page.Items.SingleOrDefault(d => d.Code.Value == code) is not { LegalStatus: "VERIFIED" or "SECONDARY_SOURCE" });
     }
 
+    /// <summary>The payment and repair clocks start with the statutory offer (BO-CLM-06).</summary>
+    public const string PaymentCode = "CLM_MTPL_PAYMENT";
+    public const string RepairCode = "CLM_MTPL_REPAIR";
+    public const string OfferCode = "CLM_MTPL_OFFER";
+
+    /// <summary>The legal status text of a clock definition (UNVERIFIED when the definition is missing). Fail closed (D-USR-19).</summary>
+    public async Task<string> LegalStatusAsync(string code, CancellationToken cancellationToken)
+    {
+        var page = await definitions.ListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        return page.Items.SingleOrDefault(d => d.Code.Value == code)?.LegalStatus ?? "UNVERIFIED";
+    }
+
+    public static bool IsConfirmed(string legalStatus) => legalStatus is "VERIFIED" or "SECONDARY_SOURCE";
+
+    /// <summary>Starts one clock of the exposure from <paramref name="start"/> (key makes a retry find the same instance); returns its CMP instance id.</summary>
+    public async Task<Guid> StartOneAsync(string code, ExposureId exposureId, Instant start, string key, string reason, CancellationToken cancellationToken)
+    {
+        var started = await clocks.StartAsync(
+            new ClockStartRequest { ClockCode = ClockCode.Parse(code), SubjectRef = Subject(exposureId), Key = key, StartTime = start, Reason = reason },
+            CommandOptions.New(), cancellationToken).ConfigureAwait(false);
+        return started.InstanceId;
+    }
+
+    /// <summary>Stops the live clock of <paramref name="code"/> among <paramref name="statutoryClocks"/> as met at <paramref name="at"/>; false when none is live.</summary>
+    public async Task<bool> StopLiveAsync(string statutoryClocks, string code, Instant at, CancellationToken cancellationToken)
+    {
+        var state = (await StatesAsync(statutoryClocks, cancellationToken).ConfigureAwait(false)).FirstOrDefault(s => s.ClockCode.Value == code && AnyLive([s]));
+        if (state is null)
+        {
+            return false;
+        }
+
+        await clocks.StopAsync(new ClockStopRequest { InstanceId = state.InstanceId, Outcome = ClockStopRequest.OutcomeValue.Met, StopTime = at }, CommandOptions.New(), cancellationToken).ConfigureAwait(false);
+        return true;
+    }
+
+    /// <summary>Cancels one clock instance when it is still live (repair in kind replaces the payment obligation).</summary>
+    public async Task CancelOneAsync(Guid instanceId, string reason, CancellationToken cancellationToken)
+    {
+        var response = await clocks.GetAsync(instanceId.ToString(), cancellationToken: cancellationToken).ConfigureAwait(false);
+        if (response.Instances.Any(i => AnyLive([i])))
+        {
+            await clocks.CancelAsync(new ClockCancelRequest { InstanceId = instanceId, Reason = reason }, CommandOptions.New(), cancellationToken).ConfigureAwait(false);
+        }
+    }
+
     /// <summary>Starts the offer and assessment clocks from <paramref name="start"/>; returns the value for <c>statutory_clocks</c>.</summary>
     public async Task<string> StartAsync(ExposureId exposureId, Instant start, string key, CancellationToken cancellationToken)
     {

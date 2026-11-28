@@ -48,6 +48,11 @@ internal static partial class PayloadDictionary
             new("declineNumber", PayloadFieldType.Text, true), new("reasons", PayloadFieldType.Text, true), new("declineDate", PayloadFieldType.Date, true),
             new("automatedNotice", PayloadFieldType.Text, true), new("customerName", PayloadFieldType.Text, false),
         ],
+        ["DT-CLM-OFFER"] =
+        [
+            new("claimNumber", PayloadFieldType.Text, true), new("exposureNumber", PayloadFieldType.Text, true), new("kind", PayloadFieldType.Text, true),
+            new("amount", PayloadFieldType.Text, true), new("issuedOn", PayloadFieldType.Date, true), new("content", PayloadFieldType.Text, true),
+        ],
         ["DT-REFUND-ADVICE"] =
         [
             new("customerName", PayloadFieldType.Text, true), new("policyNo", PayloadFieldType.Text, true), new("refundAmount", PayloadFieldType.Money, true),
