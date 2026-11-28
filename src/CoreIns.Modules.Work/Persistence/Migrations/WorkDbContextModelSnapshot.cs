@@ -213,6 +213,106 @@ namespace CoreIns.Modules.Work.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Work.Persistence.AssigneeProfileRow", b =>
+                {
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("UserId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("user_id");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean")
+                        .HasColumnName("active");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("display_name");
+
+                    b.Property<string>("Roles")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("roles");
+
+                    b.Property<string>("Skills")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("skills");
+
+                    b.HasKey("LegalEntityId", "UserId")
+                        .HasName("pk_assignee_profile");
+
+                    b.ToTable("assignee_profile", "wrk");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Work.Persistence.AssignmentRuleRow", b =>
+                {
+                    b.Property<Guid>("RuleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("rule_id");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean")
+                        .HasColumnName("active");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("code");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("PatternCode")
+                        .HasColumnType("text")
+                        .HasColumnName("pattern_code");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer")
+                        .HasColumnName("priority");
+
+                    b.Property<string>("QueueCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("queue_code");
+
+                    b.Property<string>("RequiredRole")
+                        .HasColumnType("text")
+                        .HasColumnName("required_role");
+
+                    b.Property<string>("RequiredSkill")
+                        .HasColumnType("text")
+                        .HasColumnName("required_skill");
+
+                    b.Property<string>("Strategy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("strategy");
+
+                    b.HasKey("RuleId")
+                        .HasName("pk_assignment_rule");
+
+                    b.HasIndex("LegalEntityId", "Code")
+                        .IsUnique()
+                        .HasDatabaseName("ux_assignment_rule_code");
+
+                    b.HasIndex("LegalEntityId", "QueueCode", "Priority")
+                        .HasDatabaseName("ix_assignment_rule_queue");
+
+                    b.ToTable("assignment_rule", "wrk", t =>
+                        {
+                            t.HasCheckConstraint("ck_assignment_rule_strategy", "strategy IN ('ROUND_ROBIN_OPEN_COUNT')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Platform.Persistence.DsarRestrictionRow", b =>
                 {
                     b.Property<Guid>("RestrictionId")
