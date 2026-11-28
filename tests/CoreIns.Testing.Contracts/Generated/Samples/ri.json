@@ -2862,15 +2862,46 @@
       }
     },
     "LineTableGetResponse": {
-      "tableVersion": "unspecified"
+      "tableVersion": {
+        "tableId": "0192ce8b-63a4-7cd7-8c65-f6274f8c223b",
+        "versionNo": 1,
+        "rows": [
+          {
+            "sumInsuredFrom": "12.50",
+            "sumInsuredTo": "12.50",
+            "retention": "12.50",
+            "maxLines": 1
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "sample"
+      }
     },
     "LineTableSetRequest": {
       "rows": [
-        "unspecified"
+        {
+          "sumInsuredFrom": "12.50",
+          "sumInsuredTo": "12.50",
+          "retention": "12.50",
+          "maxLines": 1
+        }
       ]
     },
     "LineTableSetResponse": {
-      "tableVersion": "unspecified"
+      "tableVersion": {
+        "tableId": "019200ad-d875-716d-8e9c-c3f4c7581009",
+        "versionNo": 1,
+        "rows": [
+          {
+            "sumInsuredFrom": "12.50",
+            "sumInsuredTo": "12.50",
+            "retention": "12.50",
+            "maxLines": 1
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "sample"
+      }
     },
     "NoticeAcknowledgeRequest": {
       "occurrence": "unspecified"
@@ -2937,17 +2968,100 @@
       "status": "ACTIVE"
     },
     "ParticipationAddRequest": {
-      "layerSection": "unspecified",
-      "partyIds": [
-        "01928efd-e79b-7b53-8748-8d29f97930ae"
-      ],
+      "contractId": "0192c04d-6514-7c17-839f-d3e080a5afc7",
+      "expectedRecordVersion": 1,
+      "effectiveFrom": "2026-10-07",
+      "reason": "Sample text",
       "lines": [
-        "unspecified"
-      ]
+        {
+          "reinsurerPartyId": "019229fd-bb13-7b4c-8863-07e397ad7a4c",
+          "brokerPartyId": "0192fc3a-72be-7772-8f48-f9bc3d6af0a7",
+          "signedLinePct": "12.50",
+          "lead": true
+        }
+      ],
+      "rebalance": true
     },
     "ParticipationAddResponse": {
-      "participations": "unspecified",
-      "checks": "unspecified"
+      "contract": {
+        "contractId": "019223cb-6bbd-746e-8b84-97bea2dfea1f",
+        "contractNumber": "SAMPLE-000001",
+        "stableTreatyId": "Sample text",
+        "legalEntity": "SAMPLE_CODE",
+        "contractType": "XOL_PER_RISK",
+        "contractYear": 1900,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "scope": {
+          "productCodes": [
+            "SAMPLE_CODE"
+          ],
+          "coverageCodes": [
+            "SAMPLE_CODE"
+          ]
+        },
+        "clause": {
+          "alaeIncluded": true,
+          "statutoryInterestIncluded": true,
+          "recoveriesInure": "REALISED_ONLY"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aad": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aal": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "participations": [
+          {
+            "reinsurerPartyId": "01927c25-4627-7e48-8cd7-6cf1ff74cb6a",
+            "brokerPartyId": "01922abc-cb65-73f7-8551-d8b277290c51",
+            "signedLinePct": "12.50",
+            "lead": true
+          }
+        ],
+        "placedPct": "12.50",
+        "status": "DRAFT",
+        "versionNo": 1,
+        "validFrom": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "maker": "sample",
+        "approvalRequestId": "0192bc61-6e2b-7740-8591-3e7b3db2e8d1",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "activatedAt": "2026-10-07T09:00:00Z"
+      },
+      "approvalRequestId": "01922c08-371b-7647-8251-81851e1ab7a9",
+      "checks": [
+        {
+          "reinsurerPartyId": "0192a8b5-75ec-7a36-85f5-eaa571ae2252",
+          "rule": "sample",
+          "ok": true,
+          "detail": "sample"
+        }
+      ]
+    },
+    "ParticipationCheck": {
+      "reinsurerPartyId": "0192452e-6873-7fea-8723-4c5eba0d9ca3",
+      "rule": "sample",
+      "ok": true,
+      "detail": "sample"
     },
     "ParticipationListItem": {
       "participations": "unspecified",
@@ -2964,17 +3078,88 @@
       "limit": 1
     },
     "ParticipationReplaceRequest": {
-      "layerSection": "unspecified",
-      "partyIds": [
-        "0192e1e0-5609-7ec8-8d51-50861a1e2b56"
-      ],
-      "lines": [
-        "unspecified"
-      ]
+      "contractId": "0192c6f4-7806-7879-876e-c0b2003a7f50",
+      "expectedRecordVersion": 1,
+      "effectiveFrom": "2026-10-07",
+      "reason": "Sample text",
+      "outgoingReinsurerPartyId": "0192052b-7e5b-775e-8f5e-9ed1bbc02bf7",
+      "incomingReinsurerPartyId": "01923275-c0f5-72bf-878c-5538458c8302",
+      "brokerPartyId": "01922aec-cb1d-751b-8ef2-0255733d6a21"
     },
     "ParticipationReplaceResponse": {
-      "participations": "unspecified",
-      "checks": "unspecified"
+      "contract": {
+        "contractId": "01927064-61d3-7cd2-892a-d46609581ab4",
+        "contractNumber": "SAMPLE-000001",
+        "stableTreatyId": "Sample text",
+        "legalEntity": "SAMPLE_CODE",
+        "contractType": "XOL_PER_RISK",
+        "contractYear": 1900,
+        "currency": "EUR",
+        "period": {
+          "from": "2026-01-01",
+          "to": "2027-01-01"
+        },
+        "scope": {
+          "productCodes": [
+            "SAMPLE_CODE"
+          ],
+          "coverageCodes": [
+            "SAMPLE_CODE"
+          ]
+        },
+        "clause": {
+          "alaeIncluded": true,
+          "statutoryInterestIncluded": true,
+          "recoveriesInure": "REALISED_ONLY"
+        },
+        "layers": [
+          {
+            "layerNo": 1,
+            "attachment": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "limit": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aad": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "aal": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
+        ],
+        "participations": [
+          {
+            "reinsurerPartyId": "01922882-bb02-7313-8834-b0894cac8f2b",
+            "brokerPartyId": "0192ff54-439a-71b5-8e75-d4b7b2121178",
+            "signedLinePct": "12.50",
+            "lead": true
+          }
+        ],
+        "placedPct": "12.50",
+        "status": "DRAFT",
+        "versionNo": 1,
+        "validFrom": "2026-10-07T09:00:00Z",
+        "recordVersion": 1,
+        "maker": "sample",
+        "approvalRequestId": "0192d6f5-ff71-7deb-861a-1e8d1bcb33f7",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "activatedAt": "2026-10-07T09:00:00Z"
+      },
+      "approvalRequestId": "0192a232-3adf-7722-8bb0-ebda3c465040",
+      "checks": [
+        {
+          "reinsurerPartyId": "01926a87-2973-7c0c-8323-8302705084ab",
+          "rule": "sample",
+          "ok": true,
+          "detail": "sample"
+        }
+      ]
     },
     "ProgrammeApproveRequest": {
       "programmeId": "01926b66-0800-7272-846c-2f7129fcd005",
@@ -3955,6 +4140,26 @@
       "createdAt": "2026-10-07T09:00:00Z",
       "activatedAt": "2026-10-07T09:00:00Z"
     },
+    "RiLineTableRow": {
+      "sumInsuredFrom": "12.50",
+      "sumInsuredTo": "12.50",
+      "retention": "12.50",
+      "maxLines": 1
+    },
+    "RiLineTableVersion": {
+      "tableId": "01921461-e4dc-7daa-8deb-546924ecfc48",
+      "versionNo": 1,
+      "rows": [
+        {
+          "sumInsuredFrom": "12.50",
+          "sumInsuredTo": "12.50",
+          "retention": "12.50",
+          "maxLines": 1
+        }
+      ],
+      "createdAt": "2026-10-07T09:00:00Z",
+      "createdBy": "sample"
+    },
     "RiParticipationInput": {
       "reinsurerPartyId": "0192ce98-d0eb-7ddf-8e33-104730949b88",
       "brokerPartyId": "01923ed2-dfdc-7e31-8987-06d787e693f5",
@@ -4073,24 +4278,130 @@
       "createdAt": "2026-10-07T09:00:00Z",
       "createdBy": "Sample text"
     },
+    "RiSecurityExposureRow": {
+      "reinsurerPartyId": "0192c59e-4b8e-7a3d-8131-a1b7027fd070",
+      "rating": "sample",
+      "contractCount": 1,
+      "limitExposure": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "exposureSharePct": "12.50",
+      "breaches": [
+        "sample"
+      ]
+    },
+    "RiSecurityRating": {
+      "reinsurerPartyId": "01923140-d92a-785d-82db-eda9822ea107",
+      "rating": "sample",
+      "maxSharePct": "12.50"
+    },
+    "RiSecurityRuleSet": {
+      "ruleSetId": "01927e99-ec20-72a8-8e30-a19cdd1a5aff",
+      "versionNo": 1,
+      "effectiveFrom": "2026-10-07",
+      "ratingFloor": "sample",
+      "maxSharePct": "12.50",
+      "ratings": [
+        {
+          "reinsurerPartyId": "0192af03-975c-7cb7-822a-3a4850bde9d0",
+          "rating": "sample",
+          "maxSharePct": "12.50"
+        }
+      ],
+      "createdAt": "2026-10-07T09:00:00Z",
+      "createdBy": "sample"
+    },
     "SecurityReportRequest": {
-      "rules": "unspecified"
+      "ruleSetId": "0192464b-1e34-7cf2-86e5-657d50c0a045"
     },
     "SecurityReportResponse": {
-      "rules": "unspecified",
-      "report": "unspecified"
+      "validAt": "2026-10-07",
+      "ruleSetId": "01923f31-eb77-78f1-8db5-2521b1464d8b",
+      "rows": [
+        {
+          "reinsurerPartyId": "01926651-33f8-7434-8e29-7ea3d9e4bbd5",
+          "rating": "sample",
+          "contractCount": 1,
+          "limitExposure": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "exposureSharePct": "12.50",
+          "breaches": [
+            "sample"
+          ]
+        }
+      ],
+      "breachCount": 1
     },
     "SecurityRulesGetResponse": {
-      "rules": "unspecified",
-      "report": "unspecified"
+      "ruleSet": {
+        "ruleSetId": "01929b82-5b82-7f3d-86bc-8be2921dca1d",
+        "versionNo": 1,
+        "effectiveFrom": "2026-10-07",
+        "ratingFloor": "sample",
+        "maxSharePct": "12.50",
+        "ratings": [
+          {
+            "reinsurerPartyId": "0192dd9b-d884-7040-83cf-66a2f05c369d",
+            "rating": "sample",
+            "maxSharePct": "12.50"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "sample"
+      }
     },
     "SecurityRulesSetRequest": {
-      "rules": "unspecified",
-      "date": "2026-10-07"
+      "effectiveFrom": "2026-10-07",
+      "ratingFloor": "sample",
+      "maxSharePct": "12.50",
+      "ratings": [
+        {
+          "reinsurerPartyId": "0192e16b-e3d8-73c5-8efe-d008e3a6429c",
+          "rating": "sample",
+          "maxSharePct": "12.50"
+        }
+      ]
     },
     "SecurityRulesSetResponse": {
-      "rules": "unspecified",
-      "report": "unspecified"
+      "ruleSet": {
+        "ruleSetId": "01927d51-7f4c-7be8-8884-15fa8fcca1d6",
+        "versionNo": 1,
+        "effectiveFrom": "2026-10-07",
+        "ratingFloor": "sample",
+        "maxSharePct": "12.50",
+        "ratings": [
+          {
+            "reinsurerPartyId": "01923823-f1e8-7939-8a38-8aeafafd04ca",
+            "rating": "sample",
+            "maxSharePct": "12.50"
+          }
+        ],
+        "createdAt": "2026-10-07T09:00:00Z",
+        "createdBy": "sample"
+      },
+      "report": {
+        "validAt": "2026-10-07",
+        "ruleSetId": "019282ec-bbe7-7570-8519-41b2f925c14f",
+        "rows": [
+          {
+            "reinsurerPartyId": "019284df-21d7-73e4-89b3-08437a5a9338",
+            "rating": "sample",
+            "contractCount": 1,
+            "limitExposure": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "exposureSharePct": "12.50",
+            "breaches": [
+              "sample"
+            ]
+          }
+        ],
+        "breachCount": 1
+      }
     },
     "SettlementApproveRequest": {
       "counterparty": "unspecified",

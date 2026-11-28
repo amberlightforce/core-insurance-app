@@ -2229,6 +2229,10 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
 
+                    b.Property<int?>("DueDay")
+                        .HasColumnType("integer")
+                        .HasColumnName("due_day");
+
                     b.Property<Guid>("LegalEntityId")
                         .HasColumnType("uuid")
                         .HasColumnName("legal_entity_id");

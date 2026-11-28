@@ -4,23 +4,11 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.SecurityRules.get result. PRD outputs: "rules; report"</summary>
+/// <summary>ri.SecurityRules.get result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SecurityRulesGetResponse
 {
-    /// <summary>PRD: "rules"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("rules")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Rules { get; init; }
-
-    /// <summary>PRD: "report"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("report")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Report { get; init; }
+    /// <summary>Contract member 'ruleSet'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSet")]
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiSecurityRuleSet RuleSet { get; init; }
 }

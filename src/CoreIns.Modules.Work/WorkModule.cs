@@ -49,6 +49,9 @@ public static class WorkModule
         services.AddModuleDbContext<WorkDbContext>(Schema);
         services.AddSingleton<IDsarParticipant, WorkDsarParticipant>();
 
+        services.AddScoped<IWorkUserDirectory, LocalWorkUserDirectory>();
+        services.AddScoped<AssignmentRouter>();
+        services.AddScoped<AssignmentSimulator>();
         services.AddScoped<ActivityEngine>();
         services.AddScoped<ActivityReader>();
         services.AddScoped<IValidator<CreateActivity>, CreateActivityValidator>();

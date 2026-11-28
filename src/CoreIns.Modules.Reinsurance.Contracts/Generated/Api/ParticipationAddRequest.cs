@@ -4,28 +4,32 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Participation.add request. PRD inputs: "layer/section, party ids, lines"</summary>
+/// <summary>ri.Participation.add request (BO-RI-05). Adds reinsurers to the panel of an Active contract from an effective date: the change is a pending endorsement (a further contract version), decided under maker-checker like any endorsement. With rebalance (the default) the existing lines are scaled so that the signed lines still sum to the placed share (largest remainder at 6 decimals); a new lead replaces…</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ParticipationAddRequest
 {
-    /// <summary>PRD: "layer/section"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("layerSection")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? LayerSection { get; init; }
+    /// <summary>Contract member 'contractId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contractId")]
+    public required global::CoreIns.SharedKernel.Identifiers.RiContractId ContractId { get; init; }
 
-    /// <summary>PRD: "party ids"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("partyIds")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.PartyId>? PartyIds { get; init; }
+    /// <summary>Contract member 'expectedRecordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
 
-    /// <summary>PRD: "lines"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'effectiveFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveFrom")]
+    public required global::CoreIns.SharedKernel.BusinessDate EffectiveFrom { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
+
+    /// <summary>Contract member 'lines'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("lines")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.RiParticipationInput> Lines { get; init; }
+
+    /// <summary>Scale the existing lines to make room (default true); false requires the given lines to complete the panel exactly</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("rebalance")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Lines { get; init; }
+    public bool? Rebalance { get; init; }
 }

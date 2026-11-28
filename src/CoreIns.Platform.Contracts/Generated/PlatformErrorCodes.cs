@@ -46,7 +46,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-APPROVAL-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): plt.Approval.decide, plt.Approval.request, plt.Approval.withdraw.</para>
+    /// <para>Declared by 4 operation(s): plt.Approval.decide, plt.Approval.request, plt.Approval.withdraw, plt.RoleAssignment.grant.</para>
     /// </remarks>
     public const string ApprovalStale = "PLT-ERR-APPROVAL-STALE";
 
@@ -55,6 +55,12 @@ public static class PlatformErrorCodes
     /// <para>Declared by 1 operation(s): plt.Approval.verifyForExecution.</para>
     /// </remarks>
     public const string ApprovalSubjectMismatch = "PLT-ERR-APPROVAL-SUBJECT-MISMATCH";
+
+    /// <summary>PLT-ERR-ASSIGNMENT-EXISTS (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): plt.RoleAssignment.grant.</para>
+    /// </remarks>
+    public const string AssignmentExists = "PLT-ERR-ASSIGNMENT-EXISTS";
 
     /// <summary>PLT-ERR-AUDIT-INVALID (HTTP 422).</summary>
     /// <remarks>
@@ -202,7 +208,7 @@ public static class PlatformErrorCodes
 
     /// <summary>PLT-ERR-INVALID-TRANSITION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 2 operation(s): plt.User.reactivate, plt.User.suspend.</para>
+    /// <para>Declared by 5 operation(s): plt.RoleAssignment.grant, plt.RoleAssignment.revoke, plt.User.disable, plt.User.reactivate, plt.User.suspend.</para>
     /// </remarks>
     public const string InvalidTransition = "PLT-ERR-INVALID-TRANSITION";
 
@@ -326,6 +332,12 @@ public static class PlatformErrorCodes
     /// </remarks>
     public const string UnknownKey = "PLT-ERR-UNKNOWN-KEY";
 
+    /// <summary>PLT-ERR-UNKNOWN-ROLE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): plt.RoleAssignment.grant.</para>
+    /// </remarks>
+    public const string UnknownRole = "PLT-ERR-UNKNOWN-ROLE";
+
     /// <summary>PLT-ERR-UNKNOWN-TYPE (HTTP 400).</summary>
     /// <remarks>
     /// <para>Declared by 3 operation(s): plt.Approval.request, plt.ApprovalType.register, plt.Authority.check.</para>
@@ -337,6 +349,24 @@ public static class PlatformErrorCodes
     /// <para>Declared by 2 operation(s): plt.UserProfile.getPreferences, plt.UserProfile.setLanguage.</para>
     /// </remarks>
     public const string UnsupportedLanguage = "PLT-ERR-UNSUPPORTED-LANGUAGE";
+
+    /// <summary>PLT-ERR-USER-DISABLED (HTTP 403).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): plt.User.disable.</para>
+    /// </remarks>
+    public const string UserDisabled = "PLT-ERR-USER-DISABLED";
+
+    /// <summary>PLT-ERR-USER-EXISTS (HTTP 409).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): plt.User.create.</para>
+    /// </remarks>
+    public const string UserExists = "PLT-ERR-USER-EXISTS";
+
+    /// <summary>PLT-ERR-USER-SUSPENDED (HTTP 403).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): plt.User.suspend.</para>
+    /// </remarks>
+    public const string UserSuspended = "PLT-ERR-USER-SUSPENDED";
 
     /// <summary>PLT-ERR-VALIDATION (HTTP 400).</summary>
     /// <remarks>
@@ -366,7 +396,7 @@ public static class PlatformErrorCodes
     public const string Prefix = "PLT-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiDisabled, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, ApprovalSubjectMismatch, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, DeadLetterResolved, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotOwner, NotRetryable, NotRunnable, OutOfOrgScope, OwnerDecided, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownType, UnsupportedLanguage, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AgentClientNotRegistered, AiDataClass, AiDisabled, AiNotRegistered, AiOff, ApprovalHashMismatch, ApprovalStale, ApprovalSubjectMismatch, AssignmentExists, AuditInvalid, Authority, AuthorityDenied, AuthorityReferralRequired, CalendarNotPublished, CheckExpired, CheckerMustBeHuman, CircuitOpen, ControlNotFlaggable, DeadLetterResolved, EditorCannotApprove, ExpressionCost, ExpressionType, GateFailed, GrantAboveOwn, Held, IdempotencyInProgress, IdempotencyKeyInvalid, IdempotencyKeyRequired, IdempotencyMismatch, ImportCredential, Incompatible, Internal, InvalidStateTransition, InvalidTransition, NoRate, NotFound, NotOwner, NotRetryable, NotRunnable, OutOfOrgScope, OwnerDecided, RangeExhausted, RangeTooLarge, ReplayInProgress, ReviewerConflict, Schema, SchemaPii, SelfApproval, SharedSecret, Sod, TableNotActive, TemplateInvalid, TypeExists, UnknownKey, UnknownRole, UnknownType, UnsupportedLanguage, UserDisabled, UserExists, UserSuspended, Validation, VerificationFailed, WorkflowExists, WorkflowNotFound];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -379,6 +409,7 @@ public static class PlatformErrorCodes
         [ApprovalHashMismatch] = 422,
         [ApprovalStale] = 409,
         [ApprovalSubjectMismatch] = 422,
+        [AssignmentExists] = 409,
         [AuditInvalid] = 422,
         [Authority] = 403,
         [AuthorityDenied] = 403,
@@ -419,8 +450,12 @@ public static class PlatformErrorCodes
         [TemplateInvalid] = 422,
         [TypeExists] = 409,
         [UnknownKey] = 422,
+        [UnknownRole] = 422,
         [UnknownType] = 400,
         [UnsupportedLanguage] = 422,
+        [UserDisabled] = 403,
+        [UserExists] = 409,
+        [UserSuspended] = 403,
         [Validation] = 400,
         [VerificationFailed] = 422,
         [WorkflowExists] = 409,

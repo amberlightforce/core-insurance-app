@@ -1,3 +1,5 @@
+using CoreIns.SharedKernel;
+
 namespace CoreIns.Modules.Billing.Domain;
 
 /// <summary>Upper-snake wire codes of the module's enums (stored in the database and published in events).</summary>
@@ -173,4 +175,29 @@ internal static class PaymentPlans
         Monthly => 12,
         _ => 0,
     };
+
+    /// <summary>Plans of the seed catalogue, in the order they are offered (BO-BIL-03).</summary>
+    public static readonly string[] Catalogue = [Annual, SemiAnnual, Quarterly, Monthly];
+
+    /// <summary>Months between two instalments of a plan; 12 for ANNUAL, 0 when the plan is not served.</summary>
+    public static int IntervalMonths(string? planRef) => InstalmentCount(planRef) is var n and > 0 ? 12 / n : 0;
+
+    /// <summary>Due date of instalment <paramref name="no"/>: the term start plus the interval; from the second instalment on the day of month is <paramref name="dueDay"/> (clamped to the month length) when given.</summary>
+    public static BusinessDate DueDateOf(string planRef, BusinessDate termFrom, int no, int? dueDay)
+    {
+        var due = termFrom.AddMonths(IntervalMonths(planRef) * (no - 1));
+        return no > 1 && dueDay is { } day ? new BusinessDate(due.Year, due.Month, Math.Min(day, DateTime.DaysInMonth(due.Year, due.Month))) : due;
+    }
+
+    /// <summary>The whole schedule of the bound transaction: every instalment from the term start (a due date in the past is due today).</summary>
+    public static List<(int No, BusinessDate Due)> BoundSchedule(string planRef, BusinessDate termFrom, BusinessDate today, int? dueDay)
+    {
+        var count = Math.Max(1, InstalmentCount(planRef));
+        if (count == 1)
+        {
+            return [(1, today)];
+        }
+
+        return [.. Enumerable.Range(1, count).Select(no => (no, DueDateOf(planRef, termFrom, no, dueDay) is var due && due.CompareTo(today) < 0 ? today : due))];
+    }
 }

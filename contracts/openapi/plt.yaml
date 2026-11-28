@@ -150,6 +150,8 @@ paths:
       - ui
       x-permission: plt.User.create
       x-error-codes:
+      - code: PLT-ERR-USER-EXISTS
+        status: 409
       - code: PLT-ERR-SOD
         status: 403
       - code: PLT-ERR-OUT-OF-ORG-SCOPE
@@ -379,6 +381,8 @@ paths:
       - PTY
       x-permission: plt.User.suspend
       x-error-codes:
+      - code: PLT-ERR-USER-SUSPENDED
+        status: 403
       - code: PLT-ERR-SOD
         status: 403
       - code: PLT-ERR-OUT-OF-ORG-SCOPE
@@ -539,6 +543,10 @@ paths:
       - ui
       x-permission: plt.User.disable
       x-error-codes:
+      - code: PLT-ERR-USER-DISABLED
+        status: 403
+      - code: PLT-ERR-INVALID-TRANSITION
+        status: 422
       - code: PLT-ERR-SOD
         status: 403
       - code: PLT-ERR-OUT-OF-ORG-SCOPE
@@ -625,6 +633,17 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: q
+        in: query
+        required: false
+        description: Text in display name, email or Entra object id
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/UserStatus'
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
       responses:
@@ -993,6 +1012,14 @@ paths:
       - ui
       x-permission: plt.RoleAssignment.grant
       x-error-codes:
+      - code: PLT-ERR-UNKNOWN-ROLE
+        status: 422
+      - code: PLT-ERR-ASSIGNMENT-EXISTS
+        status: 409
+      - code: PLT-ERR-APPROVAL-STALE
+        status: 409
+      - code: PLT-ERR-INVALID-TRANSITION
+        status: 422
       - code: PLT-ERR-SOD
         status: 403
       - code: PLT-ERR-IDEMPOTENCY-MISMATCH
@@ -1064,6 +1091,8 @@ paths:
       - ui
       x-permission: plt.RoleAssignment.revoke
       x-error-codes:
+      - code: PLT-ERR-INVALID-TRANSITION
+        status: 422
       - code: PLT-ERR-SOD
         status: 403
       - code: PLT-ERR-IDEMPOTENCY-MISMATCH
@@ -7129,88 +7158,225 @@ components:
           description: 'PRD: "token"'
     UserCreateRequest:
       type: object
-      description: 'plt.User.create request. PRD inputs: "user fields"'
+      description: 'plt.User.create request: pre-provisions the directory entry of an Entra identity (BO-PLT-05). The first valid token of an unknown identity creates it on its own.'
+      required:
+      - entraOid
+      - displayName
       properties:
-        userFields:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user fields"'
+        entraOid:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Object id (oid) of the identity in Entra ID
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        email:
+          type: string
+          maxLength: 320
+        language:
+          $ref: '#/components/schemas/UserLanguage'
     UserCreateResponse:
       type: object
-      description: 'plt.User.create result. PRD outputs: "user"'
+      description: plt.User.create result
+      required:
+      - user
       properties:
         user:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user"'
+          $ref: '#/components/schemas/UserView'
     UserUpdateRequest:
       type: object
-      description: 'plt.User.update request. PRD inputs: "user fields"'
+      description: 'plt.User.update request: changes the display name, email or language of a directory entry (path id).'
       properties:
-        userFields:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user fields"'
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        email:
+          type: string
+          maxLength: 320
+        language:
+          $ref: '#/components/schemas/UserLanguage'
     UserUpdateResponse:
       type: object
-      description: 'plt.User.update result. PRD outputs: "user"'
+      description: plt.User.update result
+      required:
+      - user
       properties:
         user:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user"'
+          $ref: '#/components/schemas/UserView'
     UserSuspendRequest:
       type: object
-      description: 'plt.User.suspend request. PRD inputs: "user fields"'
+      description: 'plt.User.suspend request: suspends the user. A suspended or disabled user is refused with 403 on the next call.'
+      required:
+      - userId
+      - reason
       properties:
-        userFields:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user fields"'
+        userId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1024
     UserSuspendResponse:
       type: object
-      description: 'plt.User.suspend result. PRD outputs: "user"'
+      description: plt.User.suspend result
+      required:
+      - user
       properties:
         user:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user"'
+          $ref: '#/components/schemas/UserView'
     UserReactivateRequest:
       type: object
-      description: 'plt.User.reactivate request. PRD inputs: "user fields"'
+      description: 'plt.User.reactivate request: reactivates the user. A suspended or disabled user is refused with 403 on the next call.'
+      required:
+      - userId
+      - reason
       properties:
-        userFields:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user fields"'
+        userId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1024
     UserReactivateResponse:
       type: object
-      description: 'plt.User.reactivate result. PRD outputs: "user"'
+      description: plt.User.reactivate result
+      required:
+      - user
       properties:
         user:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user"'
+          $ref: '#/components/schemas/UserView'
     UserDisableRequest:
       type: object
-      description: 'plt.User.disable request. PRD inputs: "user fields"'
+      description: 'plt.User.disable request: disables (final) the user. A suspended or disabled user is refused with 403 on the next call.'
+      required:
+      - userId
+      - reason
       properties:
-        userFields:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user fields"'
+        userId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1024
     UserDisableResponse:
       type: object
-      description: 'plt.User.disable result. PRD outputs: "user"'
+      description: plt.User.disable result
+      required:
+      - user
       properties:
         user:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user"'
+          $ref: '#/components/schemas/UserView'
     UserGetResponse:
       type: object
-      description: 'plt.User.get result. PRD outputs: "user"'
+      description: plt.User.get result, the user with the role assignments
+      required:
+      - user
       properties:
         user:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user"'
+          $ref: '#/components/schemas/UserView'
     UserSearchItem:
       type: object
-      description: 'plt.User.search result. PRD outputs: "user"'
+      description: plt.User.search result item
+      required:
+      - user
       properties:
         user:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user"'
+          $ref: '#/components/schemas/UserView'
+    UserLanguage:
+      type: string
+      enum:
+      - el
+      - en
+    UserStatus:
+      type: string
+      enum:
+      - Active
+      - Suspended
+      - Disabled
+    UserView:
+      type: object
+      description: A directory entry (user_profile). Entra ID stays the identity source; no credentials are kept (D-ARC-03).
+      required:
+      - userId
+      - entraOid
+      - displayName
+      - language
+      - status
+      - legalEntity
+      - createdAt
+      - updatedAt
+      properties:
+        userId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        entraOid:
+          type: string
+        displayName:
+          type: string
+        email:
+          type: string
+        language:
+          $ref: '#/components/schemas/UserLanguage'
+        status:
+          $ref: '#/components/schemas/UserStatus'
+        legalEntity:
+          type: string
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        updatedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        lastSeenAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        roleAssignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleAssignmentView'
+    RoleAssignmentStatus:
+      type: string
+      enum:
+      - Active
+      - Revoked
+    RoleAssignmentView:
+      type: object
+      description: A recorded, audited role assignment. App roles in the token stay authoritative for authorization until decided otherwise (BO-PLT-05, SURVEY-NOTES D).
+      required:
+      - assignmentId
+      - userId
+      - role
+      - status
+      - grantedBy
+      - grantedAt
+      properties:
+        assignmentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        userId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        role:
+          type: string
+        scope:
+          type: string
+        validFrom:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        validTo:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        status:
+          $ref: '#/components/schemas/RoleAssignmentStatus'
+        grantedBy:
+          type: string
+          description: The maker (requester) of the grant
+        approvedBy:
+          type: string
+          description: The second person who approved the grant (plt.Approval)
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        grantedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        revokedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        revokedBy:
+          type: string
     UserSearchPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7278,44 +7444,62 @@ components:
           description: 'PRD: "invitation"'
     RoleAssignmentGrantRequest:
       type: object
-      description: 'plt.RoleAssignment.grant request. PRD inputs: "role, user, scope, dates"'
+      description: 'plt.RoleAssignment.grant request. Without approvalRequestId the call creates the second-approver request (PLT.ROLE_GRANT, plt.Approval) and returns PendingApproval; once a second person approved it, repeat the same request with approvalRequestId to record the assignment.'
+      required:
+      - userId
+      - role
       properties:
+        userId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
-        user:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user"'
+          type: string
+          minLength: 1
+          maxLength: 128
         scope:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "scope"'
-        dates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "dates"'
+          type: string
+          maxLength: 128
+        validFrom:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        validTo:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
     RoleAssignmentGrantResponse:
       type: object
-      description: 'plt.RoleAssignment.grant result. PRD outputs: "—"'
-      x-status: minimal
+      description: plt.RoleAssignment.grant result
+      required:
+      - status
+      properties:
+        status:
+          type: string
+          enum:
+          - PendingApproval
+          - Granted
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        assignment:
+          $ref: '#/components/schemas/RoleAssignmentView'
     RoleAssignmentRevokeRequest:
       type: object
-      description: 'plt.RoleAssignment.revoke request. PRD inputs: "role, user, scope, dates"'
+      description: 'plt.RoleAssignment.revoke request: ends an active assignment (no second approver: removing access is always safe).'
+      required:
+      - assignmentId
+      - reason
       properties:
-        role:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "role"'
-        user:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user"'
-        scope:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "scope"'
-        dates:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "dates"'
+        assignmentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1024
     RoleAssignmentRevokeResponse:
       type: object
-      description: 'plt.RoleAssignment.revoke result. PRD outputs: "—"'
-      x-status: minimal
+      description: plt.RoleAssignment.revoke result
+      required:
+      - assignment
+      properties:
+        assignment:
+          $ref: '#/components/schemas/RoleAssignmentView'
     PolicyEvaluateRequest:
       type: object
       description: 'plt.Policy.evaluate request. PRD inputs: "principal, action, resource attributes"'
@@ -8999,32 +9183,40 @@ components:
           description: 'PRD: "granted or refused"'
     UserProfileGetPreferencesResponse:
       type: object
-      description: 'plt.UserProfile.getPreferences result. PRD outputs: "saved preferences"'
+      description: plt.UserProfile.getPreferences result (the signed-in user's preferences)
+      required:
+      - savedPreferences
       properties:
         savedPreferences:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "saved preferences"'
+          $ref: '#/components/schemas/UserPreferences'
+    UserPreferences:
+      type: object
+      required:
+      - uiLanguage
+      properties:
+        uiLanguage:
+          $ref: '#/components/schemas/UserLanguage'
+        source:
+          type: string
     UserProfileSetLanguageRequest:
       type: object
-      description: 'plt.UserProfile.setLanguage request. PRD inputs: "user (from token), ui_language (BCP 47 `el` or `en`),
-        source"'
+      description: plt.UserProfile.setLanguage request (the user is always the signed-in user from the token)
+      required:
+      - uiLanguage
       properties:
-        user:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "user (from token)"'
         uiLanguage:
-          $ref: ../events/common.schema.json#/$defs/LanguageCode
-          description: 'PRD: "ui_language (BCP 47 `el` or `en`)"'
+          $ref: '#/components/schemas/UserLanguage'
         source:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "source"'
+          type: string
+          maxLength: 64
     UserProfileSetLanguageResponse:
       type: object
-      description: 'plt.UserProfile.setLanguage result. PRD outputs: "saved preferences"'
+      description: plt.UserProfile.setLanguage result
+      required:
+      - savedPreferences
       properties:
         savedPreferences:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "saved preferences"'
+          $ref: '#/components/schemas/UserPreferences'
     LineageWalkResponse:
       type: object
       description: 'plt.Lineage.walk result. PRD outputs: "ordered steps with keys and trace links"'

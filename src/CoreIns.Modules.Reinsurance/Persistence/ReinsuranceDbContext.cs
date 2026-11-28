@@ -71,6 +71,10 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
 
     public DbSet<ProgrammeRow> Programmes => Set<ProgrammeRow>();
 
+    public DbSet<SecurityRuleRow> SecurityRules => Set<SecurityRuleRow>();
+
+    public DbSet<LineTableRow> LineTables => Set<LineTableRow>();
+
     public DbSet<ProgrammeVersionRow> ProgrammeVersions => Set<ProgrammeVersionRow>();
 
     public DbSet<ProgrammeLayerRow> ProgrammeLayers => Set<ProgrammeLayerRow>();
@@ -94,6 +98,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
         StatementModel.Configure(modelBuilder);
         CashCallModel.Configure(modelBuilder);
         ProgrammeModel.Configure(modelBuilder);
+        SecurityModel.Configure(modelBuilder);
         ConfigureOccurrences(modelBuilder);
 
         modelBuilder.Entity<ContractRow>(entity =>

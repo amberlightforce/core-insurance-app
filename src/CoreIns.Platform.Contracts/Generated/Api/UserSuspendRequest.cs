@@ -4,15 +4,15 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.User.suspend request. PRD inputs: "user fields"</summary>
+/// <summary>plt.User.suspend request: suspends the user. A suspended or disabled user is refused with 403 on the next call.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record UserSuspendRequest
 {
-    /// <summary>PRD: "user fields"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("userFields")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? UserFields { get; init; }
+    /// <summary>Contract member 'userId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("userId")]
+    public required global::CoreIns.SharedKernel.Identifiers.UserId UserId { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
 }

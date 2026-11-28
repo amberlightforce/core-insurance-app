@@ -137,6 +137,7 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.PlanCode).HasColumnName("plan_code");
             entity.Property(e => e.BillMode).HasColumnName("bill_mode");
             entity.Property(e => e.Method).HasColumnName("method");
+            entity.Property(e => e.DueDay).HasColumnName("due_day");
             entity.Property(e => e.TermFrom).HasColumnName("term_from");
             entity.Property(e => e.TermTo).HasColumnName("term_to");
             entity.Property(e => e.SourceEventId).HasColumnName("source_event_id");

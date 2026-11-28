@@ -373,13 +373,72 @@
       "grantedOrRefused": "unspecified"
     },
     "plt.User.reactivate": {
-      "user": "unspecified"
+      "user": {
+        "userId": "01925d5b-43cb-7770-8e00-bb8e067916be",
+        "entraOid": "sample",
+        "displayName": "sample",
+        "email": "sample",
+        "language": "el",
+        "status": "Active",
+        "legalEntity": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "updatedAt": "2026-10-07T09:00:00Z",
+        "lastSeenAt": "2026-10-07T09:00:00Z",
+        "roleAssignments": [
+          {
+            "assignmentId": "019253ee-c4d2-79b7-8d68-7f9db98aed3a",
+            "userId": "0192e834-ca13-7166-8a57-3d22fcea952a",
+            "role": "sample",
+            "scope": "sample",
+            "validFrom": "2026-10-07T09:00:00Z",
+            "validTo": "2026-10-07T09:00:00Z",
+            "status": "Active",
+            "grantedBy": "sample",
+            "approvedBy": "sample",
+            "approvalRequestId": "019230eb-aea7-70f7-8384-7673a2bfc1bb",
+            "grantedAt": "2026-10-07T09:00:00Z",
+            "revokedAt": "2026-10-07T09:00:00Z",
+            "revokedBy": "sample"
+          }
+        ]
+      }
     },
     "plt.User.suspend": {
-      "user": "unspecified"
+      "user": {
+        "userId": "0192947a-5394-7c53-8a43-9083f32abe9e",
+        "entraOid": "sample",
+        "displayName": "sample",
+        "email": "sample",
+        "language": "el",
+        "status": "Active",
+        "legalEntity": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "updatedAt": "2026-10-07T09:00:00Z",
+        "lastSeenAt": "2026-10-07T09:00:00Z",
+        "roleAssignments": [
+          {
+            "assignmentId": "019228a9-34a1-7046-84d9-62a4741a55d4",
+            "userId": "0192b378-d1e7-7cff-8fc1-51217ee44802",
+            "role": "sample",
+            "scope": "sample",
+            "validFrom": "2026-10-07T09:00:00Z",
+            "validTo": "2026-10-07T09:00:00Z",
+            "status": "Active",
+            "grantedBy": "sample",
+            "approvedBy": "sample",
+            "approvalRequestId": "0192cc36-e8bf-76b1-8505-0d2203197649",
+            "grantedAt": "2026-10-07T09:00:00Z",
+            "revokedAt": "2026-10-07T09:00:00Z",
+            "revokedBy": "sample"
+          }
+        ]
+      }
     },
     "plt.UserProfile.getPreferences": {
-      "savedPreferences": "unspecified"
+      "savedPreferences": {
+        "uiLanguage": "el",
+        "source": "sample"
+      }
     },
     "plt.Workflow.cancel": {
       "key": "value"
@@ -1243,16 +1302,67 @@
       "changeApprovalRequest": "unspecified"
     },
     "RoleAssignmentGrantRequest": {
-      "role": "unspecified",
-      "user": "unspecified",
-      "scope": "unspecified",
-      "dates": "unspecified"
+      "userId": "01921299-09fd-7e16-8644-e0c34e2927ed",
+      "role": "sample",
+      "scope": "sample",
+      "validFrom": "2026-10-07T09:00:00Z",
+      "validTo": "2026-10-07T09:00:00Z",
+      "approvalRequestId": "0192824d-5db0-7371-8d59-f007558afc58"
+    },
+    "RoleAssignmentGrantResponse": {
+      "status": "PendingApproval",
+      "approvalRequestId": "01925988-47e7-7399-8cea-b619e305962a",
+      "assignment": {
+        "assignmentId": "0192e4df-cdbd-771c-8403-2cab86549896",
+        "userId": "0192143c-8a11-754e-85b3-8530ad96dc37",
+        "role": "sample",
+        "scope": "sample",
+        "validFrom": "2026-10-07T09:00:00Z",
+        "validTo": "2026-10-07T09:00:00Z",
+        "status": "Active",
+        "grantedBy": "sample",
+        "approvedBy": "sample",
+        "approvalRequestId": "0192afaf-e70c-7f38-8958-f4cb2f19973a",
+        "grantedAt": "2026-10-07T09:00:00Z",
+        "revokedAt": "2026-10-07T09:00:00Z",
+        "revokedBy": "sample"
+      }
     },
     "RoleAssignmentRevokeRequest": {
-      "role": "unspecified",
-      "user": "unspecified",
-      "scope": "unspecified",
-      "dates": "unspecified"
+      "assignmentId": "01924fb8-d94b-725e-811f-43441ecf386c",
+      "reason": "sample"
+    },
+    "RoleAssignmentRevokeResponse": {
+      "assignment": {
+        "assignmentId": "019258ef-7f78-7ee7-882b-eefa7e58b91c",
+        "userId": "01928001-2922-7869-8b52-5a153066d68d",
+        "role": "sample",
+        "scope": "sample",
+        "validFrom": "2026-10-07T09:00:00Z",
+        "validTo": "2026-10-07T09:00:00Z",
+        "status": "Active",
+        "grantedBy": "sample",
+        "approvedBy": "sample",
+        "approvalRequestId": "01926f73-680f-7090-8705-17e59115d885",
+        "grantedAt": "2026-10-07T09:00:00Z",
+        "revokedAt": "2026-10-07T09:00:00Z",
+        "revokedBy": "sample"
+      }
+    },
+    "RoleAssignmentView": {
+      "assignmentId": "0192283f-d8d3-76aa-828d-095dcb6ea79b",
+      "userId": "01925cd7-6053-7b2a-8460-bfad93388650",
+      "role": "sample",
+      "scope": "sample",
+      "validFrom": "2026-10-07T09:00:00Z",
+      "validTo": "2026-10-07T09:00:00Z",
+      "status": "Active",
+      "grantedBy": "sample",
+      "approvedBy": "sample",
+      "approvalRequestId": "0192b0c2-23d0-7ea4-8cc7-8aee0598f59c",
+      "grantedAt": "2026-10-07T09:00:00Z",
+      "revokedAt": "2026-10-07T09:00:00Z",
+      "revokedBy": "sample"
     },
     "SchemaCheckRequest": {
       "schema": "unspecified"
@@ -1306,60 +1416,330 @@
       "transferIdRetry": "unspecified"
     },
     "UserCreateRequest": {
-      "userFields": "unspecified"
+      "entraOid": "sample",
+      "displayName": "sample",
+      "email": "sample",
+      "language": "el"
     },
     "UserCreateResponse": {
-      "user": "unspecified"
+      "user": {
+        "userId": "0192892b-03a7-7b9b-8971-9369a8fb2fb9",
+        "entraOid": "sample",
+        "displayName": "sample",
+        "email": "sample",
+        "language": "el",
+        "status": "Active",
+        "legalEntity": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "updatedAt": "2026-10-07T09:00:00Z",
+        "lastSeenAt": "2026-10-07T09:00:00Z",
+        "roleAssignments": [
+          {
+            "assignmentId": "01924bfb-715e-7c68-8ac6-0e4a52b547c2",
+            "userId": "0192699c-f5cf-706e-895d-ed18db1d2e3c",
+            "role": "sample",
+            "scope": "sample",
+            "validFrom": "2026-10-07T09:00:00Z",
+            "validTo": "2026-10-07T09:00:00Z",
+            "status": "Active",
+            "grantedBy": "sample",
+            "approvedBy": "sample",
+            "approvalRequestId": "0192dd9e-ecf0-7e1a-8634-8b56137d9a0d",
+            "grantedAt": "2026-10-07T09:00:00Z",
+            "revokedAt": "2026-10-07T09:00:00Z",
+            "revokedBy": "sample"
+          }
+        ]
+      }
     },
     "UserDisableRequest": {
-      "userFields": "unspecified"
+      "userId": "01925aa7-be5d-717e-8aeb-a97ca6bba86e",
+      "reason": "sample"
     },
     "UserDisableResponse": {
-      "user": "unspecified"
+      "user": {
+        "userId": "019242bf-485a-7904-83e3-ca8279ac6a62",
+        "entraOid": "sample",
+        "displayName": "sample",
+        "email": "sample",
+        "language": "el",
+        "status": "Active",
+        "legalEntity": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "updatedAt": "2026-10-07T09:00:00Z",
+        "lastSeenAt": "2026-10-07T09:00:00Z",
+        "roleAssignments": [
+          {
+            "assignmentId": "0192c3c0-7a6f-7782-8ca0-18df821d11b3",
+            "userId": "01921f2e-0cd3-745b-82e2-27cff3421c14",
+            "role": "sample",
+            "scope": "sample",
+            "validFrom": "2026-10-07T09:00:00Z",
+            "validTo": "2026-10-07T09:00:00Z",
+            "status": "Active",
+            "grantedBy": "sample",
+            "approvedBy": "sample",
+            "approvalRequestId": "01921cc4-6a8f-783f-83bc-af01a4642727",
+            "grantedAt": "2026-10-07T09:00:00Z",
+            "revokedAt": "2026-10-07T09:00:00Z",
+            "revokedBy": "sample"
+          }
+        ]
+      }
     },
     "UserGetResponse": {
-      "user": "unspecified"
+      "user": {
+        "userId": "0192e170-6267-74b7-8a11-bce386ca4c42",
+        "entraOid": "sample",
+        "displayName": "sample",
+        "email": "sample",
+        "language": "el",
+        "status": "Active",
+        "legalEntity": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "updatedAt": "2026-10-07T09:00:00Z",
+        "lastSeenAt": "2026-10-07T09:00:00Z",
+        "roleAssignments": [
+          {
+            "assignmentId": "0192d8d2-4904-7e8e-8fe0-4bdfa4fd00d1",
+            "userId": "01927238-e7d5-7e58-80fa-7af2df125ec5",
+            "role": "sample",
+            "scope": "sample",
+            "validFrom": "2026-10-07T09:00:00Z",
+            "validTo": "2026-10-07T09:00:00Z",
+            "status": "Active",
+            "grantedBy": "sample",
+            "approvedBy": "sample",
+            "approvalRequestId": "0192feb4-01de-7501-88cc-3367bb675dfc",
+            "grantedAt": "2026-10-07T09:00:00Z",
+            "revokedAt": "2026-10-07T09:00:00Z",
+            "revokedBy": "sample"
+          }
+        ]
+      }
+    },
+    "UserPreferences": {
+      "uiLanguage": "el",
+      "source": "sample"
     },
     "UserProfileGetPreferencesResponse": {
-      "savedPreferences": "unspecified"
+      "savedPreferences": {
+        "uiLanguage": "el",
+        "source": "sample"
+      }
     },
     "UserProfileSetLanguageRequest": {
-      "user": "unspecified",
       "uiLanguage": "el",
-      "source": "unspecified"
+      "source": "sample"
     },
     "UserProfileSetLanguageResponse": {
-      "savedPreferences": "unspecified"
+      "savedPreferences": {
+        "uiLanguage": "el",
+        "source": "sample"
+      }
     },
     "UserReactivateRequest": {
-      "userFields": "unspecified"
+      "userId": "0192db3f-9c77-75e6-80d9-8b1ac50284da",
+      "reason": "sample"
     },
     "UserReactivateResponse": {
-      "user": "unspecified"
+      "user": {
+        "userId": "019291d5-6f0a-7ab9-89b1-387ae00137e5",
+        "entraOid": "sample",
+        "displayName": "sample",
+        "email": "sample",
+        "language": "el",
+        "status": "Active",
+        "legalEntity": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "updatedAt": "2026-10-07T09:00:00Z",
+        "lastSeenAt": "2026-10-07T09:00:00Z",
+        "roleAssignments": [
+          {
+            "assignmentId": "0192bceb-abed-7df7-89b7-a8ad980b9b92",
+            "userId": "0192b879-3a82-7c6c-839f-1d6d9a1d3cad",
+            "role": "sample",
+            "scope": "sample",
+            "validFrom": "2026-10-07T09:00:00Z",
+            "validTo": "2026-10-07T09:00:00Z",
+            "status": "Active",
+            "grantedBy": "sample",
+            "approvedBy": "sample",
+            "approvalRequestId": "0192fa2d-a9f6-7aae-82f9-f33bccd9061b",
+            "grantedAt": "2026-10-07T09:00:00Z",
+            "revokedAt": "2026-10-07T09:00:00Z",
+            "revokedBy": "sample"
+          }
+        ]
+      }
     },
     "UserSearchItem": {
-      "user": "unspecified"
+      "user": {
+        "userId": "0192c971-180b-7e04-8ebb-c09ac9343725",
+        "entraOid": "sample",
+        "displayName": "sample",
+        "email": "sample",
+        "language": "el",
+        "status": "Active",
+        "legalEntity": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "updatedAt": "2026-10-07T09:00:00Z",
+        "lastSeenAt": "2026-10-07T09:00:00Z",
+        "roleAssignments": [
+          {
+            "assignmentId": "01920085-5961-7b0f-82c4-973b06803e80",
+            "userId": "019288cd-2034-7a27-8481-33fcb2965fef",
+            "role": "sample",
+            "scope": "sample",
+            "validFrom": "2026-10-07T09:00:00Z",
+            "validTo": "2026-10-07T09:00:00Z",
+            "status": "Active",
+            "grantedBy": "sample",
+            "approvedBy": "sample",
+            "approvalRequestId": "0192cef4-d1d5-74c2-8163-ffb73b7bc717",
+            "grantedAt": "2026-10-07T09:00:00Z",
+            "revokedAt": "2026-10-07T09:00:00Z",
+            "revokedBy": "sample"
+          }
+        ]
+      }
     },
     "UserSearchPage": {
       "items": [
         {
-          "user": "unspecified"
+          "user": {
+            "userId": "0192ddbf-e757-732e-8062-60886108d785",
+            "entraOid": "sample",
+            "displayName": "sample",
+            "email": "sample",
+            "language": "el",
+            "status": "Active",
+            "legalEntity": "sample",
+            "createdAt": "2026-10-07T09:00:00Z",
+            "updatedAt": "2026-10-07T09:00:00Z",
+            "lastSeenAt": "2026-10-07T09:00:00Z",
+            "roleAssignments": [
+              {
+                "assignmentId": "01924b78-6bed-7072-8808-45cdc4862624",
+                "userId": "0192e106-514a-7bb5-83d5-e6f40e881009",
+                "role": "sample",
+                "scope": "sample",
+                "validFrom": "2026-10-07T09:00:00Z",
+                "validTo": "2026-10-07T09:00:00Z",
+                "status": "Active",
+                "grantedBy": "sample",
+                "approvedBy": "sample",
+                "approvalRequestId": "0192fe16-87e3-7f51-8324-c98e42d9662c",
+                "grantedAt": "2026-10-07T09:00:00Z",
+                "revokedAt": "2026-10-07T09:00:00Z",
+                "revokedBy": "sample"
+              }
+            ]
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "UserSuspendRequest": {
-      "userFields": "unspecified"
+      "userId": "0192499d-cee3-79f6-8079-31ab628e97de",
+      "reason": "sample"
     },
     "UserSuspendResponse": {
-      "user": "unspecified"
+      "user": {
+        "userId": "0192f9da-6f69-7ace-8c9f-03287b6f1507",
+        "entraOid": "sample",
+        "displayName": "sample",
+        "email": "sample",
+        "language": "el",
+        "status": "Active",
+        "legalEntity": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "updatedAt": "2026-10-07T09:00:00Z",
+        "lastSeenAt": "2026-10-07T09:00:00Z",
+        "roleAssignments": [
+          {
+            "assignmentId": "01925a7b-9cee-7346-8c58-ce7f3eba2924",
+            "userId": "01926dbb-44f2-7f88-8775-4c1d1fa963cb",
+            "role": "sample",
+            "scope": "sample",
+            "validFrom": "2026-10-07T09:00:00Z",
+            "validTo": "2026-10-07T09:00:00Z",
+            "status": "Active",
+            "grantedBy": "sample",
+            "approvedBy": "sample",
+            "approvalRequestId": "0192d06f-4ce9-749e-86f0-c02434f150e0",
+            "grantedAt": "2026-10-07T09:00:00Z",
+            "revokedAt": "2026-10-07T09:00:00Z",
+            "revokedBy": "sample"
+          }
+        ]
+      }
     },
     "UserUpdateRequest": {
-      "userFields": "unspecified"
+      "displayName": "sample",
+      "email": "sample",
+      "language": "el"
     },
     "UserUpdateResponse": {
-      "user": "unspecified"
+      "user": {
+        "userId": "01920f1c-bed3-7a98-88ea-88b24490d225",
+        "entraOid": "sample",
+        "displayName": "sample",
+        "email": "sample",
+        "language": "el",
+        "status": "Active",
+        "legalEntity": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "updatedAt": "2026-10-07T09:00:00Z",
+        "lastSeenAt": "2026-10-07T09:00:00Z",
+        "roleAssignments": [
+          {
+            "assignmentId": "019227b6-7cf3-7eff-893e-8f14da352fa8",
+            "userId": "01923224-374e-75a5-8cce-af65253489da",
+            "role": "sample",
+            "scope": "sample",
+            "validFrom": "2026-10-07T09:00:00Z",
+            "validTo": "2026-10-07T09:00:00Z",
+            "status": "Active",
+            "grantedBy": "sample",
+            "approvedBy": "sample",
+            "approvalRequestId": "01926857-2b2d-7728-804a-f91f6e430f71",
+            "grantedAt": "2026-10-07T09:00:00Z",
+            "revokedAt": "2026-10-07T09:00:00Z",
+            "revokedBy": "sample"
+          }
+        ]
+      }
+    },
+    "UserView": {
+      "userId": "01923018-f36e-79d6-863d-2ea59ee6aba8",
+      "entraOid": "sample",
+      "displayName": "sample",
+      "email": "sample",
+      "language": "el",
+      "status": "Active",
+      "legalEntity": "sample",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "updatedAt": "2026-10-07T09:00:00Z",
+      "lastSeenAt": "2026-10-07T09:00:00Z",
+      "roleAssignments": [
+        {
+          "assignmentId": "01929f16-7321-77b9-89f7-ba470259e618",
+          "userId": "019268e8-99be-7241-8795-4b9adf07f287",
+          "role": "sample",
+          "scope": "sample",
+          "validFrom": "2026-10-07T09:00:00Z",
+          "validTo": "2026-10-07T09:00:00Z",
+          "status": "Active",
+          "grantedBy": "sample",
+          "approvedBy": "sample",
+          "approvalRequestId": "01920203-5e40-794d-8f85-476750107b7c",
+          "grantedAt": "2026-10-07T09:00:00Z",
+          "revokedAt": "2026-10-07T09:00:00Z",
+          "revokedBy": "sample"
+        }
+      ]
     },
     "WorkflowCancelRequest": {
       "type": "unspecified",

@@ -4,28 +4,16 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.UserProfile.setLanguage request. PRD inputs: "user (from token), ui_language (BCP 47 `el` or `en`), source"</summary>
+/// <summary>plt.UserProfile.setLanguage request (the user is always the signed-in user from the token)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record UserProfileSetLanguageRequest
 {
-    /// <summary>PRD: "user (from token)"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("user")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? User { get; init; }
-
-    /// <summary>PRD: "ui_language (BCP 47 `el` or `en`)"</summary>
+    /// <summary>Contract member 'uiLanguage'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("uiLanguage")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public string? UiLanguage { get; init; }
+    public required global::CoreIns.Platform.Contracts.Api.UserLanguage UiLanguage { get; init; }
 
-    /// <summary>PRD: "source"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'source'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("source")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Source { get; init; }
+    public string? Source { get; init; }
 }

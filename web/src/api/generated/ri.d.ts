@@ -3101,37 +3101,45 @@ export interface components {
             /** @description PRD: "premiums" */
             premiums?: components["schemas"]["Unspecified"];
         };
-        /** @description ri.Participation.add request. PRD inputs: "layer/section, party ids, lines" */
+        /** @description ri.Participation.add request (BO-RI-05). Adds reinsurers to the panel of an Active contract from an effective date: the change is a pending endorsement (a further contract version), decided under maker-checker like any endorsement. With rebalance (the default) the existing lines are scaled so that the signed lines still sum to the placed share (largest remainder at 6 decimals); a new lead replaces the old one. */
         ParticipationAddRequest: {
-            /** @description PRD: "layer/section" */
-            layerSection?: components["schemas"]["Unspecified"];
-            /** @description PRD: "party ids" */
-            partyIds?: components["schemas"]["Uuid"][];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
+            contractId: components["schemas"]["Uuid"];
+            expectedRecordVersion: number;
+            effectiveFrom: components["schemas"]["LocalDate"];
+            reason: components["schemas"]["Text"];
+            lines: components["schemas"]["RiParticipationInput"][];
+            /** @description Scale the existing lines to make room (default true); false requires the given lines to complete the panel exactly */
+            rebalance?: boolean;
         };
-        /** @description ri.Participation.add result. PRD outputs: "participations, checks" */
+        /** @description One security check run on the resulting panel */
+        ParticipationCheck: {
+            reinsurerPartyId: components["schemas"]["Uuid"];
+            /** @description RATING_FLOOR or MAX_SHARE */
+            rule: string;
+            ok: boolean;
+            detail?: string;
+        };
+        /** @description ri.Participation.add result; the contract view is the endorsed (pending) version */
         ParticipationAddResponse: {
-            /** @description PRD: "participations" */
-            participations?: components["schemas"]["Unspecified"];
-            /** @description PRD: "checks" */
-            checks?: components["schemas"]["Unspecified"];
+            contract: components["schemas"]["RiContractView"];
+            approvalRequestId: components["schemas"]["Uuid"];
+            checks: components["schemas"]["ParticipationCheck"][];
         };
-        /** @description ri.Participation.replace request. PRD inputs: "layer/section, party ids, lines" */
+        /** @description ri.Participation.replace request (BO-RI-05). Replaces one reinsurer by another, taking over the outgoing line and lead role, from an effective date. The change is a pending endorsement: the earlier version keeps its panel as history. */
         ParticipationReplaceRequest: {
-            /** @description PRD: "layer/section" */
-            layerSection?: components["schemas"]["Unspecified"];
-            /** @description PRD: "party ids" */
-            partyIds?: components["schemas"]["Uuid"][];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
+            contractId: components["schemas"]["Uuid"];
+            expectedRecordVersion: number;
+            effectiveFrom: components["schemas"]["LocalDate"];
+            reason: components["schemas"]["Text"];
+            outgoingReinsurerPartyId: components["schemas"]["Uuid"];
+            incomingReinsurerPartyId: components["schemas"]["Uuid"];
+            brokerPartyId?: components["schemas"]["Uuid"] | null;
         };
-        /** @description ri.Participation.replace result. PRD outputs: "participations, checks" */
+        /** @description ri.Participation.replace result; the contract view is the endorsed (pending) version */
         ParticipationReplaceResponse: {
-            /** @description PRD: "participations" */
-            participations?: components["schemas"]["Unspecified"];
-            /** @description PRD: "checks" */
-            checks?: components["schemas"]["Unspecified"];
+            contract: components["schemas"]["RiContractView"];
+            approvalRequestId: components["schemas"]["Uuid"];
+            checks: components["schemas"]["ParticipationCheck"][];
         };
         /** @description ri.Participation.list result. PRD outputs: "participations, checks" */
         ParticipationListItem: {
@@ -3144,53 +3152,95 @@ export interface components {
         ParticipationListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["ParticipationListItem"][];
         };
-        /** @description ri.SecurityRules.set request. PRD inputs: "rules; date" */
+        /** @description The rating of one reinsurer on the security list */
+        RiSecurityRating: {
+            reinsurerPartyId: components["schemas"]["Uuid"];
+            /** @description Long-term financial strength rating on the S&P-style scale (AAA, AA+, ..., BBB-, ..., D); legalStatus Unverified */
+            rating: string;
+            /** @description Cap on the signed line of this reinsurer per contract; overrides the general cap */
+            maxSharePct?: components["schemas"]["Decimal"] | null;
+        };
+        /** @description A security rule set, effective from a date (append-only; a later set supersedes it from its date) */
+        RiSecurityRuleSet: {
+            ruleSetId: components["schemas"]["Uuid"];
+            versionNo: number;
+            effectiveFrom: components["schemas"]["LocalDate"];
+            /** @description Lowest acceptable rating; a reinsurer below it, or without a rating, is refused */
+            ratingFloor?: string | null;
+            /** @description General cap on the signed line of one reinsurer per contract */
+            maxSharePct?: components["schemas"]["Decimal"] | null;
+            ratings: components["schemas"]["RiSecurityRating"][];
+            createdAt: components["schemas"]["Instant"];
+            createdBy: string;
+        };
+        /** @description Exposure of one reinsurer across the contracts in force */
+        RiSecurityExposureRow: {
+            reinsurerPartyId: components["schemas"]["Uuid"];
+            rating?: string | null;
+            contractCount: number;
+            /** @description Sum over the layers of limit x signed line */
+            limitExposure: components["schemas"]["Money"];
+            /** @description Share of the total limit exposure */
+            exposureSharePct: components["schemas"]["Decimal"];
+            /** @description RATING_FLOOR and/or MAX_SHARE when the rule set in force is breached */
+            breaches: string[];
+        };
+        /** @description ri.SecurityRules.set request (BO-RI-05). A new rule set from a date; earlier sets stay as history. */
         SecurityRulesSetRequest: {
-            /** @description PRD: "rules" */
-            rules?: components["schemas"]["Unspecified"];
-            /** @description PRD: "date" */
-            date?: components["schemas"]["LocalDate"];
+            effectiveFrom: components["schemas"]["LocalDate"];
+            ratingFloor?: string | null;
+            maxSharePct?: components["schemas"]["Decimal"] | null;
+            ratings?: components["schemas"]["RiSecurityRating"][];
         };
-        /** @description ri.SecurityRules.set result. PRD outputs: "rules; report" */
-        SecurityRulesSetResponse: {
-            /** @description PRD: "rules" */
-            rules?: components["schemas"]["Unspecified"];
-            /** @description PRD: "report" */
-            report?: components["schemas"]["Unspecified"];
-        };
-        /** @description ri.SecurityRules.get result. PRD outputs: "rules; report" */
-        SecurityRulesGetResponse: {
-            /** @description PRD: "rules" */
-            rules?: components["schemas"]["Unspecified"];
-            /** @description PRD: "report" */
-            report?: components["schemas"]["Unspecified"];
-        };
-        /** @description ri.Security.report request. PRD inputs: "rules; date" */
-        SecurityReportRequest: {
-            /** @description PRD: "rules" */
-            rules?: components["schemas"]["Unspecified"];
-        };
-        /** @description ri.Security.report result. PRD outputs: "rules; report" */
+        /** @description ri.Security.report result. Exposure per reinsurer across the Active contracts in force at validAt, checked against the rule set in force then. */
         SecurityReportResponse: {
-            /** @description PRD: "rules" */
-            rules?: components["schemas"]["Unspecified"];
-            /** @description PRD: "report" */
-            report?: components["schemas"]["Unspecified"];
+            validAt: components["schemas"]["LocalDate"];
+            ruleSetId?: components["schemas"]["Uuid"] | null;
+            rows: components["schemas"]["RiSecurityExposureRow"][];
+            breachCount: number;
         };
-        /** @description ri.LineTable.set request. PRD inputs: "rows" */
+        /** @description ri.SecurityRules.set result, with the report as of the effective date */
+        SecurityRulesSetResponse: {
+            ruleSet: components["schemas"]["RiSecurityRuleSet"];
+            report: components["schemas"]["SecurityReportResponse"];
+        };
+        /** @description ri.SecurityRules.get result */
+        SecurityRulesGetResponse: {
+            ruleSet: components["schemas"]["RiSecurityRuleSet"];
+        };
+        /** @description ri.Security.report request. Optional rule set to check against (default: the one in force at validAt). */
+        SecurityReportRequest: {
+            ruleSetId?: components["schemas"]["Uuid"] | null;
+        };
+        /** @description One band of a line table (REQ-RI-036) in EUR. Bands are half-open [sumInsuredFrom, sumInsuredTo) and must not overlap (RI-ERR-OVERLAP). */
+        RiLineTableRow: {
+            sumInsuredFrom: components["schemas"]["Decimal"];
+            /** @description Open end when null */
+            sumInsuredTo?: components["schemas"]["Decimal"] | null;
+            /** @description Retention of the cedant in the band */
+            retention: components["schemas"]["Decimal"];
+            /** @description Number of retention lines ceded at most */
+            maxLines: number;
+        };
+        /** @description A version of the line table of the legal entity (append-only) */
+        RiLineTableVersion: {
+            tableId: components["schemas"]["Uuid"];
+            versionNo: number;
+            rows: components["schemas"]["RiLineTableRow"][];
+            createdAt: components["schemas"]["Instant"];
+            createdBy: string;
+        };
+        /** @description ri.LineTable.set request (BO-RI-05). Replaces the table with a new version; earlier versions stay as history. */
         LineTableSetRequest: {
-            /** @description PRD: "rows" */
-            rows?: components["schemas"]["Unspecified"][];
+            rows: components["schemas"]["RiLineTableRow"][];
         };
-        /** @description ri.LineTable.set result. PRD outputs: "table version" */
+        /** @description ri.LineTable.set result */
         LineTableSetResponse: {
-            /** @description PRD: "table version" */
-            tableVersion?: components["schemas"]["Unspecified"];
+            tableVersion: components["schemas"]["RiLineTableVersion"];
         };
-        /** @description ri.LineTable.get result. PRD outputs: "table version" */
+        /** @description ri.LineTable.get result */
         LineTableGetResponse: {
-            /** @description PRD: "table version" */
-            tableVersion?: components["schemas"]["Unspecified"];
+            tableVersion: components["schemas"]["RiLineTableVersion"];
         };
         /** @description ri.Cession.preview request. PRD inputs: "risk description" */
         CessionPreviewRequest: {
