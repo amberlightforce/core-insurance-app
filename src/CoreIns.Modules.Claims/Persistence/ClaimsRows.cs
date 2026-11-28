@@ -262,3 +262,41 @@ internal sealed class CatEventRow : ClaimsRow
 
     public Instant UpdatedAt { get; set; }
 }
+
+/// <summary><c>clm.certificate_request</c>: a claims-history certificate (BO-CLM-07, REQ-CLM-008). The assembled claim lines are a snapshot (jsonb, no AFM, no free text).</summary>
+internal sealed class CertificateRequestRow : ClaimsRow
+{
+    public const string Requested = "REQUESTED";
+    public const string Assembled = "ASSEMBLED";
+    public const string Issued = "ISSUED";
+
+    public Guid CertificateId { get; set; }
+
+    public PartyId RequesterPartyId { get; set; }
+
+    /// <summary>Policy numbers asked for; empty = every policy of the requester.</summary>
+    public string[] PolicyNumbers { get; set; } = [];
+
+    public BusinessDate PeriodFrom { get; set; }
+
+    public BusinessDate PeriodTo { get; set; }
+
+    /// <summary>The look-back N applied when the request was made (from MKT, or the illustrative default).</summary>
+    public int LookbackYears { get; set; }
+
+    /// <summary>Legal status of the look-back value (the MKT status, or UNVERIFIED for the default).</summary>
+    public string LegalStatus { get; set; } = "UNVERIFIED";
+
+    public string Status { get; set; } = Requested;
+
+    /// <summary>The assembled claim lines as JSON (an array).</summary>
+    public string ClaimsJson { get; set; } = "[]";
+
+    public string? CertificateNumber { get; set; }
+
+    public Guid? DocumentId { get; set; }
+
+    public Instant? IssuedAt { get; set; }
+
+    public Instant UpdatedAt { get; set; }
+}

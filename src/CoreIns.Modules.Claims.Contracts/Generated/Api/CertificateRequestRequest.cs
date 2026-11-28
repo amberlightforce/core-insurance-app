@@ -4,31 +4,24 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.Certificate.request request. PRD inputs: "requester, policies, period"</summary>
+/// <summary>clm.Certificate.request request: the requester is a party id; no policy numbers means every policy of the requester; no period means the look-back window ending today</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CertificateRequestRequest
 {
-    /// <summary>PRD: "requester"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("requester")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Requester { get; init; }
+    /// <summary>Contract member 'requesterPartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("requesterPartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId RequesterPartyId { get; init; }
 
-    /// <summary>PRD: "policies"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("policies")]
+    /// <summary>Contract member 'policyNumbers'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("policyNumbers")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Policies { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.PolicyNumber>? PolicyNumbers { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    /// <summary>Contract member 'periodFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("periodFrom")]
+    public global::CoreIns.SharedKernel.BusinessDate? PeriodFrom { get; init; }
+
+    /// <summary>Contract member 'periodTo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("periodTo")]
+    public global::CoreIns.SharedKernel.BusinessDate? PeriodTo { get; init; }
 }
