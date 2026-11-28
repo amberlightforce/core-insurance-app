@@ -402,8 +402,6 @@ CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/cancel
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/signal
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/start
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/terminate
-CONTRACT_NOT_SERVED POST /api/pol/v1/cancellations/rescind
-CONTRACT_NOT_SERVED POST /api/pol/v1/cancellations/schedule
 CONTRACT_NOT_SERVED POST /api/pol/v1/charges/reconcile
 CONTRACT_NOT_SERVED POST /api/pol/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/pol/v1/dsar/restrict

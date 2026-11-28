@@ -6029,68 +6029,78 @@ components:
       - servicingPreview
     CancellationScheduleRequest:
       type: object
-      description: 'pol.Cancellation.schedule request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef"'
+      description: 'pol.Cancellation.schedule request (BO-POL-06, REQ-POL-209..211). A cancellation with a future effective time: the refund is previewed at that time and the cancellation runs when it falls due. With dryRun only the preview is returned.'
       properties:
         policyId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "policyId"'
         source:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "source"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          $ref: '#/components/schemas/CancellationSourceCode'
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Reason code from the configured list (REQ-POL-205)
         effectiveAt:
           $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "effectiveAt"'
+          description: Future effective time. The term in force at that time is cancelled.
         evidenceRefs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidenceRefs"'
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/Text
+          description: Evidence references (document ids); no personal data
         requestRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "requestRef"'
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Reference of the customer request (channel message or document id); no personal data
+      required:
+      - policyId
+      - source
+      - reasonCode
+      - effectiveAt
     CancellationScheduleResponse:
       type: object
-      description: 'pol.Cancellation.schedule result. PRD outputs: "jobId, refund preview"'
+      description: 'pol.Cancellation.schedule result. PRD outputs: "jobId, refund preview". The job id is the scheduled cancellation id; the cancellation job itself is created when it runs.'
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "jobId"'
-        refundPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "refund preview"'
+        state:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: SCHEDULED (a dry run returns the same state but writes nothing)
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        servicingPreview:
+          $ref: '#/components/schemas/ServicingPreview'
+          description: The refund as computed now for the effective time; it is computed again when the cancellation runs.
+      required:
+      - jobId
+      - state
+      - effectiveAt
+      - servicingPreview
     CancellationRescindRequest:
       type: object
-      description: 'pol.Cancellation.rescind request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef"'
+      description: 'pol.Cancellation.rescind request (BO-POL-06): withdraws a scheduled cancellation that has not run yet, whatever the policy state.'
       properties:
         policyId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "policyId"'
-        source:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "source"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-        effectiveAt:
-          $ref: ../events/common.schema.json#/$defs/Instant
-          description: 'PRD: "effectiveAt"'
-        evidenceRefs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "evidenceRefs"'
-        requestRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "requestRef"'
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The scheduled cancellation id returned by pol.Cancellation.schedule
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Why the cancellation is rescinded
+      required:
+      - policyId
+      - jobId
+      - reasonCode
     CancellationRescindResponse:
       type: object
-      description: 'pol.Cancellation.rescind result. PRD outputs: "jobId, refund preview"'
+      description: 'pol.Cancellation.rescind result.'
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "jobId"'
-        refundPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "refund preview"'
+        state:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: RESCINDED
+      required:
+      - jobId
+      - state
     WithdrawalRight:
       type: string
       enum:

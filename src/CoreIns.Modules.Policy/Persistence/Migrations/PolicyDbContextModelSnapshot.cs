@@ -1556,6 +1556,102 @@ namespace CoreIns.Modules.Policy.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.ScheduledCancellationRow", b =>
+                {
+                    b.Property<Guid>("ScheduledId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("scheduled_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("EffectiveAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("effective_at");
+
+                    b.Property<string>("EvidenceRefs")
+                        .HasColumnType("text")
+                        .HasColumnName("evidence_refs");
+
+                    b.Property<Guid?>("ExecutedJobId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("executed_job_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Outcome")
+                        .HasColumnType("text")
+                        .HasColumnName("outcome");
+
+                    b.Property<Guid>("PolicyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("policy_id");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason_code");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("RefundMethod")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("refund_method");
+
+                    b.Property<string>("RequestRef")
+                        .HasColumnType("text")
+                        .HasColumnName("request_ref");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TermId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("term_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ScheduledId")
+                        .HasName("pk_scheduled_cancellation");
+
+                    b.HasIndex("PolicyId")
+                        .HasDatabaseName("ix_scheduled_cancellation_policy");
+
+                    b.HasIndex("TermId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_scheduled_cancellation_open_term")
+                        .HasFilter("status = 'SCHEDULED'");
+
+                    b.HasIndex("Status", "EffectiveAt")
+                        .HasDatabaseName("ix_scheduled_cancellation_due");
+
+                    b.ToTable("scheduled_cancellation", "pol", t =>
+                        {
+                            t.HasCheckConstraint("ck_scheduled_cancellation_status", "status IN ('SCHEDULED', 'EXECUTED', 'RESCINDED', 'FAILED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Policy.Persistence.SegmentRow", b =>
                 {
                     b.Property<Guid>("SegmentId")
