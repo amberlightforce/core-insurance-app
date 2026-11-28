@@ -1576,51 +1576,86 @@ export interface components {
             /** @description Present for servicing jobs (change, cancellation, renewal); absent for new business */
             servicingPreview?: components["schemas"]["ServicingPreview"];
         };
-        /** @description pol.Job.requote request. PRD inputs: "jobId, versionNo" */
+        /** @description pol.Job.requote request: re-rates and re-evaluates the current version as a new quote version. ratingArtefact says which artefact: IN_FORCE_NOW releases the pin and rates under the artefact in force (RAT effective-dated activation) and re-pins to it; PINNED keeps the job pinned artefact (or pins ratingArtefactHash). The choice is recorded in the audit and the response. Typed from REQ-POL-011, REQ-POL-115. */
         JobRequoteRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "versionNo" */
-            versionNo?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            /** @description Must be the job's current version */
+            versionNo: number;
+            expectedRecordVersion: number;
+            /** @enum {string} */
+            ratingArtefact: "IN_FORCE_NOW" | "PINNED";
+            /** @description With PINNED only; defaults to the job's current pin */
+            ratingArtefactHash?: components["schemas"]["Sha256"];
         };
-        /** @description pol.Job.requote result. PRD outputs: "quote version, premium, issues, validity" */
+        /** @description pol.Job.requote result: the new quote version, as pol.Job.quote returns it, plus the artefact used. */
         JobRequoteResponse: {
-            /** @description PRD: "quote version" */
-            quoteVersion?: components["schemas"]["Unspecified"];
-            /** @description PRD: "premium" */
-            premium?: components["schemas"]["Money"];
-            /** @description PRD: "issues" */
-            issues?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "validity" */
-            validity?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            quoteId: components["schemas"]["Uuid"];
+            versionNo: number;
+            supersededVersionNo?: number;
+            state: components["schemas"]["JobStateCode"];
+            /** @enum {string} */
+            decision: "ACCEPT" | "REFER" | "DECLINE";
+            referred: boolean;
+            bindable: boolean;
+            premium: components["schemas"]["Money"];
+            taxes: components["schemas"]["Money"];
+            total: components["schemas"]["Money"];
+            issues: components["schemas"]["UwIssue"][];
+            validUntil?: components["schemas"]["Instant"];
+            /** @enum {string} */
+            ratingArtefact: "IN_FORCE_NOW" | "PINNED";
+            /** @description The artefact the new version was rated with (now the job's pin) */
+            ratingArtefactHash?: components["schemas"]["Sha256"];
+            previousRatingArtefactHash?: components["schemas"]["Sha256"];
+            recordVersion: number;
         };
-        /** @description pol.Job.newVersion request. PRD inputs: "jobId, sourceVersion" */
+        /** @description pol.Job.newVersion request: copies the current quote version of a Quoted job into a new editable (Draft) version; the old one is superseded and immutable. Typed from REQ-POL-150, REQ-POL-151, REQ-POL-153. */
         JobNewVersionRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "sourceVersion" */
-            sourceVersion?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            /** @description Must be the job's current version */
+            sourceVersion: number;
+            /** @description The job's record version as read (optimistic concurrency, POL-ERR-STALE) */
+            expectedRecordVersion: number;
         };
-        /** @description pol.Job.newVersion result. PRD outputs: "new version; comparison" */
+        /** @description pol.Job.newVersion result: the new Draft version. Comparison of versions is pol.Job.compareVersions (BO-POL-04). */
         JobNewVersionResponse: {
-            /** @description PRD: "new version" */
-            newVersion?: components["schemas"]["Unspecified"];
-            /** @description PRD: "comparison" */
-            comparison?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            jobNumber?: components["schemas"]["BusinessNumber"];
+            versionNo: number;
+            quoteId: components["schemas"]["Uuid"];
+            /** @description expectedDraftVersion for pol.Job.updateDraft */
+            draftVersion: number;
+            state: components["schemas"]["JobStateCode"];
+            recordVersion: number;
+            /** @description The version this call superseded, when it did */
+            supersededVersionNo?: number;
+            sourceJobId?: components["schemas"]["Uuid"];
+            sourceVersionNo?: number;
         };
-        /** @description pol.Job.copyVersion request. PRD inputs: "jobId, sourceVersion" */
+        /** @description pol.Job.copyVersion request: copies any version into a new version of the same Quoted job (restore a prior version) or into a new Draft job (a fresh submission with the same risk data and product resolution). Typed from REQ-POL-150, REQ-POL-151. */
         JobCopyVersionRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "sourceVersion" */
-            sourceVersion?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            sourceVersion: number;
+            /** @enum {string} */
+            target: "NEW_VERSION" | "NEW_JOB";
+            /** @description The source job's record version as read */
+            expectedRecordVersion: number;
         };
-        /** @description pol.Job.copyVersion result. PRD outputs: "new version; comparison" */
+        /** @description pol.Job.copyVersion result: the new version, in the same job or in the new job. */
         JobCopyVersionResponse: {
-            /** @description PRD: "new version" */
-            newVersion?: components["schemas"]["Unspecified"];
-            /** @description PRD: "comparison" */
-            comparison?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            jobNumber?: components["schemas"]["BusinessNumber"];
+            versionNo: number;
+            quoteId: components["schemas"]["Uuid"];
+            /** @description expectedDraftVersion for pol.Job.updateDraft */
+            draftVersion: number;
+            state: components["schemas"]["JobStateCode"];
+            recordVersion: number;
+            /** @description The version this call superseded, when it did */
+            supersededVersionNo?: number;
+            sourceJobId?: components["schemas"]["Uuid"];
+            sourceVersionNo?: number;
         };
         /** @description pol.Job.compareVersions request. PRD inputs: "jobId, sourceVersion" */
         JobCompareVersionsRequest: {
@@ -1734,6 +1769,10 @@ export interface components {
             currentVersionNo: number;
             /** @description Bound transaction */
             transactionId?: components["schemas"]["Uuid"];
+            /** @description Pass as expectedRecordVersion to pol.Job.newVersion, requote, copyVersion and notTaken */
+            recordVersion?: number;
+            /** @description The rating artefact the job is pinned to, once rated */
+            ratingArtefactHash?: components["schemas"]["Sha256"];
             versions: components["schemas"]["QuoteVersionView"][];
             createdAt: components["schemas"]["Instant"];
         };
@@ -1832,19 +1871,21 @@ export interface components {
             /** @description PRD: "job" */
             job?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Job.notTaken request. PRD inputs: "jobId, reasonCode, text" */
+        /** @description pol.Job.notTaken request: closes a Quoted job as not taken (Quoted to NotTaken); idempotent. Typed from REQ-POL-073, REQ-POL-155. */
         JobNotTakenRequest: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "reasonCode" */
-            reasonCode?: components["schemas"]["Unspecified"];
-            /** @description PRD: "text" */
-            text?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            reasonCode: components["schemas"]["Code"];
+            text?: string;
+            expectedRecordVersion: number;
         };
-        /** @description pol.Job.notTaken result. PRD outputs: "job" */
+        /** @description pol.Job.notTaken result. */
         JobNotTakenResponse: {
-            /** @description PRD: "job" */
-            job?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            state: components["schemas"]["JobStateCode"];
+            reasonCode: components["schemas"]["Code"];
+            recordVersion: number;
+            /** @description True when the job was already NotTaken (nothing was written, no event published) */
+            replayed: boolean;
         };
         /** @description pol.Job.rebase request. PRD inputs: "jobId" */
         JobRebaseRequest: {
@@ -1890,10 +1931,33 @@ export interface components {
             /** @description PRD: "lease" */
             lease?: components["schemas"]["Unspecified"];
         };
-        /** @description pol.Job.list result. PRD outputs: "jobs" */
+        /** @description One job of pol.Job.list (REQ-POL-331). Newest first (created_at desc, job_id desc, keyset). `jobs` is the slim legacy object of the in-process caller (jobId, jobType, state, createdAt). */
         JobListItem: {
-            /** @description PRD: "jobs" */
-            jobs?: components["schemas"]["Unspecified"];
+            jobId?: components["schemas"]["Uuid"];
+            jobNumber?: components["schemas"]["BusinessNumber"];
+            jobType?: components["schemas"]["Code"];
+            state?: components["schemas"]["JobStateCode"];
+            referred?: boolean;
+            policyId?: components["schemas"]["Uuid"];
+            policyholderPartyId?: components["schemas"]["Uuid"];
+            accountId?: components["schemas"]["Uuid"];
+            productCode?: components["schemas"]["Code"];
+            producerCode?: components["schemas"]["Code"];
+            channel?: components["schemas"]["Code"];
+            /** @enum {string} */
+            quoteType?: "QUICK" | "FULL";
+            currentVersionNo?: number;
+            /** @description Pass as expectedRecordVersion to the lifecycle commands */
+            recordVersion?: number;
+            /** @description Total of the current quote version, when priced */
+            total?: components["schemas"]["Money"];
+            /** @description The rating artefact the job is pinned to, once rated */
+            ratingArtefactHash?: components["schemas"]["Sha256"];
+            effectiveAt?: components["schemas"]["Instant"];
+            createdAt?: components["schemas"]["Instant"];
+            updatedAt?: components["schemas"]["Instant"];
+            /** @description Slim legacy object for in-process callers. */
+            jobs?: unknown;
         };
         /** @description Page of pol.Job.list results (cursor pagination, contract §3.5.5) */
         JobListPage: components["schemas"]["PageEnvelope"] & {
@@ -3636,8 +3700,14 @@ export interface operations {
                 policy?: string;
                 /** @description PRD: "participant" */
                 participant?: string;
-                /** @description PRD: "state" */
+                /** @description Job state code (DRAFT, QUOTED, BOUND, ..., NOT_TAKEN); comma-separated for several */
                 state?: string;
+                /** @description Policyholder party id */
+                partyId?: string;
+                producerCode?: string;
+                productCode?: string;
+                /** @description SUBMISSION, POLICY_CHANGE, CANCELLATION or RENEWAL */
+                jobType?: string;
             };
             header?: {
                 /**

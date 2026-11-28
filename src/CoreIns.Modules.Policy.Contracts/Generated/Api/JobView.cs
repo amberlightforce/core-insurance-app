@@ -88,6 +88,16 @@ public sealed record JobView
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.PolicyTransactionId? TransactionId { get; init; }
 
+    /// <summary>Pass as expectedRecordVersion to pol.Job.newVersion, requote, copyVersion and notTaken</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? RecordVersion { get; init; }
+
+    /// <summary>The rating artefact the job is pinned to, once rated</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ratingArtefactHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? RatingArtefactHash { get; init; }
+
     /// <summary>Contract member 'versions'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("versions")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Policy.Contracts.Api.QuoteVersionView> Versions { get; init; }

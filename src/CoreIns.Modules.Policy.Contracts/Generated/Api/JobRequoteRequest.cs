@@ -4,20 +4,42 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Job.requote request. PRD inputs: "jobId, versionNo"</summary>
+/// <summary>pol.Job.requote request: re-rates and re-evaluates the current version as a new quote version. ratingArtefact says which artefact: IN_FORCE_NOW releases the pin and rates under the artefact in force (RAT effective-dated activation) and re-pins to it; PINNED keeps the job pinned artefact (or pins ratingArtefactHash). The choice is recorded in the audit and the response. Typed from REQ-POL-011, REQ-…</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JobRequoteRequest
 {
-    /// <summary>PRD: "jobId"</summary>
+    /// <summary>Contract member 'jobId'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Identifiers.JobId? JobId { get; init; }
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
-    /// <summary>PRD: "versionNo"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Must be the job's current version</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("versionNo")]
+    public required int VersionNo { get; init; }
+
+    /// <summary>Contract member 'expectedRecordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("expectedRecordVersion")]
+    public required int ExpectedRecordVersion { get; init; }
+
+    /// <summary>Contract member 'ratingArtefact'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ratingArtefact")]
+    public required RatingArtefactValue RatingArtefact { get; init; }
+
+    /// <summary>With PINNED only; defaults to the job's current pin</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ratingArtefactHash")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? VersionNo { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? RatingArtefactHash { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<RatingArtefactValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum RatingArtefactValue
+    {
+        /// <summary><c>IN_FORCE_NOW</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("IN_FORCE_NOW")]
+        InForceNow,
+
+        /// <summary><c>PINNED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PINNED")]
+        Pinned,
+    }
 }

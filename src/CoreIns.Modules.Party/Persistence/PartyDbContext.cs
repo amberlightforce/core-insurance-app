@@ -56,6 +56,8 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
 
     public DbSet<ProducerOfRecordRow> ProducerOfRecords => Set<ProducerOfRecordRow>();
 
+    public DbSet<PartyMergeRow> PartyMerges => Set<PartyMergeRow>();
+
     protected override string Schema => PartyModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -127,6 +129,40 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
             entity.Property(e => e.RatePct).HasColumnName("rate_pct").HasColumnType("numeric(7,4)");
             entity.HasIndex(e => new { e.VersionId, e.LineNo }).IsUnique().HasDatabaseName("ux_commission_line_no");
             entity.HasOne<CommissionAgreementVersionRow>().WithMany().HasForeignKey(e => e.VersionId).HasConstraintName("fk_commission_line_version").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PartyMergeRow>(entity =>
+        {
+            entity.ToTable("party_merge", table =>
+            {
+                table.HasCheckConstraint("ck_party_merge_status", "status IN ('PENDING_APPROVAL','EXECUTED','REJECTED','UNMERGED')");
+                table.HasCheckConstraint("ck_party_merge_distinct", "survivor_party_id <> merged_party_id");
+            });
+            entity.HasKey(e => e.MergeId).HasName("pk_party_merge");
+            entity.Property(e => e.MergeId).HasColumnName("merge_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.SurvivorPartyId).HasColumnName("survivor_party_id");
+            entity.Property(e => e.MergedPartyId).HasColumnName("merged_party_id");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.Reason).HasColumnName("reason");
+            entity.Property(e => e.PriorStatus).HasColumnName("prior_status");
+            entity.Property(e => e.ContentHash).HasColumnName("content_hash");
+            entity.Property(e => e.ApprovalRequestId).HasColumnName("approval_request_id");
+            entity.Property(e => e.RequestedBy).HasColumnName("requested_by");
+            entity.Property(e => e.RequestedAt).HasColumnName("requested_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecidedBy).HasColumnName("decided_by");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecisionComment).HasColumnName("decision_comment");
+            entity.Property(e => e.ExecutedAt).HasColumnName("executed_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UnmergeWindowEnd).HasColumnName("unmerge_window_end").HasColumnType("timestamptz");
+            entity.Property(e => e.UnmergedAt).HasColumnName("unmerged_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UnmergedBy).HasColumnName("unmerged_by");
+            entity.Property(e => e.UnmergeReason).HasColumnName("unmerge_reason");
+            entity.HasIndex(e => e.MergedPartyId).IsUnique().HasFilter("status IN ('PENDING_APPROVAL','EXECUTED')").HasDatabaseName("ux_party_merge_open_merged");
+            entity.HasIndex(e => e.SurvivorPartyId).HasDatabaseName("ix_party_merge_survivor");
+            entity.HasIndex(e => new { e.LegalEntityId, e.Status, e.RequestedAt }).HasDatabaseName("ix_party_merge_status");
+            entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.SurvivorPartyId).HasConstraintName("fk_party_merge_survivor").OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.MergedPartyId).HasConstraintName("fk_party_merge_merged").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<ProducerOfRecordRow>(entity =>

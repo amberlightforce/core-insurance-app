@@ -4,23 +4,54 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Job.newVersion result. PRD outputs: "new version; comparison"</summary>
+/// <summary>pol.Job.newVersion result: the new Draft version. Comparison of versions is pol.Job.compareVersions (BO-POL-04).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JobNewVersionResponse
 {
-    /// <summary>PRD: "new version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("newVersion")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? NewVersion { get; init; }
+    /// <summary>Contract member 'jobId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
-    /// <summary>PRD: "comparison"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("comparison")]
+    /// <summary>Contract member 'jobNumber'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobNumber")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Comparison { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.JobNumber? JobNumber { get; init; }
+
+    /// <summary>Contract member 'versionNo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("versionNo")]
+    public required int VersionNo { get; init; }
+
+    /// <summary>Contract member 'quoteId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("quoteId")]
+    public required global::CoreIns.SharedKernel.Identifiers.QuoteId QuoteId { get; init; }
+
+    /// <summary>expectedDraftVersion for pol.Job.updateDraft</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("draftVersion")]
+    public required int DraftVersion { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.JobStateCode State { get; init; }
+
+    /// <summary>Contract member 'recordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    public required int RecordVersion { get; init; }
+
+    /// <summary>The version this call superseded, when it did</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("supersededVersionNo")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? SupersededVersionNo { get; init; }
+
+    /// <summary>Contract member 'sourceJobId'.</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'sourceJobId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceJobId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Guid? SourceJobId { get; init; }
+
+    /// <summary>Contract member 'sourceVersionNo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceVersionNo")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? SourceVersionNo { get; init; }
 }

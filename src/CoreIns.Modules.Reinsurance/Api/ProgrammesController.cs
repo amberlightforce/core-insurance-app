@@ -52,6 +52,27 @@ internal sealed class ProgrammesController : ControllerBase
         [FromBody] ProgrammeRenewRequest request, [FromServices] ICommandHandler<RenewProgramme, ProgrammeRenewResponse> handler, CancellationToken cancellationToken) =>
         (await handler.HandleAsync(new RenewProgramme(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
+    /// <summary>ri.Programme.submit: DRAFT to PENDING_APPROVAL with an in-process PLT approval request (BO-RI-02).</summary>
+    [HttpPost("api/ri/v1/programmes/submit")]
+    [Authorize(Policy = ReinsurancePermissions.ProgrammeSubmit)]
+    public async Task<IResult> SubmitAsync(
+        [FromBody] ProgrammeSubmitRequest request, [FromServices] ICommandHandler<SubmitProgramme, ProgrammeSubmitResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new SubmitProgramme(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>ri.Programme.approve: the checker's approval; the version becomes ACTIVE and supersedes the previous one.</summary>
+    [HttpPost("api/ri/v1/programmes/approve")]
+    [Authorize(Policy = ReinsurancePermissions.ProgrammeApprove)]
+    public async Task<IResult> ApproveAsync(
+        [FromBody] ProgrammeApproveRequest request, [FromServices] ICommandHandler<ApproveProgramme, ProgrammeApproveResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ApproveProgramme(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>ri.Programme.return: the checker sends the version back to DRAFT with a reason.</summary>
+    [HttpPost("api/ri/v1/programmes/return")]
+    [Authorize(Policy = ReinsurancePermissions.ProgrammeReturn)]
+    public async Task<IResult> ReturnAsync(
+        [FromBody] ProgrammeReturnRequest request, [FromServices] ICommandHandler<ReturnProgramme, ProgrammeReturnResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new ReturnProgramme(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
     /// <summary>ri.Programme.list.</summary>
     [HttpGet("api/ri/v1/programmes")]
     [Authorize(Policy = ReinsurancePermissions.ProgrammeList)]

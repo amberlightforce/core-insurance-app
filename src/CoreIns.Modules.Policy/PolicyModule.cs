@@ -5,6 +5,7 @@ using CoreIns.Modules.Policy.Commands.Cancellation.NonPayment;
 using CoreIns.Modules.Policy.Commands.Withdrawal;
 using CoreIns.Modules.Policy.Commands.Renewal;
 using CoreIns.Modules.Policy.Commands.Change;
+using CoreIns.Modules.Policy.Commands.Quotes;
 using CoreIns.Modules.Policy.Commands.Change.Oos;
 using CoreIns.Modules.Migration.Contracts.Spi;
 using CoreIns.Modules.Policy.Contracts;
@@ -126,6 +127,20 @@ public static class PolicyModule
         services.AddScoped<IValidator<WithdrawJob>, WithdrawJobValidator>();
         services.AddCommandAuditor<WithdrawJob, JobWithdrawResponse, WithdrawJobAuditor>();
         services.AddCommand<WithdrawJob, JobWithdrawResponse, WithdrawJobHandler>(CommandDescriptor.For("pol.Job.withdraw"));
+        // BO-POL-03: quote job lifecycle.
+        services.AddScoped<JobList>();
+        services.AddScoped<IValidator<NewVersion>, NewVersionValidator>();
+        services.AddCommandAuditor<NewVersion, JobNewVersionResponse, NewVersionAuditor>();
+        services.AddCommand<NewVersion, JobNewVersionResponse, NewVersionHandler>(CommandDescriptor.For("pol.Job.newVersion"));
+        services.AddScoped<IValidator<CopyVersion>, CopyVersionValidator>();
+        services.AddCommandAuditor<CopyVersion, JobCopyVersionResponse, CopyVersionAuditor>();
+        services.AddCommand<CopyVersion, JobCopyVersionResponse, CopyVersionHandler>(CommandDescriptor.For("pol.Job.copyVersion"));
+        services.AddScoped<IValidator<Requote>, RequoteValidator>();
+        services.AddCommandAuditor<Requote, JobRequoteResponse, RequoteAuditor>();
+        services.AddCommand<Requote, JobRequoteResponse, RequoteHandler>(CommandDescriptor.For("pol.Job.requote") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<NotTaken>, NotTakenValidator>();
+        services.AddCommandAuditor<NotTaken, JobNotTakenResponse, NotTakenAuditor>();
+        services.AddCommand<NotTaken, JobNotTakenResponse, NotTakenHandler>(CommandDescriptor.For("pol.Job.notTaken"));
         services.AddErrorDefinitions(ChangeErrors.Definitions);
 
         // In-process contracts other modules call (D-ARC-16).

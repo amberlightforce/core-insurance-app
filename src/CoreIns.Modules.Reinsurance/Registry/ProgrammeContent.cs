@@ -18,6 +18,32 @@ internal sealed record ProgrammeContent(string Name, BusinessDate ValidFrom, Bus
     /// <summary>The distinct contracts of the ladder, in the order of their lowest layer.</summary>
     public IReadOnlyList<RiContractId> ContractIds => [.. Layers.OrderBy(l => l.LayerNo).Select(l => l.ContractId).Distinct()];
 
+    /// <summary>
+    /// SHA-256 over the canonical text of the version: programme, version number, identity, name, period and the ladder with the contract each
+    /// layer sits on, amounts in a fixed scale. The programme id and version number are part of the text, so a hash cannot be replayed (BO-RI-02).
+    /// </summary>
+    public Sha256Hash Hash(RiProgrammeId programmeId, int versionNo, string code, string lineCode, int year)
+    {
+        var text = new System.Text.StringBuilder();
+        void Line(string key, string value) => text.Append(key).Append('=').Append(value).Append((char)10);
+        Line("programme", programmeId.Value.ToString("D"));
+        Line("version", versionNo.ToString(CultureInfo.InvariantCulture));
+        Line("code", code);
+        Line("line", lineCode);
+        Line("year", year.ToString(CultureInfo.InvariantCulture));
+        Line("name", Name);
+        Line("validFrom", ValidFrom.ToString());
+        Line("validTo", ValidTo.ToString());
+        foreach (var layer in Layers.OrderBy(l => l.LayerNo))
+        {
+            Line(
+                FormattableString.Invariant($"layer.{layer.LayerNo}"),
+                string.Join('|', layer.Attachment.ToString("F4", CultureInfo.InvariantCulture), layer.Limit.ToString("F4", CultureInfo.InvariantCulture), layer.ContractId.Value.ToString("D")));
+        }
+
+        return Sha256Hash.ComputeUtf8(text.ToString());
+    }
+
     /// <summary>The content as flat <c>field = text</c> facts, for the diff the commands return.</summary>
     public IReadOnlyDictionary<string, string> Facts()
     {

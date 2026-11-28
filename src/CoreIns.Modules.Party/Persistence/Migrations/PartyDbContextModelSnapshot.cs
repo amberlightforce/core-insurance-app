@@ -980,6 +980,112 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.PartyMergeRow", b =>
+                {
+                    b.Property<Guid>("MergeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("merge_id");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content_hash");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionComment")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_comment");
+
+                    b.Property<DateTime?>("ExecutedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("executed_at");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("MergedPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("merged_party_id");
+
+                    b.Property<string>("PriorStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("prior_status");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("requested_at");
+
+                    b.Property<string>("RequestedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("requested_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("SurvivorPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("survivor_party_id");
+
+                    b.Property<string>("UnmergeReason")
+                        .HasColumnType("text")
+                        .HasColumnName("unmerge_reason");
+
+                    b.Property<DateTime?>("UnmergeWindowEnd")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("unmerge_window_end");
+
+                    b.Property<DateTime?>("UnmergedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("unmerged_at");
+
+                    b.Property<string>("UnmergedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("unmerged_by");
+
+                    b.HasKey("MergeId")
+                        .HasName("pk_party_merge");
+
+                    b.HasIndex("MergedPartyId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_party_merge_open_merged")
+                        .HasFilter("status IN ('PENDING_APPROVAL','EXECUTED')");
+
+                    b.HasIndex("SurvivorPartyId")
+                        .HasDatabaseName("ix_party_merge_survivor");
+
+                    b.HasIndex("LegalEntityId", "Status", "RequestedAt")
+                        .HasDatabaseName("ix_party_merge_status");
+
+                    b.ToTable("party_merge", "pty", t =>
+                        {
+                            t.HasCheckConstraint("ck_party_merge_distinct", "survivor_party_id <> merged_party_id");
+
+                            t.HasCheckConstraint("ck_party_merge_status", "status IN ('PENDING_APPROVAL','EXECUTED','REJECTED','UNMERGED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.PartyNameRow", b =>
                 {
                     b.Property<Guid>("NameId")
@@ -1703,6 +1809,23 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_party_identifier_party");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.PartyMergeRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.PartyRow", null)
+                        .WithMany()
+                        .HasForeignKey("MergedPartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_party_merge_merged");
+
+                    b.HasOne("CoreIns.Modules.Party.Persistence.PartyRow", null)
+                        .WithMany()
+                        .HasForeignKey("SurvivorPartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_party_merge_survivor");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.PartyNameRow", b =>

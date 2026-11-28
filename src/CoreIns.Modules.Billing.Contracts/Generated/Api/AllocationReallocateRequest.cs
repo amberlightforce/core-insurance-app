@@ -4,34 +4,45 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.Allocation.reallocate request. PRD inputs: "receipt or suspense, lines"</summary>
-/// <remarks>
-/// <para>Exactly one of: receipt | suspense.</para>
-/// </remarks>
+/// <summary>bil.Allocation.reallocate request (BO-BIL-07): reverse allocations and apply the cash to other invoices in one transaction</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AllocationReallocateRequest
 {
-    /// <summary>PRD: "receipt or suspense" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("receipt")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Receipt { get; init; }
+    /// <summary>Contract member 'receiptId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("receiptId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PaymentId ReceiptId { get; init; }
 
-    /// <summary>PRD: "receipt or suspense" (optional)</summary>
+    /// <summary>Allocations to reverse; omitted or empty reverses every live allocation of the receipt</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'allocationId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("suspense")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("allocationIds")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Suspense { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? AllocationIds { get; init; }
 
-    /// <summary>PRD: "lines"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'reasonCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
+    public required string ReasonCode { get; init; }
+
+    /// <summary>Contract member 'comment'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("comment")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Comment { get; init; }
+
+    /// <summary>The new allocation, as for bil.Allocation.allocate</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("lines")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Lines { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<LineItem> Lines { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record LineItem
+    {
+        /// <summary>Contract member 'invoiceId'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("invoiceId")]
+        public required global::CoreIns.SharedKernel.Identifiers.InvoiceId InvoiceId { get; init; }
+
+        /// <summary>Contract member 'amount'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+        public required global::CoreIns.SharedKernel.Money Amount { get; init; }
+    }
 }

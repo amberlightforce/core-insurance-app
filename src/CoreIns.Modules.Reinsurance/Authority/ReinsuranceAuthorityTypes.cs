@@ -17,6 +17,9 @@ public static class ReinsuranceAuthorityTypes
     /// <summary>Approve or return a reinsurance contract (the maker-checker of REQ-RI-057).</summary>
     public static AuthorityTypeCode ContractApprove { get; } = AuthorityTypeCode.Parse("RI.CONTRACT_APPROVE");
 
+    /// <summary>Approve or return a reinsurance programme version (BO-RI-02); limited by the total limit of the ladder (EUR).</summary>
+    public static AuthorityTypeCode ProgrammeApprove { get; } = AuthorityTypeCode.Parse("RI.PROGRAMME_APPROVE");
+
     /// <summary>Make a manual recovery adjustment (BO-RI-08); limited by the amount of the adjustment.</summary>
     public static AuthorityTypeCode RecoveryAdjustment { get; } = AuthorityTypeCode.Parse("RI.RECOVERY_ADJUSTMENT");
 
@@ -38,6 +41,9 @@ public static class ReinsuranceAuthorityTypes
         new AuthorityTypeDefinition(
             ContractApprove, ModuleCode.RI, new LocalizedText("Έγκριση αντασφαλιστικής σύμβασης", "Approve reinsurance contract"),
             [new AuthorityDimensionDefinition(ContractTypeDimension, DimensionKind.Code)]),
+        new AuthorityTypeDefinition(
+            ProgrammeApprove, ModuleCode.RI, new LocalizedText("Έγκριση αντασφαλιστικού προγράμματος", "Approve reinsurance programme"),
+            [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
         new AuthorityTypeDefinition(
             AdjustmentApprove, ModuleCode.RI, new LocalizedText("Έγκριση προσαρμογής αντασφαλιστικού ασφαλίστρου ή προμήθειας", "Approve reinsurance premium adjustment or commission"),
             [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),

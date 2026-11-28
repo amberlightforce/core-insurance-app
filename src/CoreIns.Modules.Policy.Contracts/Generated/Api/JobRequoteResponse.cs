@@ -4,36 +4,111 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Job.requote result. PRD outputs: "quote version, premium, issues, validity"</summary>
+/// <summary>pol.Job.requote result: the new quote version, as pol.Job.quote returns it, plus the artefact used.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JobRequoteResponse
 {
-    /// <summary>PRD: "quote version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("quoteVersion")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? QuoteVersion { get; init; }
+    /// <summary>Contract member 'jobId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
 
-    /// <summary>PRD: "premium"</summary>
+    /// <summary>Contract member 'quoteId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("quoteId")]
+    public required global::CoreIns.SharedKernel.Identifiers.QuoteId QuoteId { get; init; }
+
+    /// <summary>Contract member 'versionNo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("versionNo")]
+    public required int VersionNo { get; init; }
+
+    /// <summary>Contract member 'supersededVersionNo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("supersededVersionNo")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public int? SupersededVersionNo { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.JobStateCode State { get; init; }
+
+    /// <summary>Contract member 'decision'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("decision")]
+    public required DecisionValue Decision { get; init; }
+
+    /// <summary>Contract member 'referred'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("referred")]
+    public required bool Referred { get; init; }
+
+    /// <summary>Contract member 'bindable'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("bindable")]
+    public required bool Bindable { get; init; }
+
+    /// <summary>Contract member 'premium'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("premium")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.Money? Premium { get; init; }
+    public required global::CoreIns.SharedKernel.Money Premium { get; init; }
 
-    /// <summary>PRD: "issues"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'taxes'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("taxes")]
+    public required global::CoreIns.SharedKernel.Money Taxes { get; init; }
+
+    /// <summary>Contract member 'total'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("total")]
+    public required global::CoreIns.SharedKernel.Money Total { get; init; }
+
+    /// <summary>Contract member 'issues'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("issues")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Issues { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Policy.Contracts.Api.UwIssue> Issues { get; init; }
 
-    /// <summary>PRD: "validity"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("validity")]
+    /// <summary>Contract member 'validUntil'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validUntil")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Validity { get; init; }
+    public global::CoreIns.SharedKernel.Instant? ValidUntil { get; init; }
+
+    /// <summary>Contract member 'ratingArtefact'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ratingArtefact")]
+    public required RatingArtefactValue RatingArtefact { get; init; }
+
+    /// <summary>The artefact the new version was rated with (now the job's pin)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("ratingArtefactHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? RatingArtefactHash { get; init; }
+
+    /// <summary>Contract member 'previousRatingArtefactHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("previousRatingArtefactHash")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? PreviousRatingArtefactHash { get; init; }
+
+    /// <summary>Contract member 'recordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    public required int RecordVersion { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<DecisionValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum DecisionValue
+    {
+        /// <summary><c>ACCEPT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ACCEPT")]
+        Accept,
+
+        /// <summary><c>REFER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REFER")]
+        Refer,
+
+        /// <summary><c>DECLINE</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DECLINE")]
+        Decline,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<RatingArtefactValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum RatingArtefactValue
+    {
+        /// <summary><c>IN_FORCE_NOW</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("IN_FORCE_NOW")]
+        InForceNow,
+
+        /// <summary><c>PINNED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("PINNED")]
+        Pinned,
+    }
 }

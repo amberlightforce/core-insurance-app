@@ -416,11 +416,20 @@ paths:
       x-error-codes:
       - code: RI-ERR-VALIDATION
         status: 422
-      - code: RI-ERR-SHARES-OVER-100
-        status: 422
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: RI-ERR-STATE
+        note: the version is not in the state this step needs, or a contract of the ladder is not Approved
+        status: 422
+      - code: RI-ERR-SOD
+        note: the checker took part in the programme (maker-checker)
+        status: 403
+      - code: RI-ERR-STALE
+        status: 409
+      - code: RI-ERR-NOT-FOUND
+        status: 404
+      x-typed: 'BO-RI-02: REQ-RI-030, REQ-RI-057'
       x-source:
       - PRD-08 §9.1 l.1500
       parameters:
@@ -484,11 +493,20 @@ paths:
       x-error-codes:
       - code: RI-ERR-VALIDATION
         status: 422
-      - code: RI-ERR-SHARES-OVER-100
-        status: 422
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: RI-ERR-STATE
+        note: the version is not in the state this step needs, or a contract of the ladder is not Approved
+        status: 422
+      - code: RI-ERR-SOD
+        note: the checker took part in the programme (maker-checker)
+        status: 403
+      - code: RI-ERR-STALE
+        status: 409
+      - code: RI-ERR-NOT-FOUND
+        status: 404
+      x-typed: 'BO-RI-02: REQ-RI-030, REQ-RI-057'
       x-source:
       - PRD-08 §9.1 l.1500
       parameters:
@@ -551,11 +569,20 @@ paths:
       x-error-codes:
       - code: RI-ERR-VALIDATION
         status: 422
-      - code: RI-ERR-SHARES-OVER-100
-        status: 422
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: RI-ERR-STATE
+        note: the version is not in the state this step needs, or a contract of the ladder is not Approved
+        status: 422
+      - code: RI-ERR-SOD
+        note: the checker took part in the programme (maker-checker)
+        status: 403
+      - code: RI-ERR-STALE
+        status: 409
+      - code: RI-ERR-NOT-FOUND
+        status: 404
+      x-typed: 'BO-RI-02: REQ-RI-030, REQ-RI-057'
       x-source:
       - PRD-08 §9.1 l.1500
       parameters:
@@ -8076,6 +8103,16 @@ components:
           - $ref: ../events/common.schema.json#/$defs/Uuid
           - type: 'null'
           description: The programme this one renewed, when it was created by renew
+        approvalRequestId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The PLT approval request of the last submit of the current version
+        returnReason:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: The checker's reason when the current version was returned to DRAFT
         versions:
           type: array
           items:
@@ -8121,73 +8158,80 @@ components:
         - after
     ProgrammeSubmitRequest:
       type: object
-      description: 'ri.Programme.submit request. PRD inputs: "programme data; period; decision"'
+      description: 'ri.Programme.submit request: DRAFT -> PENDING_APPROVAL; RI opens the PLT approval RI.PROGRAMME_APPROVE bound to the content hash (the
+        enterer is the maker and can never approve).'
       properties:
-        programmeData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programme data"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+        programmeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - programmeId
+      - expectedRecordVersion
     ProgrammeSubmitResponse:
       type: object
-      description: 'ri.Programme.submit result. PRD outputs: "programme, diff"'
+      description: ri.Programme.submit result
       properties:
         programme:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programme"'
-        diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
+          $ref: '#/components/schemas/RiProgramme'
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - programme
+      - approvalRequestId
     ProgrammeApproveRequest:
       type: object
-      description: 'ri.Programme.approve request. PRD inputs: "programme data; period; decision"'
+      description: ri.Programme.approve request. The approver must not have entered, edited or submitted the programme (RI-ERR-SOD); every contract of the
+        ladder must be Approved or Active (RI-ERR-STATE).
       properties:
-        programmeData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programme data"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+        programmeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - programmeId
+      - expectedRecordVersion
     ProgrammeApproveResponse:
       type: object
-      description: 'ri.Programme.approve result. PRD outputs: "programme, diff"'
+      description: ri.Programme.approve result. The version becomes ACTIVE; the previously active version of the programme becomes SUPERSEDED in the same
+        transaction.
       properties:
         programme:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programme"'
-        diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
+          $ref: '#/components/schemas/RiProgramme'
+        supersededVersionNo:
+          oneOf:
+          - type: integer
+            minimum: 1
+          - type: 'null'
+          description: The version that was superseded by this approval, if any
+      required:
+      - programme
     ProgrammeReturnRequest:
       type: object
-      description: 'ri.Programme.return request. PRD inputs: "programme data; period; decision"'
+      description: ri.Programme.return request. Sends a pending version back to DRAFT with the checker's reason; the PLT request is rejected.
       properties:
-        programmeData:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programme data"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
-        decision:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "decision"'
+        programmeId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Why the programme is returned (required)
+      required:
+      - programmeId
+      - expectedRecordVersion
+      - reason
     ProgrammeReturnResponse:
       type: object
-      description: 'ri.Programme.return result. PRD outputs: "programme, diff"'
+      description: ri.Programme.return result
       properties:
         programme:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "programme"'
-        diff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "diff"'
+          $ref: '#/components/schemas/RiProgramme'
+      required:
+      - programme
     ProgrammeGetResponse:
       type: object
       description: ri.Programme.get result

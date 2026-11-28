@@ -352,14 +352,23 @@ paths:
       - ui
       x-permission: pol.Job.requote
       x-error-codes:
+      - code: POL-ERR-STALE
+        note: expectedRecordVersion no longer matches the job, or the version is not the current one
+        status: 409
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
+      - code: POL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
       - code: POL-ERR-QUICK-QUOTE-NOT-BINDABLE
         note: bind only
         status: 422
       - code: POL-ERR-RATING
         status: 422
-      - code: POL-ERR-IDEMPOTENCY-MISMATCH
-        note: contract §3.5.3 (replay with a different payload)
-        status: 409
+      - code: POL-ERR-VALIDATION
+        status: 422
       x-source:
       - PRD-05 §9.1 l.1776
       parameters:
@@ -425,9 +434,19 @@ paths:
       - CHN facade POST /api/chn/v1/quotes/{id}/versions`, `GET …/compare
       x-permission: pol.Job.newVersion
       x-error-codes:
+      - code: POL-ERR-STALE
+        note: expectedRecordVersion no longer matches the job, or the version is not the current one
+        status: 409
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: POL-ERR-VALIDATION
+        note: at most 20 versions per job
+        status: 422
       x-source:
       - PRD-05 §9.1 l.1777
       parameters:
@@ -489,9 +508,19 @@ paths:
       - ui
       x-permission: pol.Job.copyVersion
       x-error-codes:
+      - code: POL-ERR-STALE
+        note: expectedRecordVersion no longer matches the job, or the version is not the current one
+        status: 409
+      - code: POL-ERR-NOT-FOUND
+        status: 404
+      - code: POL-ERR-ILLEGAL-TRANSITION
+        status: 409
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
+      - code: POL-ERR-VALIDATION
+        note: at most 20 versions per job
+        status: 422
       x-source:
       - PRD-05 §9.1 l.1777
       parameters:
@@ -783,8 +812,13 @@ paths:
       - ui
       x-permission: pol.Job.notTaken
       x-error-codes:
+      - code: POL-ERR-STALE
+        note: expectedRecordVersion no longer matches the job, or the version is not the current one
+        status: 409
+      - code: POL-ERR-NOT-FOUND
+        status: 404
       - code: POL-ERR-ILLEGAL-TRANSITION
-        status: 422
+        status: 409
       - code: POL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1144,7 +1178,29 @@ paths:
       - name: state
         in: query
         required: false
-        description: 'PRD: "state"'
+        description: Job state code (DRAFT, QUOTED, BOUND, ..., NOT_TAKEN); comma-separated for several
+        schema:
+          type: string
+      - name: partyId
+        in: query
+        required: false
+        description: Policyholder party id
+        schema:
+          type: string
+      - name: producerCode
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: productCode
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: jobType
+        in: query
+        required: false
+        description: SUBMISSION, POLICY_CHANGE, CANCELLATION or RENEWAL
         schema:
           type: string
       responses:
@@ -4754,72 +4810,212 @@ components:
       description: 'Typed from REQ-POL-011, REQ-POL-157. PRD outputs: "quote version, premium, issues, validity"'
     JobRequoteRequest:
       type: object
-      description: 'pol.Job.requote request. PRD inputs: "jobId, versionNo"'
+      description: 'pol.Job.requote request: re-rates and re-evaluates the current version as a new quote version. ratingArtefact says which artefact: IN_FORCE_NOW releases the pin and rates under the artefact in force (RAT effective-dated activation) and re-pins to it; PINNED keeps the job pinned artefact (or pins ratingArtefactHash). The choice is recorded in the audit and the response. Typed from REQ-POL-011, REQ-POL-115.'
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "jobId"'
         versionNo:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "versionNo"'
+          type: integer
+          minimum: 1
+          description: Must be the job's current version
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+        ratingArtefact:
+          type: string
+          enum:
+          - IN_FORCE_NOW
+          - PINNED
+        ratingArtefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: With PINNED only; defaults to the job's current pin
+      required:
+      - jobId
+      - versionNo
+      - expectedRecordVersion
+      - ratingArtefact
     JobRequoteResponse:
       type: object
-      description: 'pol.Job.requote result. PRD outputs: "quote version, premium, issues, validity"'
+      description: 'pol.Job.requote result: the new quote version, as pol.Job.quote returns it, plus the artefact used.'
       properties:
-        quoteVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "quote version"'
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        quoteId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        versionNo:
+          type: integer
+          minimum: 1
+        supersededVersionNo:
+          type: integer
+          minimum: 1
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        decision:
+          type: string
+          enum:
+          - ACCEPT
+          - REFER
+          - DECLINE
+        referred:
+          type: boolean
+        bindable:
+          type: boolean
         premium:
           $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "premium"'
+        taxes:
+          $ref: ../events/common.schema.json#/$defs/Money
+        total:
+          $ref: ../events/common.schema.json#/$defs/Money
         issues:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "issues"'
-        validity:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "validity"'
+            $ref: '#/components/schemas/UwIssue'
+        validUntil:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        ratingArtefact:
+          type: string
+          enum:
+          - IN_FORCE_NOW
+          - PINNED
+        ratingArtefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: The artefact the new version was rated with (now the job's pin)
+        previousRatingArtefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        recordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - jobId
+      - quoteId
+      - versionNo
+      - state
+      - decision
+      - referred
+      - bindable
+      - premium
+      - taxes
+      - total
+      - issues
+      - ratingArtefact
+      - recordVersion
     JobNewVersionRequest:
       type: object
-      description: 'pol.Job.newVersion request. PRD inputs: "jobId, sourceVersion"'
+      description: 'pol.Job.newVersion request: copies the current quote version of a Quoted job into a new editable (Draft) version; the old one is superseded and immutable. Typed from REQ-POL-150, REQ-POL-151, REQ-POL-153.'
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "jobId"'
         sourceVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "sourceVersion"'
+          type: integer
+          minimum: 1
+          description: Must be the job's current version
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The job's record version as read (optimistic concurrency, POL-ERR-STALE)
+      required:
+      - jobId
+      - sourceVersion
+      - expectedRecordVersion
     JobNewVersionResponse:
       type: object
-      description: 'pol.Job.newVersion result. PRD outputs: "new version; comparison"'
-      properties:
-        newVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "new version"'
-        comparison:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "comparison"'
-    JobCopyVersionRequest:
-      type: object
-      description: 'pol.Job.copyVersion request. PRD inputs: "jobId, sourceVersion"'
+      description: 'pol.Job.newVersion result: the new Draft version. Comparison of versions is pol.Job.compareVersions (BO-POL-04).'
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "jobId"'
+        jobNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        versionNo:
+          type: integer
+          minimum: 1
+        quoteId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        draftVersion:
+          type: integer
+          minimum: 0
+          description: expectedDraftVersion for pol.Job.updateDraft
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        recordVersion:
+          type: integer
+          minimum: 1
+        supersededVersionNo:
+          type: integer
+          minimum: 1
+          description: The version this call superseded, when it did
+        sourceJobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        sourceVersionNo:
+          type: integer
+          minimum: 1
+      required:
+      - jobId
+      - versionNo
+      - quoteId
+      - draftVersion
+      - state
+      - recordVersion
+    JobCopyVersionRequest:
+      type: object
+      description: 'pol.Job.copyVersion request: copies any version into a new version of the same Quoted job (restore a prior version) or into a new Draft job (a fresh submission with the same risk data and product resolution). Typed from REQ-POL-150, REQ-POL-151.'
+      properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         sourceVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "sourceVersion"'
+          type: integer
+          minimum: 1
+        target:
+          type: string
+          enum:
+          - NEW_VERSION
+          - NEW_JOB
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+          description: The source job's record version as read
+      required:
+      - jobId
+      - sourceVersion
+      - target
+      - expectedRecordVersion
     JobCopyVersionResponse:
       type: object
-      description: 'pol.Job.copyVersion result. PRD outputs: "new version; comparison"'
+      description: 'pol.Job.copyVersion result: the new version, in the same job or in the new job.'
       properties:
-        newVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "new version"'
-        comparison:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "comparison"'
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        jobNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        versionNo:
+          type: integer
+          minimum: 1
+        quoteId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        draftVersion:
+          type: integer
+          minimum: 0
+          description: expectedDraftVersion for pol.Job.updateDraft
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        recordVersion:
+          type: integer
+          minimum: 1
+        supersededVersionNo:
+          type: integer
+          minimum: 1
+          description: The version this call superseded, when it did
+        sourceJobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        sourceVersionNo:
+          type: integer
+          minimum: 1
+      required:
+      - jobId
+      - versionNo
+      - quoteId
+      - draftVersion
+      - state
+      - recordVersion
     JobCompareVersionsRequest:
       type: object
       description: 'pol.Job.compareVersions request. PRD inputs: "jobId, sourceVersion"'
@@ -5053,6 +5249,13 @@ components:
         transactionId:
           $ref: ../events/common.schema.json#/$defs/Uuid
           description: Bound transaction
+        recordVersion:
+          type: integer
+          minimum: 1
+          description: Pass as expectedRecordVersion to pol.Job.newVersion, requote, copyVersion and notTaken
+        ratingArtefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: The rating artefact the job is pinned to, once rated
         versions:
           type: array
           items:
@@ -5304,24 +5507,44 @@ components:
           description: 'PRD: "job"'
     JobNotTakenRequest:
       type: object
-      description: 'pol.Job.notTaken request. PRD inputs: "jobId, reasonCode, text"'
+      description: 'pol.Job.notTaken request: closes a Quoted job as not taken (Quoted to NotTaken); idempotent. Typed from REQ-POL-073, REQ-POL-155.'
       properties:
         jobId:
           $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "jobId"'
         reasonCode:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reasonCode"'
+          $ref: ../events/common.schema.json#/$defs/Code
         text:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "text"'
+          type: string
+          maxLength: 1000
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+      required:
+      - jobId
+      - reasonCode
+      - expectedRecordVersion
     JobNotTakenResponse:
       type: object
-      description: 'pol.Job.notTaken result. PRD outputs: "job"'
+      description: 'pol.Job.notTaken result.'
       properties:
-        job:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "job"'
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        recordVersion:
+          type: integer
+          minimum: 1
+        replayed:
+          type: boolean
+          description: True when the job was already NotTaken (nothing was written, no event published)
+      required:
+      - jobId
+      - state
+      - reasonCode
+      - recordVersion
+      - replayed
     JobRebaseRequest:
       type: object
       description: 'pol.Job.rebase request. PRD inputs: "jobId"'
@@ -5388,11 +5611,56 @@ components:
           description: 'PRD: "lease"'
     JobListItem:
       type: object
-      description: 'pol.Job.list result. PRD outputs: "jobs"'
+      description: 'One job of pol.Job.list (REQ-POL-331). Newest first (created_at desc, job_id desc, keyset). `jobs` is the slim legacy object of the in-process caller (jobId, jobType, state, createdAt).'
       properties:
+        jobId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        jobNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        jobType:
+          $ref: ../events/common.schema.json#/$defs/Code
+        state:
+          $ref: '#/components/schemas/JobStateCode'
+        referred:
+          type: boolean
+        policyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyholderPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        accountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        productCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        producerCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
+        quoteType:
+          type: string
+          enum:
+          - QUICK
+          - FULL
+        currentVersionNo:
+          type: integer
+          minimum: 1
+        recordVersion:
+          type: integer
+          minimum: 1
+          description: Pass as expectedRecordVersion to the lifecycle commands
+        total:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Total of the current quote version, when priced
+        ratingArtefactHash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: The rating artefact the job is pinned to, once rated
+        effectiveAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        updatedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
         jobs:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "jobs"'
+          description: Slim legacy object for in-process callers.
     JobListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope

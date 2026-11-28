@@ -4,23 +4,11 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Programme.return result. PRD outputs: "programme, diff"</summary>
+/// <summary>ri.Programme.return result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProgrammeReturnResponse
 {
-    /// <summary>PRD: "programme"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'programme'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("programme")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Programme { get; init; }
-
-    /// <summary>PRD: "diff"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("diff")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Diff { get; init; }
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiProgramme Programme { get; init; }
 }

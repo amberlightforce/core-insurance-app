@@ -36,6 +36,12 @@ public static class PartyAuthorityTypes
     /// <summary>The PLT approval type of a commission agreement version (owner-decided: PTY decides it, not the generic inbox).</summary>
     public const string CommissionApprovalType = "PTY.COMMISSION_AGREEMENT";
 
+    /// <summary>Approve or reject a party merge (BO-PTY-05): no dimension, the holder of the grant may decide any merge.</summary>
+    public static AuthorityTypeCode PartyMerge { get; } = AuthorityTypeCode.Parse("PTY.PARTY_MERGE");
+
+    /// <summary>The PLT approval type of a party merge (owner-decided: PTY decides it, not the generic inbox).</summary>
+    public const string PartyMergeApprovalType = "PTY.PARTY_MERGE";
+
     /// <summary>The amount dimension: expected annual premium volume in EUR.</summary>
     public const string AmountDimension = "amount";
 
@@ -51,6 +57,7 @@ public static class PartyAuthorityTypes
                 new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money),
                 new AuthorityDimensionDefinition(RateBandDimension, DimensionKind.Code),
             ]),
+        new AuthorityTypeDefinition(PartyMerge, ModuleCode.PTY, new LocalizedText("Έγκριση συγχώνευσης προσώπων", "Approve party merge"), []),
     ];
 
     /// <summary>Registers the Party authority types.</summary>

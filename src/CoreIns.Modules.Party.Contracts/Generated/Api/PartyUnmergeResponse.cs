@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Party.unmerge result. PRD outputs: "restored parties, approval request"</summary>
+/// <summary>pty.Party.unmerge result: the merge record (UNMERGED) and the restored party.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PartyUnmergeResponse
 {
-    /// <summary>PRD: "restored parties"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("restoredParties")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? RestoredParties { get; init; }
+    /// <summary>Contract member 'merge'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("merge")]
+    public required global::CoreIns.Modules.Party.Contracts.Api.PartyMergeView Merge { get; init; }
 
-    /// <summary>PRD: "approval request"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequest")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ApprovalRequest { get; init; }
+    /// <summary>Contract member 'restoredPartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("restoredPartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId RestoredPartyId { get; init; }
 }

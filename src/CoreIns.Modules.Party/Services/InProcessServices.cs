@@ -27,7 +27,10 @@ internal sealed class PartyPartyService(
     ICommandHandler<RevealParty, PartyGetResponse> reveal,
     PartyReader reader,
     PartySearch search,
-    PartyProtection protection) : IPartyPartyService
+    PartyProtection protection,
+    ICommandHandler<RequestPartyMerge, PartyMergeResponse> merge,
+    ICommandHandler<UnmergeParty, PartyUnmergeResponse> unmerge,
+    PartyMergeQueries mergeQueries) : IPartyPartyService
 {
     public async Task<PartyCreateResponse> CreateAsync(PartyCreateRequest request, CommandOptions options, CancellationToken cancellationToken = default)
     {
@@ -88,11 +91,27 @@ internal sealed class PartyPartyService(
             .ConfigureAwait(false));
     }
 
-    public Task<PartyMergeResponse> MergeAsync(PartyMergeRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw NotAvailable("pty.Party.merge");
+    public async Task<PartyMergeResponse> MergeAsync(PartyMergeRequest request, CommandOptions options, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        using (context.Use(options.IdempotencyKey, options.DryRun))
+        {
+            return Unwrap(await merge.HandleAsync(new RequestPartyMerge(request), cancellationToken).ConfigureAwait(false));
+        }
+    }
 
-    public Task<PartyUnmergeResponse> UnmergeAsync(PartyUnmergeRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
-        throw NotAvailable("pty.Party.unmerge");
+    public async Task<PartyUnmergeResponse> UnmergeAsync(PartyUnmergeRequest request, CommandOptions options, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        using (context.Use(options.IdempotencyKey, options.DryRun))
+        {
+            return Unwrap(await unmerge.HandleAsync(new UnmergeParty(request), cancellationToken).ConfigureAwait(false));
+        }
+    }
+
+    public async Task<PartySurvivorResponse> ResolveSurvivorAsync(Guid id, CancellationToken cancellationToken = default) =>
+        await mergeQueries.ResolveSurvivorAsync(protection.Current(context), id, cancellationToken).ConfigureAwait(false)
+        ?? throw new DomainException(DomainError.Of(ModuleCode.PTY, "NOT-FOUND", "The party does not exist."));
 
     public Task<PartyUpdateResponse> UpdateAsync(string id, PartyUpdateRequest request, CommandOptions options, CancellationToken cancellationToken = default) =>
         throw NotAvailable("pty.Party.update"); // TODO(hardening): in-process Update (REST route is built, BO-PTY-01)

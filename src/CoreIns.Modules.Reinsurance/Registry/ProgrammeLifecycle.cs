@@ -89,14 +89,14 @@ internal sealed class CreateProgrammeHandler(
 
         var legalEntity = legalEntities.Resolve(legalEntityCode);
         await ProgrammeSupport.LockLineAsync(db, legalEntity, request.LineCode, cancellationToken).ConfigureAwait(false);
-        if (await ProgrammeSupport.CheckContractsAsync(db, legalEntity, content, cancellationToken).ConfigureAwait(false) is { } contractError)
-        {
-            return contractError;
-        }
-
         if (await ProgrammeSupport.CheckOverlapAsync(db, legalEntity, request.LineCode, content.ValidFrom, content.ValidTo, except: null, cancellationToken).ConfigureAwait(false) is { } overlap)
         {
             return overlap;
+        }
+
+        if (await ProgrammeSupport.CheckContractsAsync(db, legalEntity, content, request.LineCode, except: null, cancellationToken).ConfigureAwait(false) is { } contractError)
+        {
+            return contractError;
         }
 
         var now = clock.Now;
@@ -229,14 +229,14 @@ internal sealed class UpdateProgrammeHandler(
         }
 
         await ProgrammeSupport.LockLineAsync(db, legalEntity, programme.LineCode, cancellationToken).ConfigureAwait(false);
-        if (await ProgrammeSupport.CheckContractsAsync(db, legalEntity, edited, cancellationToken).ConfigureAwait(false) is { } contractError)
-        {
-            return contractError;
-        }
-
         if (await ProgrammeSupport.CheckOverlapAsync(db, legalEntity, programme.LineCode, edited.ValidFrom, edited.ValidTo, programme.ProgrammeId, cancellationToken).ConfigureAwait(false) is { } overlap)
         {
             return overlap;
+        }
+
+        if (await ProgrammeSupport.CheckContractsAsync(db, legalEntity, edited, programme.LineCode, programme.ProgrammeId, cancellationToken).ConfigureAwait(false) is { } contractError)
+        {
+            return contractError;
         }
 
         var now = clock.Now;

@@ -49,8 +49,12 @@ public interface IPolicyJobService
     /// <param name="account">PRD: "account"</param>
     /// <param name="policy">PRD: "policy"</param>
     /// <param name="participant">PRD: "participant"</param>
-    /// <param name="state">PRD: "state"</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.JobListPage> ListAsync(string? cursor = null, int? limit = null, string? account = null, string? policy = null, string? participant = null, string? state = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="state">Job state code (DRAFT, QUOTED, BOUND, ..., NOT_TAKEN); comma-separated for several</param>
+    /// <param name="partyId">Policyholder party id</param>
+    /// <param name="producerCode">query parameter 'producerCode'</param>
+    /// <param name="productCode">query parameter 'productCode'</param>
+    /// <param name="jobType">SUBMISSION, POLICY_CHANGE, CANCELLATION or RENEWAL</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.JobListPage> ListAsync(string? cursor = null, int? limit = null, string? account = null, string? policy = null, string? participant = null, string? state = null, string? partyId = null, string? producerCode = null, string? productCode = null, string? jobType = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Versions</summary>
     /// <remarks>
@@ -59,7 +63,7 @@ public interface IPolicyJobService
     /// <para>Status: full. Wave W4.</para>
     /// <para>Exposure: ui, partner; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; no dry-run.</para>
-    /// <para>Errors: POL-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: POL-ERR-STALE (409), POL-ERR-NOT-FOUND (404), POL-ERR-ILLEGAL-TRANSITION (409), POL-ERR-IDEMPOTENCY-MISMATCH (409), POL-ERR-VALIDATION (422).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Policy.Contracts.Api.JobNewVersionResponse> NewVersionAsync(global::CoreIns.Modules.Policy.Contracts.Api.JobNewVersionRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 

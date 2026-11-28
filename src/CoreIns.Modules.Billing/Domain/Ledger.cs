@@ -40,6 +40,9 @@ internal static class EntryTypes
     /// <summary>Unapplied cash allocated to billed receivable (REQ-BIL-129, REQ-BIL-130).</summary>
     public const string Allocated = "ALLOCATED";
 
+    /// <summary>Allocations reversed (BO-BIL-07): billed receivable LA-02 back from unapplied cash LA-11; the mirror of <see cref="Allocated"/>.</summary>
+    public const string AllocationReversed = "ALLOCATION_REVERSED";
+
     /// <summary>A disbursement released to the bank: source payable or clearing (LA-17 for claim payments) → disbursements in transit LA-13 (REQ-BIL-211).</summary>
     public const string DisbursementReleased = "DISBURSEMENT_RELEASED";
 
