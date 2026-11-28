@@ -300,3 +300,53 @@ internal sealed class CertificateRequestRow : ClaimsRow
 
     public Instant UpdatedAt { get; set; }
 }
+
+/// <summary>
+/// <c>clm.statutory_offer</c>: a reasoned offer or reply on a third-party MTPL exposure at its proven delivery (BO-CLM-06, REQ-CLM-007). The letter text
+/// is not stored here; DOC holds the rendered document. At most one reasoned offer per exposure.
+/// </summary>
+internal sealed class StatutoryOfferRow : ClaimsRow
+{
+    public const string ReasonedOffer = "REASONED_OFFER";
+    public const string ReasonedReply = "REASONED_REPLY";
+    public const string Issued = "ISSUED";
+    public const string Accepted = "ACCEPTED";
+    public const string RepairAgreed = "REPAIR_AGREED";
+
+    public Guid OfferId { get; set; }
+
+    public ClaimId ClaimId { get; set; }
+
+    public ExposureId ExposureId { get; set; }
+
+    public string Kind { get; set; } = ReasonedOffer;
+
+    public string Status { get; set; } = Issued;
+
+    public decimal? Amount { get; set; }
+
+    public string? Currency { get; set; }
+
+    public Instant IssuedAt { get; set; }
+
+    public Instant DeliveredAt { get; set; }
+
+    public Guid DeliveryEvidenceId { get; set; }
+
+    public Guid DocumentId { get; set; }
+
+    /// <summary>Legal status of the payment-clock value when the offer was issued (UNVERIFIED while OQ-008 is open).</summary>
+    public string ClockLegalStatus { get; set; } = "UNVERIFIED";
+
+    public Guid? PaymentClockId { get; set; }
+
+    public Guid? RepairClockId { get; set; }
+
+    public Instant? AcceptedAt { get; set; }
+
+    public Instant? RepairAgreedAt { get; set; }
+
+    public Guid? PaymentSetId { get; set; }
+
+    public Instant UpdatedAt { get; set; }
+}

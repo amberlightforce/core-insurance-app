@@ -12,6 +12,9 @@
           "Staff.Billing",
           "Platform.Admin"
         ],
+        "mkt.Configuration.explain": ["Platform.ReleaseManager", "Platform.DesignAuthority", "Platform.Admin"],
+        "mkt.Configuration.compare": ["Platform.ReleaseManager", "Platform.DesignAuthority", "Platform.Admin"],
+        "mkt.Configuration.export": ["Platform.ReleaseManager", "Platform.DesignAuthority", "Platform.Admin"],
         "mkt.Rounding.apply": [
           "Staff.Underwriter",
           "Staff.Billing",

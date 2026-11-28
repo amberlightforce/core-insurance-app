@@ -4,31 +4,11 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.StatutoryOffer.issue result. PRD outputs: "offer record, document request; agreement → clock start"</summary>
+/// <summary>Generated contract member.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record StatutoryOfferIssueResponse
 {
-    /// <summary>PRD: "offer record"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("offerRecord")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? OfferRecord { get; init; }
-
-    /// <summary>PRD: "document request"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("documentRequest")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? DocumentRequest { get; init; }
-
-    /// <summary>PRD: "agreement → clock start"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("agreementClockStart")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? AgreementClockStart { get; init; }
+    /// <summary>Contract member 'offer'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("offer")]
+    public required global::CoreIns.Modules.Claims.Contracts.Api.StatutoryOfferView Offer { get; init; }
 }

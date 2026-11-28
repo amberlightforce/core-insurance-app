@@ -58,7 +58,10 @@
         "clm.CatEvent.close": [ "Staff.ClaimsManager" ],
         "clm.Certificate.request": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "clm.Certificate.assemble": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
-        "clm.Certificate.issue": [ "Staff.ClaimsManager" ]
+        "clm.Certificate.issue": [ "Staff.ClaimsManager" ],
+        "clm.StatutoryOffer.issue": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.StatutoryOffer.recordAcceptance": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.StatutoryOffer.recordRepairAgreement": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
       }
     },
     "Authority": {

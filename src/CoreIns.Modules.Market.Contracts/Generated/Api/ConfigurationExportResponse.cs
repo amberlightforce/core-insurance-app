@@ -4,15 +4,35 @@
 
 namespace CoreIns.Modules.Market.Contracts.Api;
 
-/// <summary>mkt.Configuration.export result. PRD outputs: "signed canonical JSON"</summary>
+/// <summary>mkt.Configuration.export result (BO-MKT-03), the state as canonical JSON with its hash.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConfigurationExportResponse
 {
-    /// <summary>PRD: "signed canonical JSON"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("signedCanonicalJson")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? SignedCanonicalJson { get; init; }
+    /// <summary>Contract member 'hash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash Hash { get; init; }
+
+    /// <summary>Contract member 'activatedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("activatedAt")]
+    public required global::CoreIns.SharedKernel.Instant ActivatedAt { get; init; }
+
+    /// <summary>Contract member 'cause'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("cause")]
+    public required string Cause { get; init; }
+
+    /// <summary>Contract member 'parentHash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("parentHash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash? ParentHash { get; init; }
+
+    /// <summary>RFC 8785 canonical JSON of the export document (manifest and values)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("canonicalJson")]
+    public required string CanonicalJson { get; init; }
+
+    /// <summary>SHA-256 of canonicalJson</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("documentDigest")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash DocumentDigest { get; init; }
+
+    /// <summary>Always null until export signing keys exist</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("signature")]
+    public required string? Signature { get; init; }
 }

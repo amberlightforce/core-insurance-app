@@ -4,31 +4,23 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Consent.withdraw request. PRD inputs: "party, purpose, channel"</summary>
+/// <summary>pty.Consent.withdraw request (BO-PTY-06). Takes effect at once: the next resolve for the purpose and channel no longer uses the consent. The earlier records stay in the history.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConsentWithdrawRequest
 {
-    /// <summary>PRD: "party"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("party")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Party { get; init; }
+    /// <summary>Contract member 'partyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PartyId { get; init; }
 
-    /// <summary>PRD: "purpose"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'purpose'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("purpose")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Purpose { get; init; }
+    public required string Purpose { get; init; }
 
-    /// <summary>PRD: "channel"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'channel'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Channel { get; init; }
+    public required string Channel { get; init; }
+
+    /// <summary>Optional proof of the withdrawal request; default the acting user</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("proofRef")]
+    public string? ProofRef { get; init; }
 }

@@ -4,15 +4,90 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Consent.query result. PRD outputs: "state"</summary>
+/// <summary>pty.Consent.query result (BO-PTY-06): one consent record. Without includeHistory the page holds the current state of each purpose and channel; with it, every record, newest first.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConsentQueryItem
 {
-    /// <summary>PRD: "state"</summary>
+    /// <summary>Contract member 'consentId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'consentId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("consentId")]
+    public required global::System.Guid ConsentId { get; init; }
+
+    /// <summary>Contract member 'partyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PartyId { get; init; }
+
+    /// <summary>Contract member 'purpose'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("purpose")]
+    public required string Purpose { get; init; }
+
+    /// <summary>Contract member 'channel'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
+    public required string Channel { get; init; }
+
+    /// <summary>Contract member 'kind'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("kind")]
+    public required KindValue Kind { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("state")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? State { get; init; }
+    public required StateValue State { get; init; }
+
+    /// <summary>Contract member 'source'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("source")]
+    public required string Source { get; init; }
+
+    /// <summary>Contract member 'wordingVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("wordingVersion")]
+    public string? WordingVersion { get; init; }
+
+    /// <summary>Contract member 'proofRef'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("proofRef")]
+    public required string ProofRef { get; init; }
+
+    /// <summary>Contract member 'recordedAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordedAt")]
+    public required global::CoreIns.SharedKernel.Instant RecordedAt { get; init; }
+
+    /// <summary>Contract member 'recordedBy'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordedBy")]
+    public required string RecordedBy { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<KindValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum KindValue
+    {
+        /// <summary><c>GIVEN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("GIVEN")]
+        Given,
+
+        /// <summary><c>WITHDRAWN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("WITHDRAWN")]
+        Withdrawn,
+
+        /// <summary><c>OBJECTION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("OBJECTION")]
+        Objection,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StateValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum StateValue
+    {
+        /// <summary><c>GRANTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("GRANTED")]
+        Granted,
+
+        /// <summary><c>WITHDRAWN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("WITHDRAWN")]
+        Withdrawn,
+
+        /// <summary><c>OBJECTED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("OBJECTED")]
+        Objected,
+    }
 }

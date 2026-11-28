@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.CommunicationPreference.resolve request. PRD inputs: "party, purpose, date"</summary>
+/// <summary>pty.CommunicationPreference.resolve request (BO-PTY-06). The date is the validAt query parameter.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CommunicationPreferenceResolveRequest
 {
-    /// <summary>PRD: "party"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("party")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Party { get; init; }
+    /// <summary>Contract member 'partyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PartyId { get; init; }
 
-    /// <summary>PRD: "purpose"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'purpose'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("purpose")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Purpose { get; init; }
+    public required string Purpose { get; init; }
 }

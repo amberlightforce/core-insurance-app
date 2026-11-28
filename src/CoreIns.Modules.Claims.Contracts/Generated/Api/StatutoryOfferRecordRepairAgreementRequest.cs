@@ -4,23 +4,18 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.StatutoryOffer.recordRepairAgreement request. PRD inputs: "exposure, content"</summary>
+/// <summary>clm.StatutoryOffer.recordRepairAgreement request: the parties agreed repair in kind instead of payment. Cancels the payment clock and starts the repair clock from the agreement.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record StatutoryOfferRecordRepairAgreementRequest
 {
-    /// <summary>PRD: "exposure"</summary>
+    /// <summary>Contract member 'offerId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'offerId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exposure")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Exposure { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("offerId")]
+    public required global::System.Guid OfferId { get; init; }
 
-    /// <summary>PRD: "content"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("content")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Content { get; init; }
+    /// <summary>Default now; not before the delivery</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("agreedAt")]
+    public global::CoreIns.SharedKernel.Instant? AgreedAt { get; init; }
 }

@@ -55,8 +55,6 @@ CONTRACT_NOT_SERVED GET /api/fin/v1/periods/status
 CONTRACT_NOT_SERVED GET /api/fin/v1/written-premium/query
 CONTRACT_NOT_SERVED GET /api/mkt/v1/capabilities/get
 CONTRACT_NOT_SERVED GET /api/mkt/v1/changeover/configuration
-CONTRACT_NOT_SERVED GET /api/mkt/v1/configuration/compare
-CONTRACT_NOT_SERVED GET /api/mkt/v1/configuration/explain
 CONTRACT_NOT_SERVED GET /api/mkt/v1/cross-borders/basis
 CONTRACT_NOT_SERVED GET /api/mkt/v1/currencies/rule
 CONTRACT_NOT_SERVED GET /api/mkt/v1/l10n/bundle
@@ -89,7 +87,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/retention/runs
 CONTRACT_NOT_SERVED GET /api/plt/v1/time/now
 CONTRACT_NOT_SERVED GET /api/plt/v1/transfers
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
-CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
 CONTRACT_NOT_SERVED GET /api/rat/v1/breakdowns/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/change-explanations/get
 CONTRACT_NOT_SERVED GET /api/rat/v1/impact-analysises/{}
@@ -210,9 +207,6 @@ CONTRACT_NOT_SERVED POST /api/clm/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/clm/v1/redresses/request
 CONTRACT_NOT_SERVED POST /api/clm/v1/services/cancel
 CONTRACT_NOT_SERVED POST /api/clm/v1/services/request
-CONTRACT_NOT_SERVED POST /api/clm/v1/statutory-offers/issue
-CONTRACT_NOT_SERVED POST /api/clm/v1/statutory-offers/record-acceptance
-CONTRACT_NOT_SERVED POST /api/clm/v1/statutory-offers/record-repair-agreement
 CONTRACT_NOT_SERVED POST /api/clm/v1/vendor-invoices/decide
 CONTRACT_NOT_SERVED POST /api/clm/v1/vendor-invoices/submit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/annual-returns/amend
@@ -307,7 +301,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/draft
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/preview-impact
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/submit
 CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/test
-CONTRACT_NOT_SERVED POST /api/mkt/v1/configuration/export
 CONTRACT_NOT_SERVED POST /api/mkt/v1/cross-borders/check
 CONTRACT_NOT_SERVED POST /api/mkt/v1/currencies/convert-fixed
 CONTRACT_NOT_SERVED POST /api/mkt/v1/l10n-ui-languages/resolve
@@ -402,10 +395,6 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/rewrites
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/request-policy-move
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/split
-CONTRACT_NOT_SERVED POST /api/pty/v1/communication-preferences/resolve
-CONTRACT_NOT_SERVED POST /api/pty/v1/communication-preferences/set
-CONTRACT_NOT_SERVED POST /api/pty/v1/consents/record
-CONTRACT_NOT_SERVED POST /api/pty/v1/consents/withdraw
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/evaluate-erasure
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/lift-restriction

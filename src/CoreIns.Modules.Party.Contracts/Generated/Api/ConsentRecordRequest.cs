@@ -4,63 +4,49 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Consent.record request. PRD inputs: "party, purpose, channel, kind, source, wording version, proof ref"</summary>
+/// <summary>pty.Consent.record request (BO-PTY-06, REQ-PTY-005, REQ-PTY-150). Records a consent given, or an objection, for one purpose and channel. Proof is required (PTY-ERR-PROOF-REQUIRED); a record is never changed afterwards, a withdrawal is a new record.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConsentRecordRequest
 {
-    /// <summary>PRD: "party"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("party")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Party { get; init; }
+    /// <summary>Contract member 'partyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PartyId { get; init; }
 
-    /// <summary>PRD: "purpose"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>MARKETING, PROFILING, THIRD_PARTY_SHARING, SERVICE_MESSAGES, CLAIMS_UPDATES, RENEWAL_NOTICES, DOCUMENT_DELIVERY</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("purpose")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Purpose { get; init; }
+    public required string Purpose { get; init; }
 
-    /// <summary>PRD: "channel"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>EMAIL, SMS, POST, PHONE, PORTAL</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Channel { get; init; }
+    public required string Channel { get; init; }
 
-    /// <summary>PRD: "kind"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'kind'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("kind")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Kind { get; init; }
+    public required KindValue Kind { get; init; }
 
-    /// <summary>PRD: "source"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Where the consent came from, for example PORTAL, BRANCH, PHONE, PAPER, BROKER</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("source")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Source { get; init; }
+    public required string Source { get; init; }
 
-    /// <summary>PRD: "wording version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Version of the consent wording shown; required for GIVEN</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("wordingVersion")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? WordingVersion { get; init; }
+    public string? WordingVersion { get; init; }
 
-    /// <summary>PRD: "proof ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Reference to the proof (document id, call recording, portal event)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("proofRef")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ProofRef { get; init; }
+    public required string ProofRef { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<KindValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum KindValue
+    {
+        /// <summary><c>GIVEN</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("GIVEN")]
+        Given,
+
+        /// <summary><c>OBJECTION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("OBJECTION")]
+        Objection,
+    }
 }

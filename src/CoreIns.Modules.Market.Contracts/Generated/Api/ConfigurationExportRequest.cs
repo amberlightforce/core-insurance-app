@@ -8,16 +8,11 @@ namespace CoreIns.Modules.Market.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConfigurationExportRequest
 {
-    /// <summary>PRD: "hash"</summary>
+    /// <summary>The state to export (default current)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::CoreIns.SharedKernel.Identifiers.Sha256Hash? Hash { get; init; }
 
-    /// <summary>PRD: "optional context" (optional)</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Legal entity code; when given, only the core and that entity country layer are exported</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("context")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Context { get; init; }
+    public string? Context { get; init; }
 }

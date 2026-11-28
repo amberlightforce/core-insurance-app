@@ -20,12 +20,12 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [DOC](#doc) | 47 | 46 | 1 | 27 | 20 | 4 | 12 | 0 |
 | [CMP](#cmp) | 93 | 62 | 31 | 69 | 24 | 21 | 0 | 3 |
 | [CHN](#chn) | 106 | 62 | 44 | 67 | 39 | 3 | 25 | 2 |
-| [WRK](#wrk) | 58 | 23 | 35 | 40 | 18 | 9 | 3 | 14 |
+| [WRK](#wrk) | 60 | 25 | 35 | 41 | 19 | 9 | 3 | 14 |
 | [PLT](#plt) | 101 | 67 | 34 | 63 | 38 | 25 | 0 | 10 |
 | [DAT](#dat) | 47 | 47 | 0 | 28 | 19 | 5 | 0 | 0 |
 | [MIG](#mig) | 45 | 45 | 0 | 29 | 16 | 5 | 0 | 12 |
 | [MKT](#mkt) | 50 | 38 | 12 | 17 | 33 | 1 | 0 | 5 |
-| **Total** | 1222 | 1003 | 219 | 784 | 438 | 128 | 69 | 63 |
+| **Total** | 1224 | 1005 | 219 | 785 | 439 | 128 | 69 | 63 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -402,7 +402,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `bil.BillingAccount.moveTerm` | POST `/api/bil/v1/billing-accounts/move-term` | C | yes | ui | POL | W5 | full | REQ-BIL-031, REQ-BIL-228 |
 | `bil.BillingAccount.reopen` | POST `/api/bil/v1/billing-accounts/reopen` | C |  | ui |  | W5 | full | REQ-BIL-001, REQ-BIL-030..REQ-BIL-042 |
 | `bil.BillingAccount.search` | GET `/api/bil/v1/billing-accounts/search` | Q |  | ui |  | W5 | full | REQ-BIL-001, REQ-BIL-030..REQ-BIL-042 |
-| `bil.BillingAccount.update` | PATCH `/api/bil/v1/billing-accounts/{id}` | C |  | ui |  | W5 | full | REQ-BIL-001, REQ-BIL-030..REQ-BIL-042 |
+| `bil.BillingAccount.update` | PATCH `/api/bil/v1/billing-accounts/{id}` | C | yes | ui |  | W5 | full | REQ-BIL-001, REQ-BIL-030..REQ-BIL-042 |
 | `bil.BillingPreview.compute` | POST `/api/bil/v1/billing-preview/compute` | Q |  | ui | CHN | W5 | full | REQ-BIL-058 |
 | `bil.Commission.calculations` | GET `/api/bil/v1/commission/calculations` | Q |  | ui |  | W6 | full | REQ-BIL-008, REQ-BIL-249..REQ-BIL-268 |
 | `bil.Commission.dispute` | POST `/api/bil/v1/commission/dispute` | C |  | ui | CHN | W6 | full | REQ-BIL-008, REQ-BIL-249..REQ-BIL-268, REQ-BIL-266 |
@@ -1143,6 +1143,8 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `wrk.Participant.change` | POST `/api/wrk/v1/participants/change` | C | yes | ui | UW | W2 | minimal | REQ-WRK-010, REQ-WRK-300..REQ-WRK-308 |
 | `wrk.Participant.list` | GET `/api/wrk/v1/participants` | Q |  | ui | UW | W2 | minimal | REQ-WRK-010, REQ-WRK-300..REQ-WRK-308 |
 | `wrk.Participant.objectsFor` | GET `/api/wrk/v1/participants/objects-for` | Q |  | ui | UW | W2 | minimal | REQ-WRK-010, REQ-WRK-300..REQ-WRK-308 |
+| `wrk.Pattern.list` | GET `/api/wrk/v1/admin/patterns` | Q |  | ui |  | W2 | full | REQ-WRK-001 |
+| `wrk.Pattern.upsert` | PUT `/api/wrk/v1/admin/patterns` | C |  | ui |  | W2 | full | REQ-WRK-001 |
 | `wrk.Queue.getNext` | POST `/api/wrk/v1/queues/get-next` | C |  | ui |  | W2 | full | REQ-WRK-126 |
 | `wrk.RecentItem.list` | GET `/api/wrk/v1/recent-items` | Q |  | ui |  | W2 | full | REQ-WRK-006, REQ-WRK-325..REQ-WRK-340 |
 | `wrk.Request.close` | POST `/api/wrk/v1/requests/close` | C |  | ui | UW | W2 | minimal | REQ-WRK-008, REQ-WRK-210..REQ-WRK-226 |
@@ -1616,7 +1618,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-CHN-007 | `chn.Withdrawal.close`, `chn.Withdrawal.confirm`, `chn.Withdrawal.declare` |  |
 | REQ-CHN-008 | `chn.Language.get`, `chn.Language.set`, `plt.ExternalUser.invite`, `plt.ExternalUser.link` (+2) | mapped by builder |
 | REQ-CHN-009 | `chn.Notification.list`, `chn.Notification.markRead`, `chn.NotificationSubscription.set` |  |
-| REQ-WRK-001 | `wrk.Activity.create`, `wrk.Activity.get`, `wrk.Activity.list` |  |
+| REQ-WRK-001 | `wrk.Activity.create`, `wrk.Activity.get`, `wrk.Activity.list`, `wrk.Pattern.list` (+1) |  |
 | REQ-WRK-002 | `wrk.ActivityPattern.*` |  |
 | REQ-WRK-003 | `wrk.Group.*`, `wrk.Membership.*`, `wrk.Queue.*`, `wrk.Skill.*` |  |
 | REQ-WRK-004 | `wrk.Note.create`, `wrk.Note.delete`, `wrk.Note.edit`, `wrk.Note.export` (+4) |  |
