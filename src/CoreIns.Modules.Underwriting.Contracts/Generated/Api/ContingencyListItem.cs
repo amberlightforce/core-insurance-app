@@ -4,15 +4,69 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Contingency.list result. PRD outputs: "contingencies"</summary>
+/// <summary>uw.Contingency.list item (BO-UW-08)</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ContingencyListItem
 {
-    /// <summary>PRD: "contingencies"</summary>
+    /// <summary>Contingency</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'id' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("contingencies")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("id")]
+    public required global::System.Guid Id { get; init; }
+
+    /// <summary>Policy term</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'termRef' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("termRef")]
+    public required global::System.Guid TermRef { get; init; }
+
+    /// <summary>Job (optional)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Contingencies { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.JobId? JobRef { get; init; }
+
+    /// <summary>Type</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contingencyType")]
+    public required string ContingencyType { get; init; }
+
+    /// <summary>What must be done</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("description")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? Description { get; init; }
+
+    /// <summary>Customer text</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("customerText")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? CustomerText { get; init; }
+
+    /// <summary>Due date</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("dueDate")]
+    public required global::CoreIns.SharedKernel.BusinessDate DueDate { get; init; }
+
+    /// <summary>Owner</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("owner")]
+    public required string Owner { get; init; }
+
+    /// <summary>Blocking point</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("blockingPoint")]
+    public required global::CoreIns.Platform.Contracts.Common.BlockingPoint BlockingPoint { get; init; }
+
+    /// <summary>Open, Satisfied, Waived or ConsequenceApplied</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+    public required string Status { get; init; }
+
+    /// <summary>True when due and still Open</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("overdue")]
+    public required bool Overdue { get; init; }
+
+    /// <summary>Consequence when overdue</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("consequenceCode")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ConsequenceCode { get; init; }
+
+    /// <summary>Record version</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    public required int RecordVersion { get; init; }
 }

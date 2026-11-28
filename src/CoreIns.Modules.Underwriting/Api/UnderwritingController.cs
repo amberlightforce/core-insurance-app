@@ -43,6 +43,13 @@ internal static class UnderwritingPermissions
     public const string DeclineDecideReview = "uw.Decline.decideReview";
     public const string RefusalRegisterQuery = "uw.RefusalRegister.query";
     public const string RefusalRegisterExport = "uw.RefusalRegister.export";
+    public const string ContingencyCreate = "uw.Contingency.create";
+    public const string ContingencyList = "uw.Contingency.list";
+    public const string ContingencyUpdate = "uw.Contingency.update";
+    public const string ContingencySatisfy = "uw.Contingency.satisfy";
+    public const string ContingencyWaive = "uw.Contingency.waive";
+    public const string ContingencyExtend = "uw.Contingency.extend";
+    public const string ContingencyApplyConsequence = "uw.Contingency.applyConsequence";
 }
 
 /// <summary>REST facade of <c>uw.Rules.evaluate</c>, <c>uw.Issue.blockingStatus</c>, <c>uw.Issue.list</c> and <c>uw.Issue.decide</c>.</summary>
@@ -344,6 +351,63 @@ internal sealed class UnderwritingController : ControllerBase
     public Task<IResult> ExportRefusalRegisterAsync(
         [FromBody] RefusalRegisterExportRequest request, [FromServices] ICommandHandler<ExportRefusalRegister, RefusalRegisterExportResponse> handler, CancellationToken cancellationToken) =>
         RunAsync(handler, new ExportRefusalRegister(request), cancellationToken);
+
+    /// <summary>uw.Contingency.create: a condition on a policy term with a due date and an owner (a command; dry-run supported).</summary>
+    [HttpPost("contingencies")]
+    [Authorize(Policy = UnderwritingPermissions.ContingencyCreate)]
+    public async Task<IResult> CreateContingencyAsync(
+        [FromBody] ContingencyCreateRequest request, [FromServices] ICommandHandler<CreateContingency, ContingencyCreateResponse> handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new CreateContingency(request), cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Json(result.Value, statusCode: StatusCodes.Status201Created) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Contingency.list: contingencies by term, with filters and the audience's view.</summary>
+    [HttpGet("contingencies")]
+    [Authorize(Policy = UnderwritingPermissions.ContingencyList)]
+    public async Task<IResult> ListContingenciesAsync(
+        [FromQuery] string? termRef, [FromQuery] string? policyRef, [FromQuery] string? filters, [FromQuery] string? audience, [FromQuery] string? cursor, [FromQuery] int? limit,
+        [FromServices] ContingencyQueries queries, CancellationToken cancellationToken)
+    {
+        var result = await queries.ListAsync(termRef, policyRef, filters, audience, cursor, limit, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Contingency.update: change the text or owner of an open contingency.</summary>
+    [HttpPatch("contingencies/{id:guid}")]
+    [Authorize(Policy = UnderwritingPermissions.ContingencyUpdate)]
+    public Task<IResult> UpdateContingencyAsync(
+        Guid id, [FromBody] ContingencyUpdateRequest request, [FromServices] ICommandHandler<UpdateContingency, ContingencyUpdateResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new UpdateContingency(id, request), cancellationToken);
+
+    /// <summary>uw.Contingency.satisfy: the evidence arrived.</summary>
+    [HttpPost("contingencies/satisfy")]
+    [Authorize(Policy = UnderwritingPermissions.ContingencySatisfy)]
+    public Task<IResult> SatisfyContingencyAsync(
+        [FromBody] ContingencySatisfyRequest request, [FromServices] ICommandHandler<SatisfyContingency, ContingencySatisfyResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new SatisfyContingency(request), cancellationToken);
+
+    /// <summary>uw.Contingency.waive: waive the contingency with a reason (managers).</summary>
+    [HttpPost("contingencies/waive")]
+    [Authorize(Policy = UnderwritingPermissions.ContingencyWaive)]
+    public Task<IResult> WaiveContingencyAsync(
+        [FromBody] ContingencyWaiveRequest request, [FromServices] ICommandHandler<WaiveContingency, ContingencyWaiveResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new WaiveContingency(request), cancellationToken);
+
+    /// <summary>uw.Contingency.extend: move the due date later, with a reason.</summary>
+    [HttpPost("contingencies/extend")]
+    [Authorize(Policy = UnderwritingPermissions.ContingencyExtend)]
+    public Task<IResult> ExtendContingencyAsync(
+        [FromBody] ContingencyExtendRequest request, [FromServices] ICommandHandler<ExtendContingency, ContingencyExtendResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new ExtendContingency(request), cancellationToken);
+
+    /// <summary>uw.Contingency.applyConsequence: apply the consequence of an overdue contingency (managers; dry-run supported).</summary>
+    [HttpPost("contingencies/apply-consequence")]
+    [Authorize(Policy = UnderwritingPermissions.ContingencyApplyConsequence)]
+    public Task<IResult> ApplyContingencyConsequenceAsync(
+        [FromBody] ContingencyApplyConsequenceRequest request, [FromServices] ICommandHandler<ApplyContingencyConsequence, ContingencyApplyConsequenceResponse> handler,
+        CancellationToken cancellationToken) =>
+        RunAsync(handler, new ApplyContingencyConsequence(request), cancellationToken);
 
     private async Task<IResult> RunAsync<TCommand, TResult>(ICommandHandler<TCommand, TResult> handler, TCommand command, CancellationToken cancellationToken)
         where TCommand : ICommand<TResult>
