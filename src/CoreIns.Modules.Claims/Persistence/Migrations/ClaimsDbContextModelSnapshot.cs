@@ -181,6 +181,113 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.CertificateRequestRow", b =>
+                {
+                    b.Property<Guid>("CertificateId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("certificate_id");
+
+                    b.Property<string>("CertificateNumber")
+                        .HasColumnType("text")
+                        .HasColumnName("certificate_number");
+
+                    b.Property<string>("ClaimsJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("claims");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("DocumentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("document_id");
+
+                    b.Property<DateTime?>("IssuedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("issued_at");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("LegalStatus")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_status");
+
+                    b.Property<int>("LookbackYears")
+                        .HasColumnType("integer")
+                        .HasColumnName("lookback_years");
+
+                    b.Property<DateOnly>("PeriodFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("period_from");
+
+                    b.Property<DateOnly>("PeriodTo")
+                        .HasColumnType("date")
+                        .HasColumnName("period_to");
+
+                    b.PrimitiveCollection<string[]>("PolicyNumbers")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("policy_numbers");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<Guid>("RequesterPartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("requester_party_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("CertificateId")
+                        .HasName("pk_certificate_request");
+
+                    b.HasIndex("LegalEntityId", "CertificateNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ux_certificate_request_number")
+                        .HasFilter("certificate_number IS NOT NULL");
+
+                    b.HasIndex("LegalEntityId", "RequesterPartyId", "CreatedAt")
+                        .HasDatabaseName("ix_certificate_request_requester");
+
+                    b.ToTable("certificate_request", "clm", t =>
+                        {
+                            t.HasCheckConstraint("ck_certificate_request_issued", "status <> 'ISSUED' OR (certificate_number IS NOT NULL AND document_id IS NOT NULL AND issued_at IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_certificate_request_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+
+                            t.HasCheckConstraint("ck_certificate_request_period", "period_to >= period_from");
+
+                            t.HasCheckConstraint("ck_certificate_request_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_certificate_request_status", "status IN ('REQUESTED', 'ASSEMBLED', 'ISSUED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.ClaimPaymentRow", b =>
                 {
                     b.Property<Guid>("ClaimPaymentId")

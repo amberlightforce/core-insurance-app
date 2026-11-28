@@ -2780,7 +2780,13 @@ paths:
       x-permission: clm.Certificate.request
       x-error-codes:
       - code: CLM-ERR-CERT-REQUESTER
+        note: requester, policies or period not acceptable
         status: 422
+      - code: CLM-ERR-CERT-STATE
+        note: wrong state for the step, or the look-back value is not confirmed in Production
+        status: 422
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -2847,7 +2853,13 @@ paths:
       x-permission: clm.Certificate.assemble
       x-error-codes:
       - code: CLM-ERR-CERT-REQUESTER
+        note: requester, policies or period not acceptable
         status: 422
+      - code: CLM-ERR-CERT-STATE
+        note: wrong state for the step, or the look-back value is not confirmed in Production
+        status: 422
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -2914,7 +2926,13 @@ paths:
       x-permission: clm.Certificate.issue
       x-error-codes:
       - code: CLM-ERR-CERT-REQUESTER
+        note: requester, policies or period not acceptable
         status: 422
+      - code: CLM-ERR-CERT-STATE
+        note: wrong state for the step, or the look-back value is not confirmed in Production
+        status: 422
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -8392,66 +8410,148 @@ components:
         agreementClockStart:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "agreement → clock start"'
+    CertificateClaimLine:
+      type: object
+      description: One claim on the claims-history certificate (BO-CLM-07). No AFM, no free text; matched by party id.
+      properties:
+        claimNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        policyNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        lossDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        lossCause:
+          $ref: ../events/common.schema.json#/$defs/Code
+        status:
+          type: string
+        outcome:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+      required:
+      - claimNumber
+      - policyNumber
+      - lossDate
+      - lossCause
+      - status
+    CertificateView:
+      type: object
+      description: 'A claims-history certificate (BO-CLM-07, REQ-CLM-008). legalStatus is Unverified until the look-back value is confirmed in MKT; an unconfirmed certificate cannot be issued in Production.'
+      properties:
+        certificateId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        certificateNumber:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/BusinessNumber
+          - type: 'null'
+        requesterPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumbers:
+          type: array
+          items:
+            $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        periodFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        periodTo:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        lookbackYears:
+          type: integer
+        legalStatus:
+          type: string
+        status:
+          type: string
+          enum:
+          - REQUESTED
+          - ASSEMBLED
+          - ISSUED
+        claims:
+          type: array
+          items:
+            $ref: '#/components/schemas/CertificateClaimLine'
+        documentId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        issuedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        recordVersion:
+          type: integer
+      required:
+      - certificateId
+      - requesterPartyId
+      - policyNumbers
+      - periodFrom
+      - periodTo
+      - lookbackYears
+      - legalStatus
+      - status
+      - claims
+      - recordVersion
     CertificateRequestRequest:
       type: object
-      description: 'clm.Certificate.request request. PRD inputs: "requester, policies, period"'
+      description: 'clm.Certificate.request request: the requester is a party id; no policy numbers means every policy of the requester; no period means the look-back window ending today'
       properties:
-        requester:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "requester"'
-        policies:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "policies"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+        requesterPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        policyNumbers:
+          type: array
+          maxItems: 50
+          items:
+            $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        periodFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+        periodTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+      required:
+      - requesterPartyId
     CertificateRequestResponse:
       type: object
-      description: 'clm.Certificate.request result. PRD outputs: "certificate"'
       properties:
         certificate:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "certificate"'
+          $ref: '#/components/schemas/CertificateView'
+      required:
+      - certificate
     CertificateAssembleRequest:
       type: object
-      description: 'clm.Certificate.assemble request. PRD inputs: "requester, policies, period"'
+      description: 'clm.Certificate.assemble request: collects the requester''s claims of the period (withdrawn, duplicate and draft claims and claims restricted for a data-subject request are left out); may be repeated until issued'
       properties:
-        requester:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "requester"'
-        policies:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "policies"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+        certificateId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - certificateId
     CertificateAssembleResponse:
       type: object
-      description: 'clm.Certificate.assemble result. PRD outputs: "certificate"'
       properties:
         certificate:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "certificate"'
+          $ref: '#/components/schemas/CertificateView'
+      required:
+      - certificate
     CertificateIssueRequest:
       type: object
-      description: 'clm.Certificate.issue request. PRD inputs: "requester, policies, period"'
+      description: 'clm.Certificate.issue request: issues an assembled certificate once (numbers it, renders DT-CLAIMS-HISTORY, publishes ClaimsHistoryCertificateIssued); a repeat returns the issued certificate'
       properties:
-        requester:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "requester"'
-        policies:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "policies"'
-        period:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "period"'
+        certificateId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        language:
+          type: string
+          enum:
+          - el
+          - en
+      required:
+      - certificateId
     CertificateIssueResponse:
       type: object
-      description: 'clm.Certificate.issue result. PRD outputs: "certificate"'
       properties:
         certificate:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "certificate"'
+          $ref: '#/components/schemas/CertificateView'
+      required:
+      - certificate
     ClaimTrackingView:
       type: object
       description: Claim tracking view (BO-CLM-08, REQ-CLM-009); derived from the claim and its approved financials, no stored state of its own

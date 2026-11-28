@@ -8,6 +8,7 @@ import {
   textColumn,
   type DataColumn,
 } from '../../../design-system';
+import { nextDeadline } from '../complaints/api';
 import { LinkButton } from '../../staff/LinkButton';
 import { PageHeader, Section } from '../../staff/PageHeader';
 import { QueryView } from '../../staff/QueryView';
@@ -15,7 +16,6 @@ import { SimpleTable } from '../../staff/SimpleTable';
 import staff from '../../staff/staff.module.css';
 import { useFormat } from '../../staff/useFormat';
 import {
-  earliestDeadline,
   isOpenClock,
   scalar,
   useClocks,
@@ -37,8 +37,7 @@ const clockSemantic: Record<string, Semantic> = {
 };
 
 const subjectText = (c: ClockItem): string => scalar(c.subjectRef, ['id', 'ref']) || '—';
-const complaintNumber = (c: ComplaintItem): string =>
-  scalar(c.number, ['value', 'number']) || scalar(c.complaint, ['number']);
+const complaintNumber = (c: ComplaintItem): string => c.number ?? c.complaint?.number ?? '';
 
 /** Compliance landing: statutory clocks, complaints, and the way into the DSAR console. */
 export function ComplianceHomePage() {
@@ -88,13 +87,13 @@ export function ComplianceHomePage() {
       textColumn<ComplaintItem>(
         'status',
         t('home.complaints.columns.status'),
-        (c) => scalar(c.complaint, ['status', 'state']) || '—',
+        (c) => c.complaint?.status ?? '—',
         { size: 180 },
       ),
       textColumn<ComplaintItem>(
         'deadline',
         t('home.complaints.columns.deadline'),
-        (c) => fmt.dateTime(earliestDeadline(c.deadlines)),
+        (c) => fmt.dateTime(nextDeadline(c)?.deadline),
         { size: 170 },
       ),
     ],
@@ -146,6 +145,10 @@ export function ComplianceHomePage() {
             />
           )}
         </QueryView>
+      </Section>
+      <Section title={t('home.complaints.open.title')}>
+        <p className={staff.muted}>{t('home.complaints.open.body')}</p>
+        <LinkButton to="/compliance/complaints">{t('home.complaints.open.link')}</LinkButton>
       </Section>
       <Section title={t('home.dsar.title')}>
         <p className={staff.muted}>{t('home.dsar.body')}</p>

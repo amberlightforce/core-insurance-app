@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { expectNoA11yViolations } from '../../../test/axe';
 import { mockApi, problem, renderScreen } from '../../../test/mockApi';
-import { earliestDeadline, scalar } from './api';
+import { scalar } from './api';
 import { ComplianceHomePage } from './ComplianceHomePage';
 
 vi.setConfig({ testTimeout: 60_000 });
@@ -48,8 +48,14 @@ describe('Compliance landing', () => {
             items: [
               {
                 number: 'CMP-2026-0001',
-                complaint: { status: 'OPEN' },
-                deadlines: ['2026-10-01T09:00:00Z'],
+                complaint: { status: 'RECEIVED' },
+                deadlines: [
+                  {
+                    clockCode: 'CMP_COMPLAINT_REPLY',
+                    status: 'RUNNING',
+                    deadline: '2026-10-01T09:00:00Z',
+                  },
+                ],
               },
             ],
             nextCursor: null,
@@ -61,7 +67,7 @@ describe('Compliance landing', () => {
     expect(await screen.findByText('COMPLAINT_REPLY')).toBeInTheDocument();
     expect(screen.getByText('Παραβιάστηκε')).toBeInTheDocument();
     expect(screen.getByText('Σε εξέλιξη')).toBeInTheDocument();
-    expect(await screen.findByText('OPEN')).toBeInTheDocument();
+    expect(await screen.findByText('RECEIVED')).toBeInTheDocument();
     await expectNoA11yViolations();
     expect(screen.getByRole('button', { name: 'Άνοιγμα κονσόλας DSAR' })).toBeInTheDocument();
   });
@@ -84,12 +90,8 @@ describe('Compliance landing', () => {
     expect(await screen.findByText('Δεν υπάρχουν καταχωρημένα παράπονα.')).toBeInTheDocument();
   });
 
-  it('reads opaque contract values defensively', () => {
+  it('reads opaque contract values defensively (clock subjects)', () => {
     expect(scalar({ value: 'X-1' }, ['value'])).toBe('X-1');
     expect(scalar(null)).toBe('');
-    expect(earliestDeadline({ a: '2026-12-01T00:00:00Z', b: ['2026-11-01T00:00:00Z'] })).toBe(
-      '2026-11-01T00:00:00Z',
-    );
-    expect(earliestDeadline('nope')).toBeNull();
   });
 });

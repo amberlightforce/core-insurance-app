@@ -42,6 +42,9 @@ internal static class ConfigKeys
     public const string RoundingTaxPrefix = "cur.rounding.tax.";
     public const string OrderOfOperations = "cur.order_of_operations";
 
+    /// <summary>Claims-history certificate look-back in whole years (REQ-CLM-008, BO-CLM-07); registered, no pack value: the PRDs state no N.</summary>
+    public const string ClaimsHistoryLookbackYears = "clm.history.lookback_years";
+
     public static IReadOnlyList<ConfigKeyDescriptor> All { get; } =
     [
         new(IptRateGeneral, ConfigValueType.ExactDecimal, TimeBases.TaxPointDate, "Premium tax (IPT) rate, general class (GR-01)"),
@@ -62,6 +65,7 @@ internal static class ConfigKeys
         new(CurFunctional, ConfigValueType.Text, TimeBases.EffectiveDate, "Functional currency (REQ-MKT-190)"),
         new(RoundingDefault, ConfigValueType.Json, TimeBases.EffectiveDate, "Currency default rounding rule (REQ-MKT-191, BR-MKT-027)"),
         new(RoundingPrefix, ConfigValueType.Json, TimeBases.EffectiveDate, "Rounding rule per purpose, cur.rounding.<purpose> (REQ-MKT-192), and per tax class, cur.rounding.tax.<class> (REQ-MKT-193)", IsPrefix: true),
+        new(ClaimsHistoryLookbackYears, ConfigValueType.WholeNumber, TimeBases.EffectiveDate, "Years of claims a claims-history certificate covers (REQ-CLM-008); empty until confirmed, CLM then uses its illustrative default as Unverified"),
         new(OrderOfOperations, ConfigValueType.Json, TimeBases.EffectiveDate, "Order of operations for money calculations (REQ-MKT-194)"),
         new(TaxTreatmentRules.KeyPrefix, ConfigValueType.Json, TimeBases.TaxPointDate, "Tax treatment rule row per charge category, transaction kind and cancellation source (REQ-MKT-330/331); pack data, no core default", IsPrefix: true),
         new(TaxTreatmentRules.WithdrawalVoidRouting, ConfigValueType.Text, TimeBases.TaxPointDate, "Withdrawal/void routing, REVERSE_AS_VOID or INSURER_BEARS (REQ-MKT-331); registered, not used by the slice"),

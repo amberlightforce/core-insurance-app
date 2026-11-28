@@ -8,14 +8,14 @@ using CoreIns.SharedKernel.Results;
 namespace CoreIns.Modules.Work.Queries;
 
 /// <summary><c>wrk.Assignment.simulate</c>: explains where an activity of a pattern would be routed, without creating or changing anything.</summary>
-internal sealed class AssignmentSimulator(AssignmentRouter router)
+internal sealed class AssignmentSimulator(AssignmentRouter router, WorkCatalogue catalogue)
 {
     public async Task<Result<AssignmentSimulateResponse>> SimulateAsync(AssignmentSimulateRequest request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         var code = request.DraftActivity is { ValueKind: JsonValueKind.Object } draft
             && draft.TryGetProperty("patternCode", out var p) && p.ValueKind == JsonValueKind.String ? p.GetString() : null;
-        var pattern = code is null ? null : WorkCatalog.Pattern(code);
+        var pattern = code is null ? null : (await catalogue.GetAsync(cancellationToken).ConfigureAwait(false)).Pattern(code);
         if (pattern is null)
         {
             return WorkErrors.Invalid("draftActivity is {patternCode} of a known pattern.");

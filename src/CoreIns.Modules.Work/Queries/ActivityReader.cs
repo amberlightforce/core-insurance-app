@@ -117,7 +117,7 @@ internal sealed record ActivityView
 }
 
 /// <summary>Reads activities for the staff inbox: my tasks, the team queue, one activity, and the gate query.</summary>
-internal sealed class ActivityReader(WorkDbContext db, RequestContext context, ILegalEntityDirectory legalEntities)
+internal sealed class ActivityReader(WorkDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, WorkCatalogue catalogue)
 {
     private const int DefaultLimit = 25;
     private const int MaxLimit = 200;
@@ -144,7 +144,7 @@ internal sealed class ActivityReader(WorkDbContext db, RequestContext context, I
             return parsed.Error!;
         }
 
-        var actor = WorkActor.From(context);
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
         var query = VisibleTo(actor, parsed.Value, id);
         if (query.IsFailure)
         {
@@ -169,7 +169,7 @@ internal sealed class ActivityReader(WorkDbContext db, RequestContext context, I
             return WorkErrors.NotFound();
         }
 
-        var actor = WorkActor.From(context);
+        var actor = await catalogue.ActorAsync(cancellationToken).ConfigureAwait(false);
         var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
         var row = await db.Activities.AsNoTracking().SingleOrDefaultAsync(a => a.ActivityId == activityId && a.LegalEntityId == legalEntity, cancellationToken).ConfigureAwait(false);
         if (row is null || !ActivityEngine.IsVisible(row, actor))

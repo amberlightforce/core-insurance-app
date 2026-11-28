@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using CoreIns.Modules.Work.Persistence;
+using CoreIns.Modules.Work.Queries;
 using CoreIns.Platform.Context;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
@@ -58,12 +59,12 @@ internal sealed record RoutingDecision(string? UserId, string QueueCode, string?
 /// Rule based assignment (REQ-WRK-131): the queue's active rules run in priority order; the first rule with an eligible candidate wins and
 /// picks the candidate with the fewest open activities (ties: lowest user id, so the choice is deterministic). No rule or no candidate: the queue.
 /// </summary>
-internal sealed class AssignmentRouter(WorkDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IWorkUserDirectory directory)
+internal sealed class AssignmentRouter(WorkDbContext db, RequestContext context, ILegalEntityDirectory legalEntities, IWorkUserDirectory directory, WorkCatalogue catalogue)
 {
     public async Task<RoutingDecision> RouteAsync(string patternCode, string queueCode, CancellationToken cancellationToken)
     {
         var legalEntity = legalEntities.Resolve(context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity."));
-        var queue = WorkCatalog.Queue(queueCode);
+        var queue = (await catalogue.GetAsync(cancellationToken).ConfigureAwait(false)).Queue(queueCode);
         var rules = await db.AssignmentRules.AsNoTracking()
             .Where(r => r.LegalEntityId == legalEntity && r.Active && r.QueueCode == queueCode && (r.PatternCode == null || r.PatternCode == patternCode))
             .OrderBy(r => r.Priority).ThenBy(r => r.Code).ToListAsync(cancellationToken).ConfigureAwait(false);
