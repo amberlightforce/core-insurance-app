@@ -44,7 +44,7 @@ internal sealed class JobReader(DbSession session)
                    j.account_id AS AccountId, j.product_code AS ProductCode, j.product_version AS ProductVersion, j.channel AS Channel,
                    j.producer_code AS ProducerCode, j.quote_type AS QuoteType, j.effective_at AS EffectiveAt, j.expiration_at AS ExpirationAt,
                    j.currency AS Currency, j.current_version_no AS CurrentVersionNo, j.bound_transaction_id AS BoundTransactionId,
-                   j.created_at AS CreatedAt
+                   j.created_at AS CreatedAt, j.record_version AS RecordVersion, j.rating_artefact_hash AS RatingArtefactHash
               FROM pol.job j LEFT JOIN pol.policy p ON p.policy_id = j.policy_id
              WHERE j.job_id = @jobId AND j.legal_entity_id = @le
             """, new { jobId, le = legalEntity.Value }, session.Transaction, cancellationToken: cancellationToken)).ConfigureAwait(false);
@@ -84,6 +84,8 @@ internal sealed class JobReader(DbSession session)
             CurrentVersionNo = job.CurrentVersionNo,
             TransactionId = job.BoundTransactionId is { } tx ? new PolicyTransactionId(tx) : null,
             CreatedAt = Time(job.CreatedAt),
+            RecordVersion = job.RecordVersion,
+            RatingArtefactHash = job.RatingArtefactHash is null ? null : Sha256Hash.Parse(job.RatingArtefactHash),
             Versions = [.. versions.Select(v => new QuoteVersionView
             {
                 QuoteId = new QuoteId(v.QuoteId),
@@ -147,6 +149,10 @@ internal sealed class JobReader(DbSession session)
         public Guid? BoundTransactionId { get; set; }
 
         public DateTime CreatedAt { get; set; }
+
+        public int RecordVersion { get; set; }
+
+        public string? RatingArtefactHash { get; set; }
     }
 
     private sealed class VersionRecord

@@ -257,6 +257,8 @@
         "currency": "EUR",
         "currentVersionNo": 1,
         "transactionId": "0192da16-070c-745b-8b41-fad5d8478d02",
+        "recordVersion": 1,
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
         "versions": [
           {
             "quoteId": "01920d03-4eff-7ac1-8694-44fd11c30888",
@@ -378,6 +380,28 @@
     "pol.Job.list": {
       "items": [
         {
+          "jobId": "0192be74-e479-74f1-818c-9638b06d3248",
+          "jobNumber": "SAMPLE-000001",
+          "jobType": "SAMPLE_CODE",
+          "state": "DRAFT",
+          "referred": true,
+          "policyId": "01920e07-9b73-7a3e-8374-11e3937ab739",
+          "policyholderPartyId": "0192bd3f-75d8-7ba7-8d19-63b42b53efae",
+          "accountId": "01929530-80d8-720e-8f07-d1ba76a05046",
+          "productCode": "SAMPLE_CODE",
+          "producerCode": "SAMPLE_CODE",
+          "channel": "SAMPLE_CODE",
+          "quoteType": "QUICK",
+          "currentVersionNo": 1,
+          "recordVersion": 1,
+          "total": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "effectiveAt": "2026-10-07T09:00:00Z",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "updatedAt": "2026-10-07T09:00:00Z",
           "jobs": "unspecified"
         }
       ],
@@ -385,8 +409,16 @@
       "limit": 1
     },
     "pol.Job.newVersion": {
-      "newVersion": "unspecified",
-      "comparison": "unspecified"
+      "jobId": "019249da-c743-7a8d-8928-330b68b3f1d0",
+      "jobNumber": "SAMPLE-000001",
+      "versionNo": 1,
+      "quoteId": "0192fbc0-c45c-77ea-89fc-ffff8355315e",
+      "draftVersion": 1,
+      "state": "DRAFT",
+      "recordVersion": 1,
+      "supersededVersionNo": 1,
+      "sourceJobId": "01927bdd-eef0-7ef9-89b1-681b1f884bfe",
+      "sourceVersionNo": 1
     },
     "pol.Job.quote": {
       "jobId": "0192ee18-f32e-7fb2-8038-7e58b1b4288f",
@@ -2060,11 +2092,21 @@
     },
     "JobCopyVersionRequest": {
       "jobId": "01921a5e-035d-777e-8ad7-ee557415f6c2",
-      "sourceVersion": "unspecified"
+      "sourceVersion": 1,
+      "target": "NEW_VERSION",
+      "expectedRecordVersion": 1
     },
     "JobCopyVersionResponse": {
-      "newVersion": "unspecified",
-      "comparison": "unspecified"
+      "jobId": "01926d9f-54e5-7c70-869e-e289a2fcbb78",
+      "jobNumber": "SAMPLE-000001",
+      "versionNo": 1,
+      "quoteId": "01920274-123e-78e8-8289-fccb0820163d",
+      "draftVersion": 1,
+      "state": "DRAFT",
+      "recordVersion": 1,
+      "supersededVersionNo": 1,
+      "sourceJobId": "01923bd3-1c3b-7c09-8ba4-c5d0f8c6773c",
+      "sourceVersionNo": 1
     },
     "JobGetResponse": {
       "job": {
@@ -2087,6 +2129,8 @@
         "currency": "EUR",
         "currentVersionNo": 1,
         "transactionId": "01925b08-ab55-791f-8c76-9442a2f90f0d",
+        "recordVersion": 1,
+        "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
         "versions": [
           {
             "quoteId": "01920c48-6af4-7f3a-8e9f-91be0540ccdb",
@@ -2212,11 +2256,55 @@
       "lease": "unspecified"
     },
     "JobListItem": {
+      "jobId": "0192339f-943e-7b94-82e9-f88370d31a91",
+      "jobNumber": "SAMPLE-000001",
+      "jobType": "SAMPLE_CODE",
+      "state": "DRAFT",
+      "referred": true,
+      "policyId": "0192e3e2-f34c-7d80-8834-e1d849e84d14",
+      "policyholderPartyId": "019202fb-e678-71bf-8508-d3d12c615c29",
+      "accountId": "0192504f-e562-7aa2-8dac-6669587c5715",
+      "productCode": "SAMPLE_CODE",
+      "producerCode": "SAMPLE_CODE",
+      "channel": "SAMPLE_CODE",
+      "quoteType": "QUICK",
+      "currentVersionNo": 1,
+      "recordVersion": 1,
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "effectiveAt": "2026-10-07T09:00:00Z",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "updatedAt": "2026-10-07T09:00:00Z",
       "jobs": "unspecified"
     },
     "JobListPage": {
       "items": [
         {
+          "jobId": "01927743-9f7f-7080-8659-cc255d57f77d",
+          "jobNumber": "SAMPLE-000001",
+          "jobType": "SAMPLE_CODE",
+          "state": "DRAFT",
+          "referred": true,
+          "policyId": "01929339-e687-7446-8154-302bca715312",
+          "policyholderPartyId": "0192e5ce-e9e1-754a-8f34-6e2e979dfb78",
+          "accountId": "01921154-6474-7803-8c03-7f0f733c5a57",
+          "productCode": "SAMPLE_CODE",
+          "producerCode": "SAMPLE_CODE",
+          "channel": "SAMPLE_CODE",
+          "quoteType": "QUICK",
+          "currentVersionNo": 1,
+          "recordVersion": 1,
+          "total": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "effectiveAt": "2026-10-07T09:00:00Z",
+          "createdAt": "2026-10-07T09:00:00Z",
+          "updatedAt": "2026-10-07T09:00:00Z",
           "jobs": "unspecified"
         }
       ],
@@ -2225,19 +2313,33 @@
     },
     "JobNewVersionRequest": {
       "jobId": "01927e89-de19-78af-829b-d03afdb7a108",
-      "sourceVersion": "unspecified"
+      "sourceVersion": 1,
+      "expectedRecordVersion": 1
     },
     "JobNewVersionResponse": {
-      "newVersion": "unspecified",
-      "comparison": "unspecified"
+      "jobId": "01926d74-312f-7057-8697-87cb1c57c7cb",
+      "jobNumber": "SAMPLE-000001",
+      "versionNo": 1,
+      "quoteId": "0192b4e1-8755-7e05-8d06-feb19014d899",
+      "draftVersion": 1,
+      "state": "DRAFT",
+      "recordVersion": 1,
+      "supersededVersionNo": 1,
+      "sourceJobId": "019265eb-eba5-7cf2-8a85-951009004783",
+      "sourceVersionNo": 1
     },
     "JobNotTakenRequest": {
       "jobId": "01922c16-5f6e-70bb-8816-534700251d32",
-      "reasonCode": "unspecified",
-      "text": "unspecified"
+      "reasonCode": "SAMPLE_CODE",
+      "text": "sample",
+      "expectedRecordVersion": 1
     },
     "JobNotTakenResponse": {
-      "job": "unspecified"
+      "jobId": "019236ba-e7a6-7e5b-8459-49722ff4a4ab",
+      "state": "DRAFT",
+      "reasonCode": "SAMPLE_CODE",
+      "recordVersion": 1,
+      "replayed": true
     },
     "JobQuoteRequest": {
       "jobId": "019236b4-28a7-7c18-839c-29b9f8b91d06",
@@ -2398,18 +2500,51 @@
     },
     "JobRequoteRequest": {
       "jobId": "0192223e-c5a9-79f2-8683-5f2f82630172",
-      "versionNo": "unspecified"
+      "versionNo": 1,
+      "expectedRecordVersion": 1,
+      "ratingArtefact": "IN_FORCE_NOW",
+      "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     },
     "JobRequoteResponse": {
-      "quoteVersion": "unspecified",
+      "jobId": "01924836-27b9-7d2e-8244-54ad9002fe6f",
+      "quoteId": "01921949-bac1-7c95-849f-6ceab72a65c7",
+      "versionNo": 1,
+      "supersededVersionNo": 1,
+      "state": "DRAFT",
+      "decision": "ACCEPT",
+      "referred": true,
+      "bindable": true,
       "premium": {
         "amount": "120.50",
         "currency": "EUR"
       },
+      "taxes": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "total": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
       "issues": [
-        "unspecified"
+        {
+          "issueId": "01924a51-4037-7468-8f30-6c188cfa900d",
+          "issueType": "SAMPLE_CODE",
+          "severity": "SAMPLE_CODE",
+          "blockingPoint": "PRE_QUOTE",
+          "issueKey": "sample",
+          "lane": "SAMPLE_CODE",
+          "explanationKeys": [
+            "sample"
+          ],
+          "approvalStatus": "SAMPLE_CODE"
+        }
       ],
-      "validity": "unspecified"
+      "validUntil": "2026-10-07T09:00:00Z",
+      "ratingArtefact": "IN_FORCE_NOW",
+      "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "previousRatingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "recordVersion": 1
     },
     "JobResolveConflictsRequest": {
       "jobId": "0192d724-9ab6-7b2a-8572-904f084809fa",
@@ -2570,6 +2705,8 @@
       "currency": "EUR",
       "currentVersionNo": 1,
       "transactionId": "01924bef-a476-7aaa-8a13-7df688ca49c4",
+      "recordVersion": 1,
+      "ratingArtefactHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "versions": [
         {
           "quoteId": "0192ca52-1c4d-7487-8b15-551c3d1f5954",
