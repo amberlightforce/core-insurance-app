@@ -76,7 +76,7 @@ public static class DocumentsErrorCodes
 
     /// <summary>DOC-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 27 operation(s): doc.Archive.addRendition, doc.Archive.setRetentionClass, doc.Archive.store, doc.Archive.verify, doc.Document.deleteDraft, doc.Document.hide, doc.Document.import, doc.Document.renderAsOf, doc.Document.reprint, doc.Document.request, doc.Document.requestBatch, doc.Document.resend, ….</para>
+    /// <para>Declared by 28 operation(s): doc.Archive.addRendition, doc.Archive.setRetentionClass, doc.Archive.store, doc.Archive.verify, doc.Document.deleteDraft, doc.Document.hide, doc.Document.import, doc.Document.renderAsOf, doc.Document.renderPdf, doc.Document.reprint, doc.Document.request, doc.Document.requestBatch, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "DOC-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -112,7 +112,7 @@ public static class DocumentsErrorCodes
 
     /// <summary>DOC-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): doc.Archive.download, doc.Document.get, doc.Document.listForObject, doc.Ipid.get.</para>
+    /// <para>Declared by 5 operation(s): doc.Archive.download, doc.Document.get, doc.Document.listForObject, doc.Document.renderPdf, doc.Ipid.get.</para>
     /// </remarks>
     public const string NotFound = "DOC-ERR-NOT-FOUND";
 
@@ -133,6 +133,12 @@ public static class DocumentsErrorCodes
     /// <para>Declared by 5 operation(s): doc.Signature.createEnvelope, doc.Signature.get, doc.Signature.remind, doc.Signature.send, doc.Signature.void.</para>
     /// </remarks>
     public const string ProviderUnavailable = "DOC-ERR-PROVIDER-UNAVAILABLE";
+
+    /// <summary>DOC-ERR-RENDER-FAILED (HTTP 502).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): doc.Document.renderPdf.</para>
+    /// </remarks>
+    public const string RenderFailed = "DOC-ERR-RENDER-FAILED";
 
     /// <summary>DOC-ERR-SCAN-REQUIRED (HTTP 422).</summary>
     /// <remarks>
@@ -156,7 +162,7 @@ public static class DocumentsErrorCodes
     public const string Prefix = "DOC-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AiTextUnaccepted, AlreadyDelivered, AsofUnsupported, BatchInvalid, BindingMissing, ChannelNotPermitted, CoexistenceLegacy, ContextMissing, Forbidden, HashMismatch, HumanSignatureRequired, IdempotencyMismatch, Immutable, ImportInvalid, LanguageNotApproved, NoConsent, NotBound, NotFound, Overlap, PayloadInvalid, ProviderUnavailable, ScanRequired, SignatoryIdentifierMissing, TypeUnknown];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AiTextUnaccepted, AlreadyDelivered, AsofUnsupported, BatchInvalid, BindingMissing, ChannelNotPermitted, CoexistenceLegacy, ContextMissing, Forbidden, HashMismatch, HumanSignatureRequired, IdempotencyMismatch, Immutable, ImportInvalid, LanguageNotApproved, NoConsent, NotBound, NotFound, Overlap, PayloadInvalid, ProviderUnavailable, RenderFailed, ScanRequired, SignatoryIdentifierMissing, TypeUnknown];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -182,6 +188,7 @@ public static class DocumentsErrorCodes
         [Overlap] = 422,
         [PayloadInvalid] = 422,
         [ProviderUnavailable] = 503,
+        [RenderFailed] = 502,
         [ScanRequired] = 422,
         [SignatoryIdentifierMissing] = 422,
         [TypeUnknown] = 422,

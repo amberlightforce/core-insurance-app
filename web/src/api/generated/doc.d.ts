@@ -165,6 +165,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/doc/v1/documents/render-pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Render the PDF of a document
+         * @description Renders the archived HTML letter of a document to PDF (BO-DOC-07) and stores it as a `PDF` rendition next to the HTML
+         *     (`doc.Archive.addRendition` semantics). With Gotenberg configured the PDF is PDF/A-3b (`pdfA: true`); without it a plain
+         *     local PDF is produced and flagged `pdfA: false`. Idempotent: a document that already has a PDF rendition returns it
+         *     (`alreadyRendered: true`). Delivery and the HTML archive entry are untouched.
+         */
+        post: operations["doc.Document.renderPdf"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/doc/v1/documents/resend": {
         parameters: {
             query?: never;
@@ -1227,6 +1250,21 @@ export interface components {
             /** @description PRD: "link" */
             link?: components["schemas"]["Unspecified"];
         };
+        /** @description doc.Document.renderPdf request (BO-DOC-07). */
+        DocumentRenderPdfRequest: {
+            documentId: components["schemas"]["Uuid"];
+        };
+        /** @description doc.Document.renderPdf result: the PDF rendition entry. */
+        DocumentRenderPdfResponse: {
+            documentId: components["schemas"]["Uuid"];
+            /** @description Archive entry of the PDF rendition (download with doc.Archive.download). */
+            archiveId: components["schemas"]["Uuid"];
+            hash: components["schemas"]["Sha256"];
+            /** @description True when the PDF is PDF/A-3b (Gotenberg); false for the plain local fallback. */
+            pdfA: boolean;
+            /** @description True when a PDF rendition already existed and nothing was rendered. */
+            alreadyRendered: boolean;
+        };
         /** @description doc.Document.resend request (BO-DOC-02): a new delivery of the same archived document. A reason is required. */
         DocumentResendRequest: {
             documentId?: components["schemas"]["Uuid"];
@@ -1804,6 +1842,8 @@ export interface components {
         };
         /** Format: date */
         LocalDate: string;
+        /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
+        Sha256: string;
         /**
          * Format: date-time
          * @description RFC 3339 timestamp in UTC (suffix Z).
@@ -1811,8 +1851,6 @@ export interface components {
         Instant: string;
         /** @description Product version `major.minor` (contract §3.2.3). */
         ProductVersionNumber: string;
-        /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
-        Sha256: string;
     };
     responses: {
         /** @description Malformed request or failed schema validation. */
@@ -2262,6 +2300,50 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "doc.Document.renderPdf": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentRenderPdfRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRenderPdfResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
             500: components["responses"]["InternalError"];
         };
     };
