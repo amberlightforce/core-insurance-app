@@ -6,13 +6,20 @@ using CoreIns.SharedKernel.Identifiers;
 namespace CoreIns.Modules.Policy.Commands.Cancellation;
 
 /// <summary>The command wrapper (<c>pol.Cancellation.create</c>); the request and response are the generated contract types (SL3-CONTRACTS).</summary>
-internal sealed record CancelPolicy(CancellationCreateRequest Request, WithdrawalCase? Withdrawal = null, NonPaymentCase? NonPayment = null) : CoreIns.Platform.Commands.ICommand<CancellationCreateResponse>;
+internal sealed record CancelPolicy(CancellationCreateRequest Request, WithdrawalCase? Withdrawal = null, NonPaymentCase? NonPayment = null, ScheduledCase? Scheduled = null) : CoreIns.Platform.Commands.ICommand<CancellationCreateResponse>;
 
 /// <summary>
 /// Set by the non-payment consumer (SL6-POL-NONPAY): cancel <paramref name="TermId"/> for non-payment, effective at the start of the day after the
 /// clock due date (D-SL6-04), by the pro-rata path. Never reachable from <c>pol.Cancellation.create</c>.
 /// </summary>
 internal sealed record NonPaymentCase(PolicyTermId TermId, Instant Effective, Guid ClockInstanceId, Guid RequestId);
+
+/// <summary>
+/// Set by <c>pol.Cancellation.schedule</c> (BO-POL-06, <paramref name="PreviewOnly"/>: quote the refund and write nothing) and by the scheduled
+/// cancellation sweep (run it): cancel <paramref name="TermId"/> effective at <paramref name="Effective"/>, a future moment when scheduled, on the
+/// pro-rata path of source Policyholder. Never reachable from <c>pol.Cancellation.create</c>.
+/// </summary>
+internal sealed record ScheduledCase(PolicyTermId TermId, Instant Effective, bool PreviewOnly);
 
 /// <summary>
 /// Set by <c>pol.Withdrawal.submit</c> (SL6-POL-WITHDRAW) when the cancellation machinery is used to void a term ab initio: the
