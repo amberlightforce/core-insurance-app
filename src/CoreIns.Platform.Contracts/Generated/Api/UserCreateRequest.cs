@@ -4,15 +4,25 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.User.create request. PRD inputs: "user fields"</summary>
+/// <summary>plt.User.create request: pre-provisions the directory entry of an Entra identity (BO-PLT-05). The first valid token of an unknown identity creates it on its own.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record UserCreateRequest
 {
-    /// <summary>PRD: "user fields"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("userFields")]
+    /// <summary>Object id (oid) of the identity in Entra ID</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("entraOid")]
+    public required string EntraOid { get; init; }
+
+    /// <summary>Contract member 'displayName'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("displayName")]
+    public required string DisplayName { get; init; }
+
+    /// <summary>Contract member 'email'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("email")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? UserFields { get; init; }
+    public string? Email { get; init; }
+
+    /// <summary>Contract member 'language'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("language")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.Platform.Contracts.Api.UserLanguage? Language { get; init; }
 }

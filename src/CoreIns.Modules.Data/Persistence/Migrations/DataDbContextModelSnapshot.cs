@@ -688,12 +688,73 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                     b.ToTable("mart_signoff", "rpt_mart");
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.ModelMetricRow", b =>
+                {
+                    b.Property<Guid>("MetricId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("metric_id");
+
+                    b.Property<Guid?>("BreachId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("breach_id");
+
+                    b.Property<bool>("Breached")
+                        .HasColumnType("boolean")
+                        .HasColumnName("breached");
+
+                    b.Property<string>("Metric")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("metric");
+
+                    b.Property<Guid>("ModelId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("model_id");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<int>("SampleSize")
+                        .HasColumnType("integer")
+                        .HasColumnName("sample_size");
+
+                    b.Property<decimal?>("Threshold")
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("threshold");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("value");
+
+                    b.Property<DateTime?>("WindowFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("window_from");
+
+                    b.Property<DateTime?>("WindowTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("window_to");
+
+                    b.HasKey("MetricId")
+                        .HasName("pk_model_metric");
+
+                    b.HasIndex("ModelId", "RecordedAt")
+                        .HasDatabaseName("ix_model_metric_model_time");
+
+                    b.ToTable("model_metric", "dat");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Data.Persistence.ModelRow", b =>
                 {
                     b.Property<Guid>("ModelId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("model_id");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("approved_by");
 
                     b.Property<string>("Card")
                         .IsRequired()
@@ -704,19 +765,55 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("DriftFlagged")
+                        .HasColumnType("boolean")
+                        .HasColumnName("drift_flagged");
+
+                    b.Property<string>("DriftReason")
+                        .HasColumnType("text")
+                        .HasColumnName("drift_reason");
+
+                    b.Property<DateOnly?>("EffectiveDate")
+                        .HasColumnType("date")
+                        .HasColumnName("effective_date");
+
                     b.Property<string>("FeatureKey")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("feature_key");
+
+                    b.Property<string>("RetiredReason")
+                        .HasColumnType("text")
+                        .HasColumnName("retired_reason");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("status");
 
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
+
                     b.Property<string>("SuspendedReason")
                         .HasColumnType("text")
                         .HasColumnName("suspended_reason");
+
+                    b.Property<string>("ValidatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("validated_by");
+
+                    b.Property<string>("ValidationFindings")
+                        .HasColumnType("text")
+                        .HasColumnName("validation_findings");
+
+                    b.Property<string>("ValidationOutcome")
+                        .HasColumnType("text")
+                        .HasColumnName("validation_outcome");
 
                     b.Property<string>("Version")
                         .IsRequired()
@@ -732,8 +829,46 @@ namespace CoreIns.Modules.Data.Persistence.Migrations
 
                     b.ToTable("model", "dat", t =>
                         {
-                            t.HasCheckConstraint("ck_model_status", "status IN ('ACTIVE','SUSPENDED')");
+                            t.HasCheckConstraint("ck_model_status", "status IN ('DRAFT','IN_VALIDATION','APPROVED','ACTIVE','SUSPENDED','RETIRED')");
                         });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Data.Persistence.ModelTransitionRow", b =>
+                {
+                    b.Property<Guid>("TransitionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("transition_id");
+
+                    b.Property<string>("ActorKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("actor_key");
+
+                    b.Property<DateTime>("At")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("at");
+
+                    b.Property<Guid>("ModelId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("model_id");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("TransitionId")
+                        .HasName("pk_model_transition");
+
+                    b.HasIndex("ModelId")
+                        .HasDatabaseName("ix_model_transition_model");
+
+                    b.ToTable("model_transition", "dat");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Data.Persistence.ProjectedEventRow", b =>

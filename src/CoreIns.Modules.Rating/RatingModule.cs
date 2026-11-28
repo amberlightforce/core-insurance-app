@@ -78,7 +78,8 @@ public static class RatingModule
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<IRatingRateService, RatingRateService>();
         services.AddScoped<IRatingRatingArtifactService, RatingRatingArtifactService>();
-        services.AddScoped<IRatingWorksheetService, RatingWorksheetService>();
+        services.AddScoped<RatingWorksheetService>();
+        services.AddScoped<IRatingWorksheetService>(sp => sp.GetRequiredService<RatingWorksheetService>());
         services.AddScoped<IRatingProrationEngine, RatingProrationEngine>(); // SL3-RAT-PRORATE
         services.AddScoped<IRatingServicingTax, RatingServicingTax>();
 

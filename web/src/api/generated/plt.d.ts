@@ -2330,65 +2330,100 @@ export interface components {
             /** @description PRD: "token" */
             token?: components["schemas"]["Unspecified"];
         };
-        /** @description plt.User.create request. PRD inputs: "user fields" */
+        /** @description plt.User.create request: pre-provisions the directory entry of an Entra identity (BO-PLT-05). The first valid token of an unknown identity creates it on its own. */
         UserCreateRequest: {
-            /** @description PRD: "user fields" */
-            userFields?: components["schemas"]["Unspecified"];
+            /** @description Object id (oid) of the identity in Entra ID */
+            entraOid: string;
+            displayName: string;
+            email?: string;
+            language?: components["schemas"]["UserLanguage"];
         };
-        /** @description plt.User.create result. PRD outputs: "user" */
+        /** @description plt.User.create result */
         UserCreateResponse: {
-            /** @description PRD: "user" */
-            user?: components["schemas"]["Unspecified"];
+            user: components["schemas"]["UserView"];
         };
-        /** @description plt.User.update request. PRD inputs: "user fields" */
+        /** @description plt.User.update request: changes the display name, email or language of a directory entry (path id). */
         UserUpdateRequest: {
-            /** @description PRD: "user fields" */
-            userFields?: components["schemas"]["Unspecified"];
+            displayName?: string;
+            email?: string;
+            language?: components["schemas"]["UserLanguage"];
         };
-        /** @description plt.User.update result. PRD outputs: "user" */
+        /** @description plt.User.update result */
         UserUpdateResponse: {
-            /** @description PRD: "user" */
-            user?: components["schemas"]["Unspecified"];
+            user: components["schemas"]["UserView"];
         };
-        /** @description plt.User.suspend request. PRD inputs: "user fields" */
+        /** @description plt.User.suspend request: suspends the user. A suspended or disabled user is refused with 403 on the next call. */
         UserSuspendRequest: {
-            /** @description PRD: "user fields" */
-            userFields?: components["schemas"]["Unspecified"];
+            userId: components["schemas"]["Uuid"];
+            reason: string;
         };
-        /** @description plt.User.suspend result. PRD outputs: "user" */
+        /** @description plt.User.suspend result */
         UserSuspendResponse: {
-            /** @description PRD: "user" */
-            user?: components["schemas"]["Unspecified"];
+            user: components["schemas"]["UserView"];
         };
-        /** @description plt.User.reactivate request. PRD inputs: "user fields" */
+        /** @description plt.User.reactivate request: reactivates the user. A suspended or disabled user is refused with 403 on the next call. */
         UserReactivateRequest: {
-            /** @description PRD: "user fields" */
-            userFields?: components["schemas"]["Unspecified"];
+            userId: components["schemas"]["Uuid"];
+            reason: string;
         };
-        /** @description plt.User.reactivate result. PRD outputs: "user" */
+        /** @description plt.User.reactivate result */
         UserReactivateResponse: {
-            /** @description PRD: "user" */
-            user?: components["schemas"]["Unspecified"];
+            user: components["schemas"]["UserView"];
         };
-        /** @description plt.User.disable request. PRD inputs: "user fields" */
+        /** @description plt.User.disable request: disables (final) the user. A suspended or disabled user is refused with 403 on the next call. */
         UserDisableRequest: {
-            /** @description PRD: "user fields" */
-            userFields?: components["schemas"]["Unspecified"];
+            userId: components["schemas"]["Uuid"];
+            reason: string;
         };
-        /** @description plt.User.disable result. PRD outputs: "user" */
+        /** @description plt.User.disable result */
         UserDisableResponse: {
-            /** @description PRD: "user" */
-            user?: components["schemas"]["Unspecified"];
+            user: components["schemas"]["UserView"];
         };
-        /** @description plt.User.get result. PRD outputs: "user" */
+        /** @description plt.User.get result, the user with the role assignments */
         UserGetResponse: {
-            /** @description PRD: "user" */
-            user?: components["schemas"]["Unspecified"];
+            user: components["schemas"]["UserView"];
         };
-        /** @description plt.User.search result. PRD outputs: "user" */
+        /** @description plt.User.search result item */
         UserSearchItem: {
-            /** @description PRD: "user" */
-            user?: components["schemas"]["Unspecified"];
+            user: components["schemas"]["UserView"];
+        };
+        /** @enum {string} */
+        UserLanguage: "el" | "en";
+        /** @enum {string} */
+        UserStatus: "Active" | "Suspended" | "Disabled";
+        /** @description A directory entry (user_profile). Entra ID stays the identity source; no credentials are kept (D-ARC-03). */
+        UserView: {
+            userId: components["schemas"]["Uuid"];
+            entraOid: string;
+            displayName: string;
+            email?: string;
+            language: components["schemas"]["UserLanguage"];
+            status: components["schemas"]["UserStatus"];
+            legalEntity: string;
+            createdAt: components["schemas"]["Instant"];
+            updatedAt: components["schemas"]["Instant"];
+            lastSeenAt?: components["schemas"]["Instant"];
+            roleAssignments?: components["schemas"]["RoleAssignmentView"][];
+        };
+        /** @enum {string} */
+        RoleAssignmentStatus: "Active" | "Revoked";
+        /** @description A recorded, audited role assignment. App roles in the token stay authoritative for authorization until decided otherwise (BO-PLT-05, SURVEY-NOTES D). */
+        RoleAssignmentView: {
+            assignmentId: components["schemas"]["Uuid"];
+            userId: components["schemas"]["Uuid"];
+            role: string;
+            scope?: string;
+            validFrom?: components["schemas"]["Instant"];
+            validTo?: components["schemas"]["Instant"];
+            status: components["schemas"]["RoleAssignmentStatus"];
+            /** @description The maker (requester) of the grant */
+            grantedBy: string;
+            /** @description The second person who approved the grant (plt.Approval) */
+            approvedBy?: string;
+            approvalRequestId?: components["schemas"]["Uuid"];
+            grantedAt: components["schemas"]["Instant"];
+            revokedAt?: components["schemas"]["Instant"];
+            revokedBy?: string;
         };
         /** @description Page of plt.User.search results (cursor pagination, contract §3.5.5) */
         UserSearchPage: components["schemas"]["PageEnvelope"] & {
@@ -2424,32 +2459,31 @@ export interface components {
             /** @description PRD: "invitation" */
             invitation?: components["schemas"]["Unspecified"];
         };
-        /** @description plt.RoleAssignment.grant request. PRD inputs: "role, user, scope, dates" */
+        /** @description plt.RoleAssignment.grant request. Without approvalRequestId the call creates the second-approver request (PLT.ROLE_GRANT, plt.Approval) and returns PendingApproval; once a second person approved it, repeat the same request with approvalRequestId to record the assignment. */
         RoleAssignmentGrantRequest: {
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
-            /** @description PRD: "user" */
-            user?: components["schemas"]["Unspecified"];
-            /** @description PRD: "scope" */
-            scope?: components["schemas"]["Unspecified"];
-            /** @description PRD: "dates" */
-            dates?: components["schemas"]["Unspecified"];
+            userId: components["schemas"]["Uuid"];
+            role: string;
+            scope?: string;
+            validFrom?: components["schemas"]["Instant"];
+            validTo?: components["schemas"]["Instant"];
+            approvalRequestId?: components["schemas"]["Uuid"];
         };
-        /** @description plt.RoleAssignment.grant result. PRD outputs: "—" */
-        RoleAssignmentGrantResponse: Record<string, never>;
-        /** @description plt.RoleAssignment.revoke request. PRD inputs: "role, user, scope, dates" */
+        /** @description plt.RoleAssignment.grant result */
+        RoleAssignmentGrantResponse: {
+            /** @enum {string} */
+            status: "PendingApproval" | "Granted";
+            approvalRequestId?: components["schemas"]["Uuid"];
+            assignment?: components["schemas"]["RoleAssignmentView"];
+        };
+        /** @description plt.RoleAssignment.revoke request: ends an active assignment (no second approver: removing access is always safe). */
         RoleAssignmentRevokeRequest: {
-            /** @description PRD: "role" */
-            role?: components["schemas"]["Unspecified"];
-            /** @description PRD: "user" */
-            user?: components["schemas"]["Unspecified"];
-            /** @description PRD: "scope" */
-            scope?: components["schemas"]["Unspecified"];
-            /** @description PRD: "dates" */
-            dates?: components["schemas"]["Unspecified"];
+            assignmentId: components["schemas"]["Uuid"];
+            reason: string;
         };
-        /** @description plt.RoleAssignment.revoke result. PRD outputs: "—" */
-        RoleAssignmentRevokeResponse: Record<string, never>;
+        /** @description plt.RoleAssignment.revoke result */
+        RoleAssignmentRevokeResponse: {
+            assignment: components["schemas"]["RoleAssignmentView"];
+        };
         /** @description plt.Policy.evaluate request. PRD inputs: "principal, action, resource attributes" */
         PolicyEvaluateRequest: {
             /** @description PRD: "principal" */
@@ -3383,24 +3417,22 @@ export interface components {
             /** @description PRD: "granted or refused" */
             grantedOrRefused?: components["schemas"]["Unspecified"];
         };
-        /** @description plt.UserProfile.getPreferences result. PRD outputs: "saved preferences" */
+        /** @description plt.UserProfile.getPreferences result (the signed-in user's preferences) */
         UserProfileGetPreferencesResponse: {
-            /** @description PRD: "saved preferences" */
-            savedPreferences?: components["schemas"]["Unspecified"];
+            savedPreferences: components["schemas"]["UserPreferences"];
         };
-        /** @description plt.UserProfile.setLanguage request. PRD inputs: "user (from token), ui_language (BCP 47 `el` or `en`), source" */
+        UserPreferences: {
+            uiLanguage: components["schemas"]["UserLanguage"];
+            source?: string;
+        };
+        /** @description plt.UserProfile.setLanguage request (the user is always the signed-in user from the token) */
         UserProfileSetLanguageRequest: {
-            /** @description PRD: "user (from token)" */
-            user?: components["schemas"]["Unspecified"];
-            /** @description PRD: "ui_language (BCP 47 `el` or `en`)" */
-            uiLanguage?: components["schemas"]["LanguageCode"];
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
+            uiLanguage: components["schemas"]["UserLanguage"];
+            source?: string;
         };
-        /** @description plt.UserProfile.setLanguage result. PRD outputs: "saved preferences" */
+        /** @description plt.UserProfile.setLanguage result */
         UserProfileSetLanguageResponse: {
-            /** @description PRD: "saved preferences" */
-            savedPreferences?: components["schemas"]["Unspecified"];
+            savedPreferences: components["schemas"]["UserPreferences"];
         };
         /** @description plt.Lineage.walk result. PRD outputs: "ordered steps with keys and trace links" */
         LineageWalkResponse: {
@@ -3506,6 +3538,11 @@ export interface components {
         };
         /** @description Internal identifier (UUID, generated as UUIDv7 in .NET, D-ARC-05). Lower-case. */
         Uuid: string;
+        /**
+         * Format: date-time
+         * @description RFC 3339 timestamp in UTC (suffix Z).
+         */
+        Instant: string;
         /** @description Cursor page (contract §3.5.5). Lists are filtered by the caller's legal entity and ABAC scope. */
         PageEnvelope: {
             items: unknown[];
@@ -3515,11 +3552,6 @@ export interface components {
         };
         /** Format: date */
         LocalDate: string;
-        /**
-         * Format: date-time
-         * @description RFC 3339 timestamp in UTC (suffix Z).
-         */
-        Instant: string;
         /** @description Who acted: user, service or AI agent id (contract §3.4.1 actor). */
         Actor: {
             /** @enum {string} */
@@ -4009,6 +4041,9 @@ export interface operations {
     "plt.User.search": {
         parameters: {
             query?: {
+                /** @description Text in display name, email or Entra object id */
+                q?: string;
+                status?: components["schemas"]["UserStatus"];
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */

@@ -30,7 +30,6 @@ CONTRACT_NOT_SERVED GET /api/chn/v1/wallets/status
 CONTRACT_NOT_SERVED GET /api/chn/v1/webhooks/deliveries
 CONTRACT_NOT_SERVED GET /api/chn/v1/{}/{}/documents
 CONTRACT_NOT_SERVED GET /api/clm/v1/conversations
-CONTRACT_NOT_SERVED GET /api/clm/v1/financials/daily-totals
 CONTRACT_NOT_SERVED GET /api/cmp/v1/bureaus/status
 CONTRACT_NOT_SERVED GET /api/cmp/v1/taxonomies
 CONTRACT_NOT_SERVED GET /api/dat/v1/accumulation/footprint
@@ -95,9 +94,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/lineage/walk
 CONTRACT_NOT_SERVED GET /api/plt/v1/retention/runs
 CONTRACT_NOT_SERVED GET /api/plt/v1/time/now
 CONTRACT_NOT_SERVED GET /api/plt/v1/transfers
-CONTRACT_NOT_SERVED GET /api/plt/v1/user-profile/get-preferences
-CONTRACT_NOT_SERVED GET /api/plt/v1/users/search
-CONTRACT_NOT_SERVED GET /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
 CONTRACT_NOT_SERVED GET /api/pty/v1/screening/case-get
@@ -110,7 +106,6 @@ CONTRACT_NOT_SERVED GET /api/rat/v1/rates/get-batch
 CONTRACT_NOT_SERVED GET /api/rat/v1/rates/get-batch-results
 CONTRACT_NOT_SERVED GET /api/rat/v1/shadow-runs/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/statements/get
-CONTRACT_NOT_SERVED GET /api/rat/v1/worksheets/explain
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/footprint
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/query
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/zone
@@ -147,7 +142,6 @@ CONTRACT_NOT_SERVED GET /api/wrk/v1/teams/summary
 CONTRACT_NOT_SERVED PATCH /api/bil/v1/billing-accounts/{}
 CONTRACT_NOT_SERVED PATCH /api/clm/v1/services/{}
 CONTRACT_NOT_SERVED PATCH /api/pfc/v1/pogs/{}
-CONTRACT_NOT_SERVED PATCH /api/plt/v1/users/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/contingencies/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
 CONTRACT_NOT_SERVED PATCH /api/wrk/v1/activities/{}
@@ -242,9 +236,6 @@ CONTRACT_NOT_SERVED POST /api/clm/v1/services/request
 CONTRACT_NOT_SERVED POST /api/clm/v1/statutory-offers/issue
 CONTRACT_NOT_SERVED POST /api/clm/v1/statutory-offers/record-acceptance
 CONTRACT_NOT_SERVED POST /api/clm/v1/statutory-offers/record-repair-agreement
-CONTRACT_NOT_SERVED POST /api/clm/v1/transaction-sets/approve
-CONTRACT_NOT_SERVED POST /api/clm/v1/transaction-sets/reject
-CONTRACT_NOT_SERVED POST /api/clm/v1/transaction-sets/return
 CONTRACT_NOT_SERVED POST /api/clm/v1/vendor-invoices/decide
 CONTRACT_NOT_SERVED POST /api/clm/v1/vendor-invoices/submit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/annual-returns/amend
@@ -412,8 +403,6 @@ CONTRACT_NOT_SERVED POST /api/plt/v1/privileged-accesses/request
 CONTRACT_NOT_SERVED POST /api/plt/v1/privileged-accesses/revoke
 CONTRACT_NOT_SERVED POST /api/plt/v1/retention/register-dataset
 CONTRACT_NOT_SERVED POST /api/plt/v1/retention/schedule
-CONTRACT_NOT_SERVED POST /api/plt/v1/role-assignments/grant
-CONTRACT_NOT_SERVED POST /api/plt/v1/role-assignments/revoke
 CONTRACT_NOT_SERVED POST /api/plt/v1/ror/export
 CONTRACT_NOT_SERVED POST /api/plt/v1/schemas/check
 CONTRACT_NOT_SERVED POST /api/plt/v1/schemas/register
@@ -421,11 +410,6 @@ CONTRACT_NOT_SERVED POST /api/plt/v1/subject/export
 CONTRACT_NOT_SERVED POST /api/plt/v1/tokens/exchange
 CONTRACT_NOT_SERVED POST /api/plt/v1/tokens/grant-agent-scope
 CONTRACT_NOT_SERVED POST /api/plt/v1/transfers/retry
-CONTRACT_NOT_SERVED POST /api/plt/v1/user-profile/set-language
-CONTRACT_NOT_SERVED POST /api/plt/v1/users
-CONTRACT_NOT_SERVED POST /api/plt/v1/users/disable
-CONTRACT_NOT_SERVED POST /api/plt/v1/users/reactivate
-CONTRACT_NOT_SERVED POST /api/plt/v1/users/suspend
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/cancel
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/signal
 CONTRACT_NOT_SERVED POST /api/plt/v1/workflows/start
@@ -484,9 +468,6 @@ CONTRACT_NOT_SERVED POST /api/rat/v1/rates/cancel-batch
 CONTRACT_NOT_SERVED POST /api/rat/v1/rates/rate-batch
 CONTRACT_NOT_SERVED POST /api/rat/v1/shadow-runs/start
 CONTRACT_NOT_SERVED POST /api/rat/v1/shadow-runs/stop
-CONTRACT_NOT_SERVED POST /api/rat/v1/worksheets/attach
-CONTRACT_NOT_SERVED POST /api/rat/v1/worksheets/export
-CONTRACT_NOT_SERVED POST /api/rat/v1/worksheets/reperform
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/estimate
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/export-oed
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/import-model-results
@@ -579,7 +560,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/bulk-set
 CONTRACT_NOT_SERVED POST /api/uw/v1/renewal-directions/set
 CONTRACT_NOT_SERVED POST /api/uw/v1/valuation/compute
 CONTRACT_NOT_SERVED POST /api/wrk/v1/activities/bulk-reassign
-CONTRACT_NOT_SERVED POST /api/wrk/v1/assignments/simulate
 CONTRACT_NOT_SERVED POST /api/wrk/v1/command-registries/register
 CONTRACT_NOT_SERVED POST /api/wrk/v1/data-subject/erase
 CONTRACT_NOT_SERVED POST /api/wrk/v1/data-subject/export

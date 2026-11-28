@@ -4,7 +4,7 @@
 
 namespace CoreIns.Modules.Data.Contracts.Api;
 
-/// <summary>dat.Model.get result</summary>
+/// <summary>dat.Model.get result: the registry row, its lifecycle trail and the latest drift metrics (BO-DAT-06).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ModelGetResponse
 {
@@ -32,11 +32,53 @@ public sealed record ModelGetResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public string? SuspendedReason { get; init; }
 
+    /// <summary>PASSED or FAILED once a validation was recorded.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validationOutcome")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ValidationOutcome { get; init; }
+
+    /// <summary>True while an unresolved drift breach flags the feature (cleared by a passing metric).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("driftFlagged")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? DriftFlagged { get; init; }
+
+    /// <summary>Contract member 'driftReason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("driftReason")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? DriftReason { get; init; }
+
+    /// <summary>Contract member 'effectiveDate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("effectiveDate")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? EffectiveDate { get; init; }
+
+    /// <summary>Contract member 'transitions'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("transitions")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<TransitionItem>? Transitions { get; init; }
+
+    /// <summary>Latest metric records, newest first (at most 50).</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("metrics")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::System.Collections.Generic.IReadOnlyList<MetricItem>? Metrics { get; init; }
+
     /// <summary>Generated contract member.</summary>
     [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<StatusValue>))]
     [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
     public enum StatusValue
     {
+        /// <summary><c>DRAFT</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("DRAFT")]
+        Draft,
+
+        /// <summary><c>IN_VALIDATION</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("IN_VALIDATION")]
+        InValidation,
+
+        /// <summary><c>APPROVED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("APPROVED")]
+        Approved,
+
         /// <summary><c>ACTIVE</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("ACTIVE")]
         Active,
@@ -44,5 +86,69 @@ public sealed record ModelGetResponse
         /// <summary><c>SUSPENDED</c></summary>
         [global::System.Text.Json.Serialization.JsonStringEnumMemberName("SUSPENDED")]
         Suspended,
+
+        /// <summary><c>RETIRED</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("RETIRED")]
+        Retired,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record TransitionItem
+    {
+        /// <summary>Contract member 'status'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("status")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Status { get; init; }
+
+        /// <summary>Contract member 'at'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("at")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? At { get; init; }
+
+        /// <summary>Contract member 'by'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("by")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? By { get; init; }
+
+        /// <summary>Contract member 'note'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("note")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Note { get; init; }
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public sealed record MetricItem
+    {
+        /// <summary>Contract member 'metric'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("metric")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Metric { get; init; }
+
+        /// <summary>Contract member 'value'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("value")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Value { get; init; }
+
+        /// <summary>Contract member 'threshold'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("threshold")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Threshold { get; init; }
+
+        /// <summary>Contract member 'breached'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("breached")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public bool? Breached { get; init; }
+
+        /// <summary>Contract member 'sampleSize'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("sampleSize")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public int? SampleSize { get; init; }
+
+        /// <summary>Contract member 'recordedAt'.</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("recordedAt")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? RecordedAt { get; init; }
     }
 }

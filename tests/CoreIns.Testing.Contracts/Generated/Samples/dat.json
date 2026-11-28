@@ -72,10 +72,15 @@
     },
     "dat.Model.register": {
       "modelId": "0192ccc4-4199-7756-88c1-d16c64f0df95",
-      "status": "ACTIVE"
+      "status": "DRAFT"
     },
     "dat.Monitor.metrics": {
-      "acceptedCounts": "unspecified"
+      "accepted": 1,
+      "breached": 1,
+      "driftFlagged": true,
+      "breachIds": [
+        "01921bd6-0867-7e68-8399-6a245012c858"
+      ]
     },
     "dat.Population.aggregate": {
       "nextCursor": "sample",
@@ -422,58 +427,104 @@
       "signedBy": "sample"
     },
     "ModelApproveRequest": {
-      "modelCard": "unspecified",
-      "version": "unspecified"
+      "modelId": "0192e198-7f21-78ef-8f9b-567efea06e3e",
+      "effectiveDate": "sample"
     },
     "ModelApproveResponse": {
-      "status": "unspecified"
+      "modelId": "01924e93-c860-7cac-8e4e-2c06c2c1b995",
+      "status": "DRAFT",
+      "effectiveDate": "sample"
     },
     "ModelGetResponse": {
       "modelId": "01922d48-c468-7398-884a-bcfc8a1de87d",
       "featureKey": "sample",
       "version": "sample",
-      "status": "ACTIVE",
-      "suspendedReason": "sample"
+      "status": "DRAFT",
+      "suspendedReason": "sample",
+      "validationOutcome": "sample",
+      "driftFlagged": true,
+      "driftReason": "sample",
+      "effectiveDate": "sample",
+      "transitions": [
+        {
+          "status": "sample",
+          "at": "sample",
+          "by": "sample",
+          "note": "sample"
+        }
+      ],
+      "metrics": [
+        {
+          "metric": "sample",
+          "value": "sample",
+          "threshold": "sample",
+          "breached": true,
+          "sampleSize": 1,
+          "recordedAt": "sample"
+        }
+      ]
     },
     "ModelRecordValidationRequest": {
-      "modelCard": "unspecified",
-      "version": "unspecified"
+      "modelId": "019240ad-6d52-7e86-8ccb-068a88e993a6",
+      "outcome": "PASSED",
+      "findings": "sample"
     },
     "ModelRecordValidationResponse": {
-      "status": "unspecified"
+      "modelId": "01924678-3001-70f8-83a2-0b8558fd2685",
+      "status": "DRAFT",
+      "outcome": "sample"
     },
     "ModelRegisterRequest": {
       "featureKey": "sample",
       "version": "sample",
       "modelCard": {
         "key": "value"
-      }
+      },
+      "draft": true
     },
     "ModelRegisterResponse": {
       "modelId": "0192fd0e-413f-75db-8bca-bac3b560bff5",
-      "status": "ACTIVE"
+      "status": "DRAFT"
     },
     "ModelRetireRequest": {
-      "modelCard": "unspecified",
-      "version": "unspecified"
+      "modelId": "01929b4e-3c4c-747b-8a04-1bcc1e8e2629",
+      "reason": "sample"
     },
     "ModelRetireResponse": {
-      "status": "unspecified"
+      "modelId": "0192eeec-b209-71fe-8277-1491d2da7dc8",
+      "status": "DRAFT"
     },
     "ModelSubmitValidationRequest": {
-      "modelCard": "unspecified",
-      "version": "unspecified"
+      "modelId": "019292e8-eec2-7312-8c74-a877be7dcee3",
+      "modelCard": {
+        "key": "value"
+      }
     },
     "ModelSubmitValidationResponse": {
-      "status": "unspecified"
+      "modelId": "01929c55-5517-7c32-8b83-c1ba50c8fe3d",
+      "status": "DRAFT"
     },
     "MonitorMetricsRequest": {
-      "feature": "unspecified",
-      "version": "unspecified",
-      "metricRecords": "unspecified"
+      "feature": "AI-CLM-01",
+      "version": "sample",
+      "metricRecords": [
+        {
+          "metric": "SAMPLE_CODE",
+          "value": "12.50",
+          "threshold": "12.50",
+          "sampleSize": 1,
+          "windowFrom": "2026-10-07T09:00:00Z",
+          "windowTo": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "MonitorMetricsResponse": {
-      "acceptedCounts": "unspecified"
+      "accepted": 1,
+      "breached": 1,
+      "driftFlagged": true,
+      "breachIds": [
+        "01922d05-c150-707b-8e66-14821597efdd"
+      ]
     },
     "PopulationAggregateResponse": {
       "nextCursor": "sample",

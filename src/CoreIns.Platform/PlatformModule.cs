@@ -11,6 +11,7 @@ using CoreIns.Platform.Contracts;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
+using CoreIns.Platform.Identity;
 using CoreIns.Platform.Numbering;
 using CoreIns.Platform.Persistence;
 using CoreIns.Platform.Time;
@@ -111,6 +112,7 @@ public static class PlatformModule
             ErrorDefinition.For(ModuleCode.PLT, NumberingErrors.UnknownScheme, 500, "Δεν έχει οριστεί σειρά αρίθμησης", "No numbering series is defined")
                 .Describe("Ο τύπος αναγνωριστικού δεν έχει ορισμό σειράς στις ρυθμίσεις της πλατφόρμας.", "The identifier type has no series definition in the platform settings."));
         services.AddApprovals();
+        services.AddUserDirectory();
         services.AddDeadLetters();
         services.AddAiControlPlane();
         services.AddSupportAuthorityTypes();
@@ -223,6 +225,8 @@ public static class PlatformModule
         $"GRANT SELECT, INSERT, UPDATE ON {Schema}.approval_request TO {appRole}",
         // Approval type catalogue (BO-PLT-02): administrator-registered, never deleted.
         $"GRANT SELECT, INSERT, UPDATE ON {Schema}.approval_type TO {appRole}",
+        // User directory and role assignments (BO-PLT-05): never deleted (revoked/disabled instead).
+        $"GRANT SELECT, INSERT, UPDATE ON {Schema}.user_profile, {Schema}.role_assignment TO {appRole}",
         // Dev clock offset (D-SL3-12): never deleted (trigger); only read/advanced when the Development dev clock is registered.
         $"GRANT SELECT, UPDATE ON {Schema}.dev_clock TO {appRole}",
         $"GRANT SELECT, INSERT ON {Schema}.audit_event TO {appRole}",
