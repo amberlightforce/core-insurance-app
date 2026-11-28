@@ -19,5 +19,5 @@ public interface IPartyCommissionAgreementService
     /// <para>Exposure: ui; consumers: BIL, CHN.</para>
     /// <para>Errors: PTY-ERR-RATE-ABOVE-MAX (422), PTY-ERR-BACKDATE (422), PTY-ERR-SPLIT-SUM (422).</para>
     /// </remarks>
-    global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> ResolveAsync(global::System.Text.Json.JsonElement request, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.CommissionAgreementResolveResponse> ResolveAsync(global::CoreIns.Modules.Party.Contracts.Api.CommissionAgreementResolveRequest request, global::System.Threading.CancellationToken cancellationToken = default);
 }

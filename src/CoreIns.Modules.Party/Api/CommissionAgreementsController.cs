@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CoreIns.Modules.Party.Api;
 
-/// <summary>REST facade of <c>pty.CommissionAgreement.*</c> (BO-PTY-10, REQ-PTY-010). resolve and simulate belong to BO-PTY-11.</summary>
+/// <summary>REST facade of <c>pty.CommissionAgreement.*</c> (BO-PTY-10, REQ-PTY-010). resolve and simulate: BO-PTY-11.</summary>
 [ApiController]
 [Route("api/pty/v1/commission-agreements")]
 internal sealed class CommissionAgreementsController : ControllerBase
@@ -79,4 +79,18 @@ internal sealed class CommissionAgreementsController : ControllerBase
             ? HttpResults.Problem(CommissionSupport.NotFound(), HttpContext)
             : Results.Ok(comparison);
     }
+
+    /// <summary>pty.CommissionAgreement.resolve (BO-PTY-11): the producers, agreement version and rate line that apply, with the reason. Read only.</summary>
+    [HttpPost("resolve")]
+    [Authorize(Policy = "pty.CommissionAgreement.resolve")]
+    public async Task<IResult> ResolveAsync(
+        [FromBody] CommissionAgreementResolveRequest request, [FromServices] CommissionResolution resolution, CancellationToken cancellationToken) =>
+        (await resolution.ResolveAsync(request, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>pty.CommissionAgreement.simulate (BO-PTY-11): commission on premium lines, nothing written.</summary>
+    [HttpPost("simulate")]
+    [Authorize(Policy = "pty.CommissionAgreement.simulate")]
+    public async Task<IResult> SimulateAsync(
+        [FromBody] CommissionAgreementSimulateRequest request, [FromServices] CommissionResolution resolution, CancellationToken cancellationToken) =>
+        (await resolution.SimulateAsync(request, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 }

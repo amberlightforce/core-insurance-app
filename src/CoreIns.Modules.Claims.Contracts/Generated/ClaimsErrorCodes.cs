@@ -20,6 +20,12 @@ public static class ClaimsErrorCodes
     /// </remarks>
     public const string Authority = "CLM-ERR-AUTHORITY";
 
+    /// <summary>CLM-ERR-CAT-EVENT (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 2 operation(s): clm.CatEvent.close, clm.CatEvent.declare.</para>
+    /// </remarks>
+    public const string CatEvent = "CLM-ERR-CAT-EVENT";
+
     /// <summary>CLM-ERR-CERT-REQUESTER (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 3 operation(s): clm.Certificate.assemble, clm.Certificate.issue, clm.Certificate.request.</para>
@@ -94,7 +100,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 55 operation(s): clm.Certificate.assemble, clm.Certificate.issue, clm.Certificate.request, clm.Claim.close, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Conversation.schedule, clm.Conversation.send, clm.Coverage.decide, clm.Coverage.reverify, clm.Dsar.export, ….</para>
+    /// <para>Declared by 57 operation(s): clm.CatEvent.close, clm.CatEvent.declare, clm.Certificate.assemble, clm.Certificate.issue, clm.Certificate.request, clm.Claim.close, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Conversation.schedule, clm.Conversation.send, clm.Coverage.decide, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "CLM-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -148,7 +154,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 35 operation(s): clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.close, clm.Exposure.create, clm.Exposure.reopen, clm.Exposure.update, clm.Financials.get, clm.Fnol.get, ….</para>
+    /// <para>Declared by 38 operation(s): clm.CatEvent.close, clm.CatEvent.declare, clm.CatEvent.list, clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.reverify, clm.Exposure.close, clm.Exposure.create, clm.Exposure.reopen, ….</para>
     /// </remarks>
     public const string NotFound = "CLM-ERR-NOT-FOUND";
 
@@ -252,13 +258,14 @@ public static class ClaimsErrorCodes
     public const string Prefix = "CLM-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Allocation, Authority, CertRequester, CloseGuard, ContactProhibited, CoverageInQuestion, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, FsDisabled, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, MergeFinancials, MergeNotDuplicate, MtplClocksRequired, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, RecoveryState, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Allocation, Authority, CatEvent, CertRequester, CloseGuard, ContactProhibited, CoverageInQuestion, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, FsDisabled, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, MergeFinancials, MergeNotDuplicate, MtplClocksRequired, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, RecoveryState, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
     {
         [Allocation] = 422,
         [Authority] = 403,
+        [CatEvent] = 422,
         [CertRequester] = 422,
         [CloseGuard] = 422,
         [ContactProhibited] = 422,

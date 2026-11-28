@@ -38,5 +38,20 @@ public sealed record ClaimUpdateRequest
         [global::System.Text.Json.Serialization.JsonPropertyName("liabilityFacts")]
         [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
         public global::CoreIns.Modules.Claims.Contracts.Api.LiabilityFacts? LiabilityFacts { get; init; }
+
+        /// <summary>Tracking milestone code (BO-CLM-08); published as ClaimUpdated.newMilestone</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("milestone")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? Milestone { get; init; }
+
+        /// <summary>Tags the claim to this open CAT event; the loss date must lie in the event window (BO-CLM-08)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("catEventCode")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? CatEventCode { get; init; }
+
+        /// <summary>true removes the CAT event tag (BO-CLM-08)</summary>
+        [global::System.Text.Json.Serialization.JsonPropertyName("untagCatEvent")]
+        [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public bool? UntagCatEvent { get; init; }
     }
 }

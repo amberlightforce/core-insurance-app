@@ -44,7 +44,13 @@
         "clm.Claim.reopen": [ "Staff.ClaimsManager" ],
         "clm.Claim.merge": [ "Staff.ClaimsManager" ],
         "clm.Fnol.saveDraft": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
-        "clm.Fnol.getDraft": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ]
+        "clm.Fnol.getDraft": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.ClaimTracking.get": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.ClaimTracking.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.CatEvent.list": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.CatEvent.aggregate": [ "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
+        "clm.CatEvent.declare": [ "Staff.ClaimsManager" ],
+        "clm.CatEvent.close": [ "Staff.ClaimsManager" ]
       }
     },
     "Authority": {

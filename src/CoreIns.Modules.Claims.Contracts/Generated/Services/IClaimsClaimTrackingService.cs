@@ -36,5 +36,9 @@ public interface IClaimsClaimTrackingService
     /// <param name="claim">PRD: "claim"</param>
     /// <param name="party">PRD: "party or policy" (optional)</param>
     /// <param name="policy">PRD: "party or policy" (optional)</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.ClaimTrackingListPage> ListAsync(string? cursor = null, int? limit = null, string? claim = null, string? party = null, string? policy = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="status">Claim status filter; the default is Open (the watch list)</param>
+    /// <param name="catCode">Only claims tagged to this CAT event</param>
+    /// <param name="largeLoss">true keeps large losses only</param>
+    /// <param name="minAgeDays">Only claims at least this many days old</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.ClaimTrackingListPage> ListAsync(string? cursor = null, int? limit = null, string? claim = null, string? party = null, string? policy = null, string? status = null, string? catCode = null, bool? largeLoss = null, int? minAgeDays = null, global::System.Threading.CancellationToken cancellationToken = default);
 }
