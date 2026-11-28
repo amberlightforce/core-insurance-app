@@ -4,39 +4,71 @@
 
 namespace CoreIns.Modules.Market.Contracts.Api;
 
-/// <summary>mkt.Configuration.explain result. PRD outputs: "layer contributions, merge steps, CR and approvers"</summary>
+/// <summary>mkt.Configuration.explain result (BO-MKT-03), which layer supplied the value of a key, with the pack version, the merge steps and the change request.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConfigurationExplainResponse
 {
-    /// <summary>PRD: "layer contributions"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'key'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("key")]
+    public required string Key { get; init; }
+
+    /// <summary>Contract member 'hash'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("hash")]
+    public required global::CoreIns.SharedKernel.Identifiers.Sha256Hash Hash { get; init; }
+
+    /// <summary>Contract member 'validAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validAt")]
+    public required global::CoreIns.SharedKernel.BusinessDate ValidAt { get; init; }
+
+    /// <summary>Contract member 'legalEntity'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalEntity")]
+    public required string LegalEntity { get; init; }
+
+    /// <summary>Contract member 'jurisdiction'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jurisdiction")]
+    public required string Jurisdiction { get; init; }
+
+    /// <summary>False when no layer holds a value valid on the date</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("found")]
+    public required bool Found { get; init; }
+
+    /// <summary>Contract member 'value'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("value")]
+    public required string? Value { get; init; }
+
+    /// <summary>Node that supplied the value</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("layer")]
+    public required string? Layer { get; init; }
+
+    /// <summary>Contract member 'legalStatus'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("legalStatus")]
+    public required string? LegalStatus { get; init; }
+
+    /// <summary>Contract member 'packId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("packId")]
+    public required string? PackId { get; init; }
+
+    /// <summary>Contract member 'packVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("packVersion")]
+    public required string? PackVersion { get; init; }
+
+    /// <summary>Contract member 'sourceRef'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("sourceRef")]
+    public required string? SourceRef { get; init; }
+
+    /// <summary>Contract member 'layerContributions'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("layerContributions")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? LayerContributions { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Market.Contracts.Api.ConfigurationLayerContribution> LayerContributions { get; init; }
 
-    /// <summary>PRD: "merge steps"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'mergeSteps'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("mergeSteps")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? MergeSteps { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<string> MergeSteps { get; init; }
 
-    /// <summary>PRD: "CR and approvers"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'cr'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("cr")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Cr { get; init; }
+    public required global::CoreIns.Modules.Market.Contracts.Api.ConfigurationExplainChangeRequest? Cr { get; init; }
 
-    /// <summary>PRD: "CR and approvers"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'approvers'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("approvers")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Approvers { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<string> Approvers { get; init; }
 }

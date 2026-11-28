@@ -202,16 +202,28 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - name: key
         in: query
-        required: false
-        description: 'PRD: "key"'
+        required: true
+        description: A key of the configuration key registry
         schema:
           type: string
       - name: context
         in: query
         required: false
-        description: 'PRD: "context"'
+        description: Legal entity code whose jurisdiction selects the country layer (default the first legal entity of the registry)
         schema:
           type: string
+      - name: validAt
+        in: query
+        required: false
+        description: Business date to explain (default today in the legal entity time zone)
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      - name: hash
+        in: query
+        required: false
+        description: Explain on this recorded configuration state (default the current state)
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Sha256
       responses:
         '200':
           description: Success
@@ -261,19 +273,31 @@ paths:
       - name: hash
         in: query
         required: false
-        description: 'PRD: "hash A"'
+        description: Hash compare, state A (also the state of a date compare; default current)
         schema:
           $ref: ../events/common.schema.json#/$defs/Sha256
       - name: hashB
         in: query
         required: false
-        description: 'PRD: "hash B"'
+        description: Hash compare, state B (default current)
         schema:
           $ref: ../events/common.schema.json#/$defs/Sha256
+      - name: validAt
+        in: query
+        required: false
+        description: Date compare, first business date (with validAtB), on the state given by hash (default current)
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      - name: validAtB
+        in: query
+        required: false
+        description: Date compare, second business date
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
       - name: filter
         in: query
         required: false
-        description: 'PRD: "filter"'
+        description: Key prefix; only keys starting with it are compared
         schema:
           type: string
       responses:
@@ -3668,46 +3692,225 @@ components:
         activatedAt:
           $ref: ../events/common.schema.json#/$defs/Instant
           description: 'PRD: "activated_at"'
+    ConfigurationLayerContribution:
+      type: object
+      description: One stored version of the explained key at a layer node.
+      properties:
+        node:
+          type: string
+          description: Layer node, for example core or country:GR
+        layer:
+          type: string
+          enum: [Core, Country]
+        value:
+          type: string
+        legalStatus:
+          type: string
+        sourceRef:
+          type: string
+        packId:
+          type:
+          - string
+          - 'null'
+        packVersion:
+          type:
+          - string
+          - 'null'
+        validFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+        applies:
+          type: boolean
+          description: True when the version is valid on the explained date and belongs to the entity jurisdiction
+        winning:
+          type: boolean
+          description: True for the version that supplies the resolved value
+      required: [node, layer, value, legalStatus, sourceRef, packId, packVersion, validFrom, validTo, applies, winning]
+    ConfigurationExplainChangeRequest:
+      type: object
+      description: The approved configuration change request that produced the winning value.
+      properties:
+        requestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+        requestedBy:
+          type: string
+        appliedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        resultingHash:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Sha256
+          - type: 'null'
+      required: [requestId, reason, requestedBy, appliedAt, resultingHash]
     ConfigurationExplainResponse:
       type: object
-      description: 'mkt.Configuration.explain result. PRD outputs: "layer contributions, merge steps, CR and approvers"'
+      description: mkt.Configuration.explain result (BO-MKT-03), which layer supplied the value of a key, with the pack version, the merge steps and the change request.
       properties:
+        key:
+          type: string
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        validAt:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        legalEntity:
+          type: string
+        jurisdiction:
+          type: string
+        found:
+          type: boolean
+          description: False when no layer holds a value valid on the date
+        value:
+          type:
+          - string
+          - 'null'
+        layer:
+          type:
+          - string
+          - 'null'
+          description: Node that supplied the value
+        legalStatus:
+          type:
+          - string
+          - 'null'
+        packId:
+          type:
+          - string
+          - 'null'
+        packVersion:
+          type:
+          - string
+          - 'null'
+        sourceRef:
+          type:
+          - string
+          - 'null'
         layerContributions:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "layer contributions"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigurationLayerContribution'
         mergeSteps:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "merge steps"'
+          type: array
+          items:
+            type: string
         cr:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "CR and approvers"'
+          oneOf:
+          - $ref: '#/components/schemas/ConfigurationExplainChangeRequest'
+          - type: 'null'
         approvers:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "CR and approvers"'
+          type: array
+          items:
+            type: string
+      required: [key, hash, validAt, legalEntity, jurisdiction, found, value, layer, legalStatus, packId, packVersion, sourceRef, layerContributions, mergeSteps, cr, approvers]
+    ConfigurationValueSummary:
+      type: object
+      properties:
+        value:
+          type: string
+        legalStatus:
+          type: string
+        sourceRef:
+          type: string
+        packVersion:
+          type:
+          - string
+          - 'null'
+        validFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+        validTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+      required: [value, legalStatus, sourceRef, packVersion, validFrom, validTo]
+    ConfigurationChange:
+      type: object
+      properties:
+        key:
+          type: string
+        node:
+          type: string
+        change:
+          type: string
+          enum: [Added, Removed, Changed]
+        before:
+          oneOf:
+          - $ref: '#/components/schemas/ConfigurationValueSummary'
+          - type: 'null'
+        after:
+          oneOf:
+          - $ref: '#/components/schemas/ConfigurationValueSummary'
+          - type: 'null'
+      required: [key, node, change, before, after]
     ConfigurationCompareResponse:
       type: object
-      description: 'mkt.Configuration.compare result. PRD outputs: "changes"'
+      description: mkt.Configuration.compare result (BO-MKT-03), empty changes when the two sides are the same.
       properties:
+        hashA:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        hashB:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        validAtA:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+        validAtB:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
         changes:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "changes"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigurationChange'
+      required: [hashA, hashB, validAtA, validAtB, changes]
     ConfigurationExportRequest:
       type: object
       description: 'mkt.Configuration.export request. PRD inputs: "hash, optional context"'
       properties:
         hash:
-          $ref: ../events/common.schema.json#/$defs/Sha256
-          description: 'PRD: "hash"'
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Sha256
+          - type: 'null'
+          description: The state to export (default current)
         context:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "optional context" (optional)'
+          type:
+          - string
+          - 'null'
+          description: Legal entity code; when given, only the core and that entity country layer are exported
     ConfigurationExportResponse:
       type: object
-      description: 'mkt.Configuration.export result. PRD outputs: "signed canonical JSON"'
+      description: mkt.Configuration.export result (BO-MKT-03), the state as canonical JSON with its hash.
       properties:
-        signedCanonicalJson:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "signed canonical JSON"'
+        hash:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+        activatedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        cause:
+          type: string
+        parentHash:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Sha256
+          - type: 'null'
+        canonicalJson:
+          type: string
+          description: RFC 8785 canonical JSON of the export document (manifest and values)
+        documentDigest:
+          $ref: ../events/common.schema.json#/$defs/Sha256
+          description: SHA-256 of canonicalJson
+        signature:
+          type:
+          - string
+          - 'null'
+          description: Always null until export signing keys exist
+      required: [hash, activatedAt, cause, parentHash, canonicalJson, documentDigest, signature]
     ConfigChangeRequestCreateRequest:
       type: object
       description: 'mkt.ConfigChangeRequest.create request (BO-MKT-01). A DRAFT change of country-layer configuration values; only keys of the key registry are accepted.'

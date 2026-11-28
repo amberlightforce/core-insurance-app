@@ -1,5 +1,7 @@
 # STATUS — Greek P&C core insurance build
 
+> **Progress 2026-11-28 (later):** build-out 109/295 (waves 6–11 done, W12 14/15, W13 2/15, W14 3/15). This session (max 5 Sonnet builders): CLM-03/04/06/07, RI-05/16, PLT-05, BIL-01/03/06a/11, WRK-02/03/04, DAT-06, PTY-06/07/12, RAT-02, POL-06/08, MKT-03/06, UW-04/07, CMP-01/07. Gate on 79913dbe green (build, ContractGen, Architecture/Host/Contracts). Notable gaps: RI-16 release has no BIL/FIN leg; PTY-12 added a contract family (`pty.AgencyUser.*`) awaiting contract-owner approval.
+
 > **Handover 2026-11-28 (main @ e43149f2):** hardening waves 1–5 done; build-out 82/295 (waves 6–8 done, MVP 82/190, all 20 P0 done). Gate green. Read `HANDOVER-2026-11-28.md` first.
 
 > **Build-out planned 2026-11-27:** 295 items in waves 6–27 (MVP 6–20, post-MVP 21–27) in `build-out/`, from six code surveys of what the master plan still lacks. Hardening waves 1–4 done, wave 5 in progress. NX-UI-14 superseded and NX-UI-11 split by the build-out. Document map: `README.md`.

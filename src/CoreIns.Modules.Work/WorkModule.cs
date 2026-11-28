@@ -6,6 +6,7 @@ using CoreIns.Modules.Work.Contracts.Api;
 using CoreIns.Modules.Work.Domain;
 using CoreIns.Modules.Work.Events;
 using CoreIns.Modules.Work.Jobs;
+using CoreIns.Modules.Work.Notes;
 using CoreIns.Modules.Work.Persistence;
 using CoreIns.Modules.Work.Queries;
 using CoreIns.Modules.Work.Services;
@@ -79,6 +80,17 @@ public static class WorkModule
         services.AddCommandAuditor<GetNextActivity, QueueGetNextResponse, GetNextActivityAuditor>();
         services.AddCommand<GetNextActivity, QueueGetNextResponse, GetNextActivityHandler>(CommandDescriptor.For("wrk.Queue.getNext"));
         services.AddScoped<IWorkActivityService, WorkActivityService>();
+
+        // BO-WRK-07: notes on business objects.
+        services.AddScoped<NoteService>();
+        services.AddCommandAuditor<CreateNote, NoteCreateResponse, CreateNoteAuditor>();
+        services.AddCommand<CreateNote, NoteCreateResponse, CreateNoteHandler>(CommandDescriptor.For("wrk.Note.create"));
+        services.AddCommandAuditor<EditNote, NoteEditResponse, EditNoteAuditor>();
+        services.AddCommand<EditNote, NoteEditResponse, EditNoteHandler>(CommandDescriptor.For("wrk.Note.edit"));
+        services.AddCommandAuditor<DeleteNote, NoteDeleteResponse, DeleteNoteAuditor>();
+        services.AddCommand<DeleteNote, NoteDeleteResponse, DeleteNoteHandler>(CommandDescriptor.For("wrk.Note.delete"));
+        services.AddCommandAuditor<ExportNotes, NoteExportResponse, ExportNotesAuditor>();
+        services.AddCommand<ExportNotes, NoteExportResponse, ExportNotesHandler>(CommandDescriptor.For("wrk.Note.export"));
 
         // D-SL5-10: a pack rollback gets a review activity in the rollback queue.
         services.AddEventHandler<PackRolledBackV1, PackRolledBackReviewHandler>(
