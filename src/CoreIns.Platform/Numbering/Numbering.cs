@@ -56,6 +56,9 @@ public static class NumberingSchemes
 
     /// <summary>Sanctions screening case number (REQ-PTY-006, BO-PTY-07).</summary>
     public const string ScreeningCase = "SCREENING_CASE";
+
+    /// <summary>Underwriting decline / refusal register number (REQ-UW-005, BO-UW-07).</summary>
+    public const string Decline = "DECLINE";
 }
 
 /// <summary>Whether a series may have gaps (REQ-PLT-210, REQ-PLT-211).</summary>

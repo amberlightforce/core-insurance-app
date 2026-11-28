@@ -37,6 +37,12 @@ internal static class UnderwritingPermissions
     public const string ReferralRequestInformation = "uw.Referral.requestInformation";
     public const string ReviewLock = "uw.Review.lock";
     public const string ReviewRelease = "uw.Review.release";
+    public const string DeclineCreate = "uw.Decline.create";
+    public const string DeclineGet = "uw.Decline.get";
+    public const string DeclineRequestReview = "uw.Decline.requestReview";
+    public const string DeclineDecideReview = "uw.Decline.decideReview";
+    public const string RefusalRegisterQuery = "uw.RefusalRegister.query";
+    public const string RefusalRegisterExport = "uw.RefusalRegister.export";
 }
 
 /// <summary>REST facade of <c>uw.Rules.evaluate</c>, <c>uw.Issue.blockingStatus</c>, <c>uw.Issue.list</c> and <c>uw.Issue.decide</c>.</summary>
@@ -287,6 +293,57 @@ internal sealed class UnderwritingController : ControllerBase
     public Task<IResult> ReleaseReviewAsync(
         [FromBody] ReviewReleaseRequest request, [FromServices] ICommandHandler<ReleaseReview, ReviewReleaseResponse> handler, CancellationToken cancellationToken) =>
         RunAsync(handler, new ReleaseReview(request), cancellationToken);
+
+    /// <summary>uw.Decline.create: record a decline (automated or manual) with its number, refusal data and the DeclineIssued event (a command; dry-run supported).</summary>
+    [HttpPost("declines")]
+    [Authorize(Policy = UnderwritingPermissions.DeclineCreate)]
+    public async Task<IResult> CreateDeclineAsync(
+        [FromBody] DeclineCreateRequest request, [FromServices] ICommandHandler<CreateDecline, DeclineCreateResponse> handler, CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new CreateDecline(request), cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Json(result.Value, statusCode: StatusCodes.Status201Created) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Decline.get: one decline with its refusal requirement.</summary>
+    [HttpGet("declines/{id:guid}")]
+    [Authorize(Policy = UnderwritingPermissions.DeclineGet)]
+    public async Task<IResult> GetDeclineAsync(Guid id, [FromServices] DeclineQueries queries, CancellationToken cancellationToken)
+    {
+        var result = await queries.GetAsync(id, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.Decline.requestReview: ask for a person to review an automated decline.</summary>
+    [HttpPost("declines/request-review")]
+    [Authorize(Policy = UnderwritingPermissions.DeclineRequestReview)]
+    public Task<IResult> RequestDeclineReviewAsync(
+        [FromBody] DeclineRequestReviewRequest request, [FromServices] ICommandHandler<RequestDeclineReview, DeclineRequestReviewResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new RequestDeclineReview(request), cancellationToken);
+
+    /// <summary>uw.Decline.decideReview: a second underwriter upholds or overturns the decline.</summary>
+    [HttpPost("declines/decide-review")]
+    [Authorize(Policy = UnderwritingPermissions.DeclineDecideReview)]
+    public Task<IResult> DecideDeclineReviewAsync(
+        [FromBody] DeclineDecideReviewRequest request, [FromServices] ICommandHandler<DecideDeclineReview, DeclineDecideReviewResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new DecideDeclineReview(request), cancellationToken);
+
+    /// <summary>uw.RefusalRegister.query: the register of declines for a period and filters.</summary>
+    [HttpGet("refusal-registers/query")]
+    [Authorize(Policy = UnderwritingPermissions.RefusalRegisterQuery)]
+    public async Task<IResult> QueryRefusalRegisterAsync(
+        [FromQuery] string? afm, [FromQuery] string? period, [FromQuery] string? filters, [FromQuery] string? cursor, [FromQuery] int? limit,
+        [FromServices] DeclineQueries queries, CancellationToken cancellationToken)
+    {
+        var result = await queries.QueryAsync(afm, period, filters, cursor, limit, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
+    }
+
+    /// <summary>uw.RefusalRegister.export: the register as CSV with a manifest (a command: Idempotency-Key required, audited with requester and purpose).</summary>
+    [HttpPost("refusal-registers/export")]
+    [Authorize(Policy = UnderwritingPermissions.RefusalRegisterExport)]
+    public Task<IResult> ExportRefusalRegisterAsync(
+        [FromBody] RefusalRegisterExportRequest request, [FromServices] ICommandHandler<ExportRefusalRegister, RefusalRegisterExportResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new ExportRefusalRegister(request), cancellationToken);
 
     private async Task<IResult> RunAsync<TCommand, TResult>(ICommandHandler<TCommand, TResult> handler, TCommand command, CancellationToken cancellationToken)
         where TCommand : ICommand<TResult>

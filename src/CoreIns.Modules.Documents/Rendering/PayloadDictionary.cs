@@ -38,6 +38,11 @@ internal static partial class PayloadDictionary
         [
             new("customerName", PayloadFieldType.Text, true), new("policyNo", PayloadFieldType.Text, true), new("effectiveDate", PayloadFieldType.Date, true),
         ],
+        ["DT-REFUSAL-LETTER"] =
+        [
+            new("declineNumber", PayloadFieldType.Text, true), new("reasons", PayloadFieldType.Text, true), new("declineDate", PayloadFieldType.Date, true),
+            new("automatedNotice", PayloadFieldType.Text, true), new("customerName", PayloadFieldType.Text, false),
+        ],
         ["DT-REFUND-ADVICE"] =
         [
             new("customerName", PayloadFieldType.Text, true), new("policyNo", PayloadFieldType.Text, true), new("refundAmount", PayloadFieldType.Money, true),

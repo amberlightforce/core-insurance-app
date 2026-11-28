@@ -220,6 +220,64 @@ internal sealed class ReferralStateRow
     public string UpdatedBy { get; set; } = string.Empty;
 }
 
+/// <summary>
+/// <c>uw.decline</c>: the decline record and refusal register entry (BO-UW-07). Reasons and declined pairs are JSON; the review of an
+/// automated decline (requested by the customer or producer, decided by a second underwriter) is on the same row.
+/// </summary>
+internal sealed class DeclineRow
+{
+    public Guid DeclineId { get; set; }
+
+    public Guid LegalEntityId { get; set; }
+
+    public string DeclineNumber { get; set; } = string.Empty;
+
+    public Guid? JobId { get; set; }
+
+    public Guid? IntakeId { get; set; }
+
+    public string Scope { get; set; } = string.Empty;
+
+    public string ReasonCodes { get; set; } = "[]";
+
+    public string Pairs { get; set; } = "[]";
+
+    public string? Wording { get; set; }
+
+    public bool Automated { get; set; }
+
+    public string Status { get; set; } = "Issued";
+
+    public Guid? EvaluationId { get; set; }
+
+    /// <summary>The data of the refusal letter (number, reasons, wording, automated notice, review route).</summary>
+    public string LetterData { get; set; } = "{}";
+
+    public string LetterStatus { get; set; } = "DATA_READY";
+
+    public Instant CreatedAt { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public Instant? ReviewRequestedAt { get; set; }
+
+    public string? ReviewRequestedBy { get; set; }
+
+    public string? ReviewRequester { get; set; }
+
+    public string? ReviewStatement { get; set; }
+
+    public Instant? ReviewDecidedAt { get; set; }
+
+    public string? ReviewDecidedBy { get; set; }
+
+    public string? ReviewOutcome { get; set; }
+
+    public string? ReviewReason { get; set; }
+
+    public int RecordVersion { get; set; } = 1;
+}
+
 /// <summary>The Underwriting module's EF Core context (schema <c>uw</c>): tables and migrations; reads and writes use Dapper on the scope's connection.</summary>
 internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbContext> options) : ModuleDbContext(options)
 {
@@ -232,6 +290,8 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
     public DbSet<IssueRow> Issues => Set<IssueRow>();
 
     public DbSet<ReferralStateRow> ReferralStates => Set<ReferralStateRow>();
+
+    public DbSet<DeclineRow> Declines => Set<DeclineRow>();
 
     protected override string Schema => UnderwritingModule.Schema;
 
@@ -398,6 +458,46 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
             entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
             entity.HasIndex(e => new { e.LegalEntityId, e.Lifecycle, e.SlaDue }).HasDatabaseName("ix_referral_state_queue");
+        });
+
+        modelBuilder.Entity<DeclineRow>(entity =>
+        {
+            entity.ToTable("decline", table =>
+            {
+                table.HasCheckConstraint("ck_decline_subject", "(job_id IS NULL) <> (intake_id IS NULL)");
+                table.HasCheckConstraint("ck_decline_status", "status IN ('Issued', 'ReviewRequested', 'Upheld', 'Overturned')");
+                table.HasCheckConstraint("ck_decline_scope", "scope IN ('FULL', 'PARTIAL')");
+            });
+            entity.HasKey(e => e.DeclineId).HasName("pk_decline");
+            entity.Property(e => e.DeclineId).HasColumnName("decline_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.DeclineNumber).HasColumnName("decline_number");
+            entity.Property(e => e.JobId).HasColumnName("job_id");
+            entity.Property(e => e.IntakeId).HasColumnName("intake_id");
+            entity.Property(e => e.Scope).HasColumnName("scope");
+            entity.Property(e => e.ReasonCodes).HasColumnName("reason_codes").HasColumnType("jsonb");
+            entity.Property(e => e.Pairs).HasColumnName("pairs").HasColumnType("jsonb");
+            entity.Property(e => e.Wording).HasColumnName("wording");
+            entity.Property(e => e.Automated).HasColumnName("automated");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.EvaluationId).HasColumnName("evaluation_id");
+            entity.Property(e => e.LetterData).HasColumnName("letter_data").HasColumnType("jsonb");
+            entity.Property(e => e.LetterStatus).HasColumnName("letter_status");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.ReviewRequestedAt).HasColumnName("review_requested_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ReviewRequestedBy).HasColumnName("review_requested_by");
+            entity.Property(e => e.ReviewRequester).HasColumnName("review_requester");
+            entity.Property(e => e.ReviewStatement).HasColumnName("review_statement");
+            entity.Property(e => e.ReviewDecidedAt).HasColumnName("review_decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ReviewDecidedBy).HasColumnName("review_decided_by");
+            entity.Property(e => e.ReviewOutcome).HasColumnName("review_outcome");
+            entity.Property(e => e.ReviewReason).HasColumnName("review_reason");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.LegalEntityId, e.DeclineNumber }).IsUnique().HasDatabaseName("ux_decline_number");
+            entity.HasIndex(e => e.JobId).IsUnique().HasFilter("job_id IS NOT NULL AND status <> 'Overturned'").HasDatabaseName("ux_decline_job");
+            entity.HasIndex(e => e.IntakeId).IsUnique().HasFilter("intake_id IS NOT NULL AND status <> 'Overturned'").HasDatabaseName("ux_decline_intake");
+            entity.HasIndex(e => new { e.LegalEntityId, e.CreatedAt, e.DeclineId }).HasDatabaseName("ix_decline_register");
         });
     }
 }
