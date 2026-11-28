@@ -39,6 +39,9 @@ internal static class ProductPermissions
     public const string ChangeSetRevert = "pfc.ChangeSet.revert";
     public const string ChangeSetRebase = "pfc.ChangeSet.rebase";
     public const string Submit = "pfc.ProductVersion.submit";
+    public const string Diff = "pfc.ProductVersion.diff";
+    public const string Export = "pfc.ProductVersion.export";
+    public const string ProductImport = "pfc.ProductImport.import";
     public const string SignOff = "pfc.ProductVersion.signOff";
     public const string Schedule = "pfc.ProductVersion.schedule";
     public const string CancelSchedule = "pfc.ProductVersion.cancelSchedule";

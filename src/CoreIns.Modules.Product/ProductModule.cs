@@ -48,11 +48,17 @@ public static class ProductModule
         services.AddScoped<CatalogueQueries>();
         services.AddScoped<ProductListQueries>();
         services.AddScoped<RuntimeQueries>();
+        services.AddScoped<ProductSourceQueries>();
 
         // The one state-changing path: import a product source document (the seed and, later, the authoring workflow).
         services.AddScoped<IValidator<ImportProductVersion>, ImportProductVersionValidator>();
         services.AddCommandAuditor<ImportProductVersion, ProductVersionImportResponse, ImportProductVersionAuditor>();
         services.AddCommand<ImportProductVersion, ProductVersionImportResponse, ImportProductVersionHandler>(CommandDescriptor.For("pfc.ProductVersion.import"));
+
+        // BO-PFC-03: YAML or JSON source into a draft change set (never a Locked version).
+        services.AddScoped<IValidator<ImportProductSource>, ImportProductSourceValidator>();
+        services.AddCommandAuditor<ImportProductSource, ProductImportImportResponse, ImportProductSourceAuditor>();
+        services.AddCommand<ImportProductSource, ProductImportImportResponse, ImportProductSourceHandler>(CommandDescriptor.For("pfc.ProductImport.import") with { SupportsDryRun = true });
 
         // REQ-PFC-213 / D-SL5-09: emergency fall-back with maker-checker (PLT approval PFC.Fallback, authority PFC.EMERGENCY_CHANGE).
         services.AddProductAuthorityTypes();
@@ -157,6 +163,10 @@ public static class ProductModule
             .Describe("Μόνο ανοιχτό σύνολο αλλαγών μπορεί να τροποποιηθεί ή να εγκαταλειφθεί.", "Only an open change set can be edited or abandoned."),
         ErrorDefinition.For(ModuleCode.PFC, "INVALID-EDIT", 422, "Μη έγκυρη επεξεργασία", "Invalid edit")
             .Describe("Η διαδρομή ή η τιμή της επεξεργασίας δεν ταιριάζει με το προσχέδιο.", "The edit's path or value does not fit the draft."),
+        ErrorDefinition.For(ModuleCode.PFC, "IMPORT-INVALID", 422, "Μη έγκυρη πηγή εισαγωγής", "Invalid import source")
+            .Describe("Η πηγή YAML ή JSON δεν είναι έγκυρος ορισμός προϊόντος.", "The YAML or JSON source is not a valid product definition."),
+        ErrorDefinition.For(ModuleCode.PFC, "INVALID-REQUEST", 400, "Μη έγκυρο αίτημα", "Invalid request")
+            .Describe("Μια παράμετρος του αιτήματος λείπει ή δεν είναι έγκυρη.", "A request parameter is missing or not valid."),
         ErrorDefinition.For(ModuleCode.PFC, "CONFLICT", 409, "Σύγκρουση αλλαγών", "Change conflict")
             .Describe("Η ίδια διαδρομή άλλαξε και στο προσχέδιο και στη νεότερη έκδοση, ή μια μεταγενέστερη αλλαγή την επηρεάζει.", "The same path changed on both sides, or a later change touches it."),
         ErrorDefinition.For(ModuleCode.PFC, "CHECKS-FAILED", 422, "Οι έλεγχοι υποβολής απέτυχαν", "Submit checks failed")

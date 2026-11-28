@@ -4,23 +4,39 @@
 
 namespace CoreIns.Modules.Product.Contracts.Api;
 
-/// <summary>pfc.ProductImport.import request. PRD inputs: "legacy definition, mapping"</summary>
+/// <summary>pfc.ProductImport.import request (BO-PFC-03). The source is a complete product definition as YAML or JSON text.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ProductImportImportRequest
 {
-    /// <summary>PRD: "legacy definition"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("legacyDefinition")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? LegacyDefinition { get; init; }
+    /// <summary>Contract member 'source'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("source")]
+    public required string Source { get; init; }
 
-    /// <summary>PRD: "mapping"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("mapping")]
+    /// <summary>AUTO (default) tells JSON from YAML by the first character</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("format")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Mapping { get; init; }
+    public FormatValue? Format { get; init; }
+
+    /// <summary>The Locked version the draft is based on (the default is the highest Locked version of the product)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("baseVersion")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Identifiers.ProductVersionNumber? BaseVersion { get; init; }
+
+    /// <summary>AUTO (default) tells JSON from YAML by the first character</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<FormatValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum FormatValue
+    {
+        /// <summary><c>AUTO</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("AUTO")]
+        Auto,
+
+        /// <summary><c>YAML</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("YAML")]
+        Yaml,
+
+        /// <summary><c>JSON</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("JSON")]
+        Json,
+    }
 }

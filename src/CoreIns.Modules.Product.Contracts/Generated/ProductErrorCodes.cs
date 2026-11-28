@@ -106,7 +106,7 @@ public static class ProductErrorCodes
 
     /// <summary>PFC-ERR-NO-VERSION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): pfc.ChangeSet.create, pfc.ChangeSet.rebase, pfc.ChangeSet.revert, pfc.Product.describe, pfc.ProductVersion.fallback, pfc.ProductVersion.resolve.</para>
+    /// <para>Declared by 9 operation(s): pfc.ChangeSet.create, pfc.ChangeSet.rebase, pfc.ChangeSet.revert, pfc.Product.describe, pfc.ProductImport.import, pfc.ProductVersion.diff, pfc.ProductVersion.export, pfc.ProductVersion.fallback, pfc.ProductVersion.resolve.</para>
     /// </remarks>
     public const string NoVersion = "PFC-ERR-NO-VERSION";
 
@@ -142,7 +142,7 @@ public static class ProductErrorCodes
 
     /// <summary>PFC-ERR-UNKNOWN-PRODUCT (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): pfc.ChangeSet.create, pfc.ProductVersion.fallback, pfc.ProductVersion.resolve.</para>
+    /// <para>Declared by 4 operation(s): pfc.ChangeSet.create, pfc.ProductImport.import, pfc.ProductVersion.fallback, pfc.ProductVersion.resolve.</para>
     /// </remarks>
     public const string UnknownProduct = "PFC-ERR-UNKNOWN-PRODUCT";
 
