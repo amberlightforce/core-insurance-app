@@ -3470,6 +3470,181 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.WriteOffLineRow", b =>
+                {
+                    b.Property<Guid>("WriteOffLineId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("write_off_line_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<Guid>("InvoiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invoice_id");
+
+                    b.Property<Guid>("InvoiceItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invoice_item_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("WriteOffId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("write_off_id");
+
+                    b.HasKey("WriteOffLineId")
+                        .HasName("pk_write_off_line");
+
+                    b.HasIndex("InvoiceId");
+
+                    b.HasIndex("InvoiceItemId")
+                        .HasDatabaseName("ix_write_off_line_item");
+
+                    b.HasIndex("WriteOffId", "InvoiceItemId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_write_off_line_item");
+
+                    b.ToTable("write_off_line", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_write_off_line_amount", "amount > 0");
+
+                            t.HasCheckConstraint("ck_write_off_line_currency", "currency ~ '^[A-Z]{3}$'");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.WriteOffRow", b =>
+                {
+                    b.Property<Guid>("WriteOffId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("write_off_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid?>("AuthorityCheckId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("authority_check_id");
+
+                    b.Property<Guid>("BillingAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("billing_account_id");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text")
+                        .HasColumnName("comment");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("char(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionComment")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_comment");
+
+                    b.Property<Guid>("InvoiceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invoice_id");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid?>("LedgerEntryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ledger_entry_id");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<DateTime?>("PostedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("posted_at");
+
+                    b.Property<string>("PostedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("posted_by");
+
+                    b.Property<DateTime>("ProposedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("proposed_at");
+
+                    b.Property<string>("ProposedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("proposed_by");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason_code");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.Property<decimal?>("ToleranceLimit")
+                        .HasColumnType("numeric(19,4)")
+                        .HasColumnName("tolerance_limit");
+
+                    b.HasKey("WriteOffId")
+                        .HasName("pk_write_off");
+
+                    b.HasIndex("BillingAccountId")
+                        .HasDatabaseName("ix_write_off_account");
+
+                    b.HasIndex("InvoiceId")
+                        .HasDatabaseName("ix_write_off_invoice");
+
+                    b.HasIndex("LegalEntityId", "State", "ProposedAt")
+                        .HasDatabaseName("ix_write_off_state");
+
+                    b.ToTable("write_off", "bil", t =>
+                        {
+                            t.HasCheckConstraint("ck_write_off_amount", "amount > 0");
+
+                            t.HasCheckConstraint("ck_write_off_currency", "currency ~ '^[A-Z]{3}$'");
+
+                            t.HasCheckConstraint("ck_write_off_decided", "state = 'PROPOSED' OR decided_by IS NOT NULL");
+
+                            t.HasCheckConstraint("ck_write_off_kind", "kind IN ('MANUAL', 'TOLERANCE')");
+
+                            t.HasCheckConstraint("ck_write_off_posted", "(state = 'POSTED') = (ledger_entry_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_write_off_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_write_off_state", "state IN ('PROPOSED', 'APPROVED', 'REJECTED', 'POSTED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Billing.MigrationImport.MigrationMandateRow", b =>
                 {
                     b.HasOne("CoreIns.Modules.Billing.Persistence.BillingAccountRow", null)
@@ -3819,6 +3994,40 @@ namespace CoreIns.Modules.Billing.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_suspense_item_receipt");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.WriteOffLineRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.InvoiceRow", null)
+                        .WithMany()
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_write_off_line_invoice");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.WriteOffRow", null)
+                        .WithMany()
+                        .HasForeignKey("WriteOffId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_write_off_line_write_off");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Billing.Persistence.WriteOffRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.BillingAccountRow", null)
+                        .WithMany()
+                        .HasForeignKey("BillingAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_write_off_account");
+
+                    b.HasOne("CoreIns.Modules.Billing.Persistence.InvoiceRow", null)
+                        .WithMany()
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_write_off_invoice");
                 });
 #pragma warning restore 612, 618
         }

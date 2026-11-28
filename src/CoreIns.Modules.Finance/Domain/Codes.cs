@@ -274,7 +274,7 @@ internal static class Sl4Entries
     /// </summary>
     // BO-BIL-08: SUSPENSE_TRANSFERRED (unapplied cash moves between billing accounts, LA-11 to LA-11 through LA-29: nothing changes in the GL) and
     // SUSPENSE_REFUND_APPROVED (LA-11 to LA-12) are memo as well. TODO(hardening): book the second one with a versioned finance rule set.
-    public static readonly string[] Memo = [ReceivableRegistered, "SUSPENSE_TRANSFERRED", "SUSPENSE_REFUND_APPROVED"];
+    public static readonly string[] Memo = [ReceivableRegistered, "SUSPENSE_TRANSFERRED", "SUSPENSE_REFUND_APPROVED", "MONEY_TRANSFERRED"];
 
     /// <summary>Entry type and leg roles of a RI recoverable (REQ-FIN-164).</summary>
     public const string RiRecovery = "RECOVERY";

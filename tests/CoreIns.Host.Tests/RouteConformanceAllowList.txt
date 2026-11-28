@@ -143,10 +143,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/intermediary-collections/report-file
 CONTRACT_NOT_SERVED POST /api/bil/v1/invoices/dispute
 CONTRACT_NOT_SERVED POST /api/bil/v1/invoices/send-copy
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/fin
-CONTRACT_NOT_SERVED POST /api/bil/v1/transfers/money
-CONTRACT_NOT_SERVED POST /api/bil/v1/write-offs/decide
-CONTRACT_NOT_SERVED POST /api/bil/v1/write-offs/post
-CONTRACT_NOT_SERVED POST /api/bil/v1/write-offs/propose
 CONTRACT_NOT_SERVED POST /api/chn/v1/agent-logs/export
 CONTRACT_NOT_SERVED POST /api/chn/v1/aggregators/quote
 CONTRACT_NOT_SERVED POST /api/chn/v1/api-products
@@ -302,8 +298,6 @@ CONTRACT_NOT_SERVED POST /api/mkt/v1/spis/suspend
 CONTRACT_NOT_SERVED POST /api/mkt/v1/terminology/approve
 CONTRACT_NOT_SERVED POST /api/mkt/v1/terminology/propose
 CONTRACT_NOT_SERVED POST /api/mkt/v1/translations/gate
-CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/rebase
-CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/revert
 CONTRACT_NOT_SERVED POST /api/pfc/v1/impact-analysises/run
 CONTRACT_NOT_SERVED POST /api/pfc/v1/pogs/record-review
 CONTRACT_NOT_SERVED POST /api/pfc/v1/pogs/record-test

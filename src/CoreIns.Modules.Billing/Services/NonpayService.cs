@@ -432,7 +432,10 @@ internal sealed class NonpayService(
         var credited = (await db.CreditApplications.AsNoTracking().Where(c => c.TargetInvoiceItemId != null && ids.Contains(c.TargetInvoiceItemId.Value))
             .GroupBy(c => c.TargetInvoiceItemId!.Value).Select(g => new { Item = g.Key, Sum = g.Sum(c => c.Amount) }).ToListAsync(cancellationToken).ConfigureAwait(false))
             .ToDictionary(c => c.Item, c => c.Sum);
-        return items.Sum(i => Math.Max(0m, i.Amount - allocated.GetValueOrDefault(i.InvoiceItemId) - credited.GetValueOrDefault(i.InvoiceItemId)));
+        var writtenOff = (await db.WriteOffLines.AsNoTracking().Where(w => ids.Contains(w.InvoiceItemId))
+            .GroupBy(w => w.InvoiceItemId).Select(g => new { Item = g.Key, Sum = g.Sum(w => w.Amount) }).ToListAsync(cancellationToken).ConfigureAwait(false))
+            .ToDictionary(w => w.Item, w => w.Sum);
+        return items.Sum(i => Math.Max(0m, i.Amount - allocated.GetValueOrDefault(i.InvoiceItemId) - credited.GetValueOrDefault(i.InvoiceItemId) - writtenOff.GetValueOrDefault(i.InvoiceItemId)));
     }
 
     private async Task ResolveAsync(DelinquencyCaseRow row, string outcome, DelinquencyResolvedV1.OutcomeValue eventOutcome, bool stopClock, CancellationToken cancellationToken)

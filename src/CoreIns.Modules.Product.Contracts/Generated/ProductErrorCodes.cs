@@ -16,13 +16,13 @@ public static class ProductErrorCodes
 
     /// <summary>PFC-ERR-CHANGE-SET-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 6 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.edit, pfc.ProductVersion.cancelSchedule, pfc.ProductVersion.schedule, pfc.ProductVersion.signOff, pfc.ProductVersion.submit.</para>
+    /// <para>Declared by 8 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.edit, pfc.ChangeSet.rebase, pfc.ChangeSet.revert, pfc.ProductVersion.cancelSchedule, pfc.ProductVersion.schedule, pfc.ProductVersion.signOff, pfc.ProductVersion.submit.</para>
     /// </remarks>
     public const string ChangeSetNotFound = "PFC-ERR-CHANGE-SET-NOT-FOUND";
 
     /// <summary>PFC-ERR-CHANGE-SET-STATE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.edit, pfc.ProductVersion.schedule, pfc.ProductVersion.signOff, pfc.ProductVersion.submit.</para>
+    /// <para>Declared by 7 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.edit, pfc.ChangeSet.rebase, pfc.ChangeSet.revert, pfc.ProductVersion.schedule, pfc.ProductVersion.signOff, pfc.ProductVersion.submit.</para>
     /// </remarks>
     public const string ChangeSetState = "PFC-ERR-CHANGE-SET-STATE";
 
@@ -82,7 +82,7 @@ public static class ProductErrorCodes
 
     /// <summary>PFC-ERR-INVALID-EDIT (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): pfc.ChangeSet.edit.</para>
+    /// <para>Declared by 3 operation(s): pfc.ChangeSet.edit, pfc.ChangeSet.rebase, pfc.ChangeSet.revert.</para>
     /// </remarks>
     public const string InvalidEdit = "PFC-ERR-INVALID-EDIT";
 
@@ -106,7 +106,7 @@ public static class ProductErrorCodes
 
     /// <summary>PFC-ERR-NO-VERSION (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): pfc.ChangeSet.create, pfc.Product.describe, pfc.ProductVersion.fallback, pfc.ProductVersion.resolve.</para>
+    /// <para>Declared by 6 operation(s): pfc.ChangeSet.create, pfc.ChangeSet.rebase, pfc.ChangeSet.revert, pfc.Product.describe, pfc.ProductVersion.fallback, pfc.ProductVersion.resolve.</para>
     /// </remarks>
     public const string NoVersion = "PFC-ERR-NO-VERSION";
 
@@ -124,7 +124,7 @@ public static class ProductErrorCodes
 
     /// <summary>PFC-ERR-STALE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.edit, pfc.ProductVersion.submit.</para>
+    /// <para>Declared by 5 operation(s): pfc.ChangeSet.abandon, pfc.ChangeSet.edit, pfc.ChangeSet.rebase, pfc.ChangeSet.revert, pfc.ProductVersion.submit.</para>
     /// </remarks>
     public const string Stale = "PFC-ERR-STALE";
 

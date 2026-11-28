@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.WriteOff.propose result. PRD outputs: "write-off, posting preview"</summary>
+/// <summary>bil.WriteOff.propose result: the write-off and the ledger lines it will post. A residual within the MKT tolerance is approved and posted in the same call.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record WriteOffProposeResponse
 {
-    /// <summary>PRD: "write-off"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'writeOff'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("writeOff")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? WriteOff { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.WriteOffView WriteOff { get; init; }
 
-    /// <summary>PRD: "posting preview"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'postingPreview'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("postingPreview")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? PostingPreview { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.WriteOffPostingLine> PostingPreview { get; init; }
 }

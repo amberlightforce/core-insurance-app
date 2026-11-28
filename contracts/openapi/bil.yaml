@@ -4937,10 +4937,7 @@ paths:
       operationId: bil.WriteOff.propose
       summary: Write-offs
       description: |-
-        Write-offs
-
-        PRD inputs: items, reason
-        PRD outputs: write-off, posting preview
+        Propose the write-off of part or all of the open balance of an invoice (BO-BIL-13, maker-checker). A MANUAL write-off waits for a second person; a residual within the MKT tolerance (bil.writeoff.tolerance) is approved and posted in the same call. Returns the lines the posting will book.
       tags:
       - WriteOff
       x-requirement:
@@ -4950,7 +4947,6 @@ paths:
       - W6-BIL-01
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -4960,10 +4956,23 @@ paths:
       - ui
       x-permission: bil.WriteOff.propose
       x-authority-types:
-      - BIL.WriteOff
+      - BIL.WRITE_OFF
       x-authority-source:
       - PRD-06 l.862
       x-error-codes:
+      - code: BIL-ERR-VALIDATION
+        status: 422
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-INVOICE-STATE
+        note: the invoice has nothing open to write off
+        status: 422
+      - code: BIL-ERR-AMOUNT-MISMATCH
+        note: the amount exceeds the open balance of the invoice
+        status: 422
+      - code: BIL-ERR-PERIOD-LOCKED
+        note: a tolerance write-off posts at once and the accounting period is closed in FIN
+        status: 422
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -5004,10 +5013,7 @@ paths:
       operationId: bil.WriteOff.decide
       summary: Write-offs
       description: |-
-        Write-offs
-
-        PRD inputs: items, reason
-        PRD outputs: write-off, posting preview
+        Approve or reject a proposed write-off (BO-BIL-13). The decider must not be the proposer and must hold BIL.WRITE_OFF authority over the amount.
       tags:
       - WriteOff
       x-requirement:
@@ -5017,7 +5023,6 @@ paths:
       - W6-BIL-01
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -5027,10 +5032,20 @@ paths:
       - ui
       x-permission: bil.WriteOff.decide
       x-authority-types:
-      - BIL.WriteOff
+      - BIL.WRITE_OFF
       x-authority-source:
       - PRD-06 l.862
       x-error-codes:
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-WRITE-OFF-STATE
+        note: the write-off is not waiting for a decision
+        status: 422
+      - code: BIL-ERR-SOD
+        note: the decider proposed the write-off or has no BIL.WRITE_OFF authority over the amount
+        status: 403
+      - code: BIL-ERR-STALE
+        status: 409
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -5071,10 +5086,7 @@ paths:
       operationId: bil.WriteOff.post
       summary: Write-offs
       description: |-
-        Write-offs
-
-        PRD inputs: items, reason
-        PRD outputs: write-off, posting preview
+        Post an approved write-off (BO-BIL-13): one WRITTEN_OFF ledger entry (write-off clearing LA-16 against the billed receivable LA-02), the open balance of the invoice items shrinks, the invoice becomes WRITTEN_OFF when nothing stays open. Refused when the period is closed in FIN or the balance shrank meanwhile.
       tags:
       - WriteOff
       x-requirement:
@@ -5084,7 +5096,6 @@ paths:
       - W6-BIL-01
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 3
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -5094,10 +5105,23 @@ paths:
       - ui
       x-permission: bil.WriteOff.post
       x-authority-types:
-      - BIL.WriteOff
+      - BIL.WRITE_OFF
       x-authority-source:
       - PRD-06 l.862
       x-error-codes:
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-WRITE-OFF-STATE
+        note: the write-off is not approved (or already posted)
+        status: 422
+      - code: BIL-ERR-AMOUNT-MISMATCH
+        note: the open balance of the invoice is now below the amount
+        status: 422
+      - code: BIL-ERR-PERIOD-LOCKED
+        note: the accounting period of today is closed in FIN
+        status: 422
+      - code: BIL-ERR-STALE
+        status: 409
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -5133,15 +5157,74 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/bil/v1/write-offs:
+    get:
+      operationId: bil.WriteOff.list
+      summary: List write-offs
+      description: |-
+        Write-offs of the legal entity, newest first, optionally by state or billing account (BO-BIL-13): the inbox of the maker-checker flow.
+      tags:
+      - WriteOff
+      x-requirement:
+      - REQ-BIL-217..REQ-BIL-220
+      x-wave: W6
+      x-work-packages:
+      - W6-BIL-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: query
+      x-exposure:
+      - ui
+      x-permission: bil.WriteOff.list
+      x-error-codes:
+      - code: BIL-ERR-VALIDATION
+        status: 422
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - PROPOSED
+          - APPROVED
+          - REJECTED
+          - POSTED
+      - name: billingAccountId
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteOffListResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/bil/v1/transfers/money:
     post:
       operationId: bil.Transfer.money
       summary: Move money
       description: |-
-        Move money
-
-        PRD inputs: source, target, amounts
-        PRD outputs: entries preview
+        Move the unapplied cash of receipts in suspense from one billing account to another account of the same payer (BO-BIL-13): one MONEY_TRANSFERRED entry with a pair of legs through the inter-account transfer clearing LA-20 per receipt; FIN journalises nothing (memo).
       tags:
       - Transfer
       x-requirement:
@@ -5159,8 +5242,21 @@ paths:
       - ui
       x-permission: bil.Transfer.money
       x-error-codes:
-      - code: BIL-ERR-APPROVAL-REQUIRED
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-PAYER-MISMATCH
+        note: the accounts have different payers
         status: 422
+      - code: BIL-ERR-CURRENCY
+        status: 422
+      - code: BIL-ERR-SUSPENSE-STATE
+        note: a receipt is not unapplied cash of the source account
+        status: 409
+      - code: BIL-ERR-METHOD-NOT-ALLOWED
+        note: an account is not Active
+        status: 422
+      - code: BIL-ERR-STALE
+        status: 409
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -9637,94 +9733,229 @@ components:
       - amount
       - endToEndId
       - status
+    WriteOffView:
+      type: object
+      description: A write-off of the open balance of one invoice (BO-BIL-13, REQ-BIL-217..220)
+      properties:
+        writeOffId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        invoiceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        invoiceNumber:
+          type: string
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        kind:
+          type: string
+          description: MANUAL needs a second person; TOLERANCE is a small residual written off at once
+          enum:
+          - MANUAL
+          - TOLERANCE
+        state:
+          type: string
+          enum:
+          - PROPOSED
+          - APPROVED
+          - REJECTED
+          - POSTED
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        comment:
+          type: string
+        proposedBy:
+          type: string
+        proposedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        decidedBy:
+          type: string
+        decidedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        decisionComment:
+          type: string
+        postedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        ledgerEntryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The WRITTEN_OFF ledger entry; set once the write-off is posted
+        recordVersion:
+          type: integer
+      required:
+      - writeOffId
+      - billingAccountId
+      - invoiceId
+      - amount
+      - kind
+      - state
+      - reasonCode
+      - proposedBy
+      - proposedAt
+      - recordVersion
+    WriteOffPostingLine:
+      type: object
+      description: One line of the ledger entry a write-off posts (preview before, the posted lines after)
+      properties:
+        account:
+          type: string
+          description: Sub-ledger account code (e.g. LA-16)
+        side:
+          type: string
+          enum:
+          - DEBIT
+          - CREDIT
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        ruleId:
+          $ref: ../events/common.schema.json#/$defs/Code
+      required:
+      - account
+      - side
+      - amount
+      - ruleId
     WriteOffProposeRequest:
       type: object
-      description: 'bil.WriteOff.propose request. PRD inputs: "items, reason"'
+      description: 'bil.WriteOff.propose request (BO-BIL-13): write off part or all of the open balance of an invoice'
       properties:
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+        invoiceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Reason, capital letters, digits and underscores (e.g. UNCOLLECTIBLE)
+        comment:
+          type: string
+          maxLength: 500
+      required:
+      - invoiceId
+      - amount
+      - reasonCode
     WriteOffProposeResponse:
       type: object
-      description: 'bil.WriteOff.propose result. PRD outputs: "write-off, posting preview"'
+      description: 'bil.WriteOff.propose result: the write-off and the ledger lines it will post. A residual within the MKT tolerance is approved and posted in the same call.'
       properties:
         writeOff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "write-off"'
+          $ref: '#/components/schemas/WriteOffView'
         postingPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "posting preview"'
+          type: array
+          items:
+            $ref: '#/components/schemas/WriteOffPostingLine'
+      required:
+      - writeOff
+      - postingPreview
     WriteOffDecideRequest:
       type: object
-      description: 'bil.WriteOff.decide request. PRD inputs: "items, reason"'
+      description: 'bil.WriteOff.decide request (BO-BIL-13): a second person approves or rejects a proposed write-off'
       properties:
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+        writeOffId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        comment:
+          type: string
+          maxLength: 500
+      required:
+      - writeOffId
+      - decision
     WriteOffDecideResponse:
       type: object
-      description: 'bil.WriteOff.decide result. PRD outputs: "write-off, posting preview"'
+      description: 'bil.WriteOff.decide result'
       properties:
         writeOff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "write-off"'
+          $ref: '#/components/schemas/WriteOffView'
         postingPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "posting preview"'
+          type: array
+          items:
+            $ref: '#/components/schemas/WriteOffPostingLine'
+      required:
+      - writeOff
+      - postingPreview
     WriteOffPostRequest:
       type: object
-      description: 'bil.WriteOff.post request. PRD inputs: "items, reason"'
+      description: 'bil.WriteOff.post request (BO-BIL-13): post an approved write-off'
+      properties:
+        writeOffId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - writeOffId
+    WriteOffPostResponse:
+      type: object
+      description: 'bil.WriteOff.post result: the posted write-off and the lines of its ledger entry'
+      properties:
+        writeOff:
+          $ref: '#/components/schemas/WriteOffView'
+        postingPreview:
+          type: array
+          items:
+            $ref: '#/components/schemas/WriteOffPostingLine'
+        ledgerEntryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - writeOff
+      - postingPreview
+      - ledgerEntryId
+    WriteOffListResponse:
+      type: object
+      description: 'bil.WriteOff.list result: write-offs of the legal entity, newest first'
       properties:
         items:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
-        reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
-    WriteOffPostResponse:
-      type: object
-      description: 'bil.WriteOff.post result. PRD outputs: "write-off, posting preview"'
-      properties:
-        writeOff:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "write-off"'
-        postingPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "posting preview"'
+            $ref: '#/components/schemas/WriteOffView'
+      required:
+      - items
     TransferMoneyRequest:
       type: object
-      description: 'bil.Transfer.money request. PRD inputs: "source, target, amounts"'
+      description: 'bil.Transfer.money request (BO-BIL-13): move the unapplied cash of receipts in suspense from one billing account to another account of the same payer'
       properties:
-        source:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "source"'
-        target:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "target"'
-        amounts:
+        sourceBillingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        targetBillingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        receiptIds:
           type: array
+          minItems: 1
+          maxItems: 50
           items:
-            $ref: ../events/common.schema.json#/$defs/Money
-          description: 'PRD: "amounts"'
+            $ref: ../events/common.schema.json#/$defs/Uuid
+        comment:
+          type: string
+          maxLength: 500
+      required:
+      - sourceBillingAccountId
+      - targetBillingAccountId
+      - receiptIds
+    MoneyTransferLine:
+      type: object
+      description: One receipt moved by bil.Transfer.money
+      properties:
+        receiptId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+      required:
+      - receiptId
+      - amount
     TransferMoneyResponse:
       type: object
-      description: 'bil.Transfer.money result. PRD outputs: "entries preview"'
+      description: 'bil.Transfer.money result: the receipts moved and the MONEY_TRANSFERRED ledger entry (a pair of legs through the inter-account transfer clearing LA-20 per receipt)'
       properties:
-        entriesPreview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "entries preview"'
+        transfers:
+          type: array
+          items:
+            $ref: '#/components/schemas/MoneyTransferLine'
+        total:
+          $ref: ../events/common.schema.json#/$defs/Money
+        ledgerEntryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - transfers
+      - total
+      - ledgerEntryId
     CommissionCalculationsItem:
       type: object
       description: 'bil.Commission.calculations result. PRD outputs: "lines, statements, run"'

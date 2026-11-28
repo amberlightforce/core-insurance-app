@@ -58,7 +58,18 @@ internal static class ChangeSetSupport
 
         var baseVersion = await db.Versions.AsNoTracking().Where(v => v.ProductVersionId == row.BaseVersionId)
             .Select(v => new { v.Major, v.Minor }).FirstAsync(cancellationToken).ConfigureAwait(false);
-        var edits = await db.ChangeSetEdits.AsNoTracking().CountAsync(e => e.ChangeSetId == row.ChangeSetId, cancellationToken).ConfigureAwait(false);
+        var log = await db.ChangeSetEdits.AsNoTracking().Where(e => e.ChangeSetId == row.ChangeSetId).OrderBy(e => e.Seq)
+            .Select(e => new { e.EditId, e.Seq, e.Op, e.Path, e.Actor, e.At })
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        var edits = log.Select(e => new ChangeSetEditEntry
+        {
+            EditId = e.EditId,
+            Seq = e.Seq,
+            Op = e.Op == "add" ? ChangeSetEditEntry.OpValue.Add : e.Op == "replace" ? ChangeSetEditEntry.OpValue.Replace : ChangeSetEditEntry.OpValue.Remove,
+            Path = e.Path,
+            Actor = e.Actor,
+            At = e.At.ToString(),
+        }).ToList();
         return new ChangeSetCreateResponse
         {
             ChangeSetState = new ChangeSetState
@@ -73,7 +84,8 @@ internal static class ChangeSetSupport
                     _ => ChangeSetState.StatusValue.Submitted,
                 },
                 RecordVersion = row.RecordVersion,
-                EditCount = edits,
+                EditCount = edits.Count,
+                History = edits,
                 Draft = draft.Value,
             },
             Validation = Validation(draft.Value),
@@ -196,6 +208,91 @@ internal static class ChangeSetSupport
                 return InvalidEdit(path, "The parent of the path is not an object or array.");
         }
     }
+
+    /// <summary>Reads the node at a JSON pointer; <c>Found</c> is false when any step is missing.</summary>
+    public static (bool Found, JsonNode? Node) Resolve(JsonNode root, string path)
+    {
+        var node = root;
+        foreach (var token in path[1..].Split('/').Select(t => t.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal)))
+        {
+            switch (node)
+            {
+                case JsonObject obj when obj.TryGetPropertyValue(token, out var child):
+                    node = child;
+                    break;
+                case JsonArray array when int.TryParse(token, NumberStyles.None, CultureInfo.InvariantCulture, out var i) && i < array.Count:
+                    node = array[i];
+                    break;
+                default:
+                    return (false, null);
+            }
+        }
+
+        return (true, node);
+    }
+
+    /// <summary>The operation that undoes a logged one, or a conflict when the draft no longer holds what the edit produced.</summary>
+    public static Result<ChangeSetPatchOperation> Inverse(JsonNode draft, ChangeSetEditRow edit)
+    {
+        var (found, current) = edit.Path.Length >= 2 && edit.Path[0] == '/' ? Resolve(draft, edit.Path) : (false, null);
+        var newNode = edit.NewJson is null ? null : JsonNode.Parse(edit.NewJson);
+        var conflict = Conflict(edit.Path, "A later change touched this path; undo or adjust that change first.");
+
+        static ChangeSetPatchOperation Op(ChangeSetPatchOperation.OpValue op, string path, string? json) => new()
+        {
+            Op = op,
+            Path = path,
+            Value = json is null ? null : JsonDocument.Parse(json).RootElement.Clone(),
+        };
+
+        switch (edit.Op)
+        {
+            case "add" when edit.Path.EndsWith("/-", StringComparison.Ordinal):
+            {
+                var parentPath = edit.Path[..^2];
+                var (parentFound, parent) = parentPath.Length == 0 ? (true, draft) : Resolve(draft, parentPath);
+                if (!parentFound || parent is not JsonArray { Count: > 0 } array || !JsonNode.DeepEquals(array[^1], newNode))
+                {
+                    return conflict;
+                }
+
+                return Op(ChangeSetPatchOperation.OpValue.Remove, $"{parentPath}/{array.Count - 1}", null);
+            }
+
+            case "add" or "replace":
+                if (!found || !JsonNode.DeepEquals(current, newNode))
+                {
+                    return conflict;
+                }
+
+                return edit.OldJson is null
+                    ? Op(ChangeSetPatchOperation.OpValue.Remove, edit.Path, null)
+                    : Op(ChangeSetPatchOperation.OpValue.Replace, edit.Path, edit.OldJson);
+
+            case "remove":
+                if (edit.OldJson is null)
+                {
+                    return InvalidEdit(edit.Path, "The logged removal has no old value to restore.");
+                }
+
+                // An object key must still be free; an array index is re-inserted (Apply refuses one out of range).
+                return found && ParentOf(draft, edit.Path) is JsonObject
+                    ? conflict
+                    : Op(ChangeSetPatchOperation.OpValue.Add, edit.Path, edit.OldJson);
+
+            default:
+                return InvalidEdit(edit.Path, "Unknown logged operation.");
+        }
+    }
+
+    private static JsonNode? ParentOf(JsonNode root, string path)
+    {
+        var cut = path.LastIndexOf('/');
+        return cut <= 0 ? root : Resolve(root, path[..cut]).Node;
+    }
+
+    public static DomainError Conflict(string path, string message) =>
+        new(ErrorCode.For(ModuleCode.PFC, "CONFLICT"), message) { FieldErrors = [new FieldError(path, "PFC-CONFLICT", "pfc.conflict", message)] };
 
     private static JsonNode? Child(JsonNode node, string token) => node switch
     {
@@ -465,5 +562,224 @@ internal sealed class AbandonChangeSetAuditor : ICommandAuditor<AbandonChangeSet
         ObjectRef = ChangeSetSupport.Subject(command.Request.ChangeSetId),
         BusinessKeys = BusinessKeys.Empty.With("changeSetId", command.Request.ChangeSetId.ToString("D")),
         Changes = result is { IsSuccess: true } ? AuditDiff.Compute(new { status = ChangeSetSupport.Open }, new { status = ChangeSetSupport.Abandoned }) : [],
+    };
+}
+
+/// <summary><c>pfc.ChangeSet.revert</c>: undoes one logged edit by applying its inverse; the undo is logged as a new edit (BO-PFC-02).</summary>
+internal sealed record RevertChangeSet(ChangeSetRevertRequest Request) : ICommand<ChangeSetRevertResponse>;
+
+internal sealed class RevertChangeSetValidator : AbstractValidator<RevertChangeSet>
+{
+    public RevertChangeSetValidator()
+    {
+        RuleFor(c => c.Request.ChangeSetId).NotEmpty();
+        RuleFor(c => c.Request.EditId).NotEmpty();
+        RuleFor(c => c.Request.RecordVersion).GreaterThanOrEqualTo(1);
+    }
+}
+
+internal sealed class RevertChangeSetHandler(
+    ProductDbContext db,
+    RequestContext context,
+    IClock clock,
+    ILegalEntityDirectory legalEntities) : ICommandHandler<RevertChangeSet, ChangeSetRevertResponse>
+{
+    public async Task<Result<ChangeSetRevertResponse>> HandleAsync(RevertChangeSet command, CancellationToken cancellationToken)
+    {
+        var request = command.Request;
+        var caller = context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity.");
+        var legalEntity = legalEntities.Resolve(caller);
+
+        var row = await db.ChangeSets
+            .FromSql($"SELECT * FROM pfc.change_set WHERE change_set_id = {request.ChangeSetId} AND legal_entity_id = {legalEntity.Value} FOR UPDATE")
+            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+        if (row is null)
+        {
+            return DomainError.Of(ModuleCode.PFC, "CHANGE-SET-NOT-FOUND", "The change set does not exist.");
+        }
+
+        if (row.Status != ChangeSetSupport.Open)
+        {
+            return DomainError.Of(ModuleCode.PFC, "CHANGE-SET-STATE", $"The change set is {row.Status}; only an open change set can be edited.");
+        }
+
+        if (row.RecordVersion != request.RecordVersion)
+        {
+            return DomainError.Of(ModuleCode.PFC, "STALE", "The change set changed meanwhile; reload and retry.");
+        }
+
+        var edit = await db.ChangeSetEdits.AsNoTracking().FirstOrDefaultAsync(e => e.ChangeSetId == row.ChangeSetId && e.EditId == request.EditId, cancellationToken).ConfigureAwait(false);
+        if (edit is null)
+        {
+            return ChangeSetSupport.InvalidEdit("/editId", "The edit does not exist in this change set.");
+        }
+
+        var root = JsonNode.Parse(row.DraftJson) ?? throw new InvalidOperationException("The stored draft is empty.");
+        var inverse = ChangeSetSupport.Inverse(root, edit);
+        if (inverse.IsFailure)
+        {
+            return inverse.Error;
+        }
+
+        var old = ChangeSetSupport.Apply(root, inverse.Value);
+        if (old.IsFailure)
+        {
+            return old.Error;
+        }
+
+        var edited = root.ToJsonString();
+        var parsed = ChangeSetSupport.ParseDraft(edited);
+        if (parsed.IsFailure)
+        {
+            return parsed.Error;
+        }
+
+        var now = clock.Now;
+        var actor = context.Actor.ToString();
+        var seq = await db.ChangeSetEdits.AsNoTracking().Where(e => e.ChangeSetId == row.ChangeSetId).MaxAsync(e => (int?)e.Seq, cancellationToken).ConfigureAwait(false) ?? 0;
+        db.ChangeSetEdits.Add(new ChangeSetEditRow
+        {
+            EditId = EntityIds.NewGuid(),
+            ChangeSetId = row.ChangeSetId,
+            Seq = seq + 1,
+            Op = inverse.Value.Op.ToString().ToLowerInvariant(),
+            Path = inverse.Value.Path,
+            OldJson = old.Value,
+            NewJson = inverse.Value.Op == ChangeSetPatchOperation.OpValue.Remove ? null : inverse.Value.Value!.Value.GetRawText(),
+            Actor = actor,
+            At = now,
+        });
+        row.DraftJson = edited;
+        row.RecordVersion++;
+        row.UpdatedAt = now;
+        row.UpdatedBy = actor;
+        if (await ChangeSetSupport.TrySaveAsync(db, cancellationToken).ConfigureAwait(false) is { } error)
+        {
+            return error;
+        }
+
+        var productCode = await db.Products.AsNoTracking().Where(p => p.ProductId == row.ProductId).Select(p => p.Code).FirstAsync(cancellationToken).ConfigureAwait(false);
+        var view = await ChangeSetSupport.ViewAsync(db, row, productCode, cancellationToken).ConfigureAwait(false);
+        return view.IsFailure
+            ? view.Error
+            : new ChangeSetRevertResponse { ChangeSetState = view.Value.ChangeSetState, Validation = view.Value.Validation };
+    }
+}
+
+internal sealed class RevertChangeSetAuditor : ICommandAuditor<RevertChangeSet, ChangeSetRevertResponse>
+{
+    public CommandAuditFacts Describe(RevertChangeSet command, Result<ChangeSetRevertResponse>? result) => new()
+    {
+        ObjectRef = ChangeSetSupport.Subject(command.Request.ChangeSetId),
+        BusinessKeys = BusinessKeys.Empty.With("changeSetId", command.Request.ChangeSetId.ToString("D")).With("editId", command.Request.EditId.ToString("D")),
+        Changes = result is { IsSuccess: true } ok
+            ? AuditDiff.Compute(null, new { reverted = command.Request.EditId, recordVersion = ok.Value.ChangeSetState.RecordVersion, clean = ok.Value.Validation.Clean })
+            : [],
+    };
+}
+
+/// <summary><c>pfc.ChangeSet.rebase</c>: three-way merges the draft onto a newer Locked version of the same product (BO-PFC-02).</summary>
+internal sealed record RebaseChangeSet(ChangeSetRebaseRequest Request) : ICommand<ChangeSetRebaseResponse>;
+
+internal sealed class RebaseChangeSetValidator : AbstractValidator<RebaseChangeSet>
+{
+    public RebaseChangeSetValidator()
+    {
+        RuleFor(c => c.Request.ChangeSetId).NotEmpty();
+        RuleFor(c => c.Request.RecordVersion).GreaterThanOrEqualTo(1);
+    }
+}
+
+internal sealed class RebaseChangeSetHandler(
+    ProductDbContext db,
+    RequestContext context,
+    IClock clock,
+    ILegalEntityDirectory legalEntities) : ICommandHandler<RebaseChangeSet, ChangeSetRebaseResponse>
+{
+    /// <summary>Paths where the draft always wins: the editor sets the new version number and its windows deliberately.</summary>
+    private static readonly string[] OursWins = ["/version", "/windows"];
+
+    public async Task<Result<ChangeSetRebaseResponse>> HandleAsync(RebaseChangeSet command, CancellationToken cancellationToken)
+    {
+        var request = command.Request;
+        var caller = context.LegalEntity ?? throw new InvalidOperationException("The request context has no legal entity.");
+        var legalEntity = legalEntities.Resolve(caller);
+
+        var row = await db.ChangeSets
+            .FromSql($"SELECT * FROM pfc.change_set WHERE change_set_id = {request.ChangeSetId} AND legal_entity_id = {legalEntity.Value} FOR UPDATE")
+            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+        if (row is null)
+        {
+            return DomainError.Of(ModuleCode.PFC, "CHANGE-SET-NOT-FOUND", "The change set does not exist.");
+        }
+
+        if (row.Status != ChangeSetSupport.Open)
+        {
+            return DomainError.Of(ModuleCode.PFC, "CHANGE-SET-STATE", $"The change set is {row.Status}; only an open change set can be rebased.");
+        }
+
+        if (row.RecordVersion != request.RecordVersion)
+        {
+            return DomainError.Of(ModuleCode.PFC, "STALE", "The change set changed meanwhile; reload and retry.");
+        }
+
+        var baseVersion = await db.Versions.AsNoTracking().FirstAsync(v => v.ProductVersionId == row.BaseVersionId, cancellationToken).ConfigureAwait(false);
+        var locked = db.Versions.AsNoTracking().Where(v => v.ProductId == row.ProductId && v.Status == "LOCKED");
+        var target = request.TargetVersion is { } wanted
+            ? await locked.FirstOrDefaultAsync(v => v.Major == wanted.Major && v.Minor == wanted.Minor, cancellationToken).ConfigureAwait(false)
+            : await locked.OrderByDescending(v => v.Major).ThenByDescending(v => v.Minor).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+        if (target is null)
+        {
+            return DomainError.Of(ModuleCode.PFC, "NO-VERSION", "There is no Locked version of the product to rebase onto.");
+        }
+
+        var baseArtefact = await db.Artifacts.AsNoTracking().FirstAsync(a => a.ArtefactHash == baseVersion.ArtefactHash, cancellationToken).ConfigureAwait(false);
+        var targetArtefact = await db.Artifacts.AsNoTracking().FirstAsync(a => a.ArtefactHash == target.ArtefactHash, cancellationToken).ConfigureAwait(false);
+        var merge = ThreeWayMerge.Merge(
+            JsonNode.Parse(baseArtefact.CanonicalJson)!, JsonNode.Parse(row.DraftJson)!, JsonNode.Parse(targetArtefact.CanonicalJson)!, OursWins);
+        if (merge.HasConflicts)
+        {
+            return new DomainError(ErrorCode.For(ModuleCode.PFC, "CONFLICT"), $"{merge.Conflicts.Count} path(s) changed in both the draft and version {target.Major}.{target.Minor}; resolve them in the draft first.")
+            {
+                FieldErrors = merge.Conflicts
+                    .Select(c => new FieldError(c.Path, "PFC-CONFLICT", "pfc.conflict", $"base {c.Base ?? "absent"}, draft {c.Ours ?? "absent"}, version {target.Major}.{target.Minor} {c.Theirs ?? "absent"}"))
+                    .ToList(),
+            };
+        }
+
+        var merged = merge.Merged.ToJsonString();
+        var parsed = ChangeSetSupport.ParseDraft(merged);
+        if (parsed.IsFailure)
+        {
+            return parsed.Error;
+        }
+
+        row.DraftJson = merged;
+        row.BaseVersionId = target.ProductVersionId;
+        row.RecordVersion++;
+        row.UpdatedAt = clock.Now;
+        row.UpdatedBy = context.Actor.ToString();
+        if (await ChangeSetSupport.TrySaveAsync(db, cancellationToken).ConfigureAwait(false) is { } error)
+        {
+            return error;
+        }
+
+        var productCode = await db.Products.AsNoTracking().Where(p => p.ProductId == row.ProductId).Select(p => p.Code).FirstAsync(cancellationToken).ConfigureAwait(false);
+        var view = await ChangeSetSupport.ViewAsync(db, row, productCode, cancellationToken).ConfigureAwait(false);
+        return view.IsFailure
+            ? view.Error
+            : new ChangeSetRebaseResponse { ChangeSetState = view.Value.ChangeSetState, Validation = view.Value.Validation };
+    }
+}
+
+internal sealed class RebaseChangeSetAuditor : ICommandAuditor<RebaseChangeSet, ChangeSetRebaseResponse>
+{
+    public CommandAuditFacts Describe(RebaseChangeSet command, Result<ChangeSetRebaseResponse>? result) => new()
+    {
+        ObjectRef = ChangeSetSupport.Subject(command.Request.ChangeSetId),
+        BusinessKeys = BusinessKeys.Empty.With("changeSetId", command.Request.ChangeSetId.ToString("D")),
+        Changes = result is { IsSuccess: true } ok
+            ? AuditDiff.Compute(null, new { baseVersion = ok.Value.ChangeSetState.BaseVersion.ToString(), recordVersion = ok.Value.ChangeSetState.RecordVersion, clean = ok.Value.Validation.Clean })
+            : [],
     };
 }
