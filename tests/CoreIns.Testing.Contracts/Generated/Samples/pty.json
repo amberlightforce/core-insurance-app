@@ -168,31 +168,66 @@
       ]
     },
     "pty.CommunicationPreference.resolve": {
-      "channel": "unspecified",
+      "channel": "SAMPLE_CODE",
       "language": "el",
-      "medium": "unspecified",
-      "proof": "unspecified"
+      "medium": "SAMPLE_CODE",
+      "proof": "sample"
     },
     "pty.CommunicationPreference.set": {
-      "channel": "unspecified",
+      "preferenceId": "01926032-2383-7cbb-879d-62b78613728e",
+      "channel": "SAMPLE_CODE",
       "language": "el",
-      "medium": "unspecified",
-      "proof": "unspecified"
+      "medium": "SAMPLE_CODE",
+      "proof": "sample"
     },
     "pty.Consent.query": {
       "items": [
         {
-          "state": "unspecified"
+          "consentId": "01923854-c9b1-7182-8a6e-a7c211908723",
+          "partyId": "0192d2b1-aeb8-735b-8cc6-04282dc7e244",
+          "purpose": "SAMPLE_CODE",
+          "channel": "SAMPLE_CODE",
+          "kind": "GIVEN",
+          "state": "GRANTED",
+          "source": "sample",
+          "wordingVersion": "sample",
+          "proofRef": "sample",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "recordedBy": "sample"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "pty.Consent.record": {
-      "consentState": "unspecified"
+      "consent": {
+        "consentId": "01923bc0-6d8b-7f7a-83a8-5778df7cfead",
+        "partyId": "01925bea-071e-7894-8996-f9d4978d1130",
+        "purpose": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "kind": "GIVEN",
+        "state": "GRANTED",
+        "source": "sample",
+        "wordingVersion": "sample",
+        "proofRef": "sample",
+        "recordedAt": "2026-10-07T09:00:00Z",
+        "recordedBy": "sample"
+      }
     },
     "pty.Consent.withdraw": {
-      "state": "unspecified"
+      "consent": {
+        "consentId": "0192e33d-c824-7480-8322-869dd48cccc0",
+        "partyId": "0192584f-4600-72de-8c21-916a3f4f714c",
+        "purpose": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "kind": "GIVEN",
+        "state": "GRANTED",
+        "source": "sample",
+        "wordingVersion": "sample",
+        "proofRef": "sample",
+        "recordedAt": "2026-10-07T09:00:00Z",
+        "recordedBy": "sample"
+      }
     },
     "pty.Dsar.evaluateErasure": {
       "erased": "unspecified",
@@ -1854,57 +1889,106 @@
       ]
     },
     "CommunicationPreferenceResolveRequest": {
-      "party": "unspecified",
-      "purpose": "unspecified"
+      "partyId": "01923be2-b744-744f-80e8-4e38f06db5a1",
+      "purpose": "SAMPLE_CODE"
     },
     "CommunicationPreferenceResolveResponse": {
-      "channel": "unspecified",
+      "channel": "SAMPLE_CODE",
       "language": "el",
-      "medium": "unspecified",
-      "proof": "unspecified"
+      "medium": "SAMPLE_CODE",
+      "proof": "sample"
     },
     "CommunicationPreferenceSetRequest": {
-      "party": "unspecified",
-      "purpose": "unspecified",
-      "date": "2026-10-07"
+      "partyId": "01927409-25b4-778b-8386-99eeb7461b50",
+      "purpose": "SAMPLE_CODE",
+      "channel": "SAMPLE_CODE",
+      "language": "el",
+      "medium": "SAMPLE_CODE",
+      "validFrom": "2026-10-07"
     },
     "CommunicationPreferenceSetResponse": {
-      "channel": "unspecified",
+      "preferenceId": "01920320-b93a-7900-8286-599c39b0c9ac",
+      "channel": "SAMPLE_CODE",
       "language": "el",
-      "medium": "unspecified",
-      "proof": "unspecified"
+      "medium": "SAMPLE_CODE",
+      "proof": "sample"
     },
     "ConsentQueryItem": {
-      "state": "unspecified"
+      "consentId": "0192c32a-5a34-7a23-8db8-378af3866ef3",
+      "partyId": "01923162-cc86-75b1-8fe6-eca1485a7a15",
+      "purpose": "SAMPLE_CODE",
+      "channel": "SAMPLE_CODE",
+      "kind": "GIVEN",
+      "state": "GRANTED",
+      "source": "sample",
+      "wordingVersion": "sample",
+      "proofRef": "sample",
+      "recordedAt": "2026-10-07T09:00:00Z",
+      "recordedBy": "sample"
     },
     "ConsentQueryPage": {
       "items": [
         {
-          "state": "unspecified"
+          "consentId": "01924e91-a5dc-7697-8e30-61316430cd2d",
+          "partyId": "0192a50c-533d-7a9d-8f51-c4b84304d02a",
+          "purpose": "SAMPLE_CODE",
+          "channel": "SAMPLE_CODE",
+          "kind": "GIVEN",
+          "state": "GRANTED",
+          "source": "sample",
+          "wordingVersion": "sample",
+          "proofRef": "sample",
+          "recordedAt": "2026-10-07T09:00:00Z",
+          "recordedBy": "sample"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "ConsentRecordRequest": {
-      "party": "unspecified",
-      "purpose": "unspecified",
-      "channel": "unspecified",
-      "kind": "unspecified",
-      "source": "unspecified",
-      "wordingVersion": "unspecified",
-      "proofRef": "unspecified"
+      "partyId": "01927d95-674b-79af-8e15-a477f3101aed",
+      "purpose": "SAMPLE_CODE",
+      "channel": "SAMPLE_CODE",
+      "kind": "GIVEN",
+      "source": "SAMPLE_CODE",
+      "wordingVersion": "sample",
+      "proofRef": "sample"
     },
     "ConsentRecordResponse": {
-      "consentState": "unspecified"
+      "consent": {
+        "consentId": "019243d9-a5c4-7e0c-8011-3692407dc913",
+        "partyId": "01925ed6-51ec-78a3-8b52-f2121d8ebe30",
+        "purpose": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "kind": "GIVEN",
+        "state": "GRANTED",
+        "source": "sample",
+        "wordingVersion": "sample",
+        "proofRef": "sample",
+        "recordedAt": "2026-10-07T09:00:00Z",
+        "recordedBy": "sample"
+      }
     },
     "ConsentWithdrawRequest": {
-      "party": "unspecified",
-      "purpose": "unspecified",
-      "channel": "unspecified"
+      "partyId": "0192ee05-a964-7367-8c37-36900ae87c89",
+      "purpose": "SAMPLE_CODE",
+      "channel": "SAMPLE_CODE",
+      "proofRef": "sample"
     },
     "ConsentWithdrawResponse": {
-      "state": "unspecified"
+      "consent": {
+        "consentId": "0192feff-77c3-7869-8c5e-decf27e6453d",
+        "partyId": "019258c0-6bda-76cc-8048-c8cad9a39548",
+        "purpose": "SAMPLE_CODE",
+        "channel": "SAMPLE_CODE",
+        "kind": "GIVEN",
+        "state": "GRANTED",
+        "source": "sample",
+        "wordingVersion": "sample",
+        "proofRef": "sample",
+        "recordedAt": "2026-10-07T09:00:00Z",
+        "recordedBy": "sample"
+      }
     },
     "ContactPointInput": {
       "type": "MOBILE",

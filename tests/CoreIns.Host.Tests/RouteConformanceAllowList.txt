@@ -89,7 +89,6 @@ CONTRACT_NOT_SERVED GET /api/plt/v1/retention/runs
 CONTRACT_NOT_SERVED GET /api/plt/v1/time/now
 CONTRACT_NOT_SERVED GET /api/plt/v1/transfers
 CONTRACT_NOT_SERVED GET /api/plt/v1/workflows/query
-CONTRACT_NOT_SERVED GET /api/pty/v1/consents/query
 CONTRACT_NOT_SERVED GET /api/rat/v1/breakdowns/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/change-explanations/get
 CONTRACT_NOT_SERVED GET /api/rat/v1/impact-analysises/{}
@@ -408,10 +407,6 @@ CONTRACT_NOT_SERVED POST /api/pol/v1/rewrites
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/merge
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/request-policy-move
 CONTRACT_NOT_SERVED POST /api/pty/v1/accounts/split
-CONTRACT_NOT_SERVED POST /api/pty/v1/communication-preferences/resolve
-CONTRACT_NOT_SERVED POST /api/pty/v1/communication-preferences/set
-CONTRACT_NOT_SERVED POST /api/pty/v1/consents/record
-CONTRACT_NOT_SERVED POST /api/pty/v1/consents/withdraw
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/evaluate-erasure
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/pty/v1/dsar/lift-restriction

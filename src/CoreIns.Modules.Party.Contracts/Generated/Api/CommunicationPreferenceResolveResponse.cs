@@ -4,36 +4,23 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.CommunicationPreference.resolve result. PRD outputs: "channel, language, medium, proof"</summary>
+/// <summary>pty.CommunicationPreference.resolve result (BO-PTY-06): the effective channel for the purpose. Order: the preference for the purpose, then the DEFAULT preference, then EMAIL (when the party has an email contact point) or POST. A channel without the consent its purpose needs (MARKETING, PROFILING, THIRD_PARTY_SHARING) is skipped; a vulnerable party gets paper and no marketing.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CommunicationPreferenceResolveResponse
 {
-    /// <summary>PRD: "channel"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'channel'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Channel { get; init; }
+    public required string Channel { get; init; }
 
-    /// <summary>PRD: "language"</summary>
+    /// <summary>Contract member 'language'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("language")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public string? Language { get; init; }
+    public required string Language { get; init; }
 
-    /// <summary>PRD: "medium"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'medium'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("medium")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Medium { get; init; }
+    public required string Medium { get; init; }
 
-    /// <summary>PRD: "proof"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Which rule decided, for example PREFERENCE:&lt;id&gt;, DEFAULT-PREFERENCE:&lt;id&gt;, FALLBACK:EMAIL, with the consent id when one applied</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("proof")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Proof { get; init; }
+    public required string Proof { get; init; }
 }

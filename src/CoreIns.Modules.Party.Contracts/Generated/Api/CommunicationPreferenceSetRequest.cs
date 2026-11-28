@@ -4,28 +4,31 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.CommunicationPreference.set request. PRD inputs: "party, purpose, date"</summary>
+/// <summary>pty.CommunicationPreference.set request (BO-PTY-06). Sets the preference for a purpose (or DEFAULT) from validFrom; the earlier one stays in the history.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record CommunicationPreferenceSetRequest
 {
-    /// <summary>PRD: "party"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("party")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Party { get; init; }
+    /// <summary>Contract member 'partyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("partyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PartyId { get; init; }
 
-    /// <summary>PRD: "purpose"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>A consent purpose, or DEFAULT for every purpose without its own preference</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("purpose")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Purpose { get; init; }
+    public required string Purpose { get; init; }
 
-    /// <summary>PRD: "date"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("date")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? Date { get; init; }
+    /// <summary>Contract member 'channel'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("channel")]
+    public required string Channel { get; init; }
+
+    /// <summary>Default the party's preferred language</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("language")]
+    public string? Language { get; init; }
+
+    /// <summary>DIGITAL or PAPER; default DIGITAL (PAPER for POST)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("medium")]
+    public string? Medium { get; init; }
+
+    /// <summary>Default today</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validFrom")]
+    public global::CoreIns.SharedKernel.BusinessDate? ValidFrom { get; init; }
 }
