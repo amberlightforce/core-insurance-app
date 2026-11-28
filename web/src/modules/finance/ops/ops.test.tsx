@@ -526,13 +526,13 @@ describe('FinanceHomePage', () => {
       },
     ]);
     renderScreen(<FinanceHomePage />, { path: '/finance', url: '/finance' });
-    expect(await screen.findByRole('button', { name: 'Ισοζύγιο' })).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /Ισοζύγιο/ })).toBeInTheDocument();
     expect(await screen.findByText('2026-10')).toBeInTheDocument();
   });
 
   it('keeps the operations screens from billing users', () => {
     signIn('billing', ['Staff.Billing']);
     renderScreen(<FinanceHomePage />, { path: '/finance', url: '/finance' });
-    expect(screen.queryByRole('button', { name: 'Ισοζύγιο' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Ισοζύγιο/ })).not.toBeInTheDocument();
   });
 });
