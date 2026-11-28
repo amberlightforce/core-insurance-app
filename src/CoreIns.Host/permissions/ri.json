@@ -34,6 +34,14 @@
         "ri.Programme.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Programme.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Participation.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        // BO-RI-05: the accountant files panel changes (endorsements, the manager decides them); security rules and the line table are the manager's policy.
+        "ri.Participation.add": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Participation.replace": [ "Staff.ReinsuranceAccountant" ],
+        "ri.SecurityRules.set": [ "Staff.ReinsuranceManager" ],
+        "ri.SecurityRules.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.Security.report": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.LineTable.set": [ "Staff.ReinsuranceManager" ],
+        "ri.LineTable.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         // Premium accounting (BO-RI-10): the accountant sets schedules and calculates (maker), the manager decides (checker); PLT RI.ADJUSTMENT_APPROVE.
         "ri.DepositSchedule.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.DepositSchedule.reschedule": [ "Staff.ReinsuranceAccountant" ],

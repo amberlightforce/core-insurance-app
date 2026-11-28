@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.LineTable.set result. PRD outputs: "table version"</summary>
+/// <summary>ri.LineTable.set result</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record LineTableSetResponse
 {
-    /// <summary>PRD: "table version"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'tableVersion'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("tableVersion")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? TableVersion { get; init; }
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiLineTableVersion TableVersion { get; init; }
 }

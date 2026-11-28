@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.LineTable.set request. PRD inputs: "rows"</summary>
+/// <summary>ri.LineTable.set request (BO-RI-05). Replaces the table with a new version; earlier versions stay as history.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record LineTableSetRequest
 {
-    /// <summary>PRD: "rows"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'rows'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("rows")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Rows { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.RiLineTableRow> Rows { get; init; }
 }

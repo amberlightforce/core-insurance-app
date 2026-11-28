@@ -4,23 +4,26 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Security.report result. PRD outputs: "rules; report"</summary>
+/// <summary>ri.Security.report result. Exposure per reinsurer across the Active contracts in force at validAt, checked against the rule set in force then.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SecurityReportResponse
 {
-    /// <summary>PRD: "rules"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("rules")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Rules { get; init; }
+    /// <summary>Contract member 'validAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("validAt")]
+    public required global::CoreIns.SharedKernel.BusinessDate ValidAt { get; init; }
 
-    /// <summary>PRD: "report"</summary>
+    /// <summary>Contract member 'ruleSetId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'ruleSetId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("report")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Report { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("ruleSetId")]
+    public global::System.Guid? RuleSetId { get; init; }
+
+    /// <summary>Contract member 'rows'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("rows")]
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.RiSecurityExposureRow> Rows { get; init; }
+
+    /// <summary>Contract member 'breachCount'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("breachCount")]
+    public required int BreachCount { get; init; }
 }

@@ -1659,6 +1659,8 @@ paths:
         status: 422
       - code: RI-ERR-PARTY-BLOCKED
         status: 409
+      - code: RI-ERR-SECURITY
+        status: 422
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -1729,6 +1731,8 @@ paths:
         status: 422
       - code: RI-ERR-PARTY-BLOCKED
         status: 409
+      - code: RI-ERR-SECURITY
+        status: 422
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -8880,58 +8884,108 @@ components:
           description: 'PRD: "premiums"'
     ParticipationAddRequest:
       type: object
-      description: 'ri.Participation.add request. PRD inputs: "layer/section, party ids, lines"'
+      description: 'ri.Participation.add request (BO-RI-05). Adds reinsurers to the panel of an Active contract from an effective date: the change is a pending endorsement (a further contract version), decided under maker-checker like any endorsement. With rebalance (the default) the existing lines are scaled so that the signed lines still sum to the placed share (largest remainder at 6 decimals); a new lead replaces the old one.'
       properties:
-        layerSection:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "layer/section"'
-        partyIds:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "party ids"'
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+        effectiveFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
         lines:
           type: array
+          minItems: 1
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
+            $ref: '#/components/schemas/RiParticipationInput'
+        rebalance:
+          type: boolean
+          description: Scale the existing lines to make room (default true); false requires the given lines to complete the panel exactly
+      required:
+      - contractId
+      - expectedRecordVersion
+      - effectiveFrom
+      - reason
+      - lines
+    ParticipationCheck:
+      type: object
+      description: One security check run on the resulting panel
+      properties:
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        rule:
+          type: string
+          description: RATING_FLOOR or MAX_SHARE
+        ok:
+          type: boolean
+        detail:
+          type: string
+      required:
+      - reinsurerPartyId
+      - rule
+      - ok
     ParticipationAddResponse:
       type: object
-      description: 'ri.Participation.add result. PRD outputs: "participations, checks"'
+      description: ri.Participation.add result; the contract view is the endorsed (pending) version
       properties:
-        participations:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "participations"'
+        contract:
+          $ref: '#/components/schemas/RiContractView'
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         checks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipationCheck'
+      required:
+      - contract
+      - approvalRequestId
+      - checks
     ParticipationReplaceRequest:
       type: object
-      description: 'ri.Participation.replace request. PRD inputs: "layer/section, party ids, lines"'
+      description: 'ri.Participation.replace request (BO-RI-05). Replaces one reinsurer by another, taking over the outgoing line and lead role, from an effective date. The change is a pending endorsement: the earlier version keeps its panel as history.'
       properties:
-        layerSection:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "layer/section"'
-        partyIds:
-          type: array
-          items:
-            $ref: ../events/common.schema.json#/$defs/Uuid
-          description: 'PRD: "party ids"'
-        lines:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
+        contractId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        expectedRecordVersion:
+          type: integer
+          minimum: 1
+        effectiveFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        reason:
+          $ref: ../events/common.schema.json#/$defs/Text
+        outgoingReinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        incomingReinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        brokerPartyId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+      required:
+      - contractId
+      - expectedRecordVersion
+      - effectiveFrom
+      - reason
+      - outgoingReinsurerPartyId
+      - incomingReinsurerPartyId
     ParticipationReplaceResponse:
       type: object
-      description: 'ri.Participation.replace result. PRD outputs: "participations, checks"'
+      description: ri.Participation.replace result; the contract view is the endorsed (pending) version
       properties:
-        participations:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "participations"'
+        contract:
+          $ref: '#/components/schemas/RiContractView'
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         checks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "checks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipationCheck'
+      required:
+      - contract
+      - approvalRequestId
+      - checks
     ParticipationListItem:
       type: object
       description: 'ri.Participation.list result. PRD outputs: "participations, checks"'
@@ -8952,76 +9006,225 @@ components:
             items:
               $ref: '#/components/schemas/ParticipationListItem'
       description: Page of ri.Participation.list results (cursor pagination, contract §3.5.5)
+    RiSecurityRating:
+      type: object
+      description: The rating of one reinsurer on the security list
+      properties:
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        rating:
+          type: string
+          description: 'Long-term financial strength rating on the S&P-style scale (AAA, AA+, ..., BBB-, ..., D); legalStatus Unverified'
+        maxSharePct:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Decimal
+          - type: 'null'
+          description: Cap on the signed line of this reinsurer per contract; overrides the general cap
+      required:
+      - reinsurerPartyId
+      - rating
+    RiSecurityRuleSet:
+      type: object
+      description: A security rule set, effective from a date (append-only; a later set supersedes it from its date)
+      properties:
+        ruleSetId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        versionNo:
+          type: integer
+        effectiveFrom:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        ratingFloor:
+          oneOf:
+          - type: string
+          - type: 'null'
+          description: Lowest acceptable rating; a reinsurer below it, or without a rating, is refused
+        maxSharePct:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Decimal
+          - type: 'null'
+          description: General cap on the signed line of one reinsurer per contract
+        ratings:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiSecurityRating'
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        createdBy:
+          type: string
+      required:
+      - ruleSetId
+      - versionNo
+      - effectiveFrom
+      - ratings
+      - createdAt
+      - createdBy
+    RiSecurityExposureRow:
+      type: object
+      description: Exposure of one reinsurer across the contracts in force
+      properties:
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        rating:
+          oneOf:
+          - type: string
+          - type: 'null'
+        contractCount:
+          type: integer
+        limitExposure:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Sum over the layers of limit x signed line
+        exposureSharePct:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: Share of the total limit exposure
+        breaches:
+          type: array
+          items:
+            type: string
+          description: RATING_FLOOR and/or MAX_SHARE when the rule set in force is breached
+      required:
+      - reinsurerPartyId
+      - contractCount
+      - limitExposure
+      - exposureSharePct
+      - breaches
     SecurityRulesSetRequest:
       type: object
-      description: 'ri.SecurityRules.set request. PRD inputs: "rules; date"'
+      description: 'ri.SecurityRules.set request (BO-RI-05). A new rule set from a date; earlier sets stay as history.'
       properties:
-        rules:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rules"'
-        date:
+        effectiveFrom:
           $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
-    SecurityRulesSetResponse:
-      type: object
-      description: 'ri.SecurityRules.set result. PRD outputs: "rules; report"'
-      properties:
-        rules:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rules"'
-        report:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "report"'
-    SecurityRulesGetResponse:
-      type: object
-      description: 'ri.SecurityRules.get result. PRD outputs: "rules; report"'
-      properties:
-        rules:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rules"'
-        report:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "report"'
-    SecurityReportRequest:
-      type: object
-      description: 'ri.Security.report request. PRD inputs: "rules; date"'
-      properties:
-        rules:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rules"'
+        ratingFloor:
+          oneOf:
+          - type: string
+          - type: 'null'
+        maxSharePct:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Decimal
+          - type: 'null'
+        ratings:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiSecurityRating'
+      required:
+      - effectiveFrom
     SecurityReportResponse:
       type: object
-      description: 'ri.Security.report result. PRD outputs: "rules; report"'
+      description: ri.Security.report result. Exposure per reinsurer across the Active contracts in force at validAt, checked against the rule set in force then.
       properties:
-        rules:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rules"'
-        report:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "report"'
-    LineTableSetRequest:
-      type: object
-      description: 'ri.LineTable.set request. PRD inputs: "rows"'
-      properties:
+        validAt:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        ruleSetId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
         rows:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rows"'
+            $ref: '#/components/schemas/RiSecurityExposureRow'
+        breachCount:
+          type: integer
+      required:
+      - validAt
+      - rows
+      - breachCount
+    SecurityRulesSetResponse:
+      type: object
+      description: ri.SecurityRules.set result, with the report as of the effective date
+      properties:
+        ruleSet:
+          $ref: '#/components/schemas/RiSecurityRuleSet'
+        report:
+          $ref: '#/components/schemas/SecurityReportResponse'
+      required:
+      - ruleSet
+      - report
+    SecurityRulesGetResponse:
+      type: object
+      description: ri.SecurityRules.get result
+      properties:
+        ruleSet:
+          $ref: '#/components/schemas/RiSecurityRuleSet'
+      required:
+      - ruleSet
+    SecurityReportRequest:
+      type: object
+      description: 'ri.Security.report request. Optional rule set to check against (default: the one in force at validAt).'
+      properties:
+        ruleSetId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+    RiLineTableRow:
+      type: object
+      description: One band of a line table (REQ-RI-036) in EUR. Bands are half-open [sumInsuredFrom, sumInsuredTo) and must not overlap (RI-ERR-OVERLAP).
+      properties:
+        sumInsuredFrom:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+        sumInsuredTo:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Decimal
+          - type: 'null'
+          description: Open end when null
+        retention:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+          description: Retention of the cedant in the band
+        maxLines:
+          type: integer
+          minimum: 1
+          description: Number of retention lines ceded at most
+      required:
+      - sumInsuredFrom
+      - retention
+      - maxLines
+    RiLineTableVersion:
+      type: object
+      description: A version of the line table of the legal entity (append-only)
+      properties:
+        tableId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        versionNo:
+          type: integer
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiLineTableRow'
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        createdBy:
+          type: string
+      required:
+      - tableId
+      - versionNo
+      - rows
+      - createdAt
+      - createdBy
+    LineTableSetRequest:
+      type: object
+      description: 'ri.LineTable.set request (BO-RI-05). Replaces the table with a new version; earlier versions stay as history.'
+      properties:
+        rows:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/RiLineTableRow'
+      required:
+      - rows
     LineTableSetResponse:
       type: object
-      description: 'ri.LineTable.set result. PRD outputs: "table version"'
+      description: ri.LineTable.set result
       properties:
         tableVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "table version"'
+          $ref: '#/components/schemas/RiLineTableVersion'
+      required:
+      - tableVersion
     LineTableGetResponse:
       type: object
-      description: 'ri.LineTable.get result. PRD outputs: "table version"'
+      description: ri.LineTable.get result
       properties:
         tableVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "table version"'
+          $ref: '#/components/schemas/RiLineTableVersion'
+      required:
+      - tableVersion
     CessionPreviewRequest:
       type: object
       description: 'ri.Cession.preview request. PRD inputs: "risk description"'

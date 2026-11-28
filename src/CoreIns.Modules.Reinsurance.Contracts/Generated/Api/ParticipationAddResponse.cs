@@ -4,23 +4,19 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Participation.add result. PRD outputs: "participations, checks"</summary>
+/// <summary>ri.Participation.add result; the contract view is the endorsed (pending) version</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ParticipationAddResponse
 {
-    /// <summary>PRD: "participations"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("participations")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Participations { get; init; }
+    /// <summary>Contract member 'contract'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("contract")]
+    public required global::CoreIns.Modules.Reinsurance.Contracts.Api.RiContractView Contract { get; init; }
 
-    /// <summary>PRD: "checks"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'approvalRequestId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("approvalRequestId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ApprovalRequestId ApprovalRequestId { get; init; }
+
+    /// <summary>Contract member 'checks'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("checks")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Checks { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Reinsurance.Contracts.Api.ParticipationCheck> Checks { get; init; }
 }

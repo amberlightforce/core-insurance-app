@@ -123,8 +123,6 @@ CONTRACT_NOT_SERVED GET /api/ri/v1/data-products/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/ifrs17-links/query
-CONTRACT_NOT_SERVED GET /api/ri/v1/line-tables/{}
-CONTRACT_NOT_SERVED GET /api/ri/v1/security-rules/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/contingencies
 CONTRACT_NOT_SERVED GET /api/uw/v1/declines/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/disclosure-findings
@@ -545,15 +543,10 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/import/open-items
 CONTRACT_NOT_SERVED POST /api/ri/v1/import/programme
 CONTRACT_NOT_SERVED POST /api/ri/v1/import/recovery-history
 CONTRACT_NOT_SERVED POST /api/ri/v1/import/reverse
-CONTRACT_NOT_SERVED POST /api/ri/v1/line-tables/set
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/acknowledge
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/draft
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/send
-CONTRACT_NOT_SERVED POST /api/ri/v1/participations/add
-CONTRACT_NOT_SERVED POST /api/ri/v1/participations/replace
 CONTRACT_NOT_SERVED POST /api/ri/v1/reconciliation/fin
-CONTRACT_NOT_SERVED POST /api/ri/v1/securities/report
-CONTRACT_NOT_SERVED POST /api/ri/v1/security-rules/set
 CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/approve
 CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/propose
 CONTRACT_NOT_SERVED POST /api/ri/v1/settlements/record-manual
