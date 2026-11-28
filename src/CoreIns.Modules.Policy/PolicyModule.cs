@@ -1,6 +1,7 @@
 using CoreIns.Modules.Policy.Api;
 using CoreIns.Modules.Policy.Commands;
 using CoreIns.Modules.Policy.Commands.Cancellation;
+using CoreIns.Modules.Policy.Commands.Reinstatement;
 using CoreIns.Modules.Policy.Commands.Suspension;
 using CoreIns.Modules.Policy.Commands.Cancellation.NonPayment;
 using CoreIns.Modules.Policy.Commands.Withdrawal;
@@ -155,6 +156,9 @@ public static class PolicyModule
 
         // BO-POL-08: suspension and reactivation of a term's cover.
         services.AddSuspensionCommands();
+
+        // BO-POL-07: reinstatement and rewrite of a cancelled term.
+        services.AddLifecycleCommands();
 
         // BO-POL-06: scheduled cancellation, rescind and the sweep that runs due ones.
         services.AddScheduledCancellation(configuration);

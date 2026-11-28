@@ -21,6 +21,8 @@
         "pol.Cancellation.rescind": [ "Staff.Underwriter" ],
         "pol.Suspension.create": [ "Staff.Underwriter" ],
         "pol.Reactivation.create": [ "Staff.Underwriter" ],
+        "pol.Reinstatement.create": [ "Staff.Underwriter" ],
+        "pol.Rewrite.create": [ "Staff.Underwriter" ],
         "pol.Withdrawal.submit": [ "Staff.Underwriter" ],
         "pol.renewal.manage": [ "Staff.Underwriter" ],
         "pol.Renewal.create": [ "Staff.Underwriter" ],
