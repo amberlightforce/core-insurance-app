@@ -21,6 +21,10 @@ internal static class WorkErrors
     public const string TargetIneligible = "TARGET-INELIGIBLE";
     public const string NotAvailable = "NOT-AVAILABLE";
     public const string EditWindow = "EDIT-WINDOW";
+    public const string FileType = "FILE-TYPE";
+    public const string FileSize = "FILE-SIZE";
+    public const string CapabilityOff = "CAPABILITY-OFF";
+    public const string RequiredMissing = "REQUIRED-MISSING";
 
     public static DomainError Of(string name, string detail) => DomainError.Of(ModuleCode.WRK, name, detail);
 
@@ -50,6 +54,14 @@ internal static class WorkErrors
             .Describe("Η λειτουργία ανήκει σε επόμενο πακέτο εργασιών.", "The operation belongs to a later work package."),
         ErrorDefinition.For(ModuleCode.WRK, EditWindow, 422, "Η προθεσμία αλλαγής έληξε", "The edit window has closed")
             .Describe("Μια σημείωση αλλάζει ή διαγράφεται από τον συντάκτη της μόνο για 24 ώρες.", "An author may change or delete a note only for 24 hours."),
+        ErrorDefinition.For(ModuleCode.WRK, FileType, 422, "Μη αποδεκτός τύπος αρχείου", "The file type is not accepted")
+            .Describe("Το αρχείο δεν είναι PDF, εικόνα, έγγραφο Office ή απλό κείμενο, ή το περιεχόμενό του δεν ταιριάζει με την κατάληξη.", "The file is not a PDF, image, Office document or plain text, or its content does not match its extension."),
+        ErrorDefinition.For(ModuleCode.WRK, FileSize, 422, "Το αρχείο είναι πολύ μεγάλο", "The file is too large")
+            .Describe("Κάθε αρχείο μπορεί να είναι έως 5 MB και κάθε παραλαβή έως 20 αρχεία.", "A file may be up to 5 MB and one intake up to 20 files."),
+        ErrorDefinition.For(ModuleCode.WRK, CapabilityOff, 422, "Η δυνατότητα δεν είναι ενεργή", "The capability is not enabled")
+            .Describe("Δεν έχει συνδεθεί σαρωτής κακόβουλου λογισμικού, οπότε δεν γίνονται δεκτά αρχεία.", "No malware scanner is bound, so no file is accepted."),
+        ErrorDefinition.For(ModuleCode.WRK, RequiredMissing, 422, "Λείπει υποχρεωτικό στοιχείο", "A required value is missing")
+            .Describe("Για την επαλήθευση απαιτούνται κατηγορία εγγράφου και στοιχεία.", "Verification needs a document class and the keyed data."),
         ErrorDefinition.For(ModuleCode.WRK, TargetIneligible, 422, "Ο αποδέκτης δεν είναι κατάλληλος", "The target is not eligible")
             .Describe("Η εργασία δεν μπορεί να ανατεθεί στον συγκεκριμένο αποδέκτη.", "The activity cannot be assigned to that target."),
     ];

@@ -23,6 +23,195 @@ namespace CoreIns.Modules.Work.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Work.Inbound.InboundDocumentRow", b =>
+                {
+                    b.Property<Guid>("InboundDocumentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("inbound_document_id");
+
+                    b.Property<Guid?>("ArchiveId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("archive_id");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("channel");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("content_hash");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("content_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DocumentClass")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("document_class");
+
+                    b.Property<Guid>("EnvelopeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("envelope_id");
+
+                    b.Property<string>("EnvelopeMetadata")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("envelope_metadata");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("file_name");
+
+                    b.Property<string>("InboundNumber")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("inbound_number");
+
+                    b.Property<string>("KeyedData")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("keyed_data");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<bool>("LegalHold")
+                        .HasColumnType("boolean")
+                        .HasColumnName("legal_hold");
+
+                    b.Property<string>("LinkObject")
+                        .HasMaxLength(340)
+                        .HasColumnType("character varying(340)")
+                        .HasColumnName("link_object");
+
+                    b.Property<string>("PageRange")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("page_range");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_id");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<Guid?>("RedactedArchiveId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("redacted_archive_id");
+
+                    b.Property<string>("RedactionReason")
+                        .HasColumnType("text")
+                        .HasColumnName("redaction_reason");
+
+                    b.Property<string>("RejectReason")
+                        .HasColumnType("text")
+                        .HasColumnName("reject_reason");
+
+                    b.Property<string>("ScanSignature")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("scan_signature");
+
+                    b.Property<string>("ScanVerdict")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("scan_verdict");
+
+                    b.Property<DateTime?>("ScannedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("scanned_at");
+
+                    b.Property<string>("Scanner")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("scanner");
+
+                    b.Property<string>("Sender")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("sender");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("size_bytes");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("state");
+
+                    b.Property<string>("SuggestedClass")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("suggested_class");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("verified_at");
+
+                    b.Property<string>("VerifiedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("verified_by");
+
+                    b.HasKey("InboundDocumentId")
+                        .HasName("pk_inbound_document");
+
+                    b.HasIndex("EnvelopeId")
+                        .HasDatabaseName("ix_inbound_document_envelope");
+
+                    b.HasIndex("InboundNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ux_inbound_document_number");
+
+                    b.HasIndex("LegalEntityId", "LinkObject")
+                        .HasDatabaseName("ix_inbound_document_link");
+
+                    b.HasIndex("LegalEntityId", "State", "CreatedAt")
+                        .HasDatabaseName("ix_inbound_document_queue");
+
+                    b.ToTable("inbound_document", "wrk", t =>
+                        {
+                            t.HasCheckConstraint("ck_inbound_clean_scanned", "state NOT IN ('CLEAN', 'VERIFIED', 'SPLIT') OR scan_verdict = 'CLEAN'");
+
+                            t.HasCheckConstraint("ck_inbound_hold", "redacted_archive_id IS NULL OR (legal_hold AND archive_id IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_inbound_infected", "scan_verdict IS DISTINCT FROM 'INFECTED' OR (state IN ('INFECTED', 'REJECTED') AND archive_id IS NULL)");
+
+                            t.HasCheckConstraint("ck_inbound_state", "state IN ('QUARANTINED', 'CLEAN', 'INFECTED', 'VERIFIED', 'REJECTED', 'SPLIT')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Work.Notes.NoteRow", b =>
                 {
                     b.Property<Guid>("NoteId")

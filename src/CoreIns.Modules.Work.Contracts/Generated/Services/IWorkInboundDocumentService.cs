@@ -54,7 +54,9 @@ public interface IWorkInboundDocumentService
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Work.Contracts.Api.InboundDocumentListPage> ListAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="state">QUARANTINED, CLEAN, INFECTED, VERIFIED, REJECTED or SPLIT</param>
+    /// <param name="objectRef">Linked business object as MOD/Type/id</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Work.Contracts.Api.InboundDocumentListPage> ListAsync(string? cursor = null, int? limit = null, string? state = null, string? objectRef = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Processing and verification</summary>
     /// <remarks>

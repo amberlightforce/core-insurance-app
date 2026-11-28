@@ -5,6 +5,7 @@ using CoreIns.Modules.Work.Contracts;
 using CoreIns.Modules.Work.Contracts.Api;
 using CoreIns.Modules.Work.Domain;
 using CoreIns.Modules.Work.Events;
+using CoreIns.Modules.Work.Inbound;
 using CoreIns.Modules.Work.Jobs;
 using CoreIns.Modules.Work.Notes;
 using CoreIns.Modules.Work.Persistence;
@@ -98,6 +99,27 @@ public static class WorkModule
         services.AddCommand<DeleteNote, NoteDeleteResponse, DeleteNoteHandler>(CommandDescriptor.For("wrk.Note.delete"));
         services.AddCommandAuditor<ExportNotes, NoteExportResponse, ExportNotesAuditor>();
         services.AddCommand<ExportNotes, NoteExportResponse, ExportNotesHandler>(CommandDescriptor.For("wrk.Note.export"));
+
+        // BO-WRK-11: inbound documents with a malware scan (the scanner port is bound by AddWorkMalwareScanner).
+        services.AddScoped<InboundService>();
+        services.AddCommandAuditor<SubmitInbound, InboundDocumentSubmitResponse, SubmitInboundAuditor>();
+        services.AddCommand<SubmitInbound, InboundDocumentSubmitResponse, SubmitInboundHandler>(CommandDescriptor.For("wrk.InboundDocument.submit"));
+        services.AddCommandAuditor<VerifyInbound, InboundDocumentVerifyResponse, VerifyInboundAuditor>();
+        services.AddCommand<VerifyInbound, InboundDocumentVerifyResponse, VerifyInboundHandler>(CommandDescriptor.For("wrk.InboundDocument.verify"));
+        services.AddCommandAuditor<SplitInbound, InboundDocumentSplitResponse, SplitInboundAuditor>();
+        services.AddCommand<SplitInbound, InboundDocumentSplitResponse, SplitInboundHandler>(CommandDescriptor.For("wrk.InboundDocument.split"));
+        services.AddCommandAuditor<LinkInbound, InboundDocumentLinkResponse, LinkInboundAuditor>();
+        services.AddCommand<LinkInbound, InboundDocumentLinkResponse, LinkInboundHandler>(CommandDescriptor.For("wrk.InboundDocument.link"));
+        services.AddCommandAuditor<RelinkInbound, InboundDocumentRelinkResponse, RelinkInboundAuditor>();
+        services.AddCommand<RelinkInbound, InboundDocumentRelinkResponse, RelinkInboundHandler>(CommandDescriptor.For("wrk.InboundDocument.relink"));
+        services.AddCommandAuditor<RejectInbound, InboundDocumentRejectResponse, RejectInboundAuditor>();
+        services.AddCommand<RejectInbound, InboundDocumentRejectResponse, RejectInboundHandler>(CommandDescriptor.For("wrk.InboundDocument.reject"));
+        services.AddCommandAuditor<RedactInbound, InboundDocumentRedactResponse, RedactInboundAuditor>();
+        services.AddCommand<RedactInbound, InboundDocumentRedactResponse, RedactInboundHandler>(CommandDescriptor.For("wrk.InboundDocument.redact"));
+        services.AddCommandAuditor<ReprocessInbound, InboundDocumentReprocessResponse, ReprocessInboundAuditor>();
+        services.AddCommand<ReprocessInbound, InboundDocumentReprocessResponse, ReprocessInboundHandler>(CommandDescriptor.For("wrk.InboundDocument.reprocess"));
+        services.AddCommandAuditor<ExportInbound, InboundDocumentExportResponse, ExportInboundAuditor>();
+        services.AddCommand<ExportInbound, InboundDocumentExportResponse, ExportInboundHandler>(CommandDescriptor.For("wrk.InboundDocument.export"));
 
         // D-SL5-10: a pack rollback gets a review activity in the rollback queue.
         services.AddEventHandler<PackRolledBackV1, PackRolledBackReviewHandler>(

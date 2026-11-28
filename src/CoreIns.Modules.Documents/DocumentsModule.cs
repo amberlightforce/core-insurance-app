@@ -8,9 +8,12 @@ using CoreIns.Modules.Documents.Queries;
 using CoreIns.Modules.Documents.Rendering;
 using CoreIns.Modules.Documents.Services;
 using CoreIns.Platform;
+using CoreIns.Platform.Approvals;
+using CoreIns.Platform.Authority;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Persistence;
+using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
@@ -55,6 +58,12 @@ public static class DocumentsModule
         services.AddCommand<ReceiveProviderEvent, ProviderEventResult, ReceiveProviderEventHandler>(
             CommandDescriptor.For("doc.ProviderEvent.receive") with { RequiresIdempotencyKey = false });
         services.AddCommand<ReprintDocument, ReprintResult, ReprintDocumentHandler>(CommandDescriptor.For("doc.Document.reprint"));
+        services.AddCommand<DecideReprint, DecideReprintResult, DecideReprintHandler>(CommandDescriptor.For("doc.Document.decideReprint"));
+        services.AddScoped<DocWorkTasks>();
+        services.AddAuthorityType(new AuthorityTypeDefinition(AuthorityTypeCode.Parse(ReprintApproval.Authority), ModuleCode.DOC,
+            new LocalizedText("Επανεκτύπωση νόμιμης ειδοποίησης", "Statutory notice reprint"),
+            [new AuthorityDimensionDefinition("template", DimensionKind.Code)]));
+        services.AddOwnerDecidedApprovalType(ReprintApproval.Type);
         services.AddCommand<ResendDocument, ResendResult, ResendDocumentHandler>(CommandDescriptor.For("doc.Document.resend"));
         services.AddCommand<SetDocumentHidden, HiddenResult, SetDocumentHiddenHandler>(CommandDescriptor.For("doc.Document.hide"));
         services.AddCommand<SupersedeDocument, SupersedeResult, SupersedeDocumentHandler>(CommandDescriptor.For("doc.Document.supersede"));
@@ -84,6 +93,7 @@ public static class DocumentsModule
 
         services.AddScoped<IDocumentRequestService, DocumentRequestService>();
         services.AddScoped<IDocumentContentService, DocumentContentService>();
+        services.AddScoped<IDocumentArchiveService, DocumentArchiveService>();
         services.AddScoped<IDocumentEvidenceService, DocumentEvidenceService>();
 
         services.AddErrorDefinitions(Errors);

@@ -17,7 +17,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [CLM](#clm) | 77 | 77 | 0 | 55 | 22 | 10 | 9 | 5 |
 | [RI](#ri) | 121 | 115 | 6 | 85 | 36 | 9 | 0 | 0 |
 | [FIN](#fin) | 88 | 80 | 8 | 54 | 34 | 10 | 0 | 3 |
-| [DOC](#doc) | 48 | 47 | 1 | 28 | 20 | 4 | 12 | 0 |
+| [DOC](#doc) | 49 | 48 | 1 | 29 | 20 | 4 | 12 | 0 |
 | [CMP](#cmp) | 93 | 62 | 31 | 69 | 24 | 21 | 0 | 3 |
 | [CHN](#chn) | 106 | 62 | 44 | 66 | 40 | 3 | 25 | 2 |
 | [WRK](#wrk) | 60 | 25 | 35 | 41 | 19 | 9 | 3 | 14 |
@@ -25,7 +25,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [DAT](#dat) | 47 | 47 | 0 | 28 | 19 | 4 | 0 | 0 |
 | [MIG](#mig) | 49 | 49 | 0 | 33 | 16 | 5 | 0 | 12 |
 | [MKT](#mkt) | 50 | 41 | 9 | 17 | 33 | 1 | 0 | 5 |
-| **Total** | 1232 | 1016 | 216 | 789 | 443 | 127 | 69 | 63 |
+| **Total** | 1233 | 1017 | 216 | 790 | 443 | 127 | 69 | 63 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -830,6 +830,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `doc.Clause.get` | GET `/api/doc/v1/clauses/{id}` | Q |  | ui | PFC | W2 | full | REQ-DOC-002 |
 | `doc.Delivery.evidenceFor` | GET `/api/doc/v1/deliveries/evidence-for` | Q |  | ui | CLM, CMP | W2 | full | REQ-DOC-005, REQ-DOC-249 |
 | `doc.Delivery.status` | GET `/api/doc/v1/deliveries/status` | Q |  | ui | BIL, CHN, CLM, CMP, POL | W2 | full | REQ-DOC-005, REQ-DOC-249 |
+| `doc.Document.decideReprint` | POST `/api/doc/v1/documents/decide-reprint` | C |  | ui |  | W6 | full | REQ-DOC-205 |
 | `doc.Document.deleteDraft` | POST `/api/doc/v1/documents/delete-draft` | C |  | ui |  | W4 | full | REQ-DOC-278, REQ-DOC-279 |
 | `doc.Document.get` | GET `/api/doc/v1/documents/{id}` | Q |  | ui, partner | CHN, CLM | W4 | full | REQ-DOC-008 |
 | `doc.Document.hide` | POST `/api/doc/v1/documents/hide` | C |  | ui |  | W4 | full | REQ-DOC-278, REQ-DOC-279 |

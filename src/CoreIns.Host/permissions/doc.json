@@ -6,6 +6,7 @@
         "doc.Document.get": [ "Staff.Billing", "Platform.Admin" ],
         "doc.Document.listForObject": [ "Staff.Billing", "Platform.Admin" ],
         "doc.Document.reprint": [ "Platform.Admin" ],
+        "doc.Document.decideReprint": [ "Platform.Admin" ],
         "doc.Document.renderPdf": [ "Platform.Admin" ],
         "doc.Document.resend": [ "Staff.Billing", "Platform.Admin" ],
         "doc.Document.hide": [ "Staff.Billing", "Platform.Admin" ],
@@ -32,6 +33,13 @@
         "doc.Archive.download": [ "Staff.Billing", "Platform.Admin" ],
         "doc.EvidencePack.export": [ "Platform.Admin" ]
       }
+    },
+    "Authority": {
+      // ILLUSTRATIVE (no approved authority matrix; ignored in Production, so a statutory reprint cannot be approved there until a grant is configured).
+      // Any administrator may decide a statutory reprint; plt.Approval never lets the maker decide their own request.
+      "Grants": [
+        { "Id": "doc-statutory-reprint-illustrative", "Role": "Platform.Admin", "Type": "DOC_STATUTORY_REPRINT", "Illustrative": true }
+      ]
     }
   }
 }

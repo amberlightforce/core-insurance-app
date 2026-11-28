@@ -1115,6 +1115,70 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/doc/v1/documents/decide-reprint:
+    post:
+      operationId: doc.Document.decideReprint
+      summary: Decide a statutory reprint
+      description: |-
+        Decide a statutory reprint (BO-DOC-03)
+
+        A reprint of a statutory notice is requested through doc.Document.reprint and waits for a second person (plt.Approval, maker is never the checker). This operation records the checker's decision: approve creates the reprint delivery, reject closes the request.
+      tags:
+      - Document
+      x-requirement:
+      - REQ-DOC-205
+      x-wave: W6
+      x-work-packages:
+      - W6-DOC-01
+      x-status: full
+      x-maturity: pre-release
+      x-operation-kind: command
+      x-idempotency: required
+      x-dry-run: false
+      x-exposure:
+      - ui
+      x-permission: doc.Document.decideReprint
+      x-error-codes:
+      - code: DOC-ERR-NOT-FOUND
+        status: 404
+      - code: DOC-ERR-PAYLOAD-INVALID
+        status: 422
+      - code: DOC-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
+      x-source:
+      - BO-DOC-03
+      parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentDecideReprintRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentDecideReprintResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '404':
+          $ref: common.yaml#/components/responses/NotFound
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/doc/v1/document-types:
     get:
       operationId: doc.DocumentType.list
@@ -3760,6 +3824,29 @@ components:
         withdrawnReason:
           type: string
       required: [status, withdrawnReason]
+    DocumentDecideReprintRequest:
+      type: object
+      description: 'doc.Document.decideReprint request (BO-DOC-03): the checker approves or rejects a pending statutory reprint.'
+      properties:
+        approvalRequestId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+          enum: [APPROVE, REJECT]
+        comment:
+          type: string
+      required: [approvalRequestId, decision]
+    DocumentDecideReprintResponse:
+      type: object
+      description: 'doc.Document.decideReprint result: APPROVED carries the new delivery, REJECTED none.'
+      properties:
+        status:
+          type: string
+        documentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        deliveryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required: [status, documentId]
     DocumentTypeListItem:
       type: object
       description: 'doc.DocumentType.list result: one document type of the catalogue (BO-DOC-05).'

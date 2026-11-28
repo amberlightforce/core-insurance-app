@@ -124,7 +124,9 @@ describe('configuration change requests', () => {
     await screen.findByText('Synthetic rate update');
     await expectNoA11yViolations(container);
     expect(screen.queryByRole('button', { name: 'New change request' })).not.toBeInTheDocument();
-    await user.click(screen.getAllByRole('button', { name: /Status/ })[0] as HTMLElement);
+    const [statusFilter] = screen.getAllByRole('button', { name: /Status/ });
+    if (!statusFilter) throw new Error('no Status filter');
+    await user.click(statusFilter);
     await user.click(await screen.findByRole('option', { name: 'Applied' }));
     await waitFor(() => {
       expect(api.calls.some((c) => c.url.searchParams.get('status') === 'APPLIED')).toBe(true);
