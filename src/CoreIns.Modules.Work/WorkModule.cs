@@ -1,3 +1,4 @@
+using CoreIns.Modules.Compliance.Contracts.Events;
 using CoreIns.Modules.Market.Contracts.Events;
 using CoreIns.Modules.Work.Commands;
 using CoreIns.Modules.Work.Contracts;
@@ -82,6 +83,12 @@ public static class WorkModule
         // D-SL5-10: a pack rollback gets a review activity in the rollback queue.
         services.AddEventHandler<PackRolledBackV1, PackRolledBackReviewHandler>(
             EventDescriptor.From(PackRolledBackV1.Descriptor), PackRolledBackReviewHandler.Name, ModuleCode.WRK);
+
+        // BO-WRK-04: an escalated complaint and a rejected fiscal document each get one follow-up activity.
+        services.AddEventHandler<ComplaintEscalatedV1, ComplaintEscalatedHandler>(
+            EventDescriptor.From(ComplaintEscalatedV1.Descriptor), ComplaintEscalatedHandler.Name, ModuleCode.WRK);
+        services.AddEventHandler<FiscalDocRejectedV1, FiscalDocRejectedHandler>(
+            EventDescriptor.From(FiscalDocRejectedV1.Descriptor), FiscalDocRejectedHandler.Name, ModuleCode.WRK);
 
         // SLABreached: the sweep marks and publishes once per activity (worker role only).
         services.AddOptions<WorkOptions>().Bind(configuration.GetSection(WorkOptions.Section));

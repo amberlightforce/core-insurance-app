@@ -98,6 +98,12 @@ public static class PartyErrorCodes
     /// </remarks>
     public const string Merged = "PTY-ERR-MERGED";
 
+    /// <summary>PTY-ERR-NO-CONSENT (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 1 operation(s): pty.CommunicationPreference.resolve.</para>
+    /// </remarks>
+    public const string NoConsent = "PTY-ERR-NO-CONSENT";
+
     /// <summary>PTY-ERR-NO-EMAIL (HTTP 422).</summary>
     /// <remarks>
     /// <para>Declared by 2 operation(s): pty.CommunicationPreference.resolve, pty.CommunicationPreference.set.</para>
@@ -264,7 +270,7 @@ public static class PartyErrorCodes
     public const string Prefix = "PTY-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AccountHasJobs, ActivationIncomplete, Backdate, DuplicateIdentifier, EvidenceRequired, IdCheckdigit, IdempotencyMismatch, IntermediaryNotActive, LastAdmin, LiveDependant, LocationInUse, MemberInUse, MergeCrossEntity, MergeIdentifierConflict, Merged, NoEmail, NotAvailable, NotFound, NotMigrated, OpenJob, OutOfAgency, Overlap, PorCodeInvalid, PorLetterRequired, PostcodeFormat, ProofRequired, QueryTooShort, RateAboveMax, ReassignmentRequired, RegistryUnavailable, RelationshipCycle, Restricted, RoleDataMissing, RoleDuplicate, RoleType, ScreenInput, SelfApproval, SplitSum, Stale, State, Validation, WindowClosed];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AccountHasJobs, ActivationIncomplete, Backdate, DuplicateIdentifier, EvidenceRequired, IdCheckdigit, IdempotencyMismatch, IntermediaryNotActive, LastAdmin, LiveDependant, LocationInUse, MemberInUse, MergeCrossEntity, MergeIdentifierConflict, Merged, NoConsent, NoEmail, NotAvailable, NotFound, NotMigrated, OpenJob, OutOfAgency, Overlap, PorCodeInvalid, PorLetterRequired, PostcodeFormat, ProofRequired, QueryTooShort, RateAboveMax, ReassignmentRequired, RegistryUnavailable, RelationshipCycle, Restricted, RoleDataMissing, RoleDuplicate, RoleType, ScreenInput, SelfApproval, SplitSum, Stale, State, Validation, WindowClosed];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -284,6 +290,7 @@ public static class PartyErrorCodes
         [MergeCrossEntity] = 422,
         [MergeIdentifierConflict] = 422,
         [Merged] = 409,
+        [NoConsent] = 422,
         [NoEmail] = 422,
         [NotAvailable] = 501,
         [NotFound] = 404,

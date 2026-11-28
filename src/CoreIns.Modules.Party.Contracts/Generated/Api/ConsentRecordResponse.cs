@@ -4,15 +4,11 @@
 
 namespace CoreIns.Modules.Party.Contracts.Api;
 
-/// <summary>pty.Consent.record result. PRD outputs: "consent state"</summary>
+/// <summary>pty.Consent.record result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConsentRecordResponse
 {
-    /// <summary>PRD: "consent state"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("consentState")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? ConsentState { get; init; }
+    /// <summary>Contract member 'consent'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("consent")]
+    public required global::CoreIns.Modules.Party.Contracts.Api.ConsentQueryItem Consent { get; init; }
 }

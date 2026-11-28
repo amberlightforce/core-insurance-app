@@ -21,7 +21,11 @@ public interface IPartyConsentService
     /// </remarks>
     /// <param name="cursor">Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5).</param>
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
-    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.ConsentQueryPage> QueryAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
+    /// <param name="partyId">query parameter 'partyId'</param>
+    /// <param name="purpose">query parameter 'purpose'</param>
+    /// <param name="channel">query parameter 'channel'</param>
+    /// <param name="includeHistory">query parameter 'includeHistory'</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.ConsentQueryPage> QueryAsync(global::CoreIns.SharedKernel.Identifiers.PartyId partyId, string? cursor = null, int? limit = null, string? purpose = null, string? channel = null, bool? includeHistory = null, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Record a consent or its withdrawal with proof (called by CHN portals; same operation as in pty.Consent.query …</summary>
     /// <remarks>

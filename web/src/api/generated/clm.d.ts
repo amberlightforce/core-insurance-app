@@ -2829,53 +2829,70 @@ export interface components {
             /** @description PRD: "totals by currency and cost type with transaction ids" */
             totalsByCurrencyAndCostType?: components["schemas"]["Unspecified"];
         };
-        /** @description clm.StatutoryOffer.issue request. PRD inputs: "exposure, content" */
+        /** @description A statutory offer or reply on a third-party MTPL exposure (BO-CLM-06, REQ-CLM-007). clockLegalStatus is the legal status of the payment-clock value (D-REG-04, OQ-008); while it is not confirmed, Production refuses to issue. */
+        StatutoryOfferView: {
+            offerId: components["schemas"]["Uuid"];
+            claimId: components["schemas"]["Uuid"];
+            exposureId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            kind: "REASONED_OFFER" | "REASONED_REPLY";
+            /** @enum {string} */
+            status: "ISSUED" | "ACCEPTED" | "REPAIR_AGREED";
+            amount?: components["schemas"]["Money"] | null;
+            issuedAt: components["schemas"]["Instant"];
+            deliveredAt: components["schemas"]["Instant"];
+            deliveryEvidenceId: components["schemas"]["Uuid"];
+            documentId?: components["schemas"]["Uuid"] | null;
+            clockLegalStatus: string;
+            /** @description CMP instance of CLM_MTPL_PAYMENT, started at the proven delivery of a reasoned offer */
+            paymentClockId?: components["schemas"]["Uuid"] | null;
+            repairClockId?: components["schemas"]["Uuid"] | null;
+            acceptedAt?: components["schemas"]["Instant"] | null;
+            repairAgreedAt?: components["schemas"]["Instant"] | null;
+            /** @description The Draft payment set released by the acceptance (exactly one) */
+            paymentSetId?: components["schemas"]["Uuid"] | null;
+            recordVersion: number;
+        };
+        /** @description clm.StatutoryOffer.issue request: records a reasoned offer (with an amount) or a reasoned reply on a third-party MTPL exposure at its proven delivery. The delivery cannot be earlier than the issue or in the future. Stops the offer clock; a reasoned offer starts the payment clock from the delivery. */
         StatutoryOfferIssueRequest: {
-            /** @description PRD: "exposure" */
-            exposure?: components["schemas"]["Unspecified"];
-            /** @description PRD: "content" */
-            content?: components["schemas"]["Unspecified"];
+            exposureId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            kind: "REASONED_OFFER" | "REASONED_REPLY";
+            /** @description Offered indemnity in EUR; required for a reasoned offer, absent for a reply */
+            amount?: components["schemas"]["Money"] | null;
+            /** @description The reasoning shown in the letter */
+            content: string;
+            /** @description Default the delivery time; never after it */
+            issuedAt?: components["schemas"]["Instant"] | null;
+            deliveredAt: components["schemas"]["Instant"];
+            /** @description The proof of delivery (a DOC evidence record) */
+            deliveryEvidenceId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            language?: "el" | "en";
         };
-        /** @description clm.StatutoryOffer.issue result. PRD outputs: "offer record, document request; agreement → clock start" */
         StatutoryOfferIssueResponse: {
-            /** @description PRD: "offer record" */
-            offerRecord?: components["schemas"]["Unspecified"];
-            /** @description PRD: "document request" */
-            documentRequest?: components["schemas"]["Unspecified"];
-            /** @description PRD: "agreement → clock start" */
-            agreementClockStart?: components["schemas"]["Unspecified"];
+            offer: components["schemas"]["StatutoryOfferView"];
         };
-        /** @description clm.StatutoryOffer.recordAcceptance request. PRD inputs: "exposure, content" */
+        /** @description clm.StatutoryOffer.recordAcceptance request: the claimant accepted a reasoned offer. Releases exactly one Draft payment set for the offered amount to the payee account captured on the claim; a repeat returns the same set. */
         StatutoryOfferRecordAcceptanceRequest: {
-            /** @description PRD: "exposure" */
-            exposure?: components["schemas"]["Unspecified"];
-            /** @description PRD: "content" */
-            content?: components["schemas"]["Unspecified"];
+            offerId: components["schemas"]["Uuid"];
+            /** @description Default now; not before the delivery */
+            acceptedAt?: components["schemas"]["Instant"] | null;
+            payeePartyId: components["schemas"]["Uuid"];
+            /** @description BIL payee account captured with clm.PayeeAccount.capture */
+            payeeAccountId: components["schemas"]["Uuid"];
         };
-        /** @description clm.StatutoryOffer.recordAcceptance result. PRD outputs: "offer record, document request; agreement → clock start" */
         StatutoryOfferRecordAcceptanceResponse: {
-            /** @description PRD: "offer record" */
-            offerRecord?: components["schemas"]["Unspecified"];
-            /** @description PRD: "document request" */
-            documentRequest?: components["schemas"]["Unspecified"];
-            /** @description PRD: "agreement → clock start" */
-            agreementClockStart?: components["schemas"]["Unspecified"];
+            offer: components["schemas"]["StatutoryOfferView"];
         };
-        /** @description clm.StatutoryOffer.recordRepairAgreement request. PRD inputs: "exposure, content" */
+        /** @description clm.StatutoryOffer.recordRepairAgreement request: the parties agreed repair in kind instead of payment. Cancels the payment clock and starts the repair clock from the agreement. */
         StatutoryOfferRecordRepairAgreementRequest: {
-            /** @description PRD: "exposure" */
-            exposure?: components["schemas"]["Unspecified"];
-            /** @description PRD: "content" */
-            content?: components["schemas"]["Unspecified"];
+            offerId: components["schemas"]["Uuid"];
+            /** @description Default now; not before the delivery */
+            agreedAt?: components["schemas"]["Instant"] | null;
         };
-        /** @description clm.StatutoryOffer.recordRepairAgreement result. PRD outputs: "offer record, document request; agreement → clock start" */
         StatutoryOfferRecordRepairAgreementResponse: {
-            /** @description PRD: "offer record" */
-            offerRecord?: components["schemas"]["Unspecified"];
-            /** @description PRD: "document request" */
-            documentRequest?: components["schemas"]["Unspecified"];
-            /** @description PRD: "agreement → clock start" */
-            agreementClockStart?: components["schemas"]["Unspecified"];
+            offer: components["schemas"]["StatutoryOfferView"];
         };
         /** @description One claim on the claims-history certificate (BO-CLM-07). No AFM, no free text; matched by party id. */
         CertificateClaimLine: {

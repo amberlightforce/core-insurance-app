@@ -23,6 +23,8 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
 
     public DbSet<CertificateRequestRow> CertificateRequests => Set<CertificateRequestRow>();
 
+    public DbSet<StatutoryOfferRow> StatutoryOffers => Set<StatutoryOfferRow>();
+
     public DbSet<ClaimantRow> Claimants => Set<ClaimantRow>();
 
     public DbSet<IncidentRow> Incidents => Set<IncidentRow>();
@@ -217,6 +219,43 @@ internal sealed class ClaimsDbContext(DbContextOptions<ClaimsDbContext> options)
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
             entity.HasIndex(e => new { e.LegalEntityId, e.RequesterPartyId, e.CreatedAt }).HasDatabaseName("ix_certificate_request_requester");
             entity.HasIndex(e => new { e.LegalEntityId, e.CertificateNumber }).IsUnique().HasFilter("certificate_number IS NOT NULL").HasDatabaseName("ux_certificate_request_number");
+        });
+
+        modelBuilder.Entity<StatutoryOfferRow>(entity =>
+        {
+            entity.ToTable("statutory_offer", table =>
+            {
+                CommonChecks(table, "statutory_offer");
+                table.HasCheckConstraint("ck_statutory_offer_kind", "kind IN ('REASONED_OFFER', 'REASONED_REPLY')");
+                table.HasCheckConstraint("ck_statutory_offer_status", "status IN ('ISSUED', 'ACCEPTED', 'REPAIR_AGREED')");
+                table.HasCheckConstraint("ck_statutory_offer_amount", "(kind = 'REASONED_OFFER') = (amount IS NOT NULL AND amount > 0 AND currency IS NOT NULL)");
+                table.HasCheckConstraint("ck_statutory_offer_delivery", "delivered_at >= issued_at");
+                table.HasCheckConstraint("ck_statutory_offer_accepted", "status <> 'ACCEPTED' OR (accepted_at IS NOT NULL AND payment_set_id IS NOT NULL)");
+                table.HasCheckConstraint("ck_statutory_offer_repair", "status <> 'REPAIR_AGREED' OR (repair_agreed_at IS NOT NULL AND repair_clock_id IS NOT NULL)");
+                table.HasCheckConstraint("ck_statutory_offer_reply_closed", "kind = 'REASONED_OFFER' OR status = 'ISSUED'");
+            });
+            entity.HasKey(e => e.OfferId).HasName("pk_statutory_offer");
+            entity.Property(e => e.OfferId).HasColumnName("offer_id");
+            MapCommon(entity);
+            entity.Property(e => e.ClaimId).HasColumnName("claim_id");
+            entity.Property(e => e.ExposureId).HasColumnName("exposure_id");
+            entity.Property(e => e.Kind).HasColumnName("kind");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(19,4)");
+            entity.Property(e => e.Currency).HasColumnName("currency").HasColumnType("char(3)");
+            entity.Property(e => e.IssuedAt).HasColumnName("issued_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DeliveredAt).HasColumnName("delivered_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DeliveryEvidenceId).HasColumnName("delivery_evidence_id");
+            entity.Property(e => e.DocumentId).HasColumnName("document_id");
+            entity.Property(e => e.ClockLegalStatus).HasColumnName("clock_legal_status");
+            entity.Property(e => e.PaymentClockId).HasColumnName("payment_clock_id");
+            entity.Property(e => e.RepairClockId).HasColumnName("repair_clock_id");
+            entity.Property(e => e.AcceptedAt).HasColumnName("accepted_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RepairAgreedAt).HasColumnName("repair_agreed_at").HasColumnType("timestamptz");
+            entity.Property(e => e.PaymentSetId).HasColumnName("payment_set_id");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.LegalEntityId, e.ClaimId }).HasDatabaseName("ix_statutory_offer_claim");
+            entity.HasIndex(e => e.ExposureId).IsUnique().HasFilter("kind = 'REASONED_OFFER'").HasDatabaseName("ux_statutory_offer_exposure");
         });
 
         modelBuilder.Entity<ClaimantRow>(entity =>

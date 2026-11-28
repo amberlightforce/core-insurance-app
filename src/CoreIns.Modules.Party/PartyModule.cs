@@ -110,6 +110,17 @@ public static class PartyModule
         services.AddCommand<AddRelationship, RelationshipAddResponse, AddRelationshipHandler>(CommandDescriptor.For("pty.Relationship.add"));
         services.AddCommand<EndRelationship, RelationshipEndResponse, EndRelationshipHandler>(CommandDescriptor.For("pty.Relationship.end"));
 
+        services.AddScoped<CommunicationResolver>();
+        services.AddScoped<IValidator<RecordConsent>, RecordConsentValidator>();
+        services.AddScoped<IValidator<WithdrawConsent>, WithdrawConsentValidator>();
+        services.AddScoped<IValidator<SetCommunicationPreference>, SetCommunicationPreferenceValidator>();
+        services.AddCommandAuditor<RecordConsent, ConsentRecordResponse, ConsentAuditor>();
+        services.AddCommandAuditor<WithdrawConsent, ConsentWithdrawResponse, ConsentAuditor>();
+        services.AddCommandAuditor<SetCommunicationPreference, CommunicationPreferenceSetResponse, ConsentAuditor>();
+        services.AddCommand<RecordConsent, ConsentRecordResponse, RecordConsentHandler>(CommandDescriptor.For("pty.Consent.record"));
+        services.AddCommand<WithdrawConsent, ConsentWithdrawResponse, WithdrawConsentHandler>(CommandDescriptor.For("pty.Consent.withdraw"));
+        services.AddCommand<SetCommunicationPreference, CommunicationPreferenceSetResponse, SetCommunicationPreferenceHandler>(CommandDescriptor.For("pty.CommunicationPreference.set"));
+
         services.AddScoped<IValidator<CreateAccount>, CreateAccountValidator>();
         services.AddScoped<IValidator<SetAccountHolder>, SetAccountHolderValidator>();
         services.AddScoped<IValidator<AddAccountMember>, AddAccountMemberValidator>();
@@ -244,6 +255,10 @@ public static class PartyModule
             .Describe("Ο τύπος δεν υπάρχει στον κατάλογο ρόλων και σχέσεων.", "The type is not in the role and relationship catalogue."),
         ErrorDefinition.For(ModuleCode.PTY, "ROLE-DATA-MISSING", 422, "Λείπουν στοιχεία για τον ρόλο", "Data is missing for the role")
             .Describe("Ο ρόλος απαιτεί στοιχεία που λείπουν από το πρόσωπο (π.χ. ΑΦΜ για προμηθευτή).", "The role needs data the party does not have (for example an AFM for a vendor)."),
+        ErrorDefinition.For(ModuleCode.PTY, "PROOF-REQUIRED", 422, "Απαιτείται απόδειξη συναίνεσης", "Proof of the consent is required")
+            .Describe("Μια συναίνεση χρειάζεται έκδοση διατύπωσης και αναφορά απόδειξης.", "A consent needs its wording version and a proof reference."),
+        ErrorDefinition.For(ModuleCode.PTY, "NO-CONSENT", 422, "Δεν υπάρχει διαθέσιμο κανάλι με συναίνεση", "No channel with consent is available")
+            .Describe("Η συναίνεση για τον σκοπό λείπει ή έχει ανακληθεί, ή το πρόσωπο είναι ευάλωτο.", "The consent for the purpose is missing or withdrawn, or the party is vulnerable."),
         ErrorDefinition.For(ModuleCode.PTY, "OVERLAP", 422, "Η περίοδος επικαλύπτεται", "The period overlaps")
             .Describe("Υπάρχει ήδη η ίδια σχέση για επικαλυπτόμενη περίοδο.", "The same relationship already exists for an overlapping period."),
         ErrorDefinition.For(ModuleCode.PTY, "RELATIONSHIP-CYCLE", 422, "Η σχέση θα δημιουργούσε κύκλο", "The relationship would close a cycle")

@@ -17,7 +17,7 @@ public interface IPartyCommunicationPreferenceService
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W2.</para>
     /// <para>Exposure: ui; consumers: BIL, CHN, CLM, DOC, POL.</para>
-    /// <para>Errors: PTY-ERR-NO-EMAIL (422).</para>
+    /// <para>Errors: PTY-ERR-NO-EMAIL (422), PTY-ERR-NO-CONSENT (422).</para>
     /// </remarks>
     /// <param name="validAt">Valid (business) time, contract §3.5.5: the only name for a valid-time decision instant (D-API-02, D-API-08),</param>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.CommunicationPreferenceResolveResponse> ResolveAsync(global::CoreIns.Modules.Party.Contracts.Api.CommunicationPreferenceResolveRequest request, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::System.Threading.CancellationToken cancellationToken = default);

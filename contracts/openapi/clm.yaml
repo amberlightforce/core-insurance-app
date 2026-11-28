@@ -2567,7 +2567,19 @@ paths:
       x-permission: clm.StatutoryOffer.issue
       x-error-codes:
       - code: CLM-ERR-OFFER-CONTENT
+        note: kind, amount or content not acceptable
         status: 422
+      - code: CLM-ERR-OFFER-DELIVERY
+        note: delivery earlier than the issue or in the future
+        status: 422
+      - code: CLM-ERR-OFFER-STATE
+        note: wrong state for the step, or an offer exists already
+        status: 422
+      - code: CLM-ERR-MTPL-CLOCKS-REQUIRED
+        note: Production refuses while the clock values are not legally confirmed
+        status: 422
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -2640,7 +2652,19 @@ paths:
       x-permission: clm.StatutoryOffer.recordAcceptance
       x-error-codes:
       - code: CLM-ERR-OFFER-CONTENT
+        note: kind, amount or content not acceptable
         status: 422
+      - code: CLM-ERR-OFFER-DELIVERY
+        note: delivery earlier than the issue or in the future
+        status: 422
+      - code: CLM-ERR-OFFER-STATE
+        note: wrong state for the step, or an offer exists already
+        status: 422
+      - code: CLM-ERR-MTPL-CLOCKS-REQUIRED
+        note: Production refuses while the clock values are not legally confirmed
+        status: 422
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -2711,7 +2735,19 @@ paths:
       x-permission: clm.StatutoryOffer.recordRepairAgreement
       x-error-codes:
       - code: CLM-ERR-OFFER-CONTENT
+        note: kind, amount or content not acceptable
         status: 422
+      - code: CLM-ERR-OFFER-DELIVERY
+        note: delivery earlier than the issue or in the future
+        status: 422
+      - code: CLM-ERR-OFFER-STATE
+        note: wrong state for the step, or an offer exists already
+        status: 422
+      - code: CLM-ERR-MTPL-CLOCKS-REQUIRED
+        note: Production refuses while the clock values are not legally confirmed
+        status: 422
+      - code: CLM-ERR-NOT-FOUND
+        status: 404
       - code: CLM-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -8339,77 +8375,174 @@ components:
         totalsByCurrencyAndCostType:
           $ref: common.yaml#/components/schemas/Unspecified
           description: 'PRD: "totals by currency and cost type with transaction ids"'
+    StatutoryOfferView:
+      type: object
+      description: 'A statutory offer or reply on a third-party MTPL exposure (BO-CLM-06, REQ-CLM-007). clockLegalStatus is the legal status of the payment-clock value (D-REG-04, OQ-008); while it is not confirmed, Production refuses to issue.'
+      properties:
+        offerId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        claimId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          type: string
+          enum:
+          - REASONED_OFFER
+          - REASONED_REPLY
+        status:
+          type: string
+          enum:
+          - ISSUED
+          - ACCEPTED
+          - REPAIR_AGREED
+        amount:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+        issuedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        deliveredAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        deliveryEvidenceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        documentId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        clockLegalStatus:
+          type: string
+        paymentClockId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: CMP instance of CLM_MTPL_PAYMENT, started at the proven delivery of a reasoned offer
+        repairClockId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        acceptedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        repairAgreedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        paymentSetId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+          description: The Draft payment set released by the acceptance (exactly one)
+        recordVersion:
+          type: integer
+      required:
+      - offerId
+      - claimId
+      - exposureId
+      - kind
+      - status
+      - issuedAt
+      - deliveredAt
+      - deliveryEvidenceId
+      - clockLegalStatus
+      - recordVersion
     StatutoryOfferIssueRequest:
       type: object
-      description: 'clm.StatutoryOffer.issue request. PRD inputs: "exposure, content"'
+      description: 'clm.StatutoryOffer.issue request: records a reasoned offer (with an amount) or a reasoned reply on a third-party MTPL exposure at its proven delivery. The delivery cannot be earlier than the issue or in the future. Stops the offer clock; a reasoned offer starts the payment clock from the delivery.'
       properties:
-        exposure:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposure"'
+        exposureId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        kind:
+          type: string
+          enum:
+          - REASONED_OFFER
+          - REASONED_REPLY
+        amount:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+          description: Offered indemnity in EUR; required for a reasoned offer, absent for a reply
         content:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "content"'
+          type: string
+          minLength: 1
+          maxLength: 4000
+          description: The reasoning shown in the letter
+        issuedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+          description: Default the delivery time; never after it
+        deliveredAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        deliveryEvidenceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The proof of delivery (a DOC evidence record)
+        language:
+          type: string
+          enum:
+          - el
+          - en
+      required:
+      - exposureId
+      - kind
+      - content
+      - deliveredAt
+      - deliveryEvidenceId
     StatutoryOfferIssueResponse:
       type: object
-      description: 'clm.StatutoryOffer.issue result. PRD outputs: "offer record, document request; agreement → clock start"'
       properties:
-        offerRecord:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "offer record"'
-        documentRequest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "document request"'
-        agreementClockStart:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "agreement → clock start"'
+        offer:
+          $ref: '#/components/schemas/StatutoryOfferView'
+      required:
+      - offer
     StatutoryOfferRecordAcceptanceRequest:
       type: object
-      description: 'clm.StatutoryOffer.recordAcceptance request. PRD inputs: "exposure, content"'
+      description: 'clm.StatutoryOffer.recordAcceptance request: the claimant accepted a reasoned offer. Releases exactly one Draft payment set for the offered amount to the payee account captured on the claim; a repeat returns the same set.'
       properties:
-        exposure:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposure"'
-        content:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "content"'
+        offerId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        acceptedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+          description: Default now; not before the delivery
+        payeePartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        payeeAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: BIL payee account captured with clm.PayeeAccount.capture
+      required:
+      - offerId
+      - payeePartyId
+      - payeeAccountId
     StatutoryOfferRecordAcceptanceResponse:
       type: object
-      description: 'clm.StatutoryOffer.recordAcceptance result. PRD outputs: "offer record, document request; agreement →
-        clock start"'
       properties:
-        offerRecord:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "offer record"'
-        documentRequest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "document request"'
-        agreementClockStart:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "agreement → clock start"'
+        offer:
+          $ref: '#/components/schemas/StatutoryOfferView'
+      required:
+      - offer
     StatutoryOfferRecordRepairAgreementRequest:
       type: object
-      description: 'clm.StatutoryOffer.recordRepairAgreement request. PRD inputs: "exposure, content"'
+      description: 'clm.StatutoryOffer.recordRepairAgreement request: the parties agreed repair in kind instead of payment. Cancels the payment clock and starts the repair clock from the agreement.'
       properties:
-        exposure:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "exposure"'
-        content:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "content"'
+        offerId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        agreedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+          description: Default now; not before the delivery
+      required:
+      - offerId
     StatutoryOfferRecordRepairAgreementResponse:
       type: object
-      description: 'clm.StatutoryOffer.recordRepairAgreement result. PRD outputs: "offer record, document request; agreement
-        → clock start"'
       properties:
-        offerRecord:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "offer record"'
-        documentRequest:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "document request"'
-        agreementClockStart:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "agreement → clock start"'
+        offer:
+          $ref: '#/components/schemas/StatutoryOfferView'
+      required:
+      - offer
     CertificateClaimLine:
       type: object
       description: One claim on the claims-history certificate (BO-CLM-07). No AFM, no free text; matched by party id.

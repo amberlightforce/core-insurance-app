@@ -4,23 +4,71 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.StatutoryOffer.issue request. PRD inputs: "exposure, content"</summary>
+/// <summary>clm.StatutoryOffer.issue request: records a reasoned offer (with an amount) or a reasoned reply on a third-party MTPL exposure at its proven delivery. The delivery cannot be earlier than the issue or in the future. Stops the offer clock; a reasoned offer starts the payment clock from the delivery.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record StatutoryOfferIssueRequest
 {
-    /// <summary>PRD: "exposure"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exposure")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Exposure { get; init; }
+    /// <summary>Contract member 'exposureId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("exposureId")]
+    public required global::CoreIns.SharedKernel.Identifiers.ExposureId ExposureId { get; init; }
 
-    /// <summary>PRD: "content"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'kind'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("kind")]
+    public required KindValue Kind { get; init; }
+
+    /// <summary>Offered indemnity in EUR; required for a reasoned offer, absent for a reply</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+    public global::CoreIns.SharedKernel.Money? Amount { get; init; }
+
+    /// <summary>The reasoning shown in the letter</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("content")]
+    public required string Content { get; init; }
+
+    /// <summary>Default the delivery time; never after it</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("issuedAt")]
+    public global::CoreIns.SharedKernel.Instant? IssuedAt { get; init; }
+
+    /// <summary>Contract member 'deliveredAt'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("deliveredAt")]
+    public required global::CoreIns.SharedKernel.Instant DeliveredAt { get; init; }
+
+    /// <summary>The proof of delivery (a DOC evidence record)</summary>
+    /// <remarks>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'deliveryEvidenceId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
+    /// </remarks>
+    [global::System.Text.Json.Serialization.JsonPropertyName("deliveryEvidenceId")]
+    public required global::System.Guid DeliveryEvidenceId { get; init; }
+
+    /// <summary>Contract member 'language'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("language")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Content { get; init; }
+    public LanguageValue? Language { get; init; }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<KindValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum KindValue
+    {
+        /// <summary><c>REASONED_OFFER</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REASONED_OFFER")]
+        ReasonedOffer,
+
+        /// <summary><c>REASONED_REPLY</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("REASONED_REPLY")]
+        ReasonedReply,
+    }
+
+    /// <summary>Generated contract member.</summary>
+    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::System.Text.Json.Serialization.JsonStringEnumConverter<LanguageValue>))]
+    [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
+    public enum LanguageValue
+    {
+        /// <summary><c>el</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("el")]
+        El,
+
+        /// <summary><c>en</c></summary>
+        [global::System.Text.Json.Serialization.JsonStringEnumMemberName("en")]
+        En,
+    }
 }

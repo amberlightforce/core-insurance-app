@@ -154,7 +154,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-MTPL-CLOCKS-REQUIRED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 1 operation(s): clm.Exposure.create.</para>
+    /// <para>Declared by 4 operation(s): clm.Exposure.create, clm.StatutoryOffer.issue, clm.StatutoryOffer.recordAcceptance, clm.StatutoryOffer.recordRepairAgreement.</para>
     /// </remarks>
     public const string MtplClocksRequired = "CLM-ERR-MTPL-CLOCKS-REQUIRED";
 
@@ -166,7 +166,7 @@ public static class ClaimsErrorCodes
 
     /// <summary>CLM-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 42 operation(s): clm.CatEvent.close, clm.CatEvent.declare, clm.CatEvent.list, clm.Certificate.assemble, clm.Certificate.issue, clm.Certificate.request, clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.decide, ….</para>
+    /// <para>Declared by 45 operation(s): clm.CatEvent.close, clm.CatEvent.declare, clm.CatEvent.list, clm.Certificate.assemble, clm.Certificate.issue, clm.Certificate.request, clm.Claim.close, clm.Claim.get, clm.Claim.merge, clm.Claim.reopen, clm.Claim.update, clm.Coverage.decide, ….</para>
     /// </remarks>
     public const string NotFound = "CLM-ERR-NOT-FOUND";
 
@@ -187,6 +187,18 @@ public static class ClaimsErrorCodes
     /// <para>Declared by 3 operation(s): clm.StatutoryOffer.issue, clm.StatutoryOffer.recordAcceptance, clm.StatutoryOffer.recordRepairAgreement.</para>
     /// </remarks>
     public const string OfferContent = "CLM-ERR-OFFER-CONTENT";
+
+    /// <summary>CLM-ERR-OFFER-DELIVERY (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): clm.StatutoryOffer.issue, clm.StatutoryOffer.recordAcceptance, clm.StatutoryOffer.recordRepairAgreement.</para>
+    /// </remarks>
+    public const string OfferDelivery = "CLM-ERR-OFFER-DELIVERY";
+
+    /// <summary>CLM-ERR-OFFER-STATE (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): clm.StatutoryOffer.issue, clm.StatutoryOffer.recordAcceptance, clm.StatutoryOffer.recordRepairAgreement.</para>
+    /// </remarks>
+    public const string OfferState = "CLM-ERR-OFFER-STATE";
 
     /// <summary>CLM-ERR-PAYEE-NOT-ON-CLAIM (HTTP 422).</summary>
     /// <remarks>
@@ -270,7 +282,7 @@ public static class ClaimsErrorCodes
     public const string Prefix = "CLM-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Allocation, Authority, CatEvent, CertRequester, CertState, CloseGuard, ContactProhibited, CoverageDenied, CoverageInQuestion, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, FsDisabled, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, MergeFinancials, MergeNotDuplicate, MtplClocksRequired, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, RecoveryState, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale, Validation];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [Allocation, Authority, CatEvent, CertRequester, CertState, CloseGuard, ContactProhibited, CoverageDenied, CoverageInQuestion, DependencyUnavailable, DuplicateCandidates, DuplicatePayment, ExposureDuplicate, Fnol001, FnolConsent, FsDisabled, Held, IdempotencyMismatch, IllegalTransition, ImportValidation, InvoiceDuplicate, LossDate, MergeFinancials, MergeNotDuplicate, MtplClocksRequired, NoConsent, NotFound, NotPayable, NotStoppable, OfferContent, OfferDelivery, OfferState, PayeeNotOnClaim, PaymentExceedsReserve, PolicyUnverified, RecoveryState, ReserveReason, ReverseLiveActivity, SearchCriteria, SetStale, SiuAccess, SnapshotMismatch, Sod, Stale, Validation];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -305,6 +317,8 @@ public static class ClaimsErrorCodes
         [NotPayable] = 422,
         [NotStoppable] = 422,
         [OfferContent] = 422,
+        [OfferDelivery] = 422,
+        [OfferState] = 422,
         [PayeeNotOnClaim] = 422,
         [PaymentExceedsReserve] = 422,
         [PolicyUnverified] = 422,

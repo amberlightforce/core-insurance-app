@@ -5828,9 +5828,11 @@ paths:
   /api/bil/v1/reconciliation/bank:
     post:
       operationId: bil.Reconciliation.bank
-      summary: Bank reconciliation and invariant results
+      summary: Import a bank statement and reconcile it
       description: |-
-        Bank reconciliation and invariant results
+        Imports a camt.053 or CSV statement of an own bank account (BO-BIL-11), matches each credit by reference and amount against the
+        receipts and open invoices, parks what it cannot identify in suspense, matches each debit against a disbursement, and reports the
+        breaks. Importing the same statement again returns the first import unchanged.
 
         PRD inputs: account, date
         PRD outputs: status, breaks
@@ -5846,17 +5848,30 @@ paths:
       x-status: full
       x-maturity: pre-release
       x-io-shared: 2
-      x-operation-kind: query
-      x-idempotency: none
+      x-operation-kind: command
+      x-idempotency: required
       x-dry-run: false
       x-dry-run-note: 'PRD: n/a'
       x-exposure:
       - ui
       x-permission: bil.Reconciliation.bank
-      x-error-codes: []
+      x-error-codes:
+      - code: BIL-ERR-STATEMENT-INVALID
+        note: the file is not a well-formed camt.053 or CSV statement of the named bank account
+        status: 422
+      - code: BIL-ERR-STATEMENT-CONFLICT
+        note: a statement with this reference was imported with different content
+        status: 409
+      - code: BIL-ERR-METHOD-UNAVAILABLE
+        note: no bank-file store is bound to keep the statement (Production fails closed until a real adapter exists)
+        status: 503
+      - code: BIL-ERR-IDEMPOTENCY-MISMATCH
+        note: contract §3.5.3 (replay with a different payload)
+        status: 409
       x-source:
       - PRD-06 §9.1 l.1810
       parameters:
+      - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       requestBody:
@@ -5878,14 +5893,19 @@ paths:
           $ref: common.yaml#/components/responses/Unauthorized
         '403':
           $ref: common.yaml#/components/responses/Forbidden
+        '409':
+          $ref: common.yaml#/components/responses/Conflict
+        '422':
+          $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
   /api/bil/v1/reconciliation/invariants:
     post:
       operationId: bil.Reconciliation.invariants
-      summary: Bank reconciliation and invariant results
+      summary: Sub-ledger invariant results
       description: |-
-        Bank reconciliation and invariant results
+        Runs the sub-ledger invariants INV-01..INV-15 as of a date (BO-BIL-11), optionally for one billing account, and lists the breaks.
+        Read-only.
 
         PRD inputs: account, date
         PRD outputs: status, breaks
@@ -9985,44 +10005,238 @@ components:
           description: 'PRD: "balances"'
     ReconciliationBankRequest:
       type: object
-      description: 'bil.Reconciliation.bank request. PRD inputs: "account, date"'
+      description: 'bil.Reconciliation.bank request (BO-BIL-11): one statement of an own bank account as camt.053 XML or as CSV text with the
+        header "bookingDate,valueDate,amount,currency,reference,endToEndId" (amount signed, negative is a debit; valueDate and endToEndId may be
+        empty). The statement is kept in the bank-file store; at most 5000 lines.'
       properties:
-        account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
+        bankAccount:
+          type: string
+          description: The own bank account the statement belongs to, as an IBAN. A camt.053 file must name the same account.
+        format:
+          type: string
+          enum:
+          - CAMT053
+          - CSV
+        content:
+          type: string
+          maxLength: 4000000
+          description: The statement text.
+      required:
+      - bankAccount
+      - format
+      - content
     ReconciliationBankResponse:
       type: object
-      description: 'bil.Reconciliation.bank result. PRD outputs: "status, breaks"'
+      description: 'bil.Reconciliation.bank result: the imported statement with its lines and the breaks that need a person.'
       properties:
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum:
+          - MATCHED
+          - BREAKS
+          description: MATCHED when every line is matched and the balances agree; BREAKS otherwise.
+        duplicate:
+          type: boolean
+          description: True when the statement was imported before; the result is the first import, nothing was posted again.
+        statement:
+          $ref: '#/components/schemas/BankStatementView'
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/BankStatementLineView'
         breaks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "breaks"'
+          type: array
+          items:
+            $ref: '#/components/schemas/BankReconciliationBreak'
+      required:
+      - status
+      - duplicate
+      - statement
+      - lines
+      - breaks
+    BankStatementView:
+      type: object
+      description: An imported bank statement (BO-BIL-11). The own account is masked; the file itself is in the bank-file store.
+      properties:
+        statementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        maskedBankAccount:
+          type: string
+        statementRef:
+          type: string
+        format:
+          type: string
+          enum:
+          - CAMT053
+          - CSV
+        currency:
+          type: string
+        fromDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        toDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        openingBalance:
+          $ref: ../events/common.schema.json#/$defs/Money
+        closingBalance:
+          $ref: ../events/common.schema.json#/$defs/Money
+        lineCount:
+          type: integer
+        matchedCount:
+          type: integer
+        partialCount:
+          type: integer
+        suspenseCount:
+          type: integer
+        unmatchedCount:
+          type: integer
+        fileRef:
+          type: string
+        importedBy:
+          type: string
+        importedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+      required:
+      - statementId
+      - maskedBankAccount
+      - statementRef
+      - format
+      - currency
+      - lineCount
+      - matchedCount
+      - partialCount
+      - suspenseCount
+      - unmatchedCount
+    BankStatementLineView:
+      type: object
+      properties:
+        lineNo:
+          type: integer
+        direction:
+          type: string
+          enum:
+          - CREDIT
+          - DEBIT
+        bookingDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        valueDate:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        reference:
+          type: string
+        endToEndId:
+          type: string
+        status:
+          type: string
+          enum:
+          - MATCHED
+          - PARTIAL
+          - SUSPENSE
+          - UNMATCHED
+        matchedAmount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        receiptId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        disbursementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        suspenseItemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        note:
+          type: string
+      required:
+      - lineNo
+      - direction
+      - bookingDate
+      - amount
+      - status
+    BankReconciliationBreak:
+      type: object
+      description: A statement line or a balance that needs a person.
+      properties:
+        kind:
+          type: string
+          enum:
+          - PARTIAL_MATCH
+          - IN_SUSPENSE
+          - UNMATCHED_CREDIT
+          - UNMATCHED_DEBIT
+          - BALANCE_MISMATCH
+        lineNo:
+          type: integer
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+        difference:
+          $ref: ../events/common.schema.json#/$defs/Money
+        reference:
+          type: string
+        receiptId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        suspenseItemId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        note:
+          type: string
+      required:
+      - kind
     ReconciliationInvariantsRequest:
       type: object
-      description: 'bil.Reconciliation.invariants request. PRD inputs: "account, date"'
+      description: 'bil.Reconciliation.invariants request (BO-BIL-11): all entries with an accounting date up to the date; optionally one account.'
       properties:
         account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Restrict the checks that have a billing account to this one.
         date:
           $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
+          description: As-of accounting date; today when omitted.
     ReconciliationInvariantsResponse:
       type: object
-      description: 'bil.Reconciliation.invariants result. PRD outputs: "status, breaks"'
+      description: 'bil.Reconciliation.invariants result: one result per invariant.'
       properties:
         status:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "status"'
+          type: string
+          enum:
+          - PASS
+          - FAIL
+        asOf:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvariantResult'
         breaks:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "breaks"'
+          type: integer
+          description: Total number of broken rows over all invariants.
+      required:
+      - status
+      - asOf
+      - results
+      - breaks
+    InvariantResult:
+      type: object
+      properties:
+        invariantId:
+          type: string
+          description: INV-01 .. INV-15.
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+          - PASS
+          - FAIL
+        breakCount:
+          type: integer
+        samples:
+          type: array
+          maxItems: 5
+          items:
+            type: string
+          description: Keys (ids) of the first broken rows.
+      required:
+      - invariantId
+      - name
+      - status
+      - breakCount
+      - samples
     ReconciliationFinRequest:
       type: object
       description: 'bil.Reconciliation.fin request. PRD inputs: "legal entity, accounting date, optional sub-ledger account

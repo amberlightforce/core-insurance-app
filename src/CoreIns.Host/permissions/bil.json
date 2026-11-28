@@ -81,6 +81,9 @@
         "bil.Suspense.suggest": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
         "bil.Suspense.transfer": [ "Staff.Billing", "Staff.BillingManager" ],
         "bil.Suspense.refundToSender": [ "Staff.Billing", "Staff.BillingManager" ],
+        // BO-BIL-11: the statement import records money (billing staff); the invariant report is read-only (billing, finance).
+        "bil.Reconciliation.bank": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Reconciliation.invariants": [ "Staff.Billing", "Staff.BillingManager", "Staff.Finance", "Platform.Admin" ],
         "bil.PlanInstance.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ]
       }
     },

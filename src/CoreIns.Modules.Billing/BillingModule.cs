@@ -64,6 +64,7 @@ public static class BillingModule
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.payment_instrument, {Schema}.mandate TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.levy_payable TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.disbursement_batch, {Schema}.disbursement_batch_item TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.bank_statement, {Schema}.bank_statement_line TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
@@ -185,6 +186,12 @@ public static class BillingModule
         services.AddScoped<MigratedRecordsReader>();
         services.AddScoped<BillingOpsReader>();
         services.AddScoped<SuspenseReader>();
+        services.AddScoped<BankReconciler>();
+        services.AddScoped<SubLedgerInvariants>();
+        services.AddScoped<IValidator<ImportBankStatement>, ImportBankStatementValidator>();
+        services.AddCommandAuditor<ImportBankStatement, ReconciliationBankResponse, ImportBankStatementAuditor>();
+        services.AddCommand<ImportBankStatement, ReconciliationBankResponse, ImportBankStatementHandler>(
+            CommandDescriptor.For("bil.Reconciliation.bank") with { SupportsDryRun = false });
         services.AddScoped<IValidator<CreatePayeeAccount>, CreatePayeeAccountValidator>();
         services.AddCommandAuditor<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountAuditor>();
         services.AddCommand<CreatePayeeAccount, PayeeAccountCreateResponse, CreatePayeeAccountHandler>(
@@ -406,6 +413,10 @@ public static class BillingModule
             .Describe("Δεν υπάρχει θετικό καθαρό ποσό εισφοράς για την περίοδο και το νόμισμα.", "There is no positive net levy for the period and currency."),
         ErrorDefinition.For(ModuleCode.BIL, "HELD-ITEMS", 422, "Πληρωμές σε αναμονή", "Disbursements on hold")
             .Describe("Μία ή περισσότερες πληρωμές δεν μπορούν να μπουν σε δέσμη (δεν είναι εγκεκριμένες, είναι ήδη σε δέσμη ή ο δικαιούχος δεν είναι επαληθευμένος).", "One or more disbursements cannot enter a batch (not Approved, already in a batch, or the payee is not verified)."),
+        ErrorDefinition.For(ModuleCode.BIL, "STATEMENT-INVALID", 422, "Μη έγκυρο αντίγραφο κίνησης λογαριασμού", "The bank statement is not valid")
+            .Describe("Το αρχείο δεν είναι έγκυρο camt.053 ή CSV, ή αφορά άλλον τραπεζικό λογαριασμό· δεν εισάγεται τίποτα.", "The file is not a well-formed camt.053 or CSV statement of the named bank account; nothing is imported."),
+        ErrorDefinition.For(ModuleCode.BIL, "STATEMENT-CONFLICT", 409, "Σύγκρουση αντιγράφου κίνησης", "Bank statement conflict")
+            .Describe("Αντίγραφο με την ίδια αναφορά έχει ήδη εισαχθεί με διαφορετικό περιεχόμενο.", "A statement with this reference was imported before with different content."),
         ErrorDefinition.For(ModuleCode.BIL, "METHOD-UNAVAILABLE", 503, "Η τράπεζα δεν είναι διαθέσιμη", "Bank channel unavailable")
             .Describe("Δεν έχει συνδεθεί τραπεζικό κανάλι ή αποθήκη αρχείων τράπεζας· η πληρωμή δεν γίνεται (fail closed).", "No bank channel or bank-file store is bound; nothing is prepared or released (fail closed)."),
     ];
