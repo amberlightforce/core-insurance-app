@@ -88,7 +88,7 @@ public static class FinanceErrorCodes
 
     /// <summary>FIN-ERR-RECON-UNEXPLAINED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): fin.TaxReturn.addAdjustment, fin.TaxReturn.generateFile, fin.TaxReturn.get, fin.TaxReturn.list, fin.TaxReturn.recalculate, fin.TaxReturn.recordFiling, fin.TaxReturn.requestPayment, fin.TaxReturn.transition.</para>
+    /// <para>Declared by 16 operation(s): fin.LevyReturn.addAdjustment, fin.LevyReturn.generateFile, fin.LevyReturn.get, fin.LevyReturn.list, fin.LevyReturn.recalculate, fin.LevyReturn.recordFiling, fin.LevyReturn.requestPayment, fin.LevyReturn.transition, fin.TaxReturn.addAdjustment, fin.TaxReturn.generateFile, fin.TaxReturn.get, fin.TaxReturn.list, ….</para>
     /// </remarks>
     public const string ReconUnexplained = "FIN-ERR-RECON-UNEXPLAINED";
 
@@ -100,7 +100,7 @@ public static class FinanceErrorCodes
 
     /// <summary>FIN-ERR-RETURN-NOT-APPROVED (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): fin.TaxReturn.addAdjustment, fin.TaxReturn.generateFile, fin.TaxReturn.get, fin.TaxReturn.list, fin.TaxReturn.recalculate, fin.TaxReturn.recordFiling, fin.TaxReturn.requestPayment, fin.TaxReturn.transition.</para>
+    /// <para>Declared by 16 operation(s): fin.LevyReturn.addAdjustment, fin.LevyReturn.generateFile, fin.LevyReturn.get, fin.LevyReturn.list, fin.LevyReturn.recalculate, fin.LevyReturn.recordFiling, fin.LevyReturn.requestPayment, fin.LevyReturn.transition, fin.TaxReturn.addAdjustment, fin.TaxReturn.generateFile, fin.TaxReturn.get, fin.TaxReturn.list, ….</para>
     /// </remarks>
     public const string ReturnNotApproved = "FIN-ERR-RETURN-NOT-APPROVED";
 
@@ -118,7 +118,7 @@ public static class FinanceErrorCodes
 
     /// <summary>FIN-ERR-SPI-UNBOUND (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 8 operation(s): fin.TaxReturn.addAdjustment, fin.TaxReturn.generateFile, fin.TaxReturn.get, fin.TaxReturn.list, fin.TaxReturn.recalculate, fin.TaxReturn.recordFiling, fin.TaxReturn.requestPayment, fin.TaxReturn.transition.</para>
+    /// <para>Declared by 16 operation(s): fin.LevyReturn.addAdjustment, fin.LevyReturn.generateFile, fin.LevyReturn.get, fin.LevyReturn.list, fin.LevyReturn.recalculate, fin.LevyReturn.recordFiling, fin.LevyReturn.requestPayment, fin.LevyReturn.transition, fin.TaxReturn.addAdjustment, fin.TaxReturn.generateFile, fin.TaxReturn.get, fin.TaxReturn.list, ….</para>
     /// </remarks>
     public const string SpiUnbound = "FIN-ERR-SPI-UNBOUND";
 

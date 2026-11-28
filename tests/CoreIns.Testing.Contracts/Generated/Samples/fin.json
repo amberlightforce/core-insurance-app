@@ -1043,61 +1043,526 @@
       ]
     },
     "LevyReturnAddAdjustmentRequest": {
-      "levy": "unspecified",
-      "period": "unspecified"
+      "returnId": "0192015e-fba6-7767-830d-b2e7992f8384",
+      "amount": "sample",
+      "reason": "sample",
+      "evidenceRef": "sample",
+      "explainsReconciliation": true
     },
     "LevyReturnAddAdjustmentResponse": {
-      "return": "unspecified"
+      "return": {
+        "returnId": "0192409e-ab5b-7cc0-87ae-16aa45bbdae8",
+        "period": "sample",
+        "levyType": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "01921852-1f98-7b35-88ae-fc80e3e0458a",
+        "supersededByReturnId": "01925b39-bf69-76ec-8fcc-381dd41b9f42",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "01928ab1-4293-7d4d-815e-f1087604b908",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "0192e04b-67cd-7aff-8046-9b784b736485",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
+    },
+    "LevyReturnAdjustmentView": {
+      "adjustmentId": "0192e484-d573-7937-8911-daef2d3263cd",
+      "amount": "sample",
+      "reason": "sample",
+      "evidenceRef": "sample",
+      "explainsReconciliation": true,
+      "createdBy": "sample",
+      "createdAt": "2026-10-07T09:00:00Z"
+    },
+    "LevyReturnFileView": {
+      "fileName": "sample",
+      "fileHash": "sample",
+      "contentType": "sample",
+      "content": "sample"
     },
     "LevyReturnGenerateFileRequest": {
-      "levy": "unspecified",
-      "period": "unspecified"
+      "returnId": "01926bd5-0030-769a-857d-b60b1d150406"
     },
     "LevyReturnGenerateFileResponse": {
-      "return": "unspecified"
+      "return": {
+        "returnId": "0192cd36-7ee4-77b5-85e3-16edc43ec0ac",
+        "period": "sample",
+        "levyType": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "0192cb97-5d2d-7b01-8967-7028450d38f3",
+        "supersededByReturnId": "0192db35-df46-7546-8d9d-7a2b0e0e4b2e",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "0192107c-9ba2-7c2d-815b-48dafa9dac40",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "019272b9-7989-74a6-804a-df4e395792af",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
     },
     "LevyReturnGetResponse": {
-      "return": "unspecified"
+      "return": {
+        "returnId": "0192eaa6-84ea-7f5d-828f-2edacb4dc8eb",
+        "period": "sample",
+        "levyType": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "019286b2-c265-7ffe-8496-2ad3c6a4e358",
+        "supersededByReturnId": "0192ba07-ab67-7f32-85da-8327e349b692",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "0192e843-b093-7d87-886c-5e17ba7fe174",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "01927678-9483-795f-8ca4-fee8bfe52218",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
     },
     "LevyReturnListItem": {
-      "return": "unspecified"
+      "returnId": "01924e7f-52cc-705d-88a3-bda04acfb9d1",
+      "period": "sample",
+      "levyType": "sample",
+      "versionNo": 1,
+      "status": "DRAFT",
+      "currency": "sample",
+      "netPayable": "sample",
+      "reconciliation": "MATCHED",
+      "provisional": true,
+      "supersededByReturnId": "01920542-4d04-72e7-8120-411613261dd3",
+      "fileName": "sample",
+      "filingReference": "sample",
+      "filedAt": "2026-10-07T09:00:00Z",
+      "paymentStatus": "sample"
     },
     "LevyReturnListPage": {
       "items": [
         {
-          "return": "unspecified"
+          "returnId": "0192f9dd-c54d-70b5-876a-89816ee75f1c",
+          "period": "sample",
+          "levyType": "sample",
+          "versionNo": 1,
+          "status": "DRAFT",
+          "currency": "sample",
+          "netPayable": "sample",
+          "reconciliation": "MATCHED",
+          "provisional": true,
+          "supersededByReturnId": "0192cf6d-79f7-79b6-8c45-89f381ef5270",
+          "fileName": "sample",
+          "filingReference": "sample",
+          "filedAt": "2026-10-07T09:00:00Z",
+          "paymentStatus": "sample"
         }
       ],
       "nextCursor": "sample",
       "limit": 1
     },
     "LevyReturnRecalculateRequest": {
-      "levy": "unspecified",
-      "period": "unspecified"
+      "period": "sample",
+      "levyType": "sample"
     },
     "LevyReturnRecalculateResponse": {
-      "return": "unspecified"
+      "return": {
+        "returnId": "0192f089-a49f-7ad5-83bd-555be8567003",
+        "period": "sample",
+        "levyType": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "01929be7-39a1-77bf-8bf6-6f98cc3deaa5",
+        "supersededByReturnId": "01926e13-f719-78ff-83c1-b6ecf18584e1",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "0192b5e5-4493-74dc-8e9a-821303b4dadc",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "0192a73f-c146-7d7d-877a-4cf3d2d374eb",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
     },
     "LevyReturnRecordFilingRequest": {
-      "levy": "unspecified",
-      "period": "unspecified"
+      "returnId": "01923e28-336f-7cee-88df-7d719e57cdca",
+      "filingReference": "sample",
+      "filedOn": "2026-10-07"
     },
     "LevyReturnRecordFilingResponse": {
-      "return": "unspecified"
+      "return": {
+        "returnId": "0192b36e-35ce-7044-8a0c-42603421305a",
+        "period": "sample",
+        "levyType": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "01925493-de8f-7972-8729-1ecc28584204",
+        "supersededByReturnId": "0192882c-06d4-7af3-8253-b9e0f62cb93d",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "01923b6d-fb49-780a-84dc-9a7e42d65d64",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "01921659-cc34-7580-8bfa-40b68ea611a6",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
     },
     "LevyReturnRequestPaymentRequest": {
-      "levy": "unspecified",
-      "period": "unspecified"
+      "returnId": "01927255-25fb-7b66-8bbc-1e89fdec314e",
+      "payeePartyId": "01928e0a-f0fd-7d8c-8e33-1124a86ee300",
+      "payeeAccountId": "0192013b-5fe7-70fc-8039-d1412d60bddd",
+      "requestedValueDate": "2026-10-07"
     },
     "LevyReturnRequestPaymentResponse": {
-      "return": "unspecified"
+      "return": {
+        "returnId": "01924821-43fc-729c-8191-930dd5ab95a2",
+        "period": "sample",
+        "levyType": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "01922230-95ec-73ce-873c-29d4325e6e9b",
+        "supersededByReturnId": "0192276f-41d4-7321-87f1-ece19025740b",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "019238c8-0c57-7c9f-8c70-4585cb832c74",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "0192a621-af48-7ecd-8064-b40968980562",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
     },
     "LevyReturnTransitionRequest": {
-      "levy": "unspecified",
-      "period": "unspecified"
+      "returnId": "0192bb4e-979f-7ded-89a3-85324a7f0190",
+      "action": "SUBMIT",
+      "comment": "sample"
     },
     "LevyReturnTransitionResponse": {
-      "return": "unspecified"
+      "return": {
+        "returnId": "019206a3-f673-79cc-81d9-002543569213",
+        "period": "sample",
+        "levyType": "sample",
+        "versionNo": 1,
+        "supersedesReturnId": "01921941-37a4-74d9-8db5-fe41045c2bdc",
+        "supersededByReturnId": "01928c54-1f72-7daa-8b04-f32e75f2dae9",
+        "status": "DRAFT",
+        "currency": "sample",
+        "ledgerAmount": "sample",
+        "bilAmount": "sample",
+        "adjustmentsTotal": "sample",
+        "netPayable": "sample",
+        "entryCount": 1,
+        "reconciliation": "MATCHED",
+        "reconDifference": "sample",
+        "reconExplanation": "sample",
+        "legalStatus": "sample",
+        "provisional": true,
+        "contentHash": "sample",
+        "fileName": "sample",
+        "fileHash": "sample",
+        "approvalRequestId": "0192d2bb-d278-7a17-8f7e-ae1554fa8f96",
+        "submittedBy": "sample",
+        "submittedAt": "2026-10-07T09:00:00Z",
+        "reviewedBy": "sample",
+        "reviewedAt": "2026-10-07T09:00:00Z",
+        "filedBy": "sample",
+        "filedAt": "2026-10-07T09:00:00Z",
+        "filedOn": "2026-10-07",
+        "filingReference": "sample",
+        "disbursementId": "sample",
+        "paymentStatus": "sample",
+        "createdBy": "sample",
+        "createdAt": "2026-10-07T09:00:00Z",
+        "adjustments": [
+          {
+            "adjustmentId": "0192c4b1-c7e9-778c-8162-2c3ef0dc7a29",
+            "amount": "sample",
+            "reason": "sample",
+            "evidenceRef": "sample",
+            "explainsReconciliation": true,
+            "createdBy": "sample",
+            "createdAt": "2026-10-07T09:00:00Z"
+          }
+        ]
+      },
+      "file": {
+        "fileName": "sample",
+        "fileHash": "sample",
+        "contentType": "sample",
+        "content": "sample"
+      },
+      "paymentStatus": "sample"
+    },
+    "LevyReturnView": {
+      "returnId": "01922fa8-1120-7566-894f-7a030c77c473",
+      "period": "sample",
+      "levyType": "sample",
+      "versionNo": 1,
+      "supersedesReturnId": "01920b6b-43be-72ba-83ea-bd623b0ee22e",
+      "supersededByReturnId": "01926703-30e3-7186-8bfc-eaff41e072b0",
+      "status": "DRAFT",
+      "currency": "sample",
+      "ledgerAmount": "sample",
+      "bilAmount": "sample",
+      "adjustmentsTotal": "sample",
+      "netPayable": "sample",
+      "entryCount": 1,
+      "reconciliation": "MATCHED",
+      "reconDifference": "sample",
+      "reconExplanation": "sample",
+      "legalStatus": "sample",
+      "provisional": true,
+      "contentHash": "sample",
+      "fileName": "sample",
+      "fileHash": "sample",
+      "approvalRequestId": "0192a963-9ced-79cb-8d84-b12744d2110a",
+      "submittedBy": "sample",
+      "submittedAt": "2026-10-07T09:00:00Z",
+      "reviewedBy": "sample",
+      "reviewedAt": "2026-10-07T09:00:00Z",
+      "filedBy": "sample",
+      "filedAt": "2026-10-07T09:00:00Z",
+      "filedOn": "2026-10-07",
+      "filingReference": "sample",
+      "disbursementId": "sample",
+      "paymentStatus": "sample",
+      "createdBy": "sample",
+      "createdAt": "2026-10-07T09:00:00Z",
+      "adjustments": [
+        {
+          "adjustmentId": "0192150d-a94e-7523-837e-557cbd9decf9",
+          "amount": "sample",
+          "reason": "sample",
+          "evidenceRef": "sample",
+          "explainsReconciliation": true,
+          "createdBy": "sample",
+          "createdAt": "2026-10-07T09:00:00Z"
+        }
+      ]
     },
     "ManualJournalCreateRequest": {
       "description": "sample",
