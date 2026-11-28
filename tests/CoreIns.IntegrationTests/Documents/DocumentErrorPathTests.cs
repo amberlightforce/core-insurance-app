@@ -1,5 +1,8 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json.Nodes;
+using Npgsql;
 using static CoreIns.IntegrationTests.Party.PartyApi;
 
 namespace CoreIns.IntegrationTests.Documents;
@@ -113,5 +116,123 @@ public sealed class DocumentErrorPathTests(PostgresFixture database) : IClassFix
         noIdBody.Text("code").ShouldStartWith("DOC-ERR-");
 
         (await SendAsync(client, HttpMethod.Post, "/api/doc/v1/documents/reprint", new { documentId = Guid.CreateVersion7() }, roles: Admin)).Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    private static async Task<(HttpResponseMessage Response, JsonNode? Body)> AsAsync(HttpClient client, string user, string path, object body)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(path, UriKind.Relative));
+        request.Headers.Add(TestAuthHandler.RolesHeader, Admin);
+        request.Headers.Add(TestAuthHandler.UserHeader, user);
+        request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
+        request.Content = JsonContent.Create(body);
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+        var text = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        return (response, text.Length == 0 ? null : JsonNode.Parse(text));
+    }
+
+    private static async Task<(string DocumentId, Guid DeliveryId)> NoticeAsync(HttpClient client)
+    {
+        var body = new
+        {
+            documentType = "DT-NONPAY-NOTICE",
+            subject = new { module = "BIL", type = "DelinquencyCase", id = Guid.NewGuid().ToString() },
+            recipients = new[] { new { role = "ADDRESSEE", partyId = Guid.CreateVersion7() } },
+            deliveryInstruction = new { mode = "EXPLICIT" },
+            payloadSupplement = new
+            {
+                requestNo = Guid.NewGuid().ToString(),
+                placeholders = new { customerName = "Μαρία", policyNo = "POL1", amountDue = "120.00 EUR", dueDate = "2026-10-01" },
+            },
+        };
+        var (_, created) = await SendAsync(client, HttpMethod.Post, "/api/doc/v1/documents/request", body, roles: Admin);
+        var documentId = created.Text("documentId");
+        var (_, got) = await SendAsync(client, HttpMethod.Get, $"/api/doc/v1/documents/{documentId}", roles: Admin);
+        return (documentId, Guid.Parse(got.Text("deliveries.0.deliveryId")));
+    }
+
+    private static async Task<int> DeliveryCountAsync(HttpClient client, string documentId) =>
+        (await SendAsync(client, HttpMethod.Get, $"/api/doc/v1/documents/{documentId}", roles: Admin)).Body!["deliveries"]!.AsArray().Count;
+
+    [Fact]
+    public async Task A_statutory_reprint_waits_for_a_second_person_and_the_maker_cannot_approve_it()
+    {
+        using var client = _factory.CreateClient();
+        var (documentId, _) = await NoticeAsync(client);
+
+        var (pending, pendingBody) = await AsAsync(client, "maker", "/api/doc/v1/documents/reprint", new { documentId, reason = "LOST_IN_POST" });
+        pending.StatusCode.ShouldBe(HttpStatusCode.OK, pendingBody?.ToJsonString());
+        var link = pendingBody!["link"]!;
+        link.Text("status").ShouldBe("PENDING_APPROVAL");
+        var requestId = link.Text("approvalRequestId");
+        (await DeliveryCountAsync(client, documentId)).ShouldBe(1); // no reprint yet
+
+        var (self, selfBody) = await AsAsync(client, "maker", "/api/doc/v1/documents/decide-reprint", new { approvalRequestId = requestId, decision = "APPROVE" });
+        self.StatusCode.ShouldNotBe(HttpStatusCode.OK, selfBody?.ToJsonString());
+        selfBody.Text("code").ShouldContain("SELF-APPROVAL");
+        (await DeliveryCountAsync(client, documentId)).ShouldBe(1);
+
+        var (ok, okBody) = await AsAsync(client, "checker", "/api/doc/v1/documents/decide-reprint", new { approvalRequestId = requestId, decision = "APPROVE" });
+        ok.StatusCode.ShouldBe(HttpStatusCode.OK, okBody?.ToJsonString());
+        okBody.Text("status").ShouldBe("APPROVED");
+        (await DeliveryCountAsync(client, documentId)).ShouldBe(2);
+
+        // A decided request cannot be decided again: no second delivery.
+        var (again, _) = await AsAsync(client, "checker2", "/api/doc/v1/documents/decide-reprint", new { approvalRequestId = requestId, decision = "APPROVE" });
+        again.StatusCode.ShouldNotBe(HttpStatusCode.OK);
+        (await DeliveryCountAsync(client, documentId)).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task A_rejected_statutory_reprint_creates_no_delivery()
+    {
+        using var client = _factory.CreateClient();
+        var (documentId, _) = await NoticeAsync(client);
+        var (_, pendingBody) = await AsAsync(client, "maker", "/api/doc/v1/documents/reprint", new { documentId, reason = "CUSTOMER_REQUEST" });
+        var requestId = pendingBody!["link"]!.Text("approvalRequestId");
+
+        var (rejected, rejectedBody) = await AsAsync(client, "checker", "/api/doc/v1/documents/decide-reprint", new { approvalRequestId = requestId, decision = "REJECT", comment = "no" });
+        rejected.StatusCode.ShouldBe(HttpStatusCode.OK, rejectedBody?.ToJsonString());
+        rejectedBody.Text("status").ShouldBe("REJECTED");
+        (await DeliveryCountAsync(client, documentId)).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Deciding_an_unknown_reprint_request_is_refused_and_needs_the_permission()
+    {
+        using var client = _factory.CreateClient();
+        var (response, _) = await AsAsync(client, "checker", "/api/doc/v1/documents/decide-reprint", new { approvalRequestId = Guid.CreateVersion7(), decision = "APPROVE" });
+        response.StatusCode.ShouldNotBe(HttpStatusCode.OK);
+        (await SendAsync(client, HttpMethod.Post, "/api/doc/v1/documents/decide-reprint", new { approvalRequestId = Guid.CreateVersion7(), decision = "APPROVE" }, roles: "Viewer"))
+            .Response.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task A_conflicting_provider_callback_raises_exactly_one_open_delivery_conflict_activity()
+    {
+        using var client = _factory.CreateClient();
+        var (documentId, deliveryId) = await NoticeAsync(client);
+
+        async Task<string> CallbackAsync(string type, string? proof = null) =>
+            (await SendAsync(client, HttpMethod.Post, "/api/doc/v1/provider-events/stub-post",
+                new { providerEventId = Guid.NewGuid().ToString(), deliveryId, eventType = type, proofDate = proof, proofReference = "REG-1" }, roles: Admin)).Body.Text("outcome");
+
+        (await CallbackAsync("RETURNED")).ShouldBe("APPLIED");
+        (await OpenActivitiesAsync(documentId)).ShouldBe(0); // no conflict yet
+
+        var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+        (await CallbackAsync("DELIVERED", today)).ShouldBe("IGNORED_TERMINAL_CONFLICT");
+        (await CallbackAsync("DELIVERED", today)).ShouldBe("IGNORED_TERMINAL_CONFLICT");
+        (await OpenActivitiesAsync(documentId)).ShouldBe(1);
+
+        await using var source = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        await using var queue = source.CreateCommand($"SELECT queue_code FROM wrk.activity WHERE pattern_code = 'WRK-DOC-DELIVERY-CONFLICT' AND primary_id = '{documentId}'");
+        (await queue.ExecuteScalarAsync(TestContext.Current.CancellationToken)).ShouldBe("DOC-OPS");
+    }
+
+    private async Task<long> OpenActivitiesAsync(string documentId)
+    {
+        await using var source = NpgsqlDataSource.Create(database.SuperuserConnectionString);
+        await using var command = source.CreateCommand($"SELECT count(*) FROM wrk.activity WHERE pattern_code = 'WRK-DOC-DELIVERY-CONFLICT' AND primary_id = '{documentId}' AND state = 'OPEN'");
+        return (long)(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken))!;
     }
 }

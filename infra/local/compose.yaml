@@ -35,6 +35,12 @@ services:
     image: gotenberg/gotenberg:8.37.0
     ports: ["127.0.0.1:${GOTENBERG_HOST_PORT:-3000}:3000"]
 
+  # BO-WRK-11: malware scanner for inbound documents. To use it set Work__Malware__ClamAv__Host=clamav on the api and worker services;
+  # without it the api binds the stub scanner (the EICAR test string is infected, everything else clean). First start downloads signatures (~1-2 min).
+  clamav:
+    image: clamav/clamav:1.4
+    ports: ["127.0.0.1:${CLAMAV_HOST_PORT:-3310}:3310"]
+
   mailpit:
     image: axllent/mailpit:v1.31.4
     ports: ["127.0.0.1:${MAILPIT_UI_HOST_PORT:-8025}:8025", "127.0.0.1:${MAILPIT_SMTP_HOST_PORT:-1025}:1025"]

@@ -160,6 +160,96 @@
           "Staff.ClaimsManager",
           "Platform.Admin"
         ],
+        "wrk.InboundDocument.submit": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.InboundDocument.get": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.InboundDocument.list": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.InboundDocument.verify": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.InboundDocument.split": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.InboundDocument.link": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.InboundDocument.relink": [
+          "Staff.UnderwritingManager",
+          "Staff.BillingManager",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.InboundDocument.reject": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.InboundDocument.redact": [
+          "Staff.UnderwritingManager",
+          "Staff.BillingManager",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.InboundDocument.reprocess": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.InboundDocument.export": [
+          "Staff.UnderwritingManager",
+          "Staff.BillingManager",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
         "wrk.Pattern.list": [ "Platform.Admin" ],
         "wrk.Pattern.upsert": [ "Platform.Admin" ],
         "wrk.Assignment.simulate": [
