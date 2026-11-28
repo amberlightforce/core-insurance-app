@@ -9,6 +9,7 @@ using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Time;
+using CoreIns.Rules;
 using CoreIns.SharedKernel;
 using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Json;
@@ -195,7 +196,7 @@ internal sealed class ImportFinancialHistoryHandler(
                 lines[key] = reserveLine;
             }
 
-            var functional = Math.Round(line.Amount * line.Rate, functionalUnits, MidpointRounding.AwayFromZero);
+            var functional = DecimalRounding.RoundTo(line.Amount * line.Rate, functionalUnits, DecimalRounding.DefaultMoneyMode);
             claim.LastTransactionSequence++;
             transactions.Add(new FinancialTransactionRow
             {
@@ -259,7 +260,7 @@ internal sealed class ImportFinancialHistoryHandler(
             return (null, "amount must be a non-zero number.");
         }
 
-        if (!Currency.TryFromCode(ImportJson.Text(item, "currency") ?? FunctionalCode, out var currency) || Math.Round(amount, currency.MinorUnits) != amount)
+        if (!Currency.TryFromCode(ImportJson.Text(item, "currency") ?? FunctionalCode, out var currency) || !new Money(amount, currency).IsRoundedToMinorUnits)
         {
             return (null, "currency is unknown or amount has more decimals than the currency allows.");
         }
@@ -311,7 +312,7 @@ internal sealed class ImportConvertCurrencyHandler(ClaimsDbContext db, RequestCo
         var lines = rows.GroupBy(r => (r.ClaimId, r.ReserveLineId))
             .Select(g => new { claimId = g.Key.ClaimId.Value, reserveLineId = g.Key.ReserveLineId.Value, open = g.Sum(r => r.Kind == "RESERVE" ? r.Amount : -r.Amount) })
             .Where(l => l.open != 0m)
-            .Select(l => new { l.claimId, l.reserveLineId, openBefore = l.open, openAfter = Math.Round(l.open * rate, to.MinorUnits, MidpointRounding.AwayFromZero) })
+            .Select(l => new { l.claimId, l.reserveLineId, openBefore = l.open, openAfter = DecimalRounding.RoundTo(l.open * rate, to.MinorUnits, DecimalRounding.DefaultMoneyMode) })
             .ToList();
         return new ImportConvertCurrencyResponse
         {
