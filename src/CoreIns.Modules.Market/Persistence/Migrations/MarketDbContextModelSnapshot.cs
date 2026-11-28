@@ -484,6 +484,81 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Market.Persistence.PackVersionEventRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Actor")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("actor");
+
+                    b.Property<DateTime>("At")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("at");
+
+                    b.Property<string>("Detail")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("detail");
+
+                    b.Property<string>("PackId")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("pack_id");
+
+                    b.Property<bool>("ProductionEligible")
+                        .HasColumnType("boolean")
+                        .HasColumnName("production_eligible");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("reason");
+
+                    b.Property<long>("Seq")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("seq");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Seq"));
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TargetEnvironment")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("target_environment");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_pack_version_event");
+
+                    b.HasIndex("PackId", "Version", "Seq")
+                        .HasDatabaseName("ix_pack_version_event_version");
+
+                    b.ToTable("pack_version_event", "mkt", t =>
+                        {
+                            t.HasCheckConstraint("ck_pack_version_event_status", "status IN ('Signed', 'Certified', 'Rejected', 'Published', 'Deprecated', 'Removed')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Market.Persistence.PackVersionRow", b =>
                 {
                     b.Property<string>("PackId")
@@ -591,6 +666,16 @@ namespace CoreIns.Modules.Market.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_pack_activation_pack_version");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Market.Persistence.PackVersionEventRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Market.Persistence.PackVersionRow", null)
+                        .WithMany()
+                        .HasForeignKey("PackId", "Version")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_pack_version_event_pack_version");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Market.Persistence.ConfigChangeRequestRow", b =>
