@@ -1,3 +1,4 @@
+using CoreIns.Modules.Work.Notes;
 using CoreIns.Platform.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -18,6 +19,10 @@ internal sealed class WorkDbContext(DbContextOptions<WorkDbContext> options) : M
     public DbSet<QueueRow> Queues => Set<QueueRow>();
 
     public DbSet<PatternRow> Patterns => Set<PatternRow>();
+
+    public DbSet<NoteRow> Notes => Set<NoteRow>();
+
+    public DbSet<NoteVersionRow> NoteVersions => Set<NoteVersionRow>();
 
     protected override string Schema => WorkModule.Schema;
 
@@ -88,6 +93,46 @@ internal sealed class WorkDbContext(DbContextOptions<WorkDbContext> options) : M
             entity.Property(e => e.Active).HasColumnName("active");
             entity.HasIndex(e => new { e.LegalEntityId, e.Code }).IsUnique().HasDatabaseName("ux_assignment_rule_code");
             entity.HasIndex(e => new { e.LegalEntityId, e.QueueCode, e.Priority }).HasDatabaseName("ix_assignment_rule_queue");
+        });
+
+        modelBuilder.Entity<NoteRow>(entity =>
+        {
+            entity.ToTable("note", table =>
+            {
+                table.HasCheckConstraint("ck_note_visibility", "visibility IN ('STAFF', 'MANAGERS', 'PRIVATE')");
+                table.HasCheckConstraint("ck_note_deleted", "(deleted_at IS NULL) = (deleted_by IS NULL)");
+            });
+            entity.HasKey(e => e.NoteId).HasName("pk_note");
+            entity.Property(e => e.NoteId).HasColumnName("note_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.ObjectModule).HasColumnName("object_module").HasMaxLength(8);
+            entity.Property(e => e.ObjectType).HasColumnName("object_type").HasMaxLength(128);
+            entity.Property(e => e.ObjectId).HasColumnName("object_id").HasMaxLength(200);
+            entity.Property(e => e.Visibility).HasColumnName("visibility").HasMaxLength(16);
+            entity.Property(e => e.Body).HasColumnName("body");
+            entity.Property(e => e.SearchKey).HasColumnName("search_key");
+            entity.Property(e => e.CurrentVersion).HasColumnName("current_version");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(200);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DeletedBy).HasColumnName("deleted_by").HasMaxLength(200);
+            entity.Property(e => e.DeletedAt).HasColumnName("deleted_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DeleteReason).HasColumnName("delete_reason");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.LegalEntityId, e.ObjectModule, e.ObjectType, e.ObjectId, e.CreatedAt }).HasDatabaseName("ix_note_object");
+        });
+
+        modelBuilder.Entity<NoteVersionRow>(entity =>
+        {
+            entity.ToTable("note_version");
+            entity.HasKey(e => new { e.NoteId, e.Version }).HasName("pk_note_version");
+            entity.Property(e => e.NoteId).HasColumnName("note_id");
+            entity.Property(e => e.Version).HasColumnName("version");
+            entity.Property(e => e.Body).HasColumnName("body");
+            entity.Property(e => e.Visibility).HasColumnName("visibility").HasMaxLength(16);
+            entity.Property(e => e.EditedBy).HasColumnName("edited_by").HasMaxLength(200);
+            entity.Property(e => e.EditedAt).HasColumnName("edited_at").HasColumnType("timestamptz");
+            entity.HasOne<NoteRow>().WithMany().HasForeignKey(e => e.NoteId).HasConstraintName("fk_note_version_note");
         });
 
         modelBuilder.Entity<ActivityRow>(entity =>

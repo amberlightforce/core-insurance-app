@@ -46,6 +46,9 @@ internal enum JobType
 
     /// <summary>Reactivation of a suspended term's cover (BO-POL-08).</summary>
     Reactivation,
+
+    /// <summary>Reinstatement of a cancelled term (BO-POL-07).</summary>
+    Reinstatement,
 }
 
 /// <summary>

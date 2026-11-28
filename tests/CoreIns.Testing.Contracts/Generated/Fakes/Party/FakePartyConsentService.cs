@@ -14,7 +14,7 @@ public sealed class FakePartyConsentService : global::CoreIns.Testing.Contracts.
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.ConsentQueryPage> QueryAsync(string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.ConsentQueryPage>("pty.Consent.query", [cursor, limit], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.ConsentQueryPage> QueryAsync(global::CoreIns.SharedKernel.Identifiers.PartyId partyId, string? cursor = null, int? limit = null, string? purpose = null, string? channel = null, bool? includeHistory = null, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.ConsentQueryPage>("pty.Consent.query", [partyId, cursor, limit, purpose, channel, includeHistory], cancellationToken);
 
     /// <inheritdoc />
     public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.ConsentRecordResponse> RecordAsync(global::CoreIns.Modules.Party.Contracts.Api.ConsentRecordRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.ConsentRecordResponse>("pty.Consent.record", [request, options], cancellationToken);

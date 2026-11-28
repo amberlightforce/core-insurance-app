@@ -47,8 +47,9 @@ internal sealed record ImportClaimPayload(
 /// <c>IMigrationImporter</c> for module CLM. Creates the open claim (origin MIGRATION) on the imported policy: insured claimant, one
 /// MTPL_BI exposure, the opening reserve on the migration record, and the running clock re-created from the original notified date
 /// through <c>cmp.Clock.import</c>. No FNOL event is published: the claim was reported in the legacy system, so downstream consumers
-/// (RI intake, FIN) do not see it as new business. TODO(hardening): the opening reserve as a ledger line once the migration may post
-/// to the claim ledger; the POL xref resolved here from a legacy policy number; compensation when the clock call fails after the claim
+/// (RI intake, FIN) do not see it as new business. The legacy reserve movements are posted as migrated ledger lines by
+/// <c>clm.Import.financialHistory</c> (functional amount at the legacy rate); the ledger is append-only, so such a claim is no longer reversible.
+/// TODO(hardening): the POL xref resolved here from a legacy policy number; compensation when the clock call fails after the claim
 /// is saved.
 /// </summary>
 internal sealed class ClaimMigrationImporter(

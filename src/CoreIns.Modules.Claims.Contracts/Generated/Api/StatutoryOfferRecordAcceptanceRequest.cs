@@ -4,23 +4,29 @@
 
 namespace CoreIns.Modules.Claims.Contracts.Api;
 
-/// <summary>clm.StatutoryOffer.recordAcceptance request. PRD inputs: "exposure, content"</summary>
+/// <summary>clm.StatutoryOffer.recordAcceptance request: the claimant accepted a reasoned offer. Releases exactly one Draft payment set for the offered amount to the payee account captured on the claim; a repeat returns the same set.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record StatutoryOfferRecordAcceptanceRequest
 {
-    /// <summary>PRD: "exposure"</summary>
+    /// <summary>Contract member 'offerId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'offerId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("exposure")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Exposure { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("offerId")]
+    public required global::System.Guid OfferId { get; init; }
 
-    /// <summary>PRD: "content"</summary>
+    /// <summary>Default now; not before the delivery</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("acceptedAt")]
+    public global::CoreIns.SharedKernel.Instant? AcceptedAt { get; init; }
+
+    /// <summary>Contract member 'payeePartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("payeePartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PayeePartyId { get; init; }
+
+    /// <summary>BIL payee account captured with clm.PayeeAccount.capture</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'payeeAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("content")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Content { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("payeeAccountId")]
+    public required global::System.Guid PayeeAccountId { get; init; }
 }

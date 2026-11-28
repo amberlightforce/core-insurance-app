@@ -139,6 +139,7 @@ public static class MarketModule
 
         // In-process contracts other modules call (D-ARC-16).
         services.AddScoped<MarketConfigurationService>();
+        services.AddScoped<ConfigurationLineageService>();
         services.AddScoped<IMarketConfigurationService>(sp => sp.GetRequiredService<MarketConfigurationService>());
         services.AddScoped<MarketRoundingService>();
         services.AddScoped<IMarketRoundingService>(sp => sp.GetRequiredService<MarketRoundingService>());

@@ -23,6 +23,138 @@ namespace CoreIns.Modules.Work.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CoreIns.Modules.Work.Notes.NoteRow", b =>
+                {
+                    b.Property<Guid>("NoteId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("note_id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<int>("CurrentVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("current_version");
+
+                    b.Property<string>("DeleteReason")
+                        .HasColumnType("text")
+                        .HasColumnName("delete_reason");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("DeletedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("object_id");
+
+                    b.Property<string>("ObjectModule")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)")
+                        .HasColumnName("object_module");
+
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("object_type");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("SearchKey")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("search_key");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("visibility");
+
+                    b.HasKey("NoteId")
+                        .HasName("pk_note");
+
+                    b.HasIndex("LegalEntityId", "ObjectModule", "ObjectType", "ObjectId", "CreatedAt")
+                        .HasDatabaseName("ix_note_object");
+
+                    b.ToTable("note", "wrk", t =>
+                        {
+                            t.HasCheckConstraint("ck_note_deleted", "(deleted_at IS NULL) = (deleted_by IS NULL)");
+
+                            t.HasCheckConstraint("ck_note_visibility", "visibility IN ('STAFF', 'MANAGERS', 'PRIVATE')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Work.Notes.NoteVersionRow", b =>
+                {
+                    b.Property<Guid>("NoteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("note_id");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("EditedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("edited_at");
+
+                    b.Property<string>("EditedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("edited_by");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("visibility");
+
+                    b.HasKey("NoteId", "Version")
+                        .HasName("pk_note_version");
+
+                    b.ToTable("note_version", "wrk");
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Work.Persistence.ActivityRow", b =>
                 {
                     b.Property<Guid>("ActivityId")
@@ -466,6 +598,16 @@ namespace CoreIns.Modules.Work.Persistence.Migrations
                         .HasDatabaseName("ux_dsar_restriction_subject_class");
 
                     b.ToTable("dsar_restriction", "wrk");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Work.Notes.NoteVersionRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Work.Notes.NoteRow", null)
+                        .WithMany()
+                        .HasForeignKey("NoteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_note_version_note");
                 });
 #pragma warning restore 612, 618
         }

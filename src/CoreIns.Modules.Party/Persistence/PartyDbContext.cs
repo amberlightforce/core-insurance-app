@@ -42,6 +42,10 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
 
     public DbSet<PartyRoleRow> Roles => Set<PartyRoleRow>();
 
+    public DbSet<ConsentRow> Consents => Set<ConsentRow>();
+
+    public DbSet<CommunicationPreferenceRow> CommunicationPreferences => Set<CommunicationPreferenceRow>();
+
     public DbSet<PartyRelationshipRow> Relationships => Set<PartyRelationshipRow>();
 
     public DbSet<AccountRow> Accounts => Set<AccountRow>();
@@ -343,6 +347,45 @@ internal sealed class PartyDbContext(DbContextOptions<PartyDbContext> options) :
             entity.HasIndex(e => new { e.PartyId, e.RoleType }).HasDatabaseName("ix_party_role_party");
             entity.HasIndex(e => e.RoleId).HasDatabaseName("ix_party_role_role");
             entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.PartyId).HasConstraintName("fk_party_role_party").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ConsentRow>(entity =>
+        {
+            entity.ToTable("consent", table =>
+            {
+                table.HasCheckConstraint("ck_consent_kind", "kind IN ('GIVEN','WITHDRAWN','OBJECTION')");
+                table.HasCheckConstraint("ck_consent_state", "state IN ('GRANTED','WITHDRAWN','OBJECTED')");
+            });
+            entity.HasKey(e => e.ConsentId).HasName("pk_consent");
+            entity.Property(e => e.ConsentId).HasColumnName("consent_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.PartyId).HasColumnName("party_id");
+            entity.Property(e => e.Purpose).HasColumnName("purpose");
+            entity.Property(e => e.Channel).HasColumnName("channel");
+            entity.Property(e => e.Kind).HasColumnName("kind");
+            entity.Property(e => e.State).HasColumnName("state");
+            entity.Property(e => e.Source).HasColumnName("source");
+            entity.Property(e => e.WordingVersion).HasColumnName("wording_version");
+            entity.Property(e => e.ProofRef).HasColumnName("proof_ref");
+            entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordedBy).HasColumnName("recorded_by");
+            entity.HasIndex(e => new { e.PartyId, e.Purpose, e.Channel, e.RecordedAt }).HasDatabaseName("ix_consent_party");
+            entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.PartyId).HasConstraintName("fk_consent_party").OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<CommunicationPreferenceRow>(entity =>
+        {
+            entity.ToTable("communication_preference", table => BitemporalChecks(table, "communication_preference"));
+            entity.HasKey(e => e.RowId).HasName("pk_communication_preference");
+            entity.Property(e => e.RowId).HasColumnName("row_id");
+            entity.Property(e => e.PreferenceId).HasColumnName("preference_id");
+            MapBitemporal(entity);
+            entity.Property(e => e.Purpose).HasColumnName("purpose");
+            entity.Property(e => e.Channel).HasColumnName("channel");
+            entity.Property(e => e.Language).HasColumnName("language");
+            entity.Property(e => e.Medium).HasColumnName("medium");
+            entity.HasIndex(e => new { e.PartyId, e.Purpose }).HasDatabaseName("ix_communication_preference_party");
+            entity.HasOne<PartyRow>().WithMany().HasForeignKey(e => e.PartyId).HasConstraintName("fk_communication_preference_party").OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<PartyRelationshipRow>(entity =>

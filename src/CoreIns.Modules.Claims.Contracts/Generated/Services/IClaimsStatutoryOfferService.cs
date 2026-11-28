@@ -18,7 +18,7 @@ public interface IClaimsStatutoryOfferService
     /// <para>Status: full. Wave W7.</para>
     /// <para>Exposure: ui; consumers: CHN.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: CLM-ERR-OFFER-CONTENT (422), CLM-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: CLM-ERR-OFFER-CONTENT (422), CLM-ERR-OFFER-DELIVERY (422), CLM-ERR-OFFER-STATE (422), CLM-ERR-MTPL-CLOCKS-REQUIRED (422), CLM-ERR-NOT-FOUND (404), CLM-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Claims.Contracts.Api.StatutoryOfferRecordAcceptanceResponse> RecordAcceptanceAsync(global::CoreIns.Modules.Claims.Contracts.Api.StatutoryOfferRecordAcceptanceRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 }

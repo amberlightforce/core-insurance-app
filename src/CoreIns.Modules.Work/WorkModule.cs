@@ -1,3 +1,4 @@
+using CoreIns.Modules.Compliance.Contracts.Events;
 using CoreIns.Modules.Market.Contracts.Events;
 using CoreIns.Modules.Work.Commands;
 using CoreIns.Modules.Work.Contracts;
@@ -5,6 +6,7 @@ using CoreIns.Modules.Work.Contracts.Api;
 using CoreIns.Modules.Work.Domain;
 using CoreIns.Modules.Work.Events;
 using CoreIns.Modules.Work.Jobs;
+using CoreIns.Modules.Work.Notes;
 using CoreIns.Modules.Work.Persistence;
 using CoreIns.Modules.Work.Queries;
 using CoreIns.Modules.Work.Services;
@@ -79,9 +81,26 @@ public static class WorkModule
         services.AddCommand<GetNextActivity, QueueGetNextResponse, GetNextActivityHandler>(CommandDescriptor.For("wrk.Queue.getNext"));
         services.AddScoped<IWorkActivityService, WorkActivityService>();
 
+        // BO-WRK-07: notes on business objects.
+        services.AddScoped<NoteService>();
+        services.AddCommandAuditor<CreateNote, NoteCreateResponse, CreateNoteAuditor>();
+        services.AddCommand<CreateNote, NoteCreateResponse, CreateNoteHandler>(CommandDescriptor.For("wrk.Note.create"));
+        services.AddCommandAuditor<EditNote, NoteEditResponse, EditNoteAuditor>();
+        services.AddCommand<EditNote, NoteEditResponse, EditNoteHandler>(CommandDescriptor.For("wrk.Note.edit"));
+        services.AddCommandAuditor<DeleteNote, NoteDeleteResponse, DeleteNoteAuditor>();
+        services.AddCommand<DeleteNote, NoteDeleteResponse, DeleteNoteHandler>(CommandDescriptor.For("wrk.Note.delete"));
+        services.AddCommandAuditor<ExportNotes, NoteExportResponse, ExportNotesAuditor>();
+        services.AddCommand<ExportNotes, NoteExportResponse, ExportNotesHandler>(CommandDescriptor.For("wrk.Note.export"));
+
         // D-SL5-10: a pack rollback gets a review activity in the rollback queue.
         services.AddEventHandler<PackRolledBackV1, PackRolledBackReviewHandler>(
             EventDescriptor.From(PackRolledBackV1.Descriptor), PackRolledBackReviewHandler.Name, ModuleCode.WRK);
+
+        // BO-WRK-04: an escalated complaint and a rejected fiscal document each get one follow-up activity.
+        services.AddEventHandler<ComplaintEscalatedV1, ComplaintEscalatedHandler>(
+            EventDescriptor.From(ComplaintEscalatedV1.Descriptor), ComplaintEscalatedHandler.Name, ModuleCode.WRK);
+        services.AddEventHandler<FiscalDocRejectedV1, FiscalDocRejectedHandler>(
+            EventDescriptor.From(FiscalDocRejectedV1.Descriptor), FiscalDocRejectedHandler.Name, ModuleCode.WRK);
 
         // SLABreached: the sweep marks and publishes once per activity (worker role only).
         services.AddOptions<WorkOptions>().Bind(configuration.GetSection(WorkOptions.Section));

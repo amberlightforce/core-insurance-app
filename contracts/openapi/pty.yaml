@@ -2587,6 +2587,26 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
+      - name: partyId
+        in: query
+        required: true
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: purpose
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: channel
+        in: query
+        required: false
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Code
+      - name: includeHistory
+        in: query
+        required: false
+        schema:
+          type: boolean
       responses:
         '200':
           description: Success
@@ -2778,6 +2798,8 @@ paths:
       x-permission: pty.CommunicationPreference.resolve
       x-error-codes:
       - code: PTY-ERR-NO-EMAIL
+        status: 422
+      - code: PTY-ERR-NO-CONSENT
         status: 422
       x-source:
       - PRD-01 §9.1 l.1649
@@ -7316,11 +7338,33 @@ components:
           description: 'PRD: "created activities"'
     ConsentQueryItem:
       type: object
-      description: 'pty.Consent.query result. PRD outputs: "state"'
+      description: 'pty.Consent.query result (BO-PTY-06): one consent record. Without includeHistory the page holds the current state of each purpose and channel; with it, every record, newest first.'
       properties:
+        consentId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        purpose:
+          $ref: ../events/common.schema.json#/$defs/Code
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
+        kind:
+          type: string
+          enum: [GIVEN, WITHDRAWN, OBJECTION]
         state:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "state"'
+          type: string
+          enum: [GRANTED, WITHDRAWN, OBJECTED]
+        source:
+          type: string
+        wordingVersion:
+          type: [string, 'null']
+        proofRef:
+          type: string
+        recordedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordedBy:
+          type: string
+      required: [consentId, partyId, purpose, channel, kind, state, source, proofRef, recordedAt, recordedBy]
     ConsentQueryPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7333,112 +7377,122 @@ components:
       description: Page of pty.Consent.query results (cursor pagination, contract §3.5.5)
     ConsentRecordRequest:
       type: object
-      description: 'pty.Consent.record request. PRD inputs: "party, purpose, channel, kind, source, wording version, proof
-        ref"'
+      description: 'pty.Consent.record request (BO-PTY-06, REQ-PTY-005, REQ-PTY-150). Records a consent given, or an objection, for one purpose and channel. Proof is required (PTY-ERR-PROOF-REQUIRED); a record is never changed afterwards, a withdrawal is a new record.'
       properties:
-        party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         purpose:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "purpose"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: MARKETING, PROFILING, THIRD_PARTY_SHARING, SERVICE_MESSAGES, CLAIMS_UPDATES, RENEWAL_NOTICES, DOCUMENT_DELIVERY
         channel:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "channel"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: EMAIL, SMS, POST, PHONE, PORTAL
         kind:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "kind"'
+          type: string
+          enum: [GIVEN, OBJECTION]
         source:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "source"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Where the consent came from, for example PORTAL, BRANCH, PHONE, PAPER, BROKER
         wordingVersion:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "wording version"'
+          type: [string, 'null']
+          description: Version of the consent wording shown; required for GIVEN
         proofRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "proof ref"'
+          type: string
+          description: Reference to the proof (document id, call recording, portal event)
+      required: [partyId, purpose, channel, kind, source, proofRef]
     ConsentRecordResponse:
       type: object
-      description: 'pty.Consent.record result. PRD outputs: "consent state"'
+      description: 'pty.Consent.record result.'
       properties:
-        consentState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "consent state"'
+        consent:
+          $ref: '#/components/schemas/ConsentQueryItem'
+      required: [consent]
     ConsentWithdrawRequest:
       type: object
-      description: 'pty.Consent.withdraw request. PRD inputs: "party, purpose, channel"'
+      description: 'pty.Consent.withdraw request (BO-PTY-06). Takes effect at once: the next resolve for the purpose and channel no longer uses the consent. The earlier records stay in the history.'
       properties:
-        party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         purpose:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "purpose"'
+          $ref: ../events/common.schema.json#/$defs/Code
         channel:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "channel"'
+          $ref: ../events/common.schema.json#/$defs/Code
+        proofRef:
+          type: [string, 'null']
+          description: Optional proof of the withdrawal request; default the acting user
+      required: [partyId, purpose, channel]
     ConsentWithdrawResponse:
       type: object
-      description: 'pty.Consent.withdraw result. PRD outputs: "state"'
+      description: 'pty.Consent.withdraw result.'
       properties:
-        state:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "state"'
+        consent:
+          $ref: '#/components/schemas/ConsentQueryItem'
+      required: [consent]
     CommunicationPreferenceResolveRequest:
       type: object
-      description: 'pty.CommunicationPreference.resolve request. PRD inputs: "party, purpose, date"'
+      description: 'pty.CommunicationPreference.resolve request (BO-PTY-06). The date is the validAt query parameter.'
       properties:
-        party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         purpose:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "purpose"'
+          $ref: ../events/common.schema.json#/$defs/Code
+      required: [partyId, purpose]
     CommunicationPreferenceResolveResponse:
       type: object
-      description: 'pty.CommunicationPreference.resolve result. PRD outputs: "channel, language, medium, proof"'
+      description: 'pty.CommunicationPreference.resolve result (BO-PTY-06): the effective channel for the purpose. Order: the preference for the purpose, then the DEFAULT preference, then EMAIL (when the party has an email contact point) or POST. A channel without the consent its purpose needs (MARKETING, PROFILING, THIRD_PARTY_SHARING) is skipped; a vulnerable party gets paper and no marketing.'
       properties:
         channel:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "channel"'
+          $ref: ../events/common.schema.json#/$defs/Code
         language:
           $ref: ../events/common.schema.json#/$defs/LanguageCode
-          description: 'PRD: "language"'
         medium:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "medium"'
+          $ref: ../events/common.schema.json#/$defs/Code
         proof:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "proof"'
+          type: string
+          description: Which rule decided, for example PREFERENCE:<id>, DEFAULT-PREFERENCE:<id>, FALLBACK:EMAIL, with the consent id when one applied
+      required: [channel, language, medium, proof]
     CommunicationPreferenceSetRequest:
       type: object
-      description: 'pty.CommunicationPreference.set request. PRD inputs: "party, purpose, date"'
+      description: 'pty.CommunicationPreference.set request (BO-PTY-06). Sets the preference for a purpose (or DEFAULT) from validFrom; the earlier one stays in the history.'
       properties:
-        party:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "party"'
+        partyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         purpose:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "purpose"'
-        date:
-          $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "date"'
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: A consent purpose, or DEFAULT for every purpose without its own preference
+        channel:
+          $ref: ../events/common.schema.json#/$defs/Code
+        language:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LanguageCode
+          - type: 'null'
+          description: Default the party's preferred language
+        medium:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Code
+          - type: 'null'
+          description: DIGITAL or PAPER; default DIGITAL (PAPER for POST)
+        validFrom:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+          description: Default today
+      required: [partyId, purpose, channel]
     CommunicationPreferenceSetResponse:
       type: object
-      description: 'pty.CommunicationPreference.set result. PRD outputs: "channel, language, medium, proof"'
+      description: 'pty.CommunicationPreference.set result.'
       properties:
+        preferenceId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         channel:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "channel"'
+          $ref: ../events/common.schema.json#/$defs/Code
         language:
           $ref: ../events/common.schema.json#/$defs/LanguageCode
-          description: 'PRD: "language"'
         medium:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "medium"'
+          $ref: ../events/common.schema.json#/$defs/Code
         proof:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "proof"'
+          type: string
+      required: [preferenceId, channel, language, medium, proof]
     VulnerabilityQueryItem:
       type: object
       description: 'pty.Vulnerability.query result for one party.'

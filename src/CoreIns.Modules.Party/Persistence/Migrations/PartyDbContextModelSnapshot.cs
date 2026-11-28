@@ -485,6 +485,152 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.CommunicationPreferenceRow", b =>
+                {
+                    b.Property<Guid>("RowId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("row_id");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("channel");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("language");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Medium")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("medium");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<Guid>("PreferenceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("preference_id");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("purpose");
+
+                    b.Property<DateTime>("RecordedFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_from");
+
+                    b.Property<DateTime?>("RecordedTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_to");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateOnly?>("ValidTo")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_to");
+
+                    b.HasKey("RowId")
+                        .HasName("pk_communication_preference");
+
+                    b.HasIndex("PartyId", "Purpose")
+                        .HasDatabaseName("ix_communication_preference_party");
+
+                    b.ToTable("communication_preference", "pty", t =>
+                        {
+                            t.HasCheckConstraint("ck_communication_preference_recorded", "recorded_to IS NULL OR recorded_to > recorded_from");
+
+                            t.HasCheckConstraint("ck_communication_preference_valid", "valid_to IS NULL OR valid_to > valid_from");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.ConsentRow", b =>
+                {
+                    b.Property<Guid>("ConsentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("consent_id");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("channel");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("kind");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<Guid>("PartyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("party_id");
+
+                    b.Property<string>("ProofRef")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("proof_ref");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("purpose");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("recorded_at");
+
+                    b.Property<string>("RecordedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("recorded_by");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("state");
+
+                    b.Property<string>("WordingVersion")
+                        .HasColumnType("text")
+                        .HasColumnName("wording_version");
+
+                    b.HasKey("ConsentId")
+                        .HasName("pk_consent");
+
+                    b.HasIndex("PartyId", "Purpose", "Channel", "RecordedAt")
+                        .HasDatabaseName("ix_consent_party");
+
+                    b.ToTable("consent", "pty", t =>
+                        {
+                            t.HasCheckConstraint("ck_consent_kind", "kind IN ('GIVEN','WITHDRAWN','OBJECTION')");
+
+                            t.HasCheckConstraint("ck_consent_state", "state IN ('GRANTED','WITHDRAWN','OBJECTED')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.DsarRestrictionRow", b =>
                 {
                     b.Property<Guid>("RestrictionId")
@@ -2021,6 +2167,26 @@ namespace CoreIns.Modules.Party.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_commission_line_version");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.CommunicationPreferenceRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.PartyRow", null)
+                        .WithMany()
+                        .HasForeignKey("PartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_communication_preference_party");
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Party.Persistence.ConsentRow", b =>
+                {
+                    b.HasOne("CoreIns.Modules.Party.Persistence.PartyRow", null)
+                        .WithMany()
+                        .HasForeignKey("PartyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_consent_party");
                 });
 
             modelBuilder.Entity("CoreIns.Modules.Party.Persistence.IntermediaryAppointmentRow", b =>
