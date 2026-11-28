@@ -27,6 +27,10 @@
         "ri.Programme.create": [ "Staff.ReinsuranceAccountant" ],
         "ri.Programme.update": [ "Staff.ReinsuranceAccountant" ],
         "ri.Programme.renew": [ "Staff.ReinsuranceAccountant" ],
+        // BO-RI-02: the accountant submits (maker); the manager decides (checker, PLT RI.PROGRAMME_APPROVE).
+        "ri.Programme.submit": [ "Staff.ReinsuranceAccountant" ],
+        "ri.Programme.approve": [ "Staff.ReinsuranceManager" ],
+        "ri.Programme.return": [ "Staff.ReinsuranceManager" ],
         "ri.Programme.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Programme.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Participation.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
@@ -73,6 +77,16 @@
         {
           "Id": "ri-manager-contract-approve-illustrative", "Role": "Staff.ReinsuranceManager", "Type": "RI.CONTRACT_APPROVE", "Illustrative": true,
           "Limits": [ { "Dimension": "contractType", "Comparison": "InSet", "Codes": [ "XOL_PER_RISK" ] } ]
+        },
+        // BO-RI-02 (ILLUSTRATIVE, ignored in Production): the reinsurance manager may approve or return a programme version.
+        // Limited by the total limit of the ladder, EUR: above the accountant's limit refers to the manager; above the manager's limit DENY.
+        {
+          "Id": "ri-accountant-programme-approve-illustrative", "Role": "Staff.ReinsuranceAccountant", "Type": "RI.PROGRAMME_APPROVE", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "ri-manager-programme-approve-illustrative", "Role": "Staff.ReinsuranceManager", "Type": "RI.PROGRAMME_APPROVE", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "500000000.00", "Currency": "EUR" } ]
         },
         // BO-RI-10 (ILLUSTRATIVE, ignored in Production): adjustment premium / commission approval by absolute amount, EUR. Above the accountant's
         // limit refers to the manager (four eyes); above the manager's limit DENY.
