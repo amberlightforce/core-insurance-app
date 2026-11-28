@@ -119,10 +119,6 @@ CONTRACT_NOT_SERVED GET /api/uw/v1/renewal-directions/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/desktop/get
 CONTRACT_NOT_SERVED GET /api/wrk/v1/inbound-documents
 CONTRACT_NOT_SERVED GET /api/wrk/v1/inbound-documents/{}
-CONTRACT_NOT_SERVED GET /api/wrk/v1/notes
-CONTRACT_NOT_SERVED GET /api/wrk/v1/notes/history
-CONTRACT_NOT_SERVED GET /api/wrk/v1/notes/search
-CONTRACT_NOT_SERVED GET /api/wrk/v1/notes/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/palette/query
 CONTRACT_NOT_SERVED GET /api/wrk/v1/participants
 CONTRACT_NOT_SERVED GET /api/wrk/v1/participants/objects-for
@@ -535,10 +531,6 @@ CONTRACT_NOT_SERVED POST /api/wrk/v1/inbound-documents/reprocess
 CONTRACT_NOT_SERVED POST /api/wrk/v1/inbound-documents/split
 CONTRACT_NOT_SERVED POST /api/wrk/v1/inbound-documents/submit
 CONTRACT_NOT_SERVED POST /api/wrk/v1/inbound-documents/verify
-CONTRACT_NOT_SERVED POST /api/wrk/v1/notes
-CONTRACT_NOT_SERVED POST /api/wrk/v1/notes/delete
-CONTRACT_NOT_SERVED POST /api/wrk/v1/notes/edit
-CONTRACT_NOT_SERVED POST /api/wrk/v1/notes/export
 CONTRACT_NOT_SERVED POST /api/wrk/v1/participants/assign-by-rules
 CONTRACT_NOT_SERVED POST /api/wrk/v1/participants/change
 CONTRACT_NOT_SERVED POST /api/wrk/v1/requests/close

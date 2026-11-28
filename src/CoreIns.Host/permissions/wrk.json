@@ -70,6 +70,75 @@
           "Staff.BillingManager",
           "Platform.Admin"
         ],
+        "wrk.Note.create": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Note.list": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Note.get": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Note.search": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Note.edit": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Note.history": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Note.delete": [
+          "Staff.Underwriter",
+          "Staff.UnderwritingManager",
+          "Staff.Billing",
+          "Staff.BillingManager",
+          "Staff.ClaimsHandler",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
+        "wrk.Note.export": [
+          "Staff.UnderwritingManager",
+          "Staff.BillingManager",
+          "Staff.ClaimsManager",
+          "Platform.Admin"
+        ],
         "wrk.Pattern.list": [ "Platform.Admin" ],
         "wrk.Pattern.upsert": [ "Platform.Admin" ],
         "wrk.Assignment.simulate": [
