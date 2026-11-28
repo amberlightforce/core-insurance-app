@@ -15,6 +15,10 @@ internal sealed class WorkDbContext(DbContextOptions<WorkDbContext> options) : M
 
     public DbSet<AssignmentRuleRow> AssignmentRules => Set<AssignmentRuleRow>();
 
+    public DbSet<QueueRow> Queues => Set<QueueRow>();
+
+    public DbSet<PatternRow> Patterns => Set<PatternRow>();
+
     protected override string Schema => WorkModule.Schema;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -32,6 +36,40 @@ internal sealed class WorkDbContext(DbContextOptions<WorkDbContext> options) : M
             entity.Property(e => e.Roles).HasColumnName("roles");
             entity.Property(e => e.Skills).HasColumnName("skills");
             entity.Property(e => e.Active).HasColumnName("active");
+        });
+
+        modelBuilder.Entity<QueueRow>(entity =>
+        {
+            entity.ToTable("queue");
+            entity.HasKey(e => e.Code).HasName("pk_queue");
+            entity.Property(e => e.Code).HasColumnName("code").HasMaxLength(100);
+            entity.Property(e => e.Title).HasColumnName("title").HasMaxLength(200);
+            entity.Property(e => e.Roles).HasColumnName("roles");
+        });
+
+        modelBuilder.Entity<PatternRow>(entity =>
+        {
+            entity.ToTable("activity_pattern", table =>
+            {
+                table.HasCheckConstraint("ck_activity_pattern_priority", "priority IN ('NORMAL', 'HIGH')");
+                table.HasCheckConstraint("ck_activity_pattern_minutes", "target_minutes > 0 AND escalation_minutes >= target_minutes");
+            });
+            entity.HasKey(e => e.Code).HasName("pk_activity_pattern");
+            entity.Property(e => e.Code).HasColumnName("code").HasMaxLength(128);
+            entity.Property(e => e.Version).HasColumnName("version").HasMaxLength(20);
+            entity.Property(e => e.Title).HasColumnName("title").HasMaxLength(300);
+            entity.Property(e => e.Category).HasColumnName("category").HasMaxLength(64);
+            entity.Property(e => e.Priority).HasColumnName("priority");
+            entity.Property(e => e.QueueCode).HasColumnName("queue_code").HasMaxLength(100);
+            entity.Property(e => e.SlaPolicy).HasColumnName("sla_policy").HasMaxLength(100);
+            entity.Property(e => e.TargetMinutes).HasColumnName("target_minutes");
+            entity.Property(e => e.EscalationMinutes).HasColumnName("escalation_minutes");
+            entity.Property(e => e.GateBlocking).HasColumnName("gate_blocking");
+            entity.Property(e => e.RaisingModules).HasColumnName("raising_modules");
+            entity.Property(e => e.SuggestedAssignee).HasColumnName("suggested_assignee").HasMaxLength(200);
+            entity.Property(e => e.AmountBandPercent).HasColumnName("amount_band_percent");
+            entity.Property(e => e.Active).HasColumnName("active");
+            entity.HasIndex(e => e.QueueCode).HasDatabaseName("ix_activity_pattern_queue");
         });
 
         modelBuilder.Entity<AssignmentRuleRow>(entity =>

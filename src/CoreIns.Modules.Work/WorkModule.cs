@@ -50,6 +50,12 @@ public static class WorkModule
         services.AddSingleton<IDsarParticipant, WorkDsarParticipant>();
 
         services.AddScoped<IWorkUserDirectory, LocalWorkUserDirectory>();
+        services.AddSingleton<CatalogueCache>();
+        services.AddScoped<WorkCatalogue>();
+        services.AddScoped<PatternCatalogueReader>();
+        services.AddScoped<IValidator<UpsertPatterns>, UpsertPatternsValidator>();
+        services.AddCommandAuditor<UpsertPatterns, PatternCatalogue, UpsertPatternsAuditor>();
+        services.AddCommand<UpsertPatterns, PatternCatalogue, UpsertPatternsHandler>(CommandDescriptor.For("wrk.Pattern.upsert"));
         services.AddScoped<AssignmentRouter>();
         services.AddScoped<AssignmentSimulator>();
         services.AddScoped<ActivityEngine>();

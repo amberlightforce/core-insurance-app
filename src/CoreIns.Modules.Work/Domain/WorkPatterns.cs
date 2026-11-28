@@ -20,13 +20,18 @@ internal sealed record WorkQueue(string Code, string Title, IReadOnlyList<string
 /// <param name="EscalationMinutes">Minutes from creation to escalation.</param>
 /// <param name="GateBlocking">True when an open instance blocks the gate on its primary object (wrk.Activity.blockingStatus).</param>
 /// <param name="RaisingModules">Modules that may create the pattern; any other raising module is refused.</param>
+/// <param name="SuggestedAssignee">Default user offered new activities of the pattern (BO-WRK-03); null for none.</param>
+/// <param name="AmountBandPercent">Per amount band code, the percentage of the SLA minutes that applies (50 halves them); null for none.</param>
+/// <param name="Active">False: the pattern can no longer be created (running activities are untouched).</param>
 internal sealed record ActivityPattern(
     string Code, string Version, string Title, string Category, string Priority, string Queue, string SlaPolicy,
-    int TargetMinutes, int EscalationMinutes, bool GateBlocking, IReadOnlyList<ModuleCode> RaisingModules);
+    int TargetMinutes, int EscalationMinutes, bool GateBlocking, IReadOnlyList<ModuleCode> RaisingModules,
+    string? SuggestedAssignee = null, IReadOnlyDictionary<string, int>? AmountBandPercent = null, bool Active = true);
 
 /// <summary>
-/// The activity patterns and queues the Work core serves (NX-HD-05): the PSR and pack-rollback review activities (D-SL5-10, D-SL6-04).
-/// TODO(hardening): patterns and queues are configuration in PRD-13 (MKT-owned); they are code constants until that registry exists.
+/// The seed of the queue and pattern catalogue (BO-WRK-03): the migration inserts exactly these rows into <c>wrk.queue</c> and
+/// <c>wrk.activity_pattern</c>; the running catalogue is read from the tables (<see cref="WorkCatalogue"/>), never from here.
+/// Raisers refer to the pattern codes below.
 /// </summary>
 internal static class WorkCatalog
 {
@@ -48,7 +53,7 @@ internal static class WorkCatalog
     /// <summary>Roles of the PSR (policy service) queue: the same people who see POL's PSR queue.</summary>
     private static readonly string[] PsrRoles = ["Staff.UnderwritingManager", "Staff.Underwriter", "Platform.Admin"];
 
-    public static IReadOnlyList<WorkQueue> Queues { get; } =
+    public static IReadOnlyList<WorkQueue> SeedQueues { get; } =
     [
         // BO-PTY-07: potential sanctions hits wait for compliance (the same roles as pty.Screening.caseGet).
         new(ScreeningQueue, "Sanctions screening review", ["Staff.ComplianceOfficer", "Platform.Admin"]),
@@ -59,7 +64,7 @@ internal static class WorkCatalog
         new(UwReferralQueue, "Underwriting referral follow-up", ["Staff.UnderwritingManager", "Staff.Underwriter", "Platform.Admin"]),
     ];
 
-    public static IReadOnlyList<ActivityPattern> Patterns { get; } =
+    public static IReadOnlyList<ActivityPattern> SeedPatterns { get; } =
     [
         new(ScreeningHit, "1", "Review a potential sanctions screening hit", "REVIEW", "HIGH", ScreeningQueue, "WRK-SLA-SCREENING",
             TargetMinutes: 24 * 60, EscalationMinutes: 2 * 24 * 60, GateBlocking: false, [ModuleCode.PTY]),
@@ -76,13 +81,23 @@ internal static class WorkCatalog
         new(PsrNoticeReturned, "1", "Non-payment notice came back undelivered", "REVIEW", "NORMAL", PsrQueue, "WRK-SLA-PSR",
             TargetMinutes: 3 * 24 * 60, EscalationMinutes: 5 * 24 * 60, GateBlocking: false, [ModuleCode.BIL]),
     ];
+}
 
-    public static ActivityPattern? Pattern(string code) => Patterns.FirstOrDefault(p => string.Equals(p.Code, code, StringComparison.Ordinal));
+/// <summary>An immutable view of the queue and pattern tables, as read through <see cref="WorkCatalogue"/>.</summary>
+internal sealed class CatalogueSnapshot(IReadOnlyList<WorkQueue> queues, IReadOnlyList<ActivityPattern> patterns)
+{
+    public IReadOnlyList<WorkQueue> Queues { get; } = queues;
 
-    public static WorkQueue? Queue(string code) => Queues.FirstOrDefault(q => string.Equals(q.Code, code, StringComparison.Ordinal));
+    /// <summary>Every pattern, inactive ones included (the admin listing).</summary>
+    public IReadOnlyList<ActivityPattern> Patterns { get; } = patterns;
+
+    /// <summary>The active pattern of the code; an inactive or unknown one is null (fail closed).</summary>
+    public ActivityPattern? Pattern(string code) => Patterns.FirstOrDefault(p => p.Active && string.Equals(p.Code, code, StringComparison.Ordinal));
+
+    public WorkQueue? Queue(string code) => Queues.FirstOrDefault(q => string.Equals(q.Code, code, StringComparison.Ordinal));
 
     /// <summary>Queues the roles may see.</summary>
-    public static IReadOnlyList<WorkQueue> QueuesFor(IEnumerable<string> roles)
+    public IReadOnlyList<WorkQueue> QueuesFor(IEnumerable<string> roles)
     {
         var set = roles.ToHashSet(StringComparer.Ordinal);
         return [.. Queues.Where(q => q.Roles.Any(set.Contains))];

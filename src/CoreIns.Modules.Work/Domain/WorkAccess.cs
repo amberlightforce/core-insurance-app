@@ -57,10 +57,13 @@ internal sealed class WorkActor
 {
     public const string AdminRole = "Platform.Admin";
 
-    private WorkActor(ActorRef actor, IReadOnlyCollection<string> roles)
+    private readonly CatalogueSnapshot _catalogue;
+
+    private WorkActor(ActorRef actor, IReadOnlyCollection<string> roles, CatalogueSnapshot catalogue)
     {
         Actor = actor;
         Roles = roles;
+        _catalogue = catalogue;
     }
 
     public ActorRef Actor { get; }
@@ -75,15 +78,16 @@ internal sealed class WorkActor
     /// <summary>Managers (<c>Staff.*Manager</c>) and the platform admin may assign to others.</summary>
     public bool IsManager => IsAdmin || Roles.Any(r => r.StartsWith("Staff.", StringComparison.Ordinal) && r.EndsWith("Manager", StringComparison.Ordinal));
 
-    public static WorkActor From(RequestContext context)
+    public static WorkActor From(RequestContext context, CatalogueSnapshot catalogue)
     {
         ArgumentNullException.ThrowIfNull(context);
-        return new WorkActor(context.Actor, context.Roles);
+        ArgumentNullException.ThrowIfNull(catalogue);
+        return new WorkActor(context.Actor, context.Roles, catalogue);
     }
 
     /// <summary>Queue codes the actor may see: the admin sees every queue.</summary>
     public IReadOnlyList<string> VisibleQueues =>
-        [.. (IsAdmin ? WorkCatalog.Queues : WorkCatalog.QueuesFor(Roles)).Select(q => q.Code)];
+        [.. (IsAdmin ? _catalogue.Queues : _catalogue.QueuesFor(Roles)).Select(q => q.Code)];
 
     public bool CanSee(string queueCode) => VisibleQueues.Contains(queueCode, StringComparer.Ordinal);
 }
@@ -93,5 +97,5 @@ internal static class QueueIds
 {
     public static QueueId For(string code) => new(new Guid(SHA256.HashData(Encoding.UTF8.GetBytes("coreins.wrk.queue:" + code))[..16]));
 
-    public static string? CodeOf(QueueId id) => WorkCatalog.Queues.Select(q => q.Code).FirstOrDefault(code => For(code) == id);
+    public static string? CodeOf(CatalogueSnapshot catalogue, QueueId id) => catalogue.Queues.Select(q => q.Code).FirstOrDefault(code => For(code) == id);
 }

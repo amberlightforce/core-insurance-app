@@ -313,6 +313,116 @@ namespace CoreIns.Modules.Work.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Work.Persistence.PatternRow", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("code");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean")
+                        .HasColumnName("active");
+
+                    b.Property<string>("AmountBandPercent")
+                        .HasColumnType("text")
+                        .HasColumnName("amount_band_percent");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("category");
+
+                    b.Property<int>("EscalationMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("escalation_minutes");
+
+                    b.Property<bool>("GateBlocking")
+                        .HasColumnType("boolean")
+                        .HasColumnName("gate_blocking");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("priority");
+
+                    b.Property<string>("QueueCode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("queue_code");
+
+                    b.Property<string>("RaisingModules")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("raising_modules");
+
+                    b.Property<string>("SlaPolicy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("sla_policy");
+
+                    b.Property<string>("SuggestedAssignee")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("suggested_assignee");
+
+                    b.Property<int>("TargetMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("target_minutes");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("version");
+
+                    b.HasKey("Code")
+                        .HasName("pk_activity_pattern");
+
+                    b.HasIndex("QueueCode")
+                        .HasDatabaseName("ix_activity_pattern_queue");
+
+                    b.ToTable("activity_pattern", "wrk", t =>
+                        {
+                            t.HasCheckConstraint("ck_activity_pattern_minutes", "target_minutes > 0 AND escalation_minutes >= target_minutes");
+
+                            t.HasCheckConstraint("ck_activity_pattern_priority", "priority IN ('NORMAL', 'HIGH')");
+                        });
+                });
+
+            modelBuilder.Entity("CoreIns.Modules.Work.Persistence.QueueRow", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Roles")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("roles");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Code")
+                        .HasName("pk_queue");
+
+                    b.ToTable("queue", "wrk");
+                });
+
             modelBuilder.Entity("CoreIns.Platform.Persistence.DsarRestrictionRow", b =>
                 {
                     b.Property<Guid>("RestrictionId")
