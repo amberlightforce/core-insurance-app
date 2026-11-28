@@ -213,9 +213,6 @@ CONTRACT_NOT_SERVED POST /api/clm/v1/import/reverse
 CONTRACT_NOT_SERVED POST /api/clm/v1/redresses/request
 CONTRACT_NOT_SERVED POST /api/clm/v1/services/cancel
 CONTRACT_NOT_SERVED POST /api/clm/v1/services/request
-CONTRACT_NOT_SERVED POST /api/clm/v1/statutory-offers/issue
-CONTRACT_NOT_SERVED POST /api/clm/v1/statutory-offers/record-acceptance
-CONTRACT_NOT_SERVED POST /api/clm/v1/statutory-offers/record-repair-agreement
 CONTRACT_NOT_SERVED POST /api/clm/v1/vendor-invoices/decide
 CONTRACT_NOT_SERVED POST /api/clm/v1/vendor-invoices/submit
 CONTRACT_NOT_SERVED POST /api/cmp/v1/annual-returns/amend

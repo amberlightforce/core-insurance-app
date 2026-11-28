@@ -603,9 +603,28 @@
       "status": "unspecified"
     },
     "clm.StatutoryOffer.recordAcceptance": {
-      "offerRecord": "unspecified",
-      "documentRequest": "unspecified",
-      "agreementClockStart": "unspecified"
+      "offer": {
+        "offerId": "019284b6-cd03-7f99-8c28-820b6b5709e1",
+        "claimId": "0192f0e5-a7d9-7588-8969-cef77a563f38",
+        "exposureId": "01929c1b-5c9c-76cd-8371-dcb0ad90a594",
+        "kind": "REASONED_OFFER",
+        "status": "ISSUED",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "deliveredAt": "2026-10-07T09:00:00Z",
+        "deliveryEvidenceId": "01925519-ace3-7f3b-879b-4f8bb007bd54",
+        "documentId": "01928d1c-d148-78f9-8ca0-6d933317dd0f",
+        "clockLegalStatus": "sample",
+        "paymentClockId": "0192a09f-2478-7ee0-8b3e-483601c08961",
+        "repairClockId": "01922c11-4c60-7cc9-8713-392c785acfa6",
+        "acceptedAt": "2026-10-07T09:00:00Z",
+        "repairAgreedAt": "2026-10-07T09:00:00Z",
+        "paymentSetId": "0192e905-9d8a-7fae-8e43-0ac7bcc02704",
+        "recordVersion": 1
+      }
     },
     "clm.TransactionSet.approve": {
       "setId": "0192b409-f39a-7220-8a5e-af3ff2a9ddf3",
@@ -4008,31 +4027,121 @@
       "decidedAt": "2026-10-07T09:00:00Z"
     },
     "StatutoryOfferIssueRequest": {
-      "exposure": "unspecified",
-      "content": "unspecified"
+      "exposureId": "0192e80c-e417-7e47-888c-d5a00dbf2c59",
+      "kind": "REASONED_OFFER",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "content": "sample",
+      "issuedAt": "2026-10-07T09:00:00Z",
+      "deliveredAt": "2026-10-07T09:00:00Z",
+      "deliveryEvidenceId": "019222ce-62a2-77d9-8871-97f82fd1329d",
+      "language": "el"
     },
     "StatutoryOfferIssueResponse": {
-      "offerRecord": "unspecified",
-      "documentRequest": "unspecified",
-      "agreementClockStart": "unspecified"
+      "offer": {
+        "offerId": "019261d4-c5f9-7ac5-84d1-b2ba48079ba5",
+        "claimId": "0192e48a-bb43-7ab9-8088-5b65976079ef",
+        "exposureId": "01924533-b780-7f8a-8bfd-b9d0c683ee9b",
+        "kind": "REASONED_OFFER",
+        "status": "ISSUED",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "deliveredAt": "2026-10-07T09:00:00Z",
+        "deliveryEvidenceId": "0192a8ab-3169-7759-85ae-a56383101f24",
+        "documentId": "0192da27-70fc-75ec-8d82-5caa10f381e5",
+        "clockLegalStatus": "sample",
+        "paymentClockId": "01929597-7db4-7ce7-8d3d-fdc9e3cb889a",
+        "repairClockId": "01923339-702e-7e2b-81af-13be5567a2b4",
+        "acceptedAt": "2026-10-07T09:00:00Z",
+        "repairAgreedAt": "2026-10-07T09:00:00Z",
+        "paymentSetId": "01921ff0-8d89-7961-84df-3725154e0c34",
+        "recordVersion": 1
+      }
     },
     "StatutoryOfferRecordAcceptanceRequest": {
-      "exposure": "unspecified",
-      "content": "unspecified"
+      "offerId": "0192371d-c7a7-7c62-84eb-b6072105c162",
+      "acceptedAt": "2026-10-07T09:00:00Z",
+      "payeePartyId": "0192e21a-ef41-7d28-8667-ac536cc5f2ab",
+      "payeeAccountId": "01929f66-4b0a-7c39-8b4f-e5dd835354a7"
     },
     "StatutoryOfferRecordAcceptanceResponse": {
-      "offerRecord": "unspecified",
-      "documentRequest": "unspecified",
-      "agreementClockStart": "unspecified"
+      "offer": {
+        "offerId": "01926afc-5e29-7a02-8909-962328f58acb",
+        "claimId": "0192e562-1e6b-7eb9-8378-9037b7d45a17",
+        "exposureId": "01927a32-3adf-7b61-84a5-47b9dbdf4e99",
+        "kind": "REASONED_OFFER",
+        "status": "ISSUED",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "deliveredAt": "2026-10-07T09:00:00Z",
+        "deliveryEvidenceId": "0192b9ce-97bf-73f6-85f2-d2e80d776157",
+        "documentId": "019242f9-0b13-731e-8082-6a3ea9ca287b",
+        "clockLegalStatus": "sample",
+        "paymentClockId": "01920cee-e157-7188-8f60-6256b4c38e7f",
+        "repairClockId": "019285d9-a98a-772d-8266-9bd1b7636829",
+        "acceptedAt": "2026-10-07T09:00:00Z",
+        "repairAgreedAt": "2026-10-07T09:00:00Z",
+        "paymentSetId": "01924bfd-ea67-75a3-8316-4968c7546fe6",
+        "recordVersion": 1
+      }
     },
     "StatutoryOfferRecordRepairAgreementRequest": {
-      "exposure": "unspecified",
-      "content": "unspecified"
+      "offerId": "01922ae2-788f-7e16-8450-9923c7e6b28b",
+      "agreedAt": "2026-10-07T09:00:00Z"
     },
     "StatutoryOfferRecordRepairAgreementResponse": {
-      "offerRecord": "unspecified",
-      "documentRequest": "unspecified",
-      "agreementClockStart": "unspecified"
+      "offer": {
+        "offerId": "0192effd-b1ff-7ded-808e-416a539c44f0",
+        "claimId": "019210a6-523b-7a5c-86ca-4016ef568013",
+        "exposureId": "0192a339-1bce-7a28-8a3b-48f5c76bf9c2",
+        "kind": "REASONED_OFFER",
+        "status": "ISSUED",
+        "amount": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "issuedAt": "2026-10-07T09:00:00Z",
+        "deliveredAt": "2026-10-07T09:00:00Z",
+        "deliveryEvidenceId": "01929537-0939-784c-8b0c-5c7b069d3751",
+        "documentId": "01922b94-b3c3-7016-88fe-a20e34adc661",
+        "clockLegalStatus": "sample",
+        "paymentClockId": "01924c36-b8ae-7346-8901-7fed40b46cde",
+        "repairClockId": "019237df-d973-7947-89d9-9f753f3587f1",
+        "acceptedAt": "2026-10-07T09:00:00Z",
+        "repairAgreedAt": "2026-10-07T09:00:00Z",
+        "paymentSetId": "0192ff66-53e7-7888-821a-f3a16034c95c",
+        "recordVersion": 1
+      }
+    },
+    "StatutoryOfferView": {
+      "offerId": "0192da29-200e-720e-8e5c-87abb4a59c0e",
+      "claimId": "01925538-7c0f-771a-87ea-e4f736311801",
+      "exposureId": "0192b35c-e07f-7f00-8936-0bbcfe46dd62",
+      "kind": "REASONED_OFFER",
+      "status": "ISSUED",
+      "amount": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "issuedAt": "2026-10-07T09:00:00Z",
+      "deliveredAt": "2026-10-07T09:00:00Z",
+      "deliveryEvidenceId": "0192fce3-c1d7-78d8-8685-33b34d8d6fbd",
+      "documentId": "01929767-8eb1-739e-846c-0aeca240af39",
+      "clockLegalStatus": "sample",
+      "paymentClockId": "01928c64-9185-781b-80fe-300e44b435a0",
+      "repairClockId": "0192d30e-b7ea-7f27-8f1f-2e21420c3955",
+      "acceptedAt": "2026-10-07T09:00:00Z",
+      "repairAgreedAt": "2026-10-07T09:00:00Z",
+      "paymentSetId": "019253a2-ed85-771e-8764-bfb34ef62693",
+      "recordVersion": 1
     },
     "TransactionSetApproveRequest": {
       "setId": "0192e43d-45b7-7993-8481-64872f898bd2",
