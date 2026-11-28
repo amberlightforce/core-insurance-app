@@ -2,6 +2,12 @@
   "Platform": {
     "Permissions": {
       "Grants": {
+        // Duplicates, merge and unmerge (BO-PTY-05): anyone who maintains parties asks for a merge (maker); the underwriting manager or an admin decides (PLT PTY.PARTY_MERGE).
+        "pty.Party.duplicates": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ],
+        "pty.Party.mergeList": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ],
+        "pty.Party.merge": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ],
+        "pty.Party.approveMerge": [ "Staff.UnderwritingManager", "Platform.Admin" ],
+        "pty.Party.unmerge": [ "Staff.UnderwritingManager", "Platform.Admin" ],
         "pty.Party.explainDuplicate": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
         "pty.Party.create": [ "Staff.Underwriter", "Staff.Billing" ],
         "pty.Party.update": [ "Staff.Underwriter", "Staff.Billing" ],
@@ -57,6 +63,12 @@
       // The underwriter may approve a standard-rate agreement up to EUR 250,000; the underwriting manager up to EUR 5,000,000 and elevated
       // rates. Ignored in Production (fail closed: DENY). Maker, editors and submitter can never approve their own version.
       "Grants": [
+        {
+          "Id": "pty-uwmanager-party-merge-illustrative", "Role": "Staff.UnderwritingManager", "Type": "PTY.PARTY_MERGE", "Illustrative": true
+        },
+        {
+          "Id": "pty-admin-party-merge-illustrative", "Role": "Platform.Admin", "Type": "PTY.PARTY_MERGE", "Illustrative": true
+        },
         {
           "Id": "pty-underwriter-commission-illustrative", "Role": "Staff.Underwriter", "Type": "PTY.COMMISSION_AGREEMENT", "Illustrative": true,
           "Limits": [

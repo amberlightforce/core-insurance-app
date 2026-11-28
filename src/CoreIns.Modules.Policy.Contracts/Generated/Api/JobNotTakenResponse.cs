@@ -4,15 +4,27 @@
 
 namespace CoreIns.Modules.Policy.Contracts.Api;
 
-/// <summary>pol.Job.notTaken result. PRD outputs: "job"</summary>
+/// <summary>pol.Job.notTaken result.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record JobNotTakenResponse
 {
-    /// <summary>PRD: "job"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("job")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Job { get; init; }
+    /// <summary>Contract member 'jobId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("jobId")]
+    public required global::CoreIns.SharedKernel.Identifiers.JobId JobId { get; init; }
+
+    /// <summary>Contract member 'state'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("state")]
+    public required global::CoreIns.Modules.Policy.Contracts.Api.JobStateCode State { get; init; }
+
+    /// <summary>Contract member 'reasonCode'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reasonCode")]
+    public required string ReasonCode { get; init; }
+
+    /// <summary>Contract member 'recordVersion'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordVersion")]
+    public required int RecordVersion { get; init; }
+
+    /// <summary>True when the job was already NotTaken (nothing was written, no event published)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("replayed")]
+    public required bool Replayed { get; init; }
 }

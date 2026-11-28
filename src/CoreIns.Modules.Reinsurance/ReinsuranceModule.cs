@@ -141,6 +141,18 @@ public static class ReinsuranceModule
         services.AddCommandAuditor<RenewProgramme, ProgrammeRenewResponse, RenewProgrammeAuditor>();
         services.AddCommand<RenewProgramme, ProgrammeRenewResponse, RenewProgrammeHandler>(
             CommandDescriptor.For("ri.Programme.renew") with { SupportsDryRun = true });
+        // BO-RI-02: programme approval (maker-checker through PLT, RI.PROGRAMME_APPROVE).
+        services.AddScoped<ProgrammeApprovals>();
+        services.AddScoped<IValidator<SubmitProgramme>, SubmitProgrammeValidator>();
+        services.AddCommandAuditor<SubmitProgramme, ProgrammeSubmitResponse, SubmitProgrammeAuditor>();
+        services.AddCommand<SubmitProgramme, ProgrammeSubmitResponse, SubmitProgrammeHandler>(
+            CommandDescriptor.For("ri.Programme.submit") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<ApproveProgramme>, ApproveProgrammeValidator>();
+        services.AddCommandAuditor<ApproveProgramme, ProgrammeApproveResponse, ApproveProgrammeAuditor>();
+        services.AddCommand<ApproveProgramme, ProgrammeApproveResponse, ApproveProgrammeHandler>(CommandDescriptor.For("ri.Programme.approve"));
+        services.AddScoped<IValidator<ReturnProgramme>, ReturnProgrammeValidator>();
+        services.AddCommandAuditor<ReturnProgramme, ProgrammeReturnResponse, ReturnProgrammeAuditor>();
+        services.AddCommand<ReturnProgramme, ProgrammeReturnResponse, ReturnProgrammeHandler>(CommandDescriptor.For("ri.Programme.return"));
 
         // BO-RI-10: premium accounting (deposit schedules, adjustment premium, sliding-scale commission). Adjustments and commission are
         // decided by their own approve operations, never in the generic approvals inbox.

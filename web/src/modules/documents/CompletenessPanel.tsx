@@ -71,7 +71,7 @@ export function CompletenessPanel() {
   );
 
   return (
-    <Section title={t('completeness.title')}>
+    <Section family="teal" title={t('completeness.title')}>
       <p className={styles.muted}>{t('completeness.lead')}</p>
       <div className={local.range}>
         <DatePicker

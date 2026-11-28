@@ -98,7 +98,8 @@ internal static class ProgrammeSupport
     /// Checks the contracts of the ladder against the stored registry: each exists in the legal entity, is not expired or closed, covers the
     /// programme period with its treaty period, and has a layer with the same attachment and limit as the programme layer it carries.
     /// </summary>
-    public static async Task<DomainError?> CheckContractsAsync(ReinsuranceDbContext db, LegalEntityId legalEntity, ProgrammeContent content, CancellationToken cancellationToken)
+    public static async Task<DomainError?> CheckContractsAsync(
+        ReinsuranceDbContext db, LegalEntityId legalEntity, ProgrammeContent content, string lineCode, RiProgrammeId? except, CancellationToken cancellationToken)
     {
         var ids = content.ContractIds;
         var contracts = await db.Contracts.AsNoTracking().Where(c => ids.Contains(c.ContractId) && c.LegalEntityId == legalEntity).ToDictionaryAsync(c => c.ContractId, cancellationToken).ConfigureAwait(false);
@@ -121,6 +122,20 @@ internal static class ProgrammeSupport
                 continue;
             }
 
+            var exceptId = except?.Value;
+            var usedBy = await (
+                from l in db.ProgrammeLayers.AsNoTracking()
+                join v in db.ProgrammeVersions.AsNoTracking() on l.VersionId equals v.VersionId
+                join p in db.Programmes.AsNoTracking() on v.ProgrammeId equals p.ProgrammeId
+                where l.ContractId == layer.ContractId && (exceptId == null || p.ProgrammeId != except) && v.Status != ProgrammeStatuses.Superseded
+                    && v.ValidFrom < content.ValidTo && content.ValidFrom < v.ValidTo
+                select p.Code).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+            if (usedBy is not null)
+            {
+                Add(path, "CONTRACT_IN_OTHER_PROGRAMME");
+                continue;
+            }
+
             var first = firstVersions[layer.ContractId];
             if (first.ValidFrom > content.ValidFrom || first.ValidTo < content.ValidTo)
             {
@@ -128,6 +143,12 @@ internal static class ProgrammeSupport
             }
 
             var current = await ContractVersions.LatestAsync(db, layer.ContractId, cancellationToken).ConfigureAwait(false);
+            var scope = await db.Sections.AsNoTracking().Where(x => x.VersionId == current.VersionId && x.Rev == current.ContentRev).Select(x => x.ProductCodes).FirstAsync(cancellationToken).ConfigureAwait(false);
+            if (scope.Length > 0 && !scope.Contains(lineCode, StringComparer.Ordinal))
+            {
+                Add(path, "CONTRACT_SCOPE_EXCLUDES_LINE");
+            }
+
             var carried = await db.Layers.AsNoTracking()
                 .AnyAsync(l => l.VersionId == current.VersionId && l.Rev == current.ContentRev && l.Attachment == layer.Attachment && l.LimitAmount == layer.Limit, cancellationToken)
                 .ConfigureAwait(false);
@@ -232,6 +253,8 @@ internal static class ProgrammeSupport
                 }),
             ],
             RenewedFromId = programme.RenewedFromId?.Value,
+            ApprovalRequestId = current.ApprovalRequestId is { } rid ? new ApprovalRequestId(rid) : null,
+            ReturnReason = current.ReturnReason,
             Versions =
             [
                 .. history.Select(v => new RiProgrammeVersionSummary

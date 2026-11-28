@@ -2755,6 +2755,10 @@ export interface components {
             contracts: components["schemas"]["RiProgrammeContract"][];
             /** @description The programme this one renewed, when it was created by renew */
             renewedFromId?: components["schemas"]["Uuid"] | null;
+            /** @description The PLT approval request of the last submit of the current version */
+            approvalRequestId?: components["schemas"]["Uuid"] | null;
+            /** @description The checker's reason when the current version was returned to DRAFT */
+            returnReason?: components["schemas"]["Text"] | null;
             versions: components["schemas"]["RiProgrammeVersionSummary"][];
             createdAt: components["schemas"]["Instant"];
         };
@@ -2764,53 +2768,37 @@ export interface components {
             before: components["schemas"]["Text"] | null;
             after: components["schemas"]["Text"] | null;
         }[];
-        /** @description ri.Programme.submit request. PRD inputs: "programme data; period; decision" */
+        /** @description ri.Programme.submit request: DRAFT -> PENDING_APPROVAL; RI opens the PLT approval RI.PROGRAMME_APPROVE bound to the content hash (the enterer is the maker and can never approve). */
         ProgrammeSubmitRequest: {
-            /** @description PRD: "programme data" */
-            programmeData?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            programmeId: components["schemas"]["Uuid"];
+            expectedRecordVersion: number;
         };
-        /** @description ri.Programme.submit result. PRD outputs: "programme, diff" */
+        /** @description ri.Programme.submit result */
         ProgrammeSubmitResponse: {
-            /** @description PRD: "programme" */
-            programme?: components["schemas"]["Unspecified"];
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
+            programme: components["schemas"]["RiProgramme"];
+            approvalRequestId: components["schemas"]["Uuid"];
         };
-        /** @description ri.Programme.approve request. PRD inputs: "programme data; period; decision" */
+        /** @description ri.Programme.approve request. The approver must not have entered, edited or submitted the programme (RI-ERR-SOD); every contract of the ladder must be Approved or Active (RI-ERR-STATE). */
         ProgrammeApproveRequest: {
-            /** @description PRD: "programme data" */
-            programmeData?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            programmeId: components["schemas"]["Uuid"];
+            expectedRecordVersion: number;
         };
-        /** @description ri.Programme.approve result. PRD outputs: "programme, diff" */
+        /** @description ri.Programme.approve result. The version becomes ACTIVE; the previously active version of the programme becomes SUPERSEDED in the same transaction. */
         ProgrammeApproveResponse: {
-            /** @description PRD: "programme" */
-            programme?: components["schemas"]["Unspecified"];
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
+            programme: components["schemas"]["RiProgramme"];
+            /** @description The version that was superseded by this approval, if any */
+            supersededVersionNo?: number | null;
         };
-        /** @description ri.Programme.return request. PRD inputs: "programme data; period; decision" */
+        /** @description ri.Programme.return request. Sends a pending version back to DRAFT with the checker's reason; the PLT request is rejected. */
         ProgrammeReturnRequest: {
-            /** @description PRD: "programme data" */
-            programmeData?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-            /** @description PRD: "decision" */
-            decision?: components["schemas"]["Unspecified"];
+            programmeId: components["schemas"]["Uuid"];
+            expectedRecordVersion: number;
+            /** @description Why the programme is returned (required) */
+            reason: components["schemas"]["Text"];
         };
-        /** @description ri.Programme.return result. PRD outputs: "programme, diff" */
+        /** @description ri.Programme.return result */
         ProgrammeReturnResponse: {
-            /** @description PRD: "programme" */
-            programme?: components["schemas"]["Unspecified"];
-            /** @description PRD: "diff" */
-            diff?: components["schemas"]["Unspecified"];
+            programme: components["schemas"]["RiProgramme"];
         };
         /** @description ri.Programme.get result */
         ProgrammeGetResponse: {
@@ -4683,12 +4671,6 @@ export interface components {
             /** @description Field-level errors. */
             errors?: components["schemas"]["ProblemFieldError"][];
         };
-        /**
-         * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
-         *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
-         *     members until then.
-         */
-        Unspecified: unknown;
         /** @description Business number issued through PLT numbering (NumberingScheme); format is configuration. */
         BusinessNumber: string;
         /** @description One layer of an excess-of-loss reinsurance contract (PRD-08 REQ-RI-031..-043; SL4-CONTRACTS). Amounts are in the contract currency (EUR only in slice 4). attachment, limit and aad are always set; aal is null when the layer has no annual aggregate limit. */
@@ -4704,6 +4686,12 @@ export interface components {
             /** @description Annual aggregate limit; null when none */
             aal?: components["schemas"]["Money"] | null;
         };
+        /**
+         * @description Value whose shape the PRD row does not define (it gives only a name). The owning work package defines it in a
+         *     minor version of this contract, from its PRD, without inventing business rules. Callers must not depend on its
+         *     members until then.
+         */
+        Unspecified: unknown;
         /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
         Sha256: string;
     };

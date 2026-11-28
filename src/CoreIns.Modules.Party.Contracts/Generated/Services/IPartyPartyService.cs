@@ -38,16 +38,27 @@ public interface IPartyPartyService
     /// <param name="revealPurpose">Purpose code for showing P2 values unmasked (REQ-PTY-044). Needs permission pty.Party.revealP2; every unmasked view is audited with the purpose. Without it P2 values are masked.</param>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyGetResponse> GetAsync(string id, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, global::CoreIns.SharedKernel.Instant? knownAt = null, string? partyNumber = null, string? profile = null, string? revealPurpose = null, global::System.Threading.CancellationToken cancellationToken = default);
 
-    /// <summary>Merge or unmerge</summary>
+    /// <summary>Request a merge of two parties (maker)</summary>
     /// <remarks>
     /// <para>Operation pty.Party.merge (command; HTTP POST /api/pty/v1/parties/merge).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W6.</para>
     /// <para>Exposure: ui; consumers: MIG.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: PTY-ERR-NOT-AVAILABLE (501), PTY-ERR-MERGE-CROSS-ENTITY (422), PTY-ERR-WINDOW-CLOSED (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PTY-ERR-NOT-FOUND (404), PTY-ERR-MERGED (409), PTY-ERR-RESTRICTED (409), PTY-ERR-STATE (409), PTY-ERR-MERGE-CROSS-ENTITY (422), PTY-ERR-MERGE-IDENTIFIER-CONFLICT (422), PTY-ERR-WINDOW-CLOSED (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyMergeResponse> MergeAsync(global::CoreIns.Modules.Party.Contracts.Api.PartyMergeRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
+
+    /// <summary>Resolve the surviving party</summary>
+    /// <remarks>
+    /// <para>Operation pty.Party.resolveSurvivor (query; HTTP GET /api/pty/v1/parties/{id}/survivor).</para>
+    /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
+    /// <para>Status: full. Wave W6.</para>
+    /// <para>Exposure: ui; consumers: BIL, CHN, CLM, POL, UW.</para>
+    /// <para>Errors: PTY-ERR-NOT-FOUND (404).</para>
+    /// </remarks>
+    /// <param name="id">Party id</param>
+    global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartySurvivorResponse> ResolveSurvivorAsync(global::System.Guid id, global::System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>Search parties</summary>
     /// <remarks>
@@ -76,14 +87,14 @@ public interface IPartyPartyService
     /// <param name="limit">Page size, at most 200 (contract §3.5.5).</param>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartySearchPage> SearchByCriteriaAsync(global::CoreIns.Modules.Party.Contracts.Api.PartySearchCriteria request, global::CoreIns.Platform.Contracts.ValidAt? validAt = null, string? cursor = null, int? limit = null, global::System.Threading.CancellationToken cancellationToken = default);
 
-    /// <summary>Unmerge within the window (stated separately for MIG and steward callers; same operation as the unmerge half …</summary>
+    /// <summary>Unmerge within the window</summary>
     /// <remarks>
     /// <para>Operation pty.Party.unmerge (command; HTTP POST /api/pty/v1/parties/unmerge).</para>
     /// <para>Maturity: pre-release (D-API-06): the owner may still tighten inputs and outputs until the first consumer work package that calls it merges.</para>
     /// <para>Status: full. Wave W2.</para>
     /// <para>Exposure: ui; consumers: MIG.</para>
     /// <para>Command: idempotent on options.IdempotencyKey; supports dry-run (options.DryRun).</para>
-    /// <para>Errors: PTY-ERR-NOT-AVAILABLE (501), PTY-ERR-MERGE-CROSS-ENTITY (422), PTY-ERR-WINDOW-CLOSED (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
+    /// <para>Errors: PTY-ERR-NOT-FOUND (404), PTY-ERR-MERGED (409), PTY-ERR-RESTRICTED (409), PTY-ERR-STATE (409), PTY-ERR-MERGE-CROSS-ENTITY (422), PTY-ERR-MERGE-IDENTIFIER-CONFLICT (422), PTY-ERR-WINDOW-CLOSED (422), PTY-ERR-IDEMPOTENCY-MISMATCH (409).</para>
     /// </remarks>
     global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.PartyUnmergeResponse> UnmergeAsync(global::CoreIns.Modules.Party.Contracts.Api.PartyUnmergeRequest request, global::CoreIns.Platform.Contracts.CommandOptions options, global::System.Threading.CancellationToken cancellationToken = default);
 

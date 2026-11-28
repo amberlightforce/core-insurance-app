@@ -12,6 +12,10 @@
         "bil.Payment.take": [ "Staff.Billing" ],
         "bil.Receipt.get": [ "Staff.Billing", "Platform.Admin" ],
         "bil.Allocation.allocate": [ "Staff.Billing" ],
+        // BO-BIL-07: receipt list for billing staff; unallocate/reallocate need BIL.ALLOCATION_REVERSE authority over the amount (checked again by the handler).
+        "bil.Receipt.list": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
+        "bil.Allocation.unallocate": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.Allocation.reallocate": [ "Staff.Billing", "Staff.BillingManager" ],
         // SL2-BIL-DISB: Claims calls create/request in process; the API serves reads (claims roles: SL2-PLT).
         "bil.PayeeAccount.create": [ "Staff.Billing", "Staff.ClaimsHandler", "Staff.ClaimsManager" ],
         "bil.PayeeAccount.list": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
@@ -84,6 +88,16 @@
         },
         {
           "Id": "bil-billingmgr-disb-illustrative", "Role": "Staff.BillingManager", "Type": "BIL.DISBURSEMENT", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ]
+        },
+        // BO-BIL-07: reversal of allocations by amount (ILLUSTRATIVE, ignored in Production: fail closed). Above the actor's limit the
+        // reversal is refused; the billing manager holds the higher limit.
+        {
+          "Id": "bil-billing-allocrev-illustrative", "Role": "Staff.Billing", "Type": "BIL.ALLOCATION_REVERSE", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "5000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "bil-billingmgr-allocrev-illustrative", "Role": "Staff.BillingManager", "Type": "BIL.ALLOCATION_REVERSE", "Illustrative": true,
           "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ]
         },
         // NX-EC-09: stop/void of a disbursement by amount (ILLUSTRATIVE, ignored in Production: fail closed). A payment above the

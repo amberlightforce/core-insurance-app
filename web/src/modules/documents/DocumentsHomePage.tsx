@@ -185,7 +185,11 @@ export function DocumentsHomePage() {
         overline={t('overline')}
         description={t('home.lead')}
       />
-      <Section title={t('library.title')} count={rows.length > 0 ? rows.length : undefined}>
+      <Section
+        family="brand"
+        title={t('library.title')}
+        count={rows.length > 0 ? rows.length : undefined}
+      >
         <form
           noValidate
           aria-label={t('filters.title')}
@@ -349,7 +353,7 @@ export function DocumentsHomePage() {
         </QueryView>
       </Section>
       {isAdmin ? <CompletenessPanel /> : null}
-      <Section title={t('lookup.title')}>
+      <Section family="plum" title={t('lookup.title')}>
         <p className={styles.muted}>{t('lookup.lead')}</p>
         <ObjectLookup />
       </Section>

@@ -566,8 +566,33 @@
       }
     },
     "pty.Party.merge": {
-      "mergeRecord": "unspecified",
-      "approvalRequest": "unspecified"
+      "merge": {
+        "mergeId": "01926988-8fc4-77ae-8247-814b5fad9a61",
+        "survivorPartyId": "0192d1d0-96c2-74e0-8ed6-534c6893b4dd",
+        "mergedPartyId": "0192258f-9523-7467-853a-d4333a501259",
+        "survivorPartyNumber": "sample",
+        "mergedPartyNumber": "sample",
+        "status": "PENDING_APPROVAL",
+        "reason": "sample",
+        "requestedBy": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "approvalRequestId": "01920890-d590-7da5-8ccb-35a58e12ce53",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "sample",
+        "executedAt": "2026-10-07T09:00:00Z",
+        "unmergeWindowEnd": "2026-10-07T09:00:00Z",
+        "unmergedAt": "2026-10-07T09:00:00Z",
+        "unmergedBy": "sample",
+        "priorStatus": "SAMPLE_CODE"
+      }
+    },
+    "pty.Party.resolveSurvivor": {
+      "requestedPartyId": "0192e7b7-b343-7929-8813-dc9c6485c04d",
+      "survivorPartyId": "0192042c-2f30-7fb6-8daa-0b3a3948aab6",
+      "survivorPartyNumber": "sample",
+      "merged": true,
+      "mergeId": "0192afbc-e7e1-7ecd-8031-d98c68ae4b12"
     },
     "pty.Party.search": {
       "items": [
@@ -614,8 +639,27 @@
       "limit": 1
     },
     "pty.Party.unmerge": {
-      "restoredParties": "unspecified",
-      "approvalRequest": "unspecified"
+      "merge": {
+        "mergeId": "0192adf6-4702-70b5-83fc-9d89f6b6e4ca",
+        "survivorPartyId": "0192ea0c-ee60-70f7-8b13-81f8b79cfd50",
+        "mergedPartyId": "01920fbc-54df-7251-8d1f-cf8f213fbd5a",
+        "survivorPartyNumber": "sample",
+        "mergedPartyNumber": "sample",
+        "status": "PENDING_APPROVAL",
+        "reason": "sample",
+        "requestedBy": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "approvalRequestId": "01929bee-3013-7e98-8974-0b7789c7ee69",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "sample",
+        "executedAt": "2026-10-07T09:00:00Z",
+        "unmergeWindowEnd": "2026-10-07T09:00:00Z",
+        "unmergedAt": "2026-10-07T09:00:00Z",
+        "unmergedBy": "sample",
+        "priorStatus": "SAMPLE_CODE"
+      },
+      "restoredPartyId": "01922c45-7e9e-7eb0-8d17-03d2200ec624"
     },
     "pty.Party.update": {
       "party": {
@@ -1768,6 +1812,92 @@
     "DsarRestrictResponse": {
       "statusRestricted": "unspecified"
     },
+    "DuplicateCandidate": {
+      "candidateKey": "sample",
+      "score": 1,
+      "reasons": [
+        "SAMPLE_CODE"
+      ],
+      "partyA": {
+        "partyId": "0192a7a1-0e7f-7f2d-8003-8b68b7681d91",
+        "partyNumber": "SAMPLE-000001",
+        "partyType": "PERSON",
+        "status": "SAMPLE_CODE",
+        "displayName": "sample",
+        "displayNameLatin": "sample",
+        "maskedIdentifier": {
+          "scheme": "SAMPLE_CODE",
+          "maskedValue": "sample"
+        },
+        "primaryPostcode": "sample",
+        "primaryLocality": "sample",
+        "matchQuality": "EXACT",
+        "similarity": "12.50"
+      },
+      "partyB": {
+        "partyId": "0192db50-de63-72d9-88f8-d1a3edb45b75",
+        "partyNumber": "SAMPLE-000001",
+        "partyType": "PERSON",
+        "status": "SAMPLE_CODE",
+        "displayName": "sample",
+        "displayNameLatin": "sample",
+        "maskedIdentifier": {
+          "scheme": "SAMPLE_CODE",
+          "maskedValue": "sample"
+        },
+        "primaryPostcode": "sample",
+        "primaryLocality": "sample",
+        "matchQuality": "EXACT",
+        "similarity": "12.50"
+      },
+      "mergeBlockedReason": "SAMPLE_CODE"
+    },
+    "DuplicateCandidatePage": {
+      "items": [
+        {
+          "candidateKey": "sample",
+          "score": 1,
+          "reasons": [
+            "SAMPLE_CODE"
+          ],
+          "partyA": {
+            "partyId": "0192eafd-8155-7612-8729-2f06a35d60ba",
+            "partyNumber": "SAMPLE-000001",
+            "partyType": "PERSON",
+            "status": "SAMPLE_CODE",
+            "displayName": "sample",
+            "displayNameLatin": "sample",
+            "maskedIdentifier": {
+              "scheme": "SAMPLE_CODE",
+              "maskedValue": "sample"
+            },
+            "primaryPostcode": "sample",
+            "primaryLocality": "sample",
+            "matchQuality": "EXACT",
+            "similarity": "12.50"
+          },
+          "partyB": {
+            "partyId": "0192fa0e-73bf-73c7-88e5-3e257584cd86",
+            "partyNumber": "SAMPLE-000001",
+            "partyType": "PERSON",
+            "status": "SAMPLE_CODE",
+            "displayName": "sample",
+            "displayNameLatin": "sample",
+            "maskedIdentifier": {
+              "scheme": "SAMPLE_CODE",
+              "maskedValue": "sample"
+            },
+            "primaryPostcode": "sample",
+            "primaryLocality": "sample",
+            "matchQuality": "EXACT",
+            "similarity": "12.50"
+          },
+          "mergeBlockedReason": "SAMPLE_CODE"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
     "IdentifierInput": {
       "scheme": "SAMPLE_CODE",
       "value": "sample",
@@ -2552,13 +2682,105 @@
       "validatorVersion": "sample",
       "validFrom": "2026-10-07"
     },
+    "PartyMergeApproveRequest": {
+      "mergeId": "01927970-1512-776b-8b7e-a0839409d0d6",
+      "decision": "APPROVE",
+      "comment": "sample"
+    },
+    "PartyMergeApproveResponse": {
+      "merge": {
+        "mergeId": "01923c50-44ab-7782-8776-577e3ad2baf6",
+        "survivorPartyId": "0192cbca-f3e9-7140-899c-3986b2caccec",
+        "mergedPartyId": "01924eeb-ef8b-7b1d-8818-7fb8eb5047be",
+        "survivorPartyNumber": "sample",
+        "mergedPartyNumber": "sample",
+        "status": "PENDING_APPROVAL",
+        "reason": "sample",
+        "requestedBy": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "approvalRequestId": "0192de66-bec2-7f9b-8ca1-89b70d58b236",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "sample",
+        "executedAt": "2026-10-07T09:00:00Z",
+        "unmergeWindowEnd": "2026-10-07T09:00:00Z",
+        "unmergedAt": "2026-10-07T09:00:00Z",
+        "unmergedBy": "sample",
+        "priorStatus": "SAMPLE_CODE"
+      }
+    },
+    "PartyMergePage": {
+      "items": [
+        {
+          "mergeId": "01926178-0f43-70f3-8ca1-e685a63adeb3",
+          "survivorPartyId": "0192038f-d746-77b7-8e1b-5d0c431b0282",
+          "mergedPartyId": "01924bf5-2337-7185-8459-b8222ccee98a",
+          "survivorPartyNumber": "sample",
+          "mergedPartyNumber": "sample",
+          "status": "PENDING_APPROVAL",
+          "reason": "sample",
+          "requestedBy": "sample",
+          "requestedAt": "2026-10-07T09:00:00Z",
+          "approvalRequestId": "0192ad30-0b73-7294-877e-1218e9ac1134",
+          "decidedBy": "sample",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "decisionComment": "sample",
+          "executedAt": "2026-10-07T09:00:00Z",
+          "unmergeWindowEnd": "2026-10-07T09:00:00Z",
+          "unmergedAt": "2026-10-07T09:00:00Z",
+          "unmergedBy": "sample",
+          "priorStatus": "SAMPLE_CODE"
+        }
+      ],
+      "nextCursor": "sample",
+      "limit": 1
+    },
     "PartyMergeRequest": {
-      "candidates": "unspecified",
-      "survivorshipDecisions": "unspecified"
+      "survivorPartyId": "01924d0b-cc21-72c9-8e89-15c3311bd561",
+      "mergedPartyId": "0192dce7-efc4-762f-88bf-e66fabb0225a",
+      "reason": "sample"
     },
     "PartyMergeResponse": {
-      "mergeRecord": "unspecified",
-      "approvalRequest": "unspecified"
+      "merge": {
+        "mergeId": "01925baa-dddd-7963-8eb9-9670829d317e",
+        "survivorPartyId": "019227a0-4480-7d30-8137-b3f76e844520",
+        "mergedPartyId": "0192688f-b655-7b1f-89de-b94408f64c68",
+        "survivorPartyNumber": "sample",
+        "mergedPartyNumber": "sample",
+        "status": "PENDING_APPROVAL",
+        "reason": "sample",
+        "requestedBy": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "approvalRequestId": "0192b36d-cea4-7a2b-8bec-fea7abdaed43",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "sample",
+        "executedAt": "2026-10-07T09:00:00Z",
+        "unmergeWindowEnd": "2026-10-07T09:00:00Z",
+        "unmergedAt": "2026-10-07T09:00:00Z",
+        "unmergedBy": "sample",
+        "priorStatus": "SAMPLE_CODE"
+      }
+    },
+    "PartyMergeView": {
+      "mergeId": "0192828f-a8ff-7010-834e-a9ad9c21c013",
+      "survivorPartyId": "01924a67-3410-7a74-8d71-84fe2b87d9df",
+      "mergedPartyId": "01921095-81ef-745f-8589-e114161f3689",
+      "survivorPartyNumber": "sample",
+      "mergedPartyNumber": "sample",
+      "status": "PENDING_APPROVAL",
+      "reason": "sample",
+      "requestedBy": "sample",
+      "requestedAt": "2026-10-07T09:00:00Z",
+      "approvalRequestId": "0192951d-eca0-773f-8ec5-6ea6f6485978",
+      "decidedBy": "sample",
+      "decidedAt": "2026-10-07T09:00:00Z",
+      "decisionComment": "sample",
+      "executedAt": "2026-10-07T09:00:00Z",
+      "unmergeWindowEnd": "2026-10-07T09:00:00Z",
+      "unmergedAt": "2026-10-07T09:00:00Z",
+      "unmergedBy": "sample",
+      "priorStatus": "SAMPLE_CODE"
     },
     "PartyNameView": {
       "form": "NATIVE",
@@ -2698,13 +2920,39 @@
       "nextCursor": "sample",
       "limit": 1
     },
+    "PartySurvivorResponse": {
+      "requestedPartyId": "01924d65-e751-749d-8889-26a90c61a696",
+      "survivorPartyId": "019219d0-39a4-7554-80c5-956bf65d98db",
+      "survivorPartyNumber": "sample",
+      "merged": true,
+      "mergeId": "01929b07-25ab-7383-80f9-9de54590b77b"
+    },
     "PartyUnmergeRequest": {
       "mergeId": "0192133c-f22e-7bdc-8ddc-44095a479197",
-      "assignmentPostMergeChanges": "unspecified"
+      "reason": "sample"
     },
     "PartyUnmergeResponse": {
-      "restoredParties": "unspecified",
-      "approvalRequest": "unspecified"
+      "merge": {
+        "mergeId": "0192c466-992b-7fd6-8129-d4dca4a6834d",
+        "survivorPartyId": "01921c6e-7640-7552-8df0-f8e75a001109",
+        "mergedPartyId": "01929aa5-a180-7ecc-8e8f-53ef7854ac29",
+        "survivorPartyNumber": "sample",
+        "mergedPartyNumber": "sample",
+        "status": "PENDING_APPROVAL",
+        "reason": "sample",
+        "requestedBy": "sample",
+        "requestedAt": "2026-10-07T09:00:00Z",
+        "approvalRequestId": "0192414e-31bd-7066-84f0-3854423a7d89",
+        "decidedBy": "sample",
+        "decidedAt": "2026-10-07T09:00:00Z",
+        "decisionComment": "sample",
+        "executedAt": "2026-10-07T09:00:00Z",
+        "unmergeWindowEnd": "2026-10-07T09:00:00Z",
+        "unmergedAt": "2026-10-07T09:00:00Z",
+        "unmergedBy": "sample",
+        "priorStatus": "SAMPLE_CODE"
+      },
+      "restoredPartyId": "01921235-c2e9-7d0e-864e-49929ecb9b48"
     },
     "PartyUpdateRequest": {
       "expectedRecordVersion": 1,

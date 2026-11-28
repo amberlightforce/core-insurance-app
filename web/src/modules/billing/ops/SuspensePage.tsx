@@ -95,7 +95,7 @@ function MatchPanel({ receipt }: { receipt: SuspenseListItem }) {
   const over = chosenCents > available;
 
   return (
-    <Section title={t('suspense.match.title', { number: receipt.receiptNumber })}>
+    <Section family="info" title={t('suspense.match.title', { number: receipt.receiptNumber })}>
       <KeyValueList
         aria-label={t('suspense.match.facts')}
         items={[

@@ -787,8 +787,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Manual allocation
-         * @description Manual allocation
+         * Reverse allocations
+         * @description Reverse allocations of a receipt (BO-BIL-07): append-only reversal rows and one ALLOCATION_REVERSED ledger entry; the cash returns to the receipt's unapplied balance (the receipt goes back to suspense when nothing stays allocated) and the invoices roll back. Refused when the period is locked or the term is refunded; limited by BIL.ALLOCATION_REVERSE authority.
          *
          *     PRD inputs: receipt or suspense, lines
          *     PRD outputs: allocations
@@ -810,8 +810,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Manual allocation
-         * @description Manual allocation
+         * Reallocate cash
+         * @description Reallocate cash (BO-BIL-07): reverse the named allocations and allocate the freed cash to other invoices in one transaction.
          *
          *     PRD inputs: receipt or suspense, lines
          *     PRD outputs: allocations
@@ -2399,6 +2399,8 @@ export interface components {
             ruleId: components["schemas"]["Code"];
             /** @enum {string} */
             source: "RULE" | "MANUAL";
+            /** @description Set on a reversal row (negative amount) - the allocation it reverses */
+            reversesAllocationId?: components["schemas"]["Uuid"];
             recordedAt: components["schemas"]["Instant"];
         };
         /** @description The fiscal document CMP issued for the invoiced transaction (REQ-BIL-086, REQ-BIL-096, REQ-BIL-098). CMP is the sole fiscal issuer (D3); BIL stores its references for display. */
@@ -2721,17 +2723,19 @@ export interface components {
         ReceiptGetResponse: {
             receipt: components["schemas"]["ReceiptView"];
             allocations: components["schemas"]["AllocationView"][];
-            /** @description Reversals (none in SL-BIL) */
-            reversals: components["schemas"]["OpenObject"][];
+            /** @description Reversal rows of allocations (negative amounts, BO-BIL-07) */
+            reversals: components["schemas"]["AllocationView"][];
         };
-        /** @description bil.Receipt.list result. PRD outputs: "receipt, allocations, reversals" */
+        /**
+         * @description Receipt state (the wire code of PaymentState)
+         * @enum {string}
+         */
+        ReceiptState: "RECEIVED" | "ALLOCATED" | "PARTIALLY_ALLOCATED" | "SUSPENSE" | "REVERSED" | "REFUNDED";
+        /** @description A receipt of bil.Receipt.list. The bank reference is masked (only its last four characters show); payer details are not part of the receipt. */
         ReceiptListItem: {
-            /** @description PRD: "receipt" */
-            receipt?: components["schemas"]["Unspecified"];
-            /** @description PRD: "allocations" */
-            allocations?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reversals" */
-            reversals?: components["schemas"]["Unspecified"];
+            receipt: components["schemas"]["ReceiptView"];
+            /** @description Bank reference with all but the last four characters replaced by asterisks */
+            bankReferenceMasked?: string;
         };
         /** @description Page of bil.Receipt.list results (cursor pagination, contract §3.5.5) */
         ReceiptListPage: components["schemas"]["PageEnvelope"] & {
@@ -2750,33 +2754,41 @@ export interface components {
             allocations: components["schemas"]["AllocationView"][];
             receipt: components["schemas"]["ReceiptView"];
         };
-        /** @description bil.Allocation.unallocate request. PRD inputs: "receipt or suspense, lines" */
+        /** @description bil.Allocation.unallocate request (BO-BIL-07): reverse the live allocations of a receipt (all of them, or the named ones) with a reason */
         AllocationUnallocateRequest: {
-            /** @description PRD: "receipt or suspense" (optional) */
-            receipt?: components["schemas"]["Unspecified"];
-            /** @description PRD: "receipt or suspense" (optional) */
-            suspense?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-        } & (unknown | unknown);
-        /** @description bil.Allocation.unallocate result. PRD outputs: "allocations" */
-        AllocationUnallocateResponse: {
-            /** @description PRD: "allocations" */
-            allocations?: components["schemas"]["Unspecified"];
+            receiptId: components["schemas"]["Uuid"];
+            /** @description Allocations (original rows, not reversals) to reverse; omitted or empty reverses every live allocation of the receipt */
+            allocationIds?: components["schemas"]["Uuid"][];
+            /** @description Reason of the reversal, capital letters, digits and underscores (e.g. MISAPPLIED) */
+            reasonCode: components["schemas"]["Code"];
+            comment?: string;
         };
-        /** @description bil.Allocation.reallocate request. PRD inputs: "receipt or suspense, lines" */
+        /** @description bil.Allocation.unallocate result: the reversal rows (negative amounts), the receipt as it now stands and the reversal ledger entry */
+        AllocationUnallocateResponse: {
+            reversals: components["schemas"]["AllocationView"][];
+            receipt: components["schemas"]["ReceiptView"];
+            ledgerEntryId: components["schemas"]["Uuid"];
+        };
+        /** @description bil.Allocation.reallocate request (BO-BIL-07): reverse allocations and apply the cash to other invoices in one transaction */
         AllocationReallocateRequest: {
-            /** @description PRD: "receipt or suspense" (optional) */
-            receipt?: components["schemas"]["Unspecified"];
-            /** @description PRD: "receipt or suspense" (optional) */
-            suspense?: components["schemas"]["Unspecified"];
-            /** @description PRD: "lines" */
-            lines?: components["schemas"]["Unspecified"][];
-        } & (unknown | unknown);
-        /** @description bil.Allocation.reallocate result. PRD outputs: "allocations" */
+            receiptId: components["schemas"]["Uuid"];
+            /** @description Allocations to reverse; omitted or empty reverses every live allocation of the receipt */
+            allocationIds?: components["schemas"]["Uuid"][];
+            reasonCode: components["schemas"]["Code"];
+            comment?: string;
+            /** @description The new allocation, as for bil.Allocation.allocate */
+            lines: {
+                invoiceId: components["schemas"]["Uuid"];
+                amount: components["schemas"]["Money"];
+            }[];
+        };
+        /** @description bil.Allocation.reallocate result */
         AllocationReallocateResponse: {
-            /** @description PRD: "allocations" */
-            allocations?: components["schemas"]["Unspecified"];
+            reversals: components["schemas"]["AllocationView"][];
+            allocations: components["schemas"]["AllocationView"][];
+            receipt: components["schemas"]["ReceiptView"];
+            /** @description The reversal entry */
+            ledgerEntryId: components["schemas"]["Uuid"];
         };
         /**
          * @description State of a suspense item: OPEN (unapplied cash awaiting a decision), REFUND_PENDING (a refund to the sender waits for approval), ALLOCATED (applied to invoices), REFUNDED (paid back to the sender)
@@ -3809,14 +3821,6 @@ export interface components {
             amount: components["schemas"]["Money"];
         };
         Text: string;
-        /** @description Value inside an open structure. JSON numbers are not allowed at any depth: amounts are Money objects or decimal strings, counts are integers only where a typed field says so. */
-        OpenValue: string | boolean | null | components["schemas"]["OpenValue"][] | {
-            [key: string]: components["schemas"]["OpenValue"];
-        };
-        /** @description Structure not specified by the owning PRD; consumers must not rely on members until the producer defines them in a minor version. Bare JSON numbers are rejected at any depth (amounts must be Money or decimal strings). */
-        OpenObject: {
-            [key: string]: components["schemas"]["OpenValue"];
-        };
         /**
          * @description Disbursement source (contract D1/D4, D-CON-21): refund (BIL; BIL_REFUND for policy refunds from slice 3, BIL for earlier refund sources), claim payment (CLM; CLM_CLAIM_PAYMENT in the PRD-06 source register, REQ-BIL-354), RI_SETTLEMENT, FS_CLEARING, CMP_REDRESS, TAX_REMITTANCE. Kept open so a new decided source is an additive change.
          * @example BIL
@@ -3829,6 +3833,14 @@ export interface components {
          * @example TAX_REMITTANCE
          */
         DisbursementSourceType: string;
+        /** @description Value inside an open structure. JSON numbers are not allowed at any depth: amounts are Money objects or decimal strings, counts are integers only where a typed field says so. */
+        OpenValue: string | boolean | null | components["schemas"]["OpenValue"][] | {
+            [key: string]: components["schemas"]["OpenValue"];
+        };
+        /** @description Structure not specified by the owning PRD; consumers must not rely on members until the producer defines them in a minor version. Bare JSON numbers are rejected at any depth (amounts must be Money or decimal strings). */
+        OpenObject: {
+            [key: string]: components["schemas"]["OpenValue"];
+        };
         /** @description SHA-256 hash, lower-case hex (canonical JSON RFC 8785 where the hashed object is JSON, D-ARC-12). */
         Sha256: string;
         /**
@@ -5486,10 +5498,18 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
-                /** @description PRD: "ids" */
-                ids?: string[];
-                /** @description PRD: "filters" */
-                filters?: string;
+                billingAccountId?: components["schemas"]["Uuid"];
+                state?: components["schemas"]["ReceiptState"];
+                /** @description Value date on or after */
+                valueDateFrom?: components["schemas"]["LocalDate"];
+                /** @description Value date on or before */
+                valueDateTo?: components["schemas"]["LocalDate"];
+                /** @description Bank reference starts with (case-sensitive) */
+                bankReferencePrefix?: string;
+                /** @description Receipt amount at least (decimal in the receipt currency) */
+                amountMin?: components["schemas"]["Decimal"];
+                /** @description Receipt amount at most (decimal in the receipt currency) */
+                amountMax?: components["schemas"]["Decimal"];
             };
             header?: {
                 /**

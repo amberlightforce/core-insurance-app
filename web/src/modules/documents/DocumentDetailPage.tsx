@@ -271,15 +271,15 @@ function DocumentBody({ document }: { document: DocumentView }) {
       ) : null}
       <div className={styles.split}>
         <div className={styles.stack}>
-          <Section title={t('deliveries.title')} count={document.deliveries.length}>
+          <Section family="info" title={t('deliveries.title')} count={document.deliveries.length}>
             <DeliveryTable items={document.deliveries} />
           </Section>
-          <Section title={t('evidence.title')}>
+          <Section family="ai" title={t('evidence.title')}>
             <EvidenceTable documentId={document.documentId} />
           </Section>
         </div>
         <div className={styles.stack}>
-          <Section title={t('detail.record')}>
+          <Section family="brand" title={t('detail.record')}>
             <KeyValueList
               aria-label={t('detail.record')}
               items={[
@@ -305,10 +305,10 @@ function DocumentBody({ document }: { document: DocumentView }) {
               ]}
             />
           </Section>
-          <Section title={t('archive.title')}>
+          <Section family="teal" title={t('archive.title')}>
             <ArchivePanel document={document} />
           </Section>
-          <Section title={t('reprint.title')}>
+          <Section family="ochre" title={t('reprint.title')}>
             <ReprintForm documentId={document.documentId} />
           </Section>
         </div>

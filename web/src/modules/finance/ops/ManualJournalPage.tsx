@@ -233,7 +233,7 @@ function Details({
         }
       />
       <div className={styles.grid}>
-        <Section title={t('ops.manual.summary')}>
+        <Section family="brand" title={t('ops.manual.summary')}>
           <KeyValueList
             aria-label={t('ops.manual.summary')}
             items={[
@@ -279,7 +279,7 @@ function Details({
             ]}
           />
         </Section>
-        <Section title={t('ops.manual.form.lines')}>
+        <Section family="teal" title={t('ops.manual.form.lines')}>
           <SimpleTable<ManualJournalLine>
             aria-label={t('ops.manual.form.lines')}
             columns={columns}
@@ -295,7 +295,7 @@ function Details({
         </Section>
       </div>
       {journal.status === 'DRAFT' ? (
-        <Section title={t('ops.manual.statusLabel')}>
+        <Section family="info" title={t('ops.manual.statusLabel')}>
           <DraftActions journal={journal} onDone={reload} />
         </Section>
       ) : null}

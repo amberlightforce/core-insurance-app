@@ -46,7 +46,7 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 47 operation(s): pty.Account.addMember, pty.Account.create, pty.Account.merge, pty.Account.removeMember, pty.Account.requestPolicyMove, pty.Account.setHolder, pty.Account.split, pty.Account.withdraw, pty.CommissionAgreement.approve, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.submit, pty.CommunicationPreference.set, ….</para>
+    /// <para>Declared by 48 operation(s): pty.Account.addMember, pty.Account.create, pty.Account.merge, pty.Account.removeMember, pty.Account.requestPolicyMove, pty.Account.setHolder, pty.Account.split, pty.Account.withdraw, pty.CommissionAgreement.approve, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.submit, pty.CommunicationPreference.set, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "PTY-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -80,9 +80,15 @@ public static class PartyErrorCodes
     /// </remarks>
     public const string MergeCrossEntity = "PTY-ERR-MERGE-CROSS-ENTITY";
 
+    /// <summary>PTY-ERR-MERGE-IDENTIFIER-CONFLICT (HTTP 422).</summary>
+    /// <remarks>
+    /// <para>Declared by 3 operation(s): pty.Party.approveMerge, pty.Party.merge, pty.Party.unmerge.</para>
+    /// </remarks>
+    public const string MergeIdentifierConflict = "PTY-ERR-MERGE-IDENTIFIER-CONFLICT";
+
     /// <summary>PTY-ERR-MERGED (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): pty.Location.add, pty.Location.remove, pty.Location.update.</para>
+    /// <para>Declared by 6 operation(s): pty.Location.add, pty.Location.remove, pty.Location.update, pty.Party.approveMerge, pty.Party.merge, pty.Party.unmerge.</para>
     /// </remarks>
     public const string Merged = "PTY-ERR-MERGED";
 
@@ -94,13 +100,13 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-NOT-AVAILABLE (HTTP 501).</summary>
     /// <remarks>
-    /// <para>Declared by 3 operation(s): pty.Party.merge, pty.Party.unmerge, pty.Party.update.</para>
+    /// <para>Declared by 1 operation(s): pty.Party.update.</para>
     /// </remarks>
     public const string NotAvailable = "PTY-ERR-NOT-AVAILABLE";
 
     /// <summary>PTY-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 12 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.submit, pty.Dsar.restrict, pty.Party.get, pty.ProducerOfRecord.cancel, pty.ProducerOfRecord.change, pty.ProducerOfRecord.get, pty.Vulnerability.record, pty.Vulnerability.remove.</para>
+    /// <para>Declared by 16 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.submit, pty.Dsar.restrict, pty.Party.approveMerge, pty.Party.get, pty.Party.merge, pty.Party.resolveSurvivor, pty.Party.unmerge, pty.ProducerOfRecord.cancel, ….</para>
     /// </remarks>
     public const string NotFound = "PTY-ERR-NOT-FOUND";
 
@@ -172,7 +178,7 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-RESTRICTED (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): pty.Location.add, pty.Location.remove, pty.Location.update, pty.Party.update.</para>
+    /// <para>Declared by 7 operation(s): pty.Location.add, pty.Location.remove, pty.Location.update, pty.Party.approveMerge, pty.Party.merge, pty.Party.unmerge, pty.Party.update.</para>
     /// </remarks>
     public const string Restricted = "PTY-ERR-RESTRICTED";
 
@@ -220,7 +226,7 @@ public static class PartyErrorCodes
 
     /// <summary>PTY-ERR-STATE (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 7 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.submit, pty.ProducerOfRecord.cancel, pty.ProducerOfRecord.change.</para>
+    /// <para>Declared by 10 operation(s): pty.CommissionAgreement.approve, pty.CommissionAgreement.compare, pty.CommissionAgreement.createVersion, pty.CommissionAgreement.get, pty.CommissionAgreement.submit, pty.Party.approveMerge, pty.Party.merge, pty.Party.unmerge, pty.ProducerOfRecord.cancel, pty.ProducerOfRecord.change.</para>
     /// </remarks>
     public const string State = "PTY-ERR-STATE";
 
@@ -240,7 +246,7 @@ public static class PartyErrorCodes
     public const string Prefix = "PTY-ERR-";
 
     /// <summary>Every code of this module.</summary>
-    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AccountHasJobs, ActivationIncomplete, Backdate, DuplicateIdentifier, EvidenceRequired, IdCheckdigit, IdempotencyMismatch, IntermediaryNotActive, LiveDependant, LocationInUse, MemberInUse, MergeCrossEntity, Merged, NoEmail, NotAvailable, NotFound, NotMigrated, OpenJob, Overlap, PorCodeInvalid, PorLetterRequired, PostcodeFormat, ProofRequired, QueryTooShort, RateAboveMax, RegistryUnavailable, RelationshipCycle, Restricted, RoleDataMissing, RoleDuplicate, RoleType, ScreenInput, SelfApproval, SplitSum, Stale, State, Validation, WindowClosed];
+    public static global::System.Collections.Generic.IReadOnlyList<string> All { get; } = [AccountHasJobs, ActivationIncomplete, Backdate, DuplicateIdentifier, EvidenceRequired, IdCheckdigit, IdempotencyMismatch, IntermediaryNotActive, LiveDependant, LocationInUse, MemberInUse, MergeCrossEntity, MergeIdentifierConflict, Merged, NoEmail, NotAvailable, NotFound, NotMigrated, OpenJob, Overlap, PorCodeInvalid, PorLetterRequired, PostcodeFormat, ProofRequired, QueryTooShort, RateAboveMax, RegistryUnavailable, RelationshipCycle, Restricted, RoleDataMissing, RoleDuplicate, RoleType, ScreenInput, SelfApproval, SplitSum, Stale, State, Validation, WindowClosed];
 
     /// <summary>The HTTP status each code maps to (the most frequent declaration when operations disagree); codes registered without a status are absent.</summary>
     public static global::System.Collections.Generic.IReadOnlyDictionary<string, int> HttpStatus { get; } = new global::System.Collections.Generic.Dictionary<string, int>(global::System.StringComparer.Ordinal)
@@ -257,6 +263,7 @@ public static class PartyErrorCodes
         [LocationInUse] = 422,
         [MemberInUse] = 422,
         [MergeCrossEntity] = 422,
+        [MergeIdentifierConflict] = 422,
         [Merged] = 409,
         [NoEmail] = 422,
         [NotAvailable] = 501,

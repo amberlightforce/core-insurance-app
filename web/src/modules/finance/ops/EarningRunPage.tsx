@@ -84,7 +84,7 @@ export function EarningRunPage() {
           </LinkButton>
         }
       />
-      <Section title={t('ops.earning.latest')}>
+      <Section family="info" title={t('ops.earning.latest')}>
         <QueryView query={status}>{(data) => <Status status={data} />}</QueryView>
       </Section>
       <Section title={t('ops.earning.runTitle')} family="plum">

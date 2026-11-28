@@ -67,7 +67,7 @@ export function ManualJournalsPage() {
           </>
         }
       />
-      <Section title={t('ops.manual.title')}>
+      <Section family="brand" title={t('ops.manual.title')}>
         <QueryView query={query}>
           {(page) =>
             page.items.length === 0 ? (

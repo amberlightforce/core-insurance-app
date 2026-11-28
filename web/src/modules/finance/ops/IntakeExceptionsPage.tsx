@@ -188,7 +188,7 @@ export function IntakeExceptionsPage() {
           </LinkButton>
         }
       />
-      <Section title={t('ops.intake.queue')}>
+      <Section family="ochre" title={t('ops.intake.queue')}>
         <QueryView query={query}>
           {(page) =>
             page.items.length === 0 ? (

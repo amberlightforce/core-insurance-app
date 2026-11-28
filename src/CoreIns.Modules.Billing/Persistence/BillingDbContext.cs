@@ -384,7 +384,8 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
         {
             entity.ToTable("allocation", table =>
             {
-                table.HasCheckConstraint("ck_allocation_amount", "amount > 0");
+                table.HasCheckConstraint("ck_allocation_amount", "amount <> 0");
+                table.HasCheckConstraint("ck_allocation_reversal", "(reverses_allocation_id IS NULL) = (amount > 0)");
                 table.HasCheckConstraint("ck_allocation_source", "source IN ('RULE', 'AI', 'MANUAL')");
                 table.HasCheckConstraint("ck_allocation_currency", "currency ~ '^[A-Z]{3}$'");
             });
@@ -402,6 +403,12 @@ internal sealed class BillingDbContext(DbContextOptions<BillingDbContext> option
             entity.Property(e => e.Source).HasColumnName("source");
             entity.Property(e => e.Actor).HasColumnName("actor");
             entity.Property(e => e.RecordedAt).HasColumnName("recorded_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ReversesAllocationId).HasColumnName("reverses_allocation_id");
+            entity.Property(e => e.ReasonCode).HasColumnName("reason_code");
+            entity.Property(e => e.Comment).HasColumnName("comment");
+            entity.HasIndex(e => e.ReversesAllocationId).IsUnique().HasFilter("reverses_allocation_id IS NOT NULL").HasDatabaseName("ux_allocation_reverses");
+            entity.HasOne<AllocationRow>().WithMany().HasForeignKey(e => e.ReversesAllocationId)
+                .HasConstraintName("fk_allocation_reverses").OnDelete(DeleteBehavior.Restrict);
             entity.HasIndex(e => e.ReceiptId).HasDatabaseName("ix_allocation_receipt");
             entity.HasIndex(e => e.InvoiceItemId).HasDatabaseName("ix_allocation_item");
             entity.HasOne<ReceiptRow>().WithMany().HasForeignKey(e => e.ReceiptId)

@@ -68,6 +68,23 @@ internal sealed class ProgrammeVersionRow
     public string CreatedBy { get; set; } = string.Empty;
 
     public string? Reason { get; set; }
+
+    /// <summary>SHA-256 of the content at submit; the approval is bound to it (BO-RI-02).</summary>
+    public string? ContentHash { get; set; }
+
+    /// <summary>The PLT approval request of the last submit.</summary>
+    public Guid? ApprovalRequestId { get; set; }
+
+    public string? SubmittedBy { get; set; }
+
+    public Instant? SubmittedAt { get; set; }
+
+    public string? DecidedBy { get; set; }
+
+    public Instant? DecidedAt { get; set; }
+
+    /// <summary>The checker's reason when the version was returned to DRAFT.</summary>
+    public string? ReturnReason { get; set; }
 }
 
 /// <summary><c>ri.programme_layer</c>: a layer of the programme ladder and the contract that carries it (EUR).</summary>
@@ -141,6 +158,13 @@ internal static class ProgrammeModel
             entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.Reason).HasColumnName("reason");
+            entity.Property(e => e.ContentHash).HasColumnName("content_hash").HasColumnType("char(64)");
+            entity.Property(e => e.ApprovalRequestId).HasColumnName("approval_request_id");
+            entity.Property(e => e.SubmittedBy).HasColumnName("submitted_by");
+            entity.Property(e => e.SubmittedAt).HasColumnName("submitted_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DecidedBy).HasColumnName("decided_by");
+            entity.Property(e => e.DecidedAt).HasColumnName("decided_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ReturnReason).HasColumnName("return_reason");
             entity.HasIndex(e => new { e.ProgrammeId, e.VersionNo }).IsUnique().HasDatabaseName("ux_programme_version_no");
             entity.HasOne<ProgrammeRow>().WithMany().HasForeignKey(e => e.ProgrammeId).HasConstraintName("fk_programme_version_programme").OnDelete(DeleteBehavior.Restrict);
         });

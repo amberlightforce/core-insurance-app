@@ -280,6 +280,18 @@ internal static class FinanceSeed
     /// </summary>
     public const string GrTestV6 = "gr-test.finance.v6";
 
+    /// <summary>
+    /// The seed of migration AllocationReversalPostings (BO-BIL-07): v6 plus the ALLOCATION_REVERSED rules AV-UNALLOCATED and AV-RECEIVABLE (the mirror of
+    /// the ALLOCATED rules). A new rule-set version because v6 is immutable once applied; effective from 2026-10-01 like v6 and winning the tie by version number.
+    /// </summary>
+    public const string GrTestV7 = "gr-test.finance.v7";
+
+    /// <summary>Migration Down of AllocationReversalPostings: v7 superseded (rule rows are append-only, REQ-FIN-070); v6 governs again.</summary>
+    public const string SupersedeV7 = """
+        UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'
+         WHERE legal_entity_code = 'GR-TEST' AND book = 'IFRS17' AND version_no = 7;
+        """;
+
     /// <summary>Migration Down of DisbursementBatchPostings: v6 superseded (rule rows are append-only, REQ-FIN-070); v5 governs again.</summary>
     public const string SupersedeV6 = """
         UPDATE fin.posting_rule_set SET status = 'SUPERSEDED'

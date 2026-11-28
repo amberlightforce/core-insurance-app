@@ -119,7 +119,9 @@ public sealed class ProgrammeLifecycleTests(PostgresFixture database) : IClassFi
         await CreateAsync(slice, first);
 
         await ShouldRefuseAsync(slice, ProgrammeBody(line, a, b), "PROGRAMME_PERIOD_OVERLAP");
-        var sameCode = ProgrammeBody(NewProduct(), a, b, code: first["code"]!.GetValue<string>());
+        var otherLine = NewProduct();
+        var (c, d) = await TreatiesAsync(slice, otherLine);
+        var sameCode = ProgrammeBody(otherLine, c, d, code: first["code"]!.GetValue<string>());
         await ShouldRefuseAsync(slice, sameCode, "PROGRAMME_YEAR_EXISTS");
     }
 
