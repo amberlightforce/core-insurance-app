@@ -47,6 +47,23 @@ internal sealed class FinancePeriods(FinanceDbContext db, IClock clock)
         return null;
     }
 
+    /// <summary>The first day, on or after <paramref name="date"/>, whose month is OPEN (neither soft-closed nor locked); null after a run of closed months (BO-FIN-02 reversals).</summary>
+    public async Task<BusinessDate?> FirstPostableAsync(Guid legalEntity, BusinessDate date, CancellationToken cancellationToken)
+    {
+        var current = date;
+        for (var month = 0; month < MaxLockedRun; month++)
+        {
+            if (await StateAsync(legalEntity, CodeOf(current), cancellationToken).ConfigureAwait(false) == Open)
+            {
+                return current;
+            }
+
+            current = new BusinessDate(new DateOnly(current.Value.Year, current.Value.Month, 1).AddMonths(1));
+        }
+
+        return null;
+    }
+
     /// <summary>Sets the state of a month (dev endpoint; the close workflow replaces it).</summary>
     public async Task SetStateAsync(Guid legalEntity, string periodCode, string state, CancellationToken cancellationToken)
     {

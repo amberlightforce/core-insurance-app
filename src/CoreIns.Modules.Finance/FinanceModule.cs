@@ -69,6 +69,12 @@ public static class FinanceModule
         services.AddScoped<PostingRuleReader>();
         services.AddScoped<FinanceOpsReader>();
         services.AddScoped<ManualJournalReader>();
+        services.AddScoped<BalanceReader>();
+        services.AddScoped<WrittenPremiumReader>();
+
+        // BO-FIN-02: reversal of a posted manual or FIN-run journal through the correction path (reason mandatory, never into a closed period).
+        services.AddCommand<Commands.ReverseJournal, CoreIns.Modules.Finance.Contracts.Api.JournalReverseResponse, Commands.ReverseJournalHandler>(
+            CommandDescriptor.For("fin.Journal.reverse") with { SupportsDryRun = true });
 
         // BO-FIN-07: posting rule authoring (draft, compile, test, previewImpact, submit, decide); an approval appends an effective-dated rule-set version.
         services.AddScoped<Commands.PostingRuleAuthoringService>();
@@ -174,6 +180,8 @@ public static class FinanceModule
             .Describe("Ελέγξτε τις παραμέτρους του αιτήματος.", "Check the request parameters."),
         ErrorDefinition.For(ModuleCode.FIN, "ALREADY-REVERSED", 409, "Η εγγραφή έχει ήδη αντιλογιστεί", "The journal is already reversed")
             .Describe("Μια ημερολογιακή εγγραφή αντιλογίζεται μία μόνο φορά.", "A journal can be reversed only once."),
+        ErrorDefinition.For(ModuleCode.FIN, "SOURCE-OWNED", 422, "Η εγγραφή ανήκει σε άλλη ενότητα", "The journal belongs to another module")
+            .Describe("Εγγραφές που προέρχονται από γεγονότα άλλων ενοτήτων διορθώνονται από την ενότητα προέλευσης.", "Journals sourced from other modules' events are corrected by the source module."),
         ErrorDefinition.For(ModuleCode.FIN, "EVIDENCE-REQUIRED", 422, "Απαιτείται τεκμήριο", "Evidence is required")
             .Describe("Μια χειρόγραφη εγγραφή χρειάζεται παραπομπή σε έγγραφο ή αίτημα.", "A manual journal needs a document or ticket reference."),
         ErrorDefinition.For(ModuleCode.FIN, "TEMPLATE-ACCOUNT", 422, "Μη επιτρεπτός λογαριασμός", "Account not allowed")
