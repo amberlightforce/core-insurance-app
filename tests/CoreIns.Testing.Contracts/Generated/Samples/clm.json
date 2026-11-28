@@ -4199,12 +4199,13 @@
       "copySetId": "01922afb-7d31-70c5-8b73-1548a4c70a50"
     },
     "TransactionSetReturnRequest": {
-      "transactions": "unspecified"
+      "setId": "01921e64-483e-7efc-8e97-690901ed6e48",
+      "reason": "SAMPLE_CODE",
+      "comment": "sample"
     },
     "TransactionSetReturnResponse": {
-      "setPreview": "unspecified",
-      "checks": "unspecified",
-      "approvalRequest": "unspecified"
+      "setId": "01920406-487f-74f5-8a0a-7ae2a71202f9",
+      "status": "SAMPLE_CODE"
     },
     "TransactionSetSubmitRequest": {
       "setId": "0192f377-9020-7573-815e-04d241cf9d52"

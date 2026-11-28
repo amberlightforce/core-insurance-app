@@ -2697,19 +2697,16 @@ export interface components {
             /** @description Copy returned to the maker */
             copySetId?: components["schemas"]["Uuid"];
         };
-        /** @description clm.TransactionSet.return request. PRD inputs: "transactions" */
+        /** @description clm.TransactionSet.return request: the checker sends a set pending approval back to the maker (BO-CLM-04) */
         TransactionSetReturnRequest: {
-            /** @description PRD: "transactions" */
-            transactions?: components["schemas"]["Unspecified"];
+            setId: components["schemas"]["Uuid"];
+            reason?: components["schemas"]["Code"];
+            comment?: string;
         };
-        /** @description clm.TransactionSet.return result. PRD outputs: "set with preview, checks, approval request" */
+        /** @description clm.TransactionSet.return result: the set after the return */
         TransactionSetReturnResponse: {
-            /** @description PRD: "set with preview" */
-            setPreview?: components["schemas"]["Unspecified"];
-            /** @description PRD: "checks" */
-            checks?: components["schemas"]["Unspecified"];
-            /** @description PRD: "approval request" */
-            approvalRequest?: components["schemas"]["Unspecified"];
+            setId: components["schemas"]["Uuid"];
+            status: components["schemas"]["Code"];
         };
         /** @description Typed from REQ-CLM-125. PRD inputs: "payment id, reason" */
         PaymentVoidRequest: {
