@@ -130,6 +130,7 @@ public static class PartyModule
         services.AddPartyAuthorityTypes();
         services.AddOwnerDecidedApprovalType(PartyAuthorityTypes.CommissionApprovalType);
         services.AddScoped<CommissionAgreementQueries>();
+        services.AddScoped<CommissionResolution>();
         services.AddScoped<IValidator<CreateCommissionVersion>, CreateCommissionVersionValidator>();
         services.AddScoped<IValidator<SubmitCommissionVersion>, SubmitCommissionVersionValidator>();
         services.AddScoped<IValidator<ApproveCommissionVersion>, ApproveCommissionVersionValidator>();
@@ -167,6 +168,7 @@ public static class PartyModule
         services.AddScoped<IPartyVulnerabilityService, PartyVulnerabilityService>();
         services.AddScoped<IPartyAccountService, PartyAccountService>();
         services.AddScoped<IPartyProducerOfRecordService, PartyProducerOfRecordService>();
+        services.AddScoped<IPartyCommissionAgreementService, PartyCommissionAgreementService>();
 
         // BO-MIG-06: migration SPI (importer and reverser of Person, Organisation and Contact).
         services.AddScoped<CoreIns.Modules.Migration.Contracts.Spi.IMigrationImporter, MigrationImport.PartyMigrationImporter>();

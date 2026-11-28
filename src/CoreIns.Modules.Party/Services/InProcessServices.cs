@@ -188,3 +188,13 @@ internal sealed class PartyLocationService(
 
     private static T Unwrap<T>(Result<T> result) => result.IsSuccess ? result.Value : throw new DomainException(result.Error);
 }
+
+/// <summary>The in-process contract <see cref="IPartyCommissionAgreementService"/> (BO-PTY-11): which commission rate applies, for BIL and CHN.</summary>
+internal sealed class PartyCommissionAgreementService(CommissionResolution resolution) : IPartyCommissionAgreementService
+{
+    public async Task<CommissionAgreementResolveResponse> ResolveAsync(CommissionAgreementResolveRequest request, CancellationToken cancellationToken = default)
+    {
+        var result = await resolution.ResolveAsync(request, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess ? result.Value : throw new DomainException(result.Error);
+    }
+}
