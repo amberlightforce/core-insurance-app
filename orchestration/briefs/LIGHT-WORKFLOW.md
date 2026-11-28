@@ -52,6 +52,8 @@ Never force-push. Never push a red build to main.
 Never move the shared local `main` branch ref from your worktree (no `git pull ... HEAD:main`, `git fetch origin main:main`,
 `git branch -f main`, `git checkout main`): it is checked out in the orchestrator worktree and moving it desyncs that checkout.
 Push only with `git push origin HEAD:main`.
+`/tmp` is shared by every builder: never write helper scripts or outputs there; use your own worktree or your scratchpad
+(a stale `/tmp/edit_*.py` from another builder once ran against the wrong yaml). Run `npm ci` once per worktree, never twice at the same time.
 Never `.gitignore`-match source files: before committing, run `git status --ignored -- src tests web/src` and make sure every
 file you created is tracked (a bare `coverage/` rule once silently dropped `src/.../Services/Coverage/`).
 
