@@ -8,7 +8,7 @@ namespace CoreIns.Modules.Underwriting.Contracts.Api;
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record PolicyHoldCreateResponse
 {
-    /// <summary>PRD: "hold"</summary>
+    /// <summary>The hold (id, holdCode, status, scopes, recordVersion)</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>
@@ -16,7 +16,7 @@ public sealed record PolicyHoldCreateResponse
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public global::System.Text.Json.JsonElement? Hold { get; init; }
 
-    /// <summary>PRD: "impact counts"</summary>
+    /// <summary>In-force policies the hold would touch (inForcePolicies, byProduct)</summary>
     /// <remarks>
     /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
     /// </remarks>
