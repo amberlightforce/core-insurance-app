@@ -33,6 +33,14 @@
         "fin.TaxReturn.transition": [ "Staff.Finance", "Platform.Admin" ],
         "fin.TaxReturn.recordFiling": [ "Staff.Finance", "Platform.Admin" ],
         "fin.TaxReturn.requestPayment": [ "Staff.Finance", "Staff.Billing", "Platform.Admin" ],
+        "fin.LevyReturn.list": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.LevyReturn.get": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.LevyReturn.recalculate": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.LevyReturn.addAdjustment": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.LevyReturn.generateFile": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.LevyReturn.transition": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.LevyReturn.recordFiling": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.LevyReturn.requestPayment": [ "Staff.Finance", "Staff.Billing", "Platform.Admin" ],
         "fin.Period.devLock": [ "Staff.Finance", "Platform.Admin" ],
         "fin.ManualJournal.create": [ "Staff.Finance", "Platform.Admin" ],
         "fin.ManualJournal.list": [ "Staff.Finance", "Platform.Admin" ],
@@ -60,6 +68,14 @@
         },
         {
           "Id": "fin-admin-taxreturn-illustrative", "Role": "Platform.Admin", "Type": "FIN.TAX_RETURN", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "10000000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "fin-finance-levyreturn-illustrative", "Role": "Staff.Finance", "Type": "FIN.LEVY_RETURN", "Illustrative": true,
+          "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "10000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "fin-admin-levyreturn-illustrative", "Role": "Platform.Admin", "Type": "FIN.LEVY_RETURN", "Illustrative": true,
           "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "10000000.00", "Currency": "EUR" } ]
         }
       ]

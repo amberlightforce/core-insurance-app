@@ -165,4 +165,24 @@ internal sealed class RoutingPeriods(MigrationDbContext db, RequestContext conte
 
         return route;
     }
+
+    /// <summary>
+    /// Sets a CORE period back to the legacy master (NONE) without saving; the period keeps its dates and gains the reason (BO-MIG-12 rollback).
+    /// The module has no delete, so a rolled-back period stays as history with master NONE.
+    /// </summary>
+    public void StageRestore(RoutingRow route, string reason)
+    {
+        var oldState = route.MasterState;
+        var suffix = " | " + reason;
+        route.MasterState = RouteState.None;
+        route.Reason = route.Reason.Length + suffix.Length <= 500 ? route.Reason + suffix : (route.Reason[..(500 - suffix.Length)] + suffix);
+        events.Publish(new OutgoingEvent(
+            EventDescriptor.From(CoexistenceMasterChangedV1.Descriptor), "CoexistenceRoute", route.RouteId.ToString(),
+            new CoexistenceMasterChangedV1
+            {
+                RouteId = route.RouteId, ObjectType = route.ObjectType, LegacyKey = route.Key, OldMasterState = oldState, NewMasterState = RouteState.None,
+                EffectiveFrom = Instant.FromUtc(route.ValidFrom.Value.Year, route.ValidFrom.Value.Month, route.ValidFrom.Value.Day), Reason = reason,
+            },
+            BusinessKeys.Empty.With("routeId", route.RouteId.ToString())) { OccurredAt = clock.Now });
+    }
 }

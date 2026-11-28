@@ -4,27 +4,36 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.Consumer.replay request. PRD inputs: "consumer, from position; dead-letter ids"</summary>
+/// <summary>plt.Consumer.replay request (BO-PLT-04). Either name deadLetterIds (re-runs the Parked ones; resolved ones are skipped) or give a consumer (event handler name) plus a recordedFrom/recordedTo range of the event archive, re-delivered in archive order with origin REPLAY (the handler must be idempotent).</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record ConsumerReplayRequest
 {
-    /// <summary>PRD: "consumer"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'consumer'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("consumer")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Consumer { get; init; }
+    public string? Consumer { get; init; }
 
-    /// <summary>PRD: "from position"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("fromPosition")]
+    /// <summary>Contract member 'recordedFrom'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordedFrom")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? FromPosition { get; init; }
+    public global::CoreIns.SharedKernel.Instant? RecordedFrom { get; init; }
 
-    /// <summary>PRD: "dead-letter ids"</summary>
+    /// <summary>Contract member 'recordedTo'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("recordedTo")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public global::CoreIns.SharedKernel.Instant? RecordedTo { get; init; }
+
+    /// <summary>Contract member 'aggregateType'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("aggregateType")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? AggregateType { get; init; }
+
+    /// <summary>Contract member 'aggregateId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("aggregateId")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? AggregateId { get; init; }
+
+    /// <summary>Contract member 'deadLetterIds'.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'deadLetterId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>

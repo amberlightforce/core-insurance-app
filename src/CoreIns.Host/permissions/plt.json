@@ -33,6 +33,15 @@
         "plt.DeadLetter.list": [ "Platform.Admin" ],
         "plt.DeadLetter.get": [ "Platform.Admin" ],
         "plt.DeadLetter.replay": [ "Platform.Admin" ],
+        // BO-PLT-04: discard is privileged like replay; consumer replay, transfers, schema registry and manual publish are administrator operations.
+        "plt.DeadLetter.discard": [ "Platform.Admin" ],
+        "plt.Consumer.replay": [ "Platform.Admin" ],
+        "plt.Exchange.search": [ "Platform.Admin", "Staff.ComplianceOfficer" ],
+        "plt.Transfer.list": [ "Platform.Admin" ],
+        "plt.Transfer.retry": [ "Platform.Admin" ],
+        "plt.Schema.register": [ "Platform.Admin" ],
+        "plt.Schema.check": [ "Platform.Admin" ],
+        "plt.Outbox.publish": [ "Platform.Admin" ],
         // BO-PLT-01: the audit trail is read by administrators and compliance officers. plt.Audit.append is in-process only (no route).
         "plt.Audit.query": [ "Platform.Admin", "Staff.ComplianceOfficer" ],
         "plt.Audit.export": [ "Platform.Admin", "Staff.ComplianceOfficer" ],

@@ -4,31 +4,18 @@
 
 namespace CoreIns.Platform.Contracts.Api;
 
-/// <summary>plt.DeadLetter.discard request. PRD inputs: "consumer, from position; dead-letter ids"</summary>
+/// <summary>plt.DeadLetter.discard request (BO-PLT-04). Name the Parked dead letters and give the reason (required, kept in the audit trail and on the row). A dead letter parked longer than the configured number of days (Platform:DeadLetters:ApprovalAfterDays, default 7) also needs an Approved plt.Approval of type plt.DeadLetter.discard for subject PLT/DeadLetter/&lt;id&gt; (maker-checker). At most 100 per call.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DeadLetterDiscardRequest
 {
-    /// <summary>PRD: "consumer"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("consumer")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Consumer { get; init; }
-
-    /// <summary>PRD: "from position"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("fromPosition")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? FromPosition { get; init; }
-
-    /// <summary>PRD: "dead-letter ids"</summary>
+    /// <summary>Contract member 'deadLetterIds'.</summary>
     /// <remarks>
     /// <para>Untyped id: no SharedKernel id type is mapped for 'deadLetterId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
     [global::System.Text.Json.Serialization.JsonPropertyName("deadLetterIds")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Guid>? DeadLetterIds { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::System.Guid> DeadLetterIds { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
 }
