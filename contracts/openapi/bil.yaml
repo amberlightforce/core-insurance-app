@@ -213,19 +213,21 @@ paths:
       - W5-BIL-01
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 6
+      x-typed: REQ-BIL-030, REQ-BIL-033 (BO-BIL-01)
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: false
+      x-dry-run: true
       x-dry-run-note: 'PRD dry-run: create, close; PRD idempotency: Yes'
       x-exposure:
       - ui
       x-permission: bil.BillingAccount.update
       x-error-codes:
-      - code: BIL-ERR-BALANCE-NOT-ZERO
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-NOT-ELIGIBLE
         status: 422
-      - code: BIL-ERR-PAYER-ROLE
-        status: 422
+      - code: BIL-ERR-STALE
+        status: 409
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -289,7 +291,7 @@ paths:
       - W5-BIL-01
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 6
+      x-typed: REQ-BIL-001, REQ-BIL-030 (BO-BIL-01)
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
@@ -298,15 +300,41 @@ paths:
       - ui
       x-permission: bil.BillingAccount.search
       x-error-codes:
-      - code: BIL-ERR-BALANCE-NOT-ZERO
-        status: 422
-      - code: BIL-ERR-PAYER-ROLE
-        status: 422
       x-source:
       - PRD-06 §9.1 l.1779
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: payerPartyId
+        in: query
+        required: false
+        description: Only accounts of this payer party
+        schema:
+          type: string
+          format: uuid
+      - name: status
+        in: query
+        required: false
+        description: Only accounts in this state
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - SUSPENDED
+          - CLOSING
+          - CLOSED
+      - name: currency
+        in: query
+        required: false
+        schema:
+          type: string
+          pattern: '^[A-Z]{3}$'
+      - name: accountNumber
+        in: query
+        required: false
+        description: Exact billing account number
+        schema:
+          type: string
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
       responses:
@@ -347,7 +375,7 @@ paths:
       - W5-BIL-01
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 6
+      x-typed: REQ-BIL-030, REQ-BIL-033 (BO-BIL-01)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: true
@@ -356,10 +384,14 @@ paths:
       - ui
       x-permission: bil.BillingAccount.close
       x-error-codes:
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
       - code: BIL-ERR-BALANCE-NOT-ZERO
         status: 422
-      - code: BIL-ERR-PAYER-ROLE
+      - code: BIL-ERR-NOT-ELIGIBLE
         status: 422
+      - code: BIL-ERR-STALE
+        status: 409
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -416,7 +448,7 @@ paths:
       - W5-BIL-01
       x-status: full
       x-maturity: pre-release
-      x-io-shared: 6
+      x-typed: REQ-BIL-030, REQ-BIL-033 (BO-BIL-01)
       x-operation-kind: command
       x-idempotency: required
       x-dry-run: false
@@ -425,10 +457,12 @@ paths:
       - ui
       x-permission: bil.BillingAccount.reopen
       x-error-codes:
-      - code: BIL-ERR-BALANCE-NOT-ZERO
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-NOT-ELIGIBLE
         status: 422
-      - code: BIL-ERR-PAYER-ROLE
-        status: 422
+      - code: BIL-ERR-STALE
+        status: 409
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -489,8 +523,14 @@ paths:
       - ui
       x-permission: bil.BillingAccount.changePayer
       x-error-codes:
-      - code: BIL-ERR-APPROVAL-REQUIRED
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-PAYER-ROLE
         status: 422
+      - code: BIL-ERR-NOT-ELIGIBLE
+        status: 422
+      - code: BIL-ERR-STALE
+        status: 409
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -6693,16 +6733,49 @@ components:
       - collected
       - unapplied
       - credit
+    BillingAccountSummary:
+      type: object
+      description: A billing account row of the search result (no terms; BO-BIL-01)
+      properties:
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        accountNumber:
+          $ref: ../events/common.schema.json#/$defs/BusinessNumber
+        payerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        currency:
+          $ref: ../events/common.schema.json#/$defs/CurrencyCode
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - SUSPENDED
+          - CLOSING
+          - CLOSED
+        createdAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        recordVersion:
+          type: integer
+      required:
+      - billingAccountId
+      - accountNumber
+      - payerPartyId
+      - currency
+      - status
+      - createdAt
+      - recordVersion
     BillingAccountSearchItem:
       type: object
-      description: 'bil.BillingAccount.search result. PRD outputs: "account, balances by state"'
+      description: 'bil.BillingAccount.search item (BO-BIL-01): the account and what is still open on it'
       properties:
         account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
-        balancesByState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "balances by state"'
+          $ref: '#/components/schemas/BillingAccountSummary'
+        openBalance:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Net billed receivable (LA-02) still open on the account; negative is customer credit
+      required:
+      - account
+      - openBalance
     BillingAccountSearchPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -6715,105 +6788,109 @@ components:
       description: Page of bil.BillingAccount.search results (cursor pagination, contract §3.5.5)
     BillingAccountUpdateRequest:
       type: object
-      description: 'bil.BillingAccount.update request. PRD inputs: "payer, currency, preferences / criteria"'
+      description: 'bil.BillingAccount.update request (BO-BIL-01). Suspends or resumes an account; payments are refused while it is suspended. Resuming needs no other ACTIVE account of the same payer and currency.'
       properties:
-        payer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payer"'
-        currency:
-          $ref: ../events/common.schema.json#/$defs/CurrencyCode
-          description: 'PRD: "currency"'
-        preferences:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "preferences"'
-        criteria:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "criteria"'
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - SUSPENDED
+        reason:
+          type: string
+          maxLength: 200
+          description: Why; kept in the audit record
+      required:
+      - status
     BillingAccountUpdateResponse:
       type: object
-      description: 'bil.BillingAccount.update result. PRD outputs: "account, balances by state"'
+      description: 'bil.BillingAccount.update result'
       properties:
         account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
+          $ref: '#/components/schemas/BillingAccountView'
         balancesByState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "balances by state"'
+          $ref: '#/components/schemas/BillingAccountBalances'
+      required:
+      - account
+      - balancesByState
     BillingAccountCloseRequest:
       type: object
-      description: 'bil.BillingAccount.close request. PRD inputs: "payer, currency, preferences / criteria"'
+      description: 'bil.BillingAccount.close request (BO-BIL-01). Refused (BIL-ERR-BALANCE-NOT-ZERO) while the account has an open invoice or a non-zero balance, and while a draft or active mandate is on it.'
       properties:
-        payer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payer"'
-        currency:
-          $ref: ../events/common.schema.json#/$defs/CurrencyCode
-          description: 'PRD: "currency"'
-        preferences:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "preferences"'
-        criteria:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "criteria"'
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          maxLength: 200
+          description: Why; kept in the audit record
+      required:
+      - billingAccountId
     BillingAccountCloseResponse:
       type: object
-      description: 'bil.BillingAccount.close result. PRD outputs: "account, balances by state"'
+      description: 'bil.BillingAccount.close result'
       properties:
         account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
+          $ref: '#/components/schemas/BillingAccountView'
         balancesByState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "balances by state"'
+          $ref: '#/components/schemas/BillingAccountBalances'
+      required:
+      - account
+      - balancesByState
     BillingAccountReopenRequest:
       type: object
-      description: 'bil.BillingAccount.reopen request. PRD inputs: "payer, currency, preferences / criteria"'
+      description: 'bil.BillingAccount.reopen request (BO-BIL-01). CLOSED to ACTIVE; refused when the payer already has another ACTIVE account in the currency.'
       properties:
-        payer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "payer"'
-        currency:
-          $ref: ../events/common.schema.json#/$defs/CurrencyCode
-          description: 'PRD: "currency"'
-        preferences:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "preferences"'
-        criteria:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "criteria"'
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reason:
+          type: string
+          maxLength: 200
+          description: Why; kept in the audit record
+      required:
+      - billingAccountId
     BillingAccountReopenResponse:
       type: object
-      description: 'bil.BillingAccount.reopen result. PRD outputs: "account, balances by state"'
+      description: 'bil.BillingAccount.reopen result'
       properties:
         account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
+          $ref: '#/components/schemas/BillingAccountView'
         balancesByState:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "balances by state"'
+          $ref: '#/components/schemas/BillingAccountBalances'
+      required:
+      - account
+      - balancesByState
     BillingAccountChangePayerRequest:
       type: object
-      description: 'bil.BillingAccount.changePayer request. PRD inputs: "new payer, effective date, reason"'
+      description: 'bil.BillingAccount.changePayer request (BO-BIL-01). The new payer must exist in PTY and be ACTIVE or PROSPECT; the ledger is not touched. Refused while a draft or active mandate of the old payer is on the account.'
       properties:
-        newPayer:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "new payer"'
+        billingAccountId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        newPayerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
         effectiveDate:
           $ref: ../events/common.schema.json#/$defs/LocalDate
-          description: 'PRD: "effective date"'
+          description: Not after today (a future-dated change is not supported yet); defaults to today
         reason:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reason"'
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Why; kept in the audit record
+      required:
+      - billingAccountId
+      - newPayerPartyId
+      - reason
     BillingAccountChangePayerResponse:
       type: object
-      description: 'bil.BillingAccount.changePayer result. PRD outputs: "account, approval ref"'
+      description: 'bil.BillingAccount.changePayer result'
       properties:
         account:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "account"'
-        approvalRef:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "approval ref"'
+          $ref: '#/components/schemas/BillingAccountView'
+        balancesByState:
+          $ref: '#/components/schemas/BillingAccountBalances'
+        previousPayerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - account
+      - balancesByState
     BillingAccountAttachTermRequest:
       type: object
       description: 'bil.BillingAccount.attachTerm request. PRD inputs: "term ref, target account, billed-items choice"'

@@ -4,23 +4,15 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.BillingAccount.search result. PRD outputs: "account, balances by state"</summary>
+/// <summary>bil.BillingAccount.search item (BO-BIL-01): the account and what is still open on it</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record BillingAccountSearchItem
 {
-    /// <summary>PRD: "account"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Contract member 'account'.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("account")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Account { get; init; }
+    public required global::CoreIns.Modules.Billing.Contracts.Api.BillingAccountSummary Account { get; init; }
 
-    /// <summary>PRD: "balances by state"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("balancesByState")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? BalancesByState { get; init; }
+    /// <summary>Net billed receivable (LA-02) still open on the account; negative is customer credit</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("openBalance")]
+    public required global::CoreIns.SharedKernel.Money OpenBalance { get; init; }
 }
