@@ -230,6 +230,9 @@ internal static class FinanceSql
         $"GRANT SELECT, INSERT, UPDATE ON fin.dsar_restriction TO {appRole}",
         $"GRANT SELECT, INSERT ON fin.migration_import TO {appRole}",
         $"GRANT SELECT, INSERT, UPDATE ON fin.manual_journal TO {appRole}",
+        // BO-FIN-07: an approved draft appends a new rule-set version (append-only: the app role never updates or deletes a rule set).
+        $"GRANT INSERT ON fin.posting_rule_set, fin.posting_rule TO {appRole}",
+        $"GRANT SELECT, INSERT, UPDATE ON fin.posting_rule_draft TO {appRole}",
         $"GRANT SELECT, INSERT ON fin.manual_journal_line TO {appRole}",
         $"GRANT SELECT, INSERT, UPDATE, DELETE ON fin.period_close_task TO {appRole}",
         $"GRANT SELECT, INSERT ON fin.earning_run, fin.earned_premium TO {appRole}",

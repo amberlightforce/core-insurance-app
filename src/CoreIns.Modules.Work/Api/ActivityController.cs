@@ -3,6 +3,8 @@ using CoreIns.Modules.Work.Contracts.Api;
 using CoreIns.Modules.Work.Queries;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Errors;
+using CoreIns.SharedKernel.Results;
+using CoreIns.Modules.Work.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +24,9 @@ internal sealed class ActivityController : ControllerBase
     public const string SkipPermission = "wrk.Activity.skip";
     public const string CancelPermission = "wrk.Activity.cancel";
     public const string BlockingPermission = "wrk.Activity.blockingStatus";
+    public const string UpdatePermission = "wrk.Activity.update";
+    public const string BulkReassignPermission = "wrk.Activity.bulkReassign";
+    public const string TeamSummaryPermission = "wrk.Team.summary";
     public const string GetNextPermission = "wrk.Queue.getNext";
     public const string SimulatePermission = "wrk.Assignment.simulate";
     public const string PatternListPermission = "wrk.Pattern.list";
@@ -40,6 +45,35 @@ internal sealed class ActivityController : ControllerBase
     [Authorize(Policy = GetPermission)]
     public async Task<IResult> GetAsync(string id, [FromServices] ActivityReader reader, CancellationToken cancellationToken) =>
         (await reader.GetAsync(id, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>wrk.Activity.update: edit title, priority, due date or note (optimistic record version).</summary>
+    [HttpPatch("activities/{id}")]
+    [Authorize(Policy = UpdatePermission)]
+    public async Task<IResult> UpdateAsync(
+        string id, [FromBody] ActivityUpdateRequest request, [FromServices] ICommandHandler<UpdateActivity, ActivityUpdateResponse> handler, CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(id, out var activityId))
+        {
+            Result<ActivityUpdateResponse> missing = WorkErrors.NotFound();
+            return missing.ToHttpResult(HttpContext);
+        }
+
+        return (await handler.HandleAsync(new UpdateActivity(request with { Id = activityId }), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+    }
+
+    /// <summary>wrk.Activity.bulkReassign: up to 100 activities, one result each (supervisors).</summary>
+    [HttpPost("activities/bulk-reassign")]
+    [Authorize(Policy = BulkReassignPermission)]
+    public async Task<IResult> BulkReassignAsync(
+        [FromBody] ActivityBulkReassignRequest request, [FromServices] ICommandHandler<BulkReassignActivities, ActivityBulkReassignResponse> handler, CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new BulkReassignActivities(request), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    /// <summary>wrk.Team.summary: counts per queue and assignee (supervisors).</summary>
+    [HttpGet("teams/summary")]
+    [Authorize(Policy = TeamSummaryPermission)]
+    public async Task<IResult> TeamSummaryAsync(
+        [FromQuery] string? groups, [FromQuery] string? grouping, [FromServices] ActivityReader reader, CancellationToken cancellationToken) =>
+        (await reader.TeamSummaryAsync(groups, grouping, cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
     /// <summary>wrk.Activity.blockingStatus.</summary>
     [HttpGet("activities/blocking-status")]

@@ -42,6 +42,8 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
 
     public DbSet<ManualJournalLineRow> ManualJournalLines => Set<ManualJournalLineRow>();
 
+    public DbSet<PostingRuleDraftRow> PostingRuleDrafts => Set<PostingRuleDraftRow>();
+
     public DbSet<EarningRunRow> EarningRuns => Set<EarningRunRow>();
 
     public DbSet<ReconSourceTotalRow> ReconSourceTotals => Set<ReconSourceTotalRow>();
@@ -328,6 +330,7 @@ internal sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> option
 
         MigrationImport.FinanceMigrationModel.Configure(modelBuilder);
         ManualJournalModel.Configure(modelBuilder);
+        PostingRuleDraftModel.Configure(modelBuilder);
         EarningModel.Configure(modelBuilder);
         ReconModel.Configure(modelBuilder);
         TaxReturnModel.Configure(modelBuilder);

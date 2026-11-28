@@ -1662,6 +1662,117 @@ namespace CoreIns.Modules.Finance.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.PostingRuleDraftRow", b =>
+                {
+                    b.Property<Guid>("DraftId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("draft_id");
+
+                    b.Property<Guid?>("ActivatedRuleSetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("activated_rule_set_id");
+
+                    b.Property<int?>("ActivatedVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("activated_version");
+
+                    b.Property<Guid?>("ApprovalRequestId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_request_id");
+
+                    b.Property<int?>("BaseVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("base_version");
+
+                    b.Property<string>("Book")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("book");
+
+                    b.Property<string>("ContentHash")
+                        .IsRequired()
+                        .HasColumnType("char(64)")
+                        .HasColumnName("content_hash");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("decided_at");
+
+                    b.Property<string>("DecidedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("decided_by");
+
+                    b.Property<string>("DecisionReason")
+                        .HasColumnType("text")
+                        .HasColumnName("decision_reason");
+
+                    b.Property<DateOnly>("EffectiveFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("effective_from");
+
+                    b.Property<string>("LegalEntityCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("legal_entity_code");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Rules")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("rules");
+
+                    b.Property<string>("SampleEvents")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("sample_events");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<string>("SubmittedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("submitted_by");
+
+                    b.HasKey("DraftId")
+                        .HasName("pk_posting_rule_draft");
+
+                    b.HasIndex("LegalEntityId", "Book", "Status")
+                        .HasDatabaseName("ix_posting_rule_draft_book");
+
+                    b.ToTable("posting_rule_draft", "fin", t =>
+                        {
+                            t.HasCheckConstraint("ck_posting_rule_draft_hash", "content_hash ~ '^[0-9a-f]{64}$'");
+
+                            t.HasCheckConstraint("ck_posting_rule_draft_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_posting_rule_draft_status", "status IN ('DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'WITHDRAWN')");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Finance.Persistence.PostingRuleRow", b =>
                 {
                     b.Property<Guid>("RuleId")

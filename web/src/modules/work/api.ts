@@ -90,7 +90,7 @@ export function useTasks(scope: TaskScope, state: TaskState = 'OPEN', enabled = 
 /**
  * Open tasks of a scope with the one page the badges and the home card read (at most 200 rows). When the server has
  * more, `more` is true and the count reads «200+».
- * TODO(hardening): a server-side count (wrk.Team.summary) once it serves counts.
+ * TODO(hardening): supervisors can read server-side counts with useTeamSummary; the per-user "mine" and "queue" counts for other roles still come from this page.
  */
 export function useTaskDigest(scope: TaskScope, enabled = true) {
   return useQuery({
@@ -106,6 +106,36 @@ export function useTaskDigest(scope: TaskScope, enabled = true) {
       tasks: page.items.map(taskOf),
       more: Boolean(page.nextCursor),
     }),
+  });
+}
+
+/** One queue of wrk.Team.summary (`counts.queues[]`); declared here from ActivityReader.TeamSummaryAsync. */
+export interface TeamQueueSummary {
+  queueCode: string;
+  title: string;
+  open: number;
+  dueToday: number;
+  breached: number;
+  unassigned: number;
+  assignees: { userId: string; open: number; breached: number }[];
+}
+
+export interface TeamSummary {
+  asOf: string;
+  totals: { open: number; dueToday: number; breached: number; unassigned: number };
+  queues: TeamQueueSummary[];
+}
+
+/** wrk.Team.summary: server-side counts per queue and assignee (supervisors only; the API refuses other roles). */
+export function useTeamSummary(enabled = true) {
+  return useQuery({
+    queryKey: ['wrk', 'teamSummary'] as const,
+    enabled,
+    retry: false,
+    refetchInterval: 60_000,
+    queryFn: ({ signal }) =>
+      apiRequest<Schemas['TeamSummaryResponse']>(`${wrk}/teams/summary`, { signal }),
+    select: (response): TeamSummary => response.counts as TeamSummary,
   });
 }
 
