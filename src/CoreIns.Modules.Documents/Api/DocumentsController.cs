@@ -26,6 +26,7 @@ internal static class DocumentsPermissions
     public const string DocumentGet = "doc.Document.get";
     public const string DocumentListForObject = "doc.Document.listForObject";
     public const string DocumentReprint = "doc.Document.reprint";
+    public const string DocumentDecideReprint = "doc.Document.decideReprint";
     public const string DocumentRenderPdf = "doc.Document.renderPdf";
     public const string DocumentResend = "doc.Document.resend";
     public const string DocumentHide = "doc.Document.hide";
@@ -196,6 +197,20 @@ internal sealed class DocumentsController : ControllerBase
 
         var result = await handler.HandleAsync(new ReprintDocument(documentId, request.Reason?.ToString()), cancellationToken).ConfigureAwait(false);
         return result.IsFailure ? Problem(result.Error!) : Results.Ok(new DocumentReprintResponse { Link = DocumentReader.ToJson(result.Value) });
+    }
+
+    /// <summary>doc.Document.decideReprint.</summary>
+    [HttpPost("documents/decide-reprint")]
+    [Authorize(Policy = DocumentsPermissions.DocumentDecideReprint)]
+    public async Task<IResult> DecideReprintAsync(
+        [FromBody] DocumentDecideReprintRequest request,
+        [FromServices] ICommandHandler<DecideReprint, DecideReprintResult> handler,
+        CancellationToken cancellationToken)
+    {
+        var result = await handler.HandleAsync(new DecideReprint(request.ApprovalRequestId.Value, request.Decision == DocumentDecideReprintRequest.DecisionValue.Approve, request.Comment), cancellationToken).ConfigureAwait(false);
+        return result.IsFailure
+            ? Problem(result.Error!)
+            : Results.Ok(new DocumentDecideReprintResponse { Status = result.Value.Status, DocumentId = result.Value.DocumentId, DeliveryId = result.Value.DeliveryId });
     }
 
     /// <summary>doc.Document.resend: a new delivery of the stored document (reason required).</summary>

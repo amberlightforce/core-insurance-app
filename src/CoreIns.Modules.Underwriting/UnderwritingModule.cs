@@ -182,6 +182,29 @@ public static class UnderwritingModule
         services.AddCommand<SweepContingencies, int, SweepContingenciesHandler>(CommandDescriptor.For("uw.Contingency.sweep") with { RequiresIdempotencyKey = false, Idempotent = false });
         services.AddScoped<IUnderwritingContingencyService, UnderwritingContingencyService>();
 
+        // BO-UW-09: policy holds (Draft, Active, Released), their impact on in-force business and the accumulation check.
+        services.AddScoped<PolicyHoldStore>();
+        services.AddScoped<PolicyHoldSupport>();
+        services.AddScoped<PolicyHoldQueries>();
+        services.AddScoped<HoldGate>();
+        services.AddScoped<IValidator<CreatePolicyHold>, CreatePolicyHoldValidator>();
+        services.AddScoped<IValidator<UpdatePolicyHold>, UpdatePolicyHoldValidator>();
+        services.AddScoped<IValidator<CopyPolicyHold>, CopyPolicyHoldValidator>();
+        services.AddScoped<IValidator<ActivatePolicyHold>, ActivatePolicyHoldValidator>();
+        services.AddScoped<IValidator<ReleasePolicyHold>, ReleasePolicyHoldValidator>();
+        services.AddCommandAuditor<CreatePolicyHold, PolicyHoldCreateResponse, PolicyHoldAuditor<CreatePolicyHold, PolicyHoldCreateResponse>>();
+        services.AddCommandAuditor<UpdatePolicyHold, PolicyHoldUpdateResponse, PolicyHoldAuditor<UpdatePolicyHold, PolicyHoldUpdateResponse>>();
+        services.AddCommandAuditor<CopyPolicyHold, PolicyHoldCopyResponse, PolicyHoldAuditor<CopyPolicyHold, PolicyHoldCopyResponse>>();
+        services.AddCommandAuditor<ActivatePolicyHold, PolicyHoldActivateResponse, PolicyHoldAuditor<ActivatePolicyHold, PolicyHoldActivateResponse>>();
+        services.AddCommandAuditor<ReleasePolicyHold, PolicyHoldReleaseResponse, PolicyHoldAuditor<ReleasePolicyHold, PolicyHoldReleaseResponse>>();
+        services.AddCommand<CreatePolicyHold, PolicyHoldCreateResponse, CreatePolicyHoldHandler>(CommandDescriptor.For("uw.PolicyHold.create"));
+        services.AddCommand<UpdatePolicyHold, PolicyHoldUpdateResponse, UpdatePolicyHoldHandler>(CommandDescriptor.For("uw.PolicyHold.update"));
+        services.AddCommand<CopyPolicyHold, PolicyHoldCopyResponse, CopyPolicyHoldHandler>(CommandDescriptor.For("uw.PolicyHold.copy"));
+        services.AddCommand<ActivatePolicyHold, PolicyHoldActivateResponse, ActivatePolicyHoldHandler>(CommandDescriptor.For("uw.PolicyHold.activate"));
+        services.AddCommand<ReleasePolicyHold, PolicyHoldReleaseResponse, ReleasePolicyHoldHandler>(CommandDescriptor.For("uw.PolicyHold.release"));
+        services.AddScoped<IUnderwritingPolicyHoldService, UnderwritingPolicyHoldService>();
+        services.AddScoped<IUnderwritingAccumulationService, UnderwritingAccumulationService>();
+
         services.AddScoped<IUnderwritingRulesService, UnderwritingRulesService>();
         services.AddScoped<IUnderwritingIssueService, UnderwritingIssueService>();
 
@@ -243,6 +266,14 @@ public static class UnderwritingModule
             .Describe("Δεν υπάρχει αίρεση με αυτό το αναγνωριστικό στη νομική οντότητά σας.", "There is no contingency with this id in your legal entity."),
         ErrorDefinition.For(ModuleCode.UW, "CONTINGENCY-STATE", 422, "Η αίρεση δεν μπορεί να αλλάξει έτσι", "The contingency cannot change this way")
             .Describe("Μόνο ανοιχτή αίρεση αλλάζει· οι συνέπειες εφαρμόζονται μόνο σε εκπρόθεσμη αίρεση που έχει συνέπεια.", "Only an Open contingency changes; a consequence applies only to an overdue contingency that has one."),
+        ErrorDefinition.For(ModuleCode.UW, "HOLD-NOT-FOUND", 404, "Δεν βρέθηκε η αναστολή", "The policy hold was not found")
+            .Describe("Δεν υπάρχει αναστολή με αυτό το αναγνωριστικό στη νομική οντότητά σας.", "There is no policy hold with this id in your legal entity."),
+        ErrorDefinition.For(ModuleCode.UW, "HOLD-STATE", 422, "Η αναστολή δεν μπορεί να αλλάξει έτσι", "The policy hold cannot change this way")
+            .Describe("Αλλάζει μόνο πρόχειρη αναστολή· ενεργοποιείται μόνο πρόχειρη και αποδεσμεύεται μόνο ενεργή.", "Only a Draft hold changes; only a Draft hold is activated and only an Active one released."),
+        ErrorDefinition.For(ModuleCode.UW, "CODE-DUPLICATE", 409, "Ο κωδικός υπάρχει ήδη", "The code exists already")
+            .Describe("Υπάρχει ήδη αναστολή με αυτόν τον κωδικό.", "A policy hold with this code exists already."),
+        ErrorDefinition.For(ModuleCode.UW, "RI-UNAVAILABLE", 503, "Τα δεδομένα συσσώρευσης δεν είναι διαθέσιμα", "Accumulation data is unavailable", retryable: true)
+            .Describe("Δεν έχει οριστεί χωρητικότητα συσσώρευσης για τον κίνδυνο.", "No accumulation capacity is configured for the peril."),
         ErrorDefinition.For(ModuleCode.UW, "STALE", 409, "Το ζήτημα άλλαξε στο μεταξύ", "The issue changed meanwhile")
             .Describe("Φορτώστε ξανά το ζήτημα και αποφασίστε πάλι.", "Reload the issue and decide again."),
     ];

@@ -8,6 +8,9 @@ using CoreIns.Modules.Documents.Persistence;
 using CoreIns.Modules.Documents.Queries;
 using CoreIns.Platform.Commands;
 using CoreIns.Platform.Context;
+using CoreIns.Modules.Documents.Services;
+using CoreIns.Platform.Contracts;
+using CoreIns.Platform.Contracts.Api;
 using CoreIns.Platform.Contracts.Common;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Events;
@@ -18,6 +21,7 @@ using CoreIns.SharedKernel.Identifiers;
 using CoreIns.SharedKernel.Results;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
@@ -252,7 +256,8 @@ internal sealed class ReceiveProviderEventHandler(
     IClock clock,
     IEventPublisher events,
     IHostEnvironment environment,
-    IOptions<DocumentsOptions> options) : ICommandHandler<ReceiveProviderEvent, ProviderEventResult>
+    IOptions<DocumentsOptions> options,
+    DocWorkTasks workTasks) : ICommandHandler<ReceiveProviderEvent, ProviderEventResult>
 {
     public async Task<Result<ProviderEventResult>> HandleAsync(ReceiveProviderEvent command, CancellationToken cancellationToken)
     {
@@ -294,7 +299,7 @@ internal sealed class ReceiveProviderEventHandler(
         if (terminal)
         {
             // A conflicting event after a terminal state (RETURNED after DELIVERED, or the reverse) never flips the delivery; it is kept
-            // as evidence and flagged for a human decision. TODO(hardening): raise a work item for the flagged conflict.
+            // as evidence and flagged for a human decision: a WRK activity is raised below (BO-DOC-03).
             var wasDelivered = delivery.Status == nameof(DeliveryState.Delivered);
             var conflicting = wasDelivered ? body.EventType is "RETURNED" or "BOUNCED" : body.EventType == "DELIVERED";
             outcome = conflicting ? "IGNORED_TERMINAL_CONFLICT" : "IGNORED_TERMINAL";
@@ -362,16 +367,41 @@ internal sealed class ReceiveProviderEventHandler(
             ReceivedAt = now,
         });
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        if (outcome == "IGNORED_TERMINAL_CONFLICT")
+        {
+            // One open activity per delivery: the idempotency key and the Work duplicate rule absorb repeated conflicting callbacks.
+            await workTasks.RaiseDeliveryConflictAsync(delivery.DocumentId, delivery.DeliveryId, cancellationToken).ConfigureAwait(false);
+        }
+
         return new ProviderEventResult(outcome, delivery.Status);
     }
 }
 
-/// <summary><c>doc.Document.reprint</c>: a new delivery of the same archived document (same content, same hash).</summary>
+/// <summary>
+/// <c>doc.Document.reprint</c>: a new delivery of the same archived document (same content, same hash). A statutory notice (non-payment)
+/// needs a reason and a second person: the call opens a <c>plt.Approval</c> request and returns <c>PENDING_APPROVAL</c> without any delivery
+/// (REQ-DOC-205, BO-DOC-03); <see cref="DecideReprintHandler"/> creates the delivery once a checker other than the maker approves.
+/// </summary>
 internal sealed record ReprintDocument(DocumentId DocumentId, string? Reason) : ICommand<ReprintResult>;
 
-internal sealed record ReprintResult(DocumentId DocumentId, DeliveryId DeliveryId, string Medium);
+internal sealed record ReprintResult(DocumentId DocumentId, DeliveryId? DeliveryId, string Medium, string Status = "REPRINTED", Guid? ApprovalRequestId = null);
 
-internal sealed class ReprintDocumentHandler(DocumentsDbContext db, IClock clock) : ICommandHandler<ReprintDocument, ReprintResult>
+/// <summary>The approval type of a statutory reprint: the owner decides it through <c>doc.Document.decideReprint</c>.</summary>
+internal static class ReprintApproval
+{
+    public const string Type = "DOC.STATUTORY_REPRINT";
+    public const string Authority = "DOC_STATUTORY_REPRINT";
+    public const string ReferralRole = "Platform.Admin";
+    public const string Pending = "PENDING_APPROVAL";
+
+    public static ObjectRef Subject(DocumentId documentId) => new(ModuleCode.DOC, "Document", documentId.Value.ToString("D"));
+
+    /// <summary>The checker approves exactly this document and this reason.</summary>
+    public static Sha256Hash Hash(DocumentId documentId, string reason) =>
+        Sha256Hash.ComputeUtf8($"{Type}|{documentId.Value:D}|{reason}");
+}
+
+internal sealed class ReprintDocumentHandler(DocumentsDbContext db, IClock clock, IServiceProvider services) : ICommandHandler<ReprintDocument, ReprintResult>
 {
     public async Task<Result<ReprintResult>> HandleAsync(ReprintDocument command, CancellationToken cancellationToken)
     {
@@ -381,17 +411,130 @@ internal sealed class ReprintDocumentHandler(DocumentsDbContext db, IClock clock
             return DomainError.Of(ModuleCode.DOC, "NOT-FOUND", "The document does not exist.");
         }
 
-        // A reprint of a statutory notice (non-payment) carries a reason: fail closed without one (REQ-DOC-205).
-        // TODO(hardening): a four-eyes approval for the statutory reprint; here the reason is required but not approved.
-        if (document.TemplateKey == Templates.NonPayNotice && string.IsNullOrWhiteSpace(command.Reason))
+        if (document.TemplateKey == Templates.NonPayNotice)
         {
-            return DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "A reprint of a statutory notice needs a reason.");
+            // Fail closed: a statutory reprint carries a reason and a second approver.
+            if (string.IsNullOrWhiteSpace(command.Reason))
+            {
+                return DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "A reprint of a statutory notice needs a reason.");
+            }
+
+            var reason = command.Reason.Trim();
+            if (reason.Length > 900)
+            {
+                return DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "The reason is at most 900 characters.");
+            }
+
+            if (services.GetService<IPlatformApprovalService>() is not { } approvals)
+            {
+                return DomainError.Of(ModuleCode.DOC, "APPROVAL-UNAVAILABLE", "The approval service is not available; the statutory reprint cannot be requested.");
+            }
+
+            try
+            {
+                var response = await approvals.RequestAsync(
+                    new ApprovalRequestRequest
+                    {
+                        Type = ReprintApproval.Type,
+                        ObjectRef = ReprintApproval.Subject(document.DocumentId),
+                        PayloadHash = ReprintApproval.Hash(document.DocumentId, reason),
+                        Authority = new ApprovalAuthority
+                        {
+                            Type = ReprintApproval.Authority,
+                            Codes = new Dictionary<string, string> { ["template"] = document.TemplateKey },
+                        },
+                        ReferralRole = ReprintApproval.ReferralRole,
+                        Reason = reason,
+                    },
+                    CommandOptions.New(),
+                    cancellationToken).ConfigureAwait(false);
+                return new ReprintResult(document.DocumentId, null, document.Medium, ReprintApproval.Pending, response.Request.RequestId);
+            }
+            catch (DomainException ex)
+            {
+                return ex.Error;
+            }
         }
 
         var delivery = RequestDocumentHandler.NewDelivery(document, document.Medium, clock.Now, isReprint: true);
         db.Deliveries.Add(delivery);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return new ReprintResult(document.DocumentId, delivery.DeliveryId, document.Medium);
+    }
+}
+
+/// <summary><c>doc.Document.decideReprint</c>: the checker's decision on a pending statutory reprint.</summary>
+internal sealed record DecideReprint(Guid ApprovalRequestId, bool Approve, string? Comment) : ICommand<DecideReprintResult>;
+
+internal sealed record DecideReprintResult(string Status, DocumentId DocumentId, DeliveryId? DeliveryId);
+
+/// <summary>
+/// Segregation of duties is <c>plt.Approval.decide</c>'s: the maker (and anyone acting for them) is refused with PLT-ERR-SELF-APPROVAL, the checker
+/// must hold the <c>DOC_STATUTORY_REPRINT</c> authority. Approval creates the delivery after the decision is verified for exactly this document and reason.
+/// </summary>
+internal sealed class DecideReprintHandler(DocumentsDbContext db, IClock clock, IServiceProvider services) : ICommandHandler<DecideReprint, DecideReprintResult>
+{
+    public async Task<Result<DecideReprintResult>> HandleAsync(DecideReprint command, CancellationToken cancellationToken)
+    {
+        if (services.GetService<IPlatformApprovalService>() is not { } approvals)
+        {
+            return DomainError.Of(ModuleCode.DOC, "APPROVAL-UNAVAILABLE", "The approval service is not available; the reprint cannot be decided.");
+        }
+
+        try
+        {
+            var found = await approvals.GetAsync(command.ApprovalRequestId.ToString("D"), cancellationToken).ConfigureAwait(false);
+            var request = found.Request;
+            if (request.Type != ReprintApproval.Type || request.ObjectRef.Module != ModuleCode.DOC || !Guid.TryParse(request.ObjectRef.Id, out var documentGuid))
+            {
+                return DomainError.Of(ModuleCode.DOC, "NOT-FOUND", "The reprint request does not exist.");
+            }
+
+            var documentId = new DocumentId(documentGuid);
+            var document = await db.Documents.AsNoTracking().SingleOrDefaultAsync(d => d.DocumentId == documentId, cancellationToken).ConfigureAwait(false);
+            if (document is null)
+            {
+                return DomainError.Of(ModuleCode.DOC, "NOT-FOUND", "The document does not exist.");
+            }
+
+            var hash = ReprintApproval.Hash(documentId, request.Reason ?? string.Empty);
+            if (request.PayloadHash != hash)
+            {
+                return DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "The reprint request does not match its approval.");
+            }
+
+            await approvals.DecideAsync(
+                new ApprovalDecideRequest
+                {
+                    RequestId = command.ApprovalRequestId,
+                    PayloadHash = hash,
+                    Decision = command.Approve ? ApprovalDecideRequest.DecisionValue.Approve : ApprovalDecideRequest.DecisionValue.Reject,
+                    Comment = string.IsNullOrWhiteSpace(command.Comment) ? null : command.Comment,
+                },
+                CommandOptions.New(),
+                cancellationToken).ConfigureAwait(false);
+            if (!command.Approve)
+            {
+                return new DecideReprintResult("REJECTED", documentId, null);
+            }
+
+            var verified = await approvals.VerifyForExecutionAsync(
+                new ApprovalVerifyForExecutionRequest { RequestId = command.ApprovalRequestId, Hash = hash, Type = ReprintApproval.Type, ObjectRef = ReprintApproval.Subject(documentId) },
+                cancellationToken).ConfigureAwait(false);
+            if (!verified.Ok)
+            {
+                return DomainError.Of(ModuleCode.DOC, "PAYLOAD-INVALID", "The approval does not cover this reprint; nothing is sent that was not approved.");
+            }
+
+            var delivery = RequestDocumentHandler.NewDelivery(document, document.Medium, clock.Now, isReprint: true);
+            db.Deliveries.Add(delivery);
+            await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return new DecideReprintResult("APPROVED", documentId, delivery.DeliveryId);
+        }
+        catch (DomainException ex)
+        {
+            return ex.Error;
+        }
     }
 }
 

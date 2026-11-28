@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { expectNoA11yViolations } from '../../../test/axe';
 import { mockApi, problem, renderScreen } from '../../../test/mockApi';
 import { FiscalDocumentPage } from './FiscalDocumentPage';
-import { FiscalListPage } from './FiscalListPage';
+import { FiscalBreaksPage } from './FiscalBreaksPage';
 
 vi.setConfig({ testTimeout: 60_000 });
 afterEach(() => {
@@ -133,9 +133,9 @@ describe('Fiscal document actions (BO-CMP-14)', () => {
         }),
       },
     ]);
-    const { user } = renderScreen(<FiscalListPage />, {
-      path: '/compliance/fiscal',
-      url: '/compliance/fiscal',
+    const { user } = renderScreen(<FiscalBreaksPage />, {
+      path: '/compliance/fiscal/breaks',
+      url: '/compliance/fiscal/breaks',
     });
     await screen.findByText('A-102');
     await user.click(screen.getByRole('button', { name: 'Επανυποβολή απορριφθέντων' }));

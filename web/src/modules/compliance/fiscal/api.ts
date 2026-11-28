@@ -6,7 +6,9 @@ import type { components as Cmp } from '../../../api/generated/cmp';
 /**
  * Fiscal documents (NX-UI-11): cmp.FiscalDocument.listBySource / get and cmp.FiscalReconciliation.breaks.
  * BO-CMP-14 adds the BO-CMP-06 commands (resubmit, bulk-resubmit, cancel, correct) and the QR payload read.
- * TODO(hardening): breaks resolve actions (BO-CMP-07) and annual returns (BO-CMP-10) are not built yet.
+ * BO-CMP-14 (b): the breaks page and the reconciliation run (BO-CMP-07). Breaks resolve on their own when a later
+ * run no longer finds them: there is no resolve command.
+ * TODO(hardening): annual returns (BO-CMP-10) are not built yet.
  */
 type Schemas = Cmp['schemas'];
 const root = '/api/cmp/v1';
@@ -59,15 +61,60 @@ export function useFiscalDocuments(filter: FiscalFilter) {
   });
 }
 
-export function useFiscalBreaks() {
+export const breakKinds = [
+  'REJECTED_BY_CHANNEL',
+  'PENDING_AT_CHANNEL',
+  'MARK_MISSING',
+  'CORRELATION_BROKEN',
+] as const;
+
+export type BreakStatus = 'OPEN' | 'RESOLVED';
+
+/** A reconciliation break: the document it is about plus the break's own facts (BO-CMP-07). */
+export interface FiscalBreak extends FiscalDocument {
+  breakId?: string;
+  kind?: string;
+  detail?: string;
+  /** The break's status (OPEN or RESOLVED), not the document's (that is `document.status`). */
+  status?: string;
+  detectedAt?: string;
+  lastSeenAt?: string;
+}
+
+export function useFiscalBreaks(status: BreakStatus = 'OPEN') {
   return useQuery({
-    queryKey: ['cmp', 'fiscal', 'breaks'],
+    queryKey: ['cmp', 'fiscal', 'breaks', status],
     queryFn: async ({ signal }) => {
-      const page = await apiRequest<Page<{ breaks?: FiscalDocument }>>(
+      const page = await apiRequest<Page<{ breaks?: FiscalBreak }>>(
         `${root}/fiscal-reconciliation/breaks`,
-        { query: { limit: 100 }, signal },
+        { query: { limit: 100, status }, signal },
       );
       return page.items.flatMap((item) => (item.breaks ? [item.breaks] : []));
+    },
+  });
+}
+
+export interface ReconciliationRun {
+  checked: number;
+  opened: number;
+  reopened: number;
+  resolved: number;
+  open: number;
+  breaks: { fiscalDocumentId: string; kind: string; detail?: string }[];
+}
+
+/** cmp.FiscalReconciliation.run: one Idempotency-Key per user action; success refreshes every fiscal read. */
+export function useReconciliationRun() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ date, key }: { date: string; key: string }) =>
+      apiRequest<ReconciliationRun>(`${root}/fiscal-reconciliation/run`, {
+        method: 'POST',
+        body: date ? { date } : {},
+        idempotencyKey: key,
+      }),
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: ['cmp', 'fiscal'] });
     },
   });
 }

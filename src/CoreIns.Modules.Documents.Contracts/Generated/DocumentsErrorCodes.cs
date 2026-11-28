@@ -76,7 +76,7 @@ public static class DocumentsErrorCodes
 
     /// <summary>DOC-ERR-IDEMPOTENCY-MISMATCH (HTTP 409).</summary>
     /// <remarks>
-    /// <para>Declared by 28 operation(s): doc.Archive.addRendition, doc.Archive.setRetentionClass, doc.Archive.store, doc.Archive.verify, doc.Document.deleteDraft, doc.Document.hide, doc.Document.import, doc.Document.renderAsOf, doc.Document.renderPdf, doc.Document.reprint, doc.Document.request, doc.Document.requestBatch, ….</para>
+    /// <para>Declared by 29 operation(s): doc.Archive.addRendition, doc.Archive.setRetentionClass, doc.Archive.store, doc.Archive.verify, doc.Document.decideReprint, doc.Document.deleteDraft, doc.Document.hide, doc.Document.import, doc.Document.renderAsOf, doc.Document.renderPdf, doc.Document.reprint, doc.Document.request, ….</para>
     /// </remarks>
     public const string IdempotencyMismatch = "DOC-ERR-IDEMPOTENCY-MISMATCH";
 
@@ -112,7 +112,7 @@ public static class DocumentsErrorCodes
 
     /// <summary>DOC-ERR-NOT-FOUND (HTTP 404).</summary>
     /// <remarks>
-    /// <para>Declared by 5 operation(s): doc.Archive.download, doc.Document.get, doc.Document.listForObject, doc.Document.renderPdf, doc.Ipid.get.</para>
+    /// <para>Declared by 6 operation(s): doc.Archive.download, doc.Document.decideReprint, doc.Document.get, doc.Document.listForObject, doc.Document.renderPdf, doc.Ipid.get.</para>
     /// </remarks>
     public const string NotFound = "DOC-ERR-NOT-FOUND";
 
@@ -124,7 +124,7 @@ public static class DocumentsErrorCodes
 
     /// <summary>DOC-ERR-PAYLOAD-INVALID (HTTP 422).</summary>
     /// <remarks>
-    /// <para>Declared by 4 operation(s): doc.Archive.completeness, doc.Document.preview, doc.Document.request, doc.Document.search.</para>
+    /// <para>Declared by 5 operation(s): doc.Archive.completeness, doc.Document.decideReprint, doc.Document.preview, doc.Document.request, doc.Document.search.</para>
     /// </remarks>
     public const string PayloadInvalid = "DOC-ERR-PAYLOAD-INVALID";
 

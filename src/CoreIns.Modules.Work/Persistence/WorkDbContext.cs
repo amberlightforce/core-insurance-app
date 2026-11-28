@@ -1,3 +1,4 @@
+using CoreIns.Modules.Work.Inbound;
 using CoreIns.Modules.Work.Notes;
 using CoreIns.Platform.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,8 @@ internal sealed class WorkDbContext(DbContextOptions<WorkDbContext> options) : M
     public DbSet<NoteRow> Notes => Set<NoteRow>();
 
     public DbSet<NoteVersionRow> NoteVersions => Set<NoteVersionRow>();
+
+    public DbSet<InboundDocumentRow> InboundDocuments => Set<InboundDocumentRow>();
 
     protected override string Schema => WorkModule.Schema;
 
@@ -133,6 +136,56 @@ internal sealed class WorkDbContext(DbContextOptions<WorkDbContext> options) : M
             entity.Property(e => e.EditedBy).HasColumnName("edited_by").HasMaxLength(200);
             entity.Property(e => e.EditedAt).HasColumnName("edited_at").HasColumnType("timestamptz");
             entity.HasOne<NoteRow>().WithMany().HasForeignKey(e => e.NoteId).HasConstraintName("fk_note_version_note");
+        });
+
+        modelBuilder.Entity<InboundDocumentRow>(entity =>
+        {
+            entity.ToTable("inbound_document", table =>
+            {
+                table.HasCheckConstraint("ck_inbound_state", "state IN ('QUARANTINED', 'CLEAN', 'INFECTED', 'VERIFIED', 'REJECTED', 'SPLIT')");
+                // An infected or unscanned file can never be CLEAN, verified or split (BO-WRK-11).
+                table.HasCheckConstraint("ck_inbound_clean_scanned", "state NOT IN ('CLEAN', 'VERIFIED', 'SPLIT') OR scan_verdict = 'CLEAN'");
+                table.HasCheckConstraint("ck_inbound_infected", "scan_verdict IS DISTINCT FROM 'INFECTED' OR (state IN ('INFECTED', 'REJECTED') AND archive_id IS NULL)");
+                table.HasCheckConstraint("ck_inbound_hold", "redacted_archive_id IS NULL OR (legal_hold AND archive_id IS NOT NULL)");
+            });
+            entity.HasKey(e => e.InboundDocumentId).HasName("pk_inbound_document");
+            entity.Property(e => e.InboundDocumentId).HasColumnName("inbound_document_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.EnvelopeId).HasColumnName("envelope_id");
+            entity.Property(e => e.InboundNumber).HasColumnName("inbound_number").HasMaxLength(40);
+            entity.Property(e => e.FileName).HasColumnName("file_name").HasMaxLength(200);
+            entity.Property(e => e.ContentType).HasColumnName("content_type").HasMaxLength(100);
+            entity.Property(e => e.SizeBytes).HasColumnName("size_bytes");
+            entity.Property(e => e.ContentHash).HasColumnName("content_hash").HasMaxLength(64);
+            entity.Property(e => e.ArchiveId).HasColumnName("archive_id");
+            entity.Property(e => e.Channel).HasColumnName("channel").HasMaxLength(32);
+            entity.Property(e => e.Sender).HasColumnName("sender");
+            entity.Property(e => e.EnvelopeMetadata).HasColumnName("envelope_metadata");
+            entity.Property(e => e.SuggestedClass).HasColumnName("suggested_class").HasMaxLength(64);
+            entity.Property(e => e.DocumentClass).HasColumnName("document_class").HasMaxLength(64);
+            entity.Property(e => e.LinkObject).HasColumnName("link_object").HasMaxLength(340);
+            entity.Property(e => e.KeyedData).HasColumnName("keyed_data");
+            entity.Property(e => e.State).HasColumnName("state").HasMaxLength(16);
+            entity.Property(e => e.ScanVerdict).HasColumnName("scan_verdict").HasMaxLength(16);
+            entity.Property(e => e.ScanSignature).HasColumnName("scan_signature").HasMaxLength(200);
+            entity.Property(e => e.Scanner).HasColumnName("scanner").HasMaxLength(32);
+            entity.Property(e => e.ScannedAt).HasColumnName("scanned_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ParentId).HasColumnName("parent_id");
+            entity.Property(e => e.PageRange).HasColumnName("page_range").HasMaxLength(64);
+            entity.Property(e => e.RejectReason).HasColumnName("reject_reason");
+            entity.Property(e => e.RedactedArchiveId).HasColumnName("redacted_archive_id");
+            entity.Property(e => e.RedactionReason).HasColumnName("redaction_reason");
+            entity.Property(e => e.LegalHold).HasColumnName("legal_hold");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(200);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.VerifiedBy).HasColumnName("verified_by").HasMaxLength(200);
+            entity.Property(e => e.VerifiedAt).HasColumnName("verified_at").HasColumnType("timestamptz");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => e.InboundNumber).IsUnique().HasDatabaseName("ux_inbound_document_number");
+            entity.HasIndex(e => new { e.LegalEntityId, e.State, e.CreatedAt }).HasDatabaseName("ix_inbound_document_queue");
+            entity.HasIndex(e => new { e.LegalEntityId, e.LinkObject }).HasDatabaseName("ix_inbound_document_link");
+            entity.HasIndex(e => e.EnvelopeId).HasDatabaseName("ix_inbound_document_envelope");
         });
 
         modelBuilder.Entity<ActivityRow>(entity =>
