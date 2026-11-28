@@ -17,6 +17,8 @@
   <ItemGroup>
     <ProjectReference Include="..\CoreIns.Modules.Billing.Contracts\CoreIns.Modules.Billing.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Policy.Contracts\CoreIns.Modules.Policy.Contracts.csproj" />
+    <!-- BO-BIL-07: fin.Period.status (is the accounting period of a reversal closed?), contract only. -->
+    <ProjectReference Include="..\CoreIns.Modules.Finance.Contracts\CoreIns.Modules.Finance.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Product.Contracts\CoreIns.Modules.Product.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Compliance.Contracts\CoreIns.Modules.Compliance.Contracts.csproj" />
     <ProjectReference Include="..\CoreIns.Modules.Market.Contracts\CoreIns.Modules.Market.Contracts.csproj" />

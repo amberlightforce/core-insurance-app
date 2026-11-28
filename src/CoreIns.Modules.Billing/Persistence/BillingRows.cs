@@ -390,6 +390,15 @@ internal sealed class AllocationRow
     public string Actor { get; set; } = string.Empty;
 
     public Instant RecordedAt { get; set; }
+
+    /// <summary>BO-BIL-07: set on a reversal row (negative amount): the allocation it reverses. A row is reversed at most once.</summary>
+    public Guid? ReversesAllocationId { get; set; }
+
+    /// <summary>Reason code of a reversal row.</summary>
+    public string? ReasonCode { get; set; }
+
+    /// <summary>Free-text comment of a reversal row.</summary>
+    public string? Comment { get; set; }
 }
 
 /// <summary>An account of the sub-ledger chart (PRD-06 §7.1.4, REQ-BIL-282), seeded as data.</summary>

@@ -60,6 +60,9 @@ public enum InvoiceTrigger
 
     /// <summary>A credit note offsets the invoice in full.</summary>
     Reverse,
+
+    /// <summary>An allocation is reversed (BO-BIL-07) and part of the cash stays allocated.</summary>
+    AllocationReversedPartially,
 }
 
 /// <summary>The canonical Invoice lifecycle.</summary>
@@ -75,8 +78,9 @@ public static class InvoiceStateModel
             .Permit([InvoiceState.Due, InvoiceState.PartiallyPaid], InvoiceTrigger.AllocatePartially, InvoiceState.PartiallyPaid)
             .Permit([InvoiceState.Due, InvoiceState.PartiallyPaid], InvoiceTrigger.BecomeOverdue, InvoiceState.Overdue)
             .Permit(InvoiceState.Overdue, InvoiceTrigger.WriteOff, InvoiceState.WrittenOff)
-            .Permit(InvoiceState.Paid, InvoiceTrigger.PaymentReversedBeforeDue, InvoiceState.Due)
-            .Permit(InvoiceState.Paid, InvoiceTrigger.PaymentReversedAfterDue, InvoiceState.Overdue)
+            .Permit([InvoiceState.Paid, InvoiceState.PartiallyPaid], InvoiceTrigger.PaymentReversedBeforeDue, InvoiceState.Due)
+            .Permit([InvoiceState.Paid, InvoiceState.PartiallyPaid], InvoiceTrigger.PaymentReversedAfterDue, InvoiceState.Overdue)
+            .Permit([InvoiceState.Paid, InvoiceState.PartiallyPaid], InvoiceTrigger.AllocationReversedPartially, InvoiceState.PartiallyPaid)
             .Permit([InvoiceState.Billed, InvoiceState.Due], InvoiceTrigger.Reverse, InvoiceState.Reversed)
             .Terminal(InvoiceState.WrittenOff, InvoiceState.Reversed)
             .Build();
@@ -121,6 +125,12 @@ public enum PaymentTrigger
 
     /// <summary>The payment (or the overpaid part) is refunded.</summary>
     Refund,
+
+    /// <summary>Some allocations are reversed (BO-BIL-07) and part of the amount stays allocated.</summary>
+    Unallocate,
+
+    /// <summary>Every allocation is reversed (BO-BIL-07): the whole amount is unapplied cash again.</summary>
+    ReturnToSuspense,
 }
 
 /// <summary>The canonical incoming Payment lifecycle (PRD-18 edges plus the PRD-06 edges between the same states).</summary>
@@ -131,10 +141,12 @@ public static class PaymentStateModel
         StateMachine.Define<PaymentState, PaymentTrigger>(ModuleCode.BIL, "Payment")
             .Initial(PaymentState.Received)
             .Permit([PaymentState.Received, PaymentState.PartiallyAllocated, PaymentState.Suspense], PaymentTrigger.AllocateInFull, PaymentState.Allocated)
-            .Permit([PaymentState.Received, PaymentState.Suspense], PaymentTrigger.AllocatePartially, PaymentState.PartiallyAllocated)
+            .Permit([PaymentState.Received, PaymentState.Suspense, PaymentState.PartiallyAllocated], PaymentTrigger.AllocatePartially, PaymentState.PartiallyAllocated)
             .Permit([PaymentState.Received, PaymentState.PartiallyAllocated], PaymentTrigger.MoveToSuspense, PaymentState.Suspense)
             .Permit([PaymentState.Allocated, PaymentState.PartiallyAllocated], PaymentTrigger.Reverse, PaymentState.Reversed)
             .Permit([PaymentState.Suspense, PaymentState.Allocated], PaymentTrigger.Refund, PaymentState.Refunded)
+            .Permit([PaymentState.Allocated, PaymentState.PartiallyAllocated], PaymentTrigger.Unallocate, PaymentState.PartiallyAllocated)
+            .Permit([PaymentState.Allocated, PaymentState.PartiallyAllocated], PaymentTrigger.ReturnToSuspense, PaymentState.Suspense)
             .Terminal(PaymentState.Reversed, PaymentState.Refunded)
             .Build();
 }

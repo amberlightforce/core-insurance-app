@@ -14,7 +14,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/query
 CONTRACT_NOT_SERVED GET /api/bil/v1/mandates/{}
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-instruments
 CONTRACT_NOT_SERVED GET /api/bil/v1/payment-plans
-CONTRACT_NOT_SERVED GET /api/bil/v1/receipts
 CONTRACT_NOT_SERVED GET /api/chn/v1/account-current
 CONTRACT_NOT_SERVED GET /api/chn/v1/agent-logs/query
 CONTRACT_NOT_SERVED GET /api/chn/v1/api-products
@@ -162,8 +161,6 @@ CONTRACT_NOT_SERVED PATCH /api/uw/v1/contingencies/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
 CONTRACT_NOT_SERVED PATCH /api/wrk/v1/activities/{}
 CONTRACT_NOT_SERVED POST /api/bil/v1/account-currents/dispute
-CONTRACT_NOT_SERVED POST /api/bil/v1/allocations/reallocate
-CONTRACT_NOT_SERVED POST /api/bil/v1/allocations/unallocate
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/attach-term
 CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/change-payer

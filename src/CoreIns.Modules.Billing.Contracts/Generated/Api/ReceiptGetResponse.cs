@@ -16,10 +16,7 @@ public sealed record ReceiptGetResponse
     [global::System.Text.Json.Serialization.JsonPropertyName("allocations")]
     public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.AllocationView> Allocations { get; init; }
 
-    /// <summary>Reversals (none in SL-BIL)</summary>
-    /// <remarks>
-    /// <para>Open structure (OpenObject): consumers must not rely on its members until the producer defines them in a minor version.</para>
-    /// </remarks>
+    /// <summary>Reversal rows of allocations (negative amounts, BO-BIL-07)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("reversals")]
-    public required global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement> Reversals { get; init; }
+    public required global::System.Collections.Generic.IReadOnlyList<global::CoreIns.Modules.Billing.Contracts.Api.AllocationView> Reversals { get; init; }
 }

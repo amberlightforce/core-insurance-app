@@ -2325,6 +2325,7 @@ paths:
       - W5-BIL-03
       x-status: full
       x-maturity: pre-release
+      x-typed: REQ-BIL-004, REQ-BIL-126 (BO-BIL-07 filters, keyset paging, scoped to the legal entity)
       x-io-shared: 2
       x-operation-kind: query
       x-idempotency: none
@@ -2341,20 +2342,48 @@ paths:
       - $ref: common.yaml#/components/parameters/AcceptLanguage
       - $ref: common.yaml#/components/parameters/Cursor
       - $ref: common.yaml#/components/parameters/Limit
-      - name: ids
+      - name: billingAccountId
         in: query
         required: false
-        description: 'PRD: "ids"'
         schema:
-          type: array
-          items:
-            type: string
-      - name: filters
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      - name: state
         in: query
         required: false
-        description: 'PRD: "filters"'
+        schema:
+          $ref: '#/components/schemas/ReceiptState'
+      - name: valueDateFrom
+        in: query
+        required: false
+        description: Value date on or after
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      - name: valueDateTo
+        in: query
+        required: false
+        description: Value date on or before
+        schema:
+          $ref: ../events/common.schema.json#/$defs/LocalDate
+      - name: bankReferencePrefix
+        in: query
+        required: false
+        description: Bank reference starts with (case-sensitive)
         schema:
           type: string
+          minLength: 1
+          maxLength: 64
+      - name: amountMin
+        in: query
+        required: false
+        description: Receipt amount at least (decimal in the receipt currency)
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Decimal
+      - name: amountMax
+        in: query
+        required: false
+        description: Receipt amount at most (decimal in the receipt currency)
+        schema:
+          $ref: ../events/common.schema.json#/$defs/Decimal
       responses:
         '200':
           description: Success
@@ -2455,9 +2484,9 @@ paths:
   /api/bil/v1/allocations/unallocate:
     post:
       operationId: bil.Allocation.unallocate
-      summary: Manual allocation
+      summary: Reverse allocations
       description: |-
-        Manual allocation
+        Reverse allocations of a receipt (BO-BIL-07): append-only reversal rows and one ALLOCATION_REVERSED ledger entry; the cash returns to the receipt's unapplied balance (the receipt goes back to suspense when nothing stays allocated) and the invoices roll back. Refused when the period is locked or the term is refunded; limited by BIL.ALLOCATION_REVERSE authority.
 
         PRD inputs: receipt or suspense, lines
         PRD outputs: allocations
@@ -2486,8 +2515,27 @@ paths:
       - ui
       x-permission: bil.Allocation.unallocate
       x-error-codes:
-      - code: BIL-ERR-OVER-ALLOCATION
+      - code: BIL-ERR-VALIDATION
         status: 422
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-NOT-ALLOCATED
+        note: nothing of the receipt (or of the named allocations) is allocated any more
+        status: 422
+      - code: BIL-ERR-ALREADY-REVERSED
+        note: a concurrent request reversed the same allocation first
+        status: 409
+      - code: BIL-ERR-PERIOD-LOCKED
+        note: the accounting period of the allocation or of today is closed in FIN
+        status: 422
+      - code: BIL-ERR-ALLOCATION-REFUNDED
+        note: the allocated term is part of a refund already paid out or being disbursed
+        status: 422
+      - code: BIL-ERR-SOD
+        note: the actor has no BIL.ALLOCATION_REVERSE authority over the amount
+        status: 403
+      - code: BIL-ERR-STALE
+        status: 409
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
         status: 409
@@ -2526,9 +2574,9 @@ paths:
   /api/bil/v1/allocations/reallocate:
     post:
       operationId: bil.Allocation.reallocate
-      summary: Manual allocation
+      summary: Reallocate cash
       description: |-
-        Manual allocation
+        Reallocate cash (BO-BIL-07): reverse the named allocations and allocate the freed cash to other invoices in one transaction.
 
         PRD inputs: receipt or suspense, lines
         PRD outputs: allocations
@@ -2557,7 +2605,32 @@ paths:
       - ui
       x-permission: bil.Allocation.reallocate
       x-error-codes:
+      - code: BIL-ERR-VALIDATION
+        status: 422
+      - code: BIL-ERR-NOT-FOUND
+        status: 404
+      - code: BIL-ERR-NOT-ALLOCATED
+        note: nothing of the receipt (or of the named allocations) is allocated any more
+        status: 422
+      - code: BIL-ERR-ALREADY-REVERSED
+        note: a concurrent request reversed the same allocation first
+        status: 409
+      - code: BIL-ERR-PERIOD-LOCKED
+        note: the accounting period of the allocation or of today is closed in FIN
+        status: 422
+      - code: BIL-ERR-ALLOCATION-REFUNDED
+        note: the allocated term is part of a refund already paid out or being disbursed
+        status: 422
+      - code: BIL-ERR-SOD
+        note: the actor has no BIL.ALLOCATION_REVERSE authority over the amount
+        status: 403
+      - code: BIL-ERR-STALE
+        status: 409
+      - code: BIL-ERR-AMOUNT-MISMATCH
+        status: 422
       - code: BIL-ERR-OVER-ALLOCATION
+        status: 422
+      - code: BIL-ERR-CURRENCY
         status: 422
       - code: BIL-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -7171,6 +7244,9 @@ components:
           enum:
           - RULE
           - MANUAL
+        reversesAllocationId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: Set on a reversal row (negative amount) - the allocation it reverses
         recordedAt:
           $ref: ../events/common.schema.json#/$defs/Instant
       required:
@@ -7825,25 +7901,33 @@ components:
         reversals:
           type: array
           items:
-            $ref: ../events/common.schema.json#/$defs/OpenObject
-          description: Reversals (none in SL-BIL)
+            $ref: '#/components/schemas/AllocationView'
+          description: Reversal rows of allocations (negative amounts, BO-BIL-07)
       required:
       - receipt
       - allocations
       - reversals
+    ReceiptState:
+      type: string
+      description: Receipt state (the wire code of PaymentState)
+      enum:
+      - RECEIVED
+      - ALLOCATED
+      - PARTIALLY_ALLOCATED
+      - SUSPENSE
+      - REVERSED
+      - REFUNDED
     ReceiptListItem:
       type: object
-      description: 'bil.Receipt.list result. PRD outputs: "receipt, allocations, reversals"'
+      description: A receipt of bil.Receipt.list. The bank reference is masked (only its last four characters show); payer details are not part of the receipt.
       properties:
         receipt:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt"'
-        allocations:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "allocations"'
-        reversals:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "reversals"'
+          $ref: '#/components/schemas/ReceiptView'
+        bankReferenceMasked:
+          type: string
+          description: Bank reference with all but the last four characters replaced by asterisks
+      required:
+      - receipt
     ReceiptListPage:
       allOf:
       - $ref: common.yaml#/components/schemas/PageEnvelope
@@ -7892,58 +7976,96 @@ components:
       - receipt
     AllocationUnallocateRequest:
       type: object
-      description: 'bil.Allocation.unallocate request. PRD inputs: "receipt or suspense, lines"'
+      description: 'bil.Allocation.unallocate request (BO-BIL-07): reverse the live allocations of a receipt (all of them, or the named ones) with a reason'
       properties:
-        receipt:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt or suspense" (optional)'
-        suspense:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt or suspense" (optional)'
-        lines:
+        receiptId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        allocationIds:
           type: array
+          description: Allocations (original rows, not reversals) to reverse; omitted or empty reverses every live allocation of the receipt
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
-      oneOf:
-      - required:
-        - receipt
-      - required:
-        - suspense
+            $ref: ../events/common.schema.json#/$defs/Uuid
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Reason of the reversal, capital letters, digits and underscores (e.g. MISAPPLIED)
+        comment:
+          type: string
+          maxLength: 500
+      required:
+      - receiptId
+      - reasonCode
     AllocationUnallocateResponse:
       type: object
-      description: 'bil.Allocation.unallocate result. PRD outputs: "allocations"'
+      description: 'bil.Allocation.unallocate result: the reversal rows (negative amounts), the receipt as it now stands and the reversal ledger entry'
       properties:
-        allocations:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "allocations"'
-    AllocationReallocateRequest:
-      type: object
-      description: 'bil.Allocation.reallocate request. PRD inputs: "receipt or suspense, lines"'
-      properties:
-        receipt:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt or suspense" (optional)'
-        suspense:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "receipt or suspense" (optional)'
-        lines:
+        reversals:
           type: array
           items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "lines"'
-      oneOf:
-      - required:
-        - receipt
-      - required:
-        - suspense
+            $ref: '#/components/schemas/AllocationView'
+        receipt:
+          $ref: '#/components/schemas/ReceiptView'
+        ledgerEntryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+      required:
+      - reversals
+      - receipt
+      - ledgerEntryId
+    AllocationReallocateRequest:
+      type: object
+      description: 'bil.Allocation.reallocate request (BO-BIL-07): reverse allocations and apply the cash to other invoices in one transaction'
+      properties:
+        receiptId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        allocationIds:
+          type: array
+          description: Allocations to reverse; omitted or empty reverses every live allocation of the receipt
+          items:
+            $ref: ../events/common.schema.json#/$defs/Uuid
+        reasonCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+        comment:
+          type: string
+          maxLength: 500
+        lines:
+          type: array
+          minItems: 1
+          description: The new allocation, as for bil.Allocation.allocate
+          items:
+            type: object
+            properties:
+              invoiceId:
+                $ref: ../events/common.schema.json#/$defs/Uuid
+              amount:
+                $ref: ../events/common.schema.json#/$defs/Money
+            required:
+            - invoiceId
+            - amount
+      required:
+      - receiptId
+      - reasonCode
+      - lines
     AllocationReallocateResponse:
       type: object
-      description: 'bil.Allocation.reallocate result. PRD outputs: "allocations"'
+      description: 'bil.Allocation.reallocate result'
       properties:
+        reversals:
+          type: array
+          items:
+            $ref: '#/components/schemas/AllocationView'
         allocations:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "allocations"'
+          type: array
+          items:
+            $ref: '#/components/schemas/AllocationView'
+        receipt:
+          $ref: '#/components/schemas/ReceiptView'
+        ledgerEntryId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+          description: The reversal entry
+      required:
+      - reversals
+      - allocations
+      - receipt
+      - ledgerEntryId
     SuspenseState:
       type: string
       description: 'State of a suspense item: OPEN (unapplied cash awaiting a decision), REFUND_PENDING (a refund to the sender waits for approval), ALLOCATED (applied to invoices), REFUNDED (paid back to the sender)'
