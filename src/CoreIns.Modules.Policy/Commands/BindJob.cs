@@ -1,5 +1,7 @@
 using System.Text.Json;
 using CoreIns.Modules.Market.Contracts;
+using CoreIns.Modules.Billing.Contracts;
+using CoreIns.Modules.Billing.Contracts.Api;
 using CoreIns.Modules.Party.Contracts;
 using CoreIns.Modules.Party.Contracts.Api;
 using CoreIns.Modules.Policy.Commands.Change;
@@ -69,6 +71,7 @@ internal sealed class BindJobHandler(
     RatingInput ratingInput,
     Dependency<IMarketConfigurationService> marketConfiguration,
     Dependency<IPartyScreeningService> screening,
+    Dependency<IBillingDownPaymentService> downPayments,
     ChangeBindService changeBind,
     IOptions<PolicyOptions> options) : ICommandHandler<BindJob, JobBindResponse>
 {
@@ -162,6 +165,12 @@ internal sealed class BindJobHandler(
         gates.Add(Gate("UW_ISSUES", !uwBlocked, evaluation.Outcome == RulesEvaluateResponse.OutcomeValue.Decline ? "UW_DECLINE" : "UW_ISSUES_OPEN"));
         // Sanctions screening of the policyholder (BO-PTY-07): a potential hit (case open) or a true match blocks the bind; an unavailable screening fails closed.
         gates.Add(Gate("SANCTIONS_SCREENING", await PolicyholderClearAsync(job, cancellationToken).ConfigureAwait(false), "SANCTIONS_HIT"));
+        // Down payment (BO-BIL-04): where the product requires it, the first instalment of a multi-instalment plan must be cleared in BIL.
+        if (DownPaymentRequired(job.ProductCode, request.PaymentPlanOption))
+        {
+            gates.Add(Gate("DOWN_PAYMENT", await DownPaymentClearedAsync(job, request.PaymentPlanOption, cancellationToken).ConfigureAwait(false), "DOWN_PAYMENT_REQUIRED"));
+        }
+
         job.Referred = uwBlocked;
         version.Issues = JobSupport.Json(issues);
         job.RecordVersion++;
@@ -342,6 +351,33 @@ internal sealed class BindJobHandler(
                 CommandOptions.New(),
                 cancellationToken).ConfigureAwait(false);
             return response.Result == ScreeningScreenResponse.ResultValue.Clear && !response.PaymentBlock;
+        }
+        catch (DomainException)
+        {
+            return false;
+        }
+    }
+
+    private bool DownPaymentRequired(string productCode, string? plan)
+    {
+        var products = options.Value.DownPaymentRequiredProducts;
+
+        // ANNUAL is a single instalment: nothing to pay up front.
+        return !string.Equals(plan, "ANNUAL", StringComparison.Ordinal)
+            && products.Any(p => p == "*" || string.Equals(p, productCode, StringComparison.Ordinal));
+    }
+
+    private async Task<bool> DownPaymentClearedAsync(JobRow job, string? plan, CancellationToken cancellationToken)
+    {
+        if (downPayments.TryValue is not { } service)
+        {
+            return false;
+        }
+
+        try
+        {
+            var status = await service.StatusAsync(jobId: job.JobId, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return status.Status == DownPaymentStatusResponse.StatusValue.Cleared && string.Equals(status.PlanCode, plan, StringComparison.Ordinal);
         }
         catch (DomainException)
         {

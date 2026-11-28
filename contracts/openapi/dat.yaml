@@ -2161,7 +2161,6 @@ paths:
       x-idempotency: none
       x-dry-run: false
       x-dry-run-note: 'PRD: —'
-      x-in-process: true
       x-exposure:
       - ui
       - internal

@@ -237,6 +237,7 @@ paths:
       - $ref: common.yaml#/components/parameters/IdempotencyKey
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/DryRun
       - name: id
         in: path
         required: true
@@ -5173,12 +5174,17 @@ paths:
       x-status: full
       x-maturity: pre-release
       x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-bounded: 'Newest write-offs of the legal entity, capped by limit (1..200); no cursor'
       x-exposure:
       - ui
       x-permission: bil.WriteOff.list
       x-error-codes:
       - code: BIL-ERR-VALIDATION
         status: 422
+      x-source:
+      - BO-BIL-13
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
@@ -7299,6 +7305,9 @@ components:
         amount:
           $ref: ../events/common.schema.json#/$defs/Money
           description: Down payment required (REQ-BIL-054)
+        planCode:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: The payment plan the down payment was initiated for (the first instalment of this plan is the amount)
       required:
       - status
       description: 'Typed from REQ-BIL-003, REQ-BIL-054. PRD outputs: "status, amount, reference/QR/link"'
@@ -7311,6 +7320,9 @@ components:
           $ref: ../events/common.schema.json#/$defs/Uuid
         method:
           $ref: ../events/common.schema.json#/$defs/Code
+        paymentPlanOption:
+          $ref: ../events/common.schema.json#/$defs/Code
+          description: Payment plan the down payment is for; the first instalment of this plan is the amount (default ANNUAL, which needs none)
       required:
       - method
       oneOf:

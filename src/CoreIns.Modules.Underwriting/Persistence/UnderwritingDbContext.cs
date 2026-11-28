@@ -278,6 +278,55 @@ internal sealed class DeclineRow
     public int RecordVersion { get; set; } = 1;
 }
 
+/// <summary>
+/// <c>uw.contingency</c>: a condition on a policy term that must be met by its due date (BO-UW-08, REQ-UW-006). With a job and a blocking
+/// point it gates <c>uw.Issue.blockingStatus</c> while it is Open. Overdue is a timestamp, not a status: an overdue contingency is still Open.
+/// </summary>
+internal sealed class ContingencyRow
+{
+    public Guid ContingencyId { get; set; }
+
+    public Guid LegalEntityId { get; set; }
+
+    public Guid TermId { get; set; }
+
+    public Guid? JobId { get; set; }
+
+    public string ContingencyType { get; set; } = string.Empty;
+
+    public string Description { get; set; } = string.Empty;
+
+    public string? CustomerText { get; set; }
+
+    public DateOnly DueDate { get; set; }
+
+    public string Owner { get; set; } = string.Empty;
+
+    public string BlockingPoint { get; set; } = "PRE_ISSUE";
+
+    public string ConsequenceCode { get; set; } = "NONE";
+
+    public string? ConsequenceIssueType { get; set; }
+
+    public string Status { get; set; } = "Open";
+
+    public Instant? OverdueAt { get; set; }
+
+    public Instant? ResolvedAt { get; set; }
+
+    public string? ResolvedBy { get; set; }
+
+    public string? ResolutionNote { get; set; }
+
+    public string? EvidenceRef { get; set; }
+
+    public Instant CreatedAt { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public int RecordVersion { get; set; } = 1;
+}
+
 /// <summary>The Underwriting module's EF Core context (schema <c>uw</c>): tables and migrations; reads and writes use Dapper on the scope's connection.</summary>
 internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbContext> options) : ModuleDbContext(options)
 {
@@ -292,6 +341,8 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
     public DbSet<ReferralStateRow> ReferralStates => Set<ReferralStateRow>();
 
     public DbSet<DeclineRow> Declines => Set<DeclineRow>();
+
+    public DbSet<ContingencyRow> Contingencies => Set<ContingencyRow>();
 
     protected override string Schema => UnderwritingModule.Schema;
 
@@ -498,6 +549,40 @@ internal sealed class UnderwritingDbContext(DbContextOptions<UnderwritingDbConte
             entity.HasIndex(e => e.JobId).IsUnique().HasFilter("job_id IS NOT NULL AND status <> 'Overturned'").HasDatabaseName("ux_decline_job");
             entity.HasIndex(e => e.IntakeId).IsUnique().HasFilter("intake_id IS NOT NULL AND status <> 'Overturned'").HasDatabaseName("ux_decline_intake");
             entity.HasIndex(e => new { e.LegalEntityId, e.CreatedAt, e.DeclineId }).HasDatabaseName("ix_decline_register");
+        });
+        modelBuilder.Entity<ContingencyRow>(entity =>
+        {
+            entity.ToTable("contingency", table =>
+            {
+                table.HasCheckConstraint("ck_contingency_status", "status IN ('Open', 'Satisfied', 'Waived', 'ConsequenceApplied')");
+                table.HasCheckConstraint("ck_contingency_blocking_point", "blocking_point IN ('PRE_QUOTE', 'PRE_BIND', 'PRE_ISSUE', 'NON_BLOCKING')");
+                table.HasCheckConstraint("ck_contingency_consequence", "consequence_code IN ('NONE', 'CANCEL_QUOTE', 'ADD_ISSUE')");
+            });
+            entity.HasKey(e => e.ContingencyId).HasName("pk_contingency");
+            entity.Property(e => e.ContingencyId).HasColumnName("contingency_id");
+            entity.Property(e => e.LegalEntityId).HasColumnName("legal_entity_id");
+            entity.Property(e => e.TermId).HasColumnName("term_id");
+            entity.Property(e => e.JobId).HasColumnName("job_id");
+            entity.Property(e => e.ContingencyType).HasColumnName("contingency_type");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.CustomerText).HasColumnName("customer_text");
+            entity.Property(e => e.DueDate).HasColumnName("due_date").HasColumnType("date");
+            entity.Property(e => e.Owner).HasColumnName("owner");
+            entity.Property(e => e.BlockingPoint).HasColumnName("blocking_point");
+            entity.Property(e => e.ConsequenceCode).HasColumnName("consequence_code");
+            entity.Property(e => e.ConsequenceIssueType).HasColumnName("consequence_issue_type");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.OverdueAt).HasColumnName("overdue_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ResolvedAt).HasColumnName("resolved_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ResolvedBy).HasColumnName("resolved_by");
+            entity.Property(e => e.ResolutionNote).HasColumnName("resolution_note");
+            entity.Property(e => e.EvidenceRef).HasColumnName("evidence_ref");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.RecordVersion).HasColumnName("record_version").IsConcurrencyToken();
+            entity.HasIndex(e => new { e.LegalEntityId, e.TermId, e.Status }).HasDatabaseName("ix_contingency_term");
+            entity.HasIndex(e => new { e.LegalEntityId, e.JobId, e.Status }).HasDatabaseName("ix_contingency_job");
+            entity.HasIndex(e => new { e.Status, e.DueDate }).HasDatabaseName("ix_contingency_due");
         });
     }
 }

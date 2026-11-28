@@ -7,7 +7,6 @@ CONTRACT_NOT_SERVED GET /api/bil/v1/account-currents
 CONTRACT_NOT_SERVED GET /api/bil/v1/account-currents/{}
 CONTRACT_NOT_SERVED GET /api/bil/v1/commission/calculations
 CONTRACT_NOT_SERVED GET /api/bil/v1/commission/statements
-CONTRACT_NOT_SERVED GET /api/bil/v1/down-payment/status
 CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/balance
 CONTRACT_NOT_SERVED GET /api/bil/v1/ledger/query
 CONTRACT_NOT_SERVED GET /api/chn/v1/account-current
@@ -99,7 +98,6 @@ CONTRACT_NOT_SERVED GET /api/ri/v1/data-products/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs
 CONTRACT_NOT_SERVED GET /api/ri/v1/facs/{}
 CONTRACT_NOT_SERVED GET /api/ri/v1/ifrs17-links/query
-CONTRACT_NOT_SERVED GET /api/uw/v1/contingencies
 CONTRACT_NOT_SERVED GET /api/uw/v1/disclosure-findings
 CONTRACT_NOT_SERVED GET /api/uw/v1/disclosure-findings/{}
 CONTRACT_NOT_SERVED GET /api/uw/v1/external-reports
@@ -119,7 +117,6 @@ CONTRACT_NOT_SERVED GET /api/wrk/v1/requests/{}
 CONTRACT_NOT_SERVED GET /api/wrk/v1/teams/summary
 CONTRACT_NOT_SERVED PATCH /api/clm/v1/services/{}
 CONTRACT_NOT_SERVED PATCH /api/pfc/v1/pogs/{}
-CONTRACT_NOT_SERVED PATCH /api/uw/v1/contingencies/{}
 CONTRACT_NOT_SERVED PATCH /api/uw/v1/policy-holds/{}
 CONTRACT_NOT_SERVED PATCH /api/wrk/v1/activities/{}
 CONTRACT_NOT_SERVED POST /api/bil/v1/account-currents/dispute
@@ -129,7 +126,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/billing-accounts/move-term
 CONTRACT_NOT_SERVED POST /api/bil/v1/commission/dispute
 CONTRACT_NOT_SERVED POST /api/bil/v1/commission/run-payments
 CONTRACT_NOT_SERVED POST /api/bil/v1/commission/simulate
-CONTRACT_NOT_SERVED POST /api/bil/v1/down-payment/initiate
 CONTRACT_NOT_SERVED POST /api/bil/v1/dsar/erase
 CONTRACT_NOT_SERVED POST /api/bil/v1/dsar/export
 CONTRACT_NOT_SERVED POST /api/bil/v1/dsar/restrict
@@ -393,11 +389,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/confirm
 CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/estimate
 CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/propose
 CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/revise
-CONTRACT_NOT_SERVED POST /api/ri/v1/cession-exceptions/assign
-CONTRACT_NOT_SERVED POST /api/ri/v1/cession-exceptions/rerun
-CONTRACT_NOT_SERVED POST /api/ri/v1/cession-exceptions/resolve
-CONTRACT_NOT_SERVED POST /api/ri/v1/cessions/preview
-CONTRACT_NOT_SERVED POST /api/ri/v1/cessions/rerun
 CONTRACT_NOT_SERVED POST /api/ri/v1/close/run
 CONTRACT_NOT_SERVED POST /api/ri/v1/collaterals
 CONTRACT_NOT_SERVED POST /api/ri/v1/collaterals/draw
@@ -430,11 +421,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/notices/draft
 CONTRACT_NOT_SERVED POST /api/ri/v1/notices/send
 CONTRACT_NOT_SERVED POST /api/ri/v1/reconciliation/fin
 CONTRACT_NOT_SERVED POST /api/uw/v1/accumulation/check
-CONTRACT_NOT_SERVED POST /api/uw/v1/contingencies
-CONTRACT_NOT_SERVED POST /api/uw/v1/contingencies/apply-consequence
-CONTRACT_NOT_SERVED POST /api/uw/v1/contingencies/extend
-CONTRACT_NOT_SERVED POST /api/uw/v1/contingencies/satisfy
-CONTRACT_NOT_SERVED POST /api/uw/v1/contingencies/waive
 CONTRACT_NOT_SERVED POST /api/uw/v1/data-subject/erase
 CONTRACT_NOT_SERVED POST /api/uw/v1/data-subject/export
 CONTRACT_NOT_SERVED POST /api/uw/v1/data-subject/restrict

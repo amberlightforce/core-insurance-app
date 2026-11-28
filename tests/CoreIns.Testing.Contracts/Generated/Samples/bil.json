@@ -312,7 +312,8 @@
       "amount": {
         "amount": "120.50",
         "currency": "EUR"
-      }
+      },
+      "planCode": "SAMPLE_CODE"
     },
     "bil.Dsar.erase": {
       "perObjectOutcome": "unspecified"
@@ -2312,7 +2313,8 @@
     },
     "DownPaymentInitiateRequest": {
       "jobId": "019219ec-daf7-75fd-8169-973dc8af7bad",
-      "method": "SAMPLE_CODE"
+      "method": "SAMPLE_CODE",
+      "paymentPlanOption": "SAMPLE_CODE"
     },
     "DownPaymentInitiateResponse": {
       "status": "NOT_REQUIRED",
@@ -2329,7 +2331,8 @@
       "amount": {
         "amount": "120.50",
         "currency": "EUR"
-      }
+      },
+      "planCode": "SAMPLE_CODE"
     },
     "DsarEraseRequest": {
       "partyId": "0192ec5a-1fdf-755f-82e9-133c39988e83",

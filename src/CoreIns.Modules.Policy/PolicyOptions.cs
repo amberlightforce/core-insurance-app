@@ -54,6 +54,13 @@ internal sealed class PolicyOptions
     [Range(1, 366)]
     public int ReinstatementWindowDays { get; set; } = 30;
 
+    /// <summary>
+    /// Product codes whose bind needs the down payment (first instalment of a multi-instalment plan) cleared in BIL (BO-BIL-04); "*" means every product.
+    /// Empty by default, so a bind needs no down payment and the existing demo and E2E flows are unchanged.
+    /// TODO(hardening): serve it per product version from the MKT / PFC rule instead of configuration.
+    /// </summary>
+    public string[] DownPaymentRequiredProducts { get; set; } = [];
+
     /// <summary>The policy write-lock wait.</summary>
     public TimeSpan LockWait => TimeSpan.FromSeconds(LockWaitSeconds);
 

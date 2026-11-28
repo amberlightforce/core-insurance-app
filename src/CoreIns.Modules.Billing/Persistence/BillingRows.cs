@@ -755,3 +755,38 @@ internal sealed class RefundNettingRow
 }
 
 
+
+/// <summary>
+/// The down payment of a quoted job (BO-BIL-04): the first instalment of the chosen plan, paid before bind. The job has no billing
+/// account yet, so the cash is tracked here against the payment reference; <see cref="ClearedAmount"/> at or above <see cref="Amount"/> clears it.
+/// </summary>
+internal sealed class DownPaymentRow
+{
+    public Guid DownPaymentId { get; set; }
+
+    public LegalEntityId LegalEntityId { get; set; }
+
+    public Guid JobId { get; set; }
+
+    public string PlanCode { get; set; } = string.Empty;
+
+    public string Method { get; set; } = string.Empty;
+
+    public decimal Amount { get; set; }
+
+    public string Currency { get; set; } = string.Empty;
+
+    public string PaymentReference { get; set; } = string.Empty;
+
+    public decimal ClearedAmount { get; set; }
+
+    public Instant? ClearedAt { get; set; }
+
+    public string? ClearedBy { get; set; }
+
+    public Instant CreatedAt { get; set; }
+
+    public string CreatedBy { get; set; } = string.Empty;
+
+    public int RecordVersion { get; set; }
+}

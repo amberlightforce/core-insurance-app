@@ -3326,6 +3326,7 @@ paths:
       - W7-CLM-05
       x-status: full
       x-maturity: pre-release
+      x-bounded: 'CAT events of the legal entity, capped by limit; no cursor'
       x-operation-kind: query
       x-idempotency: none
       x-dry-run: false
