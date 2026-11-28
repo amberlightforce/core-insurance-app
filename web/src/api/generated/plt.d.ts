@@ -2732,89 +2732,143 @@ export interface components {
         };
         /** @description plt.Audit.append result. PRD outputs: "—" */
         AuditAppendResponse: Record<string, never>;
-        /** @description plt.Audit.query result. PRD outputs: "page; export job; verification result" */
+        /** @description One audit record (plt.Audit.query, BO-PLT-01). Field-level changes carry P2/P3 values redacted. */
         AuditQueryItem: {
-            /** @description PRD: "page" */
-            page?: components["schemas"]["Unspecified"];
-            /** @description PRD: "export job" */
-            exportJob?: components["schemas"]["Unspecified"];
-            /** @description PRD: "verification result" */
-            verificationResult?: components["schemas"]["Unspecified"];
+            auditId: components["schemas"]["Uuid"];
+            /** Format: date */
+            chainDate: string;
+            /** Format: int64 */
+            sequence: number;
+            hash: string;
+            occurredAt: components["schemas"]["Instant"];
+            recordedAt?: components["schemas"]["Instant"];
+            actorKind: string;
+            actorId: string;
+            onBehalfOf?: string | null;
+            roles?: string[];
+            operation: string;
+            outcome: string;
+            errorCode?: string | null;
+            objectModule?: string | null;
+            objectType?: string | null;
+            objectId?: string | null;
+            objectNumber?: string | null;
+            /** @description Field-level changes as stored (JSON array) */
+            changes?: components["schemas"]["Unspecified"];
+            reason?: string | null;
+            channel?: string | null;
+            correlationId: string;
+            origin?: string;
         };
-        /** @description Page of plt.Audit.query results (cursor pagination, contract §3.5.5) */
+        /** @description Page of plt.Audit.query results (cursor pagination, newest first, contract §3.5.5) */
         AuditQueryPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["AuditQueryItem"][];
         };
-        /** @description plt.Audit.export request. PRD inputs: "filters" */
+        /** @description plt.Audit.export request: the query filters plus a required range of at most 92 days (PLT-ERR-RANGE-TOO-LARGE). At most 5000 rows are exported. */
         AuditExportRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
+            entityType?: string | null;
+            entityId?: string | null;
+            actor?: string | null;
+            action?: string | null;
+            correlationId?: string | null;
+            from: components["schemas"]["Instant"];
+            to: components["schemas"]["Instant"];
         };
-        /** @description plt.Audit.export result. PRD outputs: "page; export job; verification result" */
+        /** @description plt.Audit.export result: the CSV is returned inline (capped); the export is itself audited. */
         AuditExportResponse: {
-            /** @description PRD: "page" */
-            page?: components["schemas"]["Unspecified"];
-            /** @description PRD: "export job" */
-            exportJob?: components["schemas"]["Unspecified"];
-            /** @description PRD: "verification result" */
-            verificationResult?: components["schemas"]["Unspecified"];
+            fileName: string;
+            contentType: string;
+            rowCount: number;
+            /** @description True when more rows matched than the cap (narrow the range) */
+            truncated: boolean;
+            csv: string;
         };
-        /** @description plt.Audit.verify request. PRD inputs: "filters" */
+        /** @description plt.Audit.verify request: the chain days to verify (each UTC day is one chain); at most 31 days (PLT-ERR-RANGE-TOO-LARGE). */
         AuditVerifyRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
         };
-        /** @description plt.Audit.verify result. PRD outputs: "page; export job; verification result" */
+        /** @description Result of verifying one day's chain. */
+        AuditChainVerification: {
+            /** Format: date */
+            chainDate: string;
+            /** Format: int64 */
+            records: number;
+            isValid: boolean;
+            /** Format: int64 */
+            brokenAtSequence?: number | null;
+            problem?: string | null;
+        };
+        /** @description plt.Audit.verify result: one entry per day, and whether all of them verify. */
         AuditVerifyResponse: {
-            /** @description PRD: "page" */
-            page?: components["schemas"]["Unspecified"];
-            /** @description PRD: "export job" */
-            exportJob?: components["schemas"]["Unspecified"];
-            /** @description PRD: "verification result" */
-            verificationResult?: components["schemas"]["Unspecified"];
+            allValid: boolean;
+            days: components["schemas"]["AuditChainVerification"][];
         };
-        /** @description plt.Outbox.publish request. PRD inputs: "event type, aggregate, payload" */
+        /** @description plt.Outbox.publish request (BO-PLT-04): administrator tool for test tenants only (legal entity ending -TEST). Only the events in the operations allow-list can be published (ConfigChanged, FeatureFlagChanged); the payload must satisfy the event contract. */
         OutboxPublishRequest: {
-            /** @description PRD: "event type" */
-            eventType?: components["schemas"]["Unspecified"];
-            /** @description PRD: "aggregate" */
-            aggregate?: components["schemas"]["Unspecified"];
-            /** @description PRD: "payload" */
-            payload?: components["schemas"]["Unspecified"];
+            eventType: string;
+            aggregateType: string;
+            aggregateId: string;
+            payload: {
+                [key: string]: unknown;
+            };
+            businessKeys?: {
+                [key: string]: string;
+            };
         };
-        /** @description plt.Outbox.publish result. PRD outputs: "—" */
-        OutboxPublishResponse: Record<string, never>;
-        /** @description plt.Schema.register request. PRD inputs: "schema" */
+        /** @description plt.Outbox.publish result: the staged event. */
+        OutboxPublishResponse: {
+            eventId: components["schemas"]["Uuid"];
+            eventType: string;
+        };
+        /** @description plt.Schema.register request (BO-PLT-04): a JSON Schema object (type/properties/required) registered under a subject. Compatibility is backward: a new version may not remove a property, change its type, or add a required property. */
         SchemaRegisterRequest: {
-            /** @description PRD: "schema" */
-            schema?: components["schemas"]["Unspecified"];
+            subject: string;
+            schema: {
+                [key: string]: unknown;
+            };
         };
-        /** @description plt.Schema.register result. PRD outputs: "compatibility result" */
         SchemaRegisterResponse: {
-            /** @description PRD: "compatibility result" */
-            compatibilityResult?: components["schemas"]["Unspecified"];
+            subject: string;
+            compatible: boolean;
+            /** @description The registered version (register), or the latest version compared against (check); null when none exists */
+            version?: number | null;
+            issues: string[];
         };
-        /** @description plt.Schema.check request. PRD inputs: "schema" */
+        /** @description plt.Schema.check request (BO-PLT-04): a JSON Schema object (type/properties/required) registered under a subject. Compatibility is backward: a new version may not remove a property, change its type, or add a required property. */
         SchemaCheckRequest: {
-            /** @description PRD: "schema" */
-            schema?: components["schemas"]["Unspecified"];
+            subject: string;
+            schema: {
+                [key: string]: unknown;
+            };
         };
-        /** @description plt.Schema.check result. PRD outputs: "compatibility result" */
         SchemaCheckResponse: {
-            /** @description PRD: "compatibility result" */
-            compatibilityResult?: components["schemas"]["Unspecified"];
+            subject: string;
+            compatible: boolean;
+            /** @description The registered version (register), or the latest version compared against (check); null when none exists */
+            version?: number | null;
+            issues: string[];
         };
-        /** @description plt.Consumer.replay request. PRD inputs: "consumer, from position; dead-letter ids" */
+        /** @description plt.Consumer.replay request (BO-PLT-04). Either name deadLetterIds (re-runs the Parked ones; resolved ones are skipped) or give a consumer (event handler name) plus a recordedFrom/recordedTo range of the event archive, re-delivered in archive order with origin REPLAY (the handler must be idempotent). */
         ConsumerReplayRequest: {
-            /** @description PRD: "consumer" */
-            consumer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "from position" */
-            fromPosition?: components["schemas"]["Unspecified"];
-            /** @description PRD: "dead-letter ids" */
+            consumer?: string;
+            recordedFrom?: components["schemas"]["Instant"];
+            recordedTo?: components["schemas"]["Instant"];
+            aggregateType?: string;
+            aggregateId?: string;
             deadLetterIds?: components["schemas"]["Uuid"][];
         };
-        /** @description plt.Consumer.replay result. PRD outputs: "—" */
-        ConsumerReplayResponse: Record<string, never>;
+        /** @description plt.Consumer.replay result. A dry run delivers nothing and only counts the events that would be re-delivered. */
+        ConsumerReplayResponse: {
+            dryRun: boolean;
+            consumer?: string | null;
+            matched: number;
+            delivered: number;
+            skipped: number;
+            stillFailing: number;
+        };
         /** @enum {string} */
         DeadLetterStatus: "Parked" | "Replayed" | "DiscardPending" | "Discarded";
         /** @description A parked (or resolved) outbox message: metadata and the last error only, never the event payload (it may hold personal data; the archived event stays in plt.event_archive). */
@@ -2868,17 +2922,23 @@ export interface components {
             skipped: number;
             results: components["schemas"]["DeadLetterReplayOutcome"][];
         };
-        /** @description plt.DeadLetter.discard request. PRD inputs: "consumer, from position; dead-letter ids" */
+        /** @description plt.DeadLetter.discard request (BO-PLT-04). Name the Parked dead letters and give the reason (required, kept in the audit trail and on the row). A dead letter parked longer than the configured number of days (Platform:DeadLetters:ApprovalAfterDays, default 7) also needs an Approved plt.Approval of type plt.DeadLetter.discard for subject PLT/DeadLetter/<id> (maker-checker). At most 100 per call. */
         DeadLetterDiscardRequest: {
-            /** @description PRD: "consumer" */
-            consumer?: components["schemas"]["Unspecified"];
-            /** @description PRD: "from position" */
-            fromPosition?: components["schemas"]["Unspecified"];
-            /** @description PRD: "dead-letter ids" */
-            deadLetterIds?: components["schemas"]["Uuid"][];
+            deadLetterIds: components["schemas"]["Uuid"][];
+            reason: string;
         };
-        /** @description plt.DeadLetter.discard result. PRD outputs: "—" */
-        DeadLetterDiscardResponse: Record<string, never>;
+        DeadLetterDiscardOutcome: {
+            deadLetterId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            outcome: "Discarded" | "WouldDiscard" | "AlreadyResolved" | "NotFound";
+        };
+        /** @description plt.DeadLetter.discard result. A dry run discards nothing and reports WouldDiscard for every Parked letter. */
+        DeadLetterDiscardResponse: {
+            dryRun: boolean;
+            discarded: number;
+            skipped: number;
+            results: components["schemas"]["DeadLetterDiscardOutcome"][];
+        };
         /** @description plt.Adapter.invoke request. PRD inputs: "adapter, operation, payload, idempotency key" */
         AdapterInvokeRequest: {
             /** @description PRD: "adapter" */
@@ -2895,10 +2955,19 @@ export interface components {
             /** @description PRD: "response" */
             response?: components["schemas"]["Unspecified"];
         };
-        /** @description plt.Exchange.search result. PRD outputs: "exchanges" */
+        /** @description plt.Exchange.search result: one logged message exchange with an external party. */
         ExchangeSearchItem: {
-            /** @description PRD: "exchanges" */
-            exchanges?: components["schemas"]["Unspecified"];
+            exchangeId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            direction: "Inbound" | "Outbound";
+            counterparty: string;
+            partyRef?: string | null;
+            channel: string;
+            operation: string;
+            status: string;
+            correlationId?: string | null;
+            startedAt: components["schemas"]["Instant"];
+            completedAt?: components["schemas"]["Instant"] | null;
         };
         /** @description Page of plt.Exchange.search results (cursor pagination, contract §3.5.5) */
         ExchangeSearchPage: components["schemas"]["PageEnvelope"] & {
@@ -3382,28 +3451,32 @@ export interface components {
             /** @description PRD: "legacy xref entries" */
             legacyXrefEntries?: components["schemas"]["Unspecified"];
         };
-        /** @description plt.Transfer.list result. PRD outputs: "transfers; transfer id → retry" */
+        /** @description plt.Transfer.list result: one file transfer. */
         TransferListItem: {
-            /** @description PRD: "transfers" */
-            transfers?: components["schemas"]["Unspecified"];
-            /** @description PRD: "transfer id → retry" */
-            transferIdRetry?: components["schemas"]["Unspecified"];
+            transferId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            direction: "Inbound" | "Outbound";
+            partner: string;
+            fileName: string;
+            /** @enum {string} */
+            status: "Pending" | "Sent" | "Failed";
+            attempts: number;
+            lastError?: string | null;
+            createdAt: components["schemas"]["Instant"];
+            updatedAt: components["schemas"]["Instant"];
         };
         /** @description Page of plt.Transfer.list results (cursor pagination, contract §3.5.5) */
         TransferListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["TransferListItem"][];
         };
-        /** @description plt.Transfer.retry request. PRD inputs: "filters" */
+        /** @description plt.Transfer.retry request: name Failed transfers (transferIds) or select the Failed ones of a partner. At most 100 per call. */
         TransferRetryRequest: {
-            /** @description PRD: "filters" */
-            filters?: components["schemas"]["Unspecified"];
+            transferIds?: components["schemas"]["Uuid"][];
+            partner?: string;
         };
-        /** @description plt.Transfer.retry result. PRD outputs: "transfers; transfer id → retry" */
         TransferRetryResponse: {
-            /** @description PRD: "transfers" */
-            transfers?: components["schemas"]["Unspecified"];
-            /** @description PRD: "transfer id → retry" */
-            transferIdRetry?: components["schemas"]["Unspecified"];
+            retried: components["schemas"]["Uuid"][];
+            skipped: components["schemas"]["Uuid"][];
         };
         /** @description plt.Token.grantAgentScope request. PRD inputs: "client, scope" */
         TokenGrantAgentScopeRequest: {
@@ -5032,6 +5105,20 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description Only records about this object type (e.g. Approval, Claim) */
+                entityType?: string;
+                /** @description Only records about this object id */
+                entityId?: string;
+                /** @description Only records by this actor id */
+                actor?: string;
+                /** @description Only records of this operation (e.g. plt.Approval.decide) */
+                action?: string;
+                /** @description Occurred at or after (UTC instant) */
+                from?: string;
+                /** @description Occurred before (UTC instant); a range wider than 366 days is refused (PLT-ERR-RANGE-TOO-LARGE) */
+                to?: string;
+                /** @description Only records of this correlation id */
+                correlationId?: string;
             };
             header?: {
                 /**
@@ -5576,8 +5663,12 @@ export interface operations {
                 limit?: components["parameters"]["Limit"];
                 /** @description PRD: "party ref" */
                 partyRef?: string;
-                /** @description PRD: "period" */
-                period?: string;
+                /** @description Started at or after (UTC instant) */
+                from?: string;
+                /** @description Started before (UTC instant) */
+                to?: string;
+                counterparty?: string;
+                direction?: "Inbound" | "Outbound";
             };
             header?: {
                 /**
@@ -7756,8 +7847,9 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
-                /** @description PRD: "filters" */
-                filters?: string;
+                partner?: string;
+                status?: "Pending" | "Sent" | "Failed";
+                direction?: "Inbound" | "Outbound";
             };
             header?: {
                 /**

@@ -17,7 +17,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [CLM](#clm) | 77 | 77 | 0 | 55 | 22 | 10 | 9 | 5 |
 | [RI](#ri) | 121 | 115 | 6 | 85 | 36 | 9 | 0 | 0 |
 | [FIN](#fin) | 88 | 80 | 8 | 55 | 33 | 10 | 0 | 3 |
-| [DOC](#doc) | 47 | 46 | 1 | 27 | 20 | 4 | 12 | 0 |
+| [DOC](#doc) | 48 | 47 | 1 | 28 | 20 | 4 | 12 | 0 |
 | [CMP](#cmp) | 93 | 62 | 31 | 69 | 24 | 21 | 0 | 3 |
 | [CHN](#chn) | 106 | 62 | 44 | 66 | 40 | 3 | 25 | 2 |
 | [WRK](#wrk) | 60 | 25 | 35 | 41 | 19 | 9 | 3 | 14 |
@@ -25,7 +25,7 @@ Columns: **Kind** C = command (requires `Idempotency-Key`), Q = query; **DR** = 
 | [DAT](#dat) | 47 | 47 | 0 | 28 | 19 | 4 | 0 | 0 |
 | [MIG](#mig) | 49 | 49 | 0 | 33 | 16 | 5 | 0 | 12 |
 | [MKT](#mkt) | 50 | 41 | 9 | 17 | 33 | 1 | 0 | 5 |
-| **Total** | 1231 | 1015 | 216 | 789 | 442 | 127 | 69 | 63 |
+| **Total** | 1232 | 1016 | 216 | 790 | 442 | 127 | 69 | 63 |
 
 Contract anchors: 174; covered by operations or families: 164; not an API (reason in `anchors.yaml`): 10.
 
@@ -837,6 +837,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | `doc.Document.listForObject` | GET `/api/doc/v1/documents/list-for-object` | Q |  | ui, partner | CHN, CLM, POL | W4 | full | REQ-DOC-008 |
 | `doc.Document.preview` | POST `/api/doc/v1/documents/preview` | Q |  | ui, partner | PFC, POL | W2 | full | REQ-DOC-306 |
 | `doc.Document.renderAsOf` | POST `/api/doc/v1/documents/render-as-of` | C |  | ui |  | W6 | full | REQ-DOC-208 |
+| `doc.Document.renderPdf` | POST `/api/doc/v1/documents/render-pdf` | C |  | ui |  | W2 | full | REQ-DOC-004 |
 | `doc.Document.reprint` | POST `/api/doc/v1/documents/reprint` | C |  | ui |  | W6 | full | REQ-DOC-205 |
 | `doc.Document.request` | POST `/api/doc/v1/documents/request` | C | yes | ui, partner | BIL, CHN, CLM, CMP, MIG, PFC, PLT, POL, PTY, RAT, RI | W2 | full | REQ-DOC-001 |
 | `doc.Document.requestBatch` | POST `/api/doc/v1/documents/request-batch` | C |  | ui | POL | W6 | full | REQ-DOC-176 |
@@ -1602,7 +1603,7 @@ Operation families named only as `Resource.*` in the PRD (members named by the o
 | REQ-DOC-001 | `doc.Document.request` |  |
 | REQ-DOC-002 | `doc.Clause.get`, `doc.Template.list` |  |
 | REQ-DOC-003 | `doc.Forms.infer` |  |
-| REQ-DOC-004 | `doc.Archive.addRendition`, `doc.Archive.completeness`, `doc.Archive.download`, `doc.Archive.get` (+4) |  |
+| REQ-DOC-004 | `doc.Archive.addRendition`, `doc.Archive.completeness`, `doc.Archive.download`, `doc.Archive.get` (+5) |  |
 | REQ-DOC-005 | `doc.Delivery.evidenceFor`, `doc.Delivery.status`, `doc.Document.resend` | mapped by builder |
 | REQ-DOC-006 | `doc.Signature.createEnvelope`, `doc.Signature.get`, `doc.Signature.remind`, `doc.Signature.send` (+1) |  |
 | REQ-DOC-007 | `doc.Ipid.get`, `doc.ProofOfCover.issue` | mapped by builder |

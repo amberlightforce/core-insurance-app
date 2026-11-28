@@ -26,6 +26,7 @@ internal static class DocumentsPermissions
     public const string DocumentGet = "doc.Document.get";
     public const string DocumentListForObject = "doc.Document.listForObject";
     public const string DocumentReprint = "doc.Document.reprint";
+    public const string DocumentRenderPdf = "doc.Document.renderPdf";
     public const string DocumentResend = "doc.Document.resend";
     public const string DocumentHide = "doc.Document.hide";
     public const string DocumentUnhide = "doc.Document.unhide";
@@ -170,6 +171,15 @@ internal sealed class DocumentsController : ControllerBase
         var items = await reader.ListForObjectAsync(subject, 200, cancellationToken).ConfigureAwait(false);
         return Results.Ok(new { items, nextCursor = (string?)null });
     }
+
+    /// <summary>doc.Document.renderPdf: PDF (PDF/A-3b when Gotenberg is configured) rendition of the archived letter; idempotent per document.</summary>
+    [HttpPost("documents/render-pdf")]
+    [Authorize(Policy = DocumentsPermissions.DocumentRenderPdf)]
+    public async Task<IResult> RenderPdfAsync(
+        [FromBody] DocumentRenderPdfRequest request,
+        [FromServices] ICommandHandler<RenderDocumentPdf, DocumentRenderPdfResponse> handler,
+        CancellationToken cancellationToken) =>
+        (await handler.HandleAsync(new RenderDocumentPdf(request.DocumentId), cancellationToken).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
     /// <summary>doc.Document.reprint.</summary>
     [HttpPost("documents/reprint")]

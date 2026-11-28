@@ -6,6 +6,7 @@
         "doc.Document.get": [ "Staff.Billing", "Platform.Admin" ],
         "doc.Document.listForObject": [ "Staff.Billing", "Platform.Admin" ],
         "doc.Document.reprint": [ "Platform.Admin" ],
+        "doc.Document.renderPdf": [ "Platform.Admin" ],
         "doc.Document.resend": [ "Staff.Billing", "Platform.Admin" ],
         "doc.Document.hide": [ "Staff.Billing", "Platform.Admin" ],
         "doc.Document.unhide": [ "Staff.Billing", "Platform.Admin" ],

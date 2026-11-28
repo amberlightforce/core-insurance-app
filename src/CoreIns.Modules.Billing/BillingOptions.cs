@@ -85,6 +85,29 @@ internal sealed class BillingOptions
     [Range(1, 86400)]
     public int DelinquencySweepIntervalSeconds { get; set; } = 3600;
 
+    /// <summary>Whether the worker role runs the scheduled SEPA direct-debit collection run (BO-BIL-06b). Off by default: a legal entity switches it on once its creditor identifier is set.</summary>
+    public bool DirectDebitEnabled { get; set; }
+
+    /// <summary>Seconds between collection runs (default hourly).</summary>
+    [Range(1, 86400)]
+    public int DirectDebitIntervalSeconds { get; set; } = 3600;
+
+    /// <summary>
+    /// ILLUSTRATIVE (no approved value): days before an instalment's due date at which it goes into a pain.008 file (SEPA Core needs at least
+    /// one business day for RCUR and FRST since 2016; two keeps a weekend margin).
+    /// </summary>
+    [Range(0, 30)]
+    public int DirectDebitLeadDays { get; set; } = 2;
+
+    /// <summary>SEPA creditor name (pain.008 <c>Cdtr/Nm</c>); the run fails closed while empty.</summary>
+    public string DirectDebitCreditorName { get; set; } = string.Empty;
+
+    /// <summary>SEPA creditor identifier (<c>CdtrSchmeId</c>) of the legal entity; the run fails closed while empty.</summary>
+    public string DirectDebitCreditorId { get; set; } = string.Empty;
+
+    /// <summary>The creditor account the collections are credited to (own account, not P2); the run fails closed while empty.</summary>
+    public string DirectDebitCreditorIban { get; set; } = string.Empty;
+
     /// <summary>Core money-source register rows (REQ-BIL-354); an absent row fails closed.</summary>
     public Dictionary<string, BillingSourceRow> Sources { get; set; } = new(StringComparer.Ordinal);
 

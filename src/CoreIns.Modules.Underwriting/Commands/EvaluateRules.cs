@@ -45,7 +45,8 @@ internal sealed class EvaluateRulesHandler(
     RequestContext context,
     ILegalEntityDirectory legalEntities,
     IClock clock,
-    IEventPublisher events) : ICommandHandler<EvaluateRules, RulesEvaluateResponse>
+    IEventPublisher events,
+    HoldGate holdGate) : ICommandHandler<EvaluateRules, RulesEvaluateResponse>
 {
     public async Task<Result<RulesEvaluateResponse>> HandleAsync(EvaluateRules command, CancellationToken cancellationToken)
     {
@@ -80,7 +81,10 @@ internal sealed class EvaluateRulesHandler(
                 Text(m, "messageEn"),
                 Text(m, "messageEl"),
                 $"{Text(m, "issueType")}:{risk.VehicleElementId}")).ToList();
-            var outcome = hits.Any(h => h.RuleType == "DECLINE") ? "DECLINE" : hits.Any(h => h.RuleType == "REFER") ? "REFER" : "ACCEPT";
+            // Policy holds (BO-UW-09): Active holds matching the facts refer the job (a hold never declines).
+            var applicableHolds = await holdGate.ApplicableAsync(
+                HoldGate.Facts(snapshot, request.ProductCode!, request.Checkpoint == RulesEvaluateRequest.CheckpointValue.Renewal, effective), cancellationToken).ConfigureAwait(false);
+            var outcome = hits.Any(h => h.RuleType == "DECLINE") ? "DECLINE" : hits.Any(h => h.RuleType == "REFER") || applicableHolds.Count > 0 ? "REFER" : "ACCEPT";
             var lane = outcome switch { "DECLINE" => "EXPERT", "REFER" => "ASSISTED", _ => "STRAIGHT_THROUGH" };
             var evaluationId = Guid.CreateVersion7();
             var jobId = request.JobRef.Value;
@@ -193,6 +197,8 @@ internal sealed class EvaluateRulesHandler(
                     await CloseAsync(gone.Existing!.IssueId, gone.Action == IssueAction.Close ? "RULE_NO_LONGER_HITS" : "VALUE_CHANGED").ConfigureAwait(false);
                 }
             }
+
+            items.AddRange(await holdGate.ReconcileAsync(applicableHolds, legalEntity, jobId, evaluationId, command.ReconcileIssues, cancellationToken).ConfigureAwait(false));
 
             // A new issue for facts a decider already rejected on this job is raised Rejected: a rejection sticks to its facts.
             async Task<(Guid Id, string Status)> RaiseAsync(Hit hit, BlockingPoint blocking, string fingerprint, bool reopened)

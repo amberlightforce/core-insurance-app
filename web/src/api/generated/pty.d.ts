@@ -1302,6 +1302,166 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/pty/v1/agency-users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the users of an agency
+         * @description List the users of an agency (BO-PTY-12, delegated agency administration).
+         *
+         *     The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+         */
+        get: operations["pty.AgencyUser.list"];
+        put?: never;
+        /**
+         * Create an agency user
+         * @description Create an agency user (BO-PTY-12, delegated agency administration).
+         *
+         *     The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+         */
+        post: operations["pty.AgencyUser.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pty/v1/agency-users/change-role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change the agency role of a user
+         * @description Change the agency role of a user (BO-PTY-12, delegated agency administration).
+         *
+         *     The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+         */
+        post: operations["pty.AgencyUser.changeRole"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pty/v1/agency-users/grant-access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Grant a user access to producer codes of the agency
+         * @description Grant a user access to producer codes of the agency (BO-PTY-12, delegated agency administration).
+         *
+         *     The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+         */
+        post: operations["pty.AgencyUser.grantAccess"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pty/v1/agency-users/revoke-access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Revoke producer-code access of a user
+         * @description Revoke producer-code access of a user (BO-PTY-12, delegated agency administration).
+         *
+         *     The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+         */
+        post: operations["pty.AgencyUser.revokeAccess"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pty/v1/agency-users/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Suspend an agency user
+         * @description Suspend an agency user (BO-PTY-12, delegated agency administration).
+         *
+         *     The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+         */
+        post: operations["pty.AgencyUser.suspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pty/v1/agency-users/reactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reactivate a suspended agency user
+         * @description Reactivate a suspended agency user (BO-PTY-12, delegated agency administration).
+         *
+         *     The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+         */
+        post: operations["pty.AgencyUser.reactivate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pty/v1/agency-users/remove-producer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Remove a producer from the agency and re-assign the book
+         * @description Remove a producer from the agency and re-assign the book (BO-PTY-12, delegated agency administration).
+         *
+         *     The caller is an agency administrator (acting inside their own agency only) or insurer staff. Every call is audited.
+         */
+        post: operations["pty.AgencyUser.removeProducer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/pty/v1/commission-agreements/resolve": {
         parameters: {
             query?: never;
@@ -2259,88 +2419,91 @@ export interface components {
             /** @description PRD: "created activities" */
             createdActivities?: components["schemas"]["Unspecified"];
         };
-        /** @description pty.Consent.query result. PRD outputs: "state" */
+        /** @description pty.Consent.query result (BO-PTY-06): one consent record. Without includeHistory the page holds the current state of each purpose and channel; with it, every record, newest first. */
         ConsentQueryItem: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
+            consentId: components["schemas"]["Uuid"];
+            partyId: components["schemas"]["Uuid"];
+            purpose: components["schemas"]["Code"];
+            channel: components["schemas"]["Code"];
+            /** @enum {string} */
+            kind: "GIVEN" | "WITHDRAWN" | "OBJECTION";
+            /** @enum {string} */
+            state: "GRANTED" | "WITHDRAWN" | "OBJECTED";
+            source: string;
+            wordingVersion?: string | null;
+            proofRef: string;
+            recordedAt: components["schemas"]["Instant"];
+            recordedBy: string;
         };
         /** @description Page of pty.Consent.query results (cursor pagination, contract §3.5.5) */
         ConsentQueryPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["ConsentQueryItem"][];
         };
-        /** @description pty.Consent.record request. PRD inputs: "party, purpose, channel, kind, source, wording version, proof ref" */
+        /** @description pty.Consent.record request (BO-PTY-06, REQ-PTY-005, REQ-PTY-150). Records a consent given, or an objection, for one purpose and channel. Proof is required (PTY-ERR-PROOF-REQUIRED); a record is never changed afterwards, a withdrawal is a new record. */
         ConsentRecordRequest: {
-            /** @description PRD: "party" */
-            party?: components["schemas"]["Unspecified"];
-            /** @description PRD: "purpose" */
-            purpose?: components["schemas"]["Unspecified"];
-            /** @description PRD: "channel" */
-            channel?: components["schemas"]["Unspecified"];
-            /** @description PRD: "kind" */
-            kind?: components["schemas"]["Unspecified"];
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
-            /** @description PRD: "wording version" */
-            wordingVersion?: components["schemas"]["Unspecified"];
-            /** @description PRD: "proof ref" */
-            proofRef?: components["schemas"]["Unspecified"];
+            partyId: components["schemas"]["Uuid"];
+            /** @description MARKETING, PROFILING, THIRD_PARTY_SHARING, SERVICE_MESSAGES, CLAIMS_UPDATES, RENEWAL_NOTICES, DOCUMENT_DELIVERY */
+            purpose: components["schemas"]["Code"];
+            /** @description EMAIL, SMS, POST, PHONE, PORTAL */
+            channel: components["schemas"]["Code"];
+            /** @enum {string} */
+            kind: "GIVEN" | "OBJECTION";
+            /** @description Where the consent came from, for example PORTAL, BRANCH, PHONE, PAPER, BROKER */
+            source: components["schemas"]["Code"];
+            /** @description Version of the consent wording shown; required for GIVEN */
+            wordingVersion?: string | null;
+            /** @description Reference to the proof (document id, call recording, portal event) */
+            proofRef: string;
         };
-        /** @description pty.Consent.record result. PRD outputs: "consent state" */
+        /** @description pty.Consent.record result. */
         ConsentRecordResponse: {
-            /** @description PRD: "consent state" */
-            consentState?: components["schemas"]["Unspecified"];
+            consent: components["schemas"]["ConsentQueryItem"];
         };
-        /** @description pty.Consent.withdraw request. PRD inputs: "party, purpose, channel" */
+        /** @description pty.Consent.withdraw request (BO-PTY-06). Takes effect at once: the next resolve for the purpose and channel no longer uses the consent. The earlier records stay in the history. */
         ConsentWithdrawRequest: {
-            /** @description PRD: "party" */
-            party?: components["schemas"]["Unspecified"];
-            /** @description PRD: "purpose" */
-            purpose?: components["schemas"]["Unspecified"];
-            /** @description PRD: "channel" */
-            channel?: components["schemas"]["Unspecified"];
+            partyId: components["schemas"]["Uuid"];
+            purpose: components["schemas"]["Code"];
+            channel: components["schemas"]["Code"];
+            /** @description Optional proof of the withdrawal request; default the acting user */
+            proofRef?: string | null;
         };
-        /** @description pty.Consent.withdraw result. PRD outputs: "state" */
+        /** @description pty.Consent.withdraw result. */
         ConsentWithdrawResponse: {
-            /** @description PRD: "state" */
-            state?: components["schemas"]["Unspecified"];
+            consent: components["schemas"]["ConsentQueryItem"];
         };
-        /** @description pty.CommunicationPreference.resolve request. PRD inputs: "party, purpose, date" */
+        /** @description pty.CommunicationPreference.resolve request (BO-PTY-06). The date is the validAt query parameter. */
         CommunicationPreferenceResolveRequest: {
-            /** @description PRD: "party" */
-            party?: components["schemas"]["Unspecified"];
-            /** @description PRD: "purpose" */
-            purpose?: components["schemas"]["Unspecified"];
+            partyId: components["schemas"]["Uuid"];
+            purpose: components["schemas"]["Code"];
         };
-        /** @description pty.CommunicationPreference.resolve result. PRD outputs: "channel, language, medium, proof" */
+        /** @description pty.CommunicationPreference.resolve result (BO-PTY-06): the effective channel for the purpose. Order: the preference for the purpose, then the DEFAULT preference, then EMAIL (when the party has an email contact point) or POST. A channel without the consent its purpose needs (MARKETING, PROFILING, THIRD_PARTY_SHARING) is skipped; a vulnerable party gets paper and no marketing. */
         CommunicationPreferenceResolveResponse: {
-            /** @description PRD: "channel" */
-            channel?: components["schemas"]["Unspecified"];
-            /** @description PRD: "language" */
-            language?: components["schemas"]["LanguageCode"];
-            /** @description PRD: "medium" */
-            medium?: components["schemas"]["Unspecified"];
-            /** @description PRD: "proof" */
-            proof?: components["schemas"]["Unspecified"];
+            channel: components["schemas"]["Code"];
+            language: components["schemas"]["LanguageCode"];
+            medium: components["schemas"]["Code"];
+            /** @description Which rule decided, for example PREFERENCE:<id>, DEFAULT-PREFERENCE:<id>, FALLBACK:EMAIL, with the consent id when one applied */
+            proof: string;
         };
-        /** @description pty.CommunicationPreference.set request. PRD inputs: "party, purpose, date" */
+        /** @description pty.CommunicationPreference.set request (BO-PTY-06). Sets the preference for a purpose (or DEFAULT) from validFrom; the earlier one stays in the history. */
         CommunicationPreferenceSetRequest: {
-            /** @description PRD: "party" */
-            party?: components["schemas"]["Unspecified"];
-            /** @description PRD: "purpose" */
-            purpose?: components["schemas"]["Unspecified"];
-            /** @description PRD: "date" */
-            date?: components["schemas"]["LocalDate"];
+            partyId: components["schemas"]["Uuid"];
+            /** @description A consent purpose, or DEFAULT for every purpose without its own preference */
+            purpose: components["schemas"]["Code"];
+            channel: components["schemas"]["Code"];
+            /** @description Default the party's preferred language */
+            language?: components["schemas"]["LanguageCode"] | null;
+            /** @description DIGITAL or PAPER; default DIGITAL (PAPER for POST) */
+            medium?: components["schemas"]["Code"] | null;
+            /** @description Default today */
+            validFrom?: components["schemas"]["LocalDate"] | null;
         };
-        /** @description pty.CommunicationPreference.set result. PRD outputs: "channel, language, medium, proof" */
+        /** @description pty.CommunicationPreference.set result. */
         CommunicationPreferenceSetResponse: {
-            /** @description PRD: "channel" */
-            channel?: components["schemas"]["Unspecified"];
-            /** @description PRD: "language" */
-            language?: components["schemas"]["LanguageCode"];
-            /** @description PRD: "medium" */
-            medium?: components["schemas"]["Unspecified"];
-            /** @description PRD: "proof" */
-            proof?: components["schemas"]["Unspecified"];
+            preferenceId: components["schemas"]["Uuid"];
+            channel: components["schemas"]["Code"];
+            language: components["schemas"]["LanguageCode"];
+            medium: components["schemas"]["Code"];
+            proof: string;
         };
         /** @description pty.Vulnerability.query result for one party. */
         VulnerabilityQueryItem: {
@@ -2758,6 +2921,82 @@ export interface components {
         ProducerOfRecordCancelResponse: {
             policyId: components["schemas"]["Uuid"];
             history: components["schemas"]["ProducerOfRecordEntry"][];
+        };
+        /** @description One user of an agency (REQ-PTY-243): the link between an external-realm identity and the agency, with its role and producer-code grants */
+        AgencyUserView: {
+            agencyUserId: components["schemas"]["Uuid"];
+            intermediaryId: components["schemas"]["Uuid"];
+            /** @description The identity-provider subject of the external user (the identity itself lives in PLT and the external realm) */
+            externalSubject: string;
+            displayName: string;
+            /** @enum {string} */
+            role: "AGENCY_ADMIN" | "OFFICE_MANAGER" | "PRODUCER" | "AGENCY_STAFF";
+            /** @enum {string} */
+            status: "ACTIVE" | "SUSPENDED" | "REMOVED";
+            statusReason?: string | null;
+            /** @description The producer codes the user is granted (REQ-PTY-245), sorted */
+            producerCodes: components["schemas"]["Code"][];
+            createdAt?: components["schemas"]["Instant"];
+        };
+        /** @description pty.AgencyUser.create request (BO-PTY-12, REQ-PTY-246): add a user to an agency. An agency administrator can only add to their own agency. */
+        AgencyUserCreateRequest: {
+            intermediaryId: components["schemas"]["Uuid"];
+            externalSubject: string;
+            displayName: string;
+            /** @enum {string} */
+            role: "AGENCY_ADMIN" | "OFFICE_MANAGER" | "PRODUCER" | "AGENCY_STAFF";
+            /** @description Optional initial grants; each must be a producer code of the agency */
+            producerCodes?: components["schemas"]["Code"][];
+        };
+        /** @description Result of an agency-user command: the user after the change */
+        AgencyUserResponse: {
+            user: components["schemas"]["AgencyUserView"];
+        };
+        /** @description pty.AgencyUser.list result: the non-removed users of the agency */
+        AgencyUserListResponse: {
+            intermediaryId: components["schemas"]["Uuid"];
+            users: components["schemas"]["AgencyUserView"][];
+        };
+        /** @description pty.AgencyUser.changeRole request (BO-PTY-12, REQ-PTY-244). The last active administrator cannot be demoted. */
+        AgencyUserChangeRoleRequest: {
+            agencyUserId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            role: "AGENCY_ADMIN" | "OFFICE_MANAGER" | "PRODUCER" | "AGENCY_STAFF";
+        };
+        /** @description pty.AgencyUser.grantAccess request (BO-PTY-12, REQ-PTY-245): grant producer codes. Only codes of the user's own agency can be granted. Emits ExternalUserAccessChanged to PLT. */
+        AgencyUserGrantAccessRequest: {
+            agencyUserId: components["schemas"]["Uuid"];
+            producerCodes: components["schemas"]["Code"][];
+        };
+        /** @description pty.AgencyUser.revokeAccess request (BO-PTY-12, REQ-PTY-245). Emits ExternalUserAccessChanged to PLT. */
+        AgencyUserRevokeAccessRequest: {
+            agencyUserId: components["schemas"]["Uuid"];
+            producerCodes: components["schemas"]["Code"][];
+        };
+        /** @description pty.AgencyUser.suspend request (BO-PTY-12, REQ-PTY-246): the record stays but PLT drops every grant. The last active administrator cannot be suspended. */
+        AgencyUserSuspendRequest: {
+            agencyUserId: components["schemas"]["Uuid"];
+            reason: string;
+        };
+        /** @description pty.AgencyUser.reactivate request (BO-PTY-12, REQ-PTY-246): grants held before the suspension are restored. */
+        AgencyUserReactivateRequest: {
+            agencyUserId: components["schemas"]["Uuid"];
+            reason: string;
+        };
+        /** @description pty.AgencyUser.removeProducer request (BO-PTY-12, REQ-PTY-247): remove a producer from the agency. The book (every current producer of record on the producer's codes) is re-assigned to reassignToProducerCode, a code of the same agency; the user is removed only when every term was moved. */
+        AgencyUserRemoveProducerRequest: {
+            agencyUserId: components["schemas"]["Uuid"];
+            reassignToProducerCode: components["schemas"]["Code"];
+            reason: string;
+        };
+        /** @description pty.AgencyUser.removeProducer result: whether the user was removed and the per-term outcome of the book transfer (a refused term keeps the user active so the removal can be retried) */
+        AgencyUserRemoveProducerResponse: {
+            removed: boolean;
+            user: components["schemas"]["AgencyUserView"];
+            transferId?: components["schemas"]["Uuid"] | null;
+            transferred: number;
+            refused: number;
+            results: components["schemas"]["ProducerOfRecordBulkTransferResult"][];
         };
         /** @description pty.CommissionAgreement.resolve request (BO-PTY-11, REQ-PTY-010): which commission rate applies on a date. Give the policy (the producer of record on the date is found, with any split) or the intermediary directly. Nothing is written. */
         CommissionAgreementResolveRequest: {
@@ -4878,11 +5117,15 @@ export interface operations {
     };
     "pty.Consent.query": {
         parameters: {
-            query?: {
+            query: {
                 /** @description Opaque cursor from the previous page's `nextCursor` (cursor pagination, stable sort keys, contract §3.5.5). */
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                partyId: components["schemas"]["Uuid"];
+                purpose?: components["schemas"]["Code"];
+                channel?: components["schemas"]["Code"];
+                includeHistory?: boolean;
             };
             header?: {
                 /**
@@ -5943,6 +6186,358 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pty.AgencyUser.list": {
+        parameters: {
+            query: {
+                /** @description The agency (intermediary) whose users are listed */
+                intermediaryId: components["schemas"]["Uuid"];
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgencyUserListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pty.AgencyUser.create": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgencyUserCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgencyUserResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pty.AgencyUser.changeRole": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgencyUserChangeRoleRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgencyUserResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pty.AgencyUser.grantAccess": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgencyUserGrantAccessRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgencyUserResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pty.AgencyUser.revokeAccess": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgencyUserRevokeAccessRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgencyUserResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pty.AgencyUser.suspend": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgencyUserSuspendRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgencyUserResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pty.AgencyUser.reactivate": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgencyUserReactivateRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgencyUserResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pty.AgencyUser.removeProducer": {
+        parameters: {
+            query?: never;
+            header: {
+                /**
+                 * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
+                 *     stores key → result for at least 7 days (`plt.idempotency_record`) and returns the original result on replay;
+                 *     a replay with a different payload fails with 409 and code `<MOD>-ERR-IDEMPOTENCY-MISMATCH`.
+                 */
+                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgencyUserRemoveProducerRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgencyUserRemoveProducerResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];

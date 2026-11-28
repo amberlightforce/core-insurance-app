@@ -30,6 +30,10 @@ If you need `infra/local/.env`, copy it from the orchestrator worktree.
 - `dotnet build CoreIns.sln -c Release` (warnings are errors — fix them).
 - If contracts changed: `dotnet run --project tools/CoreIns.ContractGen -c Release --no-build` then
   `python3 tools/CoreIns.ContractGen/validate_samples.py`; otherwise `... --no-build -- --check`.
+- If contracts changed: also run `python3 contracts/openapi/validate.py` (must report 0 errors; CI does not run it). In YAML always
+  quote refs: `$ref: '#/components/schemas/X'` — an unquoted `#` starts a comment and silently makes the ref null.
+- If you serve a route listed in `tests/CoreIns.Host.Tests/RouteConformanceAllowList.txt`, delete that line and run
+  `dotnet test --project tests/CoreIns.Host.Tests -c Release` before pushing.
 - Your own tests: `dotnet test --project tests/<Project> -c Release --filter <YourClass>`.
   `tests/CoreIns.IntegrationTests` needs Docker (Testcontainers) — run only your filtered classes.
 - `dotnet test --project tests/CoreIns.ArchitectureTests -c Release` if you added projects/references/modules.

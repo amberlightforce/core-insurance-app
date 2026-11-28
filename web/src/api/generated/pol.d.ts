@@ -2136,49 +2136,41 @@ export interface components {
             effectiveAt: components["schemas"]["Instant"];
             servicingPreview: components["schemas"]["ServicingPreview"];
         };
-        /** @description pol.Cancellation.schedule request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef" */
+        /** @description pol.Cancellation.schedule request (BO-POL-06, REQ-POL-209..211). A cancellation with a future effective time: the refund is previewed at that time and the cancellation runs when it falls due. With dryRun only the preview is returned. */
         CancellationScheduleRequest: {
-            /** @description PRD: "policyId" */
-            policyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effectiveAt" */
-            effectiveAt?: components["schemas"]["Instant"];
-            /** @description PRD: "evidenceRefs" */
-            evidenceRefs?: components["schemas"]["Unspecified"];
-            /** @description PRD: "requestRef" */
-            requestRef?: components["schemas"]["Unspecified"];
+            policyId: components["schemas"]["Uuid"];
+            source: components["schemas"]["CancellationSourceCode"];
+            /** @description Reason code from the configured list (REQ-POL-205) */
+            reasonCode: components["schemas"]["Code"];
+            /** @description Future effective time. The term in force at that time is cancelled. */
+            effectiveAt: components["schemas"]["Instant"];
+            /** @description Evidence references (document ids); no personal data */
+            evidenceRefs?: components["schemas"]["Text"][];
+            /** @description Reference of the customer request (channel message or document id); no personal data */
+            requestRef?: components["schemas"]["Text"];
         };
-        /** @description pol.Cancellation.schedule result. PRD outputs: "jobId, refund preview" */
+        /** @description pol.Cancellation.schedule result. PRD outputs: "jobId, refund preview". The job id is the scheduled cancellation id; the cancellation job itself is created when it runs. */
         CancellationScheduleResponse: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "refund preview" */
-            refundPreview?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            /** @description SCHEDULED (a dry run returns the same state but writes nothing) */
+            state: components["schemas"]["Code"];
+            effectiveAt: components["schemas"]["Instant"];
+            /** @description The refund as computed now for the effective time; it is computed again when the cancellation runs. */
+            servicingPreview: components["schemas"]["ServicingPreview"];
         };
-        /** @description pol.Cancellation.rescind request. PRD inputs: "policyId, source, reason, effectiveAt, evidenceRefs, requestRef" */
+        /** @description pol.Cancellation.rescind request (BO-POL-06): withdraws a scheduled cancellation that has not run yet, whatever the policy state. */
         CancellationRescindRequest: {
-            /** @description PRD: "policyId" */
-            policyId?: components["schemas"]["Uuid"];
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
-            /** @description PRD: "effectiveAt" */
-            effectiveAt?: components["schemas"]["Instant"];
-            /** @description PRD: "evidenceRefs" */
-            evidenceRefs?: components["schemas"]["Unspecified"];
-            /** @description PRD: "requestRef" */
-            requestRef?: components["schemas"]["Unspecified"];
+            policyId: components["schemas"]["Uuid"];
+            /** @description The scheduled cancellation id returned by pol.Cancellation.schedule */
+            jobId: components["schemas"]["Uuid"];
+            /** @description Why the cancellation is rescinded */
+            reasonCode: components["schemas"]["Code"];
         };
-        /** @description pol.Cancellation.rescind result. PRD outputs: "jobId, refund preview" */
+        /** @description pol.Cancellation.rescind result. */
         CancellationRescindResponse: {
-            /** @description PRD: "jobId" */
-            jobId?: components["schemas"]["Uuid"];
-            /** @description PRD: "refund preview" */
-            refundPreview?: components["schemas"]["Unspecified"];
+            jobId: components["schemas"]["Uuid"];
+            /** @description RESCINDED */
+            state: components["schemas"]["Code"];
         };
         /**
          * @description The statutory right exercised (REQ-POL-307, REQ-POL-308): WITHDRAWAL from a distance contract, or OBJECTION. Both void the term ab initio.

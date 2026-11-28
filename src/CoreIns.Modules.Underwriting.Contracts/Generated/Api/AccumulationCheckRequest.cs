@@ -4,23 +4,25 @@
 
 namespace CoreIns.Modules.Underwriting.Contracts.Api;
 
-/// <summary>uw.Accumulation.check request. PRD inputs: "job ref, peril"</summary>
+/// <summary>uw.Accumulation.check request (BO-UW-09): the exposure in force in the zone of a risk, against the configured capacity.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record AccumulationCheckRequest
 {
-    /// <summary>PRD: "job ref"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Job asking (optional)</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("jobRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? JobRef { get; init; }
+    public global::CoreIns.SharedKernel.Identifiers.JobId? JobRef { get; init; }
 
-    /// <summary>PRD: "peril"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>Peril whose capacity applies, e.g. FLOOD</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("peril")]
+    public required string Peril { get; init; }
+
+    /// <summary>The zone to measure</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("zone")]
+    public required global::CoreIns.Modules.Underwriting.Contracts.Api.HoldRiskLocation Zone { get; init; }
+
+    /// <summary>Restrict the exposure to one product (optional)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("product")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Peril { get; init; }
+    public string? Product { get; init; }
 }

@@ -567,6 +567,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/pfc/v1/product-versions/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export a version as YAML or JSON
+         * @description Export a Locked version's canonical definition as YAML or JSON source (BO-PFC-03). Importing the result gives the same artefact hash.
+         */
+        get: operations["pfc.ProductVersion.export"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/pfc/v1/impact-analysises/run": {
         parameters: {
             query?: never;
@@ -669,11 +689,9 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Migration import
-         * @description Migration import
-         *
-         *     PRD inputs: legacy definition, mapping
-         *     PRD outputs: change set or dry-run lint report
+         * Import a YAML or JSON source into a draft change set
+         * @description Import a YAML or JSON product source into a draft change set on the named product (BO-PFC-03); the draft is never a Locked version.
+         *     With the Dry-Run header nothing is stored and the lint report is returned.
          */
         post: operations["pfc.ProductImport.import"];
         delete?: never;
@@ -1643,10 +1661,39 @@ export interface components {
         ProductVersionCancelScheduleResponse: {
             schedule: components["schemas"]["ReleaseSchedule"];
         };
-        /** @description pfc.ProductVersion.diff result. PRD outputs: "grouped entries with classes" */
+        /** @description pfc.ProductVersion.diff result: item-level changes grouped by area, each with its class (ADDED, REMOVED, CHANGED) */
         ProductVersionDiffResponse: {
-            /** @description PRD: "grouped entries with classes" */
-            groupedEntriesClasses?: components["schemas"]["Unspecified"];
+            product: components["schemas"]["Code"];
+            from: components["schemas"]["ProductVersionNumber"];
+            to: components["schemas"]["ProductVersionNumber"];
+            total: number;
+            groups: components["schemas"]["ProductDiffGroup"][];
+        };
+        ProductDiffGroup: {
+            /** @description The top-level part of the definition, such as elements, coverages, chargeTypes or dayCount */
+            area: string;
+            entries: components["schemas"]["ProductDiffEntry"][];
+        };
+        ProductDiffEntry: {
+            /** @enum {string} */
+            class: "ADDED" | "REMOVED" | "CHANGED";
+            /** @description JSON pointer; an item of a coded list is written /elements[CODE]/property */
+            path: string;
+            /** @description The code of the element, coverage or charge type the entry belongs to, if any */
+            code?: string;
+            /** @description JSON of the old value */
+            before?: string;
+            /** @description JSON of the new value */
+            after?: string;
+        };
+        ProductVersionExportResponse: {
+            product: components["schemas"]["Code"];
+            version: components["schemas"]["ProductVersionNumber"];
+            artefactHash: components["schemas"]["Sha256"];
+            /** @enum {string} */
+            format: "YAML" | "JSON";
+            /** @description The definition as YAML or JSON text */
+            source: string;
         };
         /** @description pfc.ImpactAnalysis.run request. PRD inputs: "version" */
         ImpactAnalysisRunRequest: {
@@ -1681,17 +1728,23 @@ export interface components {
             /** @description PRD: "record" */
             record?: components["schemas"]["Unspecified"];
         };
-        /** @description pfc.ProductImport.import request. PRD inputs: "legacy definition, mapping" */
+        /** @description pfc.ProductImport.import request (BO-PFC-03). The source is a complete product definition as YAML or JSON text. */
         ProductImportImportRequest: {
-            /** @description PRD: "legacy definition" */
-            legacyDefinition?: components["schemas"]["Unspecified"];
-            /** @description PRD: "mapping" */
-            mapping?: components["schemas"]["Unspecified"];
+            source: string;
+            /**
+             * @description AUTO (default) tells JSON from YAML by the first character
+             * @enum {string}
+             */
+            format?: "AUTO" | "YAML" | "JSON";
+            /** @description The Locked version the draft is based on (the default is the highest Locked version of the product) */
+            baseVersion?: components["schemas"]["ProductVersionNumber"];
         };
-        /** @description pfc.ProductImport.import result. PRD outputs: "change set or dry-run lint report" */
+        /** @description pfc.ProductImport.import result: the draft change set, or on dry run only the lint report */
         ProductImportImportResponse: {
-            /** @description PRD: "change set or dry-run lint report" */
-            changeSetOrDryRunLint?: components["schemas"]["Unspecified"];
+            /** @description false on a dry run */
+            created: boolean;
+            changeSet?: components["schemas"]["ChangeSetCreateResponse"];
+            validation: components["schemas"]["ChangeSetValidation"];
         };
         /** @description pfc.LegacyXref.get result. PRD outputs: "core codes" */
         LegacyXrefGetResponse: {
@@ -3036,11 +3089,13 @@ export interface operations {
     };
     "pfc.ProductVersion.diff": {
         parameters: {
-            query?: {
-                /** @description PRD: "from" */
-                from?: string;
-                /** @description PRD: "to" */
-                to?: string;
+            query: {
+                /** @description Product code */
+                product: components["schemas"]["Code"];
+                /** @description Older version number, such as "1.0" */
+                from: components["schemas"]["ProductVersionNumber"];
+                /** @description Newer version number, such as "1.1" */
+                to: components["schemas"]["ProductVersionNumber"];
                 /** @description PRD: "language" */
                 language?: components["schemas"]["LanguageCode"];
             };
@@ -3070,6 +3125,43 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "pfc.ProductVersion.export": {
+        parameters: {
+            query: {
+                product: components["schemas"]["Code"];
+                version: components["schemas"]["ProductVersionNumber"];
+                format?: "YAML" | "JSON";
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductVersionExportResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };

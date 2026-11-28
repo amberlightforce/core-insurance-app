@@ -1,10 +1,10 @@
 {
   "responses": {
     "uw.Accumulation.check": {
-      "band": "unspecified",
+      "band": "GREEN",
       "exposure": "unspecified",
       "capacity": "unspecified",
-      "dataAs": "unspecified"
+      "dataAs": "2026-10-07T09:00:00Z"
     },
     "uw.Contingency.list": {
       "items": [
@@ -170,14 +170,19 @@
   },
   "schemas": {
     "AccumulationCheckRequest": {
-      "jobRef": "unspecified",
-      "peril": "unspecified"
+      "jobRef": "0192947e-52c3-701e-8eb0-f8ffd3b2e9d2",
+      "peril": "SAMPLE_CODE",
+      "zone": {
+        "postcode": "sample",
+        "hazardZone": "SAMPLE_CODE"
+      },
+      "product": "SAMPLE_CODE"
     },
     "AccumulationCheckResponse": {
-      "band": "unspecified",
+      "band": "GREEN",
       "exposure": "unspecified",
       "capacity": "unspecified",
-      "dataAs": "unspecified"
+      "dataAs": "2026-10-07T09:00:00Z"
     },
     "ApprovalHistoryItem": {
       "issueId": "0192c8f7-3a80-7910-8efc-ee0c30d4ff14",
@@ -446,6 +451,14 @@
     },
     "ExternalReportReorderResponse": {
       "order": "unspecified"
+    },
+    "HoldRiskLocation": {
+      "postcode": "sample",
+      "hazardZone": "SAMPLE_CODE"
+    },
+    "HoldScopeEntry": {
+      "dimension": "POSTCODE",
+      "value": "sample"
     },
     "InspectionCompleteResponse": {
       "inspection": "unspecified"
@@ -875,6 +888,10 @@
     "NatCatAssessResponse": {
       "assessment": "unspecified"
     },
+    "PolicyHoldActivateRequest": {
+      "holdId": "0192d48c-bd50-782c-8963-598ff5f66448",
+      "recordVersion": 1
+    },
     "PolicyHoldActivateResponse": {
       "hold": "unspecified",
       "impactCounts": "unspecified"
@@ -887,7 +904,10 @@
         "SAMPLE_CODE"
       ],
       "riskLocations": [
-        "unspecified"
+        {
+          "postcode": "sample",
+          "hazardZone": "SAMPLE_CODE"
+        }
       ],
       "transactionDate": "2026-10-07",
       "effectiveDate": "2026-10-07"
@@ -902,21 +922,62 @@
       ],
       "issueType": "SAMPLE_CODE"
     },
+    "PolicyHoldCopyRequest": {
+      "holdId": "0192d9a5-d74e-7923-8cdc-82c117d907a1",
+      "holdCode": "SAMPLE_CODE"
+    },
     "PolicyHoldCopyResponse": {
       "hold": "unspecified",
       "impactCounts": "unspecified"
+    },
+    "PolicyHoldCreateRequest": {
+      "holdCode": "SAMPLE_CODE",
+      "description": "sample",
+      "effectiveFrom": "2026-10-07",
+      "effectiveTo": "2026-10-07",
+      "jobTypes": [
+        "SAMPLE_CODE"
+      ],
+      "scopes": [
+        {
+          "dimension": "POSTCODE",
+          "value": "sample"
+        }
+      ]
     },
     "PolicyHoldCreateResponse": {
       "hold": "unspecified",
       "impactCounts": "unspecified"
     },
+    "PolicyHoldImpactRequest": {
+      "holdId": "0192ee8b-db8f-744c-8a3f-69c85bf881e0"
+    },
     "PolicyHoldImpactResponse": {
       "hold": "unspecified",
       "impactCounts": "unspecified"
     },
+    "PolicyHoldReleaseRequest": {
+      "holdId": "0192439b-f29d-7a66-8e02-fba081905953",
+      "reason": "sample"
+    },
     "PolicyHoldReleaseResponse": {
       "hold": "unspecified",
       "impactCounts": "unspecified"
+    },
+    "PolicyHoldUpdateRequest": {
+      "recordVersion": 1,
+      "description": "sample",
+      "effectiveFrom": "2026-10-07",
+      "effectiveTo": "2026-10-07",
+      "jobTypes": [
+        "SAMPLE_CODE"
+      ],
+      "scopes": [
+        {
+          "dimension": "POSTCODE",
+          "value": "sample"
+        }
+      ]
     },
     "PolicyHoldUpdateResponse": {
       "hold": "unspecified",

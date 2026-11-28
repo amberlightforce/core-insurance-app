@@ -397,6 +397,16 @@
     "DocumentRenderAsOfResponse": {
       "documentId": "01925bd6-ba15-75fc-8d17-9cc919d31e85"
     },
+    "DocumentRenderPdfRequest": {
+      "documentId": "01927033-10fb-73cb-84be-60c023f8dda4"
+    },
+    "DocumentRenderPdfResponse": {
+      "documentId": "01928b6d-75bc-7a1f-8bf7-ecb7f388d1c5",
+      "archiveId": "0192642b-6e85-7d6d-8c08-5a8dd6f33f05",
+      "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "pdfA": true,
+      "alreadyRendered": true
+    },
     "DocumentReprintRequest": {
       "documentId": "0192f558-e1eb-7039-8d18-990bbdb6176e",
       "reason": "unspecified"

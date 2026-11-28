@@ -51,6 +51,29 @@ echo "--- get (P2 revealed for purpose RATING; audited)"
 curl -s "$API/api/pty/v1/parties/$ID?revealPurpose=RATING" -H "$AUTH" -o "$WORK/reveal.json"
 json "$WORK/reveal.json" "(d['party']['birthDate'], d['party']['identifiers'][0]['value'])"
 
+# ---- PDF smoke (BO-DOC-07): request a letter, render its PDF rendition (Gotenberg PDF/A when the stack has it, plain fallback otherwise),
+# download it and check the %PDF header. Skip with SMOKE_PDF=0.
+if [ "${SMOKE_PDF:-1}" = "1" ]; then
+  curl -s -X POST "$API/api/plt/v1/dev/sign-in" -H 'Content-Type: application/json' -d '{"userId":"admin"}' -o "$WORK/admin.json"
+  ADMIN="Authorization: Bearer $(json "$WORK/admin.json" "d['accessToken']")"
+  RN="SMOKE-PDF-$(uuid)"
+  "$PY" - "$WORK/docreq.json" "$RN" "$(uuid)" <<'PYEOF'
+import json, sys
+body = {"documentType": "DT-REFUND-ADVICE", "subject": {"module": "BIL", "type": "DelinquencyCase", "id": "smoke-" + sys.argv[2]},
+        "recipients": [{"role": "ADDRESSEE", "partyId": sys.argv[3]}], "deliveryInstruction": {"mode": "EXPLICIT"},
+        "payloadSupplement": {"requestNo": sys.argv[2], "placeholders": {"customerName": "Μαρία", "policyNo": "POL000000123", "refundAmount": "55.00 EUR"}}}
+json.dump(body, open(sys.argv[1], "w", encoding="utf-8"), ensure_ascii=False)
+PYEOF
+  curl -s -X POST "$API/api/doc/v1/documents/request" -H "$ADMIN" -H "Idempotency-Key: $(uuid)" -H 'Content-Type: application/json; charset=utf-8' --data-binary @"$WORK/docreq.json" -o "$WORK/doc.json"
+  DOCID=$(json "$WORK/doc.json" "d['documentId']")
+  curl -s -X POST "$API/api/doc/v1/documents/render-pdf" -H "$ADMIN" -H "Idempotency-Key: $(uuid)" -H 'Content-Type: application/json' -d "{\"documentId\":\"$DOCID\"}" -o "$WORK/pdf.json"
+  PDFA=$(json "$WORK/pdf.json" "d['pdfA']")
+  curl -s "$API/api/doc/v1/archives/$(json "$WORK/pdf.json" "d['archiveId']")/content" -H "$ADMIN" -o "$WORK/letter.pdf"
+  HEAD=$(head -c 4 "$WORK/letter.pdf")
+  echo "pdf: header=$HEAD pdfA=$PDFA"
+  if [ "$HEAD" != "%PDF" ]; then echo "PDF SMOKE FAILED: no %PDF header" >&2; exit 1; fi
+fi
+
 # ---- seed smoke (NX-OT-10): the demo seed runs twice; the second run must change nothing (idempotent) and the data of every
 # module must be there. Skip with SMOKE_SEED=0 (the first run takes a few minutes: it binds policies and waits for the worker).
 if [ "${SMOKE_SEED:-1}" = "1" ]; then
