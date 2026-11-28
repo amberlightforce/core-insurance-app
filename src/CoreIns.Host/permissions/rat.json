@@ -4,6 +4,10 @@
       "Grants": {
         "rat.Rate.rate": [ "Staff.Underwriter", "Staff.Billing" ],
         "rat.Worksheet.get": [ "Staff.Underwriter", "Staff.Billing", "Platform.Admin" ],
+        "rat.Worksheet.explain": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ],
+        "rat.Worksheet.reperform": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Platform.Admin" ],
+        "rat.Worksheet.export": [ "Staff.Underwriter", "Staff.UnderwritingManager", "Staff.Billing", "Platform.Admin" ],
+        "rat.Worksheet.attach": [ "Staff.Underwriter", "Staff.Billing" ],
         "rat.RatingArtifact.resolve": [ "Staff.Underwriter", "Staff.Billing" ],
         "rat.Proration.prorate": [ "Staff.Underwriter", "Staff.Billing" ],
         "rat.RateTable.import": [ "Staff.UnderwritingManager", "Platform.Admin" ],

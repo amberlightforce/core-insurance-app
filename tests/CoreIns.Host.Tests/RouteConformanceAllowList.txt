@@ -107,7 +107,6 @@ CONTRACT_NOT_SERVED GET /api/rat/v1/rates/get-batch
 CONTRACT_NOT_SERVED GET /api/rat/v1/rates/get-batch-results
 CONTRACT_NOT_SERVED GET /api/rat/v1/shadow-runs/{}
 CONTRACT_NOT_SERVED GET /api/rat/v1/statements/get
-CONTRACT_NOT_SERVED GET /api/rat/v1/worksheets/explain
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/footprint
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/query
 CONTRACT_NOT_SERVED GET /api/ri/v1/accumulation/zone
@@ -474,9 +473,6 @@ CONTRACT_NOT_SERVED POST /api/rat/v1/rates/cancel-batch
 CONTRACT_NOT_SERVED POST /api/rat/v1/rates/rate-batch
 CONTRACT_NOT_SERVED POST /api/rat/v1/shadow-runs/start
 CONTRACT_NOT_SERVED POST /api/rat/v1/shadow-runs/stop
-CONTRACT_NOT_SERVED POST /api/rat/v1/worksheets/attach
-CONTRACT_NOT_SERVED POST /api/rat/v1/worksheets/export
-CONTRACT_NOT_SERVED POST /api/rat/v1/worksheets/reperform
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/estimate
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/export-oed
 CONTRACT_NOT_SERVED POST /api/ri/v1/accumulation/import-model-results

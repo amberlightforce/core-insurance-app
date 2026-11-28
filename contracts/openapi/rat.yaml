@@ -502,6 +502,18 @@ paths:
       parameters:
       - $ref: common.yaml#/components/parameters/Traceparent
       - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - name: worksheetId
+        in: query
+        required: true
+        description: 'Contract addition (BO-RAT-02): the worksheet to explain (PRD input "worksheet id")'
+        schema:
+          type: string
+      - name: language
+        in: query
+        required: false
+        description: 'Contract addition (BO-RAT-02): el or en (PRD input "language"); default en'
+        schema:
+          type: string
       responses:
         '200':
           description: Success
