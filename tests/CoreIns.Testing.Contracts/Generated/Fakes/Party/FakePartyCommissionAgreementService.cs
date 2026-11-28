@@ -14,5 +14,5 @@ public sealed class FakePartyCommissionAgreementService : global::CoreIns.Testin
     {
     }
     /// <inheritdoc />
-    public global::System.Threading.Tasks.Task<global::System.Text.Json.JsonElement> ResolveAsync(global::System.Text.Json.JsonElement request, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::System.Text.Json.JsonElement>("pty.CommissionAgreement.resolve", [request], cancellationToken);
+    public global::System.Threading.Tasks.Task<global::CoreIns.Modules.Party.Contracts.Api.CommissionAgreementResolveResponse> ResolveAsync(global::CoreIns.Modules.Party.Contracts.Api.CommissionAgreementResolveRequest request, global::System.Threading.CancellationToken cancellationToken = default) => RespondAsync<global::CoreIns.Modules.Party.Contracts.Api.CommissionAgreementResolveResponse>("pty.CommissionAgreement.resolve", [request], cancellationToken);
 }

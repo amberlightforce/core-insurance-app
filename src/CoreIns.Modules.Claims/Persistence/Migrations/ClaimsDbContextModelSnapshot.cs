@@ -87,6 +87,100 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.CatEventRow", b =>
+                {
+                    b.Property<Guid>("CatEventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("cat_event_id");
+
+                    b.Property<string>("CatCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("cat_code");
+
+                    b.Property<string>("CloseReason")
+                        .HasColumnType("text")
+                        .HasColumnName("close_reason");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("closed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Jurisdiction")
+                        .IsRequired()
+                        .HasColumnType("char(2)")
+                        .HasColumnName("jurisdiction");
+
+                    b.Property<Guid>("LegalEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("legal_entity_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.PrimitiveCollection<string[]>("Perils")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("perils");
+
+                    b.Property<int>("RecordVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("record_version");
+
+                    b.Property<string>("Region")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("region");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<DateTime>("WindowFrom")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("window_from");
+
+                    b.Property<DateTime?>("WindowTo")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("window_to");
+
+                    b.HasKey("CatEventId")
+                        .HasName("pk_cat_event");
+
+                    b.HasIndex("LegalEntityId", "CatCode")
+                        .IsUnique()
+                        .HasDatabaseName("ux_cat_event_code");
+
+                    b.ToTable("cat_event", "clm", t =>
+                        {
+                            t.HasCheckConstraint("ck_cat_event_jurisdiction", "jurisdiction ~ '^[A-Z]{2}$'");
+
+                            t.HasCheckConstraint("ck_cat_event_record_version", "record_version >= 1");
+
+                            t.HasCheckConstraint("ck_cat_event_status", "status IN ('OPEN', 'CLOSED')");
+
+                            t.HasCheckConstraint("ck_cat_event_window", "window_to IS NULL OR window_to > window_from");
+                        });
+                });
+
             modelBuilder.Entity("CoreIns.Modules.Claims.Persistence.ClaimPaymentRow", b =>
                 {
                     b.Property<Guid>("ClaimPaymentId")
@@ -275,6 +369,10 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("accident_in_greece");
 
+                    b.Property<string>("CatEventCode")
+                        .HasColumnType("text")
+                        .HasColumnName("cat_event_code");
+
                     b.Property<string>("Channel")
                         .IsRequired()
                         .HasColumnType("text")
@@ -388,6 +486,14 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
                         .HasColumnType("bytea")
                         .HasColumnName("loss_location_encrypted");
 
+                    b.Property<string>("Milestone")
+                        .HasColumnType("text")
+                        .HasColumnName("milestone");
+
+                    b.Property<DateTime?>("MilestoneAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("milestone_at");
+
                     b.Property<DateOnly>("NoticeOn")
                         .HasColumnType("date")
                         .HasColumnName("notice_on");
@@ -490,6 +596,10 @@ namespace CoreIns.Modules.Claims.Persistence.Migrations
 
                     b.HasIndex("PolicyTermId")
                         .HasDatabaseName("ix_claim_policy_term");
+
+                    b.HasIndex("LegalEntityId", "CatEventCode")
+                        .HasDatabaseName("ix_claim_cat_event")
+                        .HasFilter("cat_event_code IS NOT NULL");
 
                     b.HasIndex("LegalEntityId", "ClaimNumber")
                         .IsUnique()

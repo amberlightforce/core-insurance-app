@@ -26,6 +26,10 @@
         // SL4-BIL-DISBOPS: stop/void need BIL.DisbursementStop authority (checked again by the handler); CLM calls them in process for payment corrections.
         "bil.Disbursement.stop": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
         "bil.Disbursement.void": [ "Staff.Billing", "Staff.BillingManager", "Staff.ClaimsHandler", "Staff.ClaimsManager", "Platform.Admin" ],
+        // BO-BIL-10: bank-file batches of non-claim disbursements; the release is approved by a second person (SoD checked by the handler).
+        "bil.DisbursementBatch.prepare": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.DisbursementBatch.release": [ "Staff.Billing", "Staff.BillingManager" ],
+        "bil.DisbursementBatch.approveRelease": [ "Staff.BillingManager" ],
         // Development-only manual stub bank (Billing:StubBank:Mode=Manual); the controller answers 404 elsewhere.
         "bil.DevBank.operate": [ "Staff.Billing", "Staff.BillingManager", "Platform.Admin" ],
         // SL3-PLT-SUPPORT: refunds are read by billing staff; only the billing manager decides them (SoD: maker != checker is enforced by plt.Approval).

@@ -19,7 +19,8 @@ namespace CoreIns.Modules.Billing.Commands;
 internal sealed class DisbursementReleaser(LedgerWriter ledger, IEventPublisher events)
 {
     public async Task ReleaseAsync(
-        DisbursementRow row, IBankChannel channel, Money amount, BusinessDate today, Instant now, RefundRow? refund, CancellationToken cancellationToken)
+        DisbursementRow row, IBankChannel channel, Money amount, BusinessDate today, Instant now, RefundRow? refund, CancellationToken cancellationToken,
+        BusinessDate? batchValueDate = null)
     {
         var machine = DisbursementStateModel.Machine;
         var ctx = Describe(row, refund);
@@ -27,7 +28,7 @@ internal sealed class DisbursementReleaser(LedgerWriter ledger, IEventPublisher 
         var lineage = ctx.Lineage;
         var dimensions = ctx.Dimensions;
         var releasedType = isFs ? EntryTypes.FsClearingReleased : EntryTypes.DisbursementReleased;
-        var valueDate = row.RequestedValueDate is { } requested && requested > today ? requested : today;
+        var valueDate = batchValueDate ?? (row.RequestedValueDate is { } requested && requested > today ? requested : today);
 
         // Released: the source's clearing account to disbursements in transit (REQ-BIL-211).
         var released = await ledger.RuleAsync(ledger.Key(releasedType, RuleQualifiers.Any, row.SourceType), cancellationToken).ConfigureAwait(false);

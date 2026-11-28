@@ -4,20 +4,20 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.DisbursementBatch.prepare request. PRD inputs: "bank account, value date"</summary>
+/// <summary>bil.DisbursementBatch.prepare request (BO-BIL-10). Groups the Approved non-claim disbursements (BIL_COMMISSION, BIL_LEVY, TAX_REMITTANCE, BIL_OTHER) that are not yet in a batch into one SEPA pain.001 credit-transfer file paid from the bank account on the value date. Without disbursementIds every eligible Approved item with a requested value date on or before it is taken; with them, an item that is…</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DisbursementBatchPrepareRequest
 {
-    /// <summary>PRD: "bank account"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
+    /// <summary>The own bank account to debit, as an IBAN (electronic or print format).</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("bankAccount")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? BankAccount { get; init; }
+    public required string BankAccount { get; init; }
 
-    /// <summary>PRD: "value date"</summary>
+    /// <summary>Execution date of the file; not before today.</summary>
     [global::System.Text.Json.Serialization.JsonPropertyName("valueDate")]
+    public required global::CoreIns.SharedKernel.BusinessDate ValueDate { get; init; }
+
+    /// <summary>Optional subset of Approved disbursements to batch.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("disbursementIds")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? ValueDate { get; init; }
+    public global::System.Collections.Generic.IReadOnlyList<global::CoreIns.SharedKernel.Identifiers.DisbursementId>? DisbursementIds { get; init; }
 }

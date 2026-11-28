@@ -1,7 +1,61 @@
 {
   "responses": {
     "clm.CatEvent.aggregate": {
-      "totalsByLine": "unspecified"
+      "events": [
+        {
+          "catCode": "SAMPLE_CODE",
+          "name": "sample",
+          "status": "OPEN",
+          "claimCount": 1,
+          "totalsByCurrency": [
+            {
+              "claimCount": 1,
+              "reserved": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "paid": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "openReserve": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "incurred": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ],
+          "totalsByLine": [
+            {
+              "lineOfBusiness": "sample",
+              "totals": [
+                {
+                  "claimCount": 1,
+                  "reserved": {
+                    "amount": "120.50",
+                    "currency": "EUR"
+                  },
+                  "paid": {
+                    "amount": "120.50",
+                    "currency": "EUR"
+                  },
+                  "openReserve": {
+                    "amount": "120.50",
+                    "currency": "EUR"
+                  },
+                  "incurred": {
+                    "amount": "120.50",
+                    "currency": "EUR"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "clm.Certificate.request": {
       "certificate": "unspecified"
@@ -181,12 +235,70 @@
       "limit": 1
     },
     "clm.ClaimTracking.get": {
-      "trackingView": "unspecified"
+      "trackingView": {
+        "claimId": "0192ea7e-db07-79de-82c8-f0ff6a12d0b7",
+        "claimNumber": "SAMPLE-000001",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "0192d1b2-4bd9-7856-88b5-8ef3b1c183b1",
+        "status": "sample",
+        "subStatus": "SAMPLE_CODE",
+        "milestone": "SAMPLE_CODE",
+        "milestoneAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "openedAt": "2026-10-07T09:00:00Z",
+        "ageDays": 1,
+        "unreviewedDays": 1,
+        "largeLoss": true,
+        "handler": "sample",
+        "catEventCode": "SAMPLE_CODE",
+        "openReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "paid": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "incurred": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      }
     },
     "clm.ClaimTracking.list": {
       "items": [
         {
-          "trackingView": "unspecified"
+          "trackingView": {
+            "claimId": "0192c37a-51e2-7646-8bd3-ff882dd3c3d6",
+            "claimNumber": "SAMPLE-000001",
+            "policyNumber": "SAMPLE-000001",
+            "insuredPartyId": "01926b3f-3bc1-777e-86ae-da7313364618",
+            "status": "sample",
+            "subStatus": "SAMPLE_CODE",
+            "milestone": "SAMPLE_CODE",
+            "milestoneAt": "2026-10-07T09:00:00Z",
+            "lossDate": "2026-10-07",
+            "noticeOn": "2026-10-07",
+            "openedAt": "2026-10-07T09:00:00Z",
+            "ageDays": 1,
+            "unreviewedDays": 1,
+            "largeLoss": true,
+            "handler": "sample",
+            "catEventCode": "SAMPLE_CODE",
+            "openReserve": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "paid": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "incurred": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
         }
       ],
       "nextCursor": "sample",
@@ -552,8 +664,236 @@
       "outcome": "WITHIN",
       "role": "sample"
     },
+    "CatEventAggregate": {
+      "catCode": "SAMPLE_CODE",
+      "name": "sample",
+      "status": "OPEN",
+      "claimCount": 1,
+      "totalsByCurrency": [
+        {
+          "claimCount": 1,
+          "reserved": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paid": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "openReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "incurred": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ],
+      "totalsByLine": [
+        {
+          "lineOfBusiness": "sample",
+          "totals": [
+            {
+              "claimCount": 1,
+              "reserved": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "paid": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "openReserve": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "incurred": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ]
+        }
+      ]
+    },
     "CatEventAggregateResponse": {
-      "totalsByLine": "unspecified"
+      "events": [
+        {
+          "catCode": "SAMPLE_CODE",
+          "name": "sample",
+          "status": "OPEN",
+          "claimCount": 1,
+          "totalsByCurrency": [
+            {
+              "claimCount": 1,
+              "reserved": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "paid": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "openReserve": {
+                "amount": "120.50",
+                "currency": "EUR"
+              },
+              "incurred": {
+                "amount": "120.50",
+                "currency": "EUR"
+              }
+            }
+          ],
+          "totalsByLine": [
+            {
+              "lineOfBusiness": "sample",
+              "totals": [
+                {
+                  "claimCount": 1,
+                  "reserved": {
+                    "amount": "120.50",
+                    "currency": "EUR"
+                  },
+                  "paid": {
+                    "amount": "120.50",
+                    "currency": "EUR"
+                  },
+                  "openReserve": {
+                    "amount": "120.50",
+                    "currency": "EUR"
+                  },
+                  "incurred": {
+                    "amount": "120.50",
+                    "currency": "EUR"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "CatEventCloseRequest": {
+      "catCode": "SAMPLE_CODE",
+      "reason": "SAMPLE_CODE"
+    },
+    "CatEventCloseResponse": {
+      "catEvent": {
+        "catEventId": "0192dd24-eab4-77be-835d-0997b0b3ddb9",
+        "catCode": "SAMPLE_CODE",
+        "name": "sample",
+        "perils": [
+          "SAMPLE_CODE"
+        ],
+        "region": "sample",
+        "windowFrom": "2026-10-07T09:00:00Z",
+        "windowTo": "2026-10-07T09:00:00Z",
+        "status": "OPEN",
+        "taggedClaimCount": 1,
+        "recordVersion": 1
+      }
+    },
+    "CatEventDeclareRequest": {
+      "catCode": "SAMPLE_CODE",
+      "name": "sample",
+      "perils": [
+        "SAMPLE_CODE"
+      ],
+      "region": "sample",
+      "windowFrom": "2026-10-07T09:00:00Z",
+      "windowTo": "2026-10-07T09:00:00Z"
+    },
+    "CatEventDeclareResponse": {
+      "catEvent": {
+        "catEventId": "019279a1-4b5c-7ce0-8fb8-1a33edc39cb5",
+        "catCode": "SAMPLE_CODE",
+        "name": "sample",
+        "perils": [
+          "SAMPLE_CODE"
+        ],
+        "region": "sample",
+        "windowFrom": "2026-10-07T09:00:00Z",
+        "windowTo": "2026-10-07T09:00:00Z",
+        "status": "OPEN",
+        "taggedClaimCount": 1,
+        "recordVersion": 1
+      }
+    },
+    "CatEventLineTotals": {
+      "lineOfBusiness": "sample",
+      "totals": [
+        {
+          "claimCount": 1,
+          "reserved": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "paid": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "openReserve": {
+            "amount": "120.50",
+            "currency": "EUR"
+          },
+          "incurred": {
+            "amount": "120.50",
+            "currency": "EUR"
+          }
+        }
+      ]
+    },
+    "CatEventListResponse": {
+      "events": [
+        {
+          "catEventId": "0192eae8-f8c7-7d2a-8680-84cfc57a0b58",
+          "catCode": "SAMPLE_CODE",
+          "name": "sample",
+          "perils": [
+            "SAMPLE_CODE"
+          ],
+          "region": "sample",
+          "windowFrom": "2026-10-07T09:00:00Z",
+          "windowTo": "2026-10-07T09:00:00Z",
+          "status": "OPEN",
+          "taggedClaimCount": 1,
+          "recordVersion": 1
+        }
+      ]
+    },
+    "CatEventTotals": {
+      "claimCount": 1,
+      "reserved": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "paid": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "openReserve": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "incurred": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
+    },
+    "CatEventView": {
+      "catEventId": "0192dc7c-abb9-71e9-8163-15bffb5c0aed",
+      "catCode": "SAMPLE_CODE",
+      "name": "sample",
+      "perils": [
+        "SAMPLE_CODE"
+      ],
+      "region": "sample",
+      "windowFrom": "2026-10-07T09:00:00Z",
+      "windowTo": "2026-10-07T09:00:00Z",
+      "status": "OPEN",
+      "taggedClaimCount": 1,
+      "recordVersion": 1
     },
     "CertificateAssembleRequest": {
       "requester": "unspecified",
@@ -966,19 +1306,136 @@
       "closedAt": "2026-10-07T09:00:00Z"
     },
     "ClaimTrackingGetResponse": {
-      "trackingView": "unspecified"
+      "trackingView": {
+        "claimId": "019289c1-0e07-73e2-8874-8238901d8732",
+        "claimNumber": "SAMPLE-000001",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "0192993c-234a-7188-8d99-d7c32cf1c878",
+        "status": "sample",
+        "subStatus": "SAMPLE_CODE",
+        "milestone": "SAMPLE_CODE",
+        "milestoneAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "openedAt": "2026-10-07T09:00:00Z",
+        "ageDays": 1,
+        "unreviewedDays": 1,
+        "largeLoss": true,
+        "handler": "sample",
+        "catEventCode": "SAMPLE_CODE",
+        "openReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "paid": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "incurred": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      }
     },
     "ClaimTrackingListItem": {
-      "trackingView": "unspecified"
+      "trackingView": {
+        "claimId": "0192d4f5-3519-7ac5-8b14-e2718f15d403",
+        "claimNumber": "SAMPLE-000001",
+        "policyNumber": "SAMPLE-000001",
+        "insuredPartyId": "019284d8-5612-7f9e-8ba6-38cbb8b700d2",
+        "status": "sample",
+        "subStatus": "SAMPLE_CODE",
+        "milestone": "SAMPLE_CODE",
+        "milestoneAt": "2026-10-07T09:00:00Z",
+        "lossDate": "2026-10-07",
+        "noticeOn": "2026-10-07",
+        "openedAt": "2026-10-07T09:00:00Z",
+        "ageDays": 1,
+        "unreviewedDays": 1,
+        "largeLoss": true,
+        "handler": "sample",
+        "catEventCode": "SAMPLE_CODE",
+        "openReserve": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "paid": {
+          "amount": "120.50",
+          "currency": "EUR"
+        },
+        "incurred": {
+          "amount": "120.50",
+          "currency": "EUR"
+        }
+      }
     },
     "ClaimTrackingListPage": {
       "items": [
         {
-          "trackingView": "unspecified"
+          "trackingView": {
+            "claimId": "01926083-60b9-7768-8b2c-c74c10a2acd1",
+            "claimNumber": "SAMPLE-000001",
+            "policyNumber": "SAMPLE-000001",
+            "insuredPartyId": "019232b8-b4b3-70f3-837b-a6d7517c80da",
+            "status": "sample",
+            "subStatus": "SAMPLE_CODE",
+            "milestone": "SAMPLE_CODE",
+            "milestoneAt": "2026-10-07T09:00:00Z",
+            "lossDate": "2026-10-07",
+            "noticeOn": "2026-10-07",
+            "openedAt": "2026-10-07T09:00:00Z",
+            "ageDays": 1,
+            "unreviewedDays": 1,
+            "largeLoss": true,
+            "handler": "sample",
+            "catEventCode": "SAMPLE_CODE",
+            "openReserve": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "paid": {
+              "amount": "120.50",
+              "currency": "EUR"
+            },
+            "incurred": {
+              "amount": "120.50",
+              "currency": "EUR"
+            }
+          }
         }
       ],
       "nextCursor": "sample",
       "limit": 1
+    },
+    "ClaimTrackingView": {
+      "claimId": "0192751c-2fb3-7245-807d-3303c1b09ec9",
+      "claimNumber": "SAMPLE-000001",
+      "policyNumber": "SAMPLE-000001",
+      "insuredPartyId": "0192a545-558d-74a7-869b-8dfa279b9b12",
+      "status": "sample",
+      "subStatus": "SAMPLE_CODE",
+      "milestone": "SAMPLE_CODE",
+      "milestoneAt": "2026-10-07T09:00:00Z",
+      "lossDate": "2026-10-07",
+      "noticeOn": "2026-10-07",
+      "openedAt": "2026-10-07T09:00:00Z",
+      "ageDays": 1,
+      "unreviewedDays": 1,
+      "largeLoss": true,
+      "handler": "sample",
+      "catEventCode": "SAMPLE_CODE",
+      "openReserve": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "paid": {
+        "amount": "120.50",
+        "currency": "EUR"
+      },
+      "incurred": {
+        "amount": "120.50",
+        "currency": "EUR"
+      }
     },
     "ClaimUpdateRequest": {
       "ids": [
@@ -993,7 +1450,10 @@
           "jointReportFlag": true,
           "vehicleCount": 1,
           "accidentInGreece": true
-        }
+        },
+        "milestone": "SAMPLE_CODE",
+        "catEventCode": "SAMPLE_CODE",
+        "untagCatEvent": true
       },
       "reason": "SAMPLE_CODE"
     },

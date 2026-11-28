@@ -33,6 +33,9 @@ internal sealed class ClaimsOptions
     [Range(0, 30)]
     public int DuplicateWindowDays { get; set; }
 
+    /// <summary>Claim tracking watch list (BO-CLM-08).</summary>
+    public ClaimTrackingOptions Tracking { get; set; } = new();
+
     /// <summary>Claim financials (SL2-CLM-MONEY): illustrative cost categories and the reserve auto-adjust switch.</summary>
     public ClaimFinancialsOptions Financials { get; set; } = new();
 
@@ -113,4 +116,12 @@ internal sealed class FriendlySettlementOptions
 
     /// <summary>Days from the approval to the due date of an FS net receivable.</summary>
     public int ReceivableDueDays { get; set; } = 30;
+}
+
+/// <summary>Configuration section <c>Claims:Tracking</c>: ILLUSTRATIVE watch-list thresholds, not approved values.</summary>
+internal sealed class ClaimTrackingOptions
+{
+    /// <summary>A claim whose incurred (paid + open reserve) reaches this amount is flagged as a large loss.</summary>
+    [Range(0, 1_000_000_000)]
+    public decimal LargeLossThreshold { get; set; } = 50000m;
 }

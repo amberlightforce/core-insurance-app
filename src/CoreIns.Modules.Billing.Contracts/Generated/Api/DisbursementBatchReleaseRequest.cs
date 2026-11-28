@@ -4,20 +4,14 @@
 
 namespace CoreIns.Modules.Billing.Contracts.Api;
 
-/// <summary>bil.DisbursementBatch.release request. PRD inputs: "bank account, value date"</summary>
+/// <summary>bil.DisbursementBatch.release request (BO-BIL-10): the first person asks for the release. Items stopped since the preparation are dropped and the file and its hash are rebuilt; the second person approves that exact hash.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record DisbursementBatchReleaseRequest
 {
-    /// <summary>PRD: "bank account"</summary>
+    /// <summary>Contract member 'batchId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'batchId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("bankAccount")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? BankAccount { get; init; }
-
-    /// <summary>PRD: "value date"</summary>
-    [global::System.Text.Json.Serialization.JsonPropertyName("valueDate")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::CoreIns.SharedKernel.BusinessDate? ValueDate { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("batchId")]
+    public required global::System.Guid BatchId { get; init; }
 }

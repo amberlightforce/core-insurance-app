@@ -26,6 +26,8 @@ public sealed class CommissionAgreementTests(PostgresFixture database) : IClassF
         await _factory.DisposeAsync();
     }
 
+    private static decimal Dec(string text) => decimal.Parse(text, System.Globalization.CultureInfo.InvariantCulture);
+
     private static string Today => DateTime.UtcNow.ToString("yyyy-MM-dd");
 
     private static string DaysFromToday(int days) => DateTime.UtcNow.AddDays(days).ToString("yyyy-MM-dd");
@@ -248,5 +250,71 @@ public sealed class CommissionAgreementTests(PostgresFixture database) : IClassF
         var (_, agreement) = await AsAsync("maker", Underwriter, HttpMethod.Get, $"/api/pty/v1/commission-agreements/{compareBody.Text("agreementId")}");
         agreement.Text("agreement.versions.0.effectiveTo").ShouldBe(DaysFromToday(39));
         agreement.Text("agreement.versions.1.effectiveTo").ShouldBe("null");
+    }
+
+    [Fact]
+    public async Task Resolve_and_simulate_pick_the_rate_round_it_and_say_why_when_there_is_no_commission()
+    {
+        var intermediary = await ActiveIntermediaryAsync("094014305", "CA-0011");
+        var versionId = await ActiveVersionAsync(intermediary, DaysFromToday(1), Lines("12.5", "10"));
+        var inForce = DaysFromToday(2);
+
+        var (resolved, body) = await AsAsync("maker", Underwriter, HttpMethod.Post, "/api/pty/v1/commission-agreements/resolve", new
+        {
+            intermediaryId = intermediary, date = inForce, businessType = "NEW_BUSINESS", basis = "NET_PREMIUM",
+        });
+        resolved.StatusCode.ShouldBe(HttpStatusCode.OK, body?.ToJsonString());
+        body.Text("outcome").ShouldBe("RESOLVED");
+        body.Text("producers.0.versionId").ShouldBe(versionId);
+        Dec(body.Text("producers.0.rateLine.ratePct")).ShouldBe(12.5m);
+        Dec(body.Text("producers.0.sharePct")).ShouldBe(100m);
+        body!["producers"]![0]!["explanation"]!.AsArray().Count.ShouldBeGreaterThan(0);
+
+        // Before the version starts: an explicit no-commission answer, not a zero.
+        var (before, beforeBody) = await AsAsync("maker", Underwriter, HttpMethod.Post, "/api/pty/v1/commission-agreements/resolve", new
+        {
+            intermediaryId = intermediary, date = Today, businessType = "NEW_BUSINESS", basis = "NET_PREMIUM",
+        });
+        before.StatusCode.ShouldBe(HttpStatusCode.OK);
+        beforeBody.Text("outcome").ShouldBe("NO_COMMISSION");
+        beforeBody.Text("reason").ShouldBe("NO_AGREEMENT");
+
+        // No producer at all.
+        var (none, noneBody) = await AsAsync("maker", Underwriter, HttpMethod.Post, "/api/pty/v1/commission-agreements/resolve", new
+        {
+            date = inForce, businessType = "NEW_BUSINESS", basis = "NET_PREMIUM",
+        });
+        none.StatusCode.ShouldBe(HttpStatusCode.OK);
+        noneBody.Text("reason").ShouldBe("NO_PRODUCER");
+
+        // 12.5% of 100.10 = 12.5125 -> 12.51 (MKT half-up, 2 places); the renewal line is 10% of 33.33 = 3.333 -> 3.33; GROSS has no line.
+        var (simulated, simBody) = await AsAsync("maker", Underwriter, HttpMethod.Post, "/api/pty/v1/commission-agreements/simulate", new
+        {
+            intermediaryId = intermediary,
+            date = inForce,
+            lines = new object[]
+            {
+                new { businessType = "NEW_BUSINESS", basis = "NET_PREMIUM", premium = new { amount = "100.10", currency = "EUR" } },
+                new { businessType = "RENEWAL", basis = "NET_PREMIUM", premium = new { amount = "33.33", currency = "EUR" } },
+                new { businessType = "NEW_BUSINESS", basis = "GROSS_PREMIUM", premium = new { amount = "50.00", currency = "EUR" } },
+            },
+        });
+        simulated.StatusCode.ShouldBe(HttpStatusCode.OK, simBody?.ToJsonString());
+        Dec(simBody.Text("lines.0.commission.amount")).ShouldBe(12.51m);
+        Dec(simBody.Text("lines.1.commission.amount")).ShouldBe(3.33m);
+        simBody.Text("lines.2.outcome").ShouldBe("NO_COMMISSION");
+        simBody.Text("lines.2.reason").ShouldBe("NO_RATE_LINE");
+        Dec(simBody.Text("totalCommission.amount")).ShouldBe(15.84m);
+
+        // Same inputs, same answer.
+        var (_, again) = await AsAsync("maker", Underwriter, HttpMethod.Post, "/api/pty/v1/commission-agreements/resolve", new
+        {
+            intermediaryId = intermediary, date = inForce, businessType = "NEW_BUSINESS", basis = "NET_PREMIUM",
+        });
+        again!.ToJsonString().ShouldBe(body!.ToJsonString());
+
+        // An empty simulation is refused.
+        var (empty, _) = await AsAsync("maker", Underwriter, HttpMethod.Post, "/api/pty/v1/commission-agreements/simulate", new { intermediaryId = intermediary, date = inForce, lines = Array.Empty<object>() });
+        empty.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 }
