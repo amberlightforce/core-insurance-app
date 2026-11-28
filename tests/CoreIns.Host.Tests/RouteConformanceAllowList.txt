@@ -393,11 +393,6 @@ CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/confirm
 CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/estimate
 CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/propose
 CONTRACT_NOT_SERVED POST /api/ri/v1/cat-occurrences/revise
-CONTRACT_NOT_SERVED POST /api/ri/v1/cession-exceptions/assign
-CONTRACT_NOT_SERVED POST /api/ri/v1/cession-exceptions/rerun
-CONTRACT_NOT_SERVED POST /api/ri/v1/cession-exceptions/resolve
-CONTRACT_NOT_SERVED POST /api/ri/v1/cessions/preview
-CONTRACT_NOT_SERVED POST /api/ri/v1/cessions/rerun
 CONTRACT_NOT_SERVED POST /api/ri/v1/close/run
 CONTRACT_NOT_SERVED POST /api/ri/v1/collaterals
 CONTRACT_NOT_SERVED POST /api/ri/v1/collaterals/draw

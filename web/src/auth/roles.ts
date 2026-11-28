@@ -29,6 +29,13 @@ export const withdrawalRoles = ['Staff.Underwriter', 'Staff.Billing', 'Platform.
 /** Roles that see the billing back-office screens: refunds, receivables, releases, delinquency. */
 export const billingRoles = ['Staff.Billing', 'Staff.BillingManager'] as const;
 
+/** Roles that see the configuration change requests (permission mkt.ConfigChangeRequest.list). */
+export const configRoles = [
+  'Platform.ReleaseManager',
+  'Platform.DesignAuthority',
+  'Platform.Admin',
+] as const;
+
 /** Roles that manage pack activation (illustrative; permission mkt.Pack.list). */
 export const packRoles = [
   'Platform.ReleaseManager',

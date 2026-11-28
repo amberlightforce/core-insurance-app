@@ -23,6 +23,12 @@
         "ri.Cession.listByPolicy": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.Cession.get": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
         "ri.CessionException.list": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        // BO-RI-07: preview is a read; rerun, assign, resolve and exception rerun are limited to the reinsurance roles.
+        "ri.Cession.preview": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.RecoverySpecialist" ],
+        "ri.Cession.rerun": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
+        "ri.CessionException.assign": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
+        "ri.CessionException.resolve": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
+        "ri.CessionException.rerun": [ "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager" ],
         // Programme writes (BO-RI-01): the accountant makes; the approval (BO-RI-02) is the manager's.
         "ri.Programme.create": [ "Staff.ReinsuranceAccountant" ],
         "ri.Programme.update": [ "Staff.ReinsuranceAccountant" ],
