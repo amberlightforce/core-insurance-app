@@ -32,7 +32,7 @@ services:
     ports: ["127.0.0.1:${AZURITE_HOST_PORT:-10000}:10000"]
 
   gotenberg:
-    image: gotenberg/gotenberg:8.37.0
+    image: gotenberg/gotenberg:9.10.1
     ports: ["127.0.0.1:${GOTENBERG_HOST_PORT:-3000}:3000"]
 
   # BO-WRK-11: malware scanner for inbound documents. To use it set Work__Malware__ClamAv__Host=clamav on the api and worker services;
