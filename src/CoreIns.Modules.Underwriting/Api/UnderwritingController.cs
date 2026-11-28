@@ -26,6 +26,9 @@ internal static class UnderwritingPermissions
     public const string ListForChannel = "uw.Issue.listForChannel";
     public const string ApprovalHistory = "uw.Approval.history";
     public const string Decide = "uw.Issue.decide";
+    public const string IssueReopen = "uw.Issue.reopen";
+    public const string IssueAddManual = "uw.Issue.addManual";
+    public const string IssueClose = "uw.Issue.close";
     public const string ReferralList = "uw.Referral.list";
     public const string ReferralGet = "uw.Referral.get";
     public const string ReferralRequest = "uw.Referral.request";
@@ -184,6 +187,27 @@ internal sealed class UnderwritingController : ControllerBase
         var result = await handler.HandleAsync(new DecideIssues(request), cancellationToken).ConfigureAwait(false);
         return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error, HttpContext);
     }
+
+    /// <summary>uw.Issue.reopen: put an Approved or Rejected issue back to Open (a command: Idempotency-Key required).</summary>
+    [HttpPost("issues/reopen")]
+    [Authorize(Policy = UnderwritingPermissions.IssueReopen)]
+    public Task<IResult> ReopenIssueAsync(
+        [FromBody] IssueReopenRequest request, [FromServices] ICommandHandler<ReopenIssue, IssueReopenResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new ReopenIssue(request), cancellationToken);
+
+    /// <summary>uw.Issue.addManual: raise an issue by hand on an evaluated job.</summary>
+    [HttpPost("issues/add-manual")]
+    [Authorize(Policy = UnderwritingPermissions.IssueAddManual)]
+    public Task<IResult> AddManualIssueAsync(
+        [FromBody] IssueAddManualRequest request, [FromServices] ICommandHandler<AddManualIssue, IssueAddManualResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new AddManualIssue(request), cancellationToken);
+
+    /// <summary>uw.Issue.close: close an issue that does not block, with a reason.</summary>
+    [HttpPost("issues/close")]
+    [Authorize(Policy = UnderwritingPermissions.IssueClose)]
+    public Task<IResult> CloseIssueAsync(
+        [FromBody] IssueCloseRequest request, [FromServices] ICommandHandler<CloseIssue, IssueCloseResponse> handler, CancellationToken cancellationToken) =>
+        RunAsync(handler, new CloseIssue(request), cancellationToken);
 
     /// <summary>uw.Referral.list: the referral workbench queue (one row per referred job) with the queue counts.</summary>
     [HttpGet("referrals")]

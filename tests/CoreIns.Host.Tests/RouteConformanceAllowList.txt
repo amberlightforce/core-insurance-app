@@ -528,9 +528,6 @@ CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/accept
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/clear
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/reject
 CONTRACT_NOT_SERVED POST /api/uw/v1/intakes/verify-value
-CONTRACT_NOT_SERVED POST /api/uw/v1/issues/add-manual
-CONTRACT_NOT_SERVED POST /api/uw/v1/issues/close
-CONTRACT_NOT_SERVED POST /api/uw/v1/issues/reopen
 CONTRACT_NOT_SERVED POST /api/uw/v1/nat-cat/assess
 CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds
 CONTRACT_NOT_SERVED POST /api/uw/v1/policy-holds/activate

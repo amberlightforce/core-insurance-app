@@ -426,13 +426,37 @@
       "jobRef": "unspecified"
     },
     "IssueAddManualRequest": {
-      "issueId": "01924603-7ebf-7d18-8a1a-31941f1a901f",
-      "jobRef": "unspecified",
-      "type": "unspecified",
-      "reason": "unspecified"
+      "jobRef": "01925b5b-d130-7051-8e23-461876148634",
+      "issueType": "SAMPLE_CODE",
+      "blockingPoint": "PRE_QUOTE",
+      "reason": "sample"
     },
     "IssueAddManualResponse": {
-      "issue": "unspecified"
+      "issue": {
+        "id": "01924b57-86f7-76fd-8888-f9cc6be66170",
+        "jobRef": "0192608b-4d5f-7b0c-80f0-6c0220eb9e28",
+        "issueType": "SAMPLE_CODE",
+        "issueKey": "sample",
+        "ruleId": "sample",
+        "severity": "SAMPLE_CODE",
+        "blockingPoint": "PRE_QUOTE",
+        "lane": "SAMPLE_CODE",
+        "status": "Open",
+        "recordVersion": 1,
+        "messageEn": "sample",
+        "messageEl": "sample",
+        "raisedAt": "2026-10-07T09:00:00Z",
+        "raisedBy": "sample",
+        "decision": {
+          "decision": "APPROVE",
+          "decidedBy": "sample",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "reason": "sample",
+          "message": "sample",
+          "authorityCheckId": "0192b0de-76ed-7a77-86f9-08f178369d5e"
+        },
+        "closeReason": "sample"
+      }
     },
     "IssueBlockingStatusResponse": {
       "blocked": true,
@@ -453,12 +477,35 @@
     },
     "IssueCloseRequest": {
       "issueId": "0192beba-5d9b-796f-8308-c628a3ab0c36",
-      "jobRef": "unspecified",
-      "type": "unspecified",
-      "reason": "unspecified"
+      "reason": "sample",
+      "expectedRecordVersion": 1
     },
     "IssueCloseResponse": {
-      "issue": "unspecified"
+      "issue": {
+        "id": "0192635e-7e94-7392-8cd5-65ad55cd9c05",
+        "jobRef": "0192b798-09e8-73c1-8c33-f6174c0a4766",
+        "issueType": "SAMPLE_CODE",
+        "issueKey": "sample",
+        "ruleId": "sample",
+        "severity": "SAMPLE_CODE",
+        "blockingPoint": "PRE_QUOTE",
+        "lane": "SAMPLE_CODE",
+        "status": "Open",
+        "recordVersion": 1,
+        "messageEn": "sample",
+        "messageEl": "sample",
+        "raisedAt": "2026-10-07T09:00:00Z",
+        "raisedBy": "sample",
+        "decision": {
+          "decision": "APPROVE",
+          "decidedBy": "sample",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "reason": "sample",
+          "message": "sample",
+          "authorityCheckId": "01924c09-cfdf-7b03-8679-a312765aef10"
+        },
+        "closeReason": "sample"
+      }
     },
     "IssueDecidability": {
       "canDecide": true,
@@ -662,12 +709,35 @@
     },
     "IssueReopenRequest": {
       "issueId": "019254fc-0cbb-7555-8db3-d3792a1a215f",
-      "jobRef": "unspecified",
-      "type": "unspecified",
-      "reason": "unspecified"
+      "reason": "sample",
+      "expectedRecordVersion": 1
     },
     "IssueReopenResponse": {
-      "issue": "unspecified"
+      "issue": {
+        "id": "019218e3-1d07-73e3-8e3f-37d6693e1f47",
+        "jobRef": "0192003d-1787-73fb-89d0-f9f65043288a",
+        "issueType": "SAMPLE_CODE",
+        "issueKey": "sample",
+        "ruleId": "sample",
+        "severity": "SAMPLE_CODE",
+        "blockingPoint": "PRE_QUOTE",
+        "lane": "SAMPLE_CODE",
+        "status": "Open",
+        "recordVersion": 1,
+        "messageEn": "sample",
+        "messageEl": "sample",
+        "raisedAt": "2026-10-07T09:00:00Z",
+        "raisedBy": "sample",
+        "decision": {
+          "decision": "APPROVE",
+          "decidedBy": "sample",
+          "decidedAt": "2026-10-07T09:00:00Z",
+          "reason": "sample",
+          "message": "sample",
+          "authorityCheckId": "01924f5e-589b-70e3-8078-4e2f2f960235"
+        },
+        "closeReason": "sample"
+      }
     },
     "IssueTypeItem": {
       "code": "sample",
