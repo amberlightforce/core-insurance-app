@@ -317,8 +317,6 @@ CONTRACT_NOT_SERVED POST /api/mkt/v1/spis/suspend
 CONTRACT_NOT_SERVED POST /api/mkt/v1/terminology/approve
 CONTRACT_NOT_SERVED POST /api/mkt/v1/terminology/propose
 CONTRACT_NOT_SERVED POST /api/mkt/v1/translations/gate
-CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/rebase
-CONTRACT_NOT_SERVED POST /api/pfc/v1/change-sets/revert
 CONTRACT_NOT_SERVED POST /api/pfc/v1/impact-analysises/run
 CONTRACT_NOT_SERVED POST /api/pfc/v1/pogs/record-review
 CONTRACT_NOT_SERVED POST /api/pfc/v1/pogs/record-test

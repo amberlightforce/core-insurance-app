@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CoreIns.Modules.Product.Api;
 
-/// <summary>REST facade of the change-set (draft) store, BO-PFC-01: create, edit, abandon. Revert and rebase arrive with BO-PFC-02.</summary>
+/// <summary>REST facade of the change-set (draft) store, BO-PFC-01: create, edit, abandon. Revert and rebase: BO-PFC-02.</summary>
 [ApiController]
 [Route("api/pfc/v1/change-sets")]
 internal sealed class ChangeSetsController : ControllerBase
@@ -43,4 +43,22 @@ internal sealed class ChangeSetsController : ControllerBase
         [FromServices] ICommandHandler<AbandonChangeSet, ChangeSetAbandonResponse> handler,
         CancellationToken cancellationToken) =>
         this.Respond(await handler.HandleAsync(new AbandonChangeSet(request), cancellationToken).ConfigureAwait(false));
+
+    /// <summary>pfc.ChangeSet.revert: undoes one logged edit.</summary>
+    [HttpPost("revert")]
+    [Authorize(Policy = ProductPermissions.ChangeSetRevert)]
+    public async Task<IResult> RevertAsync(
+        [FromBody] ChangeSetRevertRequest request,
+        [FromServices] ICommandHandler<RevertChangeSet, ChangeSetRevertResponse> handler,
+        CancellationToken cancellationToken) =>
+        this.Respond(await handler.HandleAsync(new RevertChangeSet(request), cancellationToken).ConfigureAwait(false));
+
+    /// <summary>pfc.ChangeSet.rebase: three-way merge of the draft onto a newer Locked version; conflicts give 409 with the paths.</summary>
+    [HttpPost("rebase")]
+    [Authorize(Policy = ProductPermissions.ChangeSetRebase)]
+    public async Task<IResult> RebaseAsync(
+        [FromBody] ChangeSetRebaseRequest request,
+        [FromServices] ICommandHandler<RebaseChangeSet, ChangeSetRebaseResponse> handler,
+        CancellationToken cancellationToken) =>
+        this.Respond(await handler.HandleAsync(new RebaseChangeSet(request), cancellationToken).ConfigureAwait(false));
 }
