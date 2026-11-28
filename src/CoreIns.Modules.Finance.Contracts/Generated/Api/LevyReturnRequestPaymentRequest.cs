@@ -4,23 +4,30 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.LevyReturn.requestPayment request. PRD inputs: "levy, period"</summary>
+/// <summary>fin.LevyReturn.requestPayment request.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record LevyReturnRequestPaymentRequest
 {
-    /// <summary>PRD: "levy"</summary>
+    /// <summary>Contract member 'returnId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'returnId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("levy")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Levy { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("returnId")]
+    public required global::System.Guid ReturnId { get; init; }
 
-    /// <summary>PRD: "period"</summary>
+    /// <summary>Contract member 'payeePartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("payeePartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId PayeePartyId { get; init; }
+
+    /// <summary>Contract member 'payeeAccountId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'payeeAccountId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
+    [global::System.Text.Json.Serialization.JsonPropertyName("payeeAccountId")]
+    public required global::System.Guid PayeeAccountId { get; init; }
+
+    /// <summary>Contract member 'requestedValueDate'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("requestedValueDate")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    public global::CoreIns.SharedKernel.BusinessDate? RequestedValueDate { get; init; }
 }

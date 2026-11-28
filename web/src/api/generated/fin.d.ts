@@ -2969,91 +2969,183 @@ export interface components {
             payeeAccountId: components["schemas"]["Uuid"];
             requestedValueDate?: components["schemas"]["LocalDate"];
         };
-        /** @description fin.LevyReturn.list result. PRD outputs: "return" */
+        /** @description A manual adjustment of a DRAFT return (BO-FIN-10). Insert-only; the maker, the time and the reason are kept. */
+        LevyReturnAdjustmentView: {
+            adjustmentId: components["schemas"]["Uuid"];
+            /** @description Signed decimal text, 2 places; added to the ledger liability. */
+            amount: string;
+            reason: string;
+            evidenceRef?: string;
+            /** @description True when the reason explains a difference between the ledger and the BIL levy lines. */
+            explainsReconciliation?: boolean;
+            createdBy: string;
+            createdAt: components["schemas"]["Instant"];
+        };
+        /** @description A levy return of one levy type (the levy authority) and period, computed from the levy payable (GL-2420) postings of the ledger and reconciled to the BIL-sourced levy lines. DRAFT, REVIEWED (maker-checker, content hash frozen), FILED, PAID. An amendment is a new version linked to the original; a version is never edited after review. */
+        LevyReturnView: {
+            returnId: components["schemas"]["Uuid"];
+            /** @description Calendar month, yyyy-MM */
+            period: string;
+            /** @description Levy type (the levy authority), the charge type of the levy lines, e.g. GR-AUXF-PH. */
+            levyType: string;
+            versionNo: number;
+            /** @description The version this one amends. */
+            supersedesReturnId?: components["schemas"]["Uuid"];
+            /** @description The later version that amends this one. */
+            supersededByReturnId?: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "DRAFT" | "REVIEWED" | "FILED" | "PAID";
+            currency: string;
+            /** @description Credits minus debits of the levy payable account for the levy type in the period (credit levy rows net). */
+            ledgerAmount: string;
+            /** @description The part of it posted from BIL billing entries. */
+            bilAmount: string;
+            adjustmentsTotal: string;
+            /** @description ledgerAmount plus adjustmentsTotal. */
+            netPayable: string;
+            entryCount?: number;
+            /** @enum {string} */
+            reconciliation: "MATCHED" | "EXPLAINED" | "UNEXPLAINED";
+            /** @description ledgerAmount minus bilAmount. */
+            reconDifference?: string;
+            reconExplanation?: string;
+            /** @description Legal status of the pack rows of the levy the return rests on (Settled, PendingOpinion, Unverified, NotRegulatory). */
+            legalStatus: string;
+            /** @description True when the return rests on values that are not Settled; refused in Production. */
+            provisional: boolean;
+            /** @description SHA-256 of the return content, frozen when it is submitted for review. */
+            contentHash?: string;
+            fileName?: string;
+            fileHash?: string;
+            approvalRequestId?: components["schemas"]["Uuid"];
+            submittedBy?: string;
+            submittedAt?: components["schemas"]["Instant"];
+            reviewedBy?: string;
+            reviewedAt?: components["schemas"]["Instant"];
+            filedBy?: string;
+            filedAt?: components["schemas"]["Instant"];
+            filedOn?: components["schemas"]["LocalDate"];
+            filingReference?: string;
+            disbursementId?: string;
+            paymentStatus?: string;
+            createdBy?: string;
+            createdAt?: components["schemas"]["Instant"];
+            adjustments?: components["schemas"]["LevyReturnAdjustmentView"][];
+        };
+        /** @description The submission file of a return (generateFile). Deterministic from the frozen content; content is present only on generateFile. */
+        LevyReturnFileView: {
+            fileName: string;
+            fileHash: string;
+            contentType: string;
+            content?: string;
+        };
+        /** @description fin.LevyReturn.list result: return, file and payment status in brief. */
         LevyReturnListItem: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
+            returnId: components["schemas"]["Uuid"];
+            period: string;
+            levyType: string;
+            versionNo: number;
+            /** @enum {string} */
+            status: "DRAFT" | "REVIEWED" | "FILED" | "PAID";
+            currency: string;
+            netPayable: string;
+            /** @enum {string} */
+            reconciliation: "MATCHED" | "EXPLAINED" | "UNEXPLAINED";
+            provisional?: boolean;
+            supersededByReturnId?: components["schemas"]["Uuid"];
+            fileName?: string;
+            filingReference?: string;
+            filedAt?: components["schemas"]["Instant"];
+            paymentStatus?: string;
         };
         /** @description Page of fin.LevyReturn.list results (cursor pagination, contract §3.5.5) */
         LevyReturnListPage: components["schemas"]["PageEnvelope"] & {
             items?: components["schemas"]["LevyReturnListItem"][];
         };
-        /** @description fin.LevyReturn.get result. PRD outputs: "return" */
+        /** @description fin.LevyReturn.get result: the return, its file and its payment status. */
         LevyReturnGetResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["LevyReturnView"];
+            file?: components["schemas"]["LevyReturnFileView"];
+            paymentStatus?: string;
         };
-        /** @description fin.LevyReturn.recalculate request. PRD inputs: "levy, period" */
-        LevyReturnRecalculateRequest: {
-            /** @description PRD: "levy" */
-            levy?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.LevyReturn.recalculate result. PRD outputs: "return" */
+        /** @description fin.LevyReturn.recalculate result: the return, its file and its payment status. */
         LevyReturnRecalculateResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["LevyReturnView"];
+            file?: components["schemas"]["LevyReturnFileView"];
+            paymentStatus?: string;
         };
-        /** @description fin.LevyReturn.addAdjustment request. PRD inputs: "levy, period" */
-        LevyReturnAddAdjustmentRequest: {
-            /** @description PRD: "levy" */
-            levy?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.LevyReturn.addAdjustment result. PRD outputs: "return" */
+        /** @description fin.LevyReturn.addAdjustment result: the return, its file and its payment status. */
         LevyReturnAddAdjustmentResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["LevyReturnView"];
+            file?: components["schemas"]["LevyReturnFileView"];
+            paymentStatus?: string;
         };
-        /** @description fin.LevyReturn.generateFile request. PRD inputs: "levy, period" */
-        LevyReturnGenerateFileRequest: {
-            /** @description PRD: "levy" */
-            levy?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.LevyReturn.generateFile result. PRD outputs: "return" */
+        /** @description fin.LevyReturn.generateFile result: the return, its file and its payment status. */
         LevyReturnGenerateFileResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["LevyReturnView"];
+            file?: components["schemas"]["LevyReturnFileView"];
+            paymentStatus?: string;
         };
-        /** @description fin.LevyReturn.transition request. PRD inputs: "levy, period" */
-        LevyReturnTransitionRequest: {
-            /** @description PRD: "levy" */
-            levy?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.LevyReturn.transition result. PRD outputs: "return" */
+        /** @description fin.LevyReturn.transition result: the return, its file and its payment status. */
         LevyReturnTransitionResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["LevyReturnView"];
+            file?: components["schemas"]["LevyReturnFileView"];
+            paymentStatus?: string;
         };
-        /** @description fin.LevyReturn.recordFiling request. PRD inputs: "levy, period" */
-        LevyReturnRecordFilingRequest: {
-            /** @description PRD: "levy" */
-            levy?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.LevyReturn.recordFiling result. PRD outputs: "return" */
+        /** @description fin.LevyReturn.recordFiling result: the return, its file and its payment status. */
         LevyReturnRecordFilingResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["LevyReturnView"];
+            file?: components["schemas"]["LevyReturnFileView"];
+            paymentStatus?: string;
         };
-        /** @description fin.LevyReturn.requestPayment request. PRD inputs: "levy, period" */
-        LevyReturnRequestPaymentRequest: {
-            /** @description PRD: "levy" */
-            levy?: components["schemas"]["Unspecified"];
-            /** @description PRD: "period" */
-            period?: components["schemas"]["Unspecified"];
-        };
-        /** @description fin.LevyReturn.requestPayment result. PRD outputs: "return" */
+        /** @description fin.LevyReturn.requestPayment result: the return, its file and its payment status. */
         LevyReturnRequestPaymentResponse: {
-            /** @description PRD: "return" */
-            return?: components["schemas"]["Unspecified"];
+            return: components["schemas"]["LevyReturnView"];
+            file?: components["schemas"]["LevyReturnFileView"];
+            paymentStatus?: string;
+        };
+        /** @description fin.LevyReturn.recalculate request. */
+        LevyReturnRecalculateRequest: {
+            /** @description Calendar month, yyyy-MM */
+            period: string;
+            /** @description Levy type (the levy authority) of the return, the charge type of the levy lines. */
+            levyType: string;
+        };
+        /** @description fin.LevyReturn.addAdjustment request. */
+        LevyReturnAddAdjustmentRequest: {
+            returnId: components["schemas"]["Uuid"];
+            /** @description Signed decimal text, at most 2 places, not zero. */
+            amount: string;
+            reason: string;
+            evidenceRef?: string;
+            explainsReconciliation?: boolean;
+        };
+        /** @description fin.LevyReturn.generateFile request. */
+        LevyReturnGenerateFileRequest: {
+            returnId: components["schemas"]["Uuid"];
+        };
+        /** @description fin.LevyReturn.transition request. */
+        LevyReturnTransitionRequest: {
+            returnId: components["schemas"]["Uuid"];
+            /**
+             * @description SUBMIT (the preparer freezes the content hash and requests approval), APPROVE or REJECT (a second person).
+             * @enum {string}
+             */
+            action: "SUBMIT" | "APPROVE" | "REJECT";
+            comment?: string;
+        };
+        /** @description fin.LevyReturn.recordFiling request. */
+        LevyReturnRecordFilingRequest: {
+            returnId: components["schemas"]["Uuid"];
+            filingReference: string;
+            filedOn: components["schemas"]["LocalDate"];
+        };
+        /** @description fin.LevyReturn.requestPayment request. */
+        LevyReturnRequestPaymentRequest: {
+            returnId: components["schemas"]["Uuid"];
+            payeePartyId: components["schemas"]["Uuid"];
+            payeeAccountId: components["schemas"]["Uuid"];
+            requestedValueDate?: components["schemas"]["LocalDate"];
         };
         /** @description fin.FiscalReconciliation.run request. PRD inputs: "date or month" */
         FiscalReconciliationRunRequest: {
@@ -5917,6 +6009,11 @@ export interface operations {
                 cursor?: components["parameters"]["Cursor"];
                 /** @description Page size, at most 200 (contract §3.5.5). */
                 limit?: components["parameters"]["Limit"];
+                /** @description Calendar month, yyyy-MM */
+                period?: string;
+                /** @description Levy type (the levy authority) */
+                levyType?: string;
+                status?: "DRAFT" | "REVIEWED" | "FILED" | "PAID";
             };
             header?: {
                 /**
@@ -5944,6 +6041,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
@@ -5980,12 +6078,20 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };
     "fin.LevyReturn.recalculate": {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -6073,7 +6179,14 @@ export interface operations {
     };
     "fin.LevyReturn.generateFile": {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Dry-run, contract §3.5.3: run every check and return the full result (premium, charge deltas, issues, documents
+                 *     that would be produced) with no side effects. The header `X-Dry-Run: true` is accepted as an equivalent. A
+                 *     dry-run still requires an `Idempotency-Key` (its result is not stored as the command's result).
+                 */
+                dryRun?: components["parameters"]["DryRun"];
+            };
             header: {
                 /**
                  * @description Required on every command (state-changing operation), contract §3.5.3. A UUID chosen by the caller. The owner
@@ -6148,6 +6261,7 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            422: components["responses"]["UnprocessableContent"];
             500: components["responses"]["InternalError"];
         };
     };

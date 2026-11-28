@@ -29,6 +29,7 @@ public sealed class ApprovalSodMatrixTests(PostgresFixture database) : IClassFix
         new Row("BIL.REFUND", ModuleCode.BIL, "Refund", "BIL.REFUND", "1000.00", "Staff.Billing", "Staff.BillingManager", "Staff.BillingManager"),
         new Row("FIN.MANUAL_JOURNAL", ModuleCode.FIN, "ManualJournal", "FIN.MANUAL_JOURNAL", "50000.00", "Staff.Finance", "Platform.Admin", "Staff.Finance"),
         new Row("FIN.TAX_RETURN", ModuleCode.FIN, "TaxReturn", "FIN.TAX_RETURN", "50000.00", "Staff.Finance", "Platform.Admin", "Staff.Finance"),
+        new Row("FIN.LEVY_RETURN", ModuleCode.FIN, "LevyReturn", "FIN.LEVY_RETURN", "50000.00", "Staff.Finance", "Platform.Admin", "Staff.Finance"),
         new Row("RI.ADJUSTMENT_APPROVE", ModuleCode.RI, "Adjustment", "RI.ADJUSTMENT_APPROVE", "6000.00", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.ReinsuranceManager"),
         new Row("RI.PROGRAMME_APPROVE", ModuleCode.RI, "Programme", "RI.PROGRAMME_APPROVE", "6000000.00", "Staff.ReinsuranceAccountant", "Staff.ReinsuranceManager", "Staff.ReinsuranceManager"),
         new Row(

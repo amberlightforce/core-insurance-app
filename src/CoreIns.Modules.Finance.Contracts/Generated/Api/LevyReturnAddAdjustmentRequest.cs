@@ -4,23 +4,32 @@
 
 namespace CoreIns.Modules.Finance.Contracts.Api;
 
-/// <summary>fin.LevyReturn.addAdjustment request. PRD inputs: "levy, period"</summary>
+/// <summary>fin.LevyReturn.addAdjustment request.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record LevyReturnAddAdjustmentRequest
 {
-    /// <summary>PRD: "levy"</summary>
+    /// <summary>Contract member 'returnId'.</summary>
     /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
+    /// <para>Untyped id: no SharedKernel id type is mapped for 'returnId' (tools/CoreIns.ContractGen/IdTypeMap.cs).</para>
     /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("levy")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Levy { get; init; }
+    [global::System.Text.Json.Serialization.JsonPropertyName("returnId")]
+    public required global::System.Guid ReturnId { get; init; }
 
-    /// <summary>PRD: "period"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
+    /// <summary>Signed decimal text, at most 2 places, not zero.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("amount")]
+    public required string Amount { get; init; }
+
+    /// <summary>Contract member 'reason'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reason")]
+    public required string Reason { get; init; }
+
+    /// <summary>Contract member 'evidenceRef'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("evidenceRef")]
     [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Period { get; init; }
+    public string? EvidenceRef { get; init; }
+
+    /// <summary>Contract member 'explainsReconciliation'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("explainsReconciliation")]
+    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public bool? ExplainsReconciliation { get; init; }
 }
