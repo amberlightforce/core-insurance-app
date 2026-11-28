@@ -265,12 +265,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/import/lic
 CONTRACT_NOT_SERVED POST /api/fin/v1/import/opening-balances
 CONTRACT_NOT_SERVED POST /api/fin/v1/import/reverse-batch
 CONTRACT_NOT_SERVED POST /api/fin/v1/journals/reverse
-CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/compile
-CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/decide
-CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/draft
-CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/preview-impact
-CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/submit
-CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/test
 CONTRACT_NOT_SERVED POST /api/mkt/v1/cross-borders/check
 CONTRACT_NOT_SERVED POST /api/mkt/v1/currencies/convert-fixed
 CONTRACT_NOT_SERVED POST /api/mkt/v1/l10n-ui-languages/resolve

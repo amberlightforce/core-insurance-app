@@ -797,14 +797,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostingRulesDraftRequest'
+              $ref: '#/components/schemas/PostingRulesAuthoringRequest'
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PostingRulesDraftResponse'
+                $ref: '#/components/schemas/PostingRulesAuthoringResponse'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -869,14 +869,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostingRulesCompileRequest'
+              $ref: '#/components/schemas/PostingRulesAuthoringRequest'
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PostingRulesCompileResponse'
+                $ref: '#/components/schemas/PostingRulesAuthoringResponse'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -942,14 +942,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostingRulesTestRequest'
+              $ref: '#/components/schemas/PostingRulesAuthoringRequest'
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PostingRulesTestResponse'
+                $ref: '#/components/schemas/PostingRulesAuthoringResponse'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -1015,14 +1015,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostingRulesPreviewImpactRequest'
+              $ref: '#/components/schemas/PostingRulesAuthoringRequest'
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PostingRulesPreviewImpactResponse'
+                $ref: '#/components/schemas/PostingRulesAuthoringResponse'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -1094,7 +1094,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PostingRulesSubmitResponse'
+                $ref: '#/components/schemas/PostingRulesAuthoringResponse'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -1166,7 +1166,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PostingRulesDecideResponse'
+                $ref: '#/components/schemas/PostingRulesAuthoringResponse'
         '400':
           $ref: common.yaml#/components/responses/BadRequest
         '401':
@@ -6600,162 +6600,338 @@ components:
             items:
               $ref: '#/components/schemas/PostingRulesListItem'
       description: Page of fin.PostingRules.list results (cursor pagination, contract §3.5.5)
-    PostingRulesDraftRequest:
+    PostingRuleRowInput:
       type: object
-      description: 'fin.PostingRules.draft request. PRD inputs: "rule set, rule rows, sample events"'
+      description: One posting rule as authored (REQ-FIN-048). Exactly one of account and deriveFrom.
+      required:
+      - code
+      - sourceEvent
+      - entryType
+      - sourceAccount
+      properties:
+        code:
+          type: string
+        sourceEvent:
+          type: string
+        entryType:
+          type: string
+        sourceAccount:
+          type: string
+        chargeCategory:
+          oneOf:
+          - type: string
+          - type: 'null'
+        chargeType:
+          oneOf:
+          - type: string
+          - type: 'null'
+        account:
+          oneOf:
+          - type: string
+          - type: 'null'
+        deriveFrom:
+          oneOf:
+          - type: string
+          - type: 'null'
+        descriptionEl:
+          oneOf:
+          - type: string
+          - type: 'null'
+        descriptionEn:
+          oneOf:
+          - type: string
+          - type: 'null'
+    PostingRuleSampleEvent:
+      type: object
+      description: A sample (golden) event; expectRule NONE expects that no rule matches.
+      required:
+      - sourceEvent
+      - entryType
+      - sourceAccount
+      properties:
+        name:
+          oneOf:
+          - type: string
+          - type: 'null'
+        sourceEvent:
+          type: string
+        entryType:
+          type: string
+        sourceAccount:
+          type: string
+        chargeCategory:
+          oneOf:
+          - type: string
+          - type: 'null'
+        chargeType:
+          oneOf:
+          - type: string
+          - type: 'null'
+        glKey:
+          oneOf:
+          - type: string
+          - type: 'null'
+        expectRule:
+          oneOf:
+          - type: string
+          - type: 'null'
+        expectAccount:
+          oneOf:
+          - type: string
+          - type: 'null'
+    PostingRuleSetRef:
+      type: object
+      description: The rule set being authored, an existing draft or the book and effective date of a new one.
+      properties:
+        draftId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        book:
+          oneOf:
+          - type: string
+          - type: 'null'
+        effectiveFrom:
+          oneOf:
+          - type: string
+          - type: 'null'
+          description: yyyy-MM-dd
+    PostingRulesAuthoringRequest:
+      type: object
+      description: Request of draft, compile, test and previewImpact; ruleRows and sampleEvents default to the stored draft.
       properties:
         ruleSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule set"'
+          $ref: #/components/schemas/PostingRuleSetRef
         ruleRows:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule rows"'
+          type: array
+          items:
+            $ref: #/components/schemas/PostingRuleRowInput
         sampleEvents:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "sample events"'
-    PostingRulesDraftResponse:
+          type: array
+          items:
+            $ref: #/components/schemas/PostingRuleSampleEvent
+        limit:
+          oneOf:
+          - type: integer
+          - type: 'null'
+          description: previewImpact only, journals to replay (default 200, at most 1000)
+    PostingRuleDraftView:
       type: object
-      description: 'fin.PostingRules.draft result. PRD outputs: "compile and golden results, preview"'
+      description: A posting rule draft.
+      required:
+      - draftId
+      - book
+      - effectiveFrom
+      - status
+      - contentHash
+      - ruleCount
+      - recordVersion
+      - createdBy
       properties:
+        draftId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        book:
+          type: string
+        effectiveFrom:
+          type: string
+        status:
+          type: string
+        baseVersion:
+          oneOf:
+          - type: integer
+          - type: 'null'
+        contentHash:
+          type: string
+        ruleCount:
+          type: integer
+        recordVersion:
+          type: integer
+        createdBy:
+          type: string
+        submittedBy:
+          oneOf:
+          - type: string
+          - type: 'null'
+        decidedBy:
+          oneOf:
+          - type: string
+          - type: 'null'
+        decisionReason:
+          oneOf:
+          - type: string
+          - type: 'null'
+        activatedRuleSetId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        activatedVersion:
+          oneOf:
+          - type: integer
+          - type: 'null'
+    PostingRuleCompileResult:
+      type: object
+      description: Compile checks of a rule set.
+      required:
+      - ok
+      - errors
+      - warnings
+      properties:
+        ok:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: string
+        warnings:
+          type: array
+          items:
+            type: string
+    PostingRuleGoldenCase:
+      type: object
+      description: One sample event resolved against the rules.
+      required:
+      - name
+      - passed
+      properties:
+        name:
+          type: string
+        passed:
+          type: boolean
+        ruleCode:
+          oneOf:
+          - type: string
+          - type: 'null'
+        account:
+          oneOf:
+          - type: string
+          - type: 'null'
+        detail:
+          oneOf:
+          - type: string
+          - type: 'null'
+    PostingRuleGoldenResult:
+      type: object
+      description: Sample events resolved against the rules.
+      required:
+      - total
+      - passed
+      - failed
+      - cases
+      properties:
+        total:
+          type: integer
+        passed:
+          type: integer
+        failed:
+          type: integer
+        cases:
+          type: array
+          items:
+            $ref: #/components/schemas/PostingRuleGoldenCase
+    PostingRuleImpactLine:
+      type: object
+      description: A replayed line whose rule or account would change.
+      required:
+      - journalNumber
+      - lineNo
+      - outcome
+      - oldRule
+      - oldAccount
+      properties:
+        journalNumber:
+          type: string
+        lineNo:
+          type: integer
+        outcome:
+          type: string
+          description: CHANGED or UNRESOLVED
+        oldRule:
+          type: string
+        newRule:
+          oneOf:
+          - type: string
+          - type: 'null'
+        oldAccount:
+          type: string
+        newAccount:
+          oneOf:
+          - type: string
+          - type: 'null'
+        detail:
+          oneOf:
+          - type: string
+          - type: 'null'
+    PostingRuleImpactResult:
+      type: object
+      description: Replay of recent event-posted lines through the proposed rules. Nothing is posted or written.
+      required:
+      - journals
+      - lines
+      - unchanged
+      - changed
+      - unresolved
+      - skipped
+      - differences
+      properties:
+        journals:
+          type: integer
+        lines:
+          type: integer
+        unchanged:
+          type: integer
+        changed:
+          type: integer
+        unresolved:
+          type: integer
+        skipped:
+          type: integer
+        differences:
+          type: array
+          items:
+            $ref: #/components/schemas/PostingRuleImpactLine
+    PostingRulesAuthoringResponse:
+      type: object
+      description: Result of an authoring operation; the parts an operation does not produce are null.
+      properties:
+        draft:
+          oneOf:
+          - $ref: #/components/schemas/PostingRuleDraftView
+          - type: 'null'
         compileResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
+          oneOf:
+          - $ref: #/components/schemas/PostingRuleCompileResult
+          - type: 'null'
         goldenResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
+          oneOf:
+          - $ref: #/components/schemas/PostingRuleGoldenResult
+          - type: 'null'
         preview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "preview"'
-    PostingRulesCompileRequest:
-      type: object
-      description: 'fin.PostingRules.compile request. PRD inputs: "rule set, rule rows, sample events"'
-      properties:
-        ruleSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule set"'
-        ruleRows:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule rows"'
-        sampleEvents:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "sample events"'
-    PostingRulesCompileResponse:
-      type: object
-      description: 'fin.PostingRules.compile result. PRD outputs: "compile and golden results, preview"'
-      properties:
-        compileResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
-        goldenResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
-        preview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "preview"'
-    PostingRulesTestRequest:
-      type: object
-      description: 'fin.PostingRules.test request. PRD inputs: "rule set, rule rows, sample events"'
-      properties:
-        ruleSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule set"'
-        ruleRows:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule rows"'
-        sampleEvents:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "sample events"'
-    PostingRulesTestResponse:
-      type: object
-      description: 'fin.PostingRules.test result. PRD outputs: "compile and golden results, preview"'
-      properties:
-        compileResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
-        goldenResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
-        preview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "preview"'
-    PostingRulesPreviewImpactRequest:
-      type: object
-      description: 'fin.PostingRules.previewImpact request. PRD inputs: "rule set, rule rows, sample events"'
-      properties:
-        ruleSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule set"'
-        ruleRows:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule rows"'
-        sampleEvents:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "sample events"'
-    PostingRulesPreviewImpactResponse:
-      type: object
-      description: 'fin.PostingRules.previewImpact result. PRD outputs: "compile and golden results, preview"'
-      properties:
-        compileResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
-        goldenResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
-        preview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "preview"'
+          oneOf:
+          - $ref: #/components/schemas/PostingRuleImpactResult
+          - type: 'null'
     PostingRulesSubmitRequest:
       type: object
-      description: 'fin.PostingRules.submit request. PRD inputs: "rule set, rule rows, sample events"'
+      description: fin.PostingRules.submit request
+      required:
+      - draftId
       properties:
-        ruleSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule set"'
-        ruleRows:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule rows"'
-        sampleEvents:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "sample events"'
-    PostingRulesSubmitResponse:
-      type: object
-      description: 'fin.PostingRules.submit result. PRD outputs: "compile and golden results, preview"'
-      properties:
-        compileResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
-        goldenResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
-        preview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "preview"'
+        draftId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
     PostingRulesDecideRequest:
       type: object
-      description: 'fin.PostingRules.decide request. PRD inputs: "rule set, rule rows, sample events"'
+      description: fin.PostingRules.decide request, decision is APPROVE or REJECT and a rejection needs a comment.
+      required:
+      - draftId
+      - decision
       properties:
-        ruleSet:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule set"'
-        ruleRows:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "rule rows"'
-        sampleEvents:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "sample events"'
-    PostingRulesDecideResponse:
-      type: object
-      description: 'fin.PostingRules.decide result. PRD outputs: "compile and golden results, preview"'
-      properties:
-        compileResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
-        goldenResults:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "compile and golden results"'
-        preview:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "preview"'
+        draftId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        decision:
+          type: string
+        comment:
+          oneOf:
+          - type: string
+          - type: 'null'
     IntakeExceptionListItem:
       type: object
       description: 'fin.IntakeException.list result. PRD outputs: "outcomes"'

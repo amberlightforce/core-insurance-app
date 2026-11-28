@@ -5,6 +5,12 @@
         "fin.Journal.get": [ "Staff.Finance", "Staff.Billing", "Platform.Admin" ],
         "fin.Journal.query": [ "Staff.Finance", "Staff.Billing", "Platform.Admin" ],
         "fin.PostingRules.list": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.PostingRules.draft": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.PostingRules.compile": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.PostingRules.test": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.PostingRules.previewImpact": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.PostingRules.submit": [ "Staff.Finance", "Platform.Admin" ],
+        "fin.PostingRules.decide": [ "Staff.Finance", "Platform.Admin" ],
         "fin.Balance.trialBalance": [ "Staff.Finance", "Platform.Admin" ],
         "fin.IntakeException.list": [ "Staff.Finance", "Platform.Admin" ],
         "fin.IntakeException.rerun": [ "Staff.Finance", "Platform.Admin" ],
@@ -61,6 +67,9 @@
         {
           "Id": "fin-admin-manualjournal-illustrative", "Role": "Platform.Admin", "Type": "FIN.MANUAL_JOURNAL", "Illustrative": true,
           "Limits": [ { "Dimension": "amount", "Comparison": "AtMost", "Amount": "1000000.00", "Currency": "EUR" } ]
+        },
+        {
+          "Id": "fin-admin-postingruleset-illustrative", "Role": "Platform.Admin", "Type": "FIN.POSTING_RULE_SET", "Illustrative": true
         },
         {
           "Id": "fin-finance-taxreturn-illustrative", "Role": "Staff.Finance", "Type": "FIN.TAX_RETURN", "Illustrative": true,
