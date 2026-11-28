@@ -137,6 +137,12 @@ internal static class SuspenseFacts
             .Select(g => new { g.Key, Sum = g.Sum(a => a.Amount) }).ToDictionaryAsync(x => x.Key, x => x.Sum, cancellationToken).ConfigureAwait(false);
         var offsets = await db.CreditApplications.AsNoTracking().Where(a => a.TargetInvoiceId != null && ids.Contains(a.TargetInvoiceId.Value))
             .GroupBy(a => a.TargetInvoiceId!.Value).Select(g => new { g.Key, Sum = g.Sum(a => a.Amount) }).ToDictionaryAsync(x => x.Key, x => x.Sum, cancellationToken).ConfigureAwait(false);
+        foreach (var w in await db.WriteOffLines.AsNoTracking().Where(w => ids.Contains(w.InvoiceId)).GroupBy(w => w.InvoiceId)
+            .Select(g => new { g.Key, Sum = g.Sum(w => w.Amount) }).ToListAsync(cancellationToken).ConfigureAwait(false))
+        {
+            cash[w.Key] = cash.GetValueOrDefault(w.Key) + w.Sum;
+        }
+
         var accountIds = invoices.Select(i => i.BillingAccountId).Distinct().ToList();
         var payers = await db.Accounts.AsNoTracking().Where(a => accountIds.Contains(a.BillingAccountId))
             .ToDictionaryAsync(a => a.BillingAccountId, a => a.PayerPartyId.ToString(), cancellationToken).ConfigureAwait(false);

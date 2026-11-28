@@ -43,6 +43,15 @@ internal static class EntryTypes
     /// <summary>Allocations reversed (BO-BIL-07): billed receivable LA-02 back from unapplied cash LA-11; the mirror of <see cref="Allocated"/>.</summary>
     public const string AllocationReversed = "ALLOCATION_REVERSED";
 
+    /// <summary>
+    /// Part or all of the open billed receivable of an invoice written off (BO-BIL-13): billed receivable LA-02 against the write-off clearing LA-16
+    /// (or the tolerance clearing LA-19 for a residual within tolerance, rule qualifier <c>TOLERANCE</c>). FIN journalises it (rule set v8).
+    /// </summary>
+    public const string WrittenOff = "WRITTEN_OFF";
+
+    /// <summary>Unapplied cash moved between two billing accounts of one payer (BO-BIL-13): LA-11 of the source through the inter-account clearing LA-20 to LA-11 of the target. FIN journalises nothing (memo).</summary>
+    public const string MoneyTransferred = "MONEY_TRANSFERRED";
+
     /// <summary>A disbursement released to the bank: source payable or clearing (LA-17 for claim payments) → disbursements in transit LA-13 (REQ-BIL-211).</summary>
     public const string DisbursementReleased = "DISBURSEMENT_RELEASED";
 

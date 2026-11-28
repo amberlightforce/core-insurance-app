@@ -1478,10 +1478,7 @@ export interface paths {
         put?: never;
         /**
          * Write-offs
-         * @description Write-offs
-         *
-         *     PRD inputs: items, reason
-         *     PRD outputs: write-off, posting preview
+         * @description Propose the write-off of part or all of the open balance of an invoice (BO-BIL-13, maker-checker). A MANUAL write-off waits for a second person; a residual within the MKT tolerance (bil.writeoff.tolerance) is approved and posted in the same call. Returns the lines the posting will book.
          */
         post: operations["bil.WriteOff.propose"];
         delete?: never;
@@ -1501,10 +1498,7 @@ export interface paths {
         put?: never;
         /**
          * Write-offs
-         * @description Write-offs
-         *
-         *     PRD inputs: items, reason
-         *     PRD outputs: write-off, posting preview
+         * @description Approve or reject a proposed write-off (BO-BIL-13). The decider must not be the proposer and must hold BIL.WRITE_OFF authority over the amount.
          */
         post: operations["bil.WriteOff.decide"];
         delete?: never;
@@ -1524,12 +1518,29 @@ export interface paths {
         put?: never;
         /**
          * Write-offs
-         * @description Write-offs
-         *
-         *     PRD inputs: items, reason
-         *     PRD outputs: write-off, posting preview
+         * @description Post an approved write-off (BO-BIL-13): one WRITTEN_OFF ledger entry (write-off clearing LA-16 against the billed receivable LA-02), the open balance of the invoice items shrinks, the invoice becomes WRITTEN_OFF when nothing stays open. Refused when the period is closed in FIN or the balance shrank meanwhile.
          */
         post: operations["bil.WriteOff.post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bil/v1/write-offs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List write-offs
+         * @description Write-offs of the legal entity, newest first, optionally by state or billing account (BO-BIL-13): the inbox of the maker-checker flow.
+         */
+        get: operations["bil.WriteOff.list"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1547,10 +1558,7 @@ export interface paths {
         put?: never;
         /**
          * Move money
-         * @description Move money
-         *
-         *     PRD inputs: source, target, amounts
-         *     PRD outputs: entries preview
+         * @description Move the unapplied cash of receipts in suspense from one billing account to another account of the same payer (BO-BIL-13): one MONEY_TRANSFERRED entry with a pair of legs through the inter-account transfer clearing LA-20 per receipt; FIN journalises nothing (memo).
          */
         post: operations["bil.Transfer.money"];
         delete?: never;
@@ -3429,61 +3437,97 @@ export interface components {
             /** @description Canonical state of the disbursement now. */
             status: string;
         };
-        /** @description bil.WriteOff.propose request. PRD inputs: "items, reason" */
+        /** @description A write-off of the open balance of one invoice (BO-BIL-13, REQ-BIL-217..220) */
+        WriteOffView: {
+            writeOffId: components["schemas"]["Uuid"];
+            billingAccountId: components["schemas"]["Uuid"];
+            invoiceId: components["schemas"]["Uuid"];
+            invoiceNumber?: string;
+            amount: components["schemas"]["Money"];
+            /**
+             * @description MANUAL needs a second person; TOLERANCE is a small residual written off at once
+             * @enum {string}
+             */
+            kind: "MANUAL" | "TOLERANCE";
+            /** @enum {string} */
+            state: "PROPOSED" | "APPROVED" | "REJECTED" | "POSTED";
+            reasonCode: components["schemas"]["Code"];
+            comment?: string;
+            proposedBy: string;
+            proposedAt: components["schemas"]["Instant"];
+            decidedBy?: string;
+            decidedAt?: components["schemas"]["Instant"];
+            decisionComment?: string;
+            postedAt?: components["schemas"]["Instant"];
+            /** @description The WRITTEN_OFF ledger entry; set once the write-off is posted */
+            ledgerEntryId?: components["schemas"]["Uuid"];
+            recordVersion: number;
+        };
+        /** @description One line of the ledger entry a write-off posts (preview before, the posted lines after) */
+        WriteOffPostingLine: {
+            /** @description Sub-ledger account code (e.g. LA-16) */
+            account: string;
+            /** @enum {string} */
+            side: "DEBIT" | "CREDIT";
+            amount: components["schemas"]["Money"];
+            ruleId: components["schemas"]["Code"];
+        };
+        /** @description bil.WriteOff.propose request (BO-BIL-13): write off part or all of the open balance of an invoice */
         WriteOffProposeRequest: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            invoiceId: components["schemas"]["Uuid"];
+            amount: components["schemas"]["Money"];
+            /** @description Reason, capital letters, digits and underscores (e.g. UNCOLLECTIBLE) */
+            reasonCode: components["schemas"]["Code"];
+            comment?: string;
         };
-        /** @description bil.WriteOff.propose result. PRD outputs: "write-off, posting preview" */
+        /** @description bil.WriteOff.propose result: the write-off and the ledger lines it will post. A residual within the MKT tolerance is approved and posted in the same call. */
         WriteOffProposeResponse: {
-            /** @description PRD: "write-off" */
-            writeOff?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posting preview" */
-            postingPreview?: components["schemas"]["Unspecified"];
+            writeOff: components["schemas"]["WriteOffView"];
+            postingPreview: components["schemas"]["WriteOffPostingLine"][];
         };
-        /** @description bil.WriteOff.decide request. PRD inputs: "items, reason" */
+        /** @description bil.WriteOff.decide request (BO-BIL-13): a second person approves or rejects a proposed write-off */
         WriteOffDecideRequest: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            writeOffId: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            decision: "APPROVE" | "REJECT";
+            comment?: string;
         };
-        /** @description bil.WriteOff.decide result. PRD outputs: "write-off, posting preview" */
+        /** @description bil.WriteOff.decide result */
         WriteOffDecideResponse: {
-            /** @description PRD: "write-off" */
-            writeOff?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posting preview" */
-            postingPreview?: components["schemas"]["Unspecified"];
+            writeOff: components["schemas"]["WriteOffView"];
+            postingPreview: components["schemas"]["WriteOffPostingLine"][];
         };
-        /** @description bil.WriteOff.post request. PRD inputs: "items, reason" */
+        /** @description bil.WriteOff.post request (BO-BIL-13): post an approved write-off */
         WriteOffPostRequest: {
-            /** @description PRD: "items" */
-            items?: components["schemas"]["Unspecified"][];
-            /** @description PRD: "reason" */
-            reason?: components["schemas"]["Unspecified"];
+            writeOffId: components["schemas"]["Uuid"];
         };
-        /** @description bil.WriteOff.post result. PRD outputs: "write-off, posting preview" */
+        /** @description bil.WriteOff.post result: the posted write-off and the lines of its ledger entry */
         WriteOffPostResponse: {
-            /** @description PRD: "write-off" */
-            writeOff?: components["schemas"]["Unspecified"];
-            /** @description PRD: "posting preview" */
-            postingPreview?: components["schemas"]["Unspecified"];
+            writeOff: components["schemas"]["WriteOffView"];
+            postingPreview: components["schemas"]["WriteOffPostingLine"][];
+            ledgerEntryId: components["schemas"]["Uuid"];
         };
-        /** @description bil.Transfer.money request. PRD inputs: "source, target, amounts" */
+        /** @description bil.WriteOff.list result: write-offs of the legal entity, newest first */
+        WriteOffListResponse: {
+            items: components["schemas"]["WriteOffView"][];
+        };
+        /** @description bil.Transfer.money request (BO-BIL-13): move the unapplied cash of receipts in suspense from one billing account to another account of the same payer */
         TransferMoneyRequest: {
-            /** @description PRD: "source" */
-            source?: components["schemas"]["Unspecified"];
-            /** @description PRD: "target" */
-            target?: components["schemas"]["Unspecified"];
-            /** @description PRD: "amounts" */
-            amounts?: components["schemas"]["Money"][];
+            sourceBillingAccountId: components["schemas"]["Uuid"];
+            targetBillingAccountId: components["schemas"]["Uuid"];
+            receiptIds: components["schemas"]["Uuid"][];
+            comment?: string;
         };
-        /** @description bil.Transfer.money result. PRD outputs: "entries preview" */
+        /** @description One receipt moved by bil.Transfer.money */
+        MoneyTransferLine: {
+            receiptId: components["schemas"]["Uuid"];
+            amount: components["schemas"]["Money"];
+        };
+        /** @description bil.Transfer.money result: the receipts moved and the MONEY_TRANSFERRED ledger entry (a pair of legs through the inter-account transfer clearing LA-20 per receipt) */
         TransferMoneyResponse: {
-            /** @description PRD: "entries preview" */
-            entriesPreview?: components["schemas"]["Unspecified"];
+            transfers: components["schemas"]["MoneyTransferLine"][];
+            total: components["schemas"]["Money"];
+            ledgerEntryId: components["schemas"]["Uuid"];
         };
         /** @description bil.Commission.calculations result. PRD outputs: "lines, statements, run" */
         CommissionCalculationsItem: {
@@ -7261,6 +7305,42 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["UnprocessableContent"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    "bil.WriteOff.list": {
+        parameters: {
+            query?: {
+                state?: "PROPOSED" | "APPROVED" | "REJECTED" | "POSTED";
+                billingAccountId?: components["schemas"]["Uuid"];
+                limit?: number;
+            };
+            header?: {
+                /**
+                 * @description W3C Trace Context on every call (contract §3.5.6). The trace id is technical only and never a business key
+                 *     (D5, D-CON-01). If absent the gateway starts a new trace; every response and Problem Details carries the trace id.
+                 */
+                traceparent?: components["parameters"]["Traceparent"];
+                /** @description UI language for localised titles, messages and bilingual reference labels (`el` or `en`, R-101, REQ-MKT-337). */
+                "Accept-Language"?: components["parameters"]["AcceptLanguage"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WriteOffListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             500: components["responses"]["InternalError"];
         };
     };

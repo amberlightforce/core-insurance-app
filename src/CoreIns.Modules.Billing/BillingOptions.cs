@@ -71,6 +71,13 @@ internal sealed class BillingOptions
     [Range(typeof(decimal), "0", "100000")]
     public decimal DelinquencyTolerance { get; set; } = 5.00m;
 
+    /// <summary>
+    /// ILLUSTRATIVE (BO-BIL-13; fallback of MKT key <c>bil.writeoff.tolerance</c>): a residual up to this amount, being the whole remaining
+    /// balance of an invoice, is written off at once without a second person. The PRDs name no value; 0 switches the automatic write-off off.
+    /// </summary>
+    [Range(typeof(decimal), "0", "100000")]
+    public decimal WriteOffTolerance { get; set; } = 1.00m;
+
     /// <summary>Whether the worker role runs the scheduled overdue sweep (NX-HD-01). Switch off to pause case opening.</summary>
     public bool DelinquencySweepEnabled { get; set; } = true;
 
