@@ -5881,15 +5881,68 @@ paths:
           $ref: common.yaml#/components/responses/UnprocessableContent
         '500':
           $ref: common.yaml#/components/responses/InternalError
+  /api/ri/v1/settlements:
+    get:
+      operationId: ri.Settlement.list
+      summary: Settlements
+      description: |-
+        Settlements, newest first (BO-RI-16)
+      tags:
+      - Settlement
+      x-requirement:
+      - REQ-RI-189..REQ-RI-196
+      x-wave: W7
+      x-work-packages:
+      - W7-RI-02
+      x-status: full
+      x-maturity: pre-release
+      x-io-shared: 2
+      x-operation-kind: query
+      x-idempotency: none
+      x-dry-run: false
+      x-dry-run-note: 'Query'
+      x-exposure:
+      - ui
+      x-permission: ri.Settlement.list
+      x-error-codes: []
+      x-source:
+      - PRD-08 §9.1 l.1526
+      parameters:
+      - $ref: common.yaml#/components/parameters/Traceparent
+      - $ref: common.yaml#/components/parameters/AcceptLanguage
+      - $ref: common.yaml#/components/parameters/Limit
+      - name: reinsurerPartyId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        description: PROPOSED, APPROVED, RELEASED, RECORDED or SUPERSEDED
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementListResponse'
+        '400':
+          $ref: common.yaml#/components/responses/BadRequest
+        '401':
+          $ref: common.yaml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yaml#/components/responses/Forbidden
+        '500':
+          $ref: common.yaml#/components/responses/InternalError
   /api/ri/v1/settlements/propose:
     post:
       operationId: ri.Settlement.propose
-      summary: Settlements
+      summary: Propose a settlement
       description: |-
-        Settlements
-
-        PRD inputs: counterparty, statements, items
-        PRD outputs: settlement
+        BO-RI-16: net the balance of one reinsurer to a settlement proposal (D-CON-13)
       tags:
       - Settlement
       x-requirement:
@@ -5902,8 +5955,8 @@ paths:
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Settlement lifecycle writes'
       x-exposure:
       - ui
       x-permission: ri.Settlement.propose
@@ -5912,9 +5965,9 @@ paths:
       x-authority-source:
       - PRD-08 l.700
       x-error-codes:
-      - code: RI-ERR-SANCTIONS-HOLD
-        status: 422
       - code: RI-ERR-AUTHORITY
+        status: 403
+      - code: RI-ERR-SOD
         status: 403
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -5954,12 +6007,9 @@ paths:
   /api/ri/v1/settlements/approve:
     post:
       operationId: ri.Settlement.approve
-      summary: Settlements
+      summary: Approve a settlement
       description: |-
-        Settlements
-
-        PRD inputs: counterparty, statements, items
-        PRD outputs: settlement
+        BO-RI-16: approve a proposed settlement under RI.SETTLEMENT (maker is not checker, amount authority)
       tags:
       - Settlement
       x-requirement:
@@ -5972,8 +6022,8 @@ paths:
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Settlement lifecycle writes'
       x-exposure:
       - ui
       x-permission: ri.Settlement.approve
@@ -5982,9 +6032,9 @@ paths:
       x-authority-source:
       - PRD-08 l.700
       x-error-codes:
-      - code: RI-ERR-SANCTIONS-HOLD
-        status: 422
       - code: RI-ERR-AUTHORITY
+        status: 403
+      - code: RI-ERR-SOD
         status: 403
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -6024,12 +6074,9 @@ paths:
   /api/ri/v1/settlements/release:
     post:
       operationId: ri.Settlement.release
-      summary: Settlements
+      summary: Release a settlement
       description: |-
-        Settlements
-
-        PRD inputs: counterparty, statements, items
-        PRD outputs: settlement
+        BO-RI-16: release an approved settlement once, posting the movement to the technical account
       tags:
       - Settlement
       x-requirement:
@@ -6042,8 +6089,8 @@ paths:
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Settlement lifecycle writes'
       x-exposure:
       - ui
       x-permission: ri.Settlement.release
@@ -6052,9 +6099,9 @@ paths:
       x-authority-source:
       - PRD-08 l.700
       x-error-codes:
-      - code: RI-ERR-SANCTIONS-HOLD
-        status: 422
       - code: RI-ERR-AUTHORITY
+        status: 403
+      - code: RI-ERR-SOD
         status: 403
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -6094,12 +6141,9 @@ paths:
   /api/ri/v1/settlements/record-manual:
     post:
       operationId: ri.Settlement.recordManual
-      summary: Settlements
+      summary: Record a manual settlement
       description: |-
-        Settlements
-
-        PRD inputs: counterparty, statements, items
-        PRD outputs: settlement
+        BO-RI-16: record an off-system movement of an approved settlement with its evidence
       tags:
       - Settlement
       x-requirement:
@@ -6112,8 +6156,8 @@ paths:
       x-io-shared: 4
       x-operation-kind: command
       x-idempotency: required
-      x-dry-run: true
-      x-dry-run-note: 'PRD: Key; DR'
+      x-dry-run: false
+      x-dry-run-note: 'Settlement lifecycle writes'
       x-exposure:
       - ui
       x-permission: ri.Settlement.recordManual
@@ -6122,9 +6166,9 @@ paths:
       x-authority-source:
       - PRD-08 l.700
       x-error-codes:
-      - code: RI-ERR-SANCTIONS-HOLD
-        status: 422
       - code: RI-ERR-AUTHORITY
+        status: 403
+      - code: RI-ERR-SOD
         status: 403
       - code: RI-ERR-IDEMPOTENCY-MISMATCH
         note: contract §3.5.3 (replay with a different payload)
@@ -11402,94 +11446,205 @@ components:
           $ref: '#/components/schemas/CashCallView'
       required:
       - cashCall
+    SettlementView:
+      type: object
+      description: A settlement of the net balance of one reinsurer, proposed, approved and then released or recorded off-system (BO-RI-16)
+      properties:
+        settlementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        currency:
+          $ref: ../events/common.schema.json#/$defs/Text
+        period:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: The statement period the net runs through (yyyy-MM)
+        statementId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        statementClosing:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Money
+          - type: 'null'
+          description: Closing balance of the statement of that period
+        net:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Signed balance. Positive is payable to the reinsurer, negative is receivable from the reinsurer
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Absolute value of the net, the amount that moves
+        direction:
+          type: string
+          enum:
+          - PAY
+          - RECEIVE
+        status:
+          type: string
+          enum:
+          - PROPOSED
+          - APPROVED
+          - RELEASED
+          - RECORDED
+          - SUPERSEDED
+        proposedAt:
+          $ref: ../events/common.schema.json#/$defs/Instant
+        proposedBy:
+          $ref: ../events/common.schema.json#/$defs/Text
+        approvedAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        approvedBy:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        settledAt:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Instant
+          - type: 'null'
+        settledBy:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        valueDate:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+        bankReference:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        evidenceRef:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+        itemId:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Uuid
+          - type: 'null'
+        bilReference:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: Reference of the BIL disbursement or receipt; a placeholder until BIL serves the RI_SETTLEMENT source
+      required:
+      - settlementId
+      - reinsurerPartyId
+      - currency
+      - period
+      - net
+      - amount
+      - direction
+      - status
+      - proposedAt
+      - proposedBy
+    SettlementListResponse:
+      type: object
+      description: ri.Settlement.list result, newest first
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SettlementView'
+      required:
+      - items
     SettlementProposeRequest:
       type: object
-      description: 'ri.Settlement.propose request. PRD inputs: "counterparty, statements, items"'
+      description: ri.Settlement.propose request. Nets the balance of the reinsurer through the period; one live proposal per reinsurer and currency.
       properties:
-        counterparty:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "counterparty"'
-        statements:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statements"'
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
+        reinsurerPartyId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        currency:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: EUR, the only currency settled for now
+        period:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+          description: The month of today when omitted (yyyy-MM)
+      required:
+      - reinsurerPartyId
+      - currency
     SettlementProposeResponse:
       type: object
-      description: 'ri.Settlement.propose result. PRD outputs: "settlement"'
+      description: ri.Settlement.propose result
       properties:
         settlement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "settlement"'
+          $ref: '#/components/schemas/SettlementView'
+      required:
+      - settlement
     SettlementApproveRequest:
       type: object
-      description: 'ri.Settlement.approve request. PRD inputs: "counterparty, statements, items"'
+      description: ri.Settlement.approve request. Maker-checker (the proposer cannot approve) under the RI.SETTLEMENT amount authority.
       properties:
-        counterparty:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "counterparty"'
-        statements:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statements"'
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
+        settlementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        comment:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/Text
+          - type: 'null'
+      required:
+      - settlementId
     SettlementApproveResponse:
       type: object
-      description: 'ri.Settlement.approve result. PRD outputs: "settlement"'
+      description: ri.Settlement.approve result
       properties:
         settlement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "settlement"'
+          $ref: '#/components/schemas/SettlementView'
+      required:
+      - settlement
     SettlementReleaseRequest:
       type: object
-      description: 'ri.Settlement.release request. PRD inputs: "counterparty, statements, items"'
+      description: ri.Settlement.release request. An approved settlement is released once, when the balance still equals the net.
       properties:
-        counterparty:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "counterparty"'
-        statements:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statements"'
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
+        settlementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        valueDate:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+      required:
+      - settlementId
     SettlementReleaseResponse:
       type: object
-      description: 'ri.Settlement.release result. PRD outputs: "settlement"'
+      description: ri.Settlement.release result
       properties:
         settlement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "settlement"'
+          $ref: '#/components/schemas/SettlementView'
+      required:
+      - settlement
     SettlementRecordManualRequest:
       type: object
-      description: 'ri.Settlement.recordManual request. PRD inputs: "counterparty, statements, items"'
+      description: ri.Settlement.recordManual request. Records the off-system movement of an approved settlement; the evidence and the bank reference are mandatory.
       properties:
-        counterparty:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "counterparty"'
-        statements:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "statements"'
-        items:
-          type: array
-          items:
-            $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "items"'
+        settlementId:
+          $ref: ../events/common.schema.json#/$defs/Uuid
+        amount:
+          $ref: ../events/common.schema.json#/$defs/Money
+          description: Must equal the amount of the settlement
+        bankReference:
+          $ref: ../events/common.schema.json#/$defs/Text
+        evidenceRef:
+          $ref: ../events/common.schema.json#/$defs/Text
+          description: Reference of the evidence document (bank advice, SWIFT message)
+        valueDate:
+          oneOf:
+          - $ref: ../events/common.schema.json#/$defs/LocalDate
+          - type: 'null'
+      required:
+      - settlementId
+      - amount
+      - bankReference
+      - evidenceRef
     SettlementRecordManualResponse:
       type: object
-      description: 'ri.Settlement.recordManual result. PRD outputs: "settlement"'
+      description: ri.Settlement.recordManual result
       properties:
         settlement:
-          $ref: common.yaml#/components/schemas/Unspecified
-          description: 'PRD: "settlement"'
+          $ref: '#/components/schemas/SettlementView'
+      required:
+      - settlement
     CollateralCreateRequest:
       type: object
       description: 'ri.Collateral.create request. PRD inputs: "instrument data"'

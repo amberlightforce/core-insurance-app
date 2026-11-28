@@ -69,6 +69,8 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
 
     public DbSet<CashCallReceiptRow> CashCallReceipts => Set<CashCallReceiptRow>();
 
+    public DbSet<SettlementRow> Settlements => Set<SettlementRow>();
+
     public DbSet<ProgrammeRow> Programmes => Set<ProgrammeRow>();
 
     public DbSet<SecurityRuleRow> SecurityRules => Set<SecurityRuleRow>();
@@ -97,6 +99,7 @@ internal sealed class ReinsuranceDbContext(DbContextOptions<ReinsuranceDbContext
         AccountItemModel.Configure(modelBuilder);
         StatementModel.Configure(modelBuilder);
         CashCallModel.Configure(modelBuilder);
+        SettlementModel.Configure(modelBuilder);
         ProgrammeModel.Configure(modelBuilder);
         SecurityModel.Configure(modelBuilder);
         ConfigureOccurrences(modelBuilder);

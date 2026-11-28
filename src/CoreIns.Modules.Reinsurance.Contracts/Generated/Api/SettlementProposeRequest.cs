@@ -4,31 +4,19 @@
 
 namespace CoreIns.Modules.Reinsurance.Contracts.Api;
 
-/// <summary>ri.Settlement.propose request. PRD inputs: "counterparty, statements, items"</summary>
+/// <summary>ri.Settlement.propose request. Nets the balance of the reinsurer through the period; one live proposal per reinsurer and currency.</summary>
 [global::System.CodeDom.Compiler.GeneratedCode("CoreIns.ContractGen", "1.0")]
 public sealed record SettlementProposeRequest
 {
-    /// <summary>PRD: "counterparty"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("counterparty")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Counterparty { get; init; }
+    /// <summary>Contract member 'reinsurerPartyId'.</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("reinsurerPartyId")]
+    public required global::CoreIns.SharedKernel.Identifiers.PartyId ReinsurerPartyId { get; init; }
 
-    /// <summary>PRD: "statements"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("statements")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Text.Json.JsonElement? Statements { get; init; }
+    /// <summary>EUR, the only currency settled for now</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("currency")]
+    public required string Currency { get; init; }
 
-    /// <summary>PRD: "items"</summary>
-    /// <remarks>
-    /// <para>Unspecified: the PRD row gives only a name; the owning work package types it (D-API-04/06).</para>
-    /// </remarks>
-    [global::System.Text.Json.Serialization.JsonPropertyName("items")]
-    [global::System.Text.Json.Serialization.JsonIgnore(Condition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public global::System.Collections.Generic.IReadOnlyList<global::System.Text.Json.JsonElement>? Items { get; init; }
+    /// <summary>The month of today when omitted (yyyy-MM)</summary>
+    [global::System.Text.Json.Serialization.JsonPropertyName("period")]
+    public string? Period { get; init; }
 }

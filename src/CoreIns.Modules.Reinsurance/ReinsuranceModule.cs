@@ -81,6 +81,8 @@ public static class ReinsuranceModule
                 // BO-RI-15: a cash call moves through its workflow and its lines count what was received (UPDATE; the call is sealed by a trigger), receipts are append-only.
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.cash_call, {Schema}.cash_call_line TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.cash_call_receipt TO {appRole}",
+                // BO-RI-16: a settlement moves through approval and release (UPDATE; the net is sealed by a trigger, rows are never deleted).
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.settlement TO {appRole}",
                 // BO-RI-01: programmes and their versions move (UPDATE; a trigger seals identity and, past DRAFT, the content); the layers of a Draft are replaced (DELETE, guarded).
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.programme, {Schema}.programme_version TO {appRole}",
                 $"GRANT SELECT, INSERT, DELETE ON {Schema}.programme_layer TO {appRole}",
@@ -243,6 +245,21 @@ public static class ReinsuranceModule
         services.AddScoped<IValidator<SetLineTable>, SetLineTableValidator>();
         services.AddCommandAuditor<SetLineTable, LineTableSetResponse, SetLineTableAuditor>();
         services.AddCommand<SetLineTable, LineTableSetResponse, SetLineTableHandler>(CommandDescriptor.For("ri.LineTable.set") with { SupportsDryRun = true });
+
+        // BO-RI-16: manual settlement (propose the net, approve under RI.SETTLEMENT, release or record off-system).
+        services.AddScoped<SettlementReader>();
+        services.AddScoped<IValidator<ProposeSettlement>, ProposeSettlementValidator>();
+        services.AddCommandAuditor<ProposeSettlement, SettlementProposeResponse, ProposeSettlementAuditor>();
+        services.AddCommand<ProposeSettlement, SettlementProposeResponse, ProposeSettlementHandler>(CommandDescriptor.For("ri.Settlement.propose"));
+        services.AddScoped<IValidator<ApproveSettlement>, ApproveSettlementValidator>();
+        services.AddCommandAuditor<ApproveSettlement, SettlementApproveResponse, ApproveSettlementAuditor>();
+        services.AddCommand<ApproveSettlement, SettlementApproveResponse, ApproveSettlementHandler>(CommandDescriptor.For("ri.Settlement.approve"));
+        services.AddScoped<IValidator<ReleaseSettlement>, ReleaseSettlementValidator>();
+        services.AddCommandAuditor<ReleaseSettlement, SettlementReleaseResponse, ReleaseSettlementAuditor>();
+        services.AddCommand<ReleaseSettlement, SettlementReleaseResponse, ReleaseSettlementHandler>(CommandDescriptor.For("ri.Settlement.release"));
+        services.AddScoped<IValidator<RecordManualSettlement>, RecordManualSettlementValidator>();
+        services.AddCommandAuditor<RecordManualSettlement, SettlementRecordManualResponse, RecordManualSettlementAuditor>();
+        services.AddCommand<RecordManualSettlement, SettlementRecordManualResponse, RecordManualSettlementHandler>(CommandDescriptor.For("ri.Settlement.recordManual"));
 
         // The scanner's per-contract command (internal, no HTTP; exactly-once by the row lock and the state it finds).
         services.AddCommandAuditor<ApplyDueLifecycle, string, ApplyDueLifecycleAuditor>();
