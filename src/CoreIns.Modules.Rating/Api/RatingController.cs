@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using CoreIns.Modules.Rating.Contracts;
 using CoreIns.Modules.Rating.Contracts.Api;
+using CoreIns.Modules.Rating.Services;
 using CoreIns.Platform.Contracts;
 using CoreIns.Platform.Errors;
 using CoreIns.Platform.Http;
@@ -16,6 +17,10 @@ internal static class RatingPermissions
 {
     public const string Rate = "rat.Rate.rate";
     public const string WorksheetGet = "rat.Worksheet.get";
+    public const string WorksheetExplain = "rat.Worksheet.explain";
+    public const string WorksheetReperform = "rat.Worksheet.reperform";
+    public const string WorksheetExport = "rat.Worksheet.export";
+    public const string WorksheetAttach = "rat.Worksheet.attach";
     public const string ArtifactResolve = "rat.RatingArtifact.resolve";
 }
 
@@ -30,6 +35,34 @@ internal sealed class RatingController : ControllerBase
     [Authorize(Policy = RatingPermissions.Rate)]
     public async Task<IResult> RateAsync([FromBody] RateRateRequest request, [FromServices] IRatingRateService service, CancellationToken cancellationToken) =>
         await RunAsync(() => service.RateAsync(request, cancellationToken)).ConfigureAwait(false);
+
+    /// <summary>rat.Worksheet.explain: plain-language step text of a stored worksheet (BO-RAT-02).</summary>
+    [HttpGet("worksheets/explain")]
+    [Authorize(Policy = RatingPermissions.WorksheetExplain)]
+    public async Task<IResult> ExplainWorksheetAsync(
+        [FromQuery] string? worksheetId, [FromQuery] string? language, [FromServices] IRatingWorksheetService service, CancellationToken cancellationToken) =>
+        await RunAsync(() => service.ExplainAsync(worksheetId ?? string.Empty, language, cancellationToken)).ConfigureAwait(false);
+
+    /// <summary>rat.Worksheet.reperform: re-rate under the pinned hashes and report drift (a query sent as POST).</summary>
+    [HttpPost("worksheets/reperform")]
+    [SkipIdempotency]
+    [Authorize(Policy = RatingPermissions.WorksheetReperform)]
+    public async Task<IResult> ReperformWorksheetAsync([FromBody] WorksheetReperformRequest request, [FromServices] RatingWorksheetService service, CancellationToken cancellationToken) =>
+        await RunAsync(() => service.ReperformAsync(request, cancellationToken)).ConfigureAwait(false);
+
+    /// <summary>rat.Worksheet.export: CSV or JSON document of a stored worksheet (a query sent as POST).</summary>
+    [HttpPost("worksheets/export")]
+    [SkipIdempotency]
+    [Authorize(Policy = RatingPermissions.WorksheetExport)]
+    public async Task<IResult> ExportWorksheetAsync([FromBody] WorksheetExportRequest request, [FromServices] RatingWorksheetService service, CancellationToken cancellationToken) =>
+        await RunAsync(() => service.ExportAsync(request, cancellationToken)).ConfigureAwait(false);
+
+    /// <summary>rat.Worksheet.attach: link worksheets to a policy transaction (idempotent on the Idempotency-Key).</summary>
+    [HttpPost("worksheets/attach")]
+    [Authorize(Policy = RatingPermissions.WorksheetAttach)]
+    public async Task<IResult> AttachWorksheetsAsync(
+        [FromBody] WorksheetAttachRequest request, [FromServices] IRatingWorksheetService service, CancellationToken cancellationToken) =>
+        await RunAsync(() => service.AttachAsync(request, CommandOptions.New(), cancellationToken)).ConfigureAwait(false);
 
     /// <summary>rat.Worksheet.get.</summary>
     [HttpGet("worksheets/{id}")]
