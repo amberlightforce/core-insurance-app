@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Hosting;
 using System.Text.Json.Nodes;
 using CoreIns.Modules.Market.Contracts.Api;
 using CoreIns.Modules.Market.Contracts.Events;
@@ -49,7 +50,7 @@ internal sealed record DecidePackActivation(PackActivationDecideRequest Request)
 
 /// <summary>Every operation joins the command transaction and serialises the global manifest before loading entity facts.</summary>
 internal sealed class PackActivationEngine(MarketDbContext db, DbSession session, RequestContext context, IClock clock,
-    IPlatformApprovalService approvals, IEventPublisher events)
+    IPlatformApprovalService approvals, IEventPublisher events, IHostEnvironment environment)
 {
     private async Task LockAsync(CancellationToken ct) => await ConfigStateWriter.LockAsync(session.Connection,
         session.Transaction ?? throw new InvalidOperationException("Activation requires a command transaction."), ct).ConfigureAwait(false);
@@ -81,11 +82,25 @@ internal sealed class PackActivationEngine(MarketDbContext db, DbSession session
         {
             throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "This slice supports one active legal entity per country pack in a stamp."));
         }
-        var target = await db.PackVersions.AsNoTracking().SingleOrDefaultAsync(v => v.PackId == pack && v.Version == version && v.Status == "Published", ct).ConfigureAwait(false)
+        var target = await db.PackVersions.AsNoTracking().SingleOrDefaultAsync(v => v.PackId == pack && v.Version == version, ct).ConfigureAwait(false)
             ?? throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "The target version is not Published."));
+        if (await PackLifecycle.StatusAsync(db, pack, version, ct).ConfigureAwait(false) != PackLifecycle.Published)
+        {
+            throw new DomainException(ActivationSupport.Refuse("PACK-VALIDATION", "The target version is not Published."));
+        }
+
         if (target.Country != current.Country || PackVersionContent.DigestOf(PackVersionContent.FromJson(JsonNode.Parse(target.Values))).ToString() != target.ContentDigest.Trim())
         {
             throw new DomainException(ActivationSupport.Refuse("STALE", "The target pack failed its integrity check."));
+        }
+        if (environment.IsProduction())
+        {
+            // NX-EC-12: Production activation fails closed on any value that is not Settled, and on a synthetic pack.
+            var settlement = PackSettlement.Assess(pack, PackVersionContent.FromJson(JsonNode.Parse(target.Values)));
+            if (!settlement.ProductionEligible)
+            {
+                throw new DomainException(ActivationSupport.Refuse("PACK-NOT-SETTLED", "The target version holds values that are not Settled, or is synthetic; Production activation is refused."));
+            }
         }
         var source = await db.PackVersions.AsNoTracking().SingleAsync(v => v.PackId == pack && v.Version == current.Version, ct).ConfigureAwait(false);
         if (source.ContentDigest.Trim() != current.Digest.ToString())

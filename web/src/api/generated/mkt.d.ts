@@ -1514,19 +1514,62 @@ export interface components {
             /** @description Activations and rollbacks of the pack, newest first */
             activationHistory: components["schemas"]["PackActivationView"][];
         };
-        /** @description mkt.Pack.certify request. PRD inputs: "per operation" */
-        PackCertifyRequest: Record<string, never>;
-        /** @description mkt.Pack.certify result. PRD outputs: "pack/version/activation" */
-        PackCertifyResponse: {
-            /** @description PRD: "pack/version/activation" */
-            packVersionActivation?: components["schemas"]["Unspecified"];
+        /** @description mkt.Pack.certify request. Moves a Built, Signed or Rejected version to Certified (or Rejected when the golden suite fails). Attaches the golden-suite result. Unverified values block certification for PRODUCTION; with allowUnverified the version certifies for NON_PRODUCTION only and is never production-eligible. */
+        PackCertifyRequest: {
+            pack: components["schemas"]["Code"];
+            version: components["schemas"]["VersionLabel"];
+            /**
+             * @description Where the version is meant to run. PRODUCTION refuses a version with any value that is not Settled or NotRegulatory (fail closed, NX-EC-12), and the synthetic CY pack.
+             * @enum {string}
+             */
+            targetEnvironment: "PRODUCTION" | "NON_PRODUCTION";
+            goldenSuite: components["schemas"]["PackGoldenSuiteResult"];
+            /** @description Opt in to certify a version that holds values which are not Settled. Refused for PRODUCTION. Default false. */
+            allowUnverified?: boolean;
+            /** @description Why (20 to 128 characters; carried into the audit). No personal data. */
+            reason: string;
         };
-        /** @description mkt.Pack.publish request. PRD inputs: "per operation" */
-        PackPublishRequest: Record<string, never>;
-        /** @description mkt.Pack.publish result. PRD outputs: "pack/version/activation" */
+        /** @description The golden-suite run attached to a certification (produced by the CI run of the pack tests). */
+        PackGoldenSuiteResult: {
+            /** @description Suite name or run reference */
+            suite: string;
+            /** @description Cases run */
+            total: number;
+            /** @description Cases passed */
+            passed: number;
+            /** @description Names of the failed cases */
+            failedCases?: string[];
+        };
+        /** @description mkt.Pack.certify result */
+        PackCertifyResponse: {
+            pack: components["schemas"]["Code"];
+            version: components["schemas"]["VersionLabel"];
+            status: components["schemas"]["PackVersionStatus"];
+            /** @description True when every value is Settled or NotRegulatory and the pack is not synthetic */
+            productionEligible: boolean;
+            /** @description Keys whose legal status is not Settled or NotRegulatory */
+            unverifiedKeys: string[];
+            goldenSuite: components["schemas"]["PackGoldenSuiteResult"];
+        };
+        /** @description mkt.Pack.publish request. Moves a Certified version to Published. PRODUCTION requires a production-eligible certification. */
+        PackPublishRequest: {
+            pack: components["schemas"]["Code"];
+            version: components["schemas"]["VersionLabel"];
+            /**
+             * @description Where the version is meant to run. PRODUCTION refuses a version with any value that is not Settled or NotRegulatory (fail closed, NX-EC-12), and the synthetic CY pack.
+             * @enum {string}
+             */
+            targetEnvironment: "PRODUCTION" | "NON_PRODUCTION";
+            /** @description Why (20 to 128 characters; carried into the audit). No personal data. */
+            reason: string;
+        };
+        /** @description mkt.Pack.publish result */
         PackPublishResponse: {
-            /** @description PRD: "pack/version/activation" */
-            packVersionActivation?: components["schemas"]["Unspecified"];
+            pack: components["schemas"]["Code"];
+            version: components["schemas"]["VersionLabel"];
+            status: components["schemas"]["PackVersionStatus"];
+            productionEligible: boolean;
+            publishedAt: components["schemas"]["Instant"];
         };
         /** @description mkt.Pack.scheduleActivation request (D-SL5-08). The activation takes effect at the checker's decision instant (immediate instant only in slice 5). */
         PackScheduleActivationRequest: {
@@ -1576,12 +1619,18 @@ export interface components {
             /** @description PRD: "pack/version/activation" (superseded by the typed members above) */
             packVersionActivation?: components["schemas"]["Unspecified"];
         };
-        /** @description mkt.Pack.deprecate request. PRD inputs: "per operation" */
-        PackDeprecateRequest: Record<string, never>;
-        /** @description mkt.Pack.deprecate result. PRD outputs: "pack/version/activation" */
+        /** @description mkt.Pack.deprecate request. Moves a Published version to Deprecated; refused while an activation of the version is live or pending. */
+        PackDeprecateRequest: {
+            pack: components["schemas"]["Code"];
+            version: components["schemas"]["VersionLabel"];
+            /** @description Why (20 to 128 characters; carried into the audit). No personal data. */
+            reason: string;
+        };
+        /** @description mkt.Pack.deprecate result */
         PackDeprecateResponse: {
-            /** @description PRD: "pack/version/activation" */
-            packVersionActivation?: components["schemas"]["Unspecified"];
+            pack: components["schemas"]["Code"];
+            version: components["schemas"]["VersionLabel"];
+            status: components["schemas"]["PackVersionStatus"];
         };
         /** @description mkt.Capability.get result. PRD outputs: "state, source" */
         CapabilityGetResponse: {

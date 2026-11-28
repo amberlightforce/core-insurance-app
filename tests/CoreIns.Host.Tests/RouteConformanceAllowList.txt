@@ -144,10 +144,6 @@ CONTRACT_NOT_SERVED POST /api/bil/v1/intermediary-collections/report-file
 CONTRACT_NOT_SERVED POST /api/bil/v1/invoices/dispute
 CONTRACT_NOT_SERVED POST /api/bil/v1/invoices/send-copy
 CONTRACT_NOT_SERVED POST /api/bil/v1/reconciliation/fin
-CONTRACT_NOT_SERVED POST /api/bil/v1/transfers/money
-CONTRACT_NOT_SERVED POST /api/bil/v1/write-offs/decide
-CONTRACT_NOT_SERVED POST /api/bil/v1/write-offs/post
-CONTRACT_NOT_SERVED POST /api/bil/v1/write-offs/propose
 CONTRACT_NOT_SERVED POST /api/chn/v1/agent-logs/export
 CONTRACT_NOT_SERVED POST /api/chn/v1/aggregators/quote
 CONTRACT_NOT_SERVED POST /api/chn/v1/api-products
@@ -294,9 +290,6 @@ CONTRACT_NOT_SERVED POST /api/fin/v1/posting-rules/test
 CONTRACT_NOT_SERVED POST /api/mkt/v1/cross-borders/check
 CONTRACT_NOT_SERVED POST /api/mkt/v1/currencies/convert-fixed
 CONTRACT_NOT_SERVED POST /api/mkt/v1/l10n-ui-languages/resolve
-CONTRACT_NOT_SERVED POST /api/mkt/v1/packs/certify
-CONTRACT_NOT_SERVED POST /api/mkt/v1/packs/deprecate
-CONTRACT_NOT_SERVED POST /api/mkt/v1/packs/publish
 CONTRACT_NOT_SERVED POST /api/mkt/v1/risk-locations/resolve
 CONTRACT_NOT_SERVED POST /api/mkt/v1/spis/bind
 CONTRACT_NOT_SERVED POST /api/mkt/v1/spis/suspend

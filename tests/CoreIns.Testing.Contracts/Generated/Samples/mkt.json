@@ -1015,11 +1015,47 @@
       "activeSince": "2026-10-07T09:00:00Z",
       "configurationHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
     },
+    "PackCertifyRequest": {
+      "pack": "SAMPLE_CODE",
+      "version": "1",
+      "targetEnvironment": "PRODUCTION",
+      "goldenSuite": {
+        "suite": "sample",
+        "total": 1,
+        "passed": 1,
+        "failedCases": [
+          "sample"
+        ]
+      },
+      "allowUnverified": true,
+      "reason": "samplexxxxxxxxxxxxxx"
+    },
     "PackCertifyResponse": {
-      "packVersionActivation": "unspecified"
+      "pack": "SAMPLE_CODE",
+      "version": "1",
+      "status": "BUILT",
+      "productionEligible": true,
+      "unverifiedKeys": [
+        "sample"
+      ],
+      "goldenSuite": {
+        "suite": "sample",
+        "total": 1,
+        "passed": 1,
+        "failedCases": [
+          "sample"
+        ]
+      }
+    },
+    "PackDeprecateRequest": {
+      "pack": "SAMPLE_CODE",
+      "version": "1",
+      "reason": "samplexxxxxxxxxxxxxx"
     },
     "PackDeprecateResponse": {
-      "packVersionActivation": "unspecified"
+      "pack": "SAMPLE_CODE",
+      "version": "1",
+      "status": "BUILT"
     },
     "PackGetResponse": {
       "packId": "019274ae-5551-7bb9-8340-ee3678666a24",
@@ -1059,6 +1095,14 @@
           "activatedAt": "2026-10-07T09:00:00Z",
           "resultingHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
         }
+      ]
+    },
+    "PackGoldenSuiteResult": {
+      "suite": "sample",
+      "total": 1,
+      "passed": 1,
+      "failedCases": [
+        "sample"
       ]
     },
     "PackListItem": {
@@ -1113,8 +1157,18 @@
       "nextCursor": "sample",
       "limit": 1
     },
+    "PackPublishRequest": {
+      "pack": "SAMPLE_CODE",
+      "version": "1",
+      "targetEnvironment": "PRODUCTION",
+      "reason": "samplexxxxxxxxxxxxxx"
+    },
     "PackPublishResponse": {
-      "packVersionActivation": "unspecified"
+      "pack": "SAMPLE_CODE",
+      "version": "1",
+      "status": "BUILT",
+      "productionEligible": true,
+      "publishedAt": "2026-10-07T09:00:00Z"
     },
     "PackRollbackRequest": {
       "pack": "SAMPLE_CODE",

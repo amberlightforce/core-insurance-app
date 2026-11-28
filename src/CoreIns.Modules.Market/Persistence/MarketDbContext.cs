@@ -17,6 +17,8 @@ internal sealed class MarketDbContext(DbContextOptions<MarketDbContext> options)
 
     public DbSet<PackVersionRow> PackVersions => Set<PackVersionRow>();
 
+    public DbSet<PackVersionEventRow> PackVersionEvents => Set<PackVersionEventRow>();
+
     public DbSet<ConfigStateRow> ConfigStates => Set<ConfigStateRow>();
 
     public DbSet<PackActivationRow> PackActivations => Set<PackActivationRow>();
@@ -72,6 +74,29 @@ internal sealed class MarketDbContext(DbContextOptions<MarketDbContext> options)
             entity.Property(e => e.Values).HasColumnName("values").HasColumnType("jsonb");
             entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(16);
             entity.Property(e => e.RegisteredAt).HasColumnName("registered_at").HasColumnType("timestamptz");
+        });
+
+        // Append-only lifecycle of a pack version (BO-MKT-04): pack_version itself never changes, so the current status is the newest event.
+        modelBuilder.Entity<PackVersionEventRow>(entity =>
+        {
+            entity.ToTable("pack_version_event", table =>
+            {
+                table.HasCheckConstraint("ck_pack_version_event_status", "status IN ('Signed', 'Certified', 'Rejected', 'Published', 'Deprecated', 'Removed')");
+            });
+            entity.HasKey(e => e.Id).HasName("pk_pack_version_event");
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Seq).HasColumnName("seq").ValueGeneratedOnAdd().UseIdentityAlwaysColumn();
+            entity.Property(e => e.PackId).HasColumnName("pack_id").HasMaxLength(32);
+            entity.Property(e => e.Version).HasColumnName("version").HasMaxLength(32);
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(16);
+            entity.Property(e => e.TargetEnvironment).HasColumnName("target_environment").HasMaxLength(16);
+            entity.Property(e => e.ProductionEligible).HasColumnName("production_eligible");
+            entity.Property(e => e.Detail).HasColumnName("detail").HasColumnType("jsonb");
+            entity.Property(e => e.Reason).HasColumnName("reason").HasMaxLength(128);
+            entity.Property(e => e.Actor).HasColumnName("actor").HasMaxLength(128);
+            entity.Property(e => e.At).HasColumnName("at").HasColumnType("timestamptz");
+            entity.HasIndex(e => new { e.PackId, e.Version, e.Seq }).HasDatabaseName("ix_pack_version_event_version");
+            entity.HasOne<PackVersionRow>().WithMany().HasForeignKey(e => new { e.PackId, e.Version }).HasConstraintName("fk_pack_version_event_pack_version");
         });
 
         // Append-only hash chain of configuration states (D-SL5-06): a linear history, never rewritten.
@@ -241,6 +266,35 @@ internal sealed class PackVersionRow
     public string Status { get; set; } = string.Empty;
 
     public Instant RegisteredAt { get; set; }
+}
+
+/// <summary><c>mkt.pack_version_event</c>: one lifecycle step of a pack version (certify, publish, deprecate). Append-only; the newest row is the current status.</summary>
+internal sealed class PackVersionEventRow
+{
+    public Guid Id { get; set; }
+
+    public long Seq { get; set; }
+
+    public string PackId { get; set; } = string.Empty;
+
+    public string Version { get; set; } = string.Empty;
+
+    public string Status { get; set; } = string.Empty;
+
+    /// <summary>PRODUCTION or NON_PRODUCTION: the target the step was taken for (null never).</summary>
+    public string TargetEnvironment { get; set; } = string.Empty;
+
+    /// <summary>True when every value was Settled or NotRegulatory and the pack is not synthetic, at the time of the step.</summary>
+    public bool ProductionEligible { get; set; }
+
+    /// <summary>The golden-suite result, the unverified keys and the opt-in, as JSON.</summary>
+    public string Detail { get; set; } = "{}";
+
+    public string Reason { get; set; } = string.Empty;
+
+    public string Actor { get; set; } = string.Empty;
+
+    public Instant At { get; set; }
 }
 
 /// <summary><c>mkt.config_state</c>: one configuration state, keyed by the hash of its manifest (REQ-MKT-046). Append-only.</summary>

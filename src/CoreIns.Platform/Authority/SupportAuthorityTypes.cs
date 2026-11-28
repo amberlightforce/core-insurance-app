@@ -27,6 +27,9 @@ public static class SupportAuthorityTypes
     /// <summary>Reversal of cash allocations (unallocate, reallocate), limited by the reversed amount (BO-BIL-07).</summary>
     public static AuthorityTypeCode AllocationReverse { get; } = AuthorityTypeCode.Parse("BIL.ALLOCATION_REVERSE");
 
+    /// <summary>Approval of a write-off of an invoice balance, limited by its amount (BO-BIL-13).</summary>
+    public static AuthorityTypeCode WriteOff { get; } = AuthorityTypeCode.Parse("BIL.WRITE_OFF");
+
     /// <summary>The refund amount (money, so it carries its currency).</summary>
     public const string AmountDimension = "amount";
 
@@ -72,6 +75,9 @@ public static class SupportAuthorityTypes
             [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
         new AuthorityTypeDefinition(
             AllocationReverse, ModuleCode.BIL, new LocalizedText("Αντιλογισμός κατανομής", "Allocation reversal"),
+            [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
+        new AuthorityTypeDefinition(
+            WriteOff, ModuleCode.BIL, new LocalizedText("Διαγραφή υπολοίπου", "Write-off"),
             [new AuthorityDimensionDefinition(AmountDimension, DimensionKind.Money)]),
         new AuthorityTypeDefinition(
             Disbursement, ModuleCode.BIL, new LocalizedText("Εκταμίευση", "Disbursement"),

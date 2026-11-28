@@ -22,6 +22,24 @@ internal sealed class PackCommandsController : ControllerBase
         [FromServices] ICommandHandler<RequestPackRollback, PackRollbackResponse> handler, CancellationToken ct) =>
         (await handler.HandleAsync(new RequestPackRollback(request), ct).ConfigureAwait(false)).ToHttpResult(HttpContext);
 
+    [HttpPost("certify")]
+    [Authorize(Policy = "mkt.Pack.certify")]
+    public async Task<IResult> CertifyAsync([FromBody] PackCertifyRequest request,
+        [FromServices] ICommandHandler<CertifyPack, PackCertifyResponse> handler, CancellationToken ct) =>
+        (await handler.HandleAsync(new CertifyPack(request), ct).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    [HttpPost("publish")]
+    [Authorize(Policy = "mkt.Pack.publish")]
+    public async Task<IResult> PublishAsync([FromBody] PackPublishRequest request,
+        [FromServices] ICommandHandler<PublishPack, PackPublishResponse> handler, CancellationToken ct) =>
+        (await handler.HandleAsync(new PublishPack(request), ct).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
+    [HttpPost("deprecate")]
+    [Authorize(Policy = "mkt.Pack.deprecate")]
+    public async Task<IResult> DeprecateAsync([FromBody] PackDeprecateRequest request,
+        [FromServices] ICommandHandler<DeprecatePack, PackDeprecateResponse> handler, CancellationToken ct) =>
+        (await handler.HandleAsync(new DeprecatePack(request), ct).ConfigureAwait(false)).ToHttpResult(HttpContext);
+
     [HttpPost("schedule-activation")]
     [Authorize(Policy = "mkt.Pack.scheduleActivation")]
     public async Task<IResult> ActivateAsync([FromBody] PackScheduleActivationRequest request,

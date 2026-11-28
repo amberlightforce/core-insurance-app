@@ -65,6 +65,8 @@ public static class BillingModule
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.levy_payable TO {appRole}",
                 $"GRANT SELECT, INSERT, UPDATE ON {Schema}.disbursement_batch, {Schema}.disbursement_batch_item TO {appRole}",
                 $"GRANT SELECT, INSERT ON {Schema}.bank_statement, {Schema}.bank_statement_line TO {appRole}",
+                $"GRANT SELECT, INSERT, UPDATE ON {Schema}.write_off TO {appRole}",
+                $"GRANT SELECT, INSERT ON {Schema}.write_off_line TO {appRole}",
                 $"GRANT SELECT ON {Schema}.ledger_account, {Schema}.ledger_rule TO {appRole}",
                 $"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA {Schema} TO {appRole}",
             ]),
@@ -129,6 +131,21 @@ public static class BillingModule
         services.AddScoped<IValidator<ReallocateReceipt>, ReallocateReceiptValidator>();
         services.AddCommandAuditor<ReallocateReceipt, AllocationReallocateResponse, AllocationReversalAuditor<ReallocateReceipt, AllocationReallocateResponse>>();
         services.AddCommand<ReallocateReceipt, AllocationReallocateResponse, ReallocateReceiptHandler>(CommandDescriptor.For("bil.Allocation.reallocate") with { SupportsDryRun = true });
+
+        // BO-BIL-13: write-offs (maker-checker, tolerance) and money transfers between accounts of one payer.
+        services.AddScoped<WriteOffReader>();
+        services.AddScoped<WriteOffPoster>();
+        services.AddScoped<IValidator<ProposeWriteOff>, ProposeWriteOffValidator>();
+        services.AddCommandAuditor<ProposeWriteOff, WriteOffProposeResponse, WriteOffAuditor<ProposeWriteOff, WriteOffProposeResponse>>();
+        services.AddCommand<ProposeWriteOff, WriteOffProposeResponse, ProposeWriteOffHandler>(CommandDescriptor.For("bil.WriteOff.propose") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<DecideWriteOff>, DecideWriteOffValidator>();
+        services.AddCommandAuditor<DecideWriteOff, WriteOffDecideResponse, WriteOffAuditor<DecideWriteOff, WriteOffDecideResponse>>();
+        services.AddCommand<DecideWriteOff, WriteOffDecideResponse, DecideWriteOffHandler>(CommandDescriptor.For("bil.WriteOff.decide") with { SupportsDryRun = true });
+        services.AddCommandAuditor<PostWriteOff, WriteOffPostResponse, WriteOffAuditor<PostWriteOff, WriteOffPostResponse>>();
+        services.AddCommand<PostWriteOff, WriteOffPostResponse, PostWriteOffHandler>(CommandDescriptor.For("bil.WriteOff.post") with { SupportsDryRun = true });
+        services.AddScoped<IValidator<TransferMoney>, TransferMoneyValidator>();
+        services.AddCommandAuditor<TransferMoney, TransferMoneyResponse, TransferMoneyAuditor>();
+        services.AddCommand<TransferMoney, TransferMoneyResponse, TransferMoneyHandler>(CommandDescriptor.For("bil.Transfer.money") with { SupportsDryRun = true });
 
         // BO-BIL-03: payment plan catalogue, select/change and the billing preview.
         services.AddScoped<PaymentPlanReader>();
@@ -390,6 +407,10 @@ public static class BillingModule
             .Describe("Η ασφαλιστική περίοδος της κατανομής ανήκει σε επιστροφή που εκταμιεύεται ή έχει πληρωθεί· δεν αντιλογίζεται.", "A term of the allocation is part of a refund that is being disbursed or was paid; it cannot be reversed."),
         ErrorDefinition.For(ModuleCode.BIL, "INVOICE-STATE", 422, "Το τιμολόγιο δεν επιτρέπει αντιλογισμό", "The invoice does not allow a reversal")
             .Describe("Το τιμολόγιο είναι διαγραμμένο ή αντιλογισμένο· οι κατανομές του δεν αντιλογίζονται.", "The invoice is written off or reversed; its allocations cannot be reversed."),
+        ErrorDefinition.For(ModuleCode.BIL, "WRITE-OFF-STATE", 422, "Η διαγραφή δεν είναι στην κατάλληλη κατάσταση", "The write-off is not in the right state")
+            .Describe("Η διαγραφή υπολοίπου δεν βρίσκεται στην κατάσταση που απαιτεί η ενέργεια (προτεινόμενη για απόφαση, εγκεκριμένη για καταχώριση).", "The write-off is not in the state the action needs (proposed to be decided, approved to be posted)."),
+        ErrorDefinition.For(ModuleCode.BIL, "PAYER-MISMATCH", 422, "Διαφορετικός πληρωτής", "Different payer")
+            .Describe("Τα χρήματα μεταφέρονται μόνο μεταξύ λογαριασμών χρέωσης του ίδιου πληρωτή.", "Money moves only between billing accounts of the same payer."),
         ErrorDefinition.For(ModuleCode.BIL, "SOD", 403, "Διαχωρισμός καθηκόντων", "Segregation of duties")
             .Describe("Ο αιτών, όποιος επεξεργάστηκε την επιστροφή ή όποιος άλλαξε τον λογαριασμό δικαιούχου δεν μπορεί να την εγκρίνει.", "The requester, an editor of the refund or the person who changed the payee account cannot approve it."),
         ErrorDefinition.For(ModuleCode.BIL, "PAYEE-UNVERIFIED", 422, "Ο λογαριασμός δικαιούχου δεν έχει επαληθευτεί", "Payee account not verified")

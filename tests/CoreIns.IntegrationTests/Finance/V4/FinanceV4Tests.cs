@@ -235,7 +235,7 @@ public sealed class FinanceV4Tests(PostgresFixture database) : IClassFixture<Pos
             """)).ShouldBe(0);
         (await ScalarAsync<long>(_db, $"""
             SELECT count(*) FROM fin.journal_entry WHERE journal_id IN (SELECT journal_id FROM fin.journal_line WHERE {lineFilter})
-               AND (book <> 'IFRS17' OR rule_set_version <> 7)
+               AND (book <> 'IFRS17' OR rule_set_version <> 8)
             """)).ShouldBe(0);
     }
 
@@ -583,6 +583,20 @@ public sealed class FinanceV4Tests(PostgresFixture database) : IClassFixture<Pos
     }
 
     [Fact]
+    public void BO_BIL_13_rule_set_v7_is_immutable_and_v8_is_v7_plus_exactly_the_write_off_rules_and_accounts()
+    {
+        // v7 was applied by migration AllocationReversalPostings: its content never changes.
+        var v7 = FinanceSeed.Rules(FinanceSeed.GrTestV7);
+        var v8 = FinanceSeed.Rules(FinanceSeed.GrTestV8);
+        v7.Where(r => !v8.Contains(r)).ShouldBeEmpty();
+        v8.Where(r => !v7.Contains(r)).Select(r => r.Code).Order().ShouldBe(["WO-EXPENSE", "WO-RECEIVABLE", "WO-TOLERANCE"]);
+        FinanceSeed.ChartCodes(FinanceSeed.GrTestV8).Except(FinanceSeed.ChartCodes(FinanceSeed.GrTestV7)).Order().ShouldBe(["GL-6210", "GL-6220"]);
+        FinanceSeed.ChartCodes(FinanceSeed.GrTestV7).Where(c => !FinanceSeed.ChartCodes(FinanceSeed.GrTestV8).Contains(c)).ShouldBeEmpty();
+        PostingRules.Compile(v8, FinanceSeed.ChartCodes(FinanceSeed.GrTestV8), FinanceSeed.Derivations(FinanceSeed.GrTestV8)).ShouldBeEmpty();
+        FinanceSeed.RuleSetHash(FinanceSeed.GrTestV8).ShouldNotBe(FinanceSeed.RuleSetHash(FinanceSeed.GrTestV7));
+    }
+
+    [Fact]
     public void D_SL4_10_rule_set_v4_keeps_every_v3_rule_and_account_compiles_and_flags_the_placeholders()
     {
         var v3 = FinanceSeed.Rules(FinanceSeed.GrTestV3);
@@ -634,6 +648,6 @@ public sealed class FinanceV4Tests(PostgresFixture database) : IClassFixture<Pos
         await _slice.DrainAsync();
         (await StatusAsync(envelope)).ShouldBe("POSTED");
         (await ScalarAsync<int>(_db, $"SELECT rule_set_version FROM fin.journal_entry WHERE journal_id IN (SELECT journal_id FROM fin.journal_line WHERE claim_id = '{claim}')")).ShouldBe(2);
-        (await ScalarAsync<string>(_db, "SELECT string_agg(version_no::text || ':' || status, ',' ORDER BY version_no) FROM fin.posting_rule_set")).ShouldBe("1:SUPERSEDED,2:ACTIVE,3:ACTIVE,4:ACTIVE,5:ACTIVE,6:ACTIVE,7:ACTIVE");
+        (await ScalarAsync<string>(_db, "SELECT string_agg(version_no::text || ':' || status, ',' ORDER BY version_no) FROM fin.posting_rule_set")).ShouldBe("1:SUPERSEDED,2:ACTIVE,3:ACTIVE,4:ACTIVE,5:ACTIVE,6:ACTIVE,7:ACTIVE,8:ACTIVE");
     }
 }
